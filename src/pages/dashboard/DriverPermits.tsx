@@ -13,7 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import { Shield, Plus, Users, CheckCircle, XCircle, Clock, AlertTriangle, Search, FileText, Printer } from 'lucide-react';
+import { Shield, Plus, Users, CheckCircle, XCircle, Clock, AlertTriangle, Search, FileText, Printer, UserPlus, Trash2, Copy } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import PermitPrintTemplate from '@/components/permits/PermitPrintTemplate';
@@ -49,6 +49,10 @@ const DriverPermits = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [printPermit, setPrintPermit] = useState<Permit | null>(null);
+  const [entryMode, setEntryMode] = useState<'select' | 'manual'>('select');
+  const [manualDrivers, setManualDrivers] = useState<{ name: string; plate: string; license: string; phone: string }[]>([
+    { name: '', plate: '', license: '', phone: '' },
+  ]);
   const [formData, setFormData] = useState({
     valid_from: new Date().toISOString().split('T')[0],
     valid_until: '',
@@ -101,36 +105,63 @@ const DriverPermits = () => {
   // Bulk issue mutation
   const bulkIssueMutation = useMutation({
     mutationFn: async () => {
-      if (selectedDrivers.length === 0) throw new Error('اختر سائقاً واحداً على الأقل');
+      if (entryMode === 'select' && selectedDrivers.length === 0) throw new Error('اختر سائقاً واحداً على الأقل');
+      if (entryMode === 'manual' && manualDrivers.every(d => !d.name.trim())) throw new Error('أدخل بيانات سائق واحد على الأقل');
       if (!formData.valid_until) throw new Error('حدد تاريخ الانتهاء');
 
-      const inserts = await Promise.all(
-        selectedDrivers.map(async (driverId) => {
-          const permitNumber = await generatePermitNumber();
-          return {
-            organization_id: organization!.id,
-            driver_id: driverId,
-            permit_number: permitNumber,
-            permit_type: formData.permit_type,
-            issued_by: profile!.id,
-            valid_from: formData.valid_from,
-            valid_until: formData.valid_until,
-            scope: formData.scope,
-            conditions: formData.conditions || null,
-            notes: formData.notes || null,
-            status: 'active',
-          };
-        })
-      );
-
-      const { error } = await (supabase.from('driver_permits') as any).insert(inserts);
-      if (error) throw error;
+      if (entryMode === 'select') {
+        const inserts = await Promise.all(
+          selectedDrivers.map(async (driverId) => {
+            const permitNumber = await generatePermitNumber();
+            return {
+              organization_id: organization!.id,
+              driver_id: driverId,
+              permit_number: permitNumber,
+              permit_type: formData.permit_type,
+              issued_by: profile!.id,
+              valid_from: formData.valid_from,
+              valid_until: formData.valid_until,
+              scope: formData.scope,
+              conditions: formData.conditions || null,
+              notes: formData.notes || null,
+              status: 'active',
+            };
+          })
+        );
+        const { error } = await (supabase.from('driver_permits') as any).insert(inserts);
+        if (error) throw error;
+      } else {
+        // Manual entry - store as notes-based permits with manual driver info
+        const validManual = manualDrivers.filter(d => d.name.trim());
+        const inserts = await Promise.all(
+          validManual.map(async (driver) => {
+            const permitNumber = await generatePermitNumber();
+            return {
+              organization_id: organization!.id,
+              driver_id: profile!.id, // placeholder - link to org admin
+              permit_number: permitNumber,
+              permit_type: formData.permit_type,
+              issued_by: profile!.id,
+              valid_from: formData.valid_from,
+              valid_until: formData.valid_until,
+              scope: formData.scope,
+              conditions: formData.conditions || null,
+              notes: `[بيانات يدوية] الاسم: ${driver.name} | اللوحة: ${driver.plate} | الرخصة: ${driver.license} | الهاتف: ${driver.phone}${formData.notes ? '\n' + formData.notes : ''}`,
+              status: 'active',
+            };
+          })
+        );
+        const { error } = await (supabase.from('driver_permits') as any).insert(inserts);
+        if (error) throw error;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['driver-permits'] });
-      toast.success(`تم إصدار ${selectedDrivers.length} تصريح بنجاح`);
+      const count = entryMode === 'select' ? selectedDrivers.length : manualDrivers.filter(d => d.name.trim()).length;
+      toast.success(`تم إصدار ${count} تصريح بنجاح`);
       setShowBulkDialog(false);
       setSelectedDrivers([]);
+      setManualDrivers([{ name: '', plate: '', license: '', phone: '' }]);
       setFormData({
         valid_from: new Date().toISOString().split('T')[0],
         valid_until: '',
@@ -413,43 +444,158 @@ const DriverPermits = () => {
           </DialogHeader>
 
           <div className="space-y-5">
-            {/* Driver selection */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <Label className="text-base font-semibold">اختر السائقين ({selectedDrivers.length}/{drivers.length})</Label>
-                <Button variant="ghost" size="sm" onClick={selectAllDrivers}>
-                  {selectedDrivers.length === drivers.length ? 'إلغاء الكل' : 'تحديد الكل'}
-                </Button>
+            {/* Entry mode toggle */}
+            <div className="flex gap-2 p-1 bg-muted rounded-lg">
+              <Button
+                variant={entryMode === 'select' ? 'default' : 'ghost'}
+                className="flex-1 gap-2"
+                size="sm"
+                onClick={() => setEntryMode('select')}
+              >
+                <Users className="h-4 w-4" />
+                اختيار من السائقين المسجلين
+              </Button>
+              <Button
+                variant={entryMode === 'manual' ? 'default' : 'ghost'}
+                className="flex-1 gap-2"
+                size="sm"
+                onClick={() => setEntryMode('manual')}
+              >
+                <UserPlus className="h-4 w-4" />
+                إدخال بيانات يدوياً
+              </Button>
+            </div>
+
+            {/* Driver selection - registered */}
+            {entryMode === 'select' && (
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label className="text-base font-semibold">اختر السائقين ({selectedDrivers.length}/{drivers.length})</Label>
+                  <Button variant="ghost" size="sm" onClick={selectAllDrivers}>
+                    {selectedDrivers.length === drivers.length ? 'إلغاء الكل' : 'تحديد الكل'}
+                  </Button>
+                </div>
+                <div className="border rounded-lg max-h-48 overflow-y-auto divide-y">
+                  {drivers.length === 0 ? (
+                    <p className="text-center text-muted-foreground py-4">لا يوجد سائقون مسجلون</p>
+                  ) : (
+                    drivers.map((driver: any) => {
+                      const hasActivePermit = permits.some(
+                        p => p.driver_id === driver.id && p.status === 'active'
+                      );
+                      return (
+                        <label
+                          key={driver.id}
+                          className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer"
+                        >
+                          <Checkbox
+                            checked={selectedDrivers.includes(driver.id)}
+                            onCheckedChange={() => toggleDriver(driver.id)}
+                          />
+                          <div className="flex-1">
+                            <p className="font-medium">{driver.profiles?.full_name || driver.license_number}</p>
+                            <p className="text-xs text-muted-foreground">{driver.vehicle_plate} - {driver.vehicle_type}</p>
+                          </div>
+                          {hasActivePermit && (
+                            <Badge className="bg-green-100 text-green-800 text-xs">لديه تصريح ساري</Badge>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
               </div>
-              <div className="border rounded-lg max-h-48 overflow-y-auto divide-y">
-                {drivers.length === 0 ? (
-                  <p className="text-center text-muted-foreground py-4">لا يوجد سائقون مسجلون</p>
-                ) : (
-                  drivers.map((driver: any) => {
-                    const hasActivePermit = permits.some(
-                      p => p.driver_id === driver.id && p.status === 'active'
-                    );
-                    return (
-                      <label
-                        key={driver.id}
-                        className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer"
-                      >
-                        <Checkbox
-                          checked={selectedDrivers.includes(driver.id)}
-                          onCheckedChange={() => toggleDriver(driver.id)}
-                        />
-                        <div className="flex-1">
-                          <p className="font-medium">{driver.profiles?.full_name || driver.license_number}</p>
-                          <p className="text-xs text-muted-foreground">{driver.vehicle_plate} - {driver.vehicle_type}</p>
-                        </div>
-                        {hasActivePermit && (
-                          <Badge className="bg-green-100 text-green-800 text-xs">لديه تصريح ساري</Badge>
+            )}
+
+            {/* Manual driver entry */}
+            {entryMode === 'manual' && (
+              <div>
+                <Label className="text-base font-semibold mb-3 block">بيانات المصرح لهم</Label>
+                <div className="space-y-3">
+                  {manualDrivers.map((driver, idx) => (
+                    <div key={idx} className="border rounded-lg p-3 space-y-2 bg-muted/30">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-muted-foreground">سائق {idx + 1}</span>
+                        {manualDrivers.length > 1 && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive"
+                            onClick={() => setManualDrivers(prev => prev.filter((_, i) => i !== idx))}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
                         )}
-                      </label>
-                    );
-                  })
-                )}
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        <Input
+                          placeholder="اسم السائق *"
+                          value={driver.name}
+                          onChange={(e) => {
+                            const updated = [...manualDrivers];
+                            updated[idx] = { ...updated[idx], name: e.target.value };
+                            setManualDrivers(updated);
+                          }}
+                        />
+                        <Input
+                          placeholder="رقم لوحة المركبة"
+                          value={driver.plate}
+                          onChange={(e) => {
+                            const updated = [...manualDrivers];
+                            updated[idx] = { ...updated[idx], plate: e.target.value };
+                            setManualDrivers(updated);
+                          }}
+                        />
+                        <Input
+                          placeholder="رقم رخصة القيادة"
+                          value={driver.license}
+                          onChange={(e) => {
+                            const updated = [...manualDrivers];
+                            updated[idx] = { ...updated[idx], license: e.target.value };
+                            setManualDrivers(updated);
+                          }}
+                        />
+                        <Input
+                          placeholder="رقم الهاتف"
+                          value={driver.phone}
+                          onChange={(e) => {
+                            const updated = [...manualDrivers];
+                            updated[idx] = { ...updated[idx], phone: e.target.value };
+                            setManualDrivers(updated);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 border-dashed"
+                    onClick={() => setManualDrivers(prev => [...prev, { name: '', plate: '', license: '', phone: '' }])}
+                  >
+                    <Plus className="h-4 w-4" />
+                    إضافة سائق آخر
+                  </Button>
+                </div>
               </div>
+            )}
+
+            {/* Permit type */}
+            <div>
+              <Label className="mb-2 block">نوع التصريح</Label>
+              <Select value={formData.permit_type} onValueChange={(v) => setFormData(p => ({ ...p, permit_type: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="operating">تصريح تشغيل عام</SelectItem>
+                  <SelectItem value="transport">تصريح نقل مخلفات</SelectItem>
+                  <SelectItem value="hazardous">تصريح نقل مواد خطرة</SelectItem>
+                  <SelectItem value="temporary">تصريح مؤقت</SelectItem>
+                  <SelectItem value="internal">تصريح داخلي</SelectItem>
+                  <SelectItem value="cross_border">تصريح عبور بين المحافظات</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Permit details */}
@@ -475,7 +621,7 @@ const DriverPermits = () => {
             {/* Scope */}
             <div>
               <Label className="mb-2 block">نطاق التصريح</Label>
-              <div className="flex gap-4">
+              <div className="flex flex-wrap gap-4">
                 {[
                   { key: 'transport', label: 'نقل' },
                   { key: 'loading', label: 'تحميل' },
@@ -494,12 +640,38 @@ const DriverPermits = () => {
               </div>
             </div>
 
+            {/* Conditions with templates */}
             <div>
-              <Label>شروط خاصة</Label>
+              <div className="flex items-center justify-between mb-2">
+                <Label>شروط خاصة</Label>
+                <Select onValueChange={(v) => {
+                  if (v === 'custom') return;
+                  setFormData(p => ({
+                    ...p,
+                    conditions: p.conditions ? p.conditions + '\n' + v : v,
+                  }));
+                }}>
+                  <SelectTrigger className="w-auto h-8 text-xs gap-1">
+                    <Copy className="h-3 w-3" />
+                    <SelectValue placeholder="صيغ جاهزة" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="يجب الالتزام بقواعد السلامة المهنية أثناء النقل والتحميل والتفريغ.">السلامة المهنية</SelectItem>
+                    <SelectItem value="يُمنع نقل أي مواد خارج نطاق التصريح المحدد.">تقييد المواد</SelectItem>
+                    <SelectItem value="يجب ارتداء معدات الحماية الشخصية (PPE) في جميع الأوقات.">معدات الحماية</SelectItem>
+                    <SelectItem value="يُلزم السائق بالتوقيع على سجل الاستلام والتسليم لكل شحنة.">سجل الاستلام</SelectItem>
+                    <SelectItem value="يجب إبلاغ المسؤول فوراً عن أي حادث أو تسرب أثناء النقل.">الإبلاغ عن الحوادث</SelectItem>
+                    <SelectItem value="هذا التصريح صالح فقط خلال ساعات العمل الرسمية (8 صباحاً - 6 مساءً).">ساعات العمل</SelectItem>
+                    <SelectItem value="يُمنع التوقف غير المبرر أو تغيير المسار المحدد دون إذن مسبق.">الالتزام بالمسار</SelectItem>
+                    <SelectItem value="يجب أن تكون المركبة مؤمّنة ومرخصة وصالحة للسير طوال مدة التصريح.">صلاحية المركبة</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
               <Textarea
-                placeholder="أي شروط إضافية على التصريح..."
+                placeholder="أي شروط إضافية على التصريح... (اختر من الصيغ الجاهزة أو اكتب شروطك)"
                 value={formData.conditions}
                 onChange={(e) => setFormData(p => ({ ...p, conditions: e.target.value }))}
+                rows={4}
               />
             </div>
 
@@ -516,12 +688,17 @@ const DriverPermits = () => {
             <Button
               className="w-full"
               size="lg"
-              disabled={selectedDrivers.length === 0 || !formData.valid_until || bulkIssueMutation.isPending}
+              disabled={
+                (entryMode === 'select' && selectedDrivers.length === 0) ||
+                (entryMode === 'manual' && manualDrivers.every(d => !d.name.trim())) ||
+                !formData.valid_until ||
+                bulkIssueMutation.isPending
+              }
               onClick={() => bulkIssueMutation.mutate()}
             >
               {bulkIssueMutation.isPending
                 ? 'جاري الإصدار...'
-                : `إصدار ${selectedDrivers.length} تصريح`}
+                : `إصدار ${entryMode === 'select' ? selectedDrivers.length : manualDrivers.filter(d => d.name.trim()).length} تصريح`}
             </Button>
           </div>
         </DialogContent>
