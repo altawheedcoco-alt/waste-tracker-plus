@@ -102,7 +102,7 @@ const QuickActionsGrid = ({
   });
 
   return (
-    <Card className="overflow-hidden glass-card border-border/30">
+    <Card className="overflow-hidden border-border/40 bg-card shadow-sm">
       {/* Header */}
       <CardHeader className="text-right pb-2">
         <div className="flex items-center justify-between gap-2">
@@ -128,7 +128,7 @@ const QuickActionsGrid = ({
             </Button>
           </div>
           <div className="flex-1 text-right">
-            <CardTitle className={cn(isMobile ? 'text-lg' : 'text-xl', 'text-primary flex items-center justify-end gap-2')}>
+            <CardTitle className={cn(isMobile ? 'text-lg' : 'text-xl', 'text-foreground flex items-center justify-end gap-2')}>
               {title}
               <Badge variant="secondary" className="text-[10px] font-normal">
                 {actions.length}
@@ -150,19 +150,17 @@ const QuickActionsGrid = ({
             <CardContent className="pt-0 space-y-3">
               {/* Search + Category Filters */}
               <div className="flex flex-col gap-2">
-                {/* Search Bar */}
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   <Input
                     placeholder="ابحث عن إجراء..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pr-9 h-9 text-sm bg-muted/50 border-0 focus-visible:ring-1"
+                    className="pr-9 h-9 text-sm bg-muted/30 border-border/50 focus-visible:ring-1"
                     dir="rtl"
                   />
                 </div>
 
-                {/* Category Pills */}
                 <div className="flex gap-1.5 flex-wrap justify-end">
                   {(Object.keys(categoryConfig) as CategoryFilter[]).map((cat) => {
                     const cfg = categoryConfig[cat];
@@ -213,7 +211,7 @@ const QuickActionsGrid = ({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9 }}
                         transition={{ delay: index * 0.02, duration: 0.2 }}
-                        whileHover={{ scale: 1.04, y: -4 }}
+                        whileHover={{ scale: 1.03, y: -3 }}
                         whileTap={{ scale: 0.97 }}
                         className="cursor-pointer"
                         onClick={() => {
@@ -226,33 +224,41 @@ const QuickActionsGrid = ({
                       >
                         <div className={cn(
                           'h-full rounded-2xl relative overflow-hidden group',
-                          'shadow-md hover:shadow-2xl transition-all duration-500',
-                          action.iconBgClass || 'bg-gradient-to-br from-primary to-primary/80'
+                          'bg-card border border-border/50',
+                          'shadow-sm hover:shadow-lg transition-all duration-400',
+                          'hover:border-primary/30'
                         )}>
-                          {/* Decorative background pattern */}
-                          <div className="absolute inset-0 opacity-10 pointer-events-none">
-                            <div className="absolute -top-6 -left-6 w-24 h-24 rounded-full bg-white/30" />
-                            <div className="absolute -bottom-4 -right-4 w-20 h-20 rounded-full bg-white/20" />
+                          {/* Decorative geometric pattern */}
+                          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                            <svg className="absolute -top-4 -left-4 w-20 h-20 text-primary/[0.04]" viewBox="0 0 80 80">
+                              <circle cx="40" cy="40" r="35" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                              <circle cx="40" cy="40" r="22" fill="none" stroke="currentColor" strokeWidth="1"/>
+                              <circle cx="40" cy="40" r="10" fill="currentColor" opacity="0.3"/>
+                            </svg>
+                            <svg className="absolute -bottom-3 -right-3 w-16 h-16 text-primary/[0.03]" viewBox="0 0 64 64">
+                              <rect x="8" y="8" width="48" height="48" rx="6" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(15 32 32)"/>
+                              <rect x="18" y="18" width="28" height="28" rx="4" fill="none" stroke="currentColor" strokeWidth="1"/>
+                            </svg>
+                            {/* Subtle dotted line */}
+                            <div className="absolute top-2 right-2 left-2 h-px bg-[repeating-linear-gradient(90deg,hsl(var(--primary)/0.06)_0px,hsl(var(--primary)/0.06)_2px,transparent_2px,transparent_6px)]" />
                           </div>
-                          {/* Shine effect on hover */}
-                          <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none bg-gradient-to-br from-white/10 via-transparent to-transparent" />
                           
                           <div className={cn(isMobile ? 'p-3' : 'p-4', 'relative flex flex-col items-end gap-3')}>
                             {/* Icon */}
                             <div className={cn(
                               iconSize,
                               'rounded-xl flex items-center justify-center shrink-0',
-                              'bg-white/20 backdrop-blur-sm shadow-inner',
-                              'group-hover:bg-white/30 group-hover:scale-110 transition-all duration-300'
+                              'bg-primary/10 text-primary',
+                              'group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300'
                             )}>
-                              <action.icon className={cn(iconInnerSize, 'text-white drop-shadow-sm')} />
+                              <action.icon className={cn(iconInnerSize, 'drop-shadow-sm')} />
                             </div>
                             {/* Text */}
                             <div className="w-full text-right">
-                              <h3 className={cn('font-bold text-white truncate leading-tight drop-shadow-sm', titleClass)}>
+                              <h3 className={cn('font-bold text-foreground truncate leading-tight', titleClass)}>
                                 {action.title}
                               </h3>
-                              <p className={cn('text-white/75 mt-0.5 line-clamp-2 leading-snug', subtitleClass)}>
+                              <p className={cn('text-muted-foreground mt-0.5 line-clamp-2 leading-snug', subtitleClass)}>
                                 {action.subtitle}
                               </p>
                             </div>
@@ -264,7 +270,6 @@ const QuickActionsGrid = ({
                 </ResponsiveGrid>
               )}
 
-              {/* Summary footer */}
               {searchQuery && filteredActions.length > 0 && (
                 <p className="text-[11px] text-muted-foreground text-center">
                   عرض {filteredActions.length} من {actions.length} إجراء

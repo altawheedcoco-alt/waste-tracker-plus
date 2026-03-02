@@ -74,21 +74,21 @@ const SEVERITY_CONFIG = {
   critical: {
     icon: ShieldAlert,
     color: 'text-destructive',
-    bgColor: 'bg-destructive/5 border-destructive/20',
+    bgColor: 'bg-card border-destructive/30',
     badge: 'destructive' as const,
     label: 'حرج',
   },
   warning: {
     icon: AlertTriangle,
     color: 'text-primary',
-    bgColor: 'bg-accent border-primary/20',
+    bgColor: 'bg-card border-primary/30',
     badge: 'secondary' as const,
     label: 'تحذير',
   },
   info: {
     icon: Clock,
     color: 'text-muted-foreground',
-    bgColor: 'bg-muted border-border',
+    bgColor: 'bg-card border-border/60',
     badge: 'outline' as const,
     label: 'معلومة',
   },
@@ -551,7 +551,7 @@ const OperationalAlertsWidget = () => {
   if (visibleAlerts.length === 0) return null;
 
   return (
-    <Card className="border-primary/20">
+    <Card className="border-border/40 bg-card shadow-sm">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -593,11 +593,21 @@ const OperationalAlertsWidget = () => {
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 50, height: 0 }}
-                  className={`rounded-lg border transition-all ${config.bgColor}`}
+                  className={`rounded-xl border transition-all relative overflow-hidden ${config.bgColor}`}
                 >
+                  {/* Decorative pattern */}
+                  <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                    <svg className="absolute -top-2 -left-2 w-12 h-12 text-current opacity-[0.03]" viewBox="0 0 48 48">
+                      <circle cx="24" cy="24" r="20" fill="none" stroke="currentColor" strokeWidth="1.5"/>
+                      <circle cx="24" cy="24" r="10" fill="none" stroke="currentColor" strokeWidth="1"/>
+                    </svg>
+                    <svg className="absolute -bottom-1 -right-1 w-10 h-10 text-current opacity-[0.03]" viewBox="0 0 40 40">
+                      <rect x="5" y="5" width="30" height="30" rx="4" fill="none" stroke="currentColor" strokeWidth="1.5" transform="rotate(12 20 20)"/>
+                    </svg>
+                  </div>
                   {/* Collapsed header */}
                   <div
-                    className="flex items-start gap-3 p-3 cursor-pointer"
+                    className="flex items-start gap-3 p-3 cursor-pointer relative"
                     onClick={() => setExpandedId(isExpanded ? null : alert.id)}
                   >
                     <div className="flex-1 text-right min-w-0 space-y-1.5">
