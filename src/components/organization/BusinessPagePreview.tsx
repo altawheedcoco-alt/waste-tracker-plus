@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -8,12 +8,13 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import OrgPublicProfileSettings from '@/components/org-structure/OrgPublicProfileSettings';
 import {
   MapPin, Clock, Phone, Globe, ShoppingBag, Info, Calendar,
   Pin, Heart, MessageCircle, Share2, ImageIcon, CheckCircle,
   ExternalLink, Navigation, Copy, Link2, Users, Eye,
-  Building2
+  Building2, Settings
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -38,6 +39,7 @@ const DAYS_AR: Record<string, string> = {
 const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnPage = false }: BusinessPagePreviewProps) => {
   const { organization } = useAuth();
   const [activeTab, setActiveTab] = useState('posts');
+  const [showShareSettings, setShowShareSettings] = useState(false);
 
   // Fetch posts
   const { data: posts = [] } = useQuery({
@@ -202,7 +204,26 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
                 </a>
               </Button>
             )}
+            {isOwnPage && (
+              <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setShowShareSettings(true)}>
+                <Settings className="w-4 h-4" /> إعدادات المشاركة
+              </Button>
+            )}
           </div>
+
+          {/* Share Settings Dialog */}
+          {isOwnPage && (
+            <Dialog open={showShareSettings} onOpenChange={setShowShareSettings}>
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5" /> إعدادات المشاركة العامة
+                  </DialogTitle>
+                </DialogHeader>
+                <OrgPublicProfileSettings />
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </Card>
 
