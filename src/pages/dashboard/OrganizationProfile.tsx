@@ -32,7 +32,8 @@ import {
   PenSquare,
   Target,
   Briefcase,
-  Award
+  Award,
+  Globe
 } from 'lucide-react';
 import OrganizationPosts from '@/components/organization/OrganizationPosts';
 import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
@@ -48,6 +49,7 @@ import BusinessProfileSettings from '@/components/organization/BusinessProfileSe
 import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
 import LegalDataSection from '@/components/organization/LegalDataSection';
 import AttestationTabContent from '@/components/attestation/AttestationTabContent';
+import BusinessPagePreview from '@/components/organization/BusinessPagePreview';
 
 interface OrganizationDocument {
   id: string;
@@ -379,9 +381,13 @@ const OrganizationProfile = () => {
           />
         </Card>
 
-        <Tabs defaultValue="portfolio" className="space-y-4" dir="rtl">
+        <Tabs defaultValue="page" className="space-y-4" dir="rtl">
           <div className="overflow-x-auto -mx-1 px-1 pb-2">
             <TabsList className="inline-flex w-max min-w-full gap-1 h-auto p-1">
+              <TabsTrigger value="page" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
+                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
+                الصفحة التجارية
+              </TabsTrigger>
               <TabsTrigger value="portfolio" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
                 <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
                 {t('orgProfile.portfolio')}
@@ -428,6 +434,16 @@ const OrganizationProfile = () => {
               </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* Business Page Preview Tab */}
+          <TabsContent value="page">
+            <BusinessPagePreview
+              organizationId={organization.id}
+              organizationName={organization.name}
+              orgData={orgData}
+              isOwnPage={true}
+            />
+          </TabsContent>
 
           {/* Portfolio Tab */}
           <TabsContent value="portfolio">
