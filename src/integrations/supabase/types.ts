@@ -22327,6 +22327,77 @@ export type Database = {
           },
         ]
       }
+      partner_restrictions: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          notes: string | null
+          organization_id: string
+          reason: string | null
+          restricted_org_id: string
+          restriction_type: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id: string
+          reason?: string | null
+          restricted_org_id: string
+          restriction_type: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          organization_id?: string
+          reason?: string | null
+          restricted_org_id?: string
+          restriction_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_restrictions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_restrictions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_restrictions_restricted_org_id_fkey"
+            columns: ["restricted_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_restrictions_restricted_org_id_fkey"
+            columns: ["restricted_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       partner_reviews: {
         Row: {
           communication_rating: number | null
@@ -35121,6 +35192,14 @@ export type Database = {
           _external_partner_id?: string
           _partner_org_id?: string
           _user_id: string
+        }
+        Returns: boolean
+      }
+      has_partner_restriction: {
+        Args: {
+          _org_id: string
+          _restricted_org_id: string
+          _restriction_type?: string
         }
         Returns: boolean
       }
