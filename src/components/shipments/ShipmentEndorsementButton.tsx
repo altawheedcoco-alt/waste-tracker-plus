@@ -49,14 +49,14 @@ const ShipmentEndorsementButton = memo(({ shipmentId, shipmentNumber, shipmentSt
       });
   }, [organization?.id]);
 
-  // Auto-endorse when status reaches confirmed/completed and auto mode is on
+  // Auto-endorse silently when status reaches confirmed/completed and auto mode is on
   useEffect(() => {
     if (autoMode && !existingEndorsement && ['confirmed', 'completed', 'delivered'].includes(shipmentStatus)) {
-      handleEndorse();
+      handleEndorse(true);
     }
   }, [autoMode, existingEndorsement, shipmentStatus]);
 
-  const handleEndorse = useCallback(async () => {
+  const handleEndorse = useCallback(async (silent = false) => {
     if (!user?.id || !organization?.id || isLoading || existingEndorsement) return;
     setIsLoading(true);
     try {
@@ -65,6 +65,7 @@ const ShipmentEndorsementButton = memo(({ shipmentId, shipmentNumber, shipmentSt
         documentId: shipmentId,
         organizationId: organization.id,
         userId: user.id,
+        silent,
       });
       if (result.allCriteriaMet && result.endorsementId) {
         setExistingEndorsement({

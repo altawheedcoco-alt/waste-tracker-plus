@@ -353,8 +353,9 @@ export async function evaluateAndEndorse(params: {
   documentId: string;
   organizationId: string;
   userId: string;
+  silent?: boolean;
 }): Promise<AutoEndorsementResult> {
-  const { documentType, documentId, organizationId, userId } = params;
+  const { documentType, documentId, organizationId, userId, silent = false } = params;
 
   // تشغيل الفحوصات الستة بالتوازي
   const [
@@ -476,10 +477,12 @@ export async function evaluateAndEndorse(params: {
       // حفظ سجل الفحص
       await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
-      toast.success('✅ تم اعتماد المستند رقمياً من المنصة', {
-        description: `رقم الختم: ${sealNumber}`,
-        duration: 6000,
-      });
+      if (!silent) {
+        toast.success('✅ تم اعتماد المستند رقمياً من المنصة', {
+          description: `رقم الختم: ${sealNumber}`,
+          duration: 6000,
+        });
+      }
 
       return {
         allCriteriaMet: true,
@@ -494,28 +497,34 @@ export async function evaluateAndEndorse(params: {
   // إذا لم تتحقق → إيقاف مع إشعار
   await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
-  // إرسال إشعار بالمعايير غير المستوفاة
-  const blockedReason = failedCriteria
-    .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
-    .join('\n');
+  // فقط إذا لم يكن الوضع صامتاً (الاعتماد اليدوي)
+  if (!silent) {
+    const blockedReason = failedCriteria
+      .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
+      .join('\n');
 
-  await supabase.from('notifications').insert({
-    user_id: userId,
-    title: '⛔ لم يتم اعتماد المستند رقمياً',
-    message: `المستند لم يستوفِ كافة معايير الاعتماد التلقائي:\n${blockedReason}`,
-    type: 'document',
-    priority: 'high',
-    action_url: `/documents/${documentType}/${documentId}`,
-  } as any);
+    await supabase.from('notifications').insert({
+      user_id: userId,
+      title: '⛔ لم يتم اعتماد المستند رقمياً',
+      message: `المستند لم يستوفِ كافة معايير الاعتماد التلقائي:\n${blockedReason}`,
+      type: 'document',
+      priority: 'high',
+      action_url: `/documents/${documentType}/${documentId}`,
+    } as any);
 
-  toast.error('⛔ لم يتم اعتماد المستند — معايير غير مستوفاة', {
-    description: failedCriteria.map(c => c.criterionNameAr).join(', '),
-    duration: 8000,
-  });
+    toast.error('⛔ لم يتم اعتماد المستند — معايير غير مستوفاة', {
+      description: failedCriteria.map(c => c.criterionNameAr).join(', '),
+      duration: 8000,
+    });
+  }
+
+  const blockedReasonText = failedCriteria
+    .map(c => `${c.criterionNameAr}: ${c.details}`)
+    .join(' | ');
 
   return {
     allCriteriaMet: false,
     criteria,
-    blockedReason,
+    blockedReason: blockedReasonText,
   };
 }
