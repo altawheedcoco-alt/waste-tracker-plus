@@ -408,6 +408,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: BookOpen, labelAr: 'بروشور المنصة', labelEn: 'Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
       { icon: FileText, labelAr: 'إدارة الإفادات', labelEn: 'Attestations', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
       { icon: Monitor, labelAr: 'سكرين شوت', labelEn: 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
+      { icon: Globe, labelAr: 'إدارة الصفحة الرئيسية', labelEn: 'Homepage Manager', path: '/dashboard/homepage-manager', key: 'homepage-manager' },
     ],
   },
 
