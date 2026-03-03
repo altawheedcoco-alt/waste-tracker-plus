@@ -23,6 +23,7 @@ import { motion } from 'framer-motion';
 import StoryCircles from '@/components/stories/StoryCircles';
 import PostInteractions from './PostInteractions';
 import PostShareActions from '@/components/content-generator/PostShareActions';
+import BusinessPageSharePanel from './BusinessPageSharePanel';
 
 interface BusinessPagePreviewProps {
   organizationId: string;
@@ -243,6 +244,16 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
               </TabsTrigger>
             </TabsList>
           </div>
+
+          {/* ═══ Share Panel (only for own page) ═══ */}
+          {isOwnPage && (
+            <div className="p-4 pb-0">
+              <BusinessPageSharePanel
+                organizationId={organizationId}
+                organizationName={organizationName}
+              />
+            </div>
+          )}
 
           {/* ═══ Posts Tab ═══ */}
           <TabsContent value="posts" className="p-0 mt-0">
