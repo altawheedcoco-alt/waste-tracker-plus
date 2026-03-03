@@ -30,6 +30,11 @@ const DEMO_ACCOUNTS = [
   { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', orgName: 'مكتب الاستشارات البيئية التجريبي', role: 'company_admin', phone: '01000000008' },
   { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', orgName: 'المكتب الاستشاري التجريبي', role: 'company_admin', phone: '01000000009' },
   { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', orgName: 'جهة الأيزو التجريبية', role: 'company_admin', phone: '01000000010' },
+  // === حسابات عبدالله التجريبية ===
+  { email: 'abdullah-recycler@irecycle.test', fullName: 'عبدالله المدور', orgType: 'recycler', orgName: 'عبدالله المدور للتدوير', role: 'company_admin', phone: '01157570643' },
+  { email: 'abdullah-generator@irecycle.test', fullName: 'عبدالله المولد', orgType: 'generator', orgName: 'عبدالله المولد للمخلفات', role: 'company_admin', phone: '01157570643' },
+  { email: 'abdullah-transporter@irecycle.test', fullName: 'عبدالله الناقل', orgType: 'transporter', orgName: 'عبدالله الناقل للنقل', role: 'company_admin', phone: '01157570643' },
+  { email: 'abdullah-driver@irecycle.test', fullName: 'عبدالله السائق', orgType: 'transporter', orgName: 'عبدالله الناقل للنقل', role: 'driver', phone: '01157570643' },
 ];
 
 Deno.serve(async (req) => {
