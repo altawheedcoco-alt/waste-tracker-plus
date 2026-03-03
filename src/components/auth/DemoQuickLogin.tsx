@@ -9,6 +9,11 @@ const DEMO_PASSWORD = '57575757';
 const ACCESS_PIN = '575757';
 
 const allAccounts = [
+  // === حسابات عبدالله التجريبية (واتساب: 01157570643) ===
+  { email: 'abdullah-recycler@irecycle.test', label: '♻️ عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
+  { email: 'abdullah-generator@irecycle.test', label: '🏭 عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
+  { email: 'abdullah-transporter@irecycle.test', label: '🚛 عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+  { email: 'abdullah-driver@irecycle.test', label: '🚗 عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
   // مدير النظام
   { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'iRecycle Waste Management System', icon: Shield, color: 'from-yellow-500 to-amber-700' },
   // مولدات
@@ -33,11 +38,6 @@ const allAccounts = [
   { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
   { email: 'driver@demo.com', label: 'سائق التوصيل - النقل السريع', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
   { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف شركة', icon: UserCog, color: 'from-slate-500 to-slate-700' },
-  // === حسابات عبدالله التجريبية (واتساب: 01157570643) ===
-  { email: 'abdullah-recycler@irecycle.test', label: '♻️ عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
-  { email: 'abdullah-generator@irecycle.test', label: '🏭 عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
-  { email: 'abdullah-transporter@irecycle.test', label: '🚛 عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
-  { email: 'abdullah-driver@irecycle.test', label: '🚗 عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
 ];
 
 interface DemoQuickLoginProps {
