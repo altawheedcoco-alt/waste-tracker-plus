@@ -81,6 +81,9 @@ export default function PublicOrgProfile() {
       return;
     }
 
+    // Increment view count
+    supabase.rpc('increment_org_profile_views', { _share_code: code }).then(() => {});
+
     const p = profileData as any as PublicProfile;
     setSettings(p);
 

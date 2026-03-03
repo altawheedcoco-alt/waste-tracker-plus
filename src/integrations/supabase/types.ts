@@ -19722,6 +19722,7 @@ export type Database = {
           show_team_details: boolean
           show_team_documents: boolean
           updated_at: string
+          view_count: number
         }
         Insert: {
           created_at?: string
@@ -19739,6 +19740,7 @@ export type Database = {
           show_team_details?: boolean
           show_team_documents?: boolean
           updated_at?: string
+          view_count?: number
         }
         Update: {
           created_at?: string
@@ -19756,6 +19758,7 @@ export type Database = {
           show_team_details?: boolean
           show_team_documents?: boolean
           updated_at?: string
+          view_count?: number
         }
         Relationships: [
           {
@@ -35322,6 +35325,10 @@ export type Database = {
       has_waste_access: {
         Args: { _user_id: string; _waste_type: string }
         Returns: boolean
+      }
+      increment_org_profile_views: {
+        Args: { _share_code: string }
+        Returns: undefined
       }
       is_chat_participant: {
         Args: { _room_id: string; _user_id: string }
