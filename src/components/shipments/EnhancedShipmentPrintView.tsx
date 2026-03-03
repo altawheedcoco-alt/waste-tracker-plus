@@ -34,6 +34,7 @@ import { toast } from 'sonner';
 import StampSignatureSettings, { StampSignatureConfig, defaultConfig } from './StampSignatureSettings';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
+import SendForSigningButton from '@/components/documents/SendForSigningButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import AddNoteButton from '@/components/notes/AddNoteButton';
 
@@ -800,6 +801,13 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
               referenceId={shipment.shipment_number}
               referenceType="shipment"
               documentTitle={`وثيقة شحنة ${shipment.shipment_number}`}
+              variant="outline"
+            />
+            <SendForSigningButton
+              documentTitle={`وثيقة شحنة ${shipment.shipment_number}`}
+              documentType="shipment"
+              documentId={shipment.id}
+              relatedShipmentId={shipment.id}
               variant="outline"
             />
             <Button variant="outline" onClick={handleDownloadPDF} disabled={isPDFExporting} className="gap-2">

@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { type Contract, getStatusBadgeConfig, getContractTypeLabel } from '@/hooks/useContracts';
 import { signingMethodLabels } from '@/lib/contract-logic/contractSigningTypes';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
+import SendForSigningButton from '@/components/documents/SendForSigningButton';
 import { Download, Printer, PenTool, Building2, UserPlus } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
@@ -233,6 +234,12 @@ const ContractViewDialog = ({
             referenceId={contract.id}
             referenceType="contract"
             documentTitle={`عقد ${contract.title} - ${contract.contract_number}`}
+            variant="outline"
+          />
+          <SendForSigningButton
+            documentTitle={`عقد ${contract.title} - ${contract.contract_number}`}
+            documentType="contract"
+            documentId={contract.id}
             variant="outline"
           />
         </DialogFooter>
