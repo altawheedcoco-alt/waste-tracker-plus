@@ -21730,6 +21730,7 @@ export type Database = {
           license_renewal_url: string | null
           license_scope_notes: string | null
           license_source_env_approval: boolean | null
+          license_source_ida: boolean | null
           license_source_wmra_permit: boolean | null
           licensed_waste_categories: string[] | null
           licensed_waste_types: string[] | null
@@ -21835,6 +21836,7 @@ export type Database = {
           license_renewal_url?: string | null
           license_scope_notes?: string | null
           license_source_env_approval?: boolean | null
+          license_source_ida?: boolean | null
           license_source_wmra_permit?: boolean | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
@@ -21940,6 +21942,7 @@ export type Database = {
           license_renewal_url?: string | null
           license_scope_notes?: string | null
           license_source_env_approval?: boolean | null
+          license_source_ida?: boolean | null
           license_source_wmra_permit?: boolean | null
           licensed_waste_categories?: string[] | null
           licensed_waste_types?: string[] | null
