@@ -7,13 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Video, Upload, Shield, ShieldCheck, Loader2, CheckCircle2, XCircle, AlertTriangle, Eye, ArrowRight } from 'lucide-react';
+import { Camera, Video, Upload, Shield, ShieldCheck, Loader2, CheckCircle2, XCircle, AlertTriangle, Eye, ArrowRight, Film, Play, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import CameraAccessGrantsManager from '@/components/cameras/CameraAccessGrantsManager';
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+
+const VIDEO_TYPE_LABELS: Record<string, string> = {
+  live_recording: 'تسجيل مباشر',
+  upload: 'رفع ملف',
+  live_stream: 'بث مباشر',
+};
 
 const CamerasPage = () => {
   const { user, organization } = useAuth();
@@ -31,6 +37,7 @@ const CamerasPage = () => {
   const [verificationResult, setVerificationResult] = useState<any>(null);
   const [isVerifying, setIsVerifying] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
+  const [videoSource, setVideoSource] = useState<'live' | 'upload'>('live');
 
   const orgType = organization?.organization_type;
 
@@ -46,7 +53,6 @@ const CamerasPage = () => {
         .order('created_at', { ascending: false })
         .limit(50);
 
-      // Filter by org role
       if (orgType === 'generator') {
         query.eq('generator_organization_id', organization.id);
       } else if (orgType === 'transporter') {
@@ -79,6 +85,37 @@ const CamerasPage = () => {
     enabled: !!organization?.id,
   });
 
+  // Fetch all saved videos with shipment info
+  const { data: savedVideos = [], isLoading: videosLoading } = useQuery({
+    queryKey: ['shipment-videos-archive', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+      const { data, error } = await supabase
+        .from('shipment_videos')
+        .select(`
+          *,
+          shipment:shipments(id, shipment_number, waste_type, status, pickup_location, delivery_location, generator_organization_id, transporter_organization_id, recycler_organization_id),
+          uploader:profiles!shipment_videos_uploaded_by_fkey(full_name)
+        `)
+        .eq('organization_id', organization.id)
+        .order('created_at', { ascending: false })
+        .limit(50);
+      if (error) {
+        // Fallback without join if fkey not recognized
+        const { data: fallback, error: fbErr } = await supabase
+          .from('shipment_videos')
+          .select('*')
+          .eq('organization_id', organization.id)
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (fbErr) throw fbErr;
+        return fallback || [];
+      }
+      return data || [];
+    },
+    enabled: !!organization?.id,
+  });
+
   const startCamera = useCallback(async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
@@ -94,6 +131,7 @@ const CamerasPage = () => {
       setRecordedBlob(null);
       setRecordedUrl(null);
       setVerificationResult(null);
+      setVideoSource('live');
     } catch (err) {
       toast.error('فشل في فتح الكاميرا. يرجى السماح بالوصول إلى الكاميرا.');
     }
@@ -128,7 +166,7 @@ const CamerasPage = () => {
     stopCamera();
   }, [stopCamera]);
 
-  // Upload video and verify with AI
+  // Upload video, save to shipment_videos table, and verify with AI
   const uploadAndVerify = useMutation({
     mutationFn: async () => {
       if (!recordedBlob || !selectedShipmentId || !organization?.id || !user?.id) {
@@ -138,17 +176,30 @@ const CamerasPage = () => {
       setIsVerifying(true);
 
       // 1. Upload to storage
-      const fileName = `${organization.id}/${selectedShipmentId}/${Date.now()}.webm`;
+      const ext = videoSource === 'upload' ? 'mp4' : 'webm';
+      const contentType = videoSource === 'upload' ? 'video/mp4' : 'video/webm';
+      const fileName = `${organization.id}/${selectedShipmentId}/${Date.now()}.${ext}`;
       const { error: uploadError } = await supabase.storage
         .from('shipment-videos')
-        .upload(fileName, recordedBlob, { contentType: 'video/webm' });
+        .upload(fileName, recordedBlob, { contentType });
       if (uploadError) throw uploadError;
 
       const { data: urlData } = supabase.storage
         .from('shipment-videos')
         .getPublicUrl(fileName);
 
-      // 2. Call AI verification edge function
+      // 2. Save to shipment_videos table
+      const { error: insertError } = await supabase.from('shipment_videos').insert({
+        organization_id: organization.id,
+        shipment_id: selectedShipmentId,
+        uploaded_by: user.id,
+        video_url: urlData.publicUrl,
+        video_type: videoSource === 'live' ? 'live_recording' : 'upload',
+        file_size_bytes: recordedBlob.size,
+      });
+      if (insertError) console.error('Failed to save video record:', insertError);
+
+      // 3. Call AI verification edge function
       const { data, error } = await supabase.functions.invoke('verify-shipment-video', {
         body: {
           shipment_id: selectedShipmentId,
@@ -158,11 +209,22 @@ const CamerasPage = () => {
         },
       });
       if (error) throw error;
+
+      // 4. Update video record with AI result
+      if (data) {
+        await supabase.from('shipment_videos').update({
+          ai_verified: data.is_authentic || false,
+          ai_confidence_score: data.confidence_score || 0,
+          ai_result: data,
+        }).eq('video_url', urlData.publicUrl);
+      }
+
       return data;
     },
     onSuccess: (data) => {
       setVerificationResult(data);
       queryClient.invalidateQueries({ queryKey: ['camera-events-page'] });
+      queryClient.invalidateQueries({ queryKey: ['shipment-videos-archive'] });
       if (data?.is_authentic) {
         toast.success('✅ تم التحقق: الفيديو حقيقي والشحنة موجودة');
       } else {
@@ -187,6 +249,7 @@ const CamerasPage = () => {
     setRecordedBlob(file);
     setRecordedUrl(URL.createObjectURL(file));
     setVerificationResult(null);
+    setVideoSource('upload');
   }, []);
 
   return (
@@ -203,10 +266,14 @@ const CamerasPage = () => {
       </div>
 
       <Tabs defaultValue="live" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="live" className="gap-1.5">
             <Video className="w-4 h-4" />
             تسجيل مباشر
+          </TabsTrigger>
+          <TabsTrigger value="archive" className="gap-1.5">
+            <Film className="w-4 h-4" />
+            أرشيف الفيديوهات
           </TabsTrigger>
           <TabsTrigger value="grants" className="gap-1.5">
             <Shield className="w-4 h-4" />
@@ -366,12 +433,143 @@ const CamerasPage = () => {
           </Card>
         </TabsContent>
 
-        {/* ═══ Tab 2: Access Grants ═══ */}
+        {/* ═══ Tab 2: Video Archive ═══ */}
+        <TabsContent value="archive">
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                <Film className="w-5 h-5 text-primary" />
+                أرشيف الفيديوهات
+                <Badge variant="outline" className="mr-auto text-[10px]">
+                  {savedVideos.length} فيديو
+                </Badge>
+              </CardTitle>
+              <p className="text-xs text-muted-foreground">
+                جميع الفيديوهات المسجلة أو المرفوعة مرتبطة بالشحنات وبيانات التحقق
+              </p>
+            </CardHeader>
+            <CardContent>
+              {videosLoading ? (
+                <div className="flex items-center justify-center py-10 text-muted-foreground">
+                  <Loader2 className="w-6 h-6 animate-spin ml-2" />
+                  <span className="text-sm">جاري التحميل...</span>
+                </div>
+              ) : savedVideos.length === 0 ? (
+                <div className="text-center py-10 text-muted-foreground">
+                  <Film className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                  <p className="text-sm">لا توجد فيديوهات محفوظة بعد</p>
+                  <p className="text-xs mt-1">سجّل أو ارفع فيديو من تبويب &quot;تسجيل مباشر&quot; لتوثيق الشحنات</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {savedVideos.map((vid: any) => {
+                    const shipment = vid.shipment;
+                    return (
+                      <div key={vid.id} className="rounded-lg border bg-card overflow-hidden">
+                        <div className="flex gap-3 p-3">
+                          {/* Video thumbnail / play */}
+                          <div className="w-32 h-20 rounded-lg bg-muted flex-shrink-0 overflow-hidden relative group cursor-pointer"
+                            onClick={() => window.open(vid.video_url, '_blank')}
+                          >
+                            <video
+                              src={vid.video_url}
+                              className="w-full h-full object-cover"
+                              preload="metadata"
+                              muted
+                            />
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Play className="w-8 h-8 text-white" />
+                            </div>
+                          </div>
+
+                          {/* Info */}
+                          <div className="flex-1 min-w-0 space-y-1">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <Badge variant="outline" className="text-[10px]">
+                                {VIDEO_TYPE_LABELS[vid.video_type] || vid.video_type}
+                              </Badge>
+                              {vid.ai_verified !== null && (
+                                <Badge
+                                  variant={vid.ai_verified ? 'default' : 'secondary'}
+                                  className={`text-[10px] ${vid.ai_verified ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30' : ''}`}
+                                >
+                                  {vid.ai_verified ? `✓ موثق ${vid.ai_confidence_score ? `(${vid.ai_confidence_score}%)` : ''}` : 'غير موثق'}
+                                </Badge>
+                              )}
+                              {vid.file_size_bytes && (
+                                <span className="text-[10px] text-muted-foreground">
+                                  {(vid.file_size_bytes / (1024 * 1024)).toFixed(1)} MB
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Shipment info */}
+                            {shipment ? (
+                              <div className="text-xs text-muted-foreground space-y-0.5">
+                                <p className="font-medium text-foreground">
+                                  شحنة: {shipment.shipment_number || shipment.id?.slice(0, 8)}
+                                </p>
+                                <p>النوع: {shipment.waste_type || '—'} · الحالة: {shipment.status || '—'}</p>
+                                {(shipment.pickup_location || shipment.delivery_location) && (
+                                  <p className="truncate">
+                                    {shipment.pickup_location && `من: ${shipment.pickup_location}`}
+                                    {shipment.delivery_location && ` → إلى: ${shipment.delivery_location}`}
+                                  </p>
+                                )}
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">شحنة: {vid.shipment_id?.slice(0, 8) || '—'}</p>
+                            )}
+
+                            <div className="flex items-center gap-3 text-[11px] text-muted-foreground">
+                              <span>
+                                {format(new Date(vid.created_at), 'dd MMM yyyy — HH:mm', { locale: ar })}
+                              </span>
+                              {vid.uploader?.full_name && (
+                                <span>بواسطة: {vid.uploader.full_name}</span>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Actions */}
+                          <div className="flex flex-col gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-7 w-7"
+                              onClick={() => window.open(vid.video_url, '_blank')}
+                              title="فتح الفيديو"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
+                        </div>
+
+                        {/* AI Result summary if available */}
+                        {vid.ai_result && (
+                          <div className={`px-3 py-2 text-xs border-t ${vid.ai_verified ? 'bg-emerald-500/5 border-emerald-500/20' : 'bg-amber-500/5 border-amber-500/20'}`}>
+                            <span className="font-medium">
+                              {vid.ai_verified ? '✅ ' : '⚠️ '}
+                              تحليل AI:
+                            </span>{' '}
+                            {vid.ai_result.analysis_summary || 'لا توجد تفاصيل'}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ═══ Tab 3: Access Grants ═══ */}
         <TabsContent value="grants">
           <CameraAccessGrantsManager />
         </TabsContent>
 
-        {/* ═══ Tab 3: Camera Events Log ═══ */}
+        {/* ═══ Tab 4: Camera Events Log ═══ */}
         <TabsContent value="events">
           <Card>
             <CardHeader>
