@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Camera, Video, Upload, Shield, ShieldCheck, Loader2, CheckCircle2, XCircle, AlertTriangle, Eye } from 'lucide-react';
+import { Camera, Video, Upload, Shield, ShieldCheck, Loader2, CheckCircle2, XCircle, AlertTriangle, Eye, ArrowRight } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import CameraAccessGrantsManager from '@/components/cameras/CameraAccessGrantsManager';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +17,7 @@ import { ar } from 'date-fns/locale';
 
 const CamerasPage = () => {
   const { user, organization } = useAuth();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const videoRef = useRef<HTMLVideoElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -190,6 +192,9 @@ const CamerasPage = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
+        <Button variant="ghost" size="icon" onClick={() => navigate(-1)} className="h-9 w-9">
+          <ArrowRight className="w-5 h-5" />
+        </Button>
         <Camera className="w-7 h-7 text-primary" />
         <div>
           <h1 className="text-xl font-bold">نظام الكاميرات والتحقق المباشر</h1>
