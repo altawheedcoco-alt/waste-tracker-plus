@@ -29119,6 +29119,79 @@ export type Database = {
           },
         ]
       }
+      shipment_videos: {
+        Row: {
+          ai_confidence_score: number | null
+          ai_result: Json | null
+          ai_verified: boolean | null
+          created_at: string
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          shipment_id: string
+          updated_at: string
+          uploaded_by: string
+          video_type: string
+          video_url: string
+        }
+        Insert: {
+          ai_confidence_score?: number | null
+          ai_result?: Json | null
+          ai_verified?: boolean | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          shipment_id: string
+          updated_at?: string
+          uploaded_by: string
+          video_type?: string
+          video_url: string
+        }
+        Update: {
+          ai_confidence_score?: number | null
+          ai_result?: Json | null
+          ai_verified?: boolean | null
+          created_at?: string
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          shipment_id?: string
+          updated_at?: string
+          uploaded_by?: string
+          video_type?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_videos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_videos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_videos_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           account_notes: string | null
