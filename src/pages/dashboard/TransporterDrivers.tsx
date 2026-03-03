@@ -626,7 +626,7 @@ const TransporterDrivers = () => {
                     <Button
                       variant="outline"
                       className="flex-1"
-                      onClick={() => navigate(`/drivers/${driver.id}`)}
+                      onClick={() => navigate(`/dashboard/drivers/${driver.id}`)}
                     >
                       <MapPin className="ml-2 h-4 w-4" />
                       التفاصيل
