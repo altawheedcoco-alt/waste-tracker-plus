@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, Package, FileText, Receipt, Scale, Award, Building2 } from 'lucide-react';
+import { Search, QrCode, FileCheck, FileX, Loader2, Shield, Camera, Package, FileText, Receipt, Scale, Award, Building2, Lock, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -24,6 +24,105 @@ const docTypeIcons: Record<string, React.ReactNode> = {
   entity_certificate: <Building2 className="w-4 h-4" />,
 };
 
+// الحقول المسموح بعرضها للتحقق الخارجي (خصوصية الجهات)
+const EXTERNAL_ALLOWED_FIELDS: Record<string, string[]> = {
+  shipment: ['shipment_number', 'status', 'waste_type', 'quantity', 'unit', 'created_at'],
+  certificate: ['report_number', 'certificate_type', 'waste_type', 'recycling_method', 'created_at'],
+  receipt: ['receipt_number', 'signed_at', 'waste_type'],
+  contract: ['contract_number', 'title', 'start_date', 'end_date'],
+  invoice: ['invoice_number', 'issue_date', 'due_date', 'currency'],
+  disposal: ['shipment_number', 'status', 'waste_type', 'disposal_method'],
+  award_letter: ['letter_number', 'title', 'start_date', 'end_date', 'issue_date'],
+  lms_certificate: ['certificate_number', 'course_title', 'score', 'issued_at', 'is_valid'],
+  signer: ['signer_name', 'signer_title', 'authority_level'],
+  attestation: ['attestation_number', 'organization_type', 'terms_accepted', 'identity_verified', 'licenses_valid', 'kyc_complete', 'issued_at'],
+};
+
+// الحقول التي تحتوي على بيانات حساسة يجب إخفاؤها دائماً من الخارج
+const SENSITIVE_FIELDS = [
+  'id', 'generator_id', 'transporter_id', 'recycler_id', 'organization_id',
+  'created_by', 'updated_by', 'user_id', 'profile_id',
+  'total_amount', 'amount', 'price', 'cost', 'balance',
+  'phone', 'email', 'address', 'city',
+  'pickup_address', 'delivery_address', 'pickup_lat', 'pickup_lng',
+  'delivery_lat', 'delivery_lng', 'ip_address',
+  'generator_notes', 'recycler_notes', 'transporter_notes',
+  'internal_notes', 'admin_notes',
+];
+
+// تصفية البيانات للعرض الخارجي مع حماية خصوصية الجهات
+function sanitizeForExternalView(data: Record<string, any>, docType: string): Record<string, any> {
+  const allowedFields = EXTERNAL_ALLOWED_FIELDS[docType] || [];
+  const sanitized: Record<string, any> = {};
+
+  for (const [key, value] of Object.entries(data)) {
+    if (SENSITIVE_FIELDS.includes(key)) continue;
+    if (typeof value === 'object' && value !== null) continue;
+    if (!value) continue;
+    
+    // إظهار اسم المنظمة بشكل مختصر فقط
+    if (key.includes('organization_name') || key === 'partner_name') {
+      sanitized[key] = maskOrganizationName(String(value));
+      continue;
+    }
+    
+    // إظهار الحقول المسموح بها أو الحقول العامة الآمنة
+    if (allowedFields.includes(key) || key.includes('number') || key.includes('date') || key === 'status' || key === 'waste_type') {
+      sanitized[key] = value;
+    }
+  }
+
+  return sanitized;
+}
+
+// إخفاء جزء من اسم المنظمة
+function maskOrganizationName(name: string): string {
+  if (!name || name.length <= 4) return '●●●●';
+  const visibleChars = Math.min(Math.ceil(name.length * 0.4), 8);
+  return name.substring(0, visibleChars) + '●●●';
+}
+
+// تسميات عربية للحقول
+const FIELD_LABELS: Record<string, string> = {
+  shipment_number: 'رقم الشحنة',
+  status: 'الحالة',
+  waste_type: 'نوع المخلف',
+  quantity: 'الكمية',
+  unit: 'الوحدة',
+  created_at: 'تاريخ الإنشاء',
+  report_number: 'رقم الشهادة',
+  certificate_type: 'نوع الشهادة',
+  recycling_method: 'طريقة التدوير',
+  receipt_number: 'رقم الإيصال',
+  signed_at: 'تاريخ التوقيع',
+  contract_number: 'رقم العقد',
+  title: 'العنوان',
+  start_date: 'تاريخ البدء',
+  end_date: 'تاريخ الانتهاء',
+  invoice_number: 'رقم الفاتورة',
+  issue_date: 'تاريخ الإصدار',
+  due_date: 'تاريخ الاستحقاق',
+  currency: 'العملة',
+  letter_number: 'رقم الخطاب',
+  certificate_number: 'رقم الشهادة',
+  course_title: 'اسم الدورة',
+  score: 'النتيجة',
+  issued_at: 'تاريخ الإصدار',
+  is_valid: 'صالحة',
+  signer_name: 'اسم المفوض',
+  signer_title: 'المسمى الوظيفي',
+  authority_level: 'مستوى الصلاحية',
+  attestation_number: 'رقم الإفادة',
+  organization_type: 'نوع الجهة',
+  organization_name: 'اسم الجهة',
+  partner_name: 'اسم الشريك',
+  terms_accepted: 'قبول الشروط',
+  identity_verified: 'التحقق من الهوية',
+  licenses_valid: 'صلاحية التراخيص',
+  kyc_complete: 'اكتمال KYC',
+  disposal_method: 'طريقة التخلص',
+};
+
 const DocumentVerification = () => {
   const navigate = useNavigate();
   const [documentNumber, setDocumentNumber] = useState('');
@@ -35,6 +134,7 @@ const DocumentVerification = () => {
     in_transit: t('docVerify.statusInTransit'), delivered: t('docVerify.statusDelivered'), confirmed: t('docVerify.statusConfirmed'),
     cancelled: t('docVerify.statusCancelled'), active: t('docVerify.statusActive'), expired: t('docVerify.statusExpired'), draft: t('docVerify.statusDraft'),
     paid: t('docVerify.statusPaid'), unpaid: t('docVerify.statusUnpaid'), partial: t('docVerify.statusPartial'),
+    valid: 'صالحة', invalid: 'غير صالحة',
   };
 
   const handleVerify = async () => {
@@ -54,6 +154,11 @@ const DocumentVerification = () => {
   const typeLabel = result?.type
     ? DOCUMENT_TYPE_LABELS[result.type as DocumentQRType]?.[langKey] || result.type
     : '';
+
+  // تصفية البيانات للعرض الخارجي
+  const sanitizedData = result?.data
+    ? sanitizeForExternalView(result.data as Record<string, any>, result.type)
+    : null;
 
   return (
     <section className="py-10 sm:py-16 bg-muted/30">
@@ -151,26 +256,54 @@ const DocumentVerification = () => {
                           </div>
                         </div>
                       </div>
+                      
                       {result.status && (
                         <div className="mb-3">
-                          <span className="text-muted-foreground text-sm">{t('docVerify.statusLabel')}: </span>
+                          <span className="text-muted-foreground text-sm">الحالة: </span>
                           <Badge variant="secondary">{statusLabels[result.status] || result.status}</Badge>
                         </div>
                       )}
-                      {result.data && (
-                        <div className="grid grid-cols-2 gap-3 text-sm">
-                          {Object.entries(result.data as Record<string, any>)
-                            .filter(([k, v]) => v && typeof v !== 'object' && !['id', 'generator_id', 'transporter_id', 'recycler_id', 'organization_id', 'created_by'].includes(k))
+
+                      {/* بيانات مصفّاة للخصوصية - عرض خارجي */}
+                      {sanitizedData && Object.keys(sanitizedData).length > 0 && (
+                        <div className="grid grid-cols-2 gap-3 text-sm border-t border-green-200 dark:border-green-800 pt-3 mt-3">
+                          {Object.entries(sanitizedData)
                             .slice(0, 8)
                             .map(([key, value]) => (
                               <div key={key}>
-                                <span className="text-muted-foreground text-xs">{key.replace(/_/g, ' ')}: </span>
-                                <p className="font-medium truncate">{String(value)}</p>
+                                <span className="text-muted-foreground text-xs">
+                                  {FIELD_LABELS[key] || key.replace(/_/g, ' ')}:
+                                </span>
+                                <p className="font-medium truncate">
+                                  {typeof value === 'boolean' ? (value ? '✓ نعم' : '✗ لا') : String(value)}
+                                </p>
                               </div>
                             ))
                           }
                         </div>
                       )}
+
+                      {/* إشعار الخصوصية */}
+                      <div className="flex items-center gap-2 mt-4 p-2 rounded-md bg-green-100/50 dark:bg-green-900/30 text-xs text-green-700 dark:text-green-400">
+                        <EyeOff className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span>بعض البيانات محجوبة لحماية خصوصية الجهات المرتبطة</span>
+                      </div>
+
+                      {/* التوقيعات */}
+                      {result.signatures && result.signatures.length > 0 && (
+                        <div className="border-t border-green-200 dark:border-green-800 pt-3 mt-3">
+                          <p className="text-xs text-muted-foreground mb-2 font-medium">التوقيعات المعتمدة ({result.signatures.length}):</p>
+                          <div className="flex flex-wrap gap-2">
+                            {result.signatures.map((sig: any, i: number) => (
+                              <Badge key={i} variant="outline" className="gap-1 text-green-600 text-xs">
+                                <FileCheck className="w-3 h-3" />
+                                {sig.signer_name} - {sig.signer_role || sig.signer_title}
+                              </Badge>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
                       {result.verifiedAt && (
                         <p className="text-xs text-green-500 mt-3">
                           {t('docVerify.verifiedAt')}: {new Date(result.verifiedAt).toLocaleString(language === 'ar' ? 'ar-EG' : 'en-US')}
