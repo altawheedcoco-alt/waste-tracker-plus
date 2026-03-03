@@ -26,6 +26,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 import DriverLinkedOrganizations from '@/components/driver/DriverLinkedOrganizations';
+import DriverCredentialsEditor from '@/components/driver/DriverCredentialsEditor';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
 import SmartDailyBrief from './shared/SmartDailyBrief';
@@ -544,6 +545,7 @@ const DriverDashboard = () => {
             </Card>
 
             <DriverOwnLinkingCode />
+            <DriverCredentialsEditor />
             <DriverLinkedOrganizations />
 
             {driverInfo && (

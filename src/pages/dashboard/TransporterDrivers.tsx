@@ -32,6 +32,11 @@ import {
   Loader2,
   UserCheck,
   UserX,
+  Copy,
+  Eye,
+  EyeOff,
+  Key,
+  Check,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -50,6 +55,7 @@ interface Driver {
     full_name: string;
     email: string;
     phone: string | null;
+    user_id: string;
   } | null;
   activeShipments: number;
 }
@@ -62,6 +68,15 @@ const TransporterDrivers = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [addingDriver, setAddingDriver] = useState(false);
+  const [credentialsDialog, setCredentialsDialog] = useState<{ open: boolean; email: string; password: string } | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
+  const [copiedField, setCopiedField] = useState<string | null>(null);
+
+  // Edit credentials state
+  const [editDialog, setEditDialog] = useState<{ open: boolean; driver: Driver | null }>({ open: false, driver: null });
+  const [editForm, setEditForm] = useState({ new_email: '', new_password: '' });
+  const [editLoading, setEditLoading] = useState(false);
+  const [showEditPassword, setShowEditPassword] = useState(false);
 
   const [newDriver, setNewDriver] = useState({
     full_name: '',
@@ -91,14 +106,13 @@ const TransporterDrivers = () => {
           license_expiry,
           is_available,
           created_at,
-          profile:profiles(id, full_name, email, phone)
+          profile:profiles(id, full_name, email, phone, user_id)
         `)
         .eq('organization_id', organization?.id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
 
-      // Fetch active shipments count for each driver
       const driversWithShipments = await Promise.all(
         (data || []).map(async (driver) => {
           const { count } = await supabase
@@ -144,6 +158,12 @@ const TransporterDrivers = () => {
     }
   };
 
+  const copyToClipboard = async (text: string, field: string) => {
+    await navigator.clipboard.writeText(text);
+    setCopiedField(field);
+    setTimeout(() => setCopiedField(null), 2000);
+  };
+
   const handleAddDriver = async () => {
     if (!newDriver.full_name || !newDriver.license_number) {
       toast.error('يرجى ملء الاسم ورقم الرخصة على الأقل');
@@ -164,35 +184,20 @@ const TransporterDrivers = () => {
         },
       });
 
-      if (response.error) {
-        throw new Error(response.error.message);
-      }
-      
-      if (response.data?.error) {
-        throw new Error(response.data.error);
-      }
-
-      // Store the credentials locally for the team credentials page
-      if (response.data?.credentials) {
-        const { storeCredentials } = await import('./TeamCredentials');
-        storeCredentials(response.data.credentials.email, '');
-        
-        toast.success(
-          <div className="space-y-2">
-            <p className="font-bold">تم تسجيل السائق بنجاح!</p>
-            <p className="text-sm">بيانات الدخول:</p>
-            <p className="text-xs font-mono bg-muted p-2 rounded">
-              البريد: {response.data.credentials.email}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {response.data.credentials.password_notice || 'يجب على السائق إعادة تعيين كلمة المرور عند أول تسجيل دخول'}
-            </p>
-          </div>,
-          { duration: 15000 }
-        );
-      }
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
 
       setAddDialogOpen(false);
+
+      // Show credentials dialog
+      if (response.data?.credentials) {
+        setCredentialsDialog({
+          open: true,
+          email: response.data.credentials.email,
+          password: response.data.credentials.password,
+        });
+      }
+
       setNewDriver({
         full_name: '',
         email: '',
@@ -211,6 +216,38 @@ const TransporterDrivers = () => {
     }
   };
 
+  const handleEditCredentials = async () => {
+    if (!editDialog.driver?.profile?.user_id) return;
+    if (!editForm.new_email && !editForm.new_password) {
+      toast.error('أدخل البريد الجديد أو كلمة المرور الجديدة');
+      return;
+    }
+
+    setEditLoading(true);
+    try {
+      const response = await supabase.functions.invoke('update-driver-credentials', {
+        body: {
+          target_user_id: editDialog.driver.profile.user_id,
+          new_email: editForm.new_email || undefined,
+          new_password: editForm.new_password || undefined,
+          mode: 'admin',
+        },
+      });
+
+      if (response.error) throw new Error(response.error.message);
+      if (response.data?.error) throw new Error(response.data.error);
+
+      toast.success('تم تحديث بيانات الدخول بنجاح');
+      setEditDialog({ open: false, driver: null });
+      setEditForm({ new_email: '', new_password: '' });
+      fetchDrivers();
+    } catch (error: any) {
+      toast.error(error.message || 'حدث خطأ أثناء التحديث');
+    } finally {
+      setEditLoading(false);
+    }
+  };
+
   const filteredDrivers = drivers.filter(driver =>
     driver.profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     driver.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -226,7 +263,6 @@ const TransporterDrivers = () => {
   return (
     <DashboardLayout>
     <div className="space-y-6">
-      {/* Back Button */}
       <BackButton />
 
       <div className="flex items-center justify-between">
@@ -251,7 +287,7 @@ const TransporterDrivers = () => {
             <div className="space-y-4 mt-4">
               <div className="p-3 rounded-lg bg-primary/5 border border-primary/20">
                 <p className="text-sm text-muted-foreground">
-                  💡 سيتم توليد بريد إلكتروني وكلمة مرور تلقائياً للسائق، ويمكنك عرضها لاحقاً من صفحة "بيانات الفريق"
+                  💡 سيتم توليد بريد إلكتروني وكلمة مرور تلقائياً للسائق وستظهر لك بعد الإنشاء مباشرة
                 </p>
               </div>
               <div>
@@ -323,6 +359,141 @@ const TransporterDrivers = () => {
           </DialogContent>
         </Dialog>
       </div>
+
+      {/* Credentials Dialog - shown after successful creation */}
+      <Dialog open={!!credentialsDialog?.open} onOpenChange={(open) => !open && setCredentialsDialog(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-emerald-600">
+              <Check className="h-5 w-5" />
+              تم تسجيل السائق بنجاح!
+            </DialogTitle>
+            <DialogDescription>
+              احفظ بيانات الدخول التالية - يمكن للسائق تغييرها بعد تسجيل الدخول
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div className="p-4 rounded-lg border-2 border-primary/20 bg-primary/5 space-y-3">
+              <div>
+                <Label className="text-xs text-muted-foreground">البريد الإلكتروني</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <code className="flex-1 p-2 rounded bg-background border text-sm font-mono break-all" dir="ltr">
+                    {credentialsDialog?.email}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => copyToClipboard(credentialsDialog?.email || '', 'email')}
+                  >
+                    {copiedField === 'email' ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label className="text-xs text-muted-foreground">كلمة المرور</Label>
+                <div className="flex items-center gap-2 mt-1">
+                  <code className="flex-1 p-2 rounded bg-background border text-sm font-mono" dir="ltr">
+                    {showPassword ? credentialsDialog?.password : '••••••••••'}
+                  </code>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => setShowPassword(!showPassword)}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() => copyToClipboard(credentialsDialog?.password || '', 'password')}
+                  >
+                    {copiedField === 'password' ? <Check className="h-4 w-4 text-emerald-500" /> : <Copy className="h-4 w-4" />}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="p-3 rounded-lg bg-amber-50 dark:bg-amber-950 border border-amber-200 dark:border-amber-800">
+              <p className="text-sm text-amber-800 dark:text-amber-200">
+                ⚠️ احفظ هذه البيانات الآن - يمكنك تغييرها لاحقاً من صفحة إدارة السائقين، ويمكن للسائق تغييرها بنفسه بعد تسجيل الدخول.
+              </p>
+            </div>
+            <Button 
+              className="w-full" 
+              onClick={() => {
+                setCredentialsDialog(null);
+                setShowPassword(false);
+              }}
+            >
+              تم، إغلاق
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Credentials Dialog */}
+      <Dialog open={editDialog.open} onOpenChange={(open) => { if (!open) { setEditDialog({ open: false, driver: null }); setEditForm({ new_email: '', new_password: '' }); } }}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Key className="h-5 w-5" />
+              تعديل بيانات الدخول
+            </DialogTitle>
+            <DialogDescription>
+              تعديل بيانات دخول السائق: {editDialog.driver?.profile?.full_name}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 mt-4">
+            <div>
+              <Label>البريد الإلكتروني الحالي</Label>
+              <code className="block p-2 rounded bg-muted border text-sm font-mono mt-1 break-all" dir="ltr">
+                {editDialog.driver?.profile?.email}
+              </code>
+            </div>
+            <div>
+              <Label>البريد الإلكتروني الجديد (اختياري)</Label>
+              <Input
+                value={editForm.new_email}
+                onChange={(e) => setEditForm(prev => ({ ...prev, new_email: e.target.value }))}
+                placeholder="ادخل البريد الجديد"
+                type="email"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <Label>كلمة المرور الجديدة (اختياري)</Label>
+              <div className="relative">
+                <Input
+                  value={editForm.new_password}
+                  onChange={(e) => setEditForm(prev => ({ ...prev, new_password: e.target.value }))}
+                  placeholder="ادخل كلمة المرور الجديدة"
+                  type={showEditPassword ? 'text' : 'password'}
+                  dir="ltr"
+                />
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7"
+                  onClick={() => setShowEditPassword(!showEditPassword)}
+                >
+                  {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </Button>
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => setEditDialog({ open: false, driver: null })}>
+                إلغاء
+              </Button>
+              <Button variant="eco" onClick={handleEditCredentials} disabled={editLoading}>
+                {editLoading ? <Loader2 className="ml-2 h-4 w-4 animate-spin" /> : null}
+                حفظ التغييرات
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -434,7 +605,7 @@ const TransporterDrivers = () => {
                   <div className="space-y-2 text-sm">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Mail className="w-4 h-4" />
-                      <span>{driver.profile?.email || '-'}</span>
+                      <span className="truncate" dir="ltr">{driver.profile?.email || '-'}</span>
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Phone className="w-4 h-4" />
@@ -451,14 +622,27 @@ const TransporterDrivers = () => {
                     </div>
                   </div>
 
-                  <Button
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => navigate(`/drivers/${driver.id}`)}
-                  >
-                    <MapPin className="ml-2 h-4 w-4" />
-                    عرض التفاصيل والموقع
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      onClick={() => navigate(`/drivers/${driver.id}`)}
+                    >
+                      <MapPin className="ml-2 h-4 w-4" />
+                      التفاصيل
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      title="تعديل بيانات الدخول"
+                      onClick={() => {
+                        setEditDialog({ open: true, driver });
+                        setEditForm({ new_email: '', new_password: '' });
+                      }}
+                    >
+                      <Key className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
