@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import ApprovalWorkflowStepper from '@/components/approvals/ApprovalWorkflowStepper';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -422,28 +423,13 @@ const MyRequests = () => {
 
             {selectedRequest && (
               <div className="space-y-4">
-                {/* Status Banner */}
-                <div className={`p-4 rounded-lg ${
-                  selectedRequest.status === 'pending' ? 'bg-yellow-50 dark:bg-yellow-950/30 border border-yellow-200 dark:border-yellow-800' :
-                  selectedRequest.status === 'approved' ? 'bg-green-50 dark:bg-green-950/30 border border-green-200 dark:border-green-800' :
-                  'bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-800'
-                }`}>
-                  <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-full ${
-                      selectedRequest.status === 'pending' ? 'bg-yellow-100 dark:bg-yellow-900' :
-                      selectedRequest.status === 'approved' ? 'bg-green-100 dark:bg-green-900' :
-                      'bg-red-100 dark:bg-red-900'
-                    }`}>
-                      {STATUS_CONFIG[selectedRequest.status]?.icon}
-                    </div>
-                    <div>
-                      <p className="font-semibold">{STATUS_CONFIG[selectedRequest.status]?.label}</p>
-                      <p className="text-sm text-muted-foreground">
-                        {STATUS_CONFIG[selectedRequest.status]?.description}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {/* Workflow Stepper */}
+                <ApprovalWorkflowStepper
+                  status={selectedRequest.status}
+                  createdAt={selectedRequest.created_at}
+                  reviewedAt={selectedRequest.reviewed_at}
+                  adminNotes={selectedRequest.admin_notes}
+                />
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>

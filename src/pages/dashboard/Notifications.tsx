@@ -11,12 +11,13 @@ import ResponsivePageContainer from '@/components/dashboard/ResponsivePageContai
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import {
-  Bell,
+  Bell, Search,
   Package,
   Truck,
   CheckCircle,
@@ -307,7 +308,8 @@ const Notifications = () => {
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
-
+  const [readFilter, setReadFilter] = useState<'all' | 'unread' | 'read'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   // Use display mode for responsive layout - MUST be before any early returns
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
@@ -397,10 +399,14 @@ const Notifications = () => {
     navigate('/dashboard/carbon-footprint');
   };
 
-  // Filter notifications by category
+  // Filter notifications by category, read status, and search
   const filteredNotifications = notifications.filter((notification) => {
-    if (activeCategory === 'all') return true;
-    return categorizeNotification(notification.type) === activeCategory;
+    const matchesCategory = activeCategory === 'all' || categorizeNotification(notification.type) === activeCategory;
+    const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !notification.is_read : notification.is_read);
+    const matchesSearch = !searchQuery || 
+      notification.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      notification.message?.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesRead && matchesSearch;
   });
 
   // Count notifications per category
@@ -414,6 +420,29 @@ const Notifications = () => {
     return notifications.filter(n => 
       categorizeNotification(n.type) === categoryId && !n.is_read
     ).length;
+  };
+
+  // Quick action handler based on notification type
+  const getQuickAction = (notification: Notification) => {
+    const type = notification.type;
+    if (type === 'signing_request' || type === 'signature_request') {
+      return { label: 'وقّع الآن', icon: PenTool, action: () => navigate('/dashboard/signing-inbox') };
+    }
+    if (type === 'approval_request') {
+      return { label: 'راجع الطلب', icon: CheckCircle, action: () => navigate('/dashboard/my-requests') };
+    }
+    if (type === 'shipment_created' || type === 'shipment_assigned' || type === 'shipment_status' || type === 'shipment') {
+      return notification.shipment_id 
+        ? { label: 'عرض الشحنة', icon: Package, action: () => navigate(`/dashboard/shipments/${notification.shipment_id}`) }
+        : null;
+    }
+    if (type === 'partner_linked' || type === 'partner_message') {
+      return { label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners') };
+    }
+    if (type === 'invoice' || type === 'payment' || type === 'deposit') {
+      return { label: 'المالية', icon: Wallet, action: () => navigate('/dashboard/accounting') };
+    }
+    return null;
   };
 
   if (loading) {
@@ -529,6 +558,32 @@ const Notifications = () => {
               })}
             </div>
           </div>
+
+        {/* Search & Filter Bar */}
+        <div className="flex flex-wrap gap-2 items-center">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input 
+              placeholder="ابحث في الإشعارات..." 
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="pr-9 h-9 text-sm"
+            />
+          </div>
+          <div className="flex gap-1">
+            {(['all', 'unread', 'read'] as const).map(f => (
+              <Button
+                key={f}
+                size="sm"
+                variant={readFilter === f ? 'default' : 'outline'}
+                onClick={() => setReadFilter(f)}
+                className="h-9 text-xs"
+              >
+                {f === 'all' ? 'الكل' : f === 'unread' ? `غير مقروء (${unreadCount})` : 'مقروء'}
+              </Button>
+            ))}
+          </div>
+        </div>
 
         {/* Notifications List */}
         <Card>
@@ -789,13 +844,31 @@ const Notifications = () => {
                             </div>
                           )}
 
-                          {/* Time */}
-                          <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                            <Clock className="w-3 h-3" />
-                            {formatDistanceToNow(new Date(notification.created_at), {
-                              addSuffix: true,
-                              locale: dateLocale,
-                            })}
+                          {/* Time + Quick Action */}
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                              <Clock className="w-3 h-3" />
+                              {formatDistanceToNow(new Date(notification.created_at), {
+                                addSuffix: true,
+                                locale: dateLocale,
+                              })}
+                            </div>
+                            {(() => {
+                              const qa = getQuickAction(notification);
+                              if (!qa) return null;
+                              const QAIcon = qa.icon;
+                              return (
+                                <Button
+                                  size="sm"
+                                  variant="outline"
+                                  className="h-7 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                                  onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); qa.action(); }}
+                                >
+                                  <QAIcon className="w-3 h-3" />
+                                  {qa.label}
+                                </Button>
+                              );
+                            })()}
                           </div>
                           
                           {/* PDF Actions for Recycling Reports */}
