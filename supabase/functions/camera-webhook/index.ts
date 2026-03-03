@@ -135,7 +135,7 @@ serve(async (req) => {
 
       if (error) throw error;
 
-      // 4. If matched, update shipment status and notify generator
+      // 4. If matched, update shipment status and notify generator (only if grant exists)
       if (shipmentId && plateMatched) {
         // Add to chain of custody
         await supabase.from("chain_of_custody").insert({
@@ -151,21 +151,32 @@ serve(async (req) => {
           block_number: 0,
         });
 
-        // Create notification for generator
+        // Only notify generator if they have an active camera access grant
         if (generatorOrgId) {
-          await supabase.from("notifications").insert({
-            organization_id: generatorOrgId,
-            title: "✅ تأكيد وصول الشحنة بالكاميرا",
-            message: `تم تأكيد وصول المركبة (${plate_number}) إلى مرفق الاستلام عبر نظام الكاميرات الذكية`,
-            type: "shipment_update",
-            priority: "high",
-            metadata: {
-              shipment_id: shipmentId,
-              camera_event_id: event.id,
-              plate_number,
-              photo_url,
-            },
-          });
+          const { data: grant } = await supabase
+            .from("camera_access_grants")
+            .select("id")
+            .eq("facility_organization_id", facility_organization_id)
+            .eq("granted_to_organization_id", generatorOrgId)
+            .eq("is_active", true)
+            .or("expires_at.is.null,expires_at.gt." + new Date().toISOString())
+            .maybeSingle();
+
+          if (grant) {
+            await supabase.from("notifications").insert({
+              organization_id: generatorOrgId,
+              title: "✅ تأكيد وصول الشحنة بالكاميرا",
+              message: `تم تأكيد وصول المركبة (${plate_number}) إلى مرفق الاستلام عبر نظام الكاميرات الذكية`,
+              type: "shipment_update",
+              priority: "high",
+              metadata: {
+                shipment_id: shipmentId,
+                camera_event_id: event.id,
+                plate_number,
+                photo_url,
+              },
+            });
+          }
         }
       }
 
