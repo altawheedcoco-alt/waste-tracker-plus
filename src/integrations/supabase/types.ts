@@ -29031,6 +29031,94 @@ export type Database = {
           },
         ]
       }
+      shipment_verification_videos: {
+        Row: {
+          ai_analysis_result: Json | null
+          ai_confidence_score: number | null
+          ai_verification_status: string | null
+          ai_verified_at: string | null
+          created_at: string
+          device_info: Json | null
+          duration_seconds: number | null
+          file_size_bytes: number | null
+          gps_accuracy: number | null
+          gps_latitude: number | null
+          gps_longitude: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          shipment_id: string
+          thumbnail_url: string | null
+          updated_at: string
+          uploaded_by: string
+          video_url: string
+        }
+        Insert: {
+          ai_analysis_result?: Json | null
+          ai_confidence_score?: number | null
+          ai_verification_status?: string | null
+          ai_verified_at?: string | null
+          created_at?: string
+          device_info?: Json | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          gps_accuracy?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          shipment_id: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          uploaded_by: string
+          video_url: string
+        }
+        Update: {
+          ai_analysis_result?: Json | null
+          ai_confidence_score?: number | null
+          ai_verification_status?: string | null
+          ai_verified_at?: string | null
+          created_at?: string
+          device_info?: Json | null
+          duration_seconds?: number | null
+          file_size_bytes?: number | null
+          gps_accuracy?: number | null
+          gps_latitude?: number | null
+          gps_longitude?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          shipment_id?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          uploaded_by?: string
+          video_url?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_verification_videos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_verification_videos_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_verification_videos_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shipments: {
         Row: {
           account_notes: string | null
