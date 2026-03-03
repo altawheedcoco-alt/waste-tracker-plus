@@ -3085,6 +3085,106 @@ export type Database = {
           },
         ]
       }
+      camera_arrival_events: {
+        Row: {
+          arrival_verified: boolean
+          camera_id: string | null
+          confidence_score: number | null
+          created_at: string
+          event_timestamp: string
+          facility_organization_id: string
+          generator_organization_id: string | null
+          id: string
+          matched_driver_id: string | null
+          matched_vehicle_id: string | null
+          metadata: Json | null
+          photo_url: string | null
+          plate_matched: boolean
+          plate_number: string
+          shipment_id: string | null
+          video_clip_url: string | null
+        }
+        Insert: {
+          arrival_verified?: boolean
+          camera_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          event_timestamp?: string
+          facility_organization_id: string
+          generator_organization_id?: string | null
+          id?: string
+          matched_driver_id?: string | null
+          matched_vehicle_id?: string | null
+          metadata?: Json | null
+          photo_url?: string | null
+          plate_matched?: boolean
+          plate_number: string
+          shipment_id?: string | null
+          video_clip_url?: string | null
+        }
+        Update: {
+          arrival_verified?: boolean
+          camera_id?: string | null
+          confidence_score?: number | null
+          created_at?: string
+          event_timestamp?: string
+          facility_organization_id?: string
+          generator_organization_id?: string | null
+          id?: string
+          matched_driver_id?: string | null
+          matched_vehicle_id?: string | null
+          metadata?: Json | null
+          photo_url?: string | null
+          plate_matched?: boolean
+          plate_number?: string
+          shipment_id?: string | null
+          video_clip_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camera_arrival_events_camera_id_fkey"
+            columns: ["camera_id"]
+            isOneToOne: false
+            referencedRelation: "facility_cameras"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camera_arrival_events_facility_organization_id_fkey"
+            columns: ["facility_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "camera_arrival_events_facility_organization_id_fkey"
+            columns: ["facility_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camera_arrival_events_generator_organization_id_fkey"
+            columns: ["generator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "camera_arrival_events_generator_organization_id_fkey"
+            columns: ["generator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camera_arrival_events_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       carbon_credits: {
         Row: {
           carbon_tons: number
@@ -13805,6 +13905,60 @@ export type Database = {
           {
             foreignKeyName: "external_weight_records_partner_company_id_fkey"
             columns: ["partner_company_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_cameras: {
+        Row: {
+          api_key_hash: string | null
+          camera_location: string | null
+          camera_name: string
+          camera_type: string
+          created_at: string
+          id: string
+          is_active: boolean
+          last_event_at: string | null
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_hash?: string | null
+          camera_location?: string | null
+          camera_name: string
+          camera_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_event_at?: string | null
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_hash?: string | null
+          camera_location?: string | null
+          camera_name?: string
+          camera_type?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          last_event_at?: string | null
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_cameras_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "facility_cameras_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]

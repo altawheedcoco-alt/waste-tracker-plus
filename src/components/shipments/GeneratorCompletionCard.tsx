@@ -1,3 +1,4 @@
+import CameraArrivalProof from './CameraArrivalProof';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -18,6 +19,7 @@ import { ar } from 'date-fns/locale';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 interface GeneratorCompletionCardProps {
   shipment: {
+    id?: string;
     shipment_number: string;
     waste_type: string;
     quantity: number;
@@ -157,6 +159,9 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
             </div>
           )}
         </div>
+
+        {/* Camera Arrival Proof */}
+        {shipment.id && <CameraArrivalProof shipmentId={shipment.id} />}
 
         {/* Footer note */}
         <div className="flex items-center gap-2 p-3 rounded-lg bg-muted/50 border border-dashed" dir="rtl">
