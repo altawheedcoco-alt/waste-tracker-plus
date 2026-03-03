@@ -70,16 +70,17 @@ const FocusMusicPlayer = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="piano" className="w-full">
-          <TabsList className="w-full justify-start px-3 pt-3 bg-transparent">
+        <Tabs defaultValue="calm" className="w-full">
+          <TabsList className="w-full justify-start px-3 pt-3 bg-transparent flex-wrap gap-1">
+            <TabsTrigger value="calm" className="text-xs">🎶 هادئة</TabsTrigger>
             <TabsTrigger value="piano" className="text-xs">🎹 بيانو</TabsTrigger>
             <TabsTrigger value="nature" className="text-xs">🌿 طبيعة</TabsTrigger>
             <TabsTrigger value="ambient" className="text-xs">🎵 أجواء</TabsTrigger>
           </TabsList>
           
-          {(['piano', 'nature', 'ambient'] as const).map((category) => (
+          {(['calm', 'piano', 'nature', 'ambient'] as const).map((category) => (
             <TabsContent key={category} value={category} className="mt-0">
-              <div className="p-3 grid grid-cols-3 gap-2 max-h-48 overflow-y-auto">
+              <div className="p-3 grid grid-cols-3 gap-2 max-h-56 overflow-y-auto">
                 {tracks
                   .filter((track) => track.category === category)
                   .map((track) => (
