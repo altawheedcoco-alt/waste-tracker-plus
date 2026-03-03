@@ -24885,6 +24885,160 @@ export type Database = {
         }
         Relationships: []
       }
+      production_batch_inputs: {
+        Row: {
+          batch_id: string
+          created_at: string
+          id: string
+          quantity: number
+          shipment_id: string | null
+          supplier_name: string | null
+          unit: string | null
+          waste_type: string
+        }
+        Insert: {
+          batch_id: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          shipment_id?: string | null
+          supplier_name?: string | null
+          unit?: string | null
+          waste_type: string
+        }
+        Update: {
+          batch_id?: string
+          created_at?: string
+          id?: string
+          quantity?: number
+          shipment_id?: string | null
+          supplier_name?: string | null
+          unit?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_batch_inputs_batch_id_fkey"
+            columns: ["batch_id"]
+            isOneToOne: false
+            referencedRelation: "production_batches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_batch_inputs_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      production_batches: {
+        Row: {
+          batch_number: string
+          completed_at: string | null
+          cost_per_ton: number | null
+          created_at: string
+          created_by: string | null
+          energy_cost: number | null
+          extraction_rate: number | null
+          id: string
+          input_quantity: number
+          input_unit: string | null
+          input_waste_type: string
+          labor_cost: number | null
+          materials_cost: number | null
+          notes: string | null
+          organization_id: string
+          output_product_type: string | null
+          output_quantity: number | null
+          output_unit: string | null
+          production_line: string | null
+          quality_grade: string | null
+          started_at: string | null
+          status: string
+          total_cost: number | null
+          updated_at: string
+          waste_residue_quantity: number | null
+        }
+        Insert: {
+          batch_number: string
+          completed_at?: string | null
+          cost_per_ton?: number | null
+          created_at?: string
+          created_by?: string | null
+          energy_cost?: number | null
+          extraction_rate?: number | null
+          id?: string
+          input_quantity?: number
+          input_unit?: string | null
+          input_waste_type: string
+          labor_cost?: number | null
+          materials_cost?: number | null
+          notes?: string | null
+          organization_id: string
+          output_product_type?: string | null
+          output_quantity?: number | null
+          output_unit?: string | null
+          production_line?: string | null
+          quality_grade?: string | null
+          started_at?: string | null
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+          waste_residue_quantity?: number | null
+        }
+        Update: {
+          batch_number?: string
+          completed_at?: string | null
+          cost_per_ton?: number | null
+          created_at?: string
+          created_by?: string | null
+          energy_cost?: number | null
+          extraction_rate?: number | null
+          id?: string
+          input_quantity?: number
+          input_unit?: string | null
+          input_waste_type?: string
+          labor_cost?: number | null
+          materials_cost?: number | null
+          notes?: string | null
+          organization_id?: string
+          output_product_type?: string | null
+          output_quantity?: number | null
+          output_unit?: string | null
+          production_line?: string | null
+          quality_grade?: string | null
+          started_at?: string | null
+          status?: string
+          total_cost?: number | null
+          updated_at?: string
+          waste_residue_quantity?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "production_batches_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "production_batches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "production_batches_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_posts: {
         Row: {
           content: string | null
@@ -27682,6 +27836,110 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      scheduled_collections: {
+        Row: {
+          auto_create_shipment: boolean | null
+          created_at: string
+          end_date: string | null
+          estimated_quantity: number | null
+          frequency: string
+          id: string
+          is_active: boolean | null
+          next_collection_date: string | null
+          notes: string | null
+          organization_id: string
+          pickup_address: string | null
+          pickup_latitude: number | null
+          pickup_longitude: number | null
+          preferred_day: string | null
+          preferred_time_from: string | null
+          preferred_time_to: string | null
+          start_date: string
+          title: string
+          transporter_id: string | null
+          unit: string | null
+          updated_at: string
+          waste_type: string
+        }
+        Insert: {
+          auto_create_shipment?: boolean | null
+          created_at?: string
+          end_date?: string | null
+          estimated_quantity?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          next_collection_date?: string | null
+          notes?: string | null
+          organization_id: string
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          preferred_day?: string | null
+          preferred_time_from?: string | null
+          preferred_time_to?: string | null
+          start_date?: string
+          title: string
+          transporter_id?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_type: string
+        }
+        Update: {
+          auto_create_shipment?: boolean | null
+          created_at?: string
+          end_date?: string | null
+          estimated_quantity?: number | null
+          frequency?: string
+          id?: string
+          is_active?: boolean | null
+          next_collection_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          pickup_address?: string | null
+          pickup_latitude?: number | null
+          pickup_longitude?: number | null
+          preferred_day?: string | null
+          preferred_time_from?: string | null
+          preferred_time_to?: string | null
+          start_date?: string
+          title?: string
+          transporter_id?: string | null
+          unit?: string | null
+          updated_at?: string
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_collections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "scheduled_collections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scheduled_collections_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "scheduled_collections_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
