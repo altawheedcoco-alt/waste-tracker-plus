@@ -13,7 +13,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
-import { Plus, Send, FileText, Clock, CheckCircle, XCircle, Calendar, DollarSign, Briefcase, MessageCircle } from "lucide-react";
+import { Plus, Send, FileText, Clock, CheckCircle, XCircle, DollarSign, Printer, Loader2 } from "lucide-react";
+import {
+  generateSalaryCertificate,
+  generateExperienceCertificate,
+  generateLeaveRequest,
+  generateEmploymentLetter,
+  generateWorkConfirmation,
+  generateLeaveBalance,
+  type HRDocData,
+} from "@/components/dashboard/shared/printTemplates/hrDocTemplates";
 
 const REQUEST_TYPES = [
   { value: 'leave', label: 'طلب إجازة', icon: '🏖️' },
@@ -35,12 +44,24 @@ const PRIORITY_MAP: Record<string, { label: string; variant: 'default' | 'second
   urgent: { label: 'عاجلة', variant: 'destructive' },
 };
 
+const DOCUMENT_TEMPLATES = [
+  { key: 'salary_cert', title: 'شهادة راتب', desc: 'شهادة بالراتب الحالي للجهات الخارجية', icon: '💰' },
+  { key: 'experience_cert', title: 'شهادة خبرة', desc: 'شهادة بمدة العمل والمسمى الوظيفي', icon: '📜' },
+  { key: 'leave_request', title: 'طلب إجازة', desc: 'نموذج طلب إجازة رسمي جاهز للطباعة', icon: '🏖️' },
+  { key: 'employment_letter', title: 'خطاب تعريف بالعمل', desc: 'خطاب رسمي لجهة خارجية (بنك، سفارة...)', icon: '📋' },
+  { key: 'work_confirmation', title: 'إفادة عمل', desc: 'إثبات أنك على رأس العمل', icon: '✅' },
+  { key: 'leave_balance', title: 'كشف حساب إجازات', desc: 'تفاصيل رصيد الإجازات والمستهلك', icon: '📊' },
+];
+
 export default function HRSelfService() {
   const { profile, organization } = useAuth();
   const orgId = organization?.id;
   const queryClient = useQueryClient();
   const [showNew, setShowNew] = useState(false);
   const [newReq, setNewReq] = useState({ type: 'leave', title: '', details: '', priority: 'normal' });
+  const [printingDoc, setPrintingDoc] = useState<string | null>(null);
+  const [targetEntity, setTargetEntity] = useState('');
+  const [docDialog, setDocDialog] = useState<{ open: boolean; key: string; title: string } | null>(null);
 
   const { data: requests = [] } = useQuery({
     queryKey: ['hr-requests', orgId],
@@ -80,6 +101,50 @@ export default function HRSelfService() {
       case 'in_review': return <Badge variant="outline"><Clock className="w-3 h-3 ml-1" />قيد المراجعة</Badge>;
       default: return <Badge variant="secondary"><Clock className="w-3 h-3 ml-1" />معلق</Badge>;
     }
+  };
+
+  const buildDocData = (): HRDocData => ({
+    orgName: organization?.name || 'الشركة',
+    orgAddress: (organization as any)?.address || '',
+    orgPhone: (organization as any)?.phone || '',
+    employeeName: profile?.full_name || 'الموظف',
+    employeeTitle: (profile as any)?.job_title || 'موظف',
+    employeeDepartment: (profile as any)?.department || '',
+    employeeId: profile?.id?.slice(0, 8) || '',
+    joinDate: '',
+    targetEntity,
+  });
+
+  const handlePrintDocument = (key: string) => {
+    setPrintingDoc(key);
+    const d = buildDocData();
+    let html = '';
+
+    switch (key) {
+      case 'salary_cert': html = generateSalaryCertificate(d); break;
+      case 'experience_cert': html = generateExperienceCertificate(d); break;
+      case 'leave_request': html = generateLeaveRequest(d); break;
+      case 'employment_letter': html = generateEmploymentLetter(d); break;
+      case 'work_confirmation': html = generateWorkConfirmation(d); break;
+      case 'leave_balance': html = generateLeaveBalance(d); break;
+      default: return;
+    }
+
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.write(html);
+      printWindow.document.close();
+      setTimeout(() => {
+        printWindow.print();
+        setPrintingDoc(null);
+      }, 500);
+    } else {
+      toast.error('تعذر فتح نافذة الطباعة');
+      setPrintingDoc(null);
+    }
+
+    setDocDialog(null);
+    setTargetEntity('');
   };
 
   return (
@@ -177,27 +242,52 @@ export default function HRSelfService() {
         </TabsContent>
 
         <TabsContent value="documents">
-          <Card><CardContent className="pt-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {[
-                { title: 'شهادة راتب', desc: 'شهادة بالراتب الحالي للجهات الخارجية', icon: '💰' },
-                { title: 'شهادة خبرة', desc: 'شهادة بمدة العمل والمسمى الوظيفي', icon: '📜' },
-                { title: 'إفادة عمل', desc: 'إثبات أنك على رأس العمل', icon: '📋' },
-                { title: 'كشف حساب إجازات', desc: 'تفاصيل رصيد الإجازات والمستهلك', icon: '🏖️' },
-              ].map((doc, i) => (
-                <Card key={i} className="border hover:bg-muted/50 cursor-pointer transition-colors">
-                  <CardContent className="pt-4 flex items-center gap-4">
-                    <span className="text-3xl">{doc.icon}</span>
-                    <div className="flex-1">
-                      <h4 className="font-semibold">{doc.title}</h4>
-                      <p className="text-sm text-muted-foreground">{doc.desc}</p>
-                    </div>
-                    <Button size="sm" variant="outline" onClick={() => { setNewReq(p => ({ ...p, type: 'salary_cert', title: doc.title })); setShowNew(true); }}>طلب</Button>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </CardContent></Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5 text-primary" />
+                قوالب المستندات الجاهزة
+              </CardTitle>
+              <p className="text-sm text-muted-foreground">اضغط على أي مستند لتوليده تلقائياً ببياناتك وطباعته</p>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {DOCUMENT_TEMPLATES.map((doc) => (
+                  <Card key={doc.key} className="border hover:border-primary/40 hover:shadow-md cursor-pointer transition-all group">
+                    <CardContent className="pt-6 text-center space-y-3">
+                      <span className="text-5xl block">{doc.icon}</span>
+                      <h4 className="font-bold text-base">{doc.title}</h4>
+                      <p className="text-xs text-muted-foreground">{doc.desc}</p>
+                      <div className="flex gap-2 pt-2">
+                        {['employment_letter', 'salary_cert', 'work_confirmation'].includes(doc.key) ? (
+                          <Button
+                            size="sm"
+                            variant="eco"
+                            className="w-full"
+                            onClick={() => setDocDialog({ open: true, key: doc.key, title: doc.title })}
+                          >
+                            <Printer className="h-4 w-4 ml-1" />
+                            إنشاء وطباعة
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="eco"
+                            className="w-full"
+                            disabled={printingDoc === doc.key}
+                            onClick={() => handlePrintDocument(doc.key)}
+                          >
+                            {printingDoc === doc.key ? <Loader2 className="h-4 w-4 ml-1 animate-spin" /> : <Printer className="h-4 w-4 ml-1" />}
+                            إنشاء وطباعة
+                          </Button>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="payslips">
@@ -208,6 +298,30 @@ export default function HRSelfService() {
           </CardContent></Card>
         </TabsContent>
       </Tabs>
+
+      {/* Dialog for documents that need target entity */}
+      <Dialog open={!!docDialog?.open} onOpenChange={(open) => { if (!open) { setDocDialog(null); setTargetEntity(''); } }}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>{docDialog?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 mt-2">
+            <div>
+              <Label>الجهة الموجه إليها (اختياري)</Label>
+              <Input
+                value={targetEntity}
+                onChange={(e) => setTargetEntity(e.target.value)}
+                placeholder="مثال: البنك الأهلي، السفارة..."
+              />
+              <p className="text-xs text-muted-foreground mt-1">اتركه فارغاً ليكون "إلى من يهمه الأمر"</p>
+            </div>
+            <Button className="w-full" variant="eco" onClick={() => docDialog && handlePrintDocument(docDialog.key)}>
+              <Printer className="h-4 w-4 ml-2" />
+              إنشاء وطباعة
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
