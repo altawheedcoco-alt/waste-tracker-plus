@@ -12,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import {
   Share2, Copy, Check, ExternalLink, Link2, MessageCircle,
-  Globe, Users, Loader2, Lock, Unlock,
+  Globe, Users, Loader2, Lock, Unlock, Eye,
 } from 'lucide-react';
 import { useShareLink } from '@/hooks/useShareLink';
 
@@ -177,7 +177,7 @@ const BusinessPageSharePanel = ({ organizationId, organizationName }: BusinessPa
                   {copiedExternal ? <Check className="w-3.5 h-3.5 text-primary" /> : <Copy className="w-3.5 h-3.5" />}
                 </Button>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Button size="sm" variant="ghost" className="gap-1.5 text-xs h-8" asChild>
                   <a href={externalUrl} target="_blank" rel="noopener noreferrer">
                     <ExternalLink className="w-3 h-3" /> معاينة
@@ -186,6 +186,11 @@ const BusinessPageSharePanel = ({ organizationId, organizationName }: BusinessPa
                 <Button size="sm" variant="ghost" className="gap-1.5 text-xs h-8" onClick={() => handleWhatsApp(externalUrl)}>
                   <MessageCircle className="w-3 h-3" /> واتساب
                 </Button>
+                {typeof publicProfile?.view_count === 'number' && (
+                  <Badge variant="outline" className="text-[10px] gap-1 mr-auto">
+                    <Eye className="w-2.5 h-2.5" /> {publicProfile.view_count} مشاهدة
+                  </Badge>
+                )}
               </div>
             </div>
           )}
