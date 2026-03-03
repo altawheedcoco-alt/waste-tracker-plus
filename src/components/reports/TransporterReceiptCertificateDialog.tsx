@@ -41,6 +41,7 @@ import RecyclingTemplatesLibrary from './RecyclingTemplatesLibrary';
 import type { RecyclingReportTemplate } from '@/lib/recyclingReportTemplates';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
+import SendForSigningButton from '@/components/documents/SendForSigningButton';
 
 interface Shipment {
   id: string;
@@ -507,6 +508,12 @@ const TransporterReceiptCertificateDialog = ({
                   referenceId={shipment.id}
                   referenceType="receipt"
                   documentTitle={`شهادة استلام ونقل - ${shipment.shipment_number}`}
+                />
+                <SendForSigningButton
+                  documentTitle={`شهادة استلام ونقل - ${shipment.shipment_number}`}
+                  documentType="receipt"
+                  documentId={shipment.id}
+                  relatedShipmentId={shipment.id}
                 />
                 <SignDocumentButton
                   documentType="receipt"

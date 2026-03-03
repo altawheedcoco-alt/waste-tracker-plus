@@ -7,11 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Printer, FileCheck, BadgeCheck as Stamp, QrCode, BadgeCheck, Download, X, Eye } from 'lucide-react';
+import { Upload, Printer, FileCheck, BadgeCheck as Stamp, QrCode, BadgeCheck, Download, X, Eye, FileSignature, Send } from 'lucide-react';
 import { MentionableField, type MentionableEntity } from '@/components/ui/mentionable-field';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import { MentionInput } from '@/components/ui/mention-input';
 import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import MentionToSignDialog from '@/components/documents/MentionToSignDialog';
 import BackButton from '@/components/ui/back-button';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
@@ -44,6 +45,7 @@ const AdminDocumentStamping = () => {
   const [docCode] = useState(generateDocCode);
   const [isStamped, setIsStamped] = useState(false);
   const [stampDate] = useState(new Date());
+  const [showSignDialog, setShowSignDialog] = useState(false);
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -108,7 +110,10 @@ const AdminDocumentStamping = () => {
           <p className="text-sm text-muted-foreground mt-1">ارفع مستند واختمه إلكترونياً بتوقيع المنصة وكود QR وباركود</p>
         </div>
         {isStamped && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 flex-wrap">
+            <Button onClick={() => setShowSignDialog(true)} variant="outline" className="gap-2">
+              <FileSignature className="h-4 w-4" /> إرسال للتوقيع
+            </Button>
             <Button onClick={handlePrint} variant="outline" className="gap-2">
               <Printer className="h-4 w-4" /> طباعة
             </Button>
@@ -363,6 +368,15 @@ const AdminDocumentStamping = () => {
           </div>
         </>
       )}
+
+      {/* Mention to Sign Dialog */}
+      <MentionToSignDialog
+        open={showSignDialog}
+        onOpenChange={setShowSignDialog}
+        documentTitle={docTitle}
+        documentType="admin_stamped"
+        documentId={docCode}
+      />
     </div>
   );
 };
