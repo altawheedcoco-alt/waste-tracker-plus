@@ -18,6 +18,8 @@ import {
   ToggleLeft, ToggleRight, Shield, Users,
 } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import { MentionableField } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 
 interface ScopedLink {
   id: string;
@@ -45,6 +47,7 @@ interface ScopedLink {
 
 export default function ScopedLinksManager() {
   const { profile } = useAuth();
+  const { entities } = useMentionableEntities();
   const [links, setLinks] = useState<ScopedLink[]>([]);
   const [loading, setLoading] = useState(true);
   const [showCreate, setShowCreate] = useState(false);
@@ -310,7 +313,7 @@ export default function ScopedLinksManager() {
               </div>
               <div>
                 <Label>اسم المستلم *</Label>
-                <Input value={form.assigned_to_name} onChange={e => setForm(f => ({ ...f, assigned_to_name: e.target.value }))} placeholder="مثال: حمدي محمد" />
+                <MentionableField value={form.assigned_to_name} onChange={v => setForm(f => ({ ...f, assigned_to_name: v }))} entities={entities} placeholder="اكتب @ للإشارة أو الاسم يدوياً" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-3">

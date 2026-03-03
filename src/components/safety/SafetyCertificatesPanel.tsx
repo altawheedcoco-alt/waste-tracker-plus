@@ -10,6 +10,8 @@ import { useSafetyCertificates } from '@/hooks/useSafetySystem';
 import { Plus, Award, Loader2, X, Shield, QrCode, FileText, Calendar } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import LinkedPartnerSafetySelector from './LinkedPartnerSafetySelector';
+import { MentionableField } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 
 const CERT_TYPES = [
   { id: 'ppe_compliance', ar: 'شهادة امتثال PPE' },
@@ -38,6 +40,7 @@ const SafetyCertificatesPanel = memo(() => {
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<Record<string, any>>({});
   const u = (k: string, v: any) => setForm(p => ({ ...p, [k]: v }));
+  const { entities } = useMentionableEntities();
 
   const handleSubmit = () => {
     const certType = CERT_TYPES.find(c => c.id === form.certificate_type);
@@ -105,7 +108,7 @@ const SafetyCertificatesPanel = memo(() => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div><Label>اسم المستلم *</Label><Input value={form.recipient_name || ''} onChange={e => u('recipient_name', e.target.value)} /></div>
+                  <div><Label>اسم المستلم *</Label><MentionableField value={form.recipient_name || ''} onChange={v => u('recipient_name', v)} entities={entities} placeholder="اكتب @ للإشارة أو الاسم يدوياً" /></div>
                   <div><Label>تاريخ الانتهاء</Label><Input type="date" value={form.expiry_date || ''} onChange={e => u('expiry_date', e.target.value)} /></div>
                 </div>
 

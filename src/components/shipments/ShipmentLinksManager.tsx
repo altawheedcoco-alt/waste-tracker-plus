@@ -63,6 +63,8 @@ import {
 } from 'lucide-react';
 import WazeMapSearch from '@/components/maps/WazeMapSearch';
 import FlexibleWasteTypeSelector from '@/components/shipments/FlexibleWasteTypeSelector';
+import { MentionableField } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 
 interface Partner {
   id: string;
@@ -155,6 +157,7 @@ const generateToken = () => {
 
 const ShipmentLinksManager = () => {
   const { profile, organization } = useAuth();
+  const { entities } = useMentionableEntities();
   const [links, setLinks] = useState<ShipmentLink[]>([]);
   const [generators, setGenerators] = useState<Partner[]>([]);
   const [recyclers, setRecyclers] = useState<Partner[]>([]);
@@ -534,10 +537,11 @@ const ShipmentLinksManager = () => {
                       <User className="h-4 w-4" />
                       اسم المرسل (المسؤول عن إرسال البيانات)
                     </Label>
-                    <Input
+                    <MentionableField
                       value={senderName}
-                      onChange={(e) => setSenderName(e.target.value)}
-                      placeholder="مثال: أحمد محمد - مسؤول الشحنات"
+                      onChange={setSenderName}
+                      entities={entities}
+                      placeholder="اكتب @ للإشارة أو الاسم يدوياً"
                     />
                     <p className="text-xs text-muted-foreground">
                       الشخص المخوّل من جهتكم لإرسال بيانات الشحنات عبر هذا الرابط

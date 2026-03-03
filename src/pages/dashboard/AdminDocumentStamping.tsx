@@ -8,6 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Upload, Printer, FileCheck, BadgeCheck as Stamp, QrCode, BadgeCheck, Download, X, Eye } from 'lucide-react';
+import { MentionableField, type MentionableEntity } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
+import { MentionInput } from '@/components/ui/mention-input';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
 import BackButton from '@/components/ui/back-button';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
@@ -28,6 +32,8 @@ const AdminDocumentStamping = () => {
   const { toast } = useToast();
   const printRef = useRef<HTMLDivElement>(null);
   const { exportToPDF, printContent } = usePDFExport({ filename: 'stamped-document' });
+  const { entities, organizationEntities } = useMentionableEntities();
+  const { users } = useMentionableUsers();
 
   const [docFile, setDocFile] = useState<File | null>(null);
   const [docPreviewUrl, setDocPreviewUrl] = useState<string | null>(null);
@@ -165,17 +171,42 @@ const AdminDocumentStamping = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label>اسم المستلم / الموجه إليه</Label>
-                <Input value={recipientName} onChange={e => setRecipientName(e.target.value)} placeholder="اختياري" className="mt-1.5" />
+                <MentionableField
+                  value={recipientName}
+                  onChange={setRecipientName}
+                  entities={entities}
+                  placeholder="اكتب @ للإشارة أو اكتب الاسم يدوياً"
+                  onEntitySelect={(e) => {
+                    if (e.type === 'organization') {
+                      setRecipientOrg(e.name);
+                      setRecipientName('');
+                    }
+                  }}
+                  className="mt-1.5"
+                />
               </div>
               <div>
                 <Label>جهة المستلم</Label>
-                <Input value={recipientOrg} onChange={e => setRecipientOrg(e.target.value)} placeholder="اختياري" className="mt-1.5" />
+                <MentionableField
+                  value={recipientOrg}
+                  onChange={setRecipientOrg}
+                  entities={organizationEntities}
+                  placeholder="اختياري — اكتب @ للاختيار"
+                  className="mt-1.5"
+                />
               </div>
             </div>
 
             <div>
               <Label>وصف / ملاحظات</Label>
-              <Textarea value={docDescription} onChange={e => setDocDescription(e.target.value)} placeholder="اختياري — يظهر في المستند المختوم" className="mt-1.5" rows={3} />
+              <MentionInput
+                value={docDescription}
+                onChange={setDocDescription}
+                users={users}
+                placeholder="اختياري — يظهر في المستند المختوم (@ للإشارة)"
+                rows={3}
+                className="mt-1.5"
+              />
             </div>
 
             <Button onClick={handleStamp} size="lg" className="w-full gap-2 text-base">
