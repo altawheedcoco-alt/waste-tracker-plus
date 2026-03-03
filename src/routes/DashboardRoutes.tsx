@@ -141,6 +141,7 @@ const DigitalWallet = lazy(() => import("@/pages/dashboard/DigitalWallet"));
 const DriverAcademy = lazy(() => import("@/pages/dashboard/DriverAcademy"));
 const OHSReports = lazy(() => import("@/pages/dashboard/OHSReports"));
 const ManualOperations = lazy(() => import("@/pages/dashboard/ManualOperations"));
+const QuickWeightEntry = lazy(() => import("@/pages/dashboard/QuickWeightEntry"));
 const SystemScreenshots = lazy(() => import("@/pages/dashboard/SystemScreenshots"));
 const AdminHomepageManager = lazy(() => import("@/pages/dashboard/AdminHomepageManager"));
 const CircularEconomy = lazy(() => import("@/pages/dashboard/CircularEconomy"));
@@ -312,6 +313,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/subscription" element={<SubscriptionManagement />} />
     <Route path="/dashboard/document-archive" element={<DocumentArchive />} />
     <Route path="/dashboard/manual-operations" element={<ManualOperations />} />
+    <Route path="/dashboard/quick-weight" element={<QuickWeightEntry />} />
     <Route path="/dashboard/system-screenshots" element={<SystemScreenshots />} />
     <Route path="/dashboard/homepage-manager" element={<AdminHomepageManager />} />
     <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
