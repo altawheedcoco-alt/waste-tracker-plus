@@ -185,3 +185,6 @@ verify_jwt = false
 
 [functions.resolve-shared-link]
 verify_jwt = false
+
+[functions.camera-webhook]
+verify_jwt = false

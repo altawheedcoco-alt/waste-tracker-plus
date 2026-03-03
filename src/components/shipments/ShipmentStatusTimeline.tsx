@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import CameraArrivalProof from './CameraArrivalProof';
 import { motion } from 'framer-motion';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -681,7 +682,8 @@ const ShipmentStatusTimeline = ({
         </CardTitle>
         <CardDescription>السجل الزمني الكامل لتغييرات الحالة والإقرارات وشهادات الاستلام</CardDescription>
       </CardHeader>
-      <CardContent>
+      <CardContent className="space-y-4">
+        {shipment.id && <CameraArrivalProof shipmentId={shipment.id} compact />}
         {content}
       </CardContent>
     </Card>
