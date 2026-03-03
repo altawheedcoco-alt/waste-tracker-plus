@@ -14,7 +14,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { Plus, Star, Target, Users, TrendingUp, BarChart3, Award, Clock } from "lucide-react";
+import { Plus, Star, Target, Users, TrendingUp, BarChart3, Award, Clock, ArrowRight } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const SCORE_LABELS: Record<string, string> = {
   excellent: 'ممتاز (90-100)',
@@ -26,6 +27,7 @@ const SCORE_LABELS: Record<string, string> = {
 
 export default function HRPerformance() {
   const { profile, organization } = useAuth();
+  const navigate = useNavigate();
   const orgId = organization?.id;
   const queryClient = useQueryClient();
   const [showNewCycle, setShowNewCycle] = useState(false);
@@ -84,9 +86,14 @@ export default function HRPerformance() {
   return (
     <div className="p-6 space-y-6" dir="rtl">
       <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">تقييم الأداء</h1>
-          <p className="text-muted-foreground">تقييم أداء الموظفين بنظام 360°</p>
+        <div className="flex items-center gap-3">
+          <Button variant="ghost" size="icon" onClick={() => navigate(-1)}>
+            <ArrowRight className="w-5 h-5" />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">تقييم الأداء</h1>
+            <p className="text-muted-foreground">تقييم أداء الموظفين بنظام 360°</p>
+          </div>
         </div>
         <Dialog open={showNewCycle} onOpenChange={setShowNewCycle}>
           <DialogTrigger asChild><Button><Plus className="w-4 h-4 ml-2" />دورة تقييم جديدة</Button></DialogTrigger>
