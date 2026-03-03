@@ -188,3 +188,6 @@ verify_jwt = false
 
 [functions.camera-webhook]
 verify_jwt = false
+
+[functions.verify-shipment-video]
+verify_jwt = false

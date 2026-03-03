@@ -180,6 +180,7 @@ const HRShifts = lazy(() => import("@/pages/dashboard/hr/HRShifts"));
 const HROrgChart = lazy(() => import("@/pages/dashboard/hr/HROrgChart"));
 const HREndOfService = lazy(() => import("@/pages/dashboard/hr/HREndOfService"));
 const HRSelfService = lazy(() => import("@/pages/dashboard/hr/HRSelfService"));
+const CamerasPage = lazy(() => import("@/pages/dashboard/CamerasPage"));
 
 export const dashboardRoutes = (
   <>
@@ -363,6 +364,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/hr/org-chart" element={<HROrgChart />} />
     <Route path="/dashboard/hr/end-of-service" element={<HREndOfService />} />
     <Route path="/dashboard/hr/self-service" element={<HRSelfService />} />
+    <Route path="/dashboard/cameras" element={<CamerasPage />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );

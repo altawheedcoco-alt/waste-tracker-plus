@@ -219,6 +219,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records' },
       { icon: MapPin, labelAr: 'إعدادات GPS', labelEn: 'GPS Settings', path: '/dashboard/gps-settings', key: 'gps-settings' },
       { icon: Zap, labelAr: 'إعدادات IoT', labelEn: 'IoT Settings', path: '/dashboard/iot-settings', key: 'iot-settings' },
+      { icon: Eye, labelAr: 'الكاميرات والتحقق', labelEn: 'Cameras & Verification', path: '/dashboard/cameras', key: 'cameras', visibleFor: ['recycler', 'disposal', 'generator', 'transporter'] },
     ],
   },
 
