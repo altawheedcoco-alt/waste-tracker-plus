@@ -51,12 +51,16 @@ interface Props {
 interface LicenseSourceData {
   license_source_env_approval: boolean;
   license_source_wmra_permit: boolean;
+  license_source_ida: boolean;
   env_approval_number: string;
   env_approval_date: string;
   env_approval_expiry: string;
   wmra_permit_number: string;
   wmra_permit_date: string;
   wmra_permit_expiry: string;
+  ida_license: string;
+  ida_license_issue_date: string;
+  ida_license_expiry_date: string;
 }
 
 const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
@@ -66,12 +70,16 @@ const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
   const [licenseSource, setLicenseSource] = useState<LicenseSourceData>({
     license_source_env_approval: false,
     license_source_wmra_permit: false,
+    license_source_ida: false,
     env_approval_number: '',
     env_approval_date: '',
     env_approval_expiry: '',
     wmra_permit_number: '',
     wmra_permit_date: '',
     wmra_permit_expiry: '',
+    ida_license: '',
+    ida_license_issue_date: '',
+    ida_license_expiry_date: '',
   });
   const { mutate: updateTypes, isPending } = useUpdateLicensedWasteTypes();
 
@@ -79,7 +87,7 @@ const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
     const fetch = async () => {
       const { data } = await supabase
         .from('organizations')
-        .select('licensed_waste_types, license_scope_notes, license_source_env_approval, license_source_wmra_permit, env_approval_number, env_approval_date, env_approval_expiry, wmra_permit_number, wmra_permit_date, wmra_permit_expiry')
+        .select('licensed_waste_types, license_scope_notes, license_source_env_approval, license_source_wmra_permit, license_source_ida, env_approval_number, env_approval_date, env_approval_expiry, wmra_permit_number, wmra_permit_date, wmra_permit_expiry, ida_license, ida_license_issue_date, ida_license_expiry_date')
         .eq('id', organizationId)
         .single();
       if (data) {
@@ -88,12 +96,16 @@ const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
         setLicenseSource({
           license_source_env_approval: (data as any).license_source_env_approval || false,
           license_source_wmra_permit: (data as any).license_source_wmra_permit || false,
+          license_source_ida: (data as any).license_source_ida || false,
           env_approval_number: (data as any).env_approval_number || '',
           env_approval_date: (data as any).env_approval_date || '',
           env_approval_expiry: (data as any).env_approval_expiry || '',
           wmra_permit_number: (data as any).wmra_permit_number || '',
           wmra_permit_date: (data as any).wmra_permit_date || '',
           wmra_permit_expiry: (data as any).wmra_permit_expiry || '',
+          ida_license: (data as any).ida_license || '',
+          ida_license_issue_date: (data as any).ida_license_issue_date || '',
+          ida_license_expiry_date: (data as any).ida_license_expiry_date || '',
         });
       }
       setLoading(false);
@@ -118,12 +130,16 @@ const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
       .update({
         license_source_env_approval: licenseSource.license_source_env_approval,
         license_source_wmra_permit: licenseSource.license_source_wmra_permit,
+        license_source_ida: licenseSource.license_source_ida,
         env_approval_number: licenseSource.env_approval_number || null,
         env_approval_date: licenseSource.env_approval_date || null,
         env_approval_expiry: licenseSource.env_approval_expiry || null,
         wmra_permit_number: licenseSource.wmra_permit_number || null,
         wmra_permit_date: licenseSource.wmra_permit_date || null,
         wmra_permit_expiry: licenseSource.wmra_permit_expiry || null,
+        ida_license: licenseSource.ida_license || null,
+        ida_license_issue_date: licenseSource.ida_license_issue_date || null,
+        ida_license_expiry_date: licenseSource.ida_license_expiry_date || null,
       } as any)
       .eq('id', organizationId);
 
@@ -246,7 +262,55 @@ const LicensedWasteTypesEditor = memo(({ organizationId }: Props) => {
                     onChange={e => setLicenseSource(prev => ({ ...prev, wmra_permit_date: e.target.value }))}
                     className="h-7 text-xs"
                   />
+          </div>
+
+          {/* IDA - Industrial Development Authority */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-xs cursor-pointer">
+              <Checkbox
+                checked={licenseSource.license_source_ida}
+                onCheckedChange={(checked) =>
+                  setLicenseSource(prev => ({ ...prev, license_source_ida: !!checked }))
+                }
+              />
+              <span className="font-medium">ترخيص الهيئة العامة للتنمية الصناعية (IDA)</span>
+            </label>
+            {licenseSource.license_source_ida && (
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-2 mr-6">
+                <div>
+                  <Label className="text-[10px] text-muted-foreground">رقم الترخيص</Label>
+                  <Input
+                    value={licenseSource.ida_license}
+                    onChange={e => setLicenseSource(prev => ({ ...prev, ida_license: e.target.value }))}
+                    placeholder="مثال: IDA-2025-9012"
+                    className="h-7 text-xs"
+                  />
                 </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <CalendarDays className="h-2.5 w-2.5" /> تاريخ الإصدار
+                  </Label>
+                  <Input
+                    type="date"
+                    value={licenseSource.ida_license_issue_date}
+                    onChange={e => setLicenseSource(prev => ({ ...prev, ida_license_issue_date: e.target.value }))}
+                    className="h-7 text-xs"
+                  />
+                </div>
+                <div>
+                  <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <CalendarDays className="h-2.5 w-2.5" /> تاريخ الانتهاء
+                  </Label>
+                  <Input
+                    type="date"
+                    value={licenseSource.ida_license_expiry_date}
+                    onChange={e => setLicenseSource(prev => ({ ...prev, ida_license_expiry_date: e.target.value }))}
+                    className="h-7 text-xs"
+                  />
+                </div>
+              </div>
+            )}
+          </div>
                 <div>
                   <Label className="text-[10px] text-muted-foreground flex items-center gap-1">
                     <CalendarDays className="h-2.5 w-2.5" /> تاريخ الانتهاء

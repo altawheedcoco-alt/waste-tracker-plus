@@ -2,6 +2,8 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings, Leaf } from 'lucide-react';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
+const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -307,6 +309,10 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
         {/* Compliance Tab */}
         <TabsContent value="compliance" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-32 bg-muted rounded-lg" />}>
+            {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
+            <WMISEventsFeed />
+          </Suspense>
           <LegalComplianceWidget />
           <IncidentReportManager />
         </TabsContent>
