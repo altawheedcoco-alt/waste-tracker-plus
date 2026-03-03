@@ -3085,6 +3085,74 @@ export type Database = {
           },
         ]
       }
+      camera_access_grants: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          facility_organization_id: string
+          grant_type: string
+          granted_by: string | null
+          granted_to_organization_id: string
+          id: string
+          is_active: boolean
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          facility_organization_id: string
+          grant_type?: string
+          granted_by?: string | null
+          granted_to_organization_id: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          facility_organization_id?: string
+          grant_type?: string
+          granted_by?: string | null
+          granted_to_organization_id?: string
+          id?: string
+          is_active?: boolean
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "camera_access_grants_facility_organization_id_fkey"
+            columns: ["facility_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "camera_access_grants_facility_organization_id_fkey"
+            columns: ["facility_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "camera_access_grants_granted_to_organization_id_fkey"
+            columns: ["granted_to_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "camera_access_grants_granted_to_organization_id_fkey"
+            columns: ["granted_to_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       camera_arrival_events: {
         Row: {
           arrival_verified: boolean
