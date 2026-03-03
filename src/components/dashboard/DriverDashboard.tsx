@@ -25,6 +25,7 @@ import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPi
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
+import DriverLinkedOrganizations from '@/components/driver/DriverLinkedOrganizations';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
 import SmartDailyBrief from './shared/SmartDailyBrief';
@@ -543,6 +544,7 @@ const DriverDashboard = () => {
             </Card>
 
             <DriverOwnLinkingCode />
+            <DriverLinkedOrganizations />
 
             {driverInfo && (
               <EnhancedDestinationPicker 
