@@ -55,7 +55,8 @@ import {
   StickyNote,
   User,
 } from 'lucide-react';
-
+import { MentionableField } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 interface Partner {
   id: string;
   name: string;
@@ -120,6 +121,7 @@ const generateToken = () => {
 
 const DepositLinksManager = () => {
   const { profile, organization } = useAuth();
+  const { entities } = useMentionableEntities();
   const [links, setLinks] = useState<DepositLink[]>([]);
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
@@ -640,10 +642,11 @@ const DepositLinksManager = () => {
                             <User className="h-4 w-4" />
                             اسم المودع إليه
                           </Label>
-                          <Input
+                          <MentionableField
                             value={presetRecipientName}
-                            onChange={(e) => setPresetRecipientName(e.target.value)}
-                            placeholder="اسم المستلم / المستفيد"
+                            onChange={setPresetRecipientName}
+                            entities={entities}
+                            placeholder="اكتب @ للإشارة أو الاسم يدوياً"
                           />
                         </div>
 
