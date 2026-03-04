@@ -2,10 +2,10 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const WHATSAPP_API_URL = "https://graph.facebook.com/v21.0";
+const WAPILOT_BASE = "https://api.wapilot.net/api/v2";
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -17,16 +17,16 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const WHATSAPP_ACCESS_TOKEN = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
-    if (!WHATSAPP_ACCESS_TOKEN) {
+    const WAPILOT_TOKEN = Deno.env.get("WAPILOT_API_TOKEN");
+    if (!WAPILOT_TOKEN) {
       return new Response(
-        JSON.stringify({ error: "WhatsApp not configured. Please add WHATSAPP_ACCESS_TOKEN." }),
+        JSON.stringify({ error: "WaPilot not configured. Please add WAPILOT_API_TOKEN." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
     const body = await req.json();
-    const { 
+    const {
       action = "send",
       to_phone,
       organization_id,
@@ -37,23 +37,17 @@ Deno.serve(async (req) => {
       message_type = "text",
       notification_id,
       metadata,
-      // Bulk send
-      recipients, // Array of { phone, params }
+      instance_id,
+      recipients,
     } = body;
 
-    // Get org WhatsApp config
-    let phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
-    
+    // Check org config
     if (organization_id) {
       const { data: config } = await supabase
         .from("whatsapp_config")
         .select("*")
         .eq("organization_id", organization_id)
         .single();
-
-      if (config?.phone_number_id) {
-        phoneNumberId = config.phone_number_id;
-      }
 
       if (config && !config.is_active) {
         return new Response(
@@ -63,45 +57,104 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (!phoneNumberId) {
+    // Resolve WaPilot instance — use provided or fetch first available
+    let activeInstanceId = instance_id;
+    if (!activeInstanceId) {
+      const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
+        headers: { token: WAPILOT_TOKEN },
+      });
+      const instances = await listRes.json();
+      if (Array.isArray(instances) && instances.length > 0) {
+        activeInstanceId = instances[0].id;
+      }
+    }
+
+    if (!activeInstanceId) {
       return new Response(
-        JSON.stringify({ error: "WhatsApp Phone Number ID not configured." }),
+        JSON.stringify({ error: "No WaPilot instance available" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    // Build message text from template if needed
+    let finalText = message_text || "";
+    if (template_name && !finalText) {
+      // Fetch template from DB and fill params
+      const { data: tpl } = await supabase
+        .from("whatsapp_templates")
+        .select("body_text")
+        .eq("template_name", template_name)
+        .eq("is_active", true)
+        .limit(1)
+        .single();
+
+      if (tpl?.body_text) {
+        finalText = tpl.body_text;
+        if (Array.isArray(template_params)) {
+          template_params.forEach((p: string, i: number) => {
+            finalText = finalText.replace(`{{${i + 1}}}`, String(p));
+          });
+        }
+      } else {
+        finalText = template_name;
+      }
+    }
+
+    // Helper: send single message via WaPilot
+    const sendOne = async (phone: string, text: string) => {
+      const formattedPhone = phone.replace(/[\s+\-()]/g, "");
+      const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
+
+      const res = await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-message`, {
+        method: "POST",
+        headers: { token: WAPILOT_TOKEN, "Content-Type": "application/json" },
+        body: JSON.stringify({ chat_id: chatId, text }),
+      });
+      return await res.json();
+    };
 
     // Handle bulk send
     if (action === "bulk" && recipients?.length > 0) {
       const results = [];
       for (const recipient of recipients) {
         try {
-          const result = await sendWhatsAppMessage({
-            phoneNumberId,
-            accessToken: WHATSAPP_ACCESS_TOKEN,
-            to: recipient.phone,
-            templateName: template_name,
-            templateParams: recipient.params || template_params,
-            messageText: message_text,
-            messageType: message_type,
-          });
+          let recipientText = finalText;
+          if (recipient.params && Array.isArray(recipient.params)) {
+            // Re-resolve template with recipient-specific params
+            if (template_name) {
+              const { data: tpl } = await supabase
+                .from("whatsapp_templates")
+                .select("body_text")
+                .eq("template_name", template_name)
+                .eq("is_active", true)
+                .limit(1)
+                .single();
+              if (tpl?.body_text) {
+                recipientText = tpl.body_text;
+                recipient.params.forEach((p: string, i: number) => {
+                  recipientText = recipientText.replace(`{{${i + 1}}}`, String(p));
+                });
+              }
+            }
+          }
 
-          // Log message
+          const result = await sendOne(recipient.phone, recipientText);
+
           await supabase.from("whatsapp_messages").insert({
             organization_id,
             direction: "outbound",
             to_phone: recipient.phone,
             user_id: recipient.user_id,
             message_type: template_name ? "template" : message_type,
-            content: message_text || template_name,
+            content: recipientText,
             template_params: recipient.params || template_params,
-            meta_message_id: result.messages?.[0]?.id,
-            status: result.messages ? "sent" : "failed",
-            error_message: result.error?.message,
+            status: result.error ? "failed" : "sent",
+            error_message: result.error || null,
             notification_id,
             metadata,
           });
 
-          results.push({ phone: recipient.phone, success: !!result.messages });
+          results.push({ phone: recipient.phone, success: !result.error });
         } catch (e) {
           results.push({ phone: recipient.phone, success: false, error: e.message });
         }
@@ -121,15 +174,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const result = await sendWhatsAppMessage({
-      phoneNumberId,
-      accessToken: WHATSAPP_ACCESS_TOKEN,
-      to: to_phone,
-      templateName: template_name,
-      templateParams: template_params,
-      messageText: message_text,
-      messageType: message_type,
-    });
+    const result = await sendOne(to_phone, finalText);
 
     // Log the message
     const { data: msgLog } = await supabase.from("whatsapp_messages").insert({
@@ -138,17 +183,16 @@ Deno.serve(async (req) => {
       to_phone,
       user_id,
       message_type: template_name ? "template" : message_type,
-      content: message_text || template_name,
+      content: finalText,
       template_params,
-      meta_message_id: result.messages?.[0]?.id,
-      status: result.messages ? "sent" : "failed",
-      error_message: result.error?.message,
+      status: result.error ? "failed" : "sent",
+      error_message: result.error || null,
       notification_id,
       metadata,
     }).select().single();
 
     if (result.error) {
-      console.error("WhatsApp API error:", result.error);
+      console.error("WaPilot send error:", result.error);
       return new Response(
         JSON.stringify({ success: false, error: result.error, message_id: msgLog?.id }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -156,7 +200,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ success: true, message_id: msgLog?.id, wa_message_id: result.messages?.[0]?.id }),
+      JSON.stringify({ success: true, message_id: msgLog?.id }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
@@ -167,69 +211,3 @@ Deno.serve(async (req) => {
     );
   }
 });
-
-interface SendParams {
-  phoneNumberId: string;
-  accessToken: string;
-  to: string;
-  templateName?: string;
-  templateParams?: any;
-  messageText?: string;
-  messageType: string;
-}
-
-async function sendWhatsAppMessage(params: SendParams) {
-  const { phoneNumberId, accessToken, to, templateName, templateParams, messageText, messageType } = params;
-  
-  // Format phone number (remove + and spaces)
-  const formattedPhone = to.replace(/[\s+\-()]/g, "");
-
-  let payload: any;
-
-  if (templateName) {
-    // Template message
-    const components = [];
-    if (templateParams && Array.isArray(templateParams)) {
-      components.push({
-        type: "body",
-        parameters: templateParams.map((p: string) => ({
-          type: "text",
-          text: String(p),
-        })),
-      });
-    }
-
-    payload = {
-      messaging_product: "whatsapp",
-      to: formattedPhone,
-      type: "template",
-      template: {
-        name: templateName,
-        language: { code: "ar" },
-        components: components.length > 0 ? components : undefined,
-      },
-    };
-  } else {
-    // Text message
-    payload = {
-      messaging_product: "whatsapp",
-      to: formattedPhone,
-      type: "text",
-      text: { body: messageText || "" },
-    };
-  }
-
-  const response = await fetch(
-    `${WHATSAPP_API_URL}/${phoneNumberId}/messages`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(payload),
-    }
-  );
-
-  return await response.json();
-}
