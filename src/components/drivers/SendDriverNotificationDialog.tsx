@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { sendDualNotification } from '@/services/unifiedNotifier';
 import {
   Dialog,
   DialogContent,
@@ -127,19 +128,20 @@ const SendDriverNotificationDialog = ({
         ? `${message}\n\n— من: ${organization.name}`
         : message;
 
-      // Insert notification
-      const { error } = await supabase.from('notifications').insert({
+      // إرسال مزدوج: داخلي + واتساب
+      const result = await sendDualNotification({
         user_id: driverUserId,
         title: notificationTitle,
         message: fullMessage,
         type: 'partner_message',
+        organization_id: organization?.id,
       });
 
-      if (error) throw error;
+      if (!result.inApp.success) throw new Error(result.inApp.error);
 
       toast({
         title: 'تم الإرسال',
-        description: `تم إرسال الإشعار إلى ${driver.profile?.full_name}`,
+        description: `تم إرسال الإشعار إلى ${driver.profile?.full_name}${result.whatsApp.success ? ' (داخلي + واتساب)' : ' (داخلي فقط)'}`,
       });
 
       // Reset form and close

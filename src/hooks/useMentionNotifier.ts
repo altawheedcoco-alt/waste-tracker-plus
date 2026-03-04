@@ -1,4 +1,4 @@
-import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { MentionableUser, parseMentions, mentionToDisplay } from './useMentionableUsers';
 import { useCallback } from 'react';
@@ -22,42 +22,23 @@ export function useMentionNotifier() {
     const displayText = mentionToDisplay(text);
     const senderName = profile?.full_name || 'مستخدم';
 
-    // 1. Create in-app notifications
-    const notifications = mentionedIds.map(profileId => {
-      const user = users.find(u => u.id === profileId);
-      return {
-        user_id: user?.user_id || profileId,
-        title: `📌 ${senderName} أشار إليك في ${context}`,
-        message: displayText.slice(0, 200),
-        type: 'mention',
-        reference_id: referenceId || null,
-        reference_type: referenceType || null,
-      };
-    });
+    // إرسال مزدوج (داخلي + واتساب) لجميع المذكورين
+    const userIds = mentionedIds
+      .map(profileId => users.find(u => u.id === profileId)?.user_id)
+      .filter(Boolean) as string[];
 
-    try {
-      await supabase.from('notifications').insert(notifications);
-    } catch (err) {
-      console.error('Error creating mention notifications:', err);
-    }
-
-    // 2. Send via SMS/WhatsApp for users who have channels configured
-    for (const profileId of mentionedIds) {
-      const user = users.find(u => u.id === profileId);
-      if (!user?.user_id) continue;
-
+    if (userIds.length > 0) {
       try {
-        // Send via edge function which respects user channel preferences
-        await supabase.functions.invoke('send-notification', {
-          body: {
-            action: 'send',
-            userId: user.user_id,
-            channel: 'whatsapp',
-            message: `📌 ${senderName} أشار إليك في ${context}:\n${displayText.slice(0, 300)}`,
-          },
+        await sendBulkDualNotification({
+          user_ids: userIds,
+          title: `📌 ${senderName} أشار إليك في ${context}`,
+          message: displayText.slice(0, 200),
+          type: 'mention',
+          reference_id: referenceId,
+          reference_type: referenceType,
         });
-      } catch {
-        // Silent fail for external channels
+      } catch (err) {
+        console.error('Error creating mention notifications:', err);
       }
     }
   }, [profile]);

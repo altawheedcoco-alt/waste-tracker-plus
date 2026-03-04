@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Video, Phone, Plus, Loader2, Search, Users, X, UserPlus, ArrowRight, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
@@ -157,40 +158,20 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
 
       await supabase.from('video_meeting_participants').insert(participantInserts);
 
-      // 4. Send in-app notifications to all invited members
-      const notificationInserts = selectedMembers.map(member => ({
-        organization_id: organization.id,
-        user_id: member.id,
+      // 4. إرسال مزدوج (داخلي + واتساب) لجميع المدعوين
+      await sendBulkDualNotification({
+        user_ids: selectedMembers.map(m => m.id),
         title: `📹 دعوة اجتماع ${form.meeting_type === 'video' ? 'مرئي' : 'صوتي'}`,
         message: `${profile?.full_name || 'مستخدم'} يدعوك للانضمام إلى اجتماع: "${form.title}"`,
-        type: 'general' as const,
-        priority: 'high' as const,
+        type: 'general',
+        organization_id: organization.id,
         metadata: {
           meeting_id: meeting.id,
           meeting_type: form.meeting_type,
           room_id: roomId,
           action_url: '/dashboard/meetings',
         },
-      }));
-
-      await supabase.from('notifications').insert(notificationInserts);
-
-      // 5. Send WhatsApp notifications via whatsapp-event edge function
-      try {
-        await supabase.functions.invoke('whatsapp-event', {
-          body: {
-            event_type: 'meeting_invitation',
-            meeting_title: form.title,
-            meeting_type: form.meeting_type,
-            host_name: profile?.full_name || 'مستخدم',
-            organization_id: organization.id,
-            invited_user_ids: selectedMembers.map(m => m.id),
-            scheduled_at: form.scheduled_at || null,
-          },
-        });
-      } catch (e) {
-        console.warn('WhatsApp notification failed (non-blocking):', e);
-      }
+      });
     }
 
     toast.success(`تم إنشاء الاجتماع ودعوة ${selectedMembers.length} ${selectedMembers.length > 0 ? 'عضو' : ''}`);
