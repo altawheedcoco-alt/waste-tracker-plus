@@ -49,19 +49,19 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
 
   // Fetch org members
   const fetchMembers = useCallback(async () => {
-    if (!organization?.id || !user?.id) return;
+    if (!organization?.id || !profile?.id) return;
     setMembersLoading(true);
 
     const { data } = await supabase
       .from('profiles')
       .select('id, full_name, avatar_url')
       .eq('organization_id', organization.id)
-      .neq('id', user.id)
+      .neq('id', profile.id)
       .order('full_name');
 
     setOrgMembers((data || []) as OrgMember[]);
     setMembersLoading(false);
-  }, [organization?.id, user?.id]);
+  }, [organization?.id, profile?.id]);
 
   useEffect(() => {
     if (open && step === 'members') fetchMembers();
@@ -104,17 +104,18 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
   };
 
   const handleCreate = async () => {
-    if (!user?.id || !organization?.id) return;
+    if (!profile?.id || !organization?.id) return;
 
     setLoading(true);
     const roomId = generateRoomId();
 
+    try {
     // 1. Create meeting
     const { data: meeting, error } = await supabase
       .from('video_meetings')
       .insert({
         organization_id: organization.id,
-        created_by: user.id,
+        created_by: profile.id,
         title: form.title.trim(),
         description: form.description.trim() || null,
         room_id: roomId,
@@ -129,7 +130,8 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
       .single();
 
     if (error || !meeting) {
-      toast.error('فشل في إنشاء الاجتماع');
+      console.error('Meeting creation error:', error);
+      toast.error(error?.message || 'فشل في إنشاء الاجتماع');
       setLoading(false);
       return;
     }
@@ -137,7 +139,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
     // 2. Add creator as host
     await supabase.from('video_meeting_participants').insert({
       meeting_id: meeting.id,
-      user_id: user.id,
+      user_id: profile.id,
       role: 'host',
       status: 'joined',
       joined_at: new Date().toISOString(),
@@ -150,7 +152,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
         user_id: member.id,
         role: 'participant' as const,
         status: 'invited' as const,
-        invited_by: user.id,
+        invited_by: profile.id,
       }));
 
       await supabase.from('video_meeting_participants').insert(participantInserts);
@@ -193,8 +195,13 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
 
     toast.success(`تم إنشاء الاجتماع ودعوة ${selectedMembers.length} ${selectedMembers.length > 0 ? 'عضو' : ''}`);
     resetForm();
-    setLoading(false);
     onCreated(meeting.id);
+    } catch (err) {
+      console.error('Unexpected error during meeting creation:', err);
+      toast.error('حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const resetForm = () => {
