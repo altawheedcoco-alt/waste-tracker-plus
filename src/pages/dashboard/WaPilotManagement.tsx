@@ -90,6 +90,18 @@ const WaPilotManagement = () => {
   const [connectionDiag, setConnectionDiag] = useState<any>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
   const [statusMessage, setStatusMessage] = useState<string>('');
+  const [subscriptionInfo, setSubscriptionInfo] = useState<{
+    status: string;
+    plan_name: string | null;
+    start_date: string | null;
+    expiry_date: string | null;
+    days_remaining: number | null;
+    total_days: number | null;
+    progress: number;
+    auto_renew: boolean;
+    total_seats: number;
+    total_amount: number;
+  } | null>(null);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -170,6 +182,48 @@ const WaPilotManagement = () => {
       } else {
         setInstanceStatus('disconnected');
       }
+
+      // Fetch subscription info
+      try {
+        const { data: subData } = await supabase
+          .from('user_subscriptions')
+          .select('*, plan:subscription_plans(name, name_ar, duration_days)')
+          .in('status', ['active', 'grace_period', 'trial'])
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle();
+
+        if (subData) {
+          const now = new Date();
+          const startDate = subData.start_date ? new Date(subData.start_date) : null;
+          const expiryDate = subData.expiry_date ? new Date(subData.expiry_date) : null;
+          let daysRemaining: number | null = null;
+          let totalDays: number | null = null;
+          let progress = 0;
+
+          if (startDate && expiryDate) {
+            totalDays = Math.ceil((expiryDate.getTime() - startDate.getTime()) / 86400000);
+            daysRemaining = Math.max(0, Math.ceil((expiryDate.getTime() - now.getTime()) / 86400000));
+            progress = totalDays > 0 ? Math.round(((totalDays - daysRemaining) / totalDays) * 100) : 0;
+          }
+
+          setSubscriptionInfo({
+            status: subData.status,
+            plan_name: (subData.plan as any)?.name_ar || (subData.plan as any)?.name || null,
+            start_date: subData.start_date,
+            expiry_date: subData.expiry_date,
+            days_remaining: daysRemaining,
+            total_days: totalDays,
+            progress,
+            auto_renew: subData.auto_renew ?? false,
+            total_seats: subData.total_seats || 1,
+            total_amount: subData.total_amount || 0,
+          });
+        } else {
+          setSubscriptionInfo(null);
+        }
+      } catch { /* ignore */ }
+
     } catch (e) {
       console.error('Fetch error:', e);
       setApiStatus('error');
@@ -462,6 +516,76 @@ const WaPilotManagement = () => {
                   <p className="text-[10px] font-mono font-medium" dir="ltr">{connectionDiag?.api_base || 'api.wapilot.net/api/v2'}</p>
                 </div>
               </div>
+            </CardContent>
+          </Card>
+
+          {/* ══════════ SUBSCRIPTION STATUS ══════════ */}
+          <Card className={`border ${subscriptionInfo ? (subscriptionInfo.days_remaining !== null && subscriptionInfo.days_remaining <= 7 ? 'border-amber-500/30' : 'border-green-500/20') : 'border-destructive/20'}`}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <CalendarDays className="h-4 w-4 text-primary" />
+                حالة اشتراك المنصة
+                {subscriptionInfo ? (
+                  <Badge variant={subscriptionInfo.days_remaining !== null && subscriptionInfo.days_remaining <= 7 ? 'destructive' : 'default'} className="text-[10px] mr-auto">
+                    {subscriptionInfo.status === 'active' ? '✓ نشط' : subscriptionInfo.status === 'grace_period' ? '⚠ فترة سماح' : subscriptionInfo.status}
+                  </Badge>
+                ) : (
+                  <Badge variant="destructive" className="text-[10px] mr-auto">✗ لا يوجد اشتراك</Badge>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {subscriptionInfo ? (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">الخطة</p>
+                      <p className="text-xs font-medium">{subscriptionInfo.plan_name || 'غير محدد'}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">تاريخ البدء</p>
+                      <p className="text-xs font-medium">{subscriptionInfo.start_date ? new Date(subscriptionInfo.start_date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">تاريخ الانتهاء</p>
+                      <p className={`text-xs font-medium ${subscriptionInfo.days_remaining !== null && subscriptionInfo.days_remaining <= 7 ? 'text-destructive' : ''}`}>
+                        {subscriptionInfo.expiry_date ? new Date(subscriptionInfo.expiry_date).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
+                      </p>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">الأيام المتبقية</p>
+                      <p className={`text-lg font-bold ${
+                        subscriptionInfo.days_remaining === null ? 'text-muted-foreground' :
+                        subscriptionInfo.days_remaining <= 3 ? 'text-destructive' :
+                        subscriptionInfo.days_remaining <= 7 ? 'text-amber-600' :
+                        'text-green-600'
+                      }`}>
+                        {subscriptionInfo.days_remaining !== null ? `${subscriptionInfo.days_remaining} يوم` : '—'}
+                      </p>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">المقاعد</p>
+                      <p className="text-xs font-medium">{subscriptionInfo.total_seats}</p>
+                    </div>
+                    <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                      <p className="text-[10px] text-muted-foreground">التجديد التلقائي</p>
+                      <p className="text-xs font-medium">{subscriptionInfo.auto_renew ? '✓ مفعّل' : '✗ معطّل'}</p>
+                    </div>
+                  </div>
+                  {/* Progress Bar */}
+                  {subscriptionInfo.total_days && subscriptionInfo.days_remaining !== null && (
+                    <div>
+                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
+                        <span>مضى {subscriptionInfo.total_days - subscriptionInfo.days_remaining} يوم من {subscriptionInfo.total_days}</span>
+                        <span>{subscriptionInfo.progress}%</span>
+                      </div>
+                      <Progress value={subscriptionInfo.progress} className="h-2" />
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground text-center py-3">لا يوجد اشتراك نشط حالياً</p>
+              )}
             </CardContent>
           </Card>
 
