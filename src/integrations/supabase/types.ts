@@ -33570,6 +33570,191 @@ export type Database = {
           },
         ]
       }
+      video_meeting_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meeting_id: string
+          message_type: string | null
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meeting_id: string
+          message_type?: string | null
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          message_type?: string | null
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_meeting_messages_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "video_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_meeting_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_meeting_participants: {
+        Row: {
+          created_at: string
+          id: string
+          invited_by: string | null
+          joined_at: string | null
+          left_at: string | null
+          meeting_id: string
+          role: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          meeting_id: string
+          role?: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invited_by?: string | null
+          joined_at?: string | null
+          left_at?: string | null
+          meeting_id?: string
+          role?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_meeting_participants_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_meeting_participants_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "video_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_meeting_participants_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      video_meetings: {
+        Row: {
+          allow_chat: boolean | null
+          created_at: string
+          created_by: string
+          description: string | null
+          ended_at: string | null
+          id: string
+          is_private: boolean | null
+          max_participants: number | null
+          meeting_type: string
+          metadata: Json | null
+          organization_id: string
+          recording_enabled: boolean | null
+          room_id: string
+          scheduled_at: string | null
+          started_at: string | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          allow_chat?: boolean | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_private?: boolean | null
+          max_participants?: number | null
+          meeting_type?: string
+          metadata?: Json | null
+          organization_id: string
+          recording_enabled?: boolean | null
+          room_id: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          allow_chat?: boolean | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          ended_at?: string | null
+          id?: string
+          is_private?: boolean | null
+          max_participants?: number | null
+          meeting_type?: string
+          metadata?: Json | null
+          organization_id?: string
+          recording_enabled?: boolean | null
+          room_id?: string
+          scheduled_at?: string | null
+          started_at?: string | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "video_meetings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "video_meetings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "video_meetings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       wallet_transactions: {
         Row: {
           amount: number

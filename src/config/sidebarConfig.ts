@@ -330,6 +330,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: MessageCircle, labelAr: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat' },
+      { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings' },
       { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories' },
       { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal' },
       { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests' },

@@ -93,6 +93,7 @@ const AwardLetters = lazy(() => import("@/pages/dashboard/AwardLetters"));
 const OperationsDashboard = lazy(() => import("@/pages/dashboard/OperationsDashboard"));
 const ActivityLogPage = lazy(() => import("@/pages/dashboard/ActivityLogPage"));
 const GPSSettings = lazy(() => import("@/pages/dashboard/GPSSettings"));
+const Meetings = lazy(() => import("@/pages/dashboard/Meetings"));
 const DisposalFacilities = lazy(() => import("@/pages/dashboard/DisposalFacilities"));
 const DisposalDashboard = lazy(() => import("@/pages/dashboard/disposal/DisposalDashboard"));
 const DisposalOperations = lazy(() => import("@/pages/dashboard/disposal/DisposalOperations"));
@@ -288,6 +289,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/operations" element={<OperationsDashboard />} />
     <Route path="/dashboard/activity-log" element={<ActivityLogPage />} />
     <Route path="/dashboard/gps-settings" element={<GPSSettings />} />
+    <Route path="/dashboard/meetings" element={<Meetings />} />
     <Route path="/dashboard/disposal-facilities" element={<DisposalFacilities />} />
     <Route path="/dashboard/disposal" element={<DisposalDashboard />} />
     <Route path="/dashboard/disposal/operations" element={<DisposalOperations />} />

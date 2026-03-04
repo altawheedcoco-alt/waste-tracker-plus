@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Lock, Loader2, Shield, Maximize2, Search, Users, Building2 } from 'lucide-react';
+import { MessageCircle, X, Send, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, Video, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
@@ -15,6 +15,12 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
+
+// Mini version for chat header
+const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
+  <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
+);
 
 const ORG_TYPE_LABELS: Record<string, string> = {
   generator: 'مولّد',
@@ -184,10 +190,13 @@ const EncryptedChatWidget = () => {
                     <Maximize2 className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold truncate max-w-[180px]">
+                    <span className="text-sm font-semibold truncate max-w-[140px]">
                       {selectedConvo?.partner?.full_name || 'محادثة'}
                     </span>
                     <Lock className="w-3 h-3 text-white/60" />
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <ChatVideoCallButtonMini partnerName={selectedConvo?.partner?.full_name || ''} partnerUserId={selectedConvo?.partner?.user_id} />
                   </div>
                 </>
               ) : (
