@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -47,6 +47,7 @@ const Header = memo(() => {
         { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Tools', href: '#doc-ai', icon: BookOpen, desc: language === 'ar' ? 'تحليل ذكي للمستندات' : 'AI document analysis', badge: 'AI' },
         { label: language === 'ar' ? 'الخدمات' : 'Services', href: '#services', icon: Recycle, desc: language === 'ar' ? 'خدمات إدارة المخلفات' : 'Waste services' },
         { label: language === 'ar' ? 'منصة عُمالنا' : 'Omaluna', href: '#omaluna', icon: Users, desc: language === 'ar' ? 'نظام التوظيف المتكامل' : 'Recruitment system', badge: language === 'ar' ? 'جديد' : 'New' },
+        { label: language === 'ar' ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#whatsapp-notifications', icon: MessageCircle, desc: language === 'ar' ? 'إشعارات فورية عبر واتساب' : 'Instant WhatsApp notifications', badge: language === 'ar' ? 'جديد' : 'New' },
         { label: language === 'ar' ? 'قصص النجاح' : 'Testimonials', href: '#testimonials', icon: HelpCircle, desc: language === 'ar' ? 'تجارب العملاء' : 'Customer stories' },
       ],
     },
