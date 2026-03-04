@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   Video, Phone, Users, Clock, Play, Calendar, 
-  ArrowLeft, Loader2, PhoneOff, CheckCircle2 
+  ArrowLeft, Loader2, PhoneOff, CheckCircle2, Brain
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -15,6 +15,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import CreateMeetingDialog from './CreateMeetingDialog';
 import JitsiMeetingRoom from './JitsiMeetingRoom';
+import MeetingSummaryPanel from './MeetingSummaryPanel';
 
 interface Meeting {
   id: string;
@@ -47,6 +48,7 @@ const MeetingsPanel = () => {
   const [activeMeetingId, setActiveMeetingId] = useState<string | null>(null);
   const [activeMeeting, setActiveMeeting] = useState<Meeting | null>(null);
   const [tab, setTab] = useState('active');
+  const [summaryMeeting, setSummaryMeeting] = useState<{ id: string; title: string } | null>(null);
 
   const fetchMeetings = async () => {
     setLoading(true);
@@ -113,6 +115,17 @@ const MeetingsPanel = () => {
     fetchMeetings();
     toast.success('تم إنهاء الاجتماع');
   };
+
+  // If viewing summary
+  if (summaryMeeting) {
+    return (
+      <MeetingSummaryPanel
+        meetingId={summaryMeeting.id}
+        meetingTitle={summaryMeeting.title}
+        onBack={() => setSummaryMeeting(null)}
+      />
+    );
+  }
 
   // If in an active meeting, show the room
   if (activeMeetingId && activeMeeting) {
@@ -255,6 +268,17 @@ const MeetingsPanel = () => {
                           >
                             <Play className="w-3 h-3" />
                             {meeting.status === 'active' ? 'انضمام' : 'بدء'}
+                          </Button>
+                        )}
+                        {(meeting.status === 'ended' || meeting.status === 'cancelled') && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setSummaryMeeting({ id: meeting.id, title: meeting.title })}
+                            className="flex-1 gap-1.5 text-xs h-8 text-purple-600 border-purple-500/20 hover:bg-purple-500/10"
+                          >
+                            <Brain className="w-3 h-3" />
+                            ملخص AI
                           </Button>
                         )}
                         {meeting.created_by === user?.id && meeting.status === 'active' && (
