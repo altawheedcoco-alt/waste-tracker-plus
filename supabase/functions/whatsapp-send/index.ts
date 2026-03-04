@@ -109,8 +109,8 @@ Deno.serve(async (req) => {
       }
     }
 
-    // Resolve WaPilot instance
-    let activeInstanceId = instance_id;
+    // Resolve WaPilot instance - prefer env var, then provided, then try API
+    let activeInstanceId = instance_id || Deno.env.get("WAPILOT_INSTANCE_ID");
     if (!activeInstanceId) {
       try {
         const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
@@ -121,8 +121,7 @@ Deno.serve(async (req) => {
           : (instancesRaw && typeof instancesRaw === 'object' && instancesRaw.id) ? [instancesRaw]
           : [];
         if (instances.length > 0) {
-          const active = instances.find((i: any) => i.status === 'active' || i.status === 'connected') || instances[0];
-          activeInstanceId = active.id;
+          activeInstanceId = instances[0].id;
         }
       } catch (e) {
         console.warn("Failed to list instances:", e);
@@ -131,7 +130,7 @@ Deno.serve(async (req) => {
 
     if (!activeInstanceId) {
       return new Response(
-        JSON.stringify({ error: "No WaPilot instance available. Please provide instance_id or ensure an instance exists." }),
+        JSON.stringify({ error: "No WaPilot instance available. Set WAPILOT_INSTANCE_ID or provide instance_id." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
