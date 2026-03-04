@@ -57,6 +57,7 @@ const RiskMatrixWidget = lazy(() => import('@/components/compliance/RiskMatrixWi
 const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/CorrectiveActionsWidget'));
 const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
+const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -292,6 +293,12 @@ const GeneratorDashboard = () => {
                 <WeeklyShipmentChart />
                 <ComplianceGauge />
               </div>
+            </Suspense>
+          </ErrorBoundary>
+
+          <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+            <Suspense fallback={<TabFallback />}>
+              <OrgPerformanceRadar />
             </Suspense>
           </ErrorBoundary>
 

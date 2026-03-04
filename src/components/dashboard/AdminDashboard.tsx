@@ -63,6 +63,7 @@ const FinancialSummaryWidget = lazy(() => import('./generator/FinancialSummaryWi
 const ComplianceGauge = lazy(() => import('./generator/ComplianceGauge'));
 const GeneratorTrackingWidget = lazy(() => import('./generator/GeneratorTrackingWidget'));
 const DisposalRadarWidget = lazy(() => import('./generator/DisposalRadarWidget'));
+const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 const ESGReportWidget = lazy(() => import('./generator/ESGReportWidget'));
 const LegalArchiveWidget = lazy(() => import('./generator/LegalArchiveWidget'));
 const LegalComplianceWidget = lazy(() => import('./generator/LegalComplianceWidget'));
@@ -517,6 +518,9 @@ const AdminDashboard = () => {
             </ErrorBoundary>
             <ErrorBoundary fallbackTitle="خطأ في رادار التخلص">
               <DisposalRadarWidget />
+            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+              <OrgPerformanceRadar />
             </ErrorBoundary>
             <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
               <ErrorBoundary fallbackTitle="خطأ في ESG">

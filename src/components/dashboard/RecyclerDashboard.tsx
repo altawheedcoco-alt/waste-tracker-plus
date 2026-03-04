@@ -1,4 +1,6 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { Skeleton } from '@/components/ui/skeleton';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -54,6 +56,7 @@ const CarbonFootprintDashboard = lazy(() => import('@/components/recycler/Carbon
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
+const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 
 interface RecentShipment {
   id: string;
@@ -266,6 +269,13 @@ const RecyclerDashboard = () => {
           <RecyclerCommandCenter />
           <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
           <AutomationSettingsDialog organizationType="recycler" />
+
+          <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+              <OrgPerformanceRadar />
+            </Suspense>
+          </ErrorBoundary>
+
           <DailyOperationsSummary />
           <OperationalAlertsWidget />
           <UnifiedDocumentSearch />
