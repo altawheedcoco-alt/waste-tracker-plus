@@ -6,7 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowRight, Users, Star, MapPin, Clock, CheckCircle2, XCircle, Eye, MessageSquare, Calendar, BookmarkPlus } from 'lucide-react';
+import { Users, Star, MapPin, Clock, CheckCircle2, XCircle, Eye, MessageSquare, Calendar, BookmarkPlus } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -86,9 +87,7 @@ const OmalunaJobApplications = () => {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-6" dir="rtl">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/omaluna/my-jobs')}>
-            <ArrowRight className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath="/dashboard/omaluna/my-jobs" />
           <div>
             <h1 className="text-xl font-bold">الطلبات المقدمة</h1>
             <p className="text-sm text-muted-foreground">{job?.title} - {applications.length} طلب</p>

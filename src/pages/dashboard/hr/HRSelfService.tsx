@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Plus, Send, FileText, Clock, CheckCircle, XCircle, DollarSign, Printer, Loader2 } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 import {
   generateSalaryCertificate,
   generateExperienceCertificate,
@@ -149,6 +150,7 @@ export default function HRSelfService() {
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">الخدمة الذاتية للموظف</h1>
