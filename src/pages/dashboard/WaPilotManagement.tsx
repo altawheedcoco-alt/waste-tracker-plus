@@ -7,6 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import BackButton from '@/components/ui/back-button';
 import {
   MessageCircle, Send, Users, Wifi, WifiOff, Building2,
@@ -103,6 +105,9 @@ const WaPilotManagement = () => {
     total_amount: number;
   } | null>(null);
   const [endpointStatuses, setEndpointStatuses] = useState<Record<string, 'ok' | 'error' | 'checking'>>({});
+  const [quickPhone, setQuickPhone] = useState('');
+  const [quickMessage, setQuickMessage] = useState('');
+  const [sendingMessage, setSendingMessage] = useState(false);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -335,6 +340,39 @@ const WaPilotManagement = () => {
     if (connectedPhone) { navigator.clipboard.writeText(connectedPhone); toast.success('تم نسخ الرقم'); }
   };
 
+  const handleQuickSend = useCallback(async () => {
+    if (!quickPhone.trim() || !quickMessage.trim()) {
+      toast.error('يرجى إدخال رقم الهاتف ونص الرسالة');
+      return;
+    }
+    const phone = quickPhone.replace(/[\s\-\+]/g, '').replace(/^0+/, '');
+    const chatId = phone.includes('@') ? phone : `${phone}@c.us`;
+    setSendingMessage(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
+        body: { action: 'send-message', chat_id: chatId, text: quickMessage },
+      });
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+      toast.success('تم إرسال الرسالة بنجاح ✓');
+      setQuickMessage('');
+      await supabase.from('whatsapp_messages').insert({
+        to_phone: phone,
+        content: quickMessage,
+        message_type: 'text',
+        status: 'sent',
+        direction: 'outbound',
+        organization_id: orgs[0]?.id || '',
+        metadata: { source: 'wapilot_dashboard_quick_send' },
+      });
+      fetchAllData();
+    } catch (err: any) {
+      toast.error(`فشل الإرسال: ${err.message || 'خطأ غير متوقع'}`);
+    } finally {
+      setSendingMessage(false);
+    }
+  }, [quickPhone, quickMessage, orgs, fetchAllData]);
+
   if (!isAdmin) {
     return <div className="flex items-center justify-center py-20 text-muted-foreground">هذه الصفحة متاحة لمدير النظام فقط</div>;
   }
@@ -455,6 +493,62 @@ const WaPilotManagement = () => {
               </Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* ══════════ QUICK SEND MESSAGE ══════════ */}
+      <Card className="border-2 border-primary/20">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-sm flex items-center gap-2">
+            <Send className="h-4 w-4 text-primary" />
+            إرسال رسالة سريعة
+            {instanceStatus === 'connected' && (
+              <Badge variant="default" className="text-[10px] mr-auto">الجهاز متصل ✓</Badge>
+            )}
+          </CardTitle>
+          <CardDescription className="text-xs">أرسل رسالة واتساب مباشرة من لوحة التحكم</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex-shrink-0 sm:w-56">
+              <label className="text-[11px] text-muted-foreground mb-1 block">رقم الواتساب (مع كود الدولة)</label>
+              <Input
+                dir="ltr"
+                placeholder="201XXXXXXXXX"
+                value={quickPhone}
+                onChange={(e) => setQuickPhone(e.target.value)}
+                className="font-mono text-sm"
+                disabled={sendingMessage || instanceStatus !== 'connected'}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-[11px] text-muted-foreground mb-1 block">نص الرسالة</label>
+              <div className="flex gap-2">
+                <Textarea
+                  placeholder="اكتب رسالتك هنا..."
+                  value={quickMessage}
+                  onChange={(e) => setQuickMessage(e.target.value)}
+                  className="min-h-[40px] max-h-[80px] text-sm resize-none"
+                  disabled={sendingMessage || instanceStatus !== 'connected'}
+                  rows={1}
+                />
+                <Button
+                  onClick={handleQuickSend}
+                  disabled={sendingMessage || instanceStatus !== 'connected' || !quickPhone.trim() || !quickMessage.trim()}
+                  className="gap-1.5 self-end"
+                >
+                  {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                  إرسال
+                </Button>
+              </div>
+            </div>
+          </div>
+          {instanceStatus !== 'connected' && (
+            <p className="text-xs text-destructive mt-2 flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              يجب أن يكون الجهاز متصلاً لإرسال الرسائل
+            </p>
+          )}
         </CardContent>
       </Card>
 
