@@ -410,7 +410,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'إدارة الإفادات', labelEn: 'Attestations', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
       { icon: Monitor, labelAr: 'سكرين شوت', labelEn: 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
       { icon: Globe, labelAr: 'إدارة الصفحة الرئيسية', labelEn: 'Homepage Manager', path: '/dashboard/homepage-manager', key: 'homepage-manager' },
-      { icon: Send, labelAr: 'إدارة WaPilot', labelEn: 'WaPilot', path: '/dashboard/wapilot', key: 'wapilot' },
+      
     ],
   },
 

@@ -181,7 +181,7 @@ const HROrgChart = lazy(() => import("@/pages/dashboard/hr/HROrgChart"));
 const HREndOfService = lazy(() => import("@/pages/dashboard/hr/HREndOfService"));
 const HRSelfService = lazy(() => import("@/pages/dashboard/hr/HRSelfService"));
 const CamerasPage = lazy(() => import("@/pages/dashboard/CamerasPage"));
-const WaPilotManagement = lazy(() => import("@/pages/dashboard/WaPilotManagement"));
+
 
 export const dashboardRoutes = (
   <>
@@ -318,7 +318,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/quick-weight" element={<QuickWeightEntry />} />
     <Route path="/dashboard/system-screenshots" element={<SystemScreenshots />} />
     <Route path="/dashboard/homepage-manager" element={<AdminHomepageManager />} />
-    <Route path="/dashboard/wapilot" element={<WaPilotManagement />} />
+    
     <Route path="/dashboard/commodity-exchange" element={<GlobalCommodityExchange />} />
     <Route path="/dashboard/waste-exchange" element={<WasteExchange />} />
     <Route path="/dashboard/waste-flow-heatmap" element={<WasteFlowHeatmap />} />
