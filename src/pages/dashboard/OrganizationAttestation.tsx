@@ -1,4 +1,5 @@
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import AttestationTabContent from '@/components/attestation/AttestationTabContent';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -8,6 +9,7 @@ const OrganizationAttestation = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        <BackButton />
         <div className="text-right">
           <h1 className="text-2xl font-bold">إفادة التسجيل والاعتماد الرقمي</h1>
           <p className="text-muted-foreground text-sm">

@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import BackButton from '@/components/ui/back-button';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
@@ -20,7 +21,8 @@ import {
   AreaChart, Area, PieChart, Pie, Cell
 } from 'recharts';
 import { motion } from 'framer-motion';
-import BackButton from '@/components/ui/back-button';
+
+
 
 interface ESGData {
   overview: {

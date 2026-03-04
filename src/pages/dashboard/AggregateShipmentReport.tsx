@@ -2,6 +2,7 @@ import { useState, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -44,7 +45,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import BackButton from '@/components/ui/back-button';
+import { usePDFExport } from '@/hooks/usePDFExport';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { motion, AnimatePresence } from 'framer-motion';
 import AggregateReportPrint from '@/components/reports/AggregateReportPrint';

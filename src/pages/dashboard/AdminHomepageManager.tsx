@@ -1,5 +1,6 @@
 import { useState, memo, useCallback } from 'react';
 import { motion, AnimatePresence, Reorder } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -95,6 +96,7 @@ const AdminHomepageManager = () => {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between">
         <Button variant="outline" onClick={() => window.open('/', '_blank')} className="gap-2">
