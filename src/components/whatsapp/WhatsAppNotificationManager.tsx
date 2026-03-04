@@ -14,7 +14,7 @@ import {
   MessageCircle, Send, Settings, Users, BarChart3, Wifi, WifiOff, RefreshCw,
   Search, Loader2, Building2, FileText, ListChecks, BellRing, Eye, EyeOff,
   Phone, CheckCircle2, XCircle, Clock, Filter, Plus, Trash2, Zap, Bot,
-  HeartPulse, Calendar
+  HeartPulse, Calendar, Smartphone, Settings2, ShieldBan
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,6 +26,9 @@ import WaPilotScheduler from './WaPilotScheduler';
 import WaPilotQuickActions from './WaPilotQuickActions';
 import WaPilotAIComposer from './WaPilotAIComposer';
 import WaPilotHealthMonitor from './WaPilotHealthMonitor';
+import WaPilotInstanceManager from './WaPilotInstanceManager';
+import WaPilotAutoRules from './WaPilotAutoRules';
+import WaPilotBlacklist from './WaPilotBlacklist';
 
 const ORG_TYPE_LABELS: Record<string, string> = {
   generator: 'مولّد نفايات',
@@ -104,12 +107,11 @@ interface TemplateInfo {
 
 const WhatsAppNotificationManager = () => {
   const { session } = useAuth();
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('instances');
 
-  // Dashboard
+  // Instances
   const [instances, setInstances] = useState<WaPilotInstance[]>([]);
   const [loadingInstances, setLoadingInstances] = useState(false);
-  const [messageStats, setMessageStats] = useState({ total: 0, sent: 0, failed: 0, pending: 0 });
 
   // Orgs & Users Directory
   const [orgs, setOrgs] = useState<OrgInfo[]>([]);
@@ -121,7 +123,7 @@ const WhatsAppNotificationManager = () => {
 
   // Send Message
   const [selectedInstance, setSelectedInstance] = useState('');
-  const [sendMode, setSendMode] = useState<'single' | 'bulk' | 'template'>('single');
+  const [sendMode, setSendMode] = useState<'single' | 'bulk'>('single');
   const [sendPhone, setSendPhone] = useState('');
   const [sendMessage, setSendMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
@@ -143,13 +145,13 @@ const WhatsAppNotificationManager = () => {
   const [messages, setMessages] = useState<MessageLog[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [logStatusFilter, setLogStatusFilter] = useState('all');
+  const [logDirectionFilter, setLogDirectionFilter] = useState('all');
 
   // Visibility
   const [visibilityMap, setVisibilityMap] = useState<Record<string, any>>({});
 
-  useEffect(() => {
-    fetchAll();
-  }, []);
+  useEffect(() => { fetchAll(); }, []);
 
   const fetchAll = () => {
     fetchInstances();
@@ -179,10 +181,7 @@ const WhatsAppNotificationManager = () => {
   };
 
   const fetchOrgs = async () => {
-    const { data } = await supabase
-      .from('organizations')
-      .select('id, name, name_en, organization_type, phone, email, city')
-      .order('name');
+    const { data } = await supabase.from('organizations').select('id, name, name_en, organization_type, phone, email, city').order('name');
     if (data) setOrgs(data as OrgInfo[]);
   };
 
@@ -205,61 +204,32 @@ const WhatsAppNotificationManager = () => {
 
   const fetchMessages = async () => {
     setLoadingMessages(true);
-    const { data } = await supabase
-      .from('whatsapp_messages')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(300);
-    if (data) {
-      setMessages(data as any);
-      setMessageStats({
-        total: data.length,
-        sent: data.filter(m => m.status === 'sent' || m.status === 'delivered').length,
-        failed: data.filter(m => m.status === 'failed').length,
-        pending: data.filter(m => m.status === 'pending').length,
-      });
-    }
+    const { data } = await supabase.from('whatsapp_messages').select('*').order('created_at', { ascending: false }).limit(500);
+    if (data) setMessages(data as any);
     setLoadingMessages(false);
   };
 
   const fetchTemplates = async () => {
-    const { data } = await supabase
-      .from('whatsapp_templates')
-      .select('*')
-      .order('created_at', { ascending: false });
+    const { data } = await supabase.from('whatsapp_templates').select('*').order('created_at', { ascending: false });
     if (data) setTemplates(data as any);
   };
 
   const fetchVisibility = async () => {
-    const { data } = await supabase
-      .from('partner_visibility_settings')
-      .select('*');
+    const { data } = await supabase.from('partner_visibility_settings').select('*');
     if (data) {
       const map: Record<string, any> = {};
-      data.forEach((v: any) => {
-        map[`${v.organization_id}_${v.partner_organization_id}`] = v;
-      });
+      data.forEach((v: any) => { map[`${v.organization_id}_${v.partner_organization_id}`] = v; });
       setVisibilityMap(map);
     }
   };
 
   const toggleOrgConfig = async (configId: string, field: string, value: boolean) => {
-    const { error } = await supabase
-      .from('whatsapp_config')
-      .update({ [field]: value })
-      .eq('id', configId);
+    const { error } = await supabase.from('whatsapp_config').update({ [field]: value }).eq('id', configId);
     if (error) toast.error('فشل في تحديث الإعدادات');
     else { toast.success('تم تحديث الإعدادات'); fetchOrgConfigs(); }
   };
 
-  const isVisibilityBlocked = (fromOrgId: string, toOrgId: string): boolean => {
-    const key = `${fromOrgId}_${toOrgId}`;
-    const vis = visibilityMap[key];
-    if (vis && vis.can_receive_notifications === false) return true;
-    return false;
-  };
-
-  // Smart Send
+  // Send
   const handleSendMessage = async () => {
     if (sendMode === 'single') {
       if (!sendPhone || !sendMessage) { toast.error('يرجى إدخال رقم الهاتف والرسالة'); return; }
@@ -267,9 +237,7 @@ const WhatsAppNotificationManager = () => {
       try {
         const { data, error } = await supabase.functions.invoke('whatsapp-send', {
           body: {
-            action: 'send',
-            to_phone: sendPhone,
-            message_text: sendMessage,
+            action: 'send', to_phone: sendPhone, message_text: sendMessage,
             instance_id: selectedInstance || undefined,
             interactive_buttons: interactiveButtons.length > 0 ? interactiveButtons : undefined,
             attachment_url: attachmentUrl || undefined,
@@ -283,32 +251,23 @@ const WhatsAppNotificationManager = () => {
         } else toast.error(data?.error || 'فشل في إرسال الرسالة');
       } catch (e: any) { toast.error(e.message || 'خطأ في الإرسال'); }
       finally { setSendingMessage(false); }
-    } else if (sendMode === 'bulk') {
+    } else {
       if (selectedRecipients.size === 0) { toast.error('يرجى تحديد المستلمين'); return; }
       const messageText = selectedTemplate
         ? templates.find(t => t.id === selectedTemplate)?.body_text || sendMessage
         : sendMessage;
       if (!messageText) { toast.error('يرجى إدخال نص الرسالة أو اختيار قالب'); return; }
-
       setSendingMessage(true);
       try {
         let recipients: { phone: string; user_id?: string }[] = [];
-
         if (recipientType === 'users') {
-          recipients = users
-            .filter(u => selectedRecipients.has(u.id) && u.phone)
-            .map(u => ({ phone: u.phone!, user_id: u.id }));
+          recipients = users.filter(u => selectedRecipients.has(u.id) && u.phone).map(u => ({ phone: u.phone!, user_id: u.id }));
         } else {
-          recipients = orgs
-            .filter(o => selectedRecipients.has(o.id) && o.phone)
-            .map(o => ({ phone: o.phone! }));
+          recipients = orgs.filter(o => selectedRecipients.has(o.id) && o.phone).map(o => ({ phone: o.phone! }));
         }
-
         const { data, error } = await supabase.functions.invoke('whatsapp-send', {
           body: {
-            action: 'bulk',
-            message_text: messageText,
-            recipients,
+            action: 'bulk', message_text: messageText, recipients,
             instance_id: selectedInstance || undefined,
             template_name: selectedTemplate ? templates.find(t => t.id === selectedTemplate)?.template_name : undefined,
             interactive_buttons: interactiveButtons.length > 0 ? interactiveButtons : undefined,
@@ -326,21 +285,14 @@ const WhatsAppNotificationManager = () => {
   };
 
   const handleCreateTemplate = async () => {
-    if (!newTemplate.template_name || !newTemplate.body_text) {
-      toast.error('يرجى إدخال اسم القالب ونص الرسالة');
-      return;
-    }
+    if (!newTemplate.template_name || !newTemplate.body_text) { toast.error('يرجى إدخال اسم القالب ونص الرسالة'); return; }
     const { error } = await supabase.from('whatsapp_templates').insert({
-      template_name: newTemplate.template_name,
-      category: newTemplate.category,
-      header_text: newTemplate.header_text || null,
-      body_text: newTemplate.body_text,
-      footer_text: newTemplate.footer_text || null,
-      interactive_type: newTemplate.interactive_type,
+      template_name: newTemplate.template_name, category: newTemplate.category,
+      header_text: newTemplate.header_text || null, body_text: newTemplate.body_text,
+      footer_text: newTemplate.footer_text || null, interactive_type: newTemplate.interactive_type,
       buttons: newTemplate.buttons.length > 0 ? newTemplate.buttons : null,
       survey_options: newTemplate.survey_options.length > 0 ? newTemplate.survey_options : null,
-      is_active: true,
-      is_system: false,
+      is_active: true, is_system: false,
     } as any);
     if (error) toast.error('فشل في إنشاء القالب');
     else {
@@ -351,27 +303,14 @@ const WhatsAppNotificationManager = () => {
     }
   };
 
-  const addButton = () => {
-    setInteractiveButtons(prev => [...prev, { id: `btn_${Date.now()}`, title: '' }]);
-  };
-  const removeButton = (id: string) => {
-    setInteractiveButtons(prev => prev.filter(b => b.id !== id));
-  };
-  const updateButtonTitle = (id: string, title: string) => {
-    setInteractiveButtons(prev => prev.map(b => b.id === id ? { ...b, title } : b));
-  };
+  const addButton = () => setInteractiveButtons(prev => [...prev, { id: `btn_${Date.now()}`, title: '' }]);
+  const removeButton = (id: string) => setInteractiveButtons(prev => prev.filter(b => b.id !== id));
+  const updateButtonTitle = (id: string, title: string) => setInteractiveButtons(prev => prev.map(b => b.id === id ? { ...b, title } : b));
 
   const toggleRecipient = (id: string) => {
-    setSelectedRecipients(prev => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      return next;
-    });
+    setSelectedRecipients(prev => { const next = new Set(prev); if (next.has(id)) next.delete(id); else next.add(id); return next; });
   };
-
-  const selectAllFiltered = (items: { id: string }[]) => {
-    setSelectedRecipients(new Set(items.map(i => i.id)));
-  };
+  const selectAllFiltered = (items: { id: string }[]) => setSelectedRecipients(new Set(items.map(i => i.id)));
   const clearSelection = () => setSelectedRecipients(new Set());
 
   // Filtered data
@@ -381,15 +320,14 @@ const WhatsAppNotificationManager = () => {
   ), [orgs, orgTypeFilter, orgSearch]);
 
   const filteredUsers = useMemo(() => users.filter(u =>
-    !userSearch ||
-    u.full_name?.includes(userSearch) ||
-    u.phone?.includes(userSearch) ||
-    u.email?.includes(userSearch)
+    !userSearch || u.full_name?.includes(userSearch) || u.phone?.includes(userSearch) || u.email?.includes(userSearch)
   ), [users, userSearch]);
 
-  const filteredMessages = messages.filter(m =>
-    !searchQuery || m.to_phone?.includes(searchQuery) || m.from_phone?.includes(searchQuery) || m.content?.includes(searchQuery)
-  );
+  const filteredMessages = useMemo(() => messages.filter(m =>
+    (!searchQuery || m.to_phone?.includes(searchQuery) || m.from_phone?.includes(searchQuery) || m.content?.includes(searchQuery)) &&
+    (logStatusFilter === 'all' || m.status === logStatusFilter) &&
+    (logDirectionFilter === 'all' || m.direction === logDirectionFilter)
+  ), [messages, searchQuery, logStatusFilter, logDirectionFilter]);
 
   const orgConfigMap = useMemo(() => {
     const map: Record<string, OrgConfig> = {};
@@ -397,97 +335,43 @@ const WhatsAppNotificationManager = () => {
     return map;
   }, [orgConfigs]);
 
+  const messageStats = useMemo(() => ({
+    total: messages.length,
+    sent: messages.filter(m => m.status === 'sent' || m.status === 'delivered').length,
+    failed: messages.filter(m => m.status === 'failed').length,
+    pending: messages.filter(m => m.status === 'pending').length,
+  }), [messages]);
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10 h-auto">
-          <TabsTrigger value="dashboard" className="gap-1 text-xs px-1"><BarChart3 className="h-3.5 w-3.5" />لوحة التحكم</TabsTrigger>
-          <TabsTrigger value="analytics" className="gap-1 text-xs px-1"><BarChart3 className="h-3.5 w-3.5" />التحليلات</TabsTrigger>
-          <TabsTrigger value="directory" className="gap-1 text-xs px-1"><Building2 className="h-3.5 w-3.5" />الدليل</TabsTrigger>
-          <TabsTrigger value="send" className="gap-1 text-xs px-1"><Send className="h-3.5 w-3.5" />إرسال</TabsTrigger>
-          <TabsTrigger value="ai" className="gap-1 text-xs px-1"><Bot className="h-3.5 w-3.5" />AI</TabsTrigger>
-          <TabsTrigger value="quick" className="gap-1 text-xs px-1"><Zap className="h-3.5 w-3.5" />سريع</TabsTrigger>
-          <TabsTrigger value="scheduler" className="gap-1 text-xs px-1"><Calendar className="h-3.5 w-3.5" />الجدولة</TabsTrigger>
-          <TabsTrigger value="templates" className="gap-1 text-xs px-1"><FileText className="h-3.5 w-3.5" />القوالب</TabsTrigger>
-          <TabsTrigger value="health" className="gap-1 text-xs px-1"><HeartPulse className="h-3.5 w-3.5" />الصحة</TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1 text-xs px-1"><MessageCircle className="h-3.5 w-3.5" />السجل</TabsTrigger>
-        </TabsList>
+        <ScrollArea className="w-full">
+          <TabsList className="inline-flex w-auto min-w-full h-auto p-1 gap-0.5">
+            <TabsTrigger value="instances" className="gap-1 text-xs px-2 py-1.5"><Smartphone className="h-3.5 w-3.5" />الأجهزة</TabsTrigger>
+            <TabsTrigger value="directory" className="gap-1 text-xs px-2 py-1.5"><Building2 className="h-3.5 w-3.5" />الدليل</TabsTrigger>
+            <TabsTrigger value="send" className="gap-1 text-xs px-2 py-1.5"><Send className="h-3.5 w-3.5" />إرسال</TabsTrigger>
+            <TabsTrigger value="ai" className="gap-1 text-xs px-2 py-1.5"><Bot className="h-3.5 w-3.5" />AI</TabsTrigger>
+            <TabsTrigger value="automation" className="gap-1 text-xs px-2 py-1.5"><Settings2 className="h-3.5 w-3.5" />الأتمتة</TabsTrigger>
+            <TabsTrigger value="quick" className="gap-1 text-xs px-2 py-1.5"><Zap className="h-3.5 w-3.5" />سريع</TabsTrigger>
+            <TabsTrigger value="scheduler" className="gap-1 text-xs px-2 py-1.5"><Calendar className="h-3.5 w-3.5" />الجدولة</TabsTrigger>
+            <TabsTrigger value="templates" className="gap-1 text-xs px-2 py-1.5"><FileText className="h-3.5 w-3.5" />القوالب</TabsTrigger>
+            <TabsTrigger value="orgs" className="gap-1 text-xs px-2 py-1.5"><Settings className="h-3.5 w-3.5" />إعدادات</TabsTrigger>
+            <TabsTrigger value="blacklist" className="gap-1 text-xs px-2 py-1.5"><ShieldBan className="h-3.5 w-3.5" />الحظر</TabsTrigger>
+            <TabsTrigger value="analytics" className="gap-1 text-xs px-2 py-1.5"><BarChart3 className="h-3.5 w-3.5" />التحليلات</TabsTrigger>
+            <TabsTrigger value="health" className="gap-1 text-xs px-2 py-1.5"><HeartPulse className="h-3.5 w-3.5" />الصحة</TabsTrigger>
+            <TabsTrigger value="logs" className="gap-1 text-xs px-2 py-1.5"><MessageCircle className="h-3.5 w-3.5" />السجل</TabsTrigger>
+          </TabsList>
+        </ScrollArea>
 
-        {/* ==================== DASHBOARD ==================== */}
-        <TabsContent value="dashboard" className="space-y-4">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <Card><CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-primary">{messageStats.total}</div>
-              <p className="text-sm text-muted-foreground">إجمالي الرسائل</p>
-            </CardContent></Card>
-            <Card><CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-green-600">{messageStats.sent}</div>
-              <p className="text-sm text-muted-foreground">تم الإرسال</p>
-            </CardContent></Card>
-            <Card><CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-destructive">{messageStats.failed}</div>
-              <p className="text-sm text-muted-foreground">فشل</p>
-            </CardContent></Card>
-            <Card><CardContent className="pt-6 text-center">
-              <div className="text-3xl font-bold text-yellow-600">{messageStats.pending}</div>
-              <p className="text-sm text-muted-foreground">قيد الانتظار</p>
-            </CardContent></Card>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-lg">WaPilot Instances</CardTitle>
-                <Button variant="outline" size="sm" onClick={fetchInstances} disabled={loadingInstances}>
-                  <RefreshCw className={`h-4 w-4 ml-1 ${loadingInstances ? 'animate-spin' : ''}`} />تحديث
-                </Button>
-              </CardHeader>
-              <CardContent>
-                {instances.length === 0 ? (
-                  <p className="text-muted-foreground text-center py-4">{loadingInstances ? 'جاري التحميل...' : 'لا توجد Instances'}</p>
-                ) : (
-                  <div className="space-y-2">
-                    {instances.map(inst => (
-                      <div key={inst.id} className="flex items-center gap-3 p-3 border rounded-lg">
-                        {inst.status === 'active' || inst.status === 'connected' ? <Wifi className="h-5 w-5 text-green-500" /> : <WifiOff className="h-5 w-5 text-destructive" />}
-                        <div className="flex-1 min-w-0">
-                          <p className="font-medium text-sm truncate">{inst.name || inst.id}</p>
-                          <p className="text-xs text-muted-foreground">{inst.phone || inst.id}</p>
-                        </div>
-                        <Badge variant={inst.status === 'active' || inst.status === 'connected' ? 'default' : 'secondary'}>{inst.status || 'unknown'}</Badge>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader><CardTitle className="text-lg flex items-center gap-2"><Users className="h-5 w-5" />ملخص النظام</CardTitle></CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                  <span className="text-sm">إجمالي الجهات</span>
-                  <Badge variant="outline">{orgs.length}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                  <span className="text-sm">جهات مفعّل الواتساب</span>
-                  <Badge>{orgConfigs.filter(c => c.is_active).length}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                  <span className="text-sm">إجمالي المستخدمين</span>
-                  <Badge variant="outline">{users.length}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                  <span className="text-sm">مستخدمون بأرقام واتساب</span>
-                  <Badge>{users.filter(u => u.phone).length}</Badge>
-                </div>
-                <div className="flex justify-between items-center p-2 bg-muted/50 rounded">
-                  <span className="text-sm">قوالب نشطة</span>
-                  <Badge variant="outline">{templates.filter(t => t.is_active).length}</Badge>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+        {/* ==================== INSTANCES ==================== */}
+        <TabsContent value="instances">
+          <WaPilotInstanceManager
+            instances={instances}
+            loading={loadingInstances}
+            onRefresh={fetchInstances}
+            selectedInstance={selectedInstance}
+            onSelectInstance={setSelectedInstance}
+          />
         </TabsContent>
 
         {/* ==================== DIRECTORY ==================== */}
@@ -510,9 +394,7 @@ const WhatsAppNotificationManager = () => {
                       <SelectTrigger className="w-[180px]"><SelectValue placeholder="نوع الجهة" /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="all">جميع الأنواع</SelectItem>
-                        {Object.entries(ORG_TYPE_LABELS).map(([k, v]) => (
-                          <SelectItem key={k} value={k}>{v}</SelectItem>
-                        ))}
+                        {Object.entries(ORG_TYPE_LABELS).map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -551,7 +433,7 @@ const WhatsAppNotificationManager = () => {
                                   (v.organization_id === org.id || v.partner_organization_id === org.id) &&
                                   (v.can_view_recycler_info === false || v.can_view_generator_info === false)
                                 ) ? (
-                                  <div className="flex items-center gap-1 text-amber-600"><EyeOff className="h-3.5 w-3.5" /><span className="text-xs">حجب نشط</span></div>
+                                  <div className="flex items-center gap-1 text-amber-600"><EyeOff className="h-3.5 w-3.5" /><span className="text-xs">حجب</span></div>
                                 ) : (
                                   <div className="flex items-center gap-1 text-muted-foreground"><Eye className="h-3.5 w-3.5" /><span className="text-xs">مفتوح</span></div>
                                 )}
@@ -601,9 +483,7 @@ const WhatsAppNotificationManager = () => {
                             <TableCell className="font-mono text-xs" dir="ltr">{user.phone || '—'}</TableCell>
                             <TableCell className="text-xs">{user.email || '—'}</TableCell>
                             <TableCell>
-                              {user.phone
-                                ? <CheckCircle2 className="h-4 w-4 text-green-500" />
-                                : <XCircle className="h-4 w-4 text-muted-foreground" />}
+                              {user.phone ? <CheckCircle2 className="h-4 w-4 text-green-500" /> : <XCircle className="h-4 w-4 text-muted-foreground" />}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -624,7 +504,6 @@ const WhatsAppNotificationManager = () => {
               <CardDescription>إرسال فردي أو جماعي مع دعم القوالب والأزرار التفاعلية والمرفقات</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              {/* Mode Selection */}
               <div className="flex gap-2">
                 <Button variant={sendMode === 'single' ? 'default' : 'outline'} size="sm" onClick={() => setSendMode('single')}>
                   <Phone className="h-4 w-4 ml-1" />فردي
@@ -634,7 +513,6 @@ const WhatsAppNotificationManager = () => {
                 </Button>
               </div>
 
-              {/* Instance selector */}
               {instances.length > 1 && (
                 <div>
                   <Label>Instance</Label>
@@ -655,14 +533,9 @@ const WhatsAppNotificationManager = () => {
               {sendMode === 'bulk' && (
                 <div className="space-y-3">
                   <div className="flex gap-2">
-                    <Button variant={recipientType === 'users' ? 'default' : 'outline'} size="sm" onClick={() => { setRecipientType('users'); clearSelection(); }}>
-                      مستخدمون
-                    </Button>
-                    <Button variant={recipientType === 'orgs' ? 'default' : 'outline'} size="sm" onClick={() => { setRecipientType('orgs'); clearSelection(); }}>
-                      جهات
-                    </Button>
+                    <Button variant={recipientType === 'users' ? 'default' : 'outline'} size="sm" onClick={() => { setRecipientType('users'); clearSelection(); }}>مستخدمون</Button>
+                    <Button variant={recipientType === 'orgs' ? 'default' : 'outline'} size="sm" onClick={() => { setRecipientType('orgs'); clearSelection(); }}>جهات</Button>
                   </div>
-
                   {recipientType === 'orgs' && (
                     <Select value={orgTypeFilter} onValueChange={setOrgTypeFilter}>
                       <SelectTrigger className="w-[200px]"><SelectValue placeholder="تصفية بالنوع" /></SelectTrigger>
@@ -672,15 +545,11 @@ const WhatsAppNotificationManager = () => {
                       </SelectContent>
                     </Select>
                   )}
-
                   <div className="flex gap-2 items-center">
                     <Badge>{selectedRecipients.size} محدد</Badge>
-                    <Button variant="ghost" size="sm" onClick={() => selectAllFiltered(recipientType === 'users' ? filteredUsers.filter(u => u.phone) : filteredOrgs.filter(o => o.phone))}>
-                      تحديد الكل
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={clearSelection}>مسح التحديد</Button>
+                    <Button variant="ghost" size="sm" onClick={() => selectAllFiltered(recipientType === 'users' ? filteredUsers.filter(u => u.phone) : filteredOrgs.filter(o => o.phone))}>تحديد الكل</Button>
+                    <Button variant="ghost" size="sm" onClick={clearSelection}>مسح</Button>
                   </div>
-
                   <ScrollArea className="h-[200px] border rounded-md p-2">
                     {recipientType === 'users' ? (
                       filteredUsers.filter(u => u.phone).map(u => (
@@ -704,7 +573,6 @@ const WhatsAppNotificationManager = () => {
                 </div>
               )}
 
-              {/* Template selector */}
               <div>
                 <Label>قالب الرسالة (اختياري)</Label>
                 <Select value={selectedTemplate} onValueChange={v => {
@@ -722,19 +590,16 @@ const WhatsAppNotificationManager = () => {
                 </Select>
               </div>
 
-              {/* Message text */}
               <div>
                 <Label>نص الرسالة</Label>
-                <Textarea value={sendMessage} onChange={e => setSendMessage(e.target.value)} placeholder="اكتب رسالتك هنا... استخدم {{1}} {{2}} للمتغيرات" rows={4} />
+                <Textarea value={sendMessage} onChange={e => setSendMessage(e.target.value)} placeholder="اكتب رسالتك هنا..." rows={4} />
               </div>
 
-              {/* Attachment */}
               <div>
                 <Label>رابط مرفق (اختياري)</Label>
                 <Input value={attachmentUrl} onChange={e => setAttachmentUrl(e.target.value)} placeholder="https://example.com/file.pdf" dir="ltr" />
               </div>
 
-              {/* Interactive Buttons */}
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label>أزرار تفاعلية (اختياري)</Label>
@@ -744,15 +609,8 @@ const WhatsAppNotificationManager = () => {
                 </div>
                 {interactiveButtons.map(btn => (
                   <div key={btn.id} className="flex gap-2 items-center">
-                    <Input
-                      value={btn.title}
-                      onChange={e => updateButtonTitle(btn.id, e.target.value)}
-                      placeholder="عنوان الزر (مثل: موافق، رفض)"
-                      className="flex-1"
-                    />
-                    <Button variant="ghost" size="icon" onClick={() => removeButton(btn.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+                    <Input value={btn.title} onChange={e => updateButtonTitle(btn.id, e.target.value)} placeholder="عنوان الزر" className="flex-1" />
+                    <Button variant="ghost" size="icon" onClick={() => removeButton(btn.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                   </div>
                 ))}
               </div>
@@ -771,18 +629,12 @@ const WhatsAppNotificationManager = () => {
             <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>قوالب الرسائل</CardTitle>
               <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
-                <DialogTrigger asChild>
-                  <Button size="sm"><Plus className="h-4 w-4 ml-1" />قالب جديد</Button>
-                </DialogTrigger>
+                <DialogTrigger asChild><Button size="sm"><Plus className="h-4 w-4 ml-1" />قالب جديد</Button></DialogTrigger>
                 <DialogContent className="max-w-lg">
                   <DialogHeader><DialogTitle>إنشاء قالب رسالة</DialogTitle></DialogHeader>
                   <div className="space-y-3">
-                    <div>
-                      <Label>اسم القالب</Label>
-                      <Input value={newTemplate.template_name} onChange={e => setNewTemplate(p => ({ ...p, template_name: e.target.value }))} placeholder="shipment_confirmation" dir="ltr" />
-                    </div>
-                    <div>
-                      <Label>التصنيف</Label>
+                    <div><Label>اسم القالب</Label><Input value={newTemplate.template_name} onChange={e => setNewTemplate(p => ({ ...p, template_name: e.target.value }))} placeholder="shipment_confirmation" dir="ltr" /></div>
+                    <div><Label>التصنيف</Label>
                       <Select value={newTemplate.category} onValueChange={v => setNewTemplate(p => ({ ...p, category: v }))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -795,20 +647,10 @@ const WhatsAppNotificationManager = () => {
                         </SelectContent>
                       </Select>
                     </div>
-                    <div>
-                      <Label>العنوان</Label>
-                      <Input value={newTemplate.header_text} onChange={e => setNewTemplate(p => ({ ...p, header_text: e.target.value }))} placeholder="عنوان الرسالة" />
-                    </div>
-                    <div>
-                      <Label>نص الرسالة</Label>
-                      <Textarea value={newTemplate.body_text} onChange={e => setNewTemplate(p => ({ ...p, body_text: e.target.value }))} placeholder="مرحباً {{1}}، شحنتك {{2}} تم تحديثها." rows={4} />
-                    </div>
-                    <div>
-                      <Label>التذييل</Label>
-                      <Input value={newTemplate.footer_text} onChange={e => setNewTemplate(p => ({ ...p, footer_text: e.target.value }))} placeholder="iRecycle - منصة إدارة المخلفات" />
-                    </div>
-                    <div>
-                      <Label>النوع التفاعلي</Label>
+                    <div><Label>العنوان</Label><Input value={newTemplate.header_text} onChange={e => setNewTemplate(p => ({ ...p, header_text: e.target.value }))} placeholder="عنوان الرسالة" /></div>
+                    <div><Label>نص الرسالة</Label><Textarea value={newTemplate.body_text} onChange={e => setNewTemplate(p => ({ ...p, body_text: e.target.value }))} rows={4} /></div>
+                    <div><Label>التذييل</Label><Input value={newTemplate.footer_text} onChange={e => setNewTemplate(p => ({ ...p, footer_text: e.target.value }))} placeholder="iRecycle" /></div>
+                    <div><Label>النوع التفاعلي</Label>
                       <Select value={newTemplate.interactive_type} onValueChange={v => setNewTemplate(p => ({ ...p, interactive_type: v }))}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -885,11 +727,8 @@ const WhatsAppNotificationManager = () => {
                             { field: 'auto_send_marketing', label: 'رسائل تسويقية', icon: Send },
                           ].map(({ field, label, icon: Icon }) => (
                             <div key={field} className="flex items-center justify-between p-2 bg-muted/50 rounded">
-                              <span className="flex items-center gap-1"><Icon className="h-3.5 w-3.5" />{label}</span>
-                              <Switch
-                                checked={(config as any)[field]}
-                                onCheckedChange={v => toggleOrgConfig(config.id, field, v)}
-                              />
+                              <span className="flex items-center gap-1 text-xs"><Icon className="h-3.5 w-3.5" />{label}</span>
+                              <Switch checked={(config as any)[field]} onCheckedChange={v => toggleOrgConfig(config.id, field, v)} />
                             </div>
                           ))}
                         </div>
@@ -906,13 +745,31 @@ const WhatsAppNotificationManager = () => {
         {/* ==================== MESSAGE LOGS ==================== */}
         <TabsContent value="logs" className="space-y-4">
           <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>سجل الرسائل</CardTitle>
-              <div className="flex gap-2">
+            <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-2">
+              <CardTitle>سجل الرسائل ({filteredMessages.length})</CardTitle>
+              <div className="flex gap-2 flex-wrap">
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="بحث..." className="pr-9 w-48" />
+                  <Input value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="بحث..." className="pr-9 w-40" />
                 </div>
+                <Select value={logStatusFilter} onValueChange={setLogStatusFilter}>
+                  <SelectTrigger className="w-[120px]"><SelectValue placeholder="الحالة" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">الكل</SelectItem>
+                    <SelectItem value="sent">مرسلة</SelectItem>
+                    <SelectItem value="delivered">مسلّمة</SelectItem>
+                    <SelectItem value="failed">فاشلة</SelectItem>
+                    <SelectItem value="pending">قيد الانتظار</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Select value={logDirectionFilter} onValueChange={setLogDirectionFilter}>
+                  <SelectTrigger className="w-[100px]"><SelectValue placeholder="الاتجاه" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">الكل</SelectItem>
+                    <SelectItem value="outbound">صادر</SelectItem>
+                    <SelectItem value="inbound">وارد</SelectItem>
+                  </SelectContent>
+                </Select>
                 <Button variant="outline" size="sm" onClick={fetchMessages} disabled={loadingMessages}>
                   <RefreshCw className={`h-4 w-4 ${loadingMessages ? 'animate-spin' : ''}`} />
                 </Button>
@@ -928,6 +785,7 @@ const WhatsAppNotificationManager = () => {
                       <TableHead>المحتوى</TableHead>
                       <TableHead>النوع</TableHead>
                       <TableHead>الحالة</TableHead>
+                      <TableHead>الخطأ</TableHead>
                       <TableHead>التاريخ</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -950,11 +808,12 @@ const WhatsAppNotificationManager = () => {
                             msg.status === 'failed' ? 'destructive' : 'secondary'
                           }>{msg.status}</Badge>
                         </TableCell>
-                        <TableCell className="text-xs text-muted-foreground">{new Date(msg.created_at).toLocaleString('ar-EG')}</TableCell>
+                        <TableCell className="text-xs text-destructive max-w-[150px] truncate">{msg.error_message || '—'}</TableCell>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(msg.created_at).toLocaleString('ar-EG')}</TableCell>
                       </TableRow>
                     ))}
                     {filteredMessages.length === 0 && (
-                      <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-8">لا توجد رسائل</TableCell></TableRow>
+                      <TableRow><TableCell colSpan={7} className="text-center text-muted-foreground py-8">لا توجد رسائل</TableCell></TableRow>
                     )}
                   </TableBody>
                 </Table>
@@ -963,30 +822,14 @@ const WhatsAppNotificationManager = () => {
           </Card>
         </TabsContent>
 
-        {/* ==================== ANALYTICS ==================== */}
-        <TabsContent value="analytics">
-          <WaPilotAnalytics messages={messages as any} orgs={orgs as any} />
-        </TabsContent>
-
-        {/* ==================== AI COMPOSER ==================== */}
-        <TabsContent value="ai">
-          <WaPilotAIComposer onUseMessage={(text) => { setSendMessage(text); setActiveTab('send'); }} />
-        </TabsContent>
-
-        {/* ==================== QUICK ACTIONS ==================== */}
-        <TabsContent value="quick">
-          <WaPilotQuickActions />
-        </TabsContent>
-
-        {/* ==================== SCHEDULER ==================== */}
-        <TabsContent value="scheduler">
-          <WaPilotScheduler />
-        </TabsContent>
-
-        {/* ==================== HEALTH MONITOR ==================== */}
-        <TabsContent value="health">
-          <WaPilotHealthMonitor messages={messages as any} orgs={orgs as any} />
-        </TabsContent>
+        {/* ==================== DELEGATED TABS ==================== */}
+        <TabsContent value="analytics"><WaPilotAnalytics messages={messages as any} orgs={orgs as any} /></TabsContent>
+        <TabsContent value="ai"><WaPilotAIComposer onUseMessage={(text) => { setSendMessage(text); setActiveTab('send'); }} /></TabsContent>
+        <TabsContent value="quick"><WaPilotQuickActions /></TabsContent>
+        <TabsContent value="scheduler"><WaPilotScheduler /></TabsContent>
+        <TabsContent value="health"><WaPilotHealthMonitor messages={messages as any} orgs={orgs as any} /></TabsContent>
+        <TabsContent value="automation"><WaPilotAutoRules /></TabsContent>
+        <TabsContent value="blacklist"><WaPilotBlacklist /></TabsContent>
       </Tabs>
     </div>
   );
