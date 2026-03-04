@@ -34527,6 +34527,139 @@ export type Database = {
           },
         ]
       }
+      whatsapp_quick_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          interactive_buttons: Json | null
+          is_active: boolean | null
+          last_used_at: string | null
+          message_text: string | null
+          name: string
+          target_filter: Json | null
+          template_id: string | null
+          updated_at: string
+          usage_count: number | null
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interactive_buttons?: Json | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          message_text?: string | null
+          name: string
+          target_filter?: Json | null
+          template_id?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          interactive_buttons?: Json | null
+          is_active?: boolean | null
+          last_used_at?: string | null
+          message_text?: string | null
+          name?: string
+          target_filter?: Json | null
+          template_id?: string | null
+          updated_at?: string
+          usage_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_quick_actions_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_scheduled_messages: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          created_by: string | null
+          failed_count: number | null
+          id: string
+          instance_id: string | null
+          interactive_buttons: Json | null
+          message_text: string
+          notes: string | null
+          organization_id: string | null
+          recipient_type: string | null
+          recipients: Json
+          scheduled_at: string
+          sent_at: string | null
+          sent_count: number | null
+          status: string
+          template_id: string | null
+          template_params: Json | null
+          updated_at: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number | null
+          id?: string
+          instance_id?: string | null
+          interactive_buttons?: Json | null
+          message_text: string
+          notes?: string | null
+          organization_id?: string | null
+          recipient_type?: string | null
+          recipients?: Json
+          scheduled_at: string
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          template_id?: string | null
+          template_params?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          failed_count?: number | null
+          id?: string
+          instance_id?: string | null
+          interactive_buttons?: Json | null
+          message_text?: string
+          notes?: string | null
+          organization_id?: string | null
+          recipient_type?: string | null
+          recipients?: Json
+          scheduled_at?: string
+          sent_at?: string | null
+          sent_count?: number | null
+          status?: string
+          template_id?: string | null
+          template_params?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_scheduled_messages_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_templates: {
         Row: {
           attachment_url: string | null
