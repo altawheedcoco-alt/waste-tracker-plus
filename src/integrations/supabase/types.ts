@@ -34285,6 +34285,54 @@ export type Database = {
           },
         ]
       }
+      whatsapp_ai_analysis: {
+        Row: {
+          analysis_type: string
+          created_at: string | null
+          customer_opinion: string | null
+          id: string
+          key_topics: string[] | null
+          messages_analyzed: number | null
+          opt_out_category: string | null
+          opt_out_detected: boolean | null
+          phone: string
+          raw_analysis: Json | null
+          sentiment: string | null
+          sentiment_score: number | null
+          suggestions: string[] | null
+        }
+        Insert: {
+          analysis_type?: string
+          created_at?: string | null
+          customer_opinion?: string | null
+          id?: string
+          key_topics?: string[] | null
+          messages_analyzed?: number | null
+          opt_out_category?: string | null
+          opt_out_detected?: boolean | null
+          phone: string
+          raw_analysis?: Json | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          suggestions?: string[] | null
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string | null
+          customer_opinion?: string | null
+          id?: string
+          key_topics?: string[] | null
+          messages_analyzed?: number | null
+          opt_out_category?: string | null
+          opt_out_detected?: boolean | null
+          phone?: string
+          raw_analysis?: Json | null
+          sentiment?: string | null
+          sentiment_score?: number | null
+          suggestions?: string[] | null
+        }
+        Relationships: []
+      }
       whatsapp_broadcast_groups: {
         Row: {
           created_at: string
@@ -34374,6 +34422,54 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      whatsapp_contact_preferences: {
+        Row: {
+          contact_name: string | null
+          created_at: string | null
+          id: string
+          last_ai_analysis: Json | null
+          last_analyzed_at: string | null
+          notes: string | null
+          opt_out_reason: string | null
+          opted_out_all: boolean | null
+          opted_out_at: string | null
+          opted_out_categories: string[] | null
+          phone: string
+          sentiment_summary: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string
+          last_ai_analysis?: Json | null
+          last_analyzed_at?: string | null
+          notes?: string | null
+          opt_out_reason?: string | null
+          opted_out_all?: boolean | null
+          opted_out_at?: string | null
+          opted_out_categories?: string[] | null
+          phone: string
+          sentiment_summary?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          contact_name?: string | null
+          created_at?: string | null
+          id?: string
+          last_ai_analysis?: Json | null
+          last_analyzed_at?: string | null
+          notes?: string | null
+          opt_out_reason?: string | null
+          opted_out_all?: boolean | null
+          opted_out_at?: string | null
+          opted_out_categories?: string[] | null
+          phone?: string
+          sentiment_summary?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       whatsapp_message_interactions: {
         Row: {

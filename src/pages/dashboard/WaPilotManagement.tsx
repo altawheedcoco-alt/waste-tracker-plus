@@ -15,7 +15,7 @@ import {
   FileText, RefreshCw, TrendingUp, CheckCircle2, XCircle, Activity,
   Smartphone, Phone, Copy, Zap, HeartPulse, Shield, Globe,
   BarChart3, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
-  Radio, Server, Power, QrCode, RotateCcw, Loader2, Megaphone,
+  Radio, Server, Power, QrCode, RotateCcw, Loader2, Megaphone, Brain,
   Target, PieChart, CalendarDays, Bot, Hash, BookOpen, Code2, ExternalLink
 } from 'lucide-react';
 import {
@@ -25,6 +25,7 @@ import {
 import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
 import WaPilotMessageLog from '@/components/whatsapp/WaPilotMessageLog';
 import WaPilotInbox from '@/components/whatsapp/WaPilotInbox';
+import WaPilotAIInsights from '@/components/whatsapp/WaPilotAIInsights';
 import { toast } from 'sonner';
 
 interface InstanceInfo {
@@ -88,7 +89,7 @@ const WaPilotManagement = () => {
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'overview' | 'inbox' | 'manager'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'inbox' | 'ai-insights' | 'manager'>('overview');
   const [uptime, setUptime] = useState<number>(0);
   const [connectionDiag, setConnectionDiag] = useState<any>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
@@ -425,6 +426,12 @@ const WaPilotManagement = () => {
               <MessageCircle className="h-3.5 w-3.5 ml-1" />المحادثات
             </Button>
             <Button
+              variant={activeView === 'ai-insights' ? 'default' : 'outline'} size="sm"
+              onClick={() => setActiveView('ai-insights')}
+            >
+              <Brain className="h-3.5 w-3.5 ml-1" />تحليل ذكي
+            </Button>
+            <Button
               variant={activeView === 'manager' ? 'default' : 'outline'} size="sm"
               onClick={() => setActiveView('manager')}
             >
@@ -621,6 +628,11 @@ const WaPilotManagement = () => {
           orgs={orgs}
           loading={refreshing}
           instanceStatus={instanceStatus}
+          onRefresh={fetchAllData}
+        />
+      ) : activeView === 'ai-insights' ? (
+        <WaPilotAIInsights
+          messages={messages}
           onRefresh={fetchAllData}
         />
       ) : activeView === 'overview' ? (
