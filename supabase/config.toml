@@ -191,3 +191,6 @@ verify_jwt = false
 
 [functions.verify-shipment-video]
 verify_jwt = false
+
+[functions.analyze-meeting]
+verify_jwt = false

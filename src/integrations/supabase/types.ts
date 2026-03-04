@@ -18548,6 +18548,54 @@ export type Database = {
         }
         Relationships: []
       }
+      meeting_notes: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meeting_id: string
+          note_type: string
+          timestamp_in_meeting: number | null
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meeting_id: string
+          note_type?: string
+          timestamp_in_meeting?: number | null
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meeting_id?: string
+          note_type?: string
+          timestamp_in_meeting?: number | null
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meeting_notes_meeting_id_fkey"
+            columns: ["meeting_id"]
+            isOneToOne: false
+            referencedRelation: "video_meetings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "meeting_notes_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_read_receipts: {
         Row: {
           id: string
@@ -33672,6 +33720,9 @@ export type Database = {
       }
       video_meetings: {
         Row: {
+          ai_action_items: Json | null
+          ai_key_points: Json | null
+          ai_summary: string | null
           allow_chat: boolean | null
           created_at: string
           created_by: string
@@ -33680,6 +33731,7 @@ export type Database = {
           id: string
           is_private: boolean | null
           max_participants: number | null
+          meeting_duration_minutes: number | null
           meeting_type: string
           metadata: Json | null
           organization_id: string
@@ -33688,10 +33740,15 @@ export type Database = {
           scheduled_at: string | null
           started_at: string | null
           status: string
+          summary_generated_at: string | null
+          summary_generated_by: string | null
           title: string
           updated_at: string
         }
         Insert: {
+          ai_action_items?: Json | null
+          ai_key_points?: Json | null
+          ai_summary?: string | null
           allow_chat?: boolean | null
           created_at?: string
           created_by: string
@@ -33700,6 +33757,7 @@ export type Database = {
           id?: string
           is_private?: boolean | null
           max_participants?: number | null
+          meeting_duration_minutes?: number | null
           meeting_type?: string
           metadata?: Json | null
           organization_id: string
@@ -33708,10 +33766,15 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
+          summary_generated_at?: string | null
+          summary_generated_by?: string | null
           title: string
           updated_at?: string
         }
         Update: {
+          ai_action_items?: Json | null
+          ai_key_points?: Json | null
+          ai_summary?: string | null
           allow_chat?: boolean | null
           created_at?: string
           created_by?: string
@@ -33720,6 +33783,7 @@ export type Database = {
           id?: string
           is_private?: boolean | null
           max_participants?: number | null
+          meeting_duration_minutes?: number | null
           meeting_type?: string
           metadata?: Json | null
           organization_id?: string
@@ -33728,6 +33792,8 @@ export type Database = {
           scheduled_at?: string | null
           started_at?: string | null
           status?: string
+          summary_generated_at?: string | null
+          summary_generated_by?: string | null
           title?: string
           updated_at?: string
         }
