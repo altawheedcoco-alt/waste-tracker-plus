@@ -5,9 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Upload, Printer, FileCheck, BadgeCheck as Stamp, QrCode, BadgeCheck, Download, X, Eye, FileSignature, Send } from 'lucide-react';
+import { Upload, Printer, FileCheck, BadgeCheck as Stamp, BadgeCheck, Download, X, Eye, FileSignature, Send, PenTool, Trash2, User } from 'lucide-react';
 import { MentionableField, type MentionableEntity } from '@/components/ui/mentionable-field';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import { MentionInput } from '@/components/ui/mention-input';
@@ -18,6 +17,14 @@ import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import TermsBackPage from '@/components/print/TermsBackPage';
+import UniversalSignatureDialog from '@/components/signatures/UniversalSignatureDialog';
+import type { SignatureData } from '@/components/signatures/UniversalSignatureDialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
+import { saveDocumentSignature } from '@/components/signatures/signatureService';
+import { useResolvedUrl } from '@/hooks/useResolvedUrl';
 
 const STAMP_VERSION = '1.0.0';
 
@@ -29,8 +36,30 @@ const generateDocCode = () => {
   return `ADM-${yy}${mm}-${rand}`;
 };
 
+// A single signer record displayed on the document
+interface DocumentSigner {
+  id: string;
+  signerName: string;
+  signerTitle?: string;
+  signerNationalId?: string;
+  method: SignatureData['method'];
+  signatureImageUrl?: string;
+  signatureText?: string;
+  stampApplied: boolean;
+  stampImageUrl?: string;
+  signedAt: Date;
+}
+
+// Resolved image component for storage paths
+const ResolvedImage = ({ src, alt, className, style }: { src: string; alt: string; className?: string; style?: React.CSSProperties }) => {
+  const resolvedUrl = useResolvedUrl(src);
+  if (!resolvedUrl) return null;
+  return <img src={resolvedUrl} alt={alt} className={className} style={style} />;
+};
+
 const AdminDocumentStamping = () => {
   const { toast } = useToast();
+  const { user, organization, profile } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
   const { exportToPDF, printContent } = usePDFExport({ filename: 'stamped-document' });
   const { entities, organizationEntities } = useMentionableEntities();
@@ -46,16 +75,47 @@ const AdminDocumentStamping = () => {
   const [isStamped, setIsStamped] = useState(false);
   const [stampDate] = useState(new Date());
   const [showSignDialog, setShowSignDialog] = useState(false);
+  const [showSignatureDialog, setShowSignatureDialog] = useState(false);
+  const [signingLoading, setSigningLoading] = useState(false);
+
+  // Multiple signers on the document
+  const [signers, setSigners] = useState<DocumentSigner[]>([]);
+
+  // Organization stamp
+  const [orgStampUrl, setOrgStampUrl] = useState<string | null>(null);
+  const [orgSignatureUrl, setOrgSignatureUrl] = useState<string | null>(null);
+
+  // Fetch org stamp and signature when component mounts
+  const fetchOrgAssets = useCallback(async () => {
+    if (!organization?.id) return;
+    const [{ data: stamp }, { data: sig }] = await Promise.all([
+      (supabase.from('organization_stamps') as any)
+        .select('stamp_image_url')
+        .eq('organization_id', organization.id)
+        .eq('is_primary', true)
+        .eq('is_active', true)
+        .maybeSingle(),
+      (supabase.from('organization_signatures') as any)
+        .select('signature_image_url')
+        .eq('organization_id', organization.id)
+        .eq('is_primary', true)
+        .eq('is_active', true)
+        .maybeSingle(),
+    ]);
+    if (stamp) setOrgStampUrl(stamp.stamp_image_url);
+    if (sig) setOrgSignatureUrl(sig.signature_image_url);
+  }, [organization?.id]);
+
+  // Load on mount
+  useState(() => { fetchOrgAssets(); });
 
   const handleFileUpload = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    
     if (file.size > 10 * 1024 * 1024) {
       toast({ title: 'الملف كبير جداً', description: 'الحد الأقصى 10 ميجابايت', variant: 'destructive' });
       return;
     }
-
     setDocFile(file);
     if (file.type.startsWith('image/')) {
       setDocPreviewUrl(URL.createObjectURL(file));
@@ -78,6 +138,51 @@ const AdminDocumentStamping = () => {
     toast({ title: 'تم ختم المستند بنجاح ✅', description: `كود المستند: ${docCode}` });
   };
 
+  const handleSignDocument = async (data: SignatureData) => {
+    if (!user || !organization) return;
+    setSigningLoading(true);
+
+    try {
+      // Save to DB
+      const result = await saveDocumentSignature({
+        signatureData: data,
+        documentType: 'other',
+        documentId: docCode,
+        organizationId: organization.id,
+        userId: user.id,
+      });
+
+      // Add to local signers list for display on the document
+      const newSigner: DocumentSigner = {
+        id: result.signatureId || crypto.randomUUID(),
+        signerName: data.signerName,
+        signerTitle: data.signerTitle,
+        signerNationalId: data.signerNationalId,
+        method: data.method,
+        signatureImageUrl: data.signatureImageUrl,
+        signatureText: data.signatureText,
+        stampApplied: data.stampApplied,
+        stampImageUrl: data.stampImageUrl,
+        signedAt: new Date(),
+      };
+      setSigners(prev => [...prev, newSigner]);
+      setShowSignatureDialog(false);
+
+      toast({
+        title: 'تم التوقيع والختم بنجاح ✅',
+        description: `${data.signerName} — ${result.sealNumber || ''}`,
+      });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSigningLoading(false);
+    }
+  };
+
+  const removeSigner = (id: string) => {
+    setSigners(prev => prev.filter(s => s.id !== id));
+  };
+
   const handlePrint = () => {
     if (printRef.current) printContent(printRef.current);
   };
@@ -94,6 +199,7 @@ const AdminDocumentStamping = () => {
     setRecipientName('');
     setRecipientOrg('');
     setIsStamped(false);
+    setSigners([]);
   };
 
   const qrValue = `${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=admin-stamped&code=${encodeURIComponent(docCode)}&date=${stampDate.toISOString()}`;
@@ -101,18 +207,21 @@ const AdminDocumentStamping = () => {
   return (
     <div className="space-y-6 p-4 max-w-5xl mx-auto" dir="rtl">
       <BackButton />
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Stamp className="h-7 w-7 text-primary" />
             ختم وتوقيع المستندات
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">ارفع مستند واختمه إلكترونياً بتوقيع المنصة وكود QR وباركود</p>
+          <p className="text-sm text-muted-foreground mt-1">ارفع مستند واختمه إلكترونياً مع التوقيع المباشر على أصل المستند</p>
         </div>
         {isStamped && (
           <div className="flex gap-2 flex-wrap">
+            <Button onClick={() => setShowSignatureDialog(true)} className="gap-2 bg-green-600 hover:bg-green-700">
+              <PenTool className="h-4 w-4" /> توقيع وختم على المستند
+            </Button>
             <Button onClick={() => setShowSignDialog(true)} variant="outline" className="gap-2">
-              <FileSignature className="h-4 w-4" /> إرسال للتوقيع
+              <Send className="h-4 w-4" /> إرسال للتوقيع
             </Button>
             <Button onClick={handlePrint} variant="outline" className="gap-2">
               <Printer className="h-4 w-4" /> طباعة
@@ -216,16 +325,53 @@ const AdminDocumentStamping = () => {
 
             <Button onClick={handleStamp} size="lg" className="w-full gap-2 text-base">
               <Stamp className="h-5 w-5" />
-              ختم وتوقيع المستند إلكترونياً
+              ختم وتجهيز المستند
             </Button>
           </CardContent>
         </Card>
       )}
 
-      {/* Stamped Preview */}
+      {/* Signers List (outside print area) */}
+      {isStamped && signers.length > 0 && (
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <FileSignature className="h-5 w-5 text-primary" />
+              التوقيعات المطبقة على المستند ({signers.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {signers.map((s) => (
+                <div key={s.id} className="flex items-center gap-3 p-3 border rounded-lg bg-green-50/50 dark:bg-green-950/20">
+                  <div className="flex-shrink-0 w-10 h-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                    <User className="h-5 w-5 text-green-700 dark:text-green-300" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm truncate">{s.signerName}</p>
+                    <p className="text-xs text-muted-foreground">{s.signerTitle || 'موقّع'} • {format(s.signedAt, 'HH:mm dd/MM/yyyy')}</p>
+                    <div className="flex gap-1.5 mt-1">
+                      <Badge variant="secondary" className="text-[10px]">
+                        {s.method === 'draw' ? 'رسم يدوي' : s.method === 'upload' ? 'صورة' : s.method === 'text' ? 'نصي' : 'نقرة'}
+                      </Badge>
+                      {s.stampApplied && <Badge className="text-[10px] bg-primary/20 text-primary">+ ختم</Badge>}
+                    </div>
+                  </div>
+                  <Button variant="ghost" size="icon" className="text-destructive h-8 w-8" onClick={() => removeSigner(s.id)}>
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Stamped Document Preview */}
       {isStamped && (
         <>
-          <div className="flex justify-end">
+          <div className="flex justify-between items-center">
+            <p className="text-sm text-muted-foreground">معاينة المستند — التوقيعات والأختام تظهر مباشرة على المستند المطبوع</p>
             <Button variant="outline" onClick={handleClear} className="gap-2">
               <X className="h-4 w-4" /> مستند جديد
             </Button>
@@ -255,7 +401,7 @@ const AdminDocumentStamping = () => {
               {/* Document Title Banner */}
               <div className="text-center py-3 px-4 rounded-lg mb-6" style={{ backgroundColor: 'hsl(var(--primary))', color: 'white' }}>
                 <h2 style={{ fontSize: '14pt', fontWeight: 'bold' }}>مستند رسمي مختوم</h2>
-                <p style={{ fontSize: '9pt', opacity: 0.9 }}>OFFICIALLY STAMPED DOCUMENT</p>
+                <p style={{ fontSize: '9pt', opacity: 0.9 }}>OFFICIALLY STAMPED & SIGNED DOCUMENT</p>
               </div>
 
               {/* Document Info Table */}
@@ -272,6 +418,12 @@ const AdminDocumentStamping = () => {
                   <tr>
                     <td style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '10px 14px', fontWeight: 'bold' }}>تاريخ الختم</td>
                     <td style={{ border: '1px solid #e2e8f0', padding: '10px 14px' }}>{format(stampDate, 'dd MMMM yyyy — HH:mm', { locale: ar })}</td>
+                  </tr>
+                  <tr>
+                    <td style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', padding: '10px 14px', fontWeight: 'bold' }}>عدد الموقعين</td>
+                    <td style={{ border: '1px solid #e2e8f0', padding: '10px 14px' }}>
+                      {signers.length > 0 ? `${signers.length} توقيع` : 'لم يتم التوقيع بعد'}
+                    </td>
                   </tr>
                   {recipientName && (
                     <tr>
@@ -317,10 +469,93 @@ const AdminDocumentStamping = () => {
                 </div>
               )}
 
+              {/* ========== SIGNATURES & STAMPS ON DOCUMENT ========== */}
+              {signers.length > 0 && (
+                <div className="mb-6" style={{ border: '2px solid #16a34a', borderRadius: '8px', padding: '16px' }}>
+                  <div className="text-center mb-4">
+                    <p style={{ fontSize: '11pt', fontWeight: 'bold', color: '#16a34a', marginBottom: '4px' }}>
+                      ✅ التوقيعات والأختام المطبقة على المستند
+                    </p>
+                    <p style={{ fontSize: '7.5pt', color: '#666' }}>
+                      APPLIED SIGNATURES & STAMPS
+                    </p>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: signers.length === 1 ? '1fr' : signers.length === 2 ? '1fr 1fr' : 'repeat(3, 1fr)',
+                    gap: '16px',
+                  }}>
+                    {signers.map((signer, idx) => (
+                      <div key={signer.id} style={{
+                        border: '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        padding: '12px',
+                        textAlign: 'center',
+                        backgroundColor: '#fafffe',
+                      }}>
+                        {/* Signer Number */}
+                        <p style={{ fontSize: '7pt', color: '#9ca3af', marginBottom: '6px' }}>
+                          الطرف الموقع ({idx + 1})
+                        </p>
+
+                        {/* Signature Display */}
+                        <div style={{ minHeight: '60px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '8px' }}>
+                          {signer.signatureImageUrl ? (
+                            <img
+                              src={signer.signatureImageUrl}
+                              alt={`توقيع ${signer.signerName}`}
+                              style={{ maxHeight: '70px', maxWidth: '160px', objectFit: 'contain' }}
+                            />
+                          ) : signer.signatureText ? (
+                            <p style={{ fontFamily: "'Amiri', serif", fontSize: '20pt', color: '#1a365d' }}>
+                              {signer.signatureText}
+                            </p>
+                          ) : (
+                            <div style={{ borderBottom: '2px solid #1a365d', width: '120px', paddingBottom: '4px' }}>
+                              <p style={{ fontSize: '8pt', color: '#666' }}>توقيع إلكتروني</p>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Stamp */}
+                        {signer.stampApplied && signer.stampImageUrl && (
+                          <div style={{ margin: '8px auto', position: 'relative' }}>
+                            <ResolvedImage
+                              src={signer.stampImageUrl}
+                              alt="ختم"
+                              style={{ height: '70px', width: '70px', objectFit: 'contain', margin: '0 auto', opacity: 0.85 }}
+                            />
+                          </div>
+                        )}
+
+                        {/* Signer Details */}
+                        <div style={{ borderTop: '1px dashed #d1d5db', paddingTop: '8px', marginTop: '4px' }}>
+                          <p style={{ fontSize: '10pt', fontWeight: 'bold', color: '#111' }}>
+                            {signer.signerName}
+                          </p>
+                          {signer.signerTitle && (
+                            <p style={{ fontSize: '8pt', color: '#555' }}>{signer.signerTitle}</p>
+                          )}
+                          {signer.signerNationalId && (
+                            <p style={{ fontSize: '7pt', color: '#888', fontFamily: 'monospace' }}>
+                              ر.ق: {signer.signerNationalId}
+                            </p>
+                          )}
+                          <p style={{ fontSize: '7pt', color: '#9ca3af', marginTop: '4px' }}>
+                            {format(signer.signedAt, 'dd/MM/yyyy — HH:mm')}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Spacer to push footer down */}
               <div className="flex-1" />
 
-              {/* Stamp + Signature + QR Footer */}
+              {/* Stamp + QR Footer */}
               <div className="pt-6 mt-6" style={{ borderTop: '3px double hsl(var(--primary))' }}>
                 <div className="grid grid-cols-3 gap-6 items-end">
                   {/* Platform Signature */}
@@ -356,7 +591,7 @@ const AdminDocumentStamping = () => {
 
                 {/* Legal footer */}
                 <div className="mt-6 pt-3 text-center" style={{ borderTop: '1px dashed #d1d5db', fontSize: '6.5pt', color: '#9ca3af' }}>
-                  <p>هذا المستند مختوم إلكترونياً من منصة iRecycle • التوقيعات الإلكترونية مُلزمة وفقاً لقانون التوقيع الإلكتروني 15/2004</p>
+                  <p>هذا المستند مختوم وموقّع إلكترونياً من منصة iRecycle • التوقيعات الإلكترونية مُلزمة وفقاً لقانون التوقيع الإلكتروني 15/2004</p>
                   <p>يمكن التحقق من صحة المستند عبر مسح رمز QR أو إدخال كود المستند ({docCode}) في بوابة التحقق</p>
                   <p className="mt-1">© {new Date().getFullYear()} iRecycle — جميع الحقوق محفوظة • محمي بتقنية SHA-256</p>
                 </div>
@@ -376,6 +611,23 @@ const AdminDocumentStamping = () => {
         documentTitle={docTitle}
         documentType="admin_stamped"
         documentId={docCode}
+      />
+
+      {/* Universal Signature Dialog */}
+      <UniversalSignatureDialog
+        open={showSignatureDialog}
+        onOpenChange={setShowSignatureDialog}
+        onSign={handleSignDocument}
+        documentType="other"
+        documentId={docCode}
+        documentTitle={docTitle}
+        organizationId={organization?.id || ''}
+        organizationStampUrl={orgStampUrl || undefined}
+        signerDefaults={{
+          name: profile?.full_name || '',
+          title: '',
+        }}
+        loading={signingLoading}
       />
     </div>
   );
