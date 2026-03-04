@@ -21,6 +21,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend
 } from 'recharts';
 import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
+import WaPilotMessageLog from '@/components/whatsapp/WaPilotMessageLog';
 import { toast } from 'sonner';
 
 interface InstanceInfo {
@@ -40,6 +41,22 @@ interface MessageLog {
   created_at: string;
   organization_id: string;
   error_message: string | null;
+  content: string | null;
+  to_phone: string | null;
+  from_phone: string | null;
+  template_id: string | null;
+  attachment_url: string | null;
+  sent_by: string | null;
+  meta_message_id: string | null;
+  metadata: any;
+  interactive_buttons: any;
+  broadcast_group_id: string | null;
+}
+
+interface OrgInfo {
+  id: string;
+  name: string;
+  name_en?: string | null;
 }
 
 const CHART_COLORS = [
@@ -60,6 +77,7 @@ const WaPilotManagement = () => {
     todayMessages: 0, weekMessages: 0,
   });
   const [messages, setMessages] = useState<MessageLog[]>([]);
+  const [orgs, setOrgs] = useState<OrgInfo[]>([]);
   const [instances, setInstances] = useState<InstanceInfo[]>([]);
   const [instanceStatus, setInstanceStatus] = useState<'connected' | 'disconnected' | 'loading'>('loading');
   const [connectedPhone, setConnectedPhone] = useState<string | null>(null);
@@ -84,14 +102,15 @@ const WaPilotManagement = () => {
     setRefreshing(true);
     setApiStatus('checking');
     try {
-      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes, diagRes] = await Promise.all([
-        supabase.from('whatsapp_messages').select('id, status, direction, message_type, created_at, organization_id, error_message').order('created_at', { ascending: false }).limit(1000),
+      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes, diagRes, orgListRes] = await Promise.all([
+        supabase.from('whatsapp_messages').select('*').order('created_at', { ascending: false }).limit(1000),
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).not('phone', 'is', null),
         supabase.from('whatsapp_templates').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-instances' } }).catch(() => ({ data: [] })),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-campaigns' } }).catch(() => ({ data: [] })),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'diagnostics' } }).catch(() => ({ data: null })),
+        supabase.from('organizations').select('id, name, name_en').limit(1000),
       ]);
 
       // Diagnostics
@@ -109,6 +128,7 @@ const WaPilotManagement = () => {
 
       const msgs = (msgRes.data || []) as MessageLog[];
       setMessages(msgs);
+      setOrgs((orgListRes?.data || []) as OrgInfo[]);
 
       const now = new Date();
       const todayMsgs = msgs.filter(m => new Date(m.created_at).toDateString() === now.toDateString());
@@ -599,6 +619,9 @@ const WaPilotManagement = () => {
               </CardContent>
             </Card>
           </div>
+
+          {/* ══════════ MESSAGE LOG ══════════ */}
+          <WaPilotMessageLog messages={messages} orgs={orgs} loading={refreshing} />
 
           {/* ══════════ CTA to Full Manager ══════════ */}
           <Card className="border-dashed border-2 border-primary/30 bg-primary/5">
