@@ -12,7 +12,7 @@ import {
   CheckCircle2, XCircle, Clock, Phone, Send, Loader2,
   User, ChevronRight, Inbox, Eye, Users, Star, StarOff,
   BarChart3, CheckCheck, Check, AlertCircle, TrendingUp,
-  MessageSquare, Filter, SortAsc
+  MessageSquare, Filter, SortAsc, RefreshCw
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -76,6 +76,8 @@ const WaPilotInbox = ({ messages, orgs, loading, instanceStatus, onRefresh }: Pr
   const [starredPhones, setStarredPhones] = useState<Set<string>>(new Set());
   const [filterTab, setFilterTab] = useState<'all' | 'unread' | 'starred' | 'important'>('all');
   const [sortBy, setSortBy] = useState<'recent' | 'unread' | 'engagement'>('recent');
+  const [syncingChats, setSyncingChats] = useState(false);
+  const [liveMessages, setLiveMessages] = useState<MessageLog[]>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   // Load starred from localStorage
@@ -93,10 +95,104 @@ const WaPilotInbox = ({ messages, orgs, loading, instanceStatus, onRefresh }: Pr
     });
   };
 
+  // Sync chats from WaPilot API directly
+  const handleSyncChats = useCallback(async () => {
+    setSyncingChats(true);
+    try {
+      // Try fetching chats list
+      const { data: chatsData } = await supabase.functions.invoke('wapilot-proxy', {
+        body: { action: 'list-chats' },
+      });
+      
+      // For each chat, try to get messages
+      const chats = Array.isArray(chatsData) ? chatsData : 
+        (chatsData?.data && Array.isArray(chatsData.data)) ? chatsData.data : [];
+      
+      if (chats.length > 0) {
+        const chatMessages: MessageLog[] = [];
+        // Get messages for top 20 chats
+        const topChats = chats.slice(0, 20);
+        const chatPromises = topChats.map(async (chat: any) => {
+          const chatId = chat.id || chat.jid || chat.chatId || '';
+          if (!chatId || chatId.includes('status') || chatId.includes('broadcast')) return [];
+          try {
+            const { data } = await supabase.functions.invoke('wapilot-proxy', {
+              body: { action: 'get-chat-messages', chat_id: chatId, limit: 50 },
+            });
+            const rawMsgs = Array.isArray(data) ? data : 
+              (data?.data && Array.isArray(data.data)) ? data.data :
+              (data?.messages && Array.isArray(data.messages)) ? data.messages : [];
+            
+            return rawMsgs.map((msg: any, idx: number) => {
+              const isFromMe = msg.fromMe ?? msg.from_me ?? (msg.key?.fromMe) ?? false;
+              const phone = chatId.replace('@c.us', '').replace('@s.whatsapp.net', '').replace(/[\s\-\+]/g, '');
+              const content = msg.body || msg.text || msg.message?.conversation || 
+                msg.message?.extendedTextMessage?.text || msg.content || '';
+              const timestamp = msg.timestamp ? new Date(msg.timestamp * 1000).toISOString() :
+                msg.messageTimestamp ? new Date(msg.messageTimestamp * 1000).toISOString() :
+                msg.created_at || new Date().toISOString();
+              const msgId = msg.key?.id || msg.id || `chat-${chatId}-${idx}`;
+              
+              return {
+                id: `wapilot-chat-${msgId}`,
+                status: msg.ack === 3 ? 'read' : msg.ack === 2 ? 'delivered' : msg.ack === 1 ? 'sent' : 'sent',
+                direction: isFromMe ? 'outbound' : 'inbound',
+                message_type: msg.type || 'text',
+                created_at: timestamp,
+                organization_id: null,
+                error_message: null,
+                content: content || `[${msg.type || 'message'}]`,
+                to_phone: isFromMe ? phone : null,
+                from_phone: isFromMe ? null : phone,
+                template_id: null,
+                attachment_url: null,
+                sent_by: null,
+                meta_message_id: msgId,
+                metadata: { 
+                  profile_name: chat.name || chat.pushName || msg.notifyName || null,
+                  source: 'wapilot_chat_sync',
+                },
+                interactive_buttons: null,
+                broadcast_group_id: null,
+              } as MessageLog;
+            });
+          } catch {
+            return [];
+          }
+        });
+        
+        const results = await Promise.all(chatPromises);
+        results.forEach(r => chatMessages.push(...r));
+        setLiveMessages(chatMessages);
+        toast.success(`تم مزامنة ${chatMessages.length} رسالة من ${topChats.length} محادثة`);
+      } else {
+        toast.info('لم يتم العثور على محادثات - جاري استخدام الرسائل المتاحة');
+      }
+    } catch (err: any) {
+      console.error('Chat sync error:', err);
+      toast.error('فشل مزامنة المحادثات');
+    } finally {
+      setSyncingChats(false);
+    }
+  }, []);
+
+  // Combined messages: props + live synced
+  const allMessages = useMemo(() => {
+    const combined = [...messages];
+    const existingIds = new Set(messages.map(m => m.meta_message_id).filter(Boolean));
+    for (const msg of liveMessages) {
+      if (!msg.meta_message_id || !existingIds.has(msg.meta_message_id)) {
+        combined.push(msg);
+        existingIds.add(msg.meta_message_id);
+      }
+    }
+    return combined;
+  }, [messages, liveMessages]);
+
   // Group messages into conversations with engagement metrics
   const conversations = useMemo(() => {
     const convMap = new Map<string, Conversation>();
-    const sorted = [...messages].sort((a, b) =>
+    const sorted = [...allMessages].sort((a, b) =>
       new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
     );
 
@@ -180,7 +276,7 @@ const WaPilotInbox = ({ messages, orgs, loading, instanceStatus, onRefresh }: Pr
     return Array.from(convMap.values()).sort(
       (a, b) => new Date(b.lastMessage.created_at).getTime() - new Date(a.lastMessage.created_at).getTime()
     );
-  }, [messages, starredPhones]);
+  }, [allMessages, starredPhones]);
 
   // Summary stats
   const summaryStats = useMemo(() => {
@@ -368,9 +464,27 @@ const WaPilotInbox = ({ messages, orgs, loading, instanceStatus, onRefresh }: Pr
           <CardTitle className="text-sm flex items-center gap-2">
             <Inbox className="h-4 w-4 text-primary" />
             صندوق الرسائل والمحادثات
-            <Badge variant="secondary" className="text-[10px] mr-auto">
+            <Badge variant="secondary" className="text-[10px]">
               {filteredConversations.length} محادثة
             </Badge>
+            <div className="mr-auto flex items-center gap-1">
+              <Button
+                variant="outline" size="sm" className="h-7 text-[10px] gap-1"
+                onClick={handleSyncChats}
+                disabled={syncingChats || instanceStatus !== 'connected'}
+              >
+                {syncingChats ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                مزامنة المحادثات
+              </Button>
+              <Button
+                variant="ghost" size="sm" className="h-7 text-[10px] gap-1"
+                onClick={onRefresh}
+                disabled={loading}
+              >
+                {loading ? <Loader2 className="h-3 w-3 animate-spin" /> : <RefreshCw className="h-3 w-3" />}
+                تحديث
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">

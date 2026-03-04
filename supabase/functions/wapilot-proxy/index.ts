@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     const resolvedInstanceId = instance_id || defaultInstanceId;
 
     // Actions that require instance_id
-    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages', 'get-qr', 'restart-instance', 'connect-instance', 'disconnect-instance', 'instance-info'];
+    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages', 'list-chats', 'get-chat-messages', 'get-qr', 'restart-instance', 'connect-instance', 'disconnect-instance', 'instance-info'];
 
     if (actionsRequiringInstance.includes(action) && !resolvedInstanceId) {
       return new Response(JSON.stringify({ error: 'Instance ID is required. Set WAPILOT_INSTANCE_ID or provide instance_id.' }), {
@@ -155,6 +155,15 @@ Deno.serve(async (req) => {
         break;
       case 'list-messages':
         url = `${WAPILOT_BASE}/${resolvedInstanceId}/messages`;
+        if (params.chat_id) url += `?chat_id=${encodeURIComponent(params.chat_id)}`;
+        if (params.limit) url += `${url.includes('?') ? '&' : '?'}limit=${params.limit}`;
+        break;
+      case 'list-chats':
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/chats`;
+        break;
+      case 'get-chat-messages':
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/chats/${encodeURIComponent(params.chat_id)}/messages`;
+        if (params.limit) url += `?limit=${params.limit}`;
         break;
       case 'list-campaigns':
         url = `${WAPILOT_BASE}/campaigns`;
