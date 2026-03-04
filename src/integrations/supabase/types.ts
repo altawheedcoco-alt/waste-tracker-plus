@@ -19262,11 +19262,19 @@ export type Database = {
           id: string
           is_enabled: boolean
           notify_contract_alerts: boolean | null
+          notify_daily_reports: boolean | null
+          notify_delivery_confirmations: boolean | null
+          notify_driver_assignments: boolean | null
+          notify_emergency_alerts: boolean | null
           notify_payment_updates: boolean | null
           notify_shipment_updates: boolean | null
           notify_system_alerts: boolean | null
+          notify_weekly_reports: boolean | null
           organization_id: string | null
           phone_number: string | null
+          preferred_language: string | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
           updated_at: string
           user_id: string
         }
@@ -19276,11 +19284,19 @@ export type Database = {
           id?: string
           is_enabled?: boolean
           notify_contract_alerts?: boolean | null
+          notify_daily_reports?: boolean | null
+          notify_delivery_confirmations?: boolean | null
+          notify_driver_assignments?: boolean | null
+          notify_emergency_alerts?: boolean | null
           notify_payment_updates?: boolean | null
           notify_shipment_updates?: boolean | null
           notify_system_alerts?: boolean | null
+          notify_weekly_reports?: boolean | null
           organization_id?: string | null
           phone_number?: string | null
+          preferred_language?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           updated_at?: string
           user_id: string
         }
@@ -19290,11 +19306,19 @@ export type Database = {
           id?: string
           is_enabled?: boolean
           notify_contract_alerts?: boolean | null
+          notify_daily_reports?: boolean | null
+          notify_delivery_confirmations?: boolean | null
+          notify_driver_assignments?: boolean | null
+          notify_emergency_alerts?: boolean | null
           notify_payment_updates?: boolean | null
           notify_shipment_updates?: boolean | null
           notify_system_alerts?: boolean | null
+          notify_weekly_reports?: boolean | null
           organization_id?: string | null
           phone_number?: string | null
+          preferred_language?: string | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
           updated_at?: string
           user_id?: string
         }
