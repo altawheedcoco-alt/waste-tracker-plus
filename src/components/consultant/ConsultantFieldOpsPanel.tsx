@@ -9,6 +9,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -156,14 +157,12 @@ const ConsultantFieldOpsPanel = memo(({ assignments, consultantId }: ConsultantF
       const orgProfiles = await supabase.from('profiles').select('id').eq('organization_id', selectedOrg).limit(5);
       if (orgProfiles.data?.length) {
         const opLabel = OPERATION_TYPES.find(o => o.id === activeOp)?.label || activeOp;
-        await supabase.from('notifications').insert(
-          orgProfiles.data.map(p => ({
-            user_id: p.id,
-            title: `عملية ميدانية: ${opLabel}`,
-            message: `أتم الاستشاري البيئي عملية "${opLabel}" - النتيجة: ${payload.result === 'approved' ? '✅ مطابق' : payload.result === 'rejected' ? '❌ غير مطابق' : '⚠️ يحتاج مراجعة'}`,
-            type: 'consultant_action',
-          })) as any
-        );
+        await sendBulkDualNotification({
+          user_ids: orgProfiles.data.map(p => p.id),
+          title: `عملية ميدانية: ${opLabel}`,
+          message: `أتم الاستشاري البيئي عملية "${opLabel}" - النتيجة: ${payload.result === 'approved' ? '✅ مطابق' : payload.result === 'rejected' ? '❌ غير مطابق' : '⚠️ يحتاج مراجعة'}`,
+          type: 'consultant_action',
+        });
       }
     },
     onSuccess: () => {

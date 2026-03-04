@@ -28,6 +28,7 @@ import {
   Loader2,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 import { toast } from 'sonner';
 import { format, formatDistanceToNow, differenceInMinutes } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -125,23 +126,12 @@ export default function ShipmentApprovalDialog({
         });
       }
 
-      // Notify all admins
-      const { data: adminUsers } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin');
-      
-      if (adminUsers && adminUsers.length > 0) {
-        const adminNotifs = adminUsers.map(a => ({
-          user_id: a.user_id,
-          title: '✅ موافقة على شحنة',
-          message: `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
-          type: 'shipment_approved',
-          shipment_id: shipment.id,
-          is_read: false,
-        }));
-        await supabase.from('notifications').insert(adminNotifs);
-      }
+      // Notify all admins (dual: in-app + WhatsApp)
+      await notifyAdmins(
+        '✅ موافقة على شحنة',
+        `الشحنة ${shipment.shipment_number} تمت الموافقة عليها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}`,
+        { type: 'shipment_approved', reference_id: shipment.id, reference_type: 'shipment' }
+      );
 
       toast.success('تمت الموافقة على الشحنة بنجاح');
       onApprovalComplete?.();
@@ -198,23 +188,12 @@ export default function ShipmentApprovalDialog({
         });
       }
 
-      // Notify all admins about rejection
-      const { data: adminUsers } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin');
-      
-      if (adminUsers && adminUsers.length > 0) {
-        const adminNotifs = adminUsers.map(a => ({
-          user_id: a.user_id,
-          title: '❌ رفض شحنة',
-          message: `الشحنة ${shipment.shipment_number} تم رفضها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}. السبب: ${rejectionReason}`,
-          type: 'shipment_rejected',
-          shipment_id: shipment.id,
-          is_read: false,
-        }));
-        await supabase.from('notifications').insert(adminNotifs);
-      }
+      // Notify all admins about rejection (dual: in-app + WhatsApp)
+      await notifyAdmins(
+        '❌ رفض شحنة',
+        `الشحنة ${shipment.shipment_number} تم رفضها من قبل ${approvalType === 'generator' ? 'المولد' : 'المدور'}. السبب: ${rejectionReason}`,
+        { type: 'shipment_rejected', reference_id: shipment.id, reference_type: 'shipment' }
+      );
 
       toast.success('تم رفض الشحنة');
       onApprovalComplete?.();

@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 
 const WEIGHT_DISPUTE_THRESHOLD = 5; // 5% difference
 
@@ -71,24 +72,12 @@ export async function createWeightDispute(
     throw shipmentError;
   }
 
-  // Send notification to admins
-  const { data: admins } = await supabase
-    .from('user_roles')
-    .select('user_id')
-    .eq('role', 'admin');
-
-  if (admins && admins.length > 0) {
-    const notifications = admins.map((admin) => ({
-      user_id: admin.user_id,
-      title: 'تنبيه: نزاع وزن في شحنة',
-      message: `فرق الوزن ${differencePercentage}% في الشحنة - وزن المولد: ${generatorWeight} كجم، وزن المدور: ${recyclerWeight} كجم. تم تعليق العملية للمراجعة.`,
-      type: 'weight_dispute',
-      reference_id: shipmentId,
-      reference_type: 'shipment',
-    }));
-
-    await supabase.from('notifications').insert(notifications);
-  }
+  // Send dual notification (in-app + WhatsApp) to admins
+  await notifyAdmins(
+    'تنبيه: نزاع وزن في شحنة',
+    `فرق الوزن ${differencePercentage}% في الشحنة - وزن المولد: ${generatorWeight} كجم، وزن المدور: ${recyclerWeight} كجم. تم تعليق العملية للمراجعة.`,
+    { type: 'weight_dispute', reference_id: shipmentId, reference_type: 'shipment' }
+  );
 
   return true;
 }

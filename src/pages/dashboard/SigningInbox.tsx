@@ -4,6 +4,7 @@ import BackButton from '@/components/ui/back-button';
 import { useSigningInbox, SigningRequest } from '@/hooks/useSigningInbox';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -344,16 +345,14 @@ export default function SigningInbox() {
             const orgName = profile.organization_id
               ? (await supabase.from('organizations').select('name').eq('id', profile.organization_id).single()).data?.name
               : '';
-            const notifications = senderMembers.map(m => ({
-              user_id: m.user_id,
+            await sendBulkDualNotification({
+              user_ids: senderMembers.map(m => m.user_id),
               title: `✅ تم توقيع المستند: ${signingRequest.document_title}`,
               message: withTagline(`قامت ${orgName || 'الجهة المستلمة'} بالتوقيع على "${signingRequest.document_title}" بنجاح. رقم الختم: ${result.sealNumber || '—'}`),
               type: 'signing_request',
               reference_id: signingRequest.id,
               reference_type: 'signing_request',
-              is_read: false,
-            }));
-            await supabase.from('notifications').insert(notifications);
+            });
           }
         } catch (notifErr) {
           console.error('Notification error (non-blocking):', notifErr);

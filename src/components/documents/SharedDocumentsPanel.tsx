@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -187,14 +188,12 @@ const SharedDocumentsPanel = () => {
           .limit(20);
 
         if (senderUsers?.length) {
-          const notifications = senderUsers.map((u: any) => ({
-            user_id: u.user_id,
+          await sendBulkDualNotification({
+            user_ids: senderUsers.map((u: any) => u.user_id),
             title: 'تم توقيع المستند',
             message: `تم توقيع وختم "${doc.document_title}" من قبل ${profile?.full_name || 'جهة'}`,
             type: 'document_signed',
-            is_read: false,
-          }));
-          await supabase.from('notifications').insert(notifications);
+          });
         }
       }
 

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { sendDualNotification } from '@/services/unifiedNotifier';
 
 /**
  * محرك الاعتماد الرقمي التلقائي من المنصة
@@ -503,14 +504,13 @@ export async function evaluateAndEndorse(params: {
       .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
       .join('\n');
 
-    await supabase.from('notifications').insert({
+    await sendDualNotification({
       user_id: userId,
       title: '⛔ لم يتم اعتماد المستند رقمياً',
       message: `المستند لم يستوفِ كافة معايير الاعتماد التلقائي:\n${blockedReason}`,
       type: 'document',
       priority: 'high',
-      action_url: `/documents/${documentType}/${documentId}`,
-    } as any);
+    });
 
     toast.error('⛔ لم يتم اعتماد المستند — معايير غير مستوفاة', {
       description: failedCriteria.map(c => c.criterionNameAr).join(', '),

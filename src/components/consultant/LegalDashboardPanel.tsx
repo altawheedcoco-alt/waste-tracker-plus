@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import {
@@ -116,14 +117,12 @@ const LegalDashboardPanel = memo(({ assignments }: LegalDashboardPanelProps) => 
           .limit(50);
 
         if (profiles) {
-          const notifications = profiles.map(p => ({
-            user_id: p.id,
+          await sendBulkDualNotification({
+            user_ids: profiles.map(p => p.id),
             title: `تحديث قانوني: ${regTitle}`,
             message: regContent,
             type: 'legal_update',
-            action_url: '/dashboard/compliance',
-          }));
-          await supabase.from('notifications').insert(notifications as any);
+          });
         }
       }
       toast.success('تم إرسال التحديث القانوني لجميع الجهات المرتبطة');

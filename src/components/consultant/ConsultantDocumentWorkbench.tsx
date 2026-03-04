@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
@@ -170,15 +171,12 @@ const ConsultantDocumentWorkbench = memo(({ assignments }: ConsultantDocumentWor
         .limit(10);
       if (orgProfiles?.length) {
         const docLabel = GOVERNMENT_DOCUMENTS.find(d => d.id === govDocType)?.label || govDocType;
-        await supabase.from('notifications').insert(
-          orgProfiles.map(p => ({
-            user_id: p.id,
-            title: `مستند حكومي: ${docLabel}`,
-            message: `تم إعداد ${docLabel} من الاستشاري البيئي نيابة عن جهتكم`,
-            type: 'document_issued',
-            action_url: '/dashboard/documents',
-          })) as any
-        );
+        await sendBulkDualNotification({
+          user_ids: orgProfiles.map(p => p.id),
+          title: `مستند حكومي: ${docLabel}`,
+          message: `تم إعداد ${docLabel} من الاستشاري البيئي نيابة عن جهتكم`,
+          type: 'document_issued',
+        });
       }
     },
     onSuccess: () => {

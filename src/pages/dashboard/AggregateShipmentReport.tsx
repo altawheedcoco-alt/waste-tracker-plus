@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -238,16 +239,12 @@ const AggregateShipmentReport = () => {
         .eq('is_active', true);
 
       if (partnerProfiles && partnerProfiles.length > 0) {
-        const notifications = partnerProfiles.map(p => ({
-          user_id: p.user_id,
+        await sendBulkDualNotification({
+          user_ids: partnerProfiles.map(p => p.user_id),
           title: 'تقرير مجمع للشحنات',
           message: `شاركت ${organization?.name} تقريرًا مجمعًا للشحنات يتضمن ${filteredShipments.length} شحنة`,
           type: 'aggregate_report',
-          pdf_url: pdfUrl,
-        }));
-
-        const { error: notifError } = await supabase.from('notifications').insert(notifications);
-        if (notifError) throw notifError;
+        });
       }
 
       const selectedPartnersData = partnerOrganizations.filter(p => selectedPartners.includes(p.id));

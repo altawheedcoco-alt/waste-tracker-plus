@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 
 const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — صادر تلقائياً من المولّد
 
@@ -116,15 +117,14 @@ export async function autoCreateGeneratorDeclaration(
           .limit(10);
 
         if (transporterUsers && transporterUsers.length > 0) {
-          const notifs = transporterUsers.map((u: any) => ({
-            user_id: u.user_id,
+          await sendBulkDualNotification({
+            user_ids: transporterUsers.map((u: any) => u.user_id),
             title: '📝 إقرار تسليم جديد من المولّد',
             message: withTagline(`أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`),
             type: 'document_issued',
-            shipment_id: shipmentId,
-            is_read: false,
-          }));
-          await supabase.from('notifications').insert(notifs);
+            reference_id: shipmentId,
+            reference_type: 'shipment',
+          });
         }
       }
     } catch (notifErr) {
@@ -202,15 +202,14 @@ export async function autoCreateRecyclerDeclaration(
           .limit(20);
 
         if (usersToNotify && usersToNotify.length > 0) {
-          const notifs = usersToNotify.map((u: any) => ({
-            user_id: u.user_id,
+          await sendBulkDualNotification({
+            user_ids: usersToNotify.map((u: any) => u.user_id),
             title: '📥 إقرار استلام من المدوّر/جهة التخلص',
             message: withTagline(`أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`),
             type: 'document_issued',
-            shipment_id: shipmentId,
-            is_read: false,
-          }));
-          await supabase.from('notifications').insert(notifs);
+            reference_id: shipmentId,
+            reference_type: 'shipment',
+          });
         }
       }
     } catch (notifErr) {
