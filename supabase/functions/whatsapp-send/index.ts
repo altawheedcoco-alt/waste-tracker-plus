@@ -46,6 +46,14 @@ Deno.serve(async (req) => {
       to_org_id,
     } = body;
 
+    // Health check endpoint for monitoring
+    if (action === "health-check") {
+      return new Response(
+        JSON.stringify({ success: true, status: "ok", service: "whatsapp-send", timestamp: new Date().toISOString() }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Smart visibility check: respect partner masking rules
     if (check_visibility && from_org_id && to_org_id) {
       const { data: vis } = await supabase
