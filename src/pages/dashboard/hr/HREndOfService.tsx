@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { Plus, UserMinus, Calculator, CheckCircle, Clock, DollarSign, FileText, Shield } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const TERMINATION_REASONS = [
   { value: 'resignation', label: 'استقالة' },
@@ -91,6 +92,7 @@ export default function HREndOfService() {
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">نهاية الخدمة والمخالصات</h1>

@@ -4,7 +4,8 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowRight, FileText, Clock, CheckCircle2, XCircle, Star, Calendar } from 'lucide-react';
+import { FileText, Clock, CheckCircle2, XCircle, Star, Calendar } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -52,9 +53,7 @@ const OmalunaMyApplications = () => {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto p-4 md:p-6 space-y-6" dir="rtl">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/omaluna')}>
-            <ArrowRight className="h-5 w-5" />
-          </Button>
+          <BackButton fallbackPath="/dashboard/omaluna" />
           <h1 className="text-xl font-bold">طلباتي</h1>
         </div>
 

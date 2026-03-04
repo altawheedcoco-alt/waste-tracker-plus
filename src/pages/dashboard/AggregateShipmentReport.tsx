@@ -46,7 +46,6 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { usePDFExport } from '@/hooks/usePDFExport';
-import { usePDFExport } from '@/hooks/usePDFExport';
 import { motion, AnimatePresence } from 'framer-motion';
 import AggregateReportPrint from '@/components/reports/AggregateReportPrint';
 import html2canvas from 'html2canvas';

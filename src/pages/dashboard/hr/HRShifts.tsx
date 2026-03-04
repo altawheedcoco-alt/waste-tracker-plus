@@ -14,6 +14,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Plus, Clock, Calendar, Users, Sun, Moon, Repeat, ArrowLeftRight } from "lucide-react";
+import BackButton from '@/components/ui/back-button';
 
 const DAYS_AR = ['الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
@@ -78,6 +79,7 @@ export default function HRShifts() {
 
   return (
     <div className="p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">إدارة الورديات</h1>
