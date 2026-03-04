@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { sendDualNotification } from '@/services/unifiedNotifier';
 import JitsiMeetingRoom from './JitsiMeetingRoom';
 
 interface ChatVideoCallButtonProps {
@@ -74,9 +75,9 @@ const ChatVideoCallButton = ({ partnerName, partnerUserId }: ChatVideoCallButton
         .single();
 
       if (partnerProfile.data?.organization_id) {
-        await supabase.from('notifications').insert({
-          organization_id: partnerProfile.data.organization_id,
+        await sendDualNotification({
           user_id: partnerUserId,
+          organization_id: partnerProfile.data.organization_id,
           title: `📞 مكالمة ${type === 'video' ? 'فيديو' : 'صوتية'} واردة`,
           message: `${profile?.full_name || 'مستخدم'} يدعوك للانضمام لمكالمة ${type === 'video' ? 'فيديو' : 'صوتية'}`,
           type: 'general',

@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 import {
   AlertTriangle,
   Send,
@@ -55,23 +56,16 @@ const EmergencyAlertPanel = ({ shipmentId, shipmentNumber, driverName, compact =
       const typeLabel = emergencyTypes.find(t => t.value === emergencyType)?.label || emergencyType;
       const fullMessage = `🚨 تنبيه طوارئ: ${typeLabel}\n${shipmentNumber ? `الشحنة: ${shipmentNumber}\n` : ''}${driverName ? `السائق: ${driverName}\n` : ''}التفاصيل: ${message}`;
 
-      // 1. Create in-app notification for all admins
-      const { data: admins } = await supabase
-        .from('user_roles')
-        .select('user_id')
-        .eq('role', 'admin');
-
-      if (admins && admins.length > 0) {
-        const notifications = admins.map((a: any) => ({
-          user_id: a.user_id,
-          title: `🚨 ${typeLabel}${shipmentNumber ? ` — شحنة ${shipmentNumber}` : ''}`,
-          message: fullMessage,
+      // 1. إرسال مزدوج (داخلي + واتساب) للمشرفين
+      const notifResult = await notifyAdmins(
+        `🚨 ${typeLabel}${shipmentNumber ? ` — شحنة ${shipmentNumber}` : ''}`,
+        fullMessage,
+        {
           type: 'emergency',
-          reference_id: shipmentId || null,
-          reference_type: shipmentId ? 'shipment' : null,
-        }));
-        await supabase.from('notifications').insert(notifications);
-      }
+          reference_id: shipmentId,
+          reference_type: shipmentId ? 'shipment' : undefined,
+        }
+      );
 
       // 2. Log as incident
       if (shipmentId) {
@@ -83,20 +77,8 @@ const EmergencyAlertPanel = ({ shipmentId, shipmentNumber, driverName, compact =
         });
       }
 
-      // 3. Send SMS/WhatsApp if selected
-      if (channel !== 'in_app') {
-        const { data: result } = await supabase.functions.invoke('send-notification', {
-          body: {
-            action: 'broadcast',
-            channel,
-            message: fullMessage,
-            notificationType: 'system',
-          },
-        });
-        
-        if (result?.sent > 0) {
-          toast.success(`تم إرسال ${result.sent} رسالة ${channel === 'sms' ? 'SMS' : 'WhatsApp'}`);
-        }
+      if (notifResult.whatsApp.success) {
+        toast.success('تم إرسال تنبيه الطوارئ (داخلي + واتساب)');
       }
 
       toast.success('✅ تم إرسال تنبيه الطوارئ للمسؤولين');

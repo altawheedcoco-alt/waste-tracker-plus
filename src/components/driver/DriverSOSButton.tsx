@@ -14,6 +14,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useImpactRecorder } from '@/hooks/useImpactRecorder';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 
 interface DriverSOSButtonProps {
   driverId: string;
@@ -71,6 +72,14 @@ const DriverSOSButton = ({ driverId, organizationId, currentShipmentId }: Driver
           lat, lng,
         });
       }
+
+      // إرسال مزدوج (داخلي + واتساب) للمشرفين
+      const typeLabel = emergencyTypes.find(e => e.type === selectedType)?.label || selectedType;
+      await notifyAdmins(
+        `🚨 نداء طوارئ: ${typeLabel}`,
+        `${description || typeLabel}${currentShipmentId ? `\nالشحنة: ${currentShipmentId}` : ''}${lat ? `\nالموقع: ${lat}, ${lng}` : ''}`,
+        { type: 'emergency', organization_id: organizationId }
+      );
 
       setIsSent(true);
       toast({
