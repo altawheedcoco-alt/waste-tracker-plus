@@ -13,13 +13,19 @@ import { Checkbox } from '@/components/ui/checkbox';
 import {
   MessageCircle, Send, Settings, Users, BarChart3, Wifi, WifiOff, RefreshCw,
   Search, Loader2, Building2, FileText, ListChecks, BellRing, Eye, EyeOff,
-  Phone, CheckCircle2, XCircle, Clock, Filter, Plus, Trash2
+  Phone, CheckCircle2, XCircle, Clock, Filter, Plus, Trash2, Zap, Bot,
+  HeartPulse, Calendar
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
+import WaPilotAnalytics from './WaPilotAnalytics';
+import WaPilotScheduler from './WaPilotScheduler';
+import WaPilotQuickActions from './WaPilotQuickActions';
+import WaPilotAIComposer from './WaPilotAIComposer';
+import WaPilotHealthMonitor from './WaPilotHealthMonitor';
 
 const ORG_TYPE_LABELS: Record<string, string> = {
   generator: 'مولّد نفايات',
@@ -394,13 +400,17 @@ const WhatsAppNotificationManager = () => {
   return (
     <div className="space-y-6">
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-6 h-auto">
-          <TabsTrigger value="dashboard" className="gap-1 text-xs px-2"><BarChart3 className="h-3.5 w-3.5" />لوحة التحكم</TabsTrigger>
-          <TabsTrigger value="directory" className="gap-1 text-xs px-2"><Building2 className="h-3.5 w-3.5" />دليل الجهات</TabsTrigger>
-          <TabsTrigger value="send" className="gap-1 text-xs px-2"><Send className="h-3.5 w-3.5" />إرسال</TabsTrigger>
-          <TabsTrigger value="templates" className="gap-1 text-xs px-2"><FileText className="h-3.5 w-3.5" />القوالب</TabsTrigger>
-          <TabsTrigger value="orgs" className="gap-1 text-xs px-2"><Settings className="h-3.5 w-3.5" />إعدادات</TabsTrigger>
-          <TabsTrigger value="logs" className="gap-1 text-xs px-2"><MessageCircle className="h-3.5 w-3.5" />السجل</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-5 md:grid-cols-10 h-auto">
+          <TabsTrigger value="dashboard" className="gap-1 text-xs px-1"><BarChart3 className="h-3.5 w-3.5" />لوحة التحكم</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1 text-xs px-1"><BarChart3 className="h-3.5 w-3.5" />التحليلات</TabsTrigger>
+          <TabsTrigger value="directory" className="gap-1 text-xs px-1"><Building2 className="h-3.5 w-3.5" />الدليل</TabsTrigger>
+          <TabsTrigger value="send" className="gap-1 text-xs px-1"><Send className="h-3.5 w-3.5" />إرسال</TabsTrigger>
+          <TabsTrigger value="ai" className="gap-1 text-xs px-1"><Bot className="h-3.5 w-3.5" />AI</TabsTrigger>
+          <TabsTrigger value="quick" className="gap-1 text-xs px-1"><Zap className="h-3.5 w-3.5" />سريع</TabsTrigger>
+          <TabsTrigger value="scheduler" className="gap-1 text-xs px-1"><Calendar className="h-3.5 w-3.5" />الجدولة</TabsTrigger>
+          <TabsTrigger value="templates" className="gap-1 text-xs px-1"><FileText className="h-3.5 w-3.5" />القوالب</TabsTrigger>
+          <TabsTrigger value="health" className="gap-1 text-xs px-1"><HeartPulse className="h-3.5 w-3.5" />الصحة</TabsTrigger>
+          <TabsTrigger value="logs" className="gap-1 text-xs px-1"><MessageCircle className="h-3.5 w-3.5" />السجل</TabsTrigger>
         </TabsList>
 
         {/* ==================== DASHBOARD ==================== */}
@@ -951,6 +961,31 @@ const WhatsAppNotificationManager = () => {
               </ScrollArea>
             </CardContent>
           </Card>
+        </TabsContent>
+
+        {/* ==================== ANALYTICS ==================== */}
+        <TabsContent value="analytics">
+          <WaPilotAnalytics messages={messages as any} orgs={orgs as any} />
+        </TabsContent>
+
+        {/* ==================== AI COMPOSER ==================== */}
+        <TabsContent value="ai">
+          <WaPilotAIComposer onUseMessage={(text) => { setSendMessage(text); setActiveTab('send'); }} />
+        </TabsContent>
+
+        {/* ==================== QUICK ACTIONS ==================== */}
+        <TabsContent value="quick">
+          <WaPilotQuickActions />
+        </TabsContent>
+
+        {/* ==================== SCHEDULER ==================== */}
+        <TabsContent value="scheduler">
+          <WaPilotScheduler />
+        </TabsContent>
+
+        {/* ==================== HEALTH MONITOR ==================== */}
+        <TabsContent value="health">
+          <WaPilotHealthMonitor messages={messages as any} orgs={orgs as any} />
         </TabsContent>
       </Tabs>
     </div>
