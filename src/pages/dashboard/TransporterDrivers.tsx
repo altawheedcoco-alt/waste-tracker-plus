@@ -303,7 +303,7 @@ const TransporterDrivers = () => {
                 <Input
                   value={newDriver.phone}
                   onChange={(e) => setNewDriver(prev => ({ ...prev, phone: e.target.value }))}
-                  placeholder="05xxxxxxxx"
+                  placeholder="01xxxxxxxxx"
                 />
               </div>
               <div>

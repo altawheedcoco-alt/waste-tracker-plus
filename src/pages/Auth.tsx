@@ -863,7 +863,7 @@ const Auth = () => {
                   <div className="space-y-2">
                     <Label>{t('auth.phone')} (اختياري)</Label>
                     <Input
-                      placeholder="01234567890"
+                      placeholder="01xxxxxxxxx"
                       value={jobseekerData.phone}
                       onChange={(e) => handleJobseekerChange('phone', e.target.value)}
                       dir="ltr"
@@ -1009,7 +1009,7 @@ const Auth = () => {
                       <div className="space-y-2">
                         <Label>{t('auth.phone')}</Label>
                         <Input
-                          placeholder="01234567890"
+                          placeholder="01xxxxxxxxx"
                           value={driverData.phone}
                           onChange={(e) => handleDriverChange('phone', e.target.value)}
                           className={errors.phone ? 'border-destructive' : ''}

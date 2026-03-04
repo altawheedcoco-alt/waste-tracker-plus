@@ -526,7 +526,7 @@ const WhatsAppNotificationManager = () => {
               {sendMode === 'single' && (
                 <div>
                   <Label>رقم الهاتف (مع رمز الدولة)</Label>
-                  <Input value={sendPhone} onChange={e => setSendPhone(e.target.value)} placeholder="966501234567" dir="ltr" />
+                  <Input value={sendPhone} onChange={e => setSendPhone(e.target.value)} placeholder="201012345678" dir="ltr" />
                 </div>
               )}
 

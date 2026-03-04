@@ -233,7 +233,7 @@ const GPSDeviceRegistration: React.FC = () => {
                 <Label htmlFor="sim_number">رقم شريحة SIM (اختياري)</Label>
                 <Input
                   id="sim_number"
-                  placeholder="+966XXXXXXXXX"
+                  placeholder="+20XXXXXXXXXX"
                   value={formData.sim_number}
                   onChange={(e) => handleInputChange('sim_number', e.target.value)}
                 />

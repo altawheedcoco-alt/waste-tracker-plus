@@ -115,7 +115,7 @@ const WaPilotBlacklist = () => {
                     <Textarea
                       value={newEntry.phones}
                       onChange={e => setNewEntry(p => ({ ...p, phones: e.target.value }))}
-                      placeholder="966501234567&#10;201012345678"
+                      placeholder="201012345678&#10;201112345678"
                       rows={4}
                       dir="ltr"
                     />
