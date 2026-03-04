@@ -24,6 +24,7 @@ import {
 } from 'recharts';
 import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
 import WaPilotMessageLog from '@/components/whatsapp/WaPilotMessageLog';
+import WaPilotInbox from '@/components/whatsapp/WaPilotInbox';
 import { toast } from 'sonner';
 
 interface InstanceInfo {
@@ -87,7 +88,7 @@ const WaPilotManagement = () => {
   const [activeInstanceId, setActiveInstanceId] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [actionLoading, setActionLoading] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<'overview' | 'manager'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'inbox' | 'manager'>('overview');
   const [uptime, setUptime] = useState<number>(0);
   const [connectionDiag, setConnectionDiag] = useState<any>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
@@ -418,6 +419,12 @@ const WaPilotManagement = () => {
               <BarChart3 className="h-3.5 w-3.5 ml-1" />نظرة عامة
             </Button>
             <Button
+              variant={activeView === 'inbox' ? 'default' : 'outline'} size="sm"
+              onClick={() => setActiveView('inbox')}
+            >
+              <MessageCircle className="h-3.5 w-3.5 ml-1" />المحادثات
+            </Button>
+            <Button
               variant={activeView === 'manager' ? 'default' : 'outline'} size="sm"
               onClick={() => setActiveView('manager')}
             >
@@ -608,7 +615,15 @@ const WaPilotManagement = () => {
         </CardContent>
       </Card>
 
-      {activeView === 'overview' ? (
+      {activeView === 'inbox' ? (
+        <WaPilotInbox
+          messages={messages}
+          orgs={orgs}
+          loading={refreshing}
+          instanceStatus={instanceStatus}
+          onRefresh={fetchAllData}
+        />
+      ) : activeView === 'overview' ? (
         <>
           {/* ══════════ KPI CARDS ══════════ */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
