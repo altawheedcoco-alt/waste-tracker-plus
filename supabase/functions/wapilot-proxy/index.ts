@@ -114,6 +114,24 @@ Deno.serve(async (req) => {
       case 'campaign-stats':
         url = `${WAPILOT_BASE}/campaigns/${params.campaign_id}/messages/stats`;
         break;
+      case 'get-qr':
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/qr`;
+        break;
+      case 'restart-instance':
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/restart`;
+        method = 'POST';
+        break;
+      case 'connect-instance':
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/connect`;
+        method = 'POST';
+        break;
+      case 'disconnect-instance':
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/disconnect`;
+        method = 'POST';
+        break;
+      case 'instance-info':
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}`;
+        break;
       default:
         return new Response(JSON.stringify({ error: `Unknown action: ${action}` }), {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
