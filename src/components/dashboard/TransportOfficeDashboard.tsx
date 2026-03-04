@@ -29,6 +29,7 @@ import StoryCircles from '@/components/stories/StoryCircles';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
+import DocumentVerificationWidget from '@/components/dashboard/DocumentVerificationWidget';
 
 const TransportOfficeDashboard = () => {
   const { profile, organization } = useAuth();
@@ -37,6 +38,7 @@ const TransportOfficeDashboard = () => {
   const [showVehicleDialog, setShowVehicleDialog] = useState(false);
   const [selectedVehicle, setSelectedVehicle] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   const vehicles = data?.vehicles || [];
   const bookings = data?.bookings || [];
@@ -265,6 +267,7 @@ const TransportOfficeDashboard = () => {
         {/* === Documents Tab === */}
         <TabsContent value="documents" className="mt-4 space-y-4">
           <UnifiedDocumentSearch />
+          <DocumentVerificationWidget />
           <PendingApprovalsWidget />
         </TabsContent>
 
@@ -295,6 +298,7 @@ const TransportOfficeDashboard = () => {
         vehicle={selectedVehicle}
         onSaved={() => refetch()}
       />
+      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 };

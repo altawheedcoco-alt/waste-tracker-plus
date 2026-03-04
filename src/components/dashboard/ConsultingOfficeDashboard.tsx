@@ -32,6 +32,7 @@ const OfficeSettingsPanel = lazy(() => import('@/components/consulting-office/Of
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
+const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -194,6 +195,7 @@ const ConsultingOfficeDashboard = memo(() => {
   const { organization } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
   const {
     office, members, clients, pendingApprovals,
     loadingOffice, loadingMembers, isDirector, createOffice,
@@ -417,6 +419,9 @@ const ConsultingOfficeDashboard = memo(() => {
           <OfficeAIAssistant organization={organization} consultantCount={members.length} clientCount={clients.length} />
         </TabsContent>
       </Tabs>
+      <Suspense fallback={null}>
+        <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
     </div>
   );
 });

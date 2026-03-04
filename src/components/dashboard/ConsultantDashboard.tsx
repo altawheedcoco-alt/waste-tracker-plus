@@ -44,6 +44,7 @@ const ConsultantSigningCenter = lazy(() => import('@/components/consultant/Consu
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
+const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -191,6 +192,7 @@ const ConsultantDashboard = memo(() => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [selectedOrgId, setSelectedOrgId] = useState<string | null>(null);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   const { data: consultantProfile, isLoading: loadingProfile } = useQuery({
     queryKey: ['my-consultant-profile-dash', profile?.user_id],
@@ -579,6 +581,9 @@ const ConsultantDashboard = memo(() => {
           </Suspense>
         </TabsContent>
       </Tabs>
+      <Suspense fallback={null}>
+        <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      </Suspense>
     </div>
   );
 });

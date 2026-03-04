@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
+import DocumentVerificationWidget from '@/components/dashboard/DocumentVerificationWidget';
 
 
 const ISOBodyDashboard = memo(() => {
@@ -22,6 +23,7 @@ const ISOBodyDashboard = memo(() => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   // Fetch audit sessions created by this ISO body
   const { data: auditSessions = [], isLoading: loadingAudits } = useQuery({
@@ -299,6 +301,7 @@ const ISOBodyDashboard = memo(() => {
           </Card>
         </TabsContent>
       </Tabs>
+      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 });
