@@ -102,6 +102,7 @@ const WaPilotManagement = () => {
     total_seats: number;
     total_amount: number;
   } | null>(null);
+  const [endpointStatuses, setEndpointStatuses] = useState<Record<string, 'ok' | 'error' | 'checking'>>({});
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -223,6 +224,27 @@ const WaPilotManagement = () => {
           setSubscriptionInfo(null);
         }
       } catch { /* ignore */ }
+
+      // Check API endpoints health
+      const endpoints = [
+        { name: 'wapilot-proxy', body: { action: 'diagnostics' } },
+        { name: 'whatsapp-send', body: { action: 'health-check' } },
+        { name: 'whatsapp-event', body: { event_type: 'health-check' } },
+        { name: 'whatsapp-webhook', body: {} },
+      ];
+      const epStatuses: Record<string, 'ok' | 'error' | 'checking'> = {};
+      endpoints.forEach(ep => { epStatuses[ep.name] = 'checking'; });
+      setEndpointStatuses({ ...epStatuses });
+
+      await Promise.all(endpoints.map(async (ep) => {
+        try {
+          const { error } = await supabase.functions.invoke(ep.name, { body: ep.body });
+          epStatuses[ep.name] = error ? 'error' : 'ok';
+        } catch {
+          epStatuses[ep.name] = 'error';
+        }
+      }));
+      setEndpointStatuses({ ...epStatuses });
 
     } catch (e) {
       console.error('Fetch error:', e);
@@ -515,6 +537,65 @@ const WaPilotManagement = () => {
                   <p className="text-[10px] text-muted-foreground">API Base</p>
                   <p className="text-[10px] font-mono font-medium" dir="ltr">{connectionDiag?.api_base || 'api.wapilot.net/api/v2'}</p>
                 </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ══════════ API ENDPOINTS STATUS ══════════ */}
+          <Card className="border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Globe className="h-4 w-4 text-primary" />
+                حالة API Endpoints
+                <Badge variant="secondary" className="text-[10px] mr-auto">
+                  {Object.values(endpointStatuses).filter(s => s === 'ok').length}/{Object.keys(endpointStatuses).length} متاح
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {[
+                  { name: 'wapilot-proxy', label: 'WaPilot Proxy', desc: 'البوابة الرئيسية لـ WaPilot API - إدارة الأجهزة، الحملات، التشخيصات', actions: ['diagnostics', 'list-instances', 'send-message', 'list-campaigns', 'get-qr', 'restart-instance'] },
+                  { name: 'whatsapp-send', label: 'WhatsApp Send', desc: 'إرسال الرسائل الفردية والجماعية عبر WaPilot', actions: ['send-single', 'send-bulk', 'send-template'] },
+                  { name: 'whatsapp-event', label: 'WhatsApp Event', desc: 'محرك الأحداث التلقائية - إشعارات الشحنات، الفواتير، OTP', actions: ['shipment_created', 'invoice_generated', 'otp_verification'] },
+                  { name: 'whatsapp-webhook', label: 'WhatsApp Webhook', desc: 'استقبال الردود والرسائل الواردة من WhatsApp', actions: ['inbound-message', 'status-update'] },
+                ].map(ep => {
+                  const status = endpointStatuses[ep.name] || 'checking';
+                  return (
+                    <div key={ep.name} className={`rounded-xl border p-4 space-y-2.5 transition-all ${
+                      status === 'ok' ? 'border-green-500/20 bg-green-50/50 dark:bg-green-950/10' :
+                      status === 'error' ? 'border-destructive/20 bg-destructive/5' :
+                      'border-border bg-muted/20'
+                    }`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold font-mono" dir="ltr">{ep.label}</span>
+                        <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-[10px] font-medium ${
+                          status === 'ok' ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300' :
+                          status === 'error' ? 'bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300' :
+                          'bg-muted text-muted-foreground'
+                        }`}>
+                          {status === 'ok' ? <><CheckCircle2 className="h-2.5 w-2.5" />متاح</> :
+                           status === 'error' ? <><XCircle className="h-2.5 w-2.5" />خطأ</> :
+                           <><RefreshCw className="h-2.5 w-2.5 animate-spin" />فحص</>}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-muted-foreground leading-relaxed">{ep.desc}</p>
+                      <div className="space-y-1">
+                        <p className="text-[9px] text-muted-foreground font-medium">الإجراءات المدعومة:</p>
+                        <div className="flex flex-wrap gap-1">
+                          {ep.actions.map(a => (
+                            <span key={a} className="inline-block px-1.5 py-0.5 bg-muted rounded text-[9px] font-mono">{a}</span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="pt-1 border-t">
+                        <p className="text-[9px] font-mono text-muted-foreground" dir="ltr">
+                          /functions/v1/{ep.name}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </CardContent>
           </Card>
