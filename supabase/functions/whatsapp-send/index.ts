@@ -168,7 +168,12 @@ Deno.serve(async (req) => {
 
     // Helper: send single message via WaPilot
     const sendOne = async (phone: string, text: string) => {
-      const formattedPhone = phone.replace(/[\s+\-()]/g, "");
+      // Clean phone: remove spaces, +, -, () then strip leading zeros
+      let formattedPhone = phone.replace(/[\s+\-()]/g, "").replace(/^0+/, "");
+      // If it looks like a local Egyptian number (starts with 1 and 10 digits), prepend 20
+      if (/^1\d{9}$/.test(formattedPhone)) {
+        formattedPhone = "20" + formattedPhone;
+      }
       const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
 
       // Build message payload

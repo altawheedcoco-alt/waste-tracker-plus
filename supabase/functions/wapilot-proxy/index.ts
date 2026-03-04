@@ -131,8 +131,15 @@ Deno.serve(async (req) => {
       case 'send-message':
         url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-message`;
         method = 'POST';
+        // Fix phone formatting: strip leading zeros, ensure country code
+        let chatId = params.chat_id || '';
+        if (chatId) {
+          const rawPhone = chatId.replace('@c.us', '').replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+          const fixedPhone = /^1\d{9}$/.test(rawPhone) ? '20' + rawPhone : rawPhone;
+          chatId = fixedPhone + '@c.us';
+        }
         fetchBody = JSON.stringify({
-          chat_id: params.chat_id,
+          chat_id: chatId,
           text: params.text,
           priority: params.priority,
           send_at: params.send_at,
