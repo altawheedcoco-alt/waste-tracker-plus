@@ -30,6 +30,7 @@ import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
+import DocumentVerificationWidget from './DocumentVerificationWidget';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
@@ -102,6 +103,7 @@ const RecyclerDashboard = () => {
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showReportDialog, setShowReportDialog] = useState(false);
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   // Fetch recycler facility (if registered as facility)
   const { data: facility } = useQuery({
@@ -279,6 +281,7 @@ const RecyclerDashboard = () => {
           <DailyOperationsSummary />
           <OperationalAlertsWidget />
           <UnifiedDocumentSearch />
+          <DocumentVerificationWidget />
           <DriverCodeLookup />
           <RecyclerIncomingPanel />
           <PendingApprovalsWidget />
@@ -459,6 +462,7 @@ const RecyclerDashboard = () => {
         />
       )}
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
+      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 };

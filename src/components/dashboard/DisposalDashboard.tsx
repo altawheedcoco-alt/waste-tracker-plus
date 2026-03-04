@@ -26,6 +26,7 @@ import DisposalRecentOperations from '@/components/dashboard/disposal/DisposalRe
 import OperationalAlertsWidget from '@/components/dashboard/operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
+import DocumentVerificationWidget from '@/components/dashboard/DocumentVerificationWidget';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
@@ -86,6 +87,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -331,6 +333,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         {/* Documents Tab */}
         <TabsContent value="documents" className="mt-4 space-y-4">
           <UnifiedDocumentSearch />
+          <DocumentVerificationWidget />
           <DriverCodeLookup />
         </TabsContent>
 
@@ -351,6 +354,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
+      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 };
