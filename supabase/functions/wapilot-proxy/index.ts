@@ -44,6 +44,24 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { action, instance_id, ...params } = body;
 
+    // Actions that require instance_id
+    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages'];
+    if (actionsRequiringInstance.includes(action) && !instance_id) {
+      // Auto-resolve instance_id by fetching the first available instance
+      const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
+        headers: { token },
+      });
+      const instancesList = await listRes.json();
+      if (!Array.isArray(instancesList) || instancesList.length === 0) {
+        return new Response(JSON.stringify({ error: 'No WaPilot instance available' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      body.instance_id = instancesList[0].id;
+    }
+
+    const resolvedInstanceId = body.instance_id || instance_id;
+
     let url: string;
     let method = 'GET';
     let fetchBody: string | undefined;
@@ -53,10 +71,10 @@ Deno.serve(async (req) => {
         url = `${WAPILOT_BASE}/instances`;
         break;
       case 'instance-status':
-        url = `${WAPILOT_BASE}/instances/${instance_id}/status`;
+        url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/status`;
         break;
       case 'send-message':
-        url = `${WAPILOT_BASE}/${instance_id}/send-message`;
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-message`;
         method = 'POST';
         fetchBody = JSON.stringify({
           chat_id: params.chat_id,
@@ -66,7 +84,7 @@ Deno.serve(async (req) => {
         });
         break;
       case 'send-list':
-        url = `${WAPILOT_BASE}/${instance_id}/send-list`;
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-list`;
         method = 'POST';
         fetchBody = JSON.stringify({
           chat_id: params.chat_id,
@@ -74,7 +92,7 @@ Deno.serve(async (req) => {
         });
         break;
       case 'list-messages':
-        url = `${WAPILOT_BASE}/${instance_id}/messages`;
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/messages`;
         break;
       case 'list-campaigns':
         url = `${WAPILOT_BASE}/campaigns`;
