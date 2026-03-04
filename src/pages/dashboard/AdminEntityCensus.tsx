@@ -1,5 +1,6 @@
 import { memo, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import BackButton from '@/components/ui/back-button';
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -238,6 +239,7 @@ const AdminEntityCensus = memo(() => {
 
   return (
     <div className="min-h-screen bg-background p-4 sm:p-6 space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-3">

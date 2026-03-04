@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import BackButton from '@/components/ui/back-button';
 import { Bot, Brain, MessageSquare, ShoppingCart, Settings2, Plus, Trash2, Save, ToggleLeft, ToggleRight, Zap, Globe, Phone, Send, Eye, Clock, TrendingUp, Users, Star, ChevronRight, FileText, HelpCircle, DollarSign, Tag, Sparkles, MessageCircle, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

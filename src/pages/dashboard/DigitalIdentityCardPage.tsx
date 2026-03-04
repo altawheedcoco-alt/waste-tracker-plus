@@ -1,6 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const DigitalIdentityCard = lazy(() => import('@/components/dashboard/shared/DigitalIdentityCard'));
 
