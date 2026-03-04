@@ -146,6 +146,15 @@ Deno.serve(async (req) => {
     const response = await fetch(url, { method, headers, body: fetchBody });
     const data = await response.json().catch(() => ({}));
 
+    // If list-instances fails (API doesn't support listing), return empty array gracefully
+    if (action === 'list-instances' && !response.ok) {
+      console.warn('list-instances failed, returning empty array:', data);
+      return new Response(JSON.stringify([]), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     return new Response(JSON.stringify(data), {
       status: response.status,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },

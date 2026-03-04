@@ -57,7 +57,8 @@ const WaPilotManagement = () => {
       templates: tplRes.count || 0,
     });
 
-    const instList = Array.isArray(instRes.data) ? instRes.data : [];
+    const rawInst = instRes?.data;
+    const instList = Array.isArray(rawInst) ? rawInst : (rawInst && typeof rawInst === 'object' && !rawInst.message ? [rawInst] : []);
     setInstances(instList);
 
     if (instList.length > 0) {
