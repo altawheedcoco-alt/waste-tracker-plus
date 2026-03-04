@@ -222,9 +222,14 @@ const NotificationChannelsSettings = () => {
               </Label>
               
               {[
-                { key: 'notify_shipment_updates', label: 'تحديثات الشحنات', desc: 'حالة الشحن، التسليم، الموافقة' },
-                { key: 'notify_payment_updates', label: 'تحديثات المدفوعات', desc: 'الإيداعات، الفواتير المستحقة' },
+                { key: 'notify_shipment_updates', label: 'تحديثات الشحنات', desc: 'إنشاء، موافقة، نقل، تسليم، إتمام' },
+                { key: 'notify_driver_assignments', label: 'تعيين السائقين', desc: 'إشعار عند تعيين سائق لشحنة' },
+                { key: 'notify_delivery_confirmations', label: 'تأكيدات التسليم', desc: 'إشعار فوري عند وصول الشحنة' },
+                { key: 'notify_payment_updates', label: 'تحديثات المدفوعات', desc: 'الإيداعات، الفواتير، المستحقات' },
                 { key: 'notify_contract_alerts', label: 'تنبيهات العقود', desc: 'انتهاء العقود، التجديد' },
+                { key: 'notify_emergency_alerts', label: 'تنبيهات الطوارئ', desc: 'حالات حرجة تتطلب اهتمام فوري' },
+                { key: 'notify_daily_reports', label: 'التقرير اليومي', desc: 'ملخص يومي بالشحنات والإيرادات والأداء' },
+                { key: 'notify_weekly_reports', label: 'التقرير الأسبوعي', desc: 'ملخص أسبوعي شامل بالإحصائيات' },
                 { key: 'notify_system_alerts', label: 'تنبيهات النظام', desc: 'صيانة، تحديثات هامة' },
               ].map(item => (
                 <div key={item.key} className="flex items-center justify-between p-2 rounded-lg hover:bg-muted/50">

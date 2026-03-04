@@ -37,31 +37,48 @@ function buildMessage(event: EventPayload): { text: string; targets: string[]; c
   switch (event.event_type) {
     case "shipment_created":
       configColumn = "auto_send_notifications";
-      return { text: `📦 شحنة جديدة #${sn}\nتم إنشاء شحنة جديدة وهي بانتظار الموافقة.`, targets, configColumn };
+      return { text: `📦 شحنة جديدة #${sn}\nتم إنشاء شحنة جديدة وهي بانتظار الموافقة.\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "shipment_approved":
       configColumn = "auto_send_notifications";
-      return { text: `✅ تمت الموافقة على الشحنة #${sn}\nالشحنة جاهزة للنقل.`, targets, configColumn };
+      return { text: `✅ تمت الموافقة على الشحنة #${sn}\nالشحنة جاهزة للنقل. يرجى التنسيق مع السائق.\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "shipment_in_transit":
       configColumn = "auto_send_notifications";
-      return { text: `🚛 الشحنة #${sn} في الطريق\nالسائق: ${event.driver_name || "غير محدد"}`, targets, configColumn };
+      return { text: `🚛 الشحنة #${sn} في الطريق\nالسائق: ${event.driver_name || "غير محدد"}\n📍 من: ${event.extra?.pickup_address || 'غير محدد'}\n📍 إلى: ${event.extra?.delivery_address || 'غير محدد'}\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "shipment_delivered":
       configColumn = "auto_send_notifications";
-      return { text: `📍 وصلت الشحنة #${sn}\nتم التسليم بنجاح.`, targets, configColumn };
+      return { text: `📍 وصلت الشحنة #${sn}\nتم التسليم بنجاح ✅\nالسائق: ${event.driver_name || "غير محدد"}\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "shipment_completed":
       configColumn = "auto_send_notifications";
-      return { text: `🏁 اكتملت الشحنة #${sn}\nتمت معالجة الشحنة بالكامل.`, targets, configColumn };
+      return { text: `🏁 اكتملت الشحنة #${sn}\nتمت معالجة الشحنة بالكامل وإغلاق الدورة.\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
+    case "driver_assigned":
+      configColumn = "auto_send_notifications";
+      return {
+        text: `🚛 تم تعيين سائق للشحنة #${sn}\nالسائق: ${event.driver_name || "غير محدد"}\nنوع النفايات: ${event.extra?.waste_type || ''}\nالكمية: ${event.extra?.quantity || ''}\n📍 من: ${event.extra?.pickup_address || ''}\n📍 إلى: ${event.extra?.delivery_address || ''}\n🕐 ${new Date().toLocaleString('ar-EG')}`,
+        targets: [...targets, ...(event.driver_phone ? [] : [])],
+        configColumn,
+      };
     case "invoice_generated":
       configColumn = "auto_send_notifications";
-      return { text: `🧾 فاتورة جديدة للشحنة #${sn}\nتم إصدار الفاتورة.`, targets, configColumn };
+      return { text: `🧾 فاتورة جديدة للشحنة #${sn}\nرقم الفاتورة: ${event.extra?.invoice_number || ''}\nالمبلغ: ${event.extra?.amount || ''} ج.م\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
+    case "payment_received":
+      configColumn = "auto_send_notifications";
+      return { text: `💰 تم استلام دفعة مالية\nالمبلغ: ${event.extra?.amount || ''} ج.م\nالمرجع: ${event.extra?.reference || ''}\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "otp_verification":
       configColumn = "auto_send_otp";
       return { text: `🔐 رمز التحقق: ${event.otp_code}\nصالح لمدة 5 دقائق. لا تشاركه مع أحد.`, targets, configColumn };
     case "signature_request":
       configColumn = "auto_send_notifications";
-      return { text: `✍️ مطلوب توقيعك على الشحنة #${sn}\nيرجى الدخول للمنصة لإتمام التوقيع.`, targets, configColumn };
+      return { text: `✍️ مطلوب توقيعك على الشحنة #${sn}\nيرجى الدخول للمنصة لإتمام التوقيع.\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     case "subscription_reminder":
       configColumn = "auto_send_subscription_reminders";
-      return { text: `⚠️ تذكير بتجديد الاشتراك\nاشتراكك على وشك الانتهاء. جدّد الآن لاستمرار الخدمة.`, targets, configColumn };
+      return { text: `⚠️ تذكير بتجديد الاشتراك\nاشتراكك على وشك الانتهاء. جدّد الآن لاستمرار الخدمة.\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
+    case "emergency_alert":
+      configColumn = "auto_send_notifications";
+      return { text: `🚨 تنبيه طوارئ\n${event.extra?.message || 'يرجى الانتباه والتحقق من المنصة فوراً.'}\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
+    case "daily_report":
+      return { text: event.extra?.report_text || `📊 التقرير اليومي\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets };
+    case "weekly_report":
+      return { text: event.extra?.report_text || `📊 التقرير الأسبوعي\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets };
     default:
       return { text: `📢 إشعار: ${event.event_type}\n${JSON.stringify(event.extra || {}).slice(0, 200)}`, targets };
   }
@@ -213,6 +230,24 @@ Deno.serve(async (req) => {
     if (event.customer_phone) {
       const sendResult = await sendViaWaPilot(WAPILOT_TOKEN, event.customer_phone, text);
       results.push({ phone: event.customer_phone, success: sendResult.success, direct: true });
+    }
+
+    // Direct send to driver_phone for driver-specific events
+    if (event.driver_phone && ["driver_assigned", "shipment_approved", "shipment_in_transit"].includes(event.event_type)) {
+      const driverText = event.event_type === "driver_assigned"
+        ? `🚛 مهمة جديدة لك!\nالشحنة: #${event.shipment_number || ''}\nنوع النفايات: ${event.extra?.waste_type || ''}\nالكمية: ${event.extra?.quantity || ''}\n📍 من: ${event.extra?.pickup_address || ''}\n📍 إلى: ${event.extra?.delivery_address || ''}\nيرجى الدخول للمنصة لقبول المهمة.`
+        : text;
+      const sendResult = await sendViaWaPilot(WAPILOT_TOKEN, event.driver_phone, driverText);
+      await supabase.from("whatsapp_messages").insert({
+        organization_id: event.transporter_org_id || null,
+        direction: "outbound",
+        to_phone: event.driver_phone,
+        content: driverText,
+        status: sendResult.success ? "sent" : "failed",
+        error_message: sendResult.error || null,
+        metadata: { event_type: event.event_type, target: "driver" },
+      });
+      results.push({ phone: event.driver_phone, success: sendResult.success, target: "driver" });
     }
 
     console.log(`[whatsapp-event] Completed via WaPilot: ${results.length} sends`);
