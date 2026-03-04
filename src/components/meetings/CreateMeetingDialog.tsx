@@ -104,7 +104,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
   };
 
   const handleCreate = async () => {
-    if (!profile?.id || !organization?.id) return;
+    if (!user?.id || !profile?.id || !organization?.id) return;
 
     setLoading(true);
     const roomId = generateRoomId();
@@ -115,7 +115,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
       .from('video_meetings')
       .insert({
         organization_id: organization.id,
-        created_by: profile.id,
+        created_by: user.id,
         title: form.title.trim(),
         description: form.description.trim() || null,
         room_id: roomId,
@@ -139,7 +139,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
     // 2. Add creator as host
     await supabase.from('video_meeting_participants').insert({
       meeting_id: meeting.id,
-      user_id: profile.id,
+      user_id: user.id,
       role: 'host',
       status: 'joined',
       joined_at: new Date().toISOString(),
@@ -152,7 +152,7 @@ const CreateMeetingDialog = ({ onCreated, trigger }: CreateMeetingDialogProps) =
         user_id: member.id,
         role: 'participant' as const,
         status: 'invited' as const,
-        invited_by: profile.id,
+        invited_by: user.id,
       }));
 
       await supabase.from('video_meeting_participants').insert(participantInserts);
