@@ -79,6 +79,9 @@ function buildMessage(event: EventPayload): { text: string; targets: string[]; c
       return { text: event.extra?.report_text || `📊 التقرير اليومي\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets };
     case "weekly_report":
       return { text: event.extra?.report_text || `📊 التقرير الأسبوعي\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets };
+    case "meeting_invitation":
+      configColumn = "auto_send_notifications";
+      return { text: `📹 دعوة اجتماع ${event.extra?.meeting_type === 'audio' ? 'صوتي' : 'مرئي'}\nالعنوان: ${event.extra?.meeting_title || ''}\nمن: ${event.extra?.host_name || 'مستخدم'}\n${event.extra?.scheduled_at ? `📅 الموعد: ${event.extra.scheduled_at}` : '⚡ يبدأ الآن'}\n🔗 انضم من لوحة التحكم ← الاجتماعات المرئية\n🕐 ${new Date().toLocaleString('ar-EG')}`, targets, configColumn };
     default:
       return { text: `📢 إشعار: ${event.event_type}\n${JSON.stringify(event.extra || {}).slice(0, 200)}`, targets };
   }
@@ -159,6 +162,35 @@ Deno.serve(async (req) => {
     }
 
     const results: any[] = [];
+
+    // Special handling: meeting invitations - send to individual invited users
+    if (event.event_type === "meeting_invitation" && (event as any).invited_user_ids?.length > 0) {
+      const invitedIds = (event as any).invited_user_ids as string[];
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, phone, full_name")
+        .in("id", invitedIds);
+
+      for (const p of (profiles || [])) {
+        if (!p.phone) continue;
+        const personalText = `📹 دعوة اجتماع ${(event as any).meeting_type === 'audio' ? 'صوتي' : 'مرئي'}\nمرحباً ${p.full_name || ''}!\n\nالعنوان: ${(event as any).meeting_title || ''}\nمن: ${(event as any).host_name || 'مستخدم'}\n${(event as any).scheduled_at ? `📅 الموعد: ${(event as any).scheduled_at}` : '⚡ يبدأ الآن'}\n\n🔗 انضم من لوحة التحكم ← الاجتماعات المرئية\n🕐 ${new Date().toLocaleString('ar-EG')}`;
+        const sendResult = await sendViaWaPilot(WAPILOT_TOKEN, p.phone, personalText);
+        await supabase.from("whatsapp_messages").insert({
+          organization_id: event.organization_id || null,
+          direction: "outbound",
+          to_phone: p.phone,
+          content: personalText,
+          status: sendResult.success ? "sent" : "failed",
+          error_message: sendResult.error || null,
+          metadata: { event_type: "meeting_invitation", user_id: p.id },
+        });
+        results.push({ user: p.id, phone: p.phone, success: sendResult.success });
+      }
+
+      return new Response(JSON.stringify({ success: true, results }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     for (const orgId of targets) {
       const { data: orgConfig } = await supabase
