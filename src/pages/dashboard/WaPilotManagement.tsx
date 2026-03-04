@@ -506,9 +506,58 @@ const WaPilotManagement = () => {
               <Badge variant="default" className="text-[10px] mr-auto">الجهاز متصل ✓</Badge>
             )}
           </CardTitle>
-          <CardDescription className="text-xs">أرسل رسالة واتساب مباشرة من لوحة التحكم</CardDescription>
+          <CardDescription className="text-xs">اختر رسالة جاهزة أو اكتب رسالة مخصصة • أرسل واتساب مباشرة من لوحة التحكم</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-3">
+          {/* Quick Message Templates */}
+          <div>
+            <label className="text-[11px] text-muted-foreground mb-1.5 block">رسائل جاهزة حسب التصنيف</label>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { cat: '🚛 شحنات', messages: [
+                  { label: 'تأكيد شحنة', text: 'مرحباً، نود إبلاغكم بأنه تم تسجيل شحنة جديدة وسيتم التواصل معكم لتحديد موعد الاستلام. شكراً لثقتكم بمنصة آي ريسايكل.' },
+                  { label: 'موعد استلام', text: 'السلام عليكم، نود تأكيد موعد استلام الشحنة. يرجى التواصل معنا لتنسيق الوقت المناسب.' },
+                  { label: 'تم التسليم', text: 'تم تسليم الشحنة بنجاح ✅ شكراً لتعاونكم. يمكنكم مراجعة التفاصيل عبر المنصة.' },
+                ]},
+                { cat: '💰 مالية', messages: [
+                  { label: 'فاتورة جديدة', text: 'تم إصدار فاتورة جديدة لحسابكم. يرجى مراجعتها عبر المنصة واتخاذ اللازم.' },
+                  { label: 'تأكيد دفع', text: 'تم استلام الدفعة المالية بنجاح ✅ شكراً لالتزامكم.' },
+                  { label: 'تذكير سداد', text: 'تذكير ودي: لديكم مستحقات مالية معلقة. يرجى السداد في أقرب وقت لتجنب التأخير.' },
+                ]},
+                { cat: '👋 ترحيب', messages: [
+                  { label: 'عميل جديد', text: 'مرحباً بك في منصة آي ريسايكل! 🌱 نحن سعداء بانضمامك. فريقنا جاهز لمساعدتك في إدارة النفايات بكفاءة واستدامة.' },
+                  { label: 'شريك جديد', text: 'أهلاً وسهلاً بكم كشريك في منصة آي ريسايكل. نتطلع لتعاون مثمر ومستدام 🤝' },
+                ]},
+                { cat: '⚠️ تنبيهات', messages: [
+                  { label: 'تجديد رخصة', text: 'تنبيه: رخصتكم البيئية تقترب من تاريخ الانتهاء. يرجى المبادرة بالتجديد لتجنب توقف الخدمة.' },
+                  { label: 'صيانة النظام', text: 'إشعار: سيتم إجراء صيانة مجدولة للنظام. قد تتأثر بعض الخدمات مؤقتاً. نعتذر عن أي إزعاج.' },
+                  { label: 'تحديث بيانات', text: 'يرجى تحديث بيانات منشأتكم على المنصة لضمان استمرارية الخدمة وتوافقها مع الاشتراطات.' },
+                ]},
+                { cat: '♻️ بيئية', messages: [
+                  { label: 'تقرير بيئي', text: 'تقريركم البيئي الشهري جاهز للمراجعة على المنصة. يتضمن ملخص الكميات المعاد تدويرها والأثر البيئي.' },
+                  { label: 'شهادة تدوير', text: 'تم إصدار شهادة إعادة التدوير الخاصة بمنشأتكم ✅ يمكنكم تحميلها من المنصة.' },
+                ]},
+              ].map(cat => (
+                <div key={cat.cat} className="flex items-center gap-1">
+                  <span className="text-[10px] font-medium text-muted-foreground whitespace-nowrap">{cat.cat}</span>
+                  {cat.messages.map(msg => (
+                    <Button
+                      key={msg.label}
+                      variant={quickMessage === msg.text ? 'default' : 'outline'}
+                      size="sm"
+                      className="h-6 text-[10px] px-2"
+                      onClick={() => setQuickMessage(msg.text)}
+                      disabled={sendingMessage || instanceStatus !== 'connected'}
+                    >
+                      {msg.label}
+                    </Button>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Phone + Message */}
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-shrink-0 sm:w-56">
               <label className="text-[11px] text-muted-foreground mb-1 block">رقم الواتساب (مع كود الدولة)</label>
@@ -525,21 +574,28 @@ const WaPilotManagement = () => {
               <label className="text-[11px] text-muted-foreground mb-1 block">نص الرسالة</label>
               <div className="flex gap-2">
                 <Textarea
-                  placeholder="اكتب رسالتك هنا..."
+                  placeholder="اكتب رسالتك هنا أو اختر من الرسائل الجاهزة أعلاه..."
                   value={quickMessage}
                   onChange={(e) => setQuickMessage(e.target.value)}
-                  className="min-h-[40px] max-h-[80px] text-sm resize-none"
+                  className="min-h-[60px] max-h-[120px] text-sm resize-none"
                   disabled={sendingMessage || instanceStatus !== 'connected'}
-                  rows={1}
+                  rows={2}
                 />
-                <Button
-                  onClick={handleQuickSend}
-                  disabled={sendingMessage || instanceStatus !== 'connected' || !quickPhone.trim() || !quickMessage.trim()}
-                  className="gap-1.5 self-end"
-                >
-                  {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                  إرسال
-                </Button>
+                <div className="flex flex-col gap-1.5 self-end">
+                  <Button
+                    onClick={handleQuickSend}
+                    disabled={sendingMessage || instanceStatus !== 'connected' || !quickPhone.trim() || !quickMessage.trim()}
+                    className="gap-1.5"
+                  >
+                    {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                    إرسال
+                  </Button>
+                  {quickMessage && (
+                    <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setQuickMessage('')}>
+                      مسح
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
