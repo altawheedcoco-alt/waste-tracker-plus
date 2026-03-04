@@ -112,18 +112,26 @@ Deno.serve(async (req) => {
     // Resolve WaPilot instance
     let activeInstanceId = instance_id;
     if (!activeInstanceId) {
-      const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
-        headers: { token: WAPILOT_TOKEN },
-      });
-      const instances = await listRes.json();
-      if (Array.isArray(instances) && instances.length > 0) {
-        activeInstanceId = instances[0].id;
+      try {
+        const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
+          headers: { token: WAPILOT_TOKEN },
+        });
+        const instancesRaw = await listRes.json().catch(() => null);
+        const instances = Array.isArray(instancesRaw) ? instancesRaw
+          : (instancesRaw && typeof instancesRaw === 'object' && instancesRaw.id) ? [instancesRaw]
+          : [];
+        if (instances.length > 0) {
+          const active = instances.find((i: any) => i.status === 'active' || i.status === 'connected') || instances[0];
+          activeInstanceId = active.id;
+        }
+      } catch (e) {
+        console.warn("Failed to list instances:", e);
       }
     }
 
     if (!activeInstanceId) {
       return new Response(
-        JSON.stringify({ error: "No WaPilot instance available" }),
+        JSON.stringify({ error: "No WaPilot instance available. Please provide instance_id or ensure an instance exists." }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
