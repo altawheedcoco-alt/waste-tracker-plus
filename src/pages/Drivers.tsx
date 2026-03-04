@@ -377,7 +377,7 @@ const Drivers = () => {
                   <div className="space-y-2">
                     <Label>رقم الهاتف *</Label>
                     <Input
-                      placeholder="01234567890"
+                      placeholder="01xxxxxxxxx"
                       value={formData.phone}
                       onChange={(e) => handleChange('phone', e.target.value)}
                       className={errors.phone ? 'border-destructive' : ''}

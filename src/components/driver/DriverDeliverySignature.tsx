@@ -197,7 +197,7 @@ const DriverDeliverySignature = ({ shipmentId, driverId, onSigned }: DriverDeliv
             <Input
               value={receiverPhone}
               onChange={(e) => setReceiverPhone(e.target.value)}
-              placeholder="05xxxxxxxx"
+              placeholder="01xxxxxxxxx"
               className="h-9 text-sm"
               dir="ltr"
             />

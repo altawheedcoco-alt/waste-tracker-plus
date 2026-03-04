@@ -299,7 +299,7 @@ export default function AddCompanyDialog({
                         <FormItem>
                           <FormLabel>رقم الهاتف *</FormLabel>
                           <FormControl>
-                            <Input placeholder="05xxxxxxxx" dir="ltr" {...field} />
+                            <Input placeholder="01xxxxxxxxx" dir="ltr" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -313,7 +313,7 @@ export default function AddCompanyDialog({
                         <FormItem>
                           <FormLabel>رقم هاتف ثانوي</FormLabel>
                           <FormControl>
-                            <Input placeholder="05xxxxxxxx" dir="ltr" {...field} />
+                            <Input placeholder="01xxxxxxxxx" dir="ltr" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -433,7 +433,7 @@ export default function AddCompanyDialog({
                           <FormItem>
                             <FormLabel>رقم الهاتف</FormLabel>
                             <FormControl>
-                              <Input placeholder="05xxxxxxxx" dir="ltr" {...field} />
+                              <Input placeholder="01xxxxxxxxx" dir="ltr" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -495,7 +495,7 @@ export default function AddCompanyDialog({
                           <FormItem>
                             <FormLabel>رقم الهاتف</FormLabel>
                             <FormControl>
-                              <Input placeholder="05xxxxxxxx" dir="ltr" {...field} />
+                              <Input placeholder="01xxxxxxxxx" dir="ltr" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
