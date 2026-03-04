@@ -145,20 +145,21 @@ export const useRealtimeTracking = ({
               .limit(50);
 
             if (allUsers && allUsers.length > 0) {
-              const statusNotifications = allUsers
-                .filter((u: any) => u.user_id !== user.id) // Don't notify the user who made the change
-                .map((u: any) => ({
-                  user_id: u.user_id,
+              const userIds = allUsers
+                .filter((u: any) => u.user_id !== user.id)
+                .map((u: any) => u.user_id);
+
+              if (userIds.length > 0) {
+                const { sendBulkDualNotification } = await import('@/services/unifiedNotifier');
+                await sendBulkDualNotification({
+                  user_ids: userIds,
                   title: `📦 تحديث حالة الشحنة ${shipmentData.shipment_number}`,
                   message: withTagline(`تم تغيير حالة الشحنة ${shipmentData.shipment_number} إلى: ${statusLabel}`),
                   type: 'status_update',
-                  shipment_id: shipmentId,
-                  is_read: false,
-                }));
-
-              if (statusNotifications.length > 0) {
-                await supabase.from('notifications').insert(statusNotifications);
-                console.log(`[RealtimeTracking] Sent ${statusNotifications.length} status notifications`);
+                  reference_id: shipmentId,
+                  reference_type: 'shipment',
+                });
+                console.log(`[RealtimeTracking] Sent ${userIds.length} dual notifications`);
               }
             }
           } catch (notifErr) {

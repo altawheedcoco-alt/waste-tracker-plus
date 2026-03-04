@@ -4,6 +4,7 @@ import { ar } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
@@ -123,15 +124,14 @@ const ReceiptDetailsDialog = ({
             .limit(10);
 
           if (transporterUsers && transporterUsers.length > 0) {
-            const notifications = transporterUsers.map((u: any) => ({
-              user_id: u.user_id,
+            await sendBulkDualNotification({
+              user_ids: transporterUsers.map((u: any) => u.user_id),
               title: '✅ تأكيد شهادة الاستلام',
               message: withTagline(`تم تأكيد شهادة الاستلام ${receipt.receipt_number} من قبل الجهة المولدة`),
               type: 'receipt_confirmed',
-              shipment_id: receipt.shipment?.id || null,
-              is_read: false,
-            }));
-            await supabase.from('notifications').insert(notifications);
+              reference_id: receipt.shipment?.id || undefined,
+              reference_type: 'shipment',
+            });
           }
         } catch (e) {
           console.error('Failed to notify transporter:', e);

@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
@@ -76,16 +77,14 @@ export async function autoCreateReceipt(
         .limit(10);
 
       if (generatorUsers && generatorUsers.length > 0) {
-        const notifications = generatorUsers.map((u: any) => ({
-          user_id: u.user_id,
+        await sendBulkDualNotification({
+          user_ids: generatorUsers.map((u: any) => u.user_id),
           title: '🧾 شهادة استلام جديدة',
           message: withTagline(`تم إصدار شهادة استلام ${receiptData?.receipt_number || receiptNumber} للشحنة ${shipment.shipment_number}`),
           type: 'receipt_issued',
-          shipment_id: shipmentId,
-          is_read: false,
-        }));
-
-        await supabase.from('notifications').insert(notifications);
+          reference_id: shipmentId,
+          reference_type: 'shipment',
+        });
       }
     } catch (notifError) {
       console.error('Failed to send receipt notification:', notifError);

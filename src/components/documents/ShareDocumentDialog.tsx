@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   Dialog,
@@ -355,14 +356,12 @@ const ShareDocumentDialog = ({
             .eq('id', profile.organization_id)
             .single();
 
-          const notifications = recipientUsers.map((u: any) => ({
-            user_id: u.user_id,
+          await sendBulkDualNotification({
+            user_ids: recipientUsers.map((u: any) => u.user_id),
             title: 'مستند مشترك جديد',
             message: `أرسلت ${senderOrg.data?.name || 'جهة'} مستنداً: ${title.trim()}`,
             type: 'document_shared',
-            is_read: false,
-          }));
-          await supabase.from('notifications').insert(notifications);
+          });
         }
 
         setSent(true);

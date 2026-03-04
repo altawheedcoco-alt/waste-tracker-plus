@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { format, differenceInDays, subDays, subMonths, startOfMonth, endOfMonth } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -260,14 +261,13 @@ const AdminRevenueManagement = () => {
         .limit(50);
 
       if (orgUsers && orgUsers.length > 0) {
-        const notifications = orgUsers.map((u: any) => ({
-          user_id: u.user_id,
+        await sendBulkDualNotification({
+          user_ids: orgUsers.map((u: any) => u.user_id),
           title: '⚠️ تنبيه: تجديد الاشتراك مطلوب',
           message: `اشتراككم في منصة iRecycle منتهي أو على وشك الانتهاء. يرجى التجديد لضمان استمرار الخدمة.`,
           type: 'subscription_reminder',
-          is_read: false,
-        }));
-        await supabase.from('notifications').insert(notifications);
+          organization_id: orgId,
+        });
       }
       toast.success(`تم إرسال تنبيه لـ ${orgName}`);
     } catch {

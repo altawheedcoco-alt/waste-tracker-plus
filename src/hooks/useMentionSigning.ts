@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { sendDualNotification } from '@/services/unifiedNotifier';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { MentionableEntity } from '@/components/ui/mentionable-field';
@@ -94,23 +95,23 @@ export function useMentionSigning() {
 
       if (error) throw error;
 
-      // Send notification to the recipient
-      await supabase.from('notifications').insert({
-        user_id: recipientUserId || null,
-        organization_id: recipientOrgId,
-        title: `📝 طلب توقيع جديد`,
-        body: `${profile.full_name} يطلب توقيعك على: ${documentTitle}`,
-        type: 'signing_request',
-        channel: 'documents',
-        action_url: '/dashboard/signing-inbox',
-        metadata: {
-          sender_name: profile.full_name,
-          sender_org_id: orgId,
-          document_title: documentTitle,
-          document_type: documentType,
-          requires_stamp: requiresStamp,
-        },
-      } as any);
+      // Send dual notification (in-app + WhatsApp) to the recipient
+      if (recipientUserId) {
+        await sendDualNotification({
+          user_id: recipientUserId,
+          title: `📝 طلب توقيع جديد`,
+          message: `${profile.full_name} يطلب توقيعك على: ${documentTitle}`,
+          type: 'signing_request',
+          organization_id: recipientOrgId,
+          metadata: {
+            sender_name: profile.full_name,
+            sender_org_id: orgId,
+            document_title: documentTitle,
+            document_type: documentType,
+            requires_stamp: requiresStamp,
+          },
+        });
+      }
 
       toast.success(`تم إرسال طلب التوقيع إلى ${entity.name}`, {
         description: requiresStamp ? 'مطلوب ختم + توقيع' : 'مطلوب توقيع',

@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 import {
@@ -135,17 +136,14 @@ const ConsultantAutoReviewPanel = memo(({ assignments, consultantId, entityType 
           .from('profiles').select('id')
           .eq('organization_id', draft.organization_id).limit(5);
         if (orgProfiles?.length) {
-          await supabase.from('notifications').insert(
-            orgProfiles.map(p => ({
-              user_id: p.id,
-              title: action === 'approved' ? '✅ اعتماد فني: تمت الموافقة' : '❌ اعتماد فني: مرفوض',
-              message: action === 'approved'
-                ? 'تم اعتماد المطابقة الفنية للشحنة — يمكنكم الآن إصدار الفاتورة'
-                : `رُفض الاعتماد الفني: ${reviewNotes || 'يرجى مراجعة الشحنة'}`,
-              type: 'consultant_action',
-              action_url: '/dashboard/shipments',
-            })) as any
-          );
+          await sendBulkDualNotification({
+            user_ids: orgProfiles.map(p => p.id),
+            title: action === 'approved' ? '✅ اعتماد فني: تمت الموافقة' : '❌ اعتماد فني: مرفوض',
+            message: action === 'approved'
+              ? 'تم اعتماد المطابقة الفنية للشحنة — يمكنكم الآن إصدار الفاتورة'
+              : `رُفض الاعتماد الفني: ${reviewNotes || 'يرجى مراجعة الشحنة'}`,
+            type: 'consultant_action',
+          });
         }
       }
     },
