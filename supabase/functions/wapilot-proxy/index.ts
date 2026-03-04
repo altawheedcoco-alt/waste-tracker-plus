@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
 const WAPILOT_BASE = 'https://api.wapilot.net/api/v2';
@@ -14,6 +14,8 @@ Deno.serve(async (req) => {
 
   try {
     const token = Deno.env.get('WAPILOT_API_TOKEN');
+    const defaultInstanceId = Deno.env.get('WAPILOT_INSTANCE_ID');
+
     if (!token) {
       return new Response(JSON.stringify({ error: 'WAPILOT_API_TOKEN not configured' }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -44,32 +46,85 @@ Deno.serve(async (req) => {
     const body = await req.json().catch(() => ({}));
     const { action, instance_id, ...params } = body;
 
+    // Use provided instance_id or fall back to env var
+    const resolvedInstanceId = instance_id || defaultInstanceId;
+
     // Actions that require instance_id
-    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages'];
-    if (actionsRequiringInstance.includes(action) && !instance_id) {
-      // Auto-resolve instance_id by fetching the first available instance
-      const listRes = await fetch(`${WAPILOT_BASE}/instances`, {
-        headers: { token },
+    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages', 'get-qr', 'restart-instance', 'connect-instance', 'disconnect-instance', 'instance-info'];
+
+    if (actionsRequiringInstance.includes(action) && !resolvedInstanceId) {
+      return new Response(JSON.stringify({ error: 'Instance ID is required. Set WAPILOT_INSTANCE_ID or provide instance_id.' }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
-      const instancesList = await listRes.json();
-      if (!Array.isArray(instancesList) || instancesList.length === 0) {
-        return new Response(JSON.stringify({ error: 'No WaPilot instance available' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
-      }
-      body.instance_id = instancesList[0].id;
     }
 
-    const resolvedInstanceId = body.instance_id || instance_id;
+    // Special action: diagnostics - return connection info
+    if (action === 'diagnostics') {
+      const result: Record<string, any> = {
+        token_configured: true,
+        token_preview: `${token.slice(0, 6)}...${token.slice(-4)}`,
+        instance_id: resolvedInstanceId || null,
+        api_base: WAPILOT_BASE,
+      };
+
+      if (resolvedInstanceId) {
+        try {
+          const statusRes = await fetch(`${WAPILOT_BASE}/instances/${resolvedInstanceId}/status`, {
+            headers: { token },
+          });
+          result.instance_status = await statusRes.json().catch(() => ({}));
+        } catch (e: any) {
+          result.instance_status = { error: e.message };
+        }
+      }
+
+      return new Response(JSON.stringify(result), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    // For list-instances, return the configured instance as an array
+    if (action === 'list-instances') {
+      if (resolvedInstanceId) {
+        // Fetch status for the known instance
+        try {
+          const statusRes = await fetch(`${WAPILOT_BASE}/instances/${resolvedInstanceId}/status`, {
+            headers: { token },
+          });
+          const statusData = await statusRes.json().catch(() => ({}));
+          return new Response(JSON.stringify([{
+            id: resolvedInstanceId,
+            name: statusData.me_push_name || 'WaPilot Instance',
+            status: statusData.status === 'WORKING' ? 'connected' : statusData.status || 'unknown',
+            phone: statusData.me_id?.replace('@c.us', '') || null,
+            me: {
+              id: statusData.me_id || null,
+              pushName: statusData.me_push_name || null,
+            },
+            status_message: statusData.status_message || null,
+          }]), {
+            status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        } catch {
+          return new Response(JSON.stringify([{
+            id: resolvedInstanceId,
+            name: 'WaPilot Instance',
+            status: 'unknown',
+          }]), {
+            status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+      }
+      return new Response(JSON.stringify([]), {
+        status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
 
     let url: string;
     let method = 'GET';
     let fetchBody: string | undefined;
 
     switch (action) {
-      case 'list-instances':
-        url = `${WAPILOT_BASE}/instances`;
-        break;
       case 'instance-status':
         url = `${WAPILOT_BASE}/instances/${resolvedInstanceId}/status`;
         break;
@@ -145,15 +200,6 @@ Deno.serve(async (req) => {
 
     const response = await fetch(url, { method, headers, body: fetchBody });
     const data = await response.json().catch(() => ({}));
-
-    // If list-instances fails (API doesn't support listing), return empty array gracefully
-    if (action === 'list-instances' && !response.ok) {
-      console.warn('list-instances failed, returning empty array:', data);
-      return new Response(JSON.stringify([]), {
-        status: 200,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
 
     return new Response(JSON.stringify(data), {
       status: response.status,

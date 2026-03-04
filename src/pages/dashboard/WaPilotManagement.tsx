@@ -69,6 +69,9 @@ const WaPilotManagement = () => {
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<'overview' | 'manager'>('overview');
   const [uptime, setUptime] = useState<number>(0);
+  const [connectionDiag, setConnectionDiag] = useState<any>(null);
+  const [apiStatus, setApiStatus] = useState<'checking' | 'connected' | 'error'>('checking');
+  const [statusMessage, setStatusMessage] = useState<string>('');
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -79,15 +82,30 @@ const WaPilotManagement = () => {
 
   const fetchAllData = useCallback(async () => {
     setRefreshing(true);
+    setApiStatus('checking');
     try {
-      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes] = await Promise.all([
+      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes, diagRes] = await Promise.all([
         supabase.from('whatsapp_messages').select('id, status, direction, message_type, created_at, organization_id, error_message').order('created_at', { ascending: false }).limit(1000),
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).not('phone', 'is', null),
         supabase.from('whatsapp_templates').select('id', { count: 'exact', head: true }).eq('is_active', true),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-instances' } }).catch(() => ({ data: [] })),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-campaigns' } }).catch(() => ({ data: [] })),
+        supabase.functions.invoke('wapilot-proxy', { body: { action: 'diagnostics' } }).catch(() => ({ data: null })),
       ]);
+
+      // Diagnostics
+      if (diagRes?.data) {
+        setConnectionDiag(diagRes.data);
+        const instStatus = diagRes.data.instance_status;
+        if (instStatus?.success && instStatus?.status === 'WORKING') {
+          setApiStatus('connected');
+          setStatusMessage(instStatus.status_message || 'Everything is fine');
+        } else {
+          setApiStatus('error');
+          setStatusMessage(instStatus?.status_message || 'Connection issue');
+        }
+      }
 
       const msgs = (msgRes.data || []) as MessageLog[];
       setMessages(msgs);
@@ -97,7 +115,10 @@ const WaPilotManagement = () => {
       const weekAgo = new Date(now.getTime() - 7 * 86400000);
       const weekMsgs = msgs.filter(m => new Date(m.created_at) >= weekAgo);
 
-      const campaigns = Array.isArray(campaignRes?.data) ? campaignRes.data : [];
+      // Handle paginated campaign response
+      const campaignData = campaignRes?.data;
+      const campaigns = Array.isArray(campaignData) ? campaignData :
+        (campaignData?.data && Array.isArray(campaignData.data)) ? campaignData.data : [];
 
       setStats({
         totalMessages: msgs.length,
@@ -126,22 +147,12 @@ const WaPilotManagement = () => {
         const name = active.me?.pushName || active.name || null;
         setConnectedPhone(phone);
         setConnectedName(name);
-        if (!phone && active.id) {
-          try {
-            const { data: statusData } = await supabase.functions.invoke('wapilot-proxy', {
-              body: { action: 'instance-info', instance_id: active.id },
-            });
-            if (statusData) {
-              setConnectedPhone(statusData.phone || statusData.me?.id?.replace('@c.us', '') || null);
-              setConnectedName(statusData.me?.pushName || statusData.pushname || statusData.name || null);
-            }
-          } catch {}
-        }
       } else {
         setInstanceStatus('disconnected');
       }
     } catch (e) {
       console.error('Fetch error:', e);
+      setApiStatus('error');
     }
     setRefreshing(false);
   }, []);
@@ -378,6 +389,61 @@ const WaPilotManagement = () => {
               </Card>
             ))}
           </div>
+
+          {/* ══════════ API CONNECTION DETAILS ══════════ */}
+          <Card className="border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Server className="h-4 w-4 text-primary" />
+                تفاصيل اتصال WaPilot API
+                <Badge variant={apiStatus === 'connected' ? 'default' : apiStatus === 'checking' ? 'secondary' : 'destructive'} className="text-[10px] mr-auto">
+                  {apiStatus === 'connected' ? '✓ متصل ويعمل' : apiStatus === 'checking' ? 'جاري الفحص...' : '✗ خطأ'}
+                </Badge>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">API Token</p>
+                  <p className="text-xs font-mono font-medium" dir="ltr">{connectionDiag?.token_preview || '...'}</p>
+                  <Badge variant={connectionDiag?.token_configured ? 'default' : 'destructive'} className="text-[9px]">
+                    {connectionDiag?.token_configured ? '✓ مُعدّ' : '✗ غير مُعدّ'}
+                  </Badge>
+                </div>
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">Instance ID</p>
+                  <p className="text-xs font-mono font-medium" dir="ltr">{connectionDiag?.instance_id || activeInstanceId || '—'}</p>
+                  <Badge variant={connectionDiag?.instance_id ? 'default' : 'destructive'} className="text-[9px]">
+                    {connectionDiag?.instance_id ? '✓ مُعدّ' : '✗ غير مُعدّ'}
+                  </Badge>
+                </div>
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">حالة الجهاز</p>
+                  <p className="text-xs font-medium">
+                    {connectionDiag?.instance_status?.status === 'WORKING' ? '🟢 يعمل' :
+                     connectionDiag?.instance_status?.status ? `🟡 ${connectionDiag.instance_status.status}` : '⚪ غير معروف'}
+                  </p>
+                  <p className="text-[9px] text-muted-foreground">{statusMessage}</p>
+                </div>
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">رقم الواتساب</p>
+                  <p className="text-xs font-mono font-medium" dir="ltr">
+                    {connectionDiag?.instance_status?.me_id?.replace('@c.us', '') || connectedPhone || '—'}
+                  </p>
+                </div>
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">اسم الحساب</p>
+                  <p className="text-xs font-medium truncate" title={connectionDiag?.instance_status?.me_push_name || ''}>
+                    {connectionDiag?.instance_status?.me_push_name || connectedName || '—'}
+                  </p>
+                </div>
+                <div className="bg-muted/40 rounded-lg p-3 space-y-1">
+                  <p className="text-[10px] text-muted-foreground">API Base</p>
+                  <p className="text-[10px] font-mono font-medium" dir="ltr">{connectionDiag?.api_base || 'api.wapilot.net/api/v2'}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* ══════════ SECONDARY STATS ══════════ */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
