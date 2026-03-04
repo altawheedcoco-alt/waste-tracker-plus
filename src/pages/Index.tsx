@@ -28,6 +28,7 @@ const TestimonialsSection = lazy(() => import("@/components/landing/Testimonials
 const NationalInitiativeSection = lazy(() => import("@/components/landing/NationalInitiativeSection"));
 const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
 const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
+const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcase"));
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 
@@ -89,6 +90,7 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   'smart-agent': <SmartAgentShowcase />,
   services: <Services />,
   omaluna: <OmalunaSection />,
+  'whatsapp-notifications': <WhatsAppShowcase />,
   testimonials: <TestimonialsSection />,
   cta: <CTA />,
 };
