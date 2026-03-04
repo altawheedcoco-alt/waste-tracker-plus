@@ -42,7 +42,7 @@ import PinCodeSettings from '@/components/security/PinCodeSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import AdvancedAppearanceSettings from '@/components/settings/AdvancedAppearanceSettings';
 import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
-import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
+
 import LanguageSettings from '@/components/settings/LanguageSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
@@ -723,8 +723,6 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
         {/* Notification Channels Tab */}
         <TabsContent value="notifications-channels" className="space-y-6">
           <NotificationChannelsSettings />
-          <div className="border-t my-6" />
-          <WhatsAppNotificationManager />
         </TabsContent>
 
         {/* Terms and Conditions Tab */}
