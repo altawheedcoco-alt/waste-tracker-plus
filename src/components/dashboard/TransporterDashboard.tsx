@@ -87,6 +87,7 @@ const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAle
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
+const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -229,6 +230,12 @@ const TransporterDashboard = () => {
 
             <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
               <TransporterPerformanceCharts />
+            </ErrorBoundary>
+
+            <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+              <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+                <OrgPerformanceRadar />
+              </Suspense>
             </ErrorBoundary>
 
             <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={(f) => {

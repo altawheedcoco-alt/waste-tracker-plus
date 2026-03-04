@@ -787,6 +787,19 @@ export const dashboardWidgets: DashboardWidgetConfig[] = [
     defaultPinned: false,
     size: 'medium',
   },
+
+  // === رادار أداء الجهة ===
+  {
+    id: 'org_performance_radar',
+    title: 'رادار أداء الجهة',
+    description: 'تحليل شامل لـ 8 محاور أداء مقارنة بمتوسط القطاع',
+    icon: Activity,
+    category: 'advanced',
+    availableFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'],
+    defaultOrder: 59,
+    defaultPinned: false,
+    size: 'large',
+  },
 ];
 
 /**

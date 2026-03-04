@@ -4,6 +4,10 @@ import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCir
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
+const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { Skeleton } from '@/components/ui/skeleton';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -240,6 +244,13 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         <TabsContent value="operations" className="mt-4 space-y-4">
           <DisposalDailyOperations />
           <OperationalAlertsWidget />
+
+          <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
+              <OrgPerformanceRadar />
+            </Suspense>
+          </ErrorBoundary>
+
           <DisposalIncomingPanel facilityId={facility?.id} />
           <PendingApprovalsWidget />
           <QuickActionsGrid
