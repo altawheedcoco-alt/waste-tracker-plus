@@ -39,7 +39,59 @@ Deno.serve(async (req) => {
       metadata,
       instance_id,
       recipients,
+      interactive_buttons,
+      attachment_url,
+      check_visibility = false,
+      from_org_id,
+      to_org_id,
     } = body;
+
+    // Smart visibility check: respect partner masking rules
+    if (check_visibility && from_org_id && to_org_id) {
+      const { data: vis } = await supabase
+        .from("partner_visibility_settings")
+        .select("can_receive_notifications, can_view_recycler_info, can_view_generator_info")
+        .eq("organization_id", from_org_id)
+        .eq("partner_organization_id", to_org_id)
+        .single();
+
+      if (vis?.can_receive_notifications === false) {
+        return new Response(
+          JSON.stringify({ success: false, blocked: true, reason: "Notifications blocked by visibility settings" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Check shipment-level masking
+      if (metadata?.shipment_id) {
+        const { data: shipment } = await supabase
+          .from("shipments")
+          .select("hide_recycler_from_generator, hide_generator_from_recycler, generator_organization_id, recycler_organization_id")
+          .eq("id", metadata.shipment_id)
+          .single();
+
+        if (shipment) {
+          // If recycler is hidden from generator and we're sending from recycler to generator
+          if (shipment.hide_recycler_from_generator &&
+              from_org_id === shipment.recycler_organization_id &&
+              to_org_id === shipment.generator_organization_id) {
+            return new Response(
+              JSON.stringify({ success: false, blocked: true, reason: "Recycler hidden from generator" }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+          // If generator is hidden from recycler
+          if (shipment.hide_generator_from_recycler &&
+              from_org_id === shipment.generator_organization_id &&
+              to_org_id === shipment.recycler_organization_id) {
+            return new Response(
+              JSON.stringify({ success: false, blocked: true, reason: "Generator hidden from recycler" }),
+              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+            );
+          }
+        }
+      }
+    }
 
     // Check org config
     if (organization_id) {
@@ -104,10 +156,27 @@ Deno.serve(async (req) => {
       const formattedPhone = phone.replace(/[\s+\-()]/g, "");
       const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
 
+      // Build message payload
+      const msgPayload: any = { chat_id: chatId, text };
+
+      // If interactive buttons are provided, use list/button format
+      if (interactive_buttons?.length > 0) {
+        msgPayload.interactive = {
+          type: "button",
+          body: { text },
+          action: {
+            buttons: interactive_buttons.map((btn: any, idx: number) => ({
+              type: "reply",
+              reply: { id: btn.id || `btn_${idx}`, title: btn.title },
+            })),
+          },
+        };
+      }
+
       const res = await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-message`, {
         method: "POST",
         headers: { token: WAPILOT_TOKEN, "Content-Type": "application/json" },
-        body: JSON.stringify({ chat_id: chatId, text }),
+        body: JSON.stringify(msgPayload),
       });
       return await res.json();
     };
@@ -148,6 +217,8 @@ Deno.serve(async (req) => {
             error_message: result.error || null,
             notification_id,
             metadata,
+            interactive_buttons: interactive_buttons || null,
+            attachment_url: attachment_url || null,
           });
 
           results.push({ phone: recipient.phone, success: !result.error });
@@ -184,6 +255,8 @@ Deno.serve(async (req) => {
       error_message: result.error || null,
       notification_id,
       metadata,
+      interactive_buttons: interactive_buttons || null,
+      attachment_url: attachment_url || null,
     }).select().single();
 
     if (result.error) {
