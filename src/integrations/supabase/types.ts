@@ -34285,6 +34285,36 @@ export type Database = {
           },
         ]
       }
+      whatsapp_broadcast_groups: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          filter_criteria: Json | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          filter_criteria?: Json | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          filter_criteria?: Json | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       whatsapp_config: {
         Row: {
           auto_send_marketing: boolean | null
@@ -34345,19 +34375,67 @@ export type Database = {
           },
         ]
       }
+      whatsapp_message_interactions: {
+        Row: {
+          created_at: string
+          id: string
+          interaction_data: Json | null
+          interaction_type: string
+          interaction_value: string | null
+          message_id: string | null
+          organization_id: string | null
+          shipment_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          interaction_data?: Json | null
+          interaction_type?: string
+          interaction_value?: string | null
+          message_id?: string | null
+          organization_id?: string | null
+          shipment_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          interaction_data?: Json | null
+          interaction_type?: string
+          interaction_value?: string | null
+          message_id?: string | null
+          organization_id?: string | null
+          shipment_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_message_interactions_message_id_fkey"
+            columns: ["message_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_messages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_messages: {
         Row: {
+          attachment_url: string | null
+          broadcast_group_id: string | null
           content: string | null
           created_at: string
           direction: string
           error_message: string | null
           from_phone: string | null
           id: string
+          interactive_buttons: Json | null
           message_type: string
           meta_message_id: string | null
           metadata: Json | null
           notification_id: string | null
           organization_id: string | null
+          sent_by: string | null
           status: string | null
           template_id: string | null
           template_params: Json | null
@@ -34366,17 +34444,21 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          attachment_url?: string | null
+          broadcast_group_id?: string | null
           content?: string | null
           created_at?: string
           direction?: string
           error_message?: string | null
           from_phone?: string | null
           id?: string
+          interactive_buttons?: Json | null
           message_type?: string
           meta_message_id?: string | null
           metadata?: Json | null
           notification_id?: string | null
           organization_id?: string | null
+          sent_by?: string | null
           status?: string | null
           template_id?: string | null
           template_params?: Json | null
@@ -34385,17 +34467,21 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          attachment_url?: string | null
+          broadcast_group_id?: string | null
           content?: string | null
           created_at?: string
           direction?: string
           error_message?: string | null
           from_phone?: string | null
           id?: string
+          interactive_buttons?: Json | null
           message_type?: string
           meta_message_id?: string | null
           metadata?: Json | null
           notification_id?: string | null
           organization_id?: string | null
+          sent_by?: string | null
           status?: string | null
           template_id?: string | null
           template_params?: Json | null
@@ -34404,6 +34490,13 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "whatsapp_messages_broadcast_group_id_fkey"
+            columns: ["broadcast_group_id"]
+            isOneToOne: false
+            referencedRelation: "whatsapp_broadcast_groups"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "whatsapp_messages_notification_id_fkey"
             columns: ["notification_id"]
@@ -34436,6 +34529,7 @@ export type Database = {
       }
       whatsapp_templates: {
         Row: {
+          attachment_url: string | null
           body_text: string
           buttons: Json | null
           category: string
@@ -34443,16 +34537,19 @@ export type Database = {
           footer_text: string | null
           header_text: string | null
           id: string
+          interactive_type: string | null
           is_active: boolean | null
           is_system: boolean | null
           meta_status: string | null
           meta_template_id: string | null
           organization_id: string | null
+          survey_options: Json | null
           template_language: string | null
           template_name: string
           updated_at: string
         }
         Insert: {
+          attachment_url?: string | null
           body_text: string
           buttons?: Json | null
           category?: string
@@ -34460,16 +34557,19 @@ export type Database = {
           footer_text?: string | null
           header_text?: string | null
           id?: string
+          interactive_type?: string | null
           is_active?: boolean | null
           is_system?: boolean | null
           meta_status?: string | null
           meta_template_id?: string | null
           organization_id?: string | null
+          survey_options?: Json | null
           template_language?: string | null
           template_name: string
           updated_at?: string
         }
         Update: {
+          attachment_url?: string | null
           body_text?: string
           buttons?: Json | null
           category?: string
@@ -34477,11 +34577,13 @@ export type Database = {
           footer_text?: string | null
           header_text?: string | null
           id?: string
+          interactive_type?: string | null
           is_active?: boolean | null
           is_system?: boolean | null
           meta_status?: string | null
           meta_template_id?: string | null
           organization_id?: string | null
+          survey_options?: Json | null
           template_language?: string | null
           template_name?: string
           updated_at?: string
