@@ -72,6 +72,56 @@ const CHART_COLORS = [
   'hsl(199, 89%, 48%)',
 ];
 
+  // Parse WaPilot API messages into MessageLog format
+  const parseWaPilotMessages = (data: any): MessageLog[] => {
+    if (!data) return [];
+    // Handle different response structures from WaPilot API
+    const rawMessages = Array.isArray(data) ? data : 
+      (data?.data && Array.isArray(data.data)) ? data.data :
+      (data?.messages && Array.isArray(data.messages)) ? data.messages : [];
+    
+    return rawMessages.map((msg: any, idx: number) => {
+      const isFromMe = msg.fromMe ?? msg.from_me ?? (msg.key?.fromMe) ?? false;
+      const remoteJid = msg.key?.remoteJid || msg.chatId || msg.chat_id || msg.from || msg.to || '';
+      const phone = remoteJid.replace('@c.us', '').replace('@s.whatsapp.net', '').replace(/[\s\-\+]/g, '');
+      const content = msg.body || msg.text || msg.message?.conversation || 
+        msg.message?.extendedTextMessage?.text || msg.content || '';
+      const timestamp = msg.timestamp ? new Date(msg.timestamp * 1000).toISOString() :
+        msg.created_at || msg.messageTimestamp ? new Date((msg.messageTimestamp || 0) * 1000).toISOString() :
+        new Date().toISOString();
+      const msgId = msg.key?.id || msg.id || msg.message_id || `wapilot-${idx}-${Date.now()}`;
+      
+      return {
+        id: `wapilot-api-${msgId}`,
+        status: msg.ack === 3 ? 'read' : msg.ack === 2 ? 'delivered' : msg.ack === 1 ? 'sent' : 
+          msg.status || (isFromMe ? 'sent' : 'received'),
+        direction: isFromMe ? 'outbound' : 'inbound',
+        message_type: msg.type || (msg.hasMedia ? 'media' : 'text'),
+        created_at: timestamp,
+        organization_id: null,
+        error_message: null,
+        content: content || `[${msg.type || 'message'}]`,
+        to_phone: isFromMe ? phone : null,
+        from_phone: isFromMe ? null : phone,
+        template_id: null,
+        attachment_url: msg.mediaUrl || msg.media_url || null,
+        sent_by: null,
+        meta_message_id: msgId,
+        metadata: { 
+          profile_name: msg.notifyName || msg.pushName || msg.senderName || msg.contact_name || null,
+          source: 'wapilot_api',
+          ack: msg.ack,
+        },
+        interactive_buttons: null,
+        broadcast_group_id: null,
+      } as MessageLog;
+    }).filter((m: MessageLog) => {
+      // Filter out status/system messages
+      const phone = m.to_phone || m.from_phone || '';
+      return phone.length >= 8 && !phone.includes('status');
+    });
+  };
+
 const WaPilotManagement = () => {
   const { roles } = useAuth();
   const isAdmin = roles.includes('admin');
@@ -122,7 +172,7 @@ const WaPilotManagement = () => {
     setRefreshing(true);
     setApiStatus('checking');
     try {
-      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes, diagRes, orgListRes] = await Promise.all([
+      const [msgRes, orgRes, userRes, tplRes, instRes, campaignRes, diagRes, orgListRes, wapilotMsgRes] = await Promise.all([
         supabase.from('whatsapp_messages').select('*').order('created_at', { ascending: false }).limit(1000),
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }).not('phone', 'is', null),
@@ -131,6 +181,7 @@ const WaPilotManagement = () => {
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-campaigns' } }).catch(() => ({ data: [] })),
         supabase.functions.invoke('wapilot-proxy', { body: { action: 'diagnostics' } }).catch(() => ({ data: null })),
         supabase.from('organizations').select('id, name, name_en').limit(1000),
+        supabase.functions.invoke('wapilot-proxy', { body: { action: 'list-messages', limit: 500 } }).catch(() => ({ data: null })),
       ]);
 
       // Diagnostics
@@ -146,7 +197,18 @@ const WaPilotManagement = () => {
         }
       }
 
-      const msgs = (msgRes.data || []) as MessageLog[];
+      // Merge DB messages with WaPilot API real messages
+      const dbMsgs = (msgRes.data || []) as MessageLog[];
+      const apiMsgs = parseWaPilotMessages(wapilotMsgRes?.data);
+      
+      // Deduplicate: prefer DB messages over API messages
+      const dbMsgIds = new Set(dbMsgs.map(m => m.meta_message_id).filter(Boolean));
+      const uniqueApiMsgs = apiMsgs.filter(m => !m.meta_message_id || !dbMsgIds.has(m.meta_message_id));
+      const msgs = [...dbMsgs, ...uniqueApiMsgs].sort(
+        (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+      
+      console.log(`📨 Messages: ${dbMsgs.length} DB + ${apiMsgs.length} API (${uniqueApiMsgs.length} unique) = ${msgs.length} total`);
       setMessages(msgs);
       setOrgs((orgListRes?.data || []) as OrgInfo[]);
 
