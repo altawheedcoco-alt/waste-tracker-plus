@@ -201,6 +201,78 @@ Deno.serve(async (req) => {
       return await res.json();
     };
 
+    // Handle send_to_user: resolve user phone from profiles
+    if (action === "send_to_user" && user_id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("phone")
+        .eq("id", user_id)
+        .single();
+
+      if (!profile?.phone) {
+        return new Response(
+          JSON.stringify({ success: false, error: "User has no phone number", user_id }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const result = await sendOne(profile.phone, finalText);
+
+      await supabase.from("whatsapp_messages").insert({
+        organization_id,
+        direction: "outbound",
+        to_phone: profile.phone,
+        user_id,
+        message_type: "notification",
+        content: finalText,
+        status: result.error ? "failed" : "sent",
+        error_message: result.error || null,
+        notification_id,
+        metadata,
+      });
+
+      return new Response(
+        JSON.stringify({ success: !result.error, sent: result.error ? 0 : 1 }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Handle broadcast_to_users: resolve phones from profiles
+    if (action === "broadcast_to_users" && body.user_ids?.length > 0) {
+      const { data: profiles } = await supabase
+        .from("profiles")
+        .select("id, phone")
+        .in("id", body.user_ids);
+
+      const validProfiles = (profiles || []).filter((p: any) => p.phone);
+      let sentCount = 0;
+
+      for (const profile of validProfiles) {
+        try {
+          const result = await sendOne(profile.phone, finalText);
+          await supabase.from("whatsapp_messages").insert({
+            organization_id,
+            direction: "outbound",
+            to_phone: profile.phone,
+            user_id: profile.id,
+            message_type: "notification",
+            content: finalText,
+            status: result.error ? "failed" : "sent",
+            error_message: result.error || null,
+            metadata,
+          });
+          if (!result.error) sentCount++;
+        } catch (e) {
+          console.warn("Broadcast send failed for", profile.id, e.message);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, sent: sentCount, total: validProfiles.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // Handle bulk send
     if (action === "bulk" && recipients?.length > 0) {
       const results = [];
