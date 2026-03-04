@@ -14,7 +14,7 @@ import {
   Smartphone, Phone, Copy, Zap, HeartPulse, Shield, Globe,
   BarChart3, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
   Radio, Server, Power, QrCode, RotateCcw, Loader2, Megaphone,
-  Target, PieChart, CalendarDays, Bot, Hash
+  Target, PieChart, CalendarDays, Bot, Hash, BookOpen, Code2, ExternalLink
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart as RePieChart, Pie, Cell,
@@ -596,6 +596,135 @@ const WaPilotManagement = () => {
                     </div>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* ══════════ WAPILOT API DOCUMENTATION ══════════ */}
+          <Card className="border">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <BookOpen className="h-4 w-4 text-primary" />
+                توثيق WaPilot API
+                <Button variant="outline" size="sm" className="text-[10px] h-6 mr-auto gap-1" onClick={() => window.open('/dashboard/api', '_blank')}>
+                  <ExternalLink className="h-3 w-3" />صفحة API العامة
+                </Button>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Base URL */}
+              <div>
+                <p className="text-xs font-medium mb-1.5">عنوان API الأساسي (WaPilot Proxy)</p>
+                <code className="block p-2.5 bg-muted rounded-lg text-xs font-mono break-all" dir="ltr">
+                  {`${window.location.origin.replace('id-preview--', '')}/functions/v1/wapilot-proxy`}
+                </code>
+              </div>
+
+              {/* Auth */}
+              <div>
+                <p className="text-xs font-medium mb-1.5">المصادقة</p>
+                <code className="block p-2.5 bg-muted rounded-lg text-xs font-mono" dir="ltr">
+                  Authorization: Bearer {'<JWT_TOKEN>'}
+                </code>
+                <p className="text-[10px] text-muted-foreground mt-1">يتطلب توكن JWT صالح من نظام المصادقة</p>
+              </div>
+
+              {/* WaPilot Endpoints */}
+              <div>
+                <p className="text-xs font-medium mb-2">نقاط الوصول المتاحة (Actions)</p>
+                <div className="space-y-1.5">
+                  {[
+                    { action: 'diagnostics', method: 'POST', desc: 'تشخيص الاتصال وحالة النظام', category: 'نظام' },
+                    { action: 'list-instances', method: 'POST', desc: 'عرض الأجهزة المتصلة', category: 'أجهزة' },
+                    { action: 'instance-status', method: 'POST', desc: 'حالة جهاز محدد', category: 'أجهزة' },
+                    { action: 'instance-info', method: 'POST', desc: 'معلومات تفصيلية عن الجهاز', category: 'أجهزة' },
+                    { action: 'connect-instance', method: 'POST', desc: 'اتصال بالجهاز', category: 'أجهزة' },
+                    { action: 'disconnect-instance', method: 'POST', desc: 'قطع اتصال الجهاز', category: 'أجهزة' },
+                    { action: 'restart-instance', method: 'POST', desc: 'إعادة تشغيل الجهاز', category: 'أجهزة' },
+                    { action: 'get-qr', method: 'POST', desc: 'الحصول على رمز QR للربط', category: 'أجهزة' },
+                    { action: 'send-message', method: 'POST', desc: 'إرسال رسالة نصية', category: 'رسائل' },
+                    { action: 'send-list', method: 'POST', desc: 'إرسال رسالة تفاعلية (قائمة)', category: 'رسائل' },
+                    { action: 'list-messages', method: 'POST', desc: 'عرض الرسائل', category: 'رسائل' },
+                    { action: 'list-campaigns', method: 'POST', desc: 'عرض الحملات', category: 'حملات' },
+                    { action: 'create-campaign', method: 'POST', desc: 'إنشاء حملة جديدة', category: 'حملات' },
+                    { action: 'bulk-add-messages', method: 'POST', desc: 'إضافة رسائل جماعية لحملة', category: 'حملات' },
+                    { action: 'start-campaign', method: 'POST', desc: 'تشغيل حملة', category: 'حملات' },
+                    { action: 'campaign-stats', method: 'POST', desc: 'إحصائيات حملة', category: 'حملات' },
+                  ].map(ep => (
+                    <div key={ep.action} className="flex items-center justify-between p-2 bg-muted/40 rounded-lg text-xs">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="font-mono text-[9px] w-12 justify-center">{ep.method}</Badge>
+                        <code className="font-mono text-[11px]" dir="ltr">{ep.action}</code>
+                        <span className="text-muted-foreground hidden sm:inline">{ep.desc}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[9px]">{ep.category}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Other Endpoints */}
+              <div>
+                <p className="text-xs font-medium mb-2">نقاط الوصول المباشرة الأخرى</p>
+                <div className="space-y-1.5">
+                  {[
+                    { path: '/functions/v1/whatsapp-send', method: 'POST', desc: 'إرسال رسائل واتساب (فردية/جماعية) مع تسجيل تلقائي', scope: 'رسائل' },
+                    { path: '/functions/v1/whatsapp-event', method: 'POST', desc: 'محرك الأحداث التلقائية (شحنات، فواتير، OTP)', scope: 'أحداث' },
+                    { path: '/functions/v1/whatsapp-webhook', method: 'POST', desc: 'استقبال الرسائل الواردة وتحديثات الحالة', scope: 'Webhook' },
+                    { path: '/functions/v1/public-api', method: 'GET/POST', desc: 'API العام للتكامل الخارجي (شحنات، فواتير، تقارير)', scope: 'عام' },
+                  ].map(ep => (
+                    <div key={ep.path} className="flex items-center justify-between p-2 bg-muted/40 rounded-lg text-xs">
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="font-mono text-[9px] min-w-[50px] justify-center">{ep.method}</Badge>
+                        <code className="font-mono text-[10px]" dir="ltr">{ep.path}</code>
+                        <span className="text-muted-foreground hidden sm:inline">{ep.desc}</span>
+                      </div>
+                      <Badge variant="outline" className="text-[9px]">{ep.scope}</Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Example Request */}
+              <div>
+                <p className="text-xs font-medium mb-1.5">مثال: إرسال رسالة عبر WaPilot Proxy</p>
+                <pre className="p-3 bg-muted rounded-lg text-[10px] font-mono overflow-x-auto whitespace-pre-wrap" dir="ltr">
+{`// JavaScript / TypeScript
+const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
+  body: {
+    action: 'send-message',
+    chat_id: '201XXXXXXXXX@c.us',
+    text: 'مرحباً! هذه رسالة تجريبية من النظام'
+  }
+});`}
+                </pre>
+              </div>
+
+              {/* Example whatsapp-send */}
+              <div>
+                <p className="text-xs font-medium mb-1.5">مثال: إرسال عبر whatsapp-send مع تسجيل تلقائي</p>
+                <pre className="p-3 bg-muted rounded-lg text-[10px] font-mono overflow-x-auto whitespace-pre-wrap" dir="ltr">
+{`const { data, error } = await supabase.functions.invoke('whatsapp-send', {
+  body: {
+    to_phone: '201XXXXXXXXX',
+    message: 'تم إنشاء شحنة جديدة رقم #12345',
+    organization_id: 'org-uuid-here',
+    message_type: 'notification'
+  }
+});`}
+                </pre>
+              </div>
+
+              {/* Rate Limits */}
+              <div className="bg-muted/30 rounded-lg p-3 border">
+                <p className="text-xs font-medium mb-1">ملاحظات مهمة</p>
+                <ul className="text-[10px] text-muted-foreground space-y-0.5">
+                  <li>• جميع الطلبات تتطلب JWT Token صالح (باستثناء Webhook)</li>
+                  <li>• يتم تسجيل كل رسالة مُرسلة تلقائياً في جدول whatsapp_messages</li>
+                  <li>• الـ Instance ID يتم تحديده تلقائياً من إعدادات النظام</li>
+                  <li>• الحد الأقصى للإرسال الجماعي: يعتمد على خطة WaPilot</li>
+                  <li>• Public API يستخدم مفاتيح API منفصلة (x-api-key)</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
