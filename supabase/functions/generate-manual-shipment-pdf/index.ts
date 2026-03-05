@@ -1,6 +1,75 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { jsPDF } from "npm:jspdf@2.5.2";
 
+// ===== Arabic Reshaper for jsPDF =====
+const ARABIC_MAP: Record<number, [number, number, number, number]> = {
+  0x0621:[0xFE80,0xFE80,0xFE80,0xFE80],0x0622:[0xFE81,0xFE82,0xFE81,0xFE82],
+  0x0623:[0xFE83,0xFE84,0xFE83,0xFE84],0x0624:[0xFE85,0xFE86,0xFE85,0xFE86],
+  0x0625:[0xFE87,0xFE88,0xFE87,0xFE88],0x0626:[0xFE89,0xFE8A,0xFE8B,0xFE8C],
+  0x0627:[0xFE8D,0xFE8E,0xFE8D,0xFE8E],0x0628:[0xFE8F,0xFE90,0xFE91,0xFE92],
+  0x0629:[0xFE93,0xFE94,0xFE93,0xFE94],0x062A:[0xFE95,0xFE96,0xFE97,0xFE98],
+  0x062B:[0xFE99,0xFE9A,0xFE9B,0xFE9C],0x062C:[0xFE9D,0xFE9E,0xFE9F,0xFEA0],
+  0x062D:[0xFEA1,0xFEA2,0xFEA3,0xFEA4],0x062E:[0xFEA5,0xFEA6,0xFEA7,0xFEA8],
+  0x062F:[0xFEA9,0xFEAA,0xFEA9,0xFEAA],0x0630:[0xFEAB,0xFEAC,0xFEAB,0xFEAC],
+  0x0631:[0xFEAD,0xFEAE,0xFEAD,0xFEAE],0x0632:[0xFEAF,0xFEB0,0xFEAF,0xFEB0],
+  0x0633:[0xFEB1,0xFEB2,0xFEB3,0xFEB4],0x0634:[0xFEB5,0xFEB6,0xFEB7,0xFEB8],
+  0x0635:[0xFEB9,0xFEBA,0xFEBB,0xFEBC],0x0636:[0xFEBD,0xFEBE,0xFEBF,0xFEC0],
+  0x0637:[0xFEC1,0xFEC2,0xFEC3,0xFEC4],0x0638:[0xFEC5,0xFEC6,0xFEC7,0xFEC8],
+  0x0639:[0xFEC9,0xFECA,0xFECB,0xFECC],0x063A:[0xFECD,0xFECE,0xFECF,0xFED0],
+  0x0640:[0x0640,0x0640,0x0640,0x0640],
+  0x0641:[0xFED1,0xFED2,0xFED3,0xFED4],0x0642:[0xFED5,0xFED6,0xFED7,0xFED8],
+  0x0643:[0xFED9,0xFEDA,0xFEDB,0xFEDC],0x0644:[0xFEDD,0xFEDE,0xFEDF,0xFEE0],
+  0x0645:[0xFEE1,0xFEE2,0xFEE3,0xFEE4],0x0646:[0xFEE5,0xFEE6,0xFEE7,0xFEE8],
+  0x0647:[0xFEE9,0xFEEA,0xFEEB,0xFEEC],0x0648:[0xFEED,0xFEEE,0xFEED,0xFEEE],
+  0x0649:[0xFEEF,0xFEF0,0xFEEF,0xFEF0],0x064A:[0xFEF1,0xFEF2,0xFEF3,0xFEF4],
+};
+const NON_JOIN_AFTER = new Set([0x0621,0x0622,0x0623,0x0624,0x0625,0x0627,0x062F,0x0630,0x0631,0x0632,0x0648,0x0649,0x0629]);
+const TASHKEEL = new Set([0x064B,0x064C,0x064D,0x064E,0x064F,0x0650,0x0651,0x0652,0x0653,0x0654,0x0655,0x0670]);
+const LAM_ALEF: Record<number,[number,number]> = {
+  0x0622:[0xFEF5,0xFEF6],0x0623:[0xFEF7,0xFEF8],0x0625:[0xFEF9,0xFEFA],0x0627:[0xFEFB,0xFEFC],
+};
+function isAr(c:number){return(c>=0x0621&&c<=0x064A)||c===0x0640;}
+function reshapeArabic(text:string):string{
+  if(!text)return text;
+  const chars:number[]=[];
+  for(let i=0;i<text.length;i++){const c=text.charCodeAt(i);if(!TASHKEEL.has(c))chars.push(c);}
+  // Lam-Alef pass
+  const proc:number[]=[];const isLig:boolean[]=[];
+  for(let i=0;i<chars.length;i++){
+    if(chars[i]===0x0644&&i+1<chars.length&&LAM_ALEF[chars[i+1]]){
+      proc.push(chars[i]);proc.push(chars[i+1]);isLig.push(true);isLig.push(true);i++;
+    }else{proc.push(chars[i]);isLig.push(false);}
+  }
+  const res:number[]=[];
+  for(let i=0;i<proc.length;i++){
+    const c=proc[i];
+    if(!isAr(c)){res.push(c);continue;}
+    // Lam-Alef
+    if(c===0x0644&&isLig[i]&&i+1<proc.length){
+      const lig=LAM_ALEF[proc[i+1]];
+      if(lig){let pj=false;for(let p=i-1;p>=0;p--){if(!TASHKEEL.has(proc[p])){pj=isAr(proc[p])&&!NON_JOIN_AFTER.has(proc[p]);break;}}
+        res.push(pj?lig[1]:lig[0]);i++;continue;}
+    }
+    if(isLig[i]&&i>0&&proc[i-1]===0x0644)continue;
+    const forms=ARABIC_MAP[c];if(!forms){res.push(c);continue;}
+    let pj=false;for(let p=i-1;p>=0;p--){const pc=proc[p];if(TASHKEEL.has(pc))continue;if(isAr(pc)&&!NON_JOIN_AFTER.has(pc))pj=true;break;}
+    let nj=false;for(let n=i+1;n<proc.length;n++){const nc=proc[n];if(TASHKEEL.has(nc))continue;if(isAr(nc))nj=true;break;}
+    if(pj&&nj)res.push(forms[3]);else if(pj)res.push(forms[1]);else if(nj)res.push(forms[2]);else res.push(forms[0]);
+  }
+  // Reverse Arabic segments for RTL in jsPDF
+  const segs:{ch:number[];a:boolean}[]=[];let cur:number[]=[];let ca=false;
+  for(const ch of res){
+    const a=(ch>=0xFE70&&ch<=0xFEFF)||ch===0x0640;
+    if(!cur.length){ca=a;cur.push(ch);}else if(a===ca){cur.push(ch);}
+    else{segs.push({ch:[...cur],a:ca});cur=[ch];ca=a;}
+  }
+  if(cur.length)segs.push({ch:cur,a:ca});
+  const fin:number[]=[];
+  for(let i=segs.length-1;i>=0;i--){const s=segs[i];if(s.a)fin.push(...s.ch.reverse());else fin.push(...s.ch);}
+  return String.fromCharCode(...fin);
+}
+function ar(t:string):string{return reshapeArabic(t);}
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
@@ -48,7 +117,7 @@ function drawTable(doc: any, startY: number, title: string, rows: [string, strin
   doc.rect(margin, y, tableWidth, 6, 'S');
   doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
-  doc.text(title, pageWidth - margin - 3, y + 4.2, { align: 'right' });
+  doc.text(ar(title), pageWidth - margin - 3, y + 4.2, { align: 'right' });
   y += 6;
 
   // Data rows
@@ -61,7 +130,7 @@ function drawTable(doc: any, startY: number, title: string, rows: [string, strin
     doc.setDrawColor(180);
     doc.rect(pageWidth - margin - labelWidth, y, labelWidth, rowH, 'S');
     doc.setFont("Amiri", "bold");
-    doc.text(label, pageWidth - margin - 2, y + 3.5, { align: 'right' });
+    doc.text(ar(label), pageWidth - margin - 2, y + 3.5, { align: 'right' });
 
     // Value cell
     doc.setFillColor(255, 255, 255);
@@ -71,7 +140,7 @@ function drawTable(doc: any, startY: number, title: string, rows: [string, strin
     // Truncate long values
     const maxChars = 60;
     const truncVal = value.length > maxChars ? value.substring(0, maxChars) + '...' : value;
-    doc.text(truncVal, pageWidth - margin - labelWidth - 2, y + 3.5, { align: 'right' });
+    doc.text(ar(truncVal), pageWidth - margin - labelWidth - 2, y + 3.5, { align: 'right' });
 
     y += rowH;
   }
@@ -87,12 +156,12 @@ function generatePDF(doc: any, form: any): void {
   // ===== HEADER =====
   doc.setFont("Amiri", "bold");
   doc.setFontSize(16);
-  doc.text('بيان شحنة مخلفات', pageWidth / 2, y, { align: 'center' });
+  doc.text(ar('بيان شحنة مخلفات'), pageWidth / 2, y, { align: 'center' });
   y += 5;
   doc.setFontSize(9);
   doc.setFont("Amiri", "normal");
   doc.setTextColor(100);
-  doc.text('مستند رسمي — منصة iRecycle لإدارة المخلفات', pageWidth / 2, y, { align: 'center' });
+  doc.text(ar('مستند رسمي — منصة iRecycle لإدارة المخلفات'), pageWidth / 2, y, { align: 'center' });
   y += 4;
   doc.setTextColor(0);
 
@@ -112,9 +181,9 @@ function generatePDF(doc: any, form: any): void {
   const dateStr = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
 
   doc.setFont("Amiri", "bold");
-  doc.text(`رقم الشحنة: ${v(form.shipment_number)}  |  النوع: ${shipTypeLabel}  |  الخطورة: ${hazard}  |  الوجهة: ${destType}`, pageWidth - margin, y, { align: 'right' });
+  doc.text(ar(`رقم الشحنة: ${v(form.shipment_number)}  |  النوع: ${shipTypeLabel}  |  الخطورة: ${hazard}  |  الوجهة: ${destType}`), pageWidth - margin, y, { align: 'right' });
   doc.setFont("Amiri", "normal");
-  doc.text(dateStr, margin, y, { align: 'left' });
+  doc.text(ar(dateStr), margin, y, { align: 'left' });
   y += 6;
 
   // ===== GENERATOR =====
@@ -194,7 +263,7 @@ function generatePDF(doc: any, form: any): void {
   // ===== DECLARATIONS =====
   doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
-  doc.text('الإقرارات القانونية والبيئية', pageWidth - margin, y + 4, { align: 'right' });
+  doc.text(ar('الإقرارات القانونية والبيئية'), pageWidth - margin, y + 4, { align: 'right' });
   doc.setDrawColor(150);
   doc.line(margin, y + 5.5, pageWidth - margin, y + 5.5);
   y += 9;
@@ -207,7 +276,7 @@ function generatePDF(doc: any, form: any): void {
     'إقرار المستقبل: يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية.',
   ];
   for (const d of decls) {
-    const lines = doc.splitTextToSize(d, pageWidth - margin * 2 - 4);
+    const lines = doc.splitTextToSize(ar(d), pageWidth - margin * 2 - 4);
     for (const line of lines) {
       doc.text(line, pageWidth - margin - 2, y, { align: 'right' });
       y += 3.5;
@@ -221,7 +290,7 @@ function generatePDF(doc: any, form: any): void {
   doc.rect(margin, y, pageWidth - margin * 2, 7, 'FD');
   doc.setTextColor(146, 64, 14);
   doc.setFontSize(6.5);
-  doc.text('إخلاء مسؤولية: منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات.', pageWidth / 2, y + 4.5, { align: 'center' });
+  doc.text(ar('إخلاء مسؤولية: منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات.'), pageWidth / 2, y + 4.5, { align: 'center' });
   doc.setTextColor(0);
   y += 12;
 
@@ -233,7 +302,7 @@ function generatePDF(doc: any, form: any): void {
   // ===== SIGNATURES =====
   doc.setFontSize(9);
   doc.setFont("Amiri", "bold");
-  doc.text('التوقيعات والأختام', pageWidth - margin, y, { align: 'right' });
+  doc.text(ar('التوقيعات والأختام'), pageWidth - margin, y, { align: 'right' });
   doc.line(margin, y + 1.5, pageWidth - margin, y + 1.5);
   y += 6;
 
@@ -245,14 +314,14 @@ function generatePDF(doc: any, form: any): void {
     doc.rect(x, y, sigWidth, 22, 'S');
     doc.setFontSize(8);
     doc.setFont("Amiri", "bold");
-    doc.text(sigLabels[2 - i], x + sigWidth / 2, y + 4, { align: 'center' });
+    doc.text(ar(sigLabels[2 - i]), x + sigWidth / 2, y + 4, { align: 'center' });
     // Signature line
     doc.setDrawColor(50);
     doc.line(x + 8, y + 16, x + sigWidth - 8, y + 16);
     doc.setFontSize(5.5);
     doc.setFont("Amiri", "normal");
     doc.setTextColor(130);
-    doc.text('الاسم / التوقيع / الختم', x + sigWidth / 2, y + 20, { align: 'center' });
+    doc.text(ar('الاسم / التوقيع / الختم'), x + sigWidth / 2, y + 20, { align: 'center' });
     doc.setTextColor(0);
   }
   y += 26;
@@ -262,8 +331,8 @@ function generatePDF(doc: any, form: any): void {
   doc.setTextColor(130);
   doc.setDrawColor(150);
   doc.line(margin, 285, pageWidth - margin, 285);
-    doc.text(`مستند صادر إلكترونياً من منصة iRecycle لإدارة المخلفات — ${dateStr}`, pageWidth - margin, 289, { align: 'right' });
-  doc.text('الصفحة ١', margin, 289, { align: 'left' });
+  doc.text(ar(`مستند صادر إلكترونياً من منصة iRecycle لإدارة المخلفات — ${dateStr}`), pageWidth - margin, 289, { align: 'right' });
+  doc.text(ar('الصفحة ١'), margin, 289, { align: 'left' });
   doc.setTextColor(0);
 }
 
