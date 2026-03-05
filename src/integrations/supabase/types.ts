@@ -36636,6 +36636,20 @@ export type Database = {
         }
         Returns: string
       }
+      notify_related_parties: {
+        Args: {
+          _exclude_user_id?: string
+          _message?: string
+          _org_id: string
+          _partner_org_id?: string
+          _reference_id?: string
+          _reference_type?: string
+          _shipment_id?: string
+          _title?: string
+          _type?: string
+        }
+        Returns: undefined
+      }
       record_action_execution: {
         Args: {
           p_action_type: string
