@@ -54,60 +54,62 @@ function generateFullHTML(form: ManualShipmentData): string {
 <title>بيان شحنة - ${v(form.shipment_number)}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
-  @page { size: A4; margin: 10mm 12mm; }
+  @page { size: A4; margin: 14mm 16mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Amiri', 'Cairo', 'Times New Roman', serif;
-    font-size: 8px;
+    font-size: 9px;
     color: #222;
     direction: rtl;
     background: #fff;
-    line-height: 1.45;
+    line-height: 1.6;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .page { padding: 0; page-break-after: always; height: 277mm; overflow: hidden; position: relative; }
+  .page { padding: 0; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
+  /* Classic Header */
   .header {
     text-align: center;
     border-bottom: 2px double #333;
-    padding-bottom: 5px;
-    margin-bottom: 6px;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
   }
   .header h1 {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 700;
     color: #1a1a1a;
-    margin-bottom: 0;
+    margin-bottom: 1px;
     font-family: 'Cairo', sans-serif;
   }
   .header .subtitle {
-    font-size: 8px;
+    font-size: 10px;
     color: #555;
     font-style: italic;
   }
   .header-meta {
     display: table;
     width: 100%;
-    margin-top: 3px;
-    font-size: 7px;
+    margin-top: 6px;
+    font-size: 8px;
     color: #444;
   }
   .header-meta .right { display: table-cell; text-align: right; }
   .header-meta .left { display: table-cell; text-align: left; }
 
+  /* Classic Tables */
   table.classic {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 4px;
-    font-size: 7.5px;
+    margin-bottom: 8px;
+    font-size: 8.5px;
   }
   table.classic th {
     background: #f5f5f0;
     border: 1px solid #999;
-    padding: 2px 6px;
-    font-size: 8px;
+    padding: 3px 8px;
+    font-size: 9px;
     font-weight: 700;
     text-align: right;
     color: #1a1a1a;
@@ -115,110 +117,119 @@ function generateFullHTML(form: ManualShipmentData): string {
   }
   table.classic td {
     border: 1px solid #bbb;
-    padding: 1.5px 6px;
+    padding: 2.5px 8px;
     text-align: right;
     vertical-align: top;
   }
   table.classic td.k {
     background: #fafaf7;
     font-weight: 700;
-    width: 28%;
+    width: 30%;
     color: #333;
     font-family: 'Cairo', sans-serif;
-    font-size: 7px;
+    font-size: 8px;
   }
 
+  /* Two column layout */
   .row { display: table; width: 100%; table-layout: fixed; }
   .row .cell { display: table-cell; vertical-align: top; }
-  .row .cell:first-child { padding-left: 3px; }
-  .row .cell:last-child { padding-right: 3px; }
+  .row .cell:first-child { padding-left: 4px; }
+  .row .cell:last-child { padding-right: 4px; }
 
+  /* Section titles */
   .sec-title {
     font-family: 'Cairo', sans-serif;
-    font-size: 8.5px;
+    font-size: 10px;
     font-weight: 700;
     color: #1a1a1a;
     border-bottom: 1px solid #999;
-    padding-bottom: 1px;
-    margin: 5px 0 3px;
+    padding-bottom: 2px;
+    margin: 10px 0 5px;
   }
+  .sec-title span { font-size: 8px; color: #777; font-weight: 400; margin-right: 6px; }
 
+  /* Declarations */
   .decl-block {
     border: 1px solid #bbb;
-    padding: 3px 8px;
-    margin-bottom: 4px;
-    font-size: 7px;
-    line-height: 1.6;
+    padding: 6px 10px;
+    margin-bottom: 8px;
+    font-size: 8px;
+    line-height: 1.8;
   }
   .decl-block .dt {
     font-weight: 700;
     font-family: 'Cairo', sans-serif;
-    font-size: 7.5px;
+    font-size: 8.5px;
     text-decoration: underline;
+    margin-bottom: 2px;
   }
   .decl-warn {
     border: 1px solid #b45309;
     background: #fffbeb;
-    padding: 2px 6px;
-    font-size: 6.5px;
-    margin-top: 3px;
+    padding: 4px 8px;
+    font-size: 7.5px;
+    margin-top: 6px;
     text-align: center;
     color: #92400e;
   }
 
-  .sig-row { display: table; width: 100%; margin-top: 4px; }
-  .sig-cell { display: table-cell; width: 33.33%; text-align: center; vertical-align: top; padding: 2px 4px; }
+  /* Signatures */
+  .sig-row { display: table; width: 100%; margin-top: 8px; }
+  .sig-cell { display: table-cell; width: 33.33%; text-align: center; vertical-align: top; padding: 4px 6px; }
   .sig-cell + .sig-cell { border-right: 1px solid #bbb; }
-  .sig-label { font-family: 'Cairo', sans-serif; font-size: 8px; font-weight: 700; margin-bottom: 1px; }
-  .sig-box { height: 30px; border-bottom: 1px solid #333; margin: 4px 16px 2px; }
-  .sig-hint { font-size: 6px; color: #888; }
+  .sig-label { font-family: 'Cairo', sans-serif; font-size: 9px; font-weight: 700; margin-bottom: 2px; }
+  .sig-box { height: 40px; border-bottom: 1px solid #333; margin: 6px 20px 4px; }
+  .sig-hint { font-size: 7px; color: #888; }
 
-  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 4px; }
-  .verify-cell { display: table-cell; vertical-align: middle; padding: 4px; text-align: center; }
-  .qr-img { width: 52px; height: 52px; border: 1px solid #ccc; }
-  .barcode-img { height: 20px; max-width: 160px; margin-top: 3px; }
-  .v-code { font-family: 'Courier New', monospace; font-size: 9px; font-weight: 700; letter-spacing: 1px; }
+  /* Verification */
+  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 6px; }
+  .verify-cell { display: table-cell; vertical-align: middle; padding: 6px; text-align: center; }
+  .qr-img { width: 64px; height: 64px; border: 1px solid #ccc; }
+  .barcode-img { height: 24px; max-width: 180px; margin-top: 4px; }
+  .v-code { font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; }
   .stamp-circle {
-    width: 46px; height: 46px;
+    width: 56px; height: 56px;
     border: 2px solid #333;
     border-radius: 50%;
     display: inline-block;
-    line-height: 1.1;
-    padding-top: 8px;
+    line-height: 1.2;
+    padding-top: 10px;
   }
 
+  /* Footer */
   .footer {
-    margin-top: 4px;
-    padding-top: 3px;
+    margin-top: 8px;
+    padding-top: 5px;
     border-top: 1px solid #999;
-    font-size: 6px;
+    font-size: 7px;
     color: #888;
     display: table;
     width: 100%;
   }
   .footer .r { display: table-cell; text-align: right; }
-  .footer .l { display: table-cell; text-align: left; width: 100px; }
+  .footer .l { display: table-cell; text-align: left; width: 120px; }
 
-  .terms-body { font-size: 7.5px; line-height: 1.7; }
+  /* Terms page */
+  .terms-body { font-size: 8.5px; line-height: 2; }
   .terms-notice {
     border: 1px solid #333;
-    padding: 3px 8px;
+    padding: 5px 10px;
     text-align: center;
-    font-size: 7.5px;
+    font-size: 8.5px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 10px;
     font-family: 'Cairo', sans-serif;
   }
-  .t-sec { margin-bottom: 5px; }
+  .t-sec { margin-bottom: 8px; }
   .t-sec-title {
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
-    font-size: 8.5px;
+    font-size: 9.5px;
     border-bottom: 1px solid #bbb;
-    padding-bottom: 1px;
-    margin-bottom: 2px;
+    padding-bottom: 2px;
+    margin-bottom: 3px;
   }
-  .t-sec-body { padding: 0 4px; font-size: 7px; }
+  .t-sec-body { padding: 0 6px; font-size: 8px; }
 
   @media print {
     body { background: #fff; }
@@ -351,20 +362,20 @@ function generateFullHTML(form: ManualShipmentData): string {
 
   <!-- Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:60px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=60x60&data=${qrUrl}&bgcolor=ffffff&color=222222" class="qr-img" alt="QR"/>
-      <div style="font-size:5px;color:#888;margin-top:1px;">رمز QR</div>
+    <div class="verify-cell" style="width:80px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${qrUrl}&bgcolor=ffffff&color=222222" class="qr-img" alt="QR"/>
+      <div style="font-size:6px;color:#888;margin-top:2px;">رمز QR</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:6px;color:#888;">رمز التحقق الإلكتروني</div>
+      <div style="font-size:7px;color:#888;margin-bottom:2px;">رمز التحقق الإلكتروني</div>
       <div class="v-code">${verificationCode}</div>
       <img src="https://barcodeapi.org/api/128/${encodeURIComponent(verificationCode)}" class="barcode-img" alt="Barcode"/>
     </div>
-    <div class="verify-cell" style="width:56px;">
+    <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">
-        <div style="font-size:5px;font-weight:700;">iRecycle</div>
-        <div style="font-size:4px;color:#888;">مصدّق</div>
-        <div style="font-size:4px;">${dateNow}</div>
+        <div style="font-size:6px;font-weight:700;">iRecycle</div>
+        <div style="font-size:5px;color:#888;">مصدّق</div>
+        <div style="font-size:5px;">${dateNow}</div>
       </div>
     </div>
   </div>
@@ -456,20 +467,20 @@ function generateFullHTML(form: ManualShipmentData): string {
 
   <!-- Page 2 Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:56px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=50x50&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=222222" class="qr-img" style="width:44px;height:44px;" alt="QR"/>
-      <div style="font-size:5px;color:#888;margin-top:1px;">QR الشروط</div>
+    <div class="verify-cell" style="width:72px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=222222" class="qr-img" style="width:56px;height:56px;" alt="QR"/>
+      <div style="font-size:6px;color:#888;margin-top:2px;">QR الشروط</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:6px;color:#888;">رمز مصادقة الشروط والأحكام</div>
+      <div style="font-size:7px;color:#888;">رمز مصادقة الشروط والأحكام</div>
       <div class="v-code">TRM-${verificationCode}</div>
       <img src="https://barcodeapi.org/api/128/${encodeURIComponent('TRM-' + verificationCode)}" class="barcode-img" alt="Barcode"/>
     </div>
-    <div class="verify-cell" style="width:56px;">
+    <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">
-        <div style="font-size:5px;font-weight:700;">iRecycle</div>
-        <div style="font-size:4px;color:#888;">شروط وأحكام</div>
-        <div style="font-size:4px;">${dateNow}</div>
+        <div style="font-size:6px;font-weight:700;">iRecycle</div>
+        <div style="font-size:5px;color:#888;">شروط وأحكام</div>
+        <div style="font-size:5px;">${dateNow}</div>
       </div>
     </div>
   </div>
