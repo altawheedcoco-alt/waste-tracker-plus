@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
+import { notifyOrganizationMembers } from '@/services/unifiedNotifier';
 import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import DeliveryDeclarationDialog from './DeliveryDeclarationDialog';
 import ShipmentPhotoUpload from './ShipmentPhotoUpload';
@@ -56,6 +57,8 @@ interface StatusChangeDialogProps {
     gps_delivery_lng?: number | null;
     quantity?: number | null;
     generator_id?: string | null;
+    transporter_id?: string | null;
+    recycler_id?: string | null;
   };
   onStatusChanged?: () => void;
   geofenceRadius?: number;
@@ -345,6 +348,33 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         shipmentNumber: shipment.shipment_number,
         previousStatus: shipment.status,
       });
+
+      // === Dual Notification: إشعار داخلي + واتساب لجميع الأطراف ===
+      try {
+        const statusLabel = statusConfig?.labelAr || selectedStatus;
+        const notifTitle = `📦 تحديث شحنة ${shipment.shipment_number || ''}`;
+        const notifMessage = `تم تغيير حالة الشحنة إلى "${statusLabel}"`;
+        const orgIds = [
+          shipment.generator_id,
+          shipment.transporter_id,
+          shipment.recycler_id,
+        ].filter(Boolean) as string[];
+
+        // Send to all relevant organizations in parallel
+        await Promise.allSettled(
+          orgIds.map(orgId =>
+            notifyOrganizationMembers(orgId, notifTitle, notifMessage, {
+              type: 'shipment_status',
+              reference_id: shipment.id,
+              reference_type: 'shipment',
+              excludeUserIds: profile?.id ? [profile.id] : undefined,
+            })
+          )
+        );
+        console.log('[DualNotify] Status change notifications sent to', orgIds.length, 'orgs');
+      } catch (notifErr) {
+        console.warn('[DualNotify] Non-blocking notification error:', notifErr);
+      }
 
       toast.success(`تم تحديث الحالة إلى "${statusConfig?.labelAr || selectedStatus}"`);
       onStatusChanged?.();
