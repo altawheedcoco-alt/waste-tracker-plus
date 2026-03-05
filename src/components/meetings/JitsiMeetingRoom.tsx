@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { 
   Mic, MicOff, Video as VideoIcon, VideoOff, PhoneOff, 
-  MessageSquare, Users, Maximize2, Minimize2, UserPlus, Shield
+  MessageSquare, Users, Maximize2, Minimize2, Shield, ExternalLink, VideoIcon as VideoPlaceholder
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import MeetingChat from './MeetingChat';
@@ -25,12 +25,13 @@ const JitsiMeetingRoom = ({
   meetingType = 'video',
   onLeave,
 }: JitsiMeetingRoomProps) => {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(meetingType === 'audio');
   const [showChat, setShowChat] = useState(false);
   const [showParticipants, setShowParticipants] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [jitsiWindowOpen, setJitsiWindowOpen] = useState(false);
+  const jitsiWindowRef = useRef<Window | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Build Jitsi URL with config
@@ -42,11 +43,9 @@ const JitsiMeetingRoom = ({
       `config.startWithVideoMuted=${meetingType === 'audio'}`,
       'config.prejoinPageEnabled=false',
       'config.disableDeepLinking=true',
-      'config.toolbarButtons=[]',
       'config.hideConferenceSubject=true',
       'config.hideConferenceTimer=false',
       'config.disableInviteFunctions=true',
-      'interfaceConfig.TOOLBAR_BUTTONS=[]',
       'interfaceConfig.SHOW_JITSI_WATERMARK=false',
       'interfaceConfig.SHOW_BRAND_WATERMARK=false',
       'interfaceConfig.SHOW_POWERED_BY=false',
@@ -55,6 +54,45 @@ const JitsiMeetingRoom = ({
     ];
     return `${base}#${config.join('&')}`;
   })();
+
+  // Open Jitsi in new window
+  const openJitsiWindow = useCallback(() => {
+    if (jitsiWindowRef.current && !jitsiWindowRef.current.closed) {
+      jitsiWindowRef.current.focus();
+      return;
+    }
+    const w = window.open(jitsiUrl, `jitsi_${roomId}`, 'width=1200,height=800,menubar=no,toolbar=no,location=no,status=no');
+    if (w) {
+      jitsiWindowRef.current = w;
+      setJitsiWindowOpen(true);
+    }
+  }, [jitsiUrl, roomId]);
+
+  // Auto-open on mount
+  useEffect(() => {
+    openJitsiWindow();
+  }, [openJitsiWindow]);
+
+  // Monitor if window was closed
+  useEffect(() => {
+    if (!jitsiWindowOpen) return;
+    const interval = setInterval(() => {
+      if (jitsiWindowRef.current?.closed) {
+        setJitsiWindowOpen(false);
+        jitsiWindowRef.current = null;
+      }
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [jitsiWindowOpen]);
+
+  // Close jitsi window on unmount
+  useEffect(() => {
+    return () => {
+      if (jitsiWindowRef.current && !jitsiWindowRef.current.closed) {
+        jitsiWindowRef.current.close();
+      }
+    };
+  }, []);
 
   const toggleFullscreen = useCallback(() => {
     if (!containerRef.current) return;
@@ -80,15 +118,39 @@ const JitsiMeetingRoom = ({
     )}>
       {/* Main area */}
       <div className="flex flex-1 min-h-0">
-        {/* Video area */}
-        <div className="flex-1 relative">
-          <iframe
-            ref={iframeRef}
-            src={jitsiUrl}
-            className="w-full h-full border-0"
-            allow="camera; microphone; display-capture; autoplay; clipboard-write"
-            allowFullScreen
-          />
+        {/* Video placeholder area */}
+        <div className="flex-1 relative flex items-center justify-center">
+          <div className="text-center space-y-4">
+            <div className="w-20 h-20 rounded-full bg-emerald-500/20 flex items-center justify-center mx-auto">
+              <VideoPlaceholder className="w-10 h-10 text-emerald-400" />
+            </div>
+            {jitsiWindowOpen ? (
+              <>
+                <p className="text-white text-lg font-medium">الاجتماع مفتوح في نافذة منفصلة</p>
+                <p className="text-white/50 text-sm">يمكنك استخدام المحادثة والمشاركين من هنا</p>
+                <Button
+                  onClick={() => jitsiWindowRef.current?.focus()}
+                  variant="outline"
+                  className="border-emerald-500/50 text-emerald-400 hover:bg-emerald-500/10 gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  التركيز على نافذة الاجتماع
+                </Button>
+              </>
+            ) : (
+              <>
+                <p className="text-white text-lg font-medium">نافذة الاجتماع مغلقة</p>
+                <p className="text-white/50 text-sm">اضغط لإعادة فتح الاجتماع</p>
+                <Button
+                  onClick={openJitsiWindow}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white gap-2"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  فتح الاجتماع
+                </Button>
+              </>
+            )}
+          </div>
           
           {/* Host badge */}
           {isHost && (
@@ -135,32 +197,6 @@ const JitsiMeetingRoom = ({
 
       {/* Controls bar */}
       <div className="flex items-center justify-center gap-2 py-3 px-4 bg-[#0f0f23] border-t border-white/10">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setIsMuted(!isMuted)}
-          className={cn(
-            "rounded-full w-10 h-10 p-0",
-            isMuted ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "text-white/70 hover:text-white hover:bg-white/10"
-          )}
-        >
-          {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-        </Button>
-
-        {meetingType === 'video' && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setIsVideoOff(!isVideoOff)}
-            className={cn(
-              "rounded-full w-10 h-10 p-0",
-              isVideoOff ? "bg-red-500/20 text-red-400 hover:bg-red-500/30" : "text-white/70 hover:text-white hover:bg-white/10"
-            )}
-          >
-            {isVideoOff ? <VideoOff className="w-4 h-4" /> : <VideoIcon className="w-4 h-4" />}
-          </Button>
-        )}
-
         <Button
           variant="ghost"
           size="sm"
