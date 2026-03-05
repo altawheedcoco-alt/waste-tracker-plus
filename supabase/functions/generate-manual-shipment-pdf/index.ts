@@ -348,7 +348,52 @@ Deno.serve(async (req) => {
     const WAPILOT_TOKEN = Deno.env.get("WAPILOT_API_TOKEN");
 
     const body = await req.json();
-    const { draft_id, send_whatsapp, to_phone } = body;
+    const { draft_id, send_whatsapp, to_phone, send_existing_file, file_url, caption } = body;
+
+    // === Mode: Send an existing stored file directly ===
+    if (send_existing_file && file_url && to_phone && WAPILOT_TOKEN) {
+      let instanceId = Deno.env.get("WAPILOT_INSTANCE_ID");
+      if (!instanceId) {
+        try {
+          const listRes = await fetch(`${WAPILOT_BASE}/instances`, { headers: { token: WAPILOT_TOKEN } });
+          const raw = await listRes.json().catch(() => null);
+          const arr = Array.isArray(raw) ? raw : (raw?.id ? [raw] : []);
+          if (arr.length > 0) instanceId = arr[0].id;
+        } catch {}
+      }
+      if (!instanceId) {
+        return new Response(JSON.stringify({ error: "No WhatsApp instance" }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      let formattedPhone = to_phone.replace(/[\s+\-()]/g, "").replace(/^0+/, "");
+      if (/^1\d{9}$/.test(formattedPhone)) formattedPhone = "20" + formattedPhone;
+      const chatId = `${formattedPhone}@c.us`;
+
+      // Download the file
+      const fileRes = await fetch(file_url);
+      if (!fileRes.ok) {
+        return new Response(JSON.stringify({ error: "Could not download file" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const fileBytes = new Uint8Array(await fileRes.arrayBuffer());
+      const fileName = file_url.split('/').pop() || 'document.pdf';
+      const contentType = fileRes.headers.get('content-type') || 'application/pdf';
+
+      const formData = new FormData();
+      formData.append("chat_id", chatId);
+      formData.append("caption", caption || `📄 مستند محفوظ`);
+      formData.append("media", new File([fileBytes], decodeURIComponent(fileName), { type: contentType }));
+
+      const sendRes = await fetch(`${WAPILOT_BASE}/${instanceId}/send-file`, {
+        method: "POST",
+        headers: { token: WAPILOT_TOKEN },
+        body: formData,
+      });
+      const sendResult = await sendRes.text();
+      console.log(`[PDF] Sent existing file (${sendRes.status}):`, sendResult);
+
+      return new Response(JSON.stringify({ success: sendRes.ok, result: JSON.parse(sendResult) }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!draft_id) {
       return new Response(JSON.stringify({ error: "draft_id is required" }), {
