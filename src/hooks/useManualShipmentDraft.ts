@@ -384,8 +384,6 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
       lines.push('');
       lines.push(`━━━━━━━━━━━━━━━━━━`);
-      const baseUrl = window.location.origin;
-      lines.push(`🔗 عرض الشحنة: ${baseUrl}/share/${code}`);
       lines.push(`🕐 ${new Date().toLocaleString('ar-EG')}`);
 
       const messageText = lines.join('\n');
