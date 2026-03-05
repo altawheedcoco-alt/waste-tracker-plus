@@ -183,6 +183,7 @@ const HREndOfService = lazy(() => import("@/pages/dashboard/hr/HREndOfService"))
 const HRSelfService = lazy(() => import("@/pages/dashboard/hr/HRSelfService"));
 const CamerasPage = lazy(() => import("@/pages/dashboard/CamerasPage"));
 const WaPilotManagement = lazy(() => import("@/pages/dashboard/WaPilotManagement"));
+const DocumentCenter = lazy(() => import("@/pages/dashboard/DocumentCenter"));
 
 export const dashboardRoutes = (
   <>
@@ -369,6 +370,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/hr/end-of-service" element={<HREndOfService />} />
     <Route path="/dashboard/hr/self-service" element={<HRSelfService />} />
     <Route path="/dashboard/cameras" element={<CamerasPage />} />
+    <Route path="/dashboard/document-center" element={<DocumentCenter />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
