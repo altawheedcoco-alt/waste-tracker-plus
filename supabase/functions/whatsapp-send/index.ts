@@ -41,6 +41,7 @@ Deno.serve(async (req) => {
       recipients,
       interactive_buttons,
       attachment_url,
+      attachment_filename,
       check_visibility = false,
       from_org_id,
       to_org_id,
@@ -167,7 +168,7 @@ Deno.serve(async (req) => {
     }
 
     // Helper: send single message via WaPilot
-    const sendOne = async (phone: string, text: string) => {
+    const sendOne = async (phone: string, text: string, docUrl?: string, docFilename?: string) => {
       // Clean phone: remove spaces, +, -, () then strip leading zeros
       let formattedPhone = phone.replace(/[\s+\-()]/g, "").replace(/^0+/, "");
       // If it looks like a local Egyptian number (starts with 1 and 10 digits), prepend 20
@@ -176,7 +177,27 @@ Deno.serve(async (req) => {
       }
       const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
 
-      // Build message payload
+      // If document URL provided, send as media first then text
+      if (docUrl) {
+        try {
+          const mediaPayload = {
+            chat_id: chatId,
+            media_url: docUrl,
+            media_type: "document",
+            caption: docFilename || "shipment-document.pdf",
+            filename: docFilename || "shipment-document.pdf",
+          };
+          await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-media`, {
+            method: "POST",
+            headers: { token: WAPILOT_TOKEN, "Content-Type": "application/json" },
+            body: JSON.stringify(mediaPayload),
+          });
+        } catch (e) {
+          console.warn("Media send failed, falling back to text only:", e.message);
+        }
+      }
+
+      // Build text message payload
       const msgPayload: any = { chat_id: chatId, text };
 
       // If interactive buttons are provided, use list/button format
@@ -341,7 +362,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    const result = await sendOne(to_phone, finalText);
+    const result = await sendOne(to_phone, finalText, attachment_url, attachment_filename);
 
     const { data: msgLog } = await supabase.from("whatsapp_messages").insert({
       organization_id,
