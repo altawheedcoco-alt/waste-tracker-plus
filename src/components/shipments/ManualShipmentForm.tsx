@@ -27,6 +27,9 @@ interface ManualShipmentFormProps {
   onSubmit: () => Promise<void>;
   onReset: () => void;
   onExportPDF: () => void;
+  onSaveAndDownloadPDF?: () => Promise<void>;
+  onSaveAndSendWhatsApp?: () => Promise<void>;
+  onSaveAndPrintPDF?: () => Promise<void>;
 }
 
 const SectionHeader = ({ icon: Icon, title, color = 'text-primary' }: { icon: React.ElementType; title: string; color?: string }) => (
@@ -60,6 +63,7 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
 const ManualShipmentForm = ({
   form, updateField, saving, savedShareCode,
   onSave, onSubmit, onReset, onExportPDF,
+  onSaveAndDownloadPDF, onSaveAndSendWhatsApp, onSaveAndPrintPDF,
 }: ManualShipmentFormProps) => {
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -121,27 +125,35 @@ const ManualShipmentForm = ({
       <div className="flex items-center gap-2 flex-wrap sticky top-0 z-10 bg-background/95 backdrop-blur-sm py-3 border-b">
         <Button onClick={onSave} disabled={saving} variant="default" className="gap-2">
           <Save className="w-4 h-4" />
-          {saving ? 'جاري الحفظ...' : 'حفظ'}
+          {saving ? 'جاري الحفظ...' : 'حفظ المسودة'}
         </Button>
-        <Button onClick={onExportPDF} variant="outline" className="gap-2">
-          <Download className="w-4 h-4" />
-          PDF
-        </Button>
-        <Button onClick={handlePrint} variant="outline" className="gap-2">
-          <Printer className="w-4 h-4" />
-          طباعة
-        </Button>
+        <Separator orientation="vertical" className="h-6" />
+        {onSaveAndDownloadPDF && (
+          <Button onClick={onSaveAndDownloadPDF} disabled={saving} variant="outline" className="gap-2">
+            <Download className="w-4 h-4" />
+            حفظ + تنزيل PDF
+          </Button>
+        )}
+        {onSaveAndPrintPDF && (
+          <Button onClick={onSaveAndPrintPDF} disabled={saving} variant="outline" className="gap-2">
+            <Printer className="w-4 h-4" />
+            حفظ + طباعة
+          </Button>
+        )}
+        {onSaveAndSendWhatsApp && (
+          <Button onClick={onSaveAndSendWhatsApp} disabled={saving} variant="outline" className="gap-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+            <MessageCircle className="w-4 h-4" />
+            حفظ + إرسال واتساب
+          </Button>
+        )}
+        <Separator orientation="vertical" className="h-6" />
         <Button onClick={handleShare} variant="outline" className="gap-2">
           <Share2 className="w-4 h-4" />
-          مشاركة رابط قابل للتعديل
+          مشاركة رابط
         </Button>
         <Button onClick={onSubmit} variant="default" className="gap-2 bg-primary">
           <Send className="w-4 h-4" />
-          إرسال
-        </Button>
-        <Button onClick={handleWhatsAppShare} variant="outline" className="gap-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
-          <MessageCircle className="w-4 h-4" />
-          إرسال واتساب
+          إرسال نهائي
         </Button>
         <div className="flex-1" />
         <Button onClick={onReset} variant="ghost" size="sm" className="gap-1 text-destructive">

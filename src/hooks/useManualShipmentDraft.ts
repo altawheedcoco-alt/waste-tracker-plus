@@ -293,6 +293,149 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     return result.data.share_code;
   };
 
+  // Core: generate PDF server-side, archive it, return URL
+  const generateAndArchivePDF = async (draftId: string): Promise<{ pdfUrl?: string; filename?: string }> => {
+    const { data: pdfResult, error: pdfError } = await supabase.functions.invoke('generate-manual-shipment-pdf', {
+      body: { draft_id: draftId },
+    });
+
+    if (pdfError || !pdfResult?.pdf_url) {
+      console.error('[ManualShipment] PDF edge function error:', pdfError);
+      return {};
+    }
+
+    const pdfUrl = pdfResult.pdf_url;
+    const filename = pdfResult.filename || `shipment-${form.shipment_number || draftId}.pdf`;
+
+    // Archive in entity_documents
+    if (organization?.id) {
+      try {
+        await supabase.from('entity_documents').insert({
+          organization_id: organization.id,
+          uploaded_by: user?.id,
+          title: `بيان شحنة يدوي - ${form.shipment_number || draftId}`,
+          file_name: filename,
+          file_url: pdfUrl,
+          file_type: 'application/pdf',
+          document_type: 'shipment',
+          document_category: 'shipment',
+          reference_number: form.shipment_number || null,
+          description: `بيان شحنة يدوي - ${form.waste_type || 'مخلفات'} - ${form.generator_name || 'غير محدد'}`,
+          tags: ['manual-shipment', 'pdf', form.waste_type].filter(Boolean) as string[],
+          document_date: new Date().toISOString().split('T')[0],
+        });
+      } catch (archiveErr) {
+        console.warn('[ManualShipment] Archive failed:', archiveErr);
+      }
+    }
+
+    return { pdfUrl, filename };
+  };
+
+  // Send PDF to all parties via WhatsApp
+  const sendPDFToWhatsApp = async (pdfUrl: string) => {
+    const phones = new Set<string>();
+    [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
+      .filter(Boolean)
+      .forEach(p => phones.add(p.replace(/\s/g, '')));
+
+    if (phones.size === 0) return;
+
+    const phoneArr = Array.from(phones);
+    const firstPhone = phoneArr[0];
+
+    // Send to first phone with full generation
+    await supabase.functions.invoke('generate-manual-shipment-pdf', {
+      body: {
+        send_existing_file: true,
+        file_url: pdfUrl,
+        to_phone: firstPhone,
+        caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
+      },
+    });
+
+    // Send to remaining phones
+    if (phoneArr.length > 1) {
+      const remaining = phoneArr.slice(1).map(phone =>
+        supabase.functions.invoke('generate-manual-shipment-pdf', {
+          body: {
+            send_existing_file: true,
+            file_url: pdfUrl,
+            to_phone: phone,
+            caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
+          },
+        })
+      );
+      await Promise.allSettled(remaining);
+    }
+
+    toast.success(`تم إرسال بيان الشحنة PDF إلى ${phones.size} جهة عبر واتساب`);
+  };
+
+  // حفظ + توليد PDF + تنزيل + أرشفة
+  const saveAndDownloadPDF = async () => {
+    const code = await saveDraft();
+    if (!code || !savedDraftId) {
+      toast.error('يجب حفظ المسودة أولاً');
+      return;
+    }
+
+    toast.info('جارٍ تجهيز بيان الشحنة PDF...');
+    const { pdfUrl, filename } = await generateAndArchivePDF(savedDraftId);
+    
+    if (pdfUrl) {
+      // Auto-download
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = filename || 'shipment-manifest.pdf';
+      link.target = '_blank';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success('تم حفظ وتنزيل بيان الشحنة PDF');
+    } else {
+      toast.error('فشل في توليد ملف PDF');
+    }
+  };
+
+  // حفظ + توليد PDF + إرسال واتساب
+  const saveAndSendWhatsApp = async () => {
+    const code = await saveDraft();
+    if (!code || !savedDraftId) {
+      toast.error('يجب حفظ المسودة أولاً');
+      return;
+    }
+
+    toast.info('جارٍ تجهيز وإرسال بيان الشحنة...');
+    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    
+    if (pdfUrl) {
+      await sendPDFToWhatsApp(pdfUrl);
+    } else {
+      toast.error('فشل في توليد ملف PDF');
+    }
+  };
+
+  // حفظ + توليد PDF + طباعة
+  const saveAndPrintPDF = async () => {
+    const code = await saveDraft();
+    if (!code || !savedDraftId) {
+      toast.error('يجب حفظ المسودة أولاً');
+      return;
+    }
+
+    toast.info('جارٍ تجهيز بيان الشحنة للطباعة...');
+    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    
+    if (pdfUrl) {
+      window.open(pdfUrl, '_blank');
+      toast.success('تم فتح بيان الشحنة — اطبعه من المتصفح');
+    } else {
+      toast.error('فشل في توليد ملف PDF');
+    }
+  };
+
+  // إرسال كامل (حفظ + PDF + أرشفة + واتساب)
   const submitDraft = async () => {
     const code = await saveDraft();
     if (!code || !savedDraftId) return;
@@ -302,74 +445,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       .update({ is_submitted: true, submitted_at: new Date().toISOString(), status: 'submitted' })
       .eq('id', savedDraftId);
     
-    // Generate PDF server-side and send WhatsApp notifications
+    toast.success('تم إرسال النموذج بنجاح');
+
     try {
       toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-
-      // Collect unique phone numbers
-      const phones = new Set<string>();
-      [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
-        .filter(Boolean)
-        .forEach(p => phones.add(p.replace(/\s/g, '')));
-
-      const firstPhone = Array.from(phones)[0];
-
-      // Call edge function to generate PDF + send to first phone
-      const { data: pdfResult, error: pdfError } = await supabase.functions.invoke('generate-manual-shipment-pdf', {
-        body: {
-          draft_id: savedDraftId,
-          send_whatsapp: !!firstPhone,
-          to_phone: firstPhone || undefined,
-        },
-      });
-
-      if (pdfError) {
-        console.error('[ManualShipment] PDF edge function error:', pdfError);
-      }
-
-      const pdfPublicUrl = pdfResult?.pdf_url;
-      const pdfFilename = pdfResult?.filename || `shipment-${form.shipment_number || savedDraftId}.pdf`;
-
-      // Archive PDF in entity_documents
-      if (pdfPublicUrl && organization?.id) {
-        try {
-          await supabase.from('entity_documents').insert({
-            organization_id: organization.id,
-            uploaded_by: user?.id,
-            title: `بيان شحنة يدوي - ${form.shipment_number || savedDraftId}`,
-            file_name: pdfFilename,
-            file_url: pdfPublicUrl,
-            file_type: 'application/pdf',
-            document_type: 'shipment',
-            document_category: 'shipment',
-            reference_number: form.shipment_number || null,
-            description: `بيان شحنة يدوي - ${form.waste_type || 'مخلفات'} - ${form.generator_name || 'غير محدد'}`,
-            tags: ['manual-shipment', 'pdf', form.waste_type].filter(Boolean) as string[],
-            document_date: new Date().toISOString().split('T')[0],
-          });
-        } catch (archiveErr) {
-          console.warn('[ManualShipment] Archive to entity_documents failed:', archiveErr);
-        }
-      }
-
-      // Send to remaining phones via whatsapp-send with the generated PDF URL
-      const remainingPhones = Array.from(phones).slice(1);
-      if (remainingPhones.length > 0 && pdfPublicUrl) {
-        const sendPromises = remainingPhones.map(phone =>
-          supabase.functions.invoke('generate-manual-shipment-pdf', {
-            body: {
-              send_existing_file: true,
-              file_url: pdfPublicUrl,
-              to_phone: phone,
-              caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
-            },
-          })
-        );
-        await Promise.allSettled(sendPromises);
-      }
-
-      if (phones.size > 0) {
-        toast.success(`تم إرسال بيان الشحنة PDF إلى ${phones.size} جهة عبر واتساب`);
+      const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+      
+      if (pdfUrl) {
+        await sendPDFToWhatsApp(pdfUrl);
       }
     } catch (err) {
       console.error('[ManualShipment] WhatsApp notification error:', err);
@@ -388,6 +471,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     loading, saving,
     savedDraftId, savedShareCode,
     saveDraft, submitDraft, resetForm,
+    saveAndDownloadPDF, saveAndSendWhatsApp, saveAndPrintPDF,
     loadByShareCode,
   };
 }

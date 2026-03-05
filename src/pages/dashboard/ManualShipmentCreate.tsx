@@ -3,9 +3,8 @@ import BackButton from '@/components/ui/back-button';
 import ManualShipmentForm from '@/components/shipments/ManualShipmentForm';
 import { useManualShipmentDraft } from '@/hooks/useManualShipmentDraft';
 import { useSearchParams } from 'react-router-dom';
-import { Truck, FileText } from 'lucide-react';
+import { FileText } from 'lucide-react';
 import { Loader2 } from 'lucide-react';
-import { generateManualShipmentPDF } from '@/utils/manualShipmentPdf';
 
 const ManualShipmentCreate = () => {
   const [searchParams] = useSearchParams();
@@ -16,11 +15,8 @@ const ManualShipmentCreate = () => {
     loading, saving,
     savedDraftId, savedShareCode,
     saveDraft, submitDraft, resetForm,
+    saveAndDownloadPDF, saveAndSendWhatsApp, saveAndPrintPDF,
   } = useManualShipmentDraft(draftId);
-
-  const handleExportPDF = () => {
-    generateManualShipmentPDF(form);
-  };
 
   if (loading) {
     return (
@@ -58,7 +54,10 @@ const ManualShipmentCreate = () => {
           onSave={saveDraft}
           onSubmit={submitDraft}
           onReset={resetForm}
-          onExportPDF={handleExportPDF}
+          onExportPDF={() => {}}
+          onSaveAndDownloadPDF={saveAndDownloadPDF}
+          onSaveAndSendWhatsApp={saveAndSendWhatsApp}
+          onSaveAndPrintPDF={saveAndPrintPDF}
         />
       </div>
     </DashboardLayout>
