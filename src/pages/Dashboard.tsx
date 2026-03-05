@@ -9,6 +9,7 @@ import PinVerificationGate from '@/components/security/PinVerificationGate';
 import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
+import { useSecurityHardening } from '@/hooks/useSecurityHardening';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -46,6 +47,9 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
   const { enabled: aiAssistantEnabled } = usePlatformSetting('ai_assistant_enabled');
+  
+  // Security hardening — session timeout, CSP, anti-XSS
+  useSecurityHardening();
 
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);

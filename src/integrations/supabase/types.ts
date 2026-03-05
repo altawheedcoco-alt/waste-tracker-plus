@@ -25621,6 +25621,33 @@ export type Database = {
           },
         ]
       }
+      rate_limit_entries: {
+        Row: {
+          created_at: string | null
+          endpoint: string
+          id: string
+          identifier: string
+          request_count: number | null
+          window_start: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          endpoint: string
+          id?: string
+          identifier: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          endpoint?: string
+          id?: string
+          identifier?: string
+          request_count?: number | null
+          window_start?: string | null
+        }
+        Relationships: []
+      }
       recruitment_agencies: {
         Row: {
           agency_name: string
@@ -36284,6 +36311,15 @@ export type Database = {
         Args: { _org_id: string; _permission: string; _user_id: string }
         Returns: boolean
       }
+      check_rate_limit: {
+        Args: {
+          p_endpoint: string
+          p_identifier: string
+          p_max_requests?: number
+          p_window_seconds?: number
+        }
+        Returns: boolean
+      }
       check_slot_availability: {
         Args: { p_booking_date: string; p_timeslot_id: string }
         Returns: number
@@ -36298,6 +36334,7 @@ export type Database = {
       }
       cleanup_expired_portal_sessions: { Args: never; Returns: undefined }
       cleanup_old_api_request_logs: { Args: never; Returns: number }
+      cleanup_rate_limit_entries: { Args: never; Returns: undefined }
       consultant_has_active_subscription: {
         Args: { _consultant_user_id: string }
         Returns: boolean
