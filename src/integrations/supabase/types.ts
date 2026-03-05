@@ -18299,6 +18299,165 @@ export type Database = {
           },
         ]
       }
+      manual_shipment_drafts: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          delivery_address: string | null
+          delivery_date: string | null
+          destination_address: string | null
+          destination_license: string | null
+          destination_name: string | null
+          destination_phone: string | null
+          destination_type: string | null
+          disposal_method: string | null
+          driver_license: string | null
+          driver_name: string | null
+          driver_phone: string | null
+          generator_address: string | null
+          generator_license: string | null
+          generator_name: string | null
+          generator_phone: string | null
+          hazard_level: string | null
+          id: string
+          is_submitted: boolean | null
+          notes: string | null
+          organization_id: string
+          packaging_method: string | null
+          pickup_address: string | null
+          pickup_date: string | null
+          price: number | null
+          price_notes: string | null
+          quantity: number | null
+          share_code: string | null
+          shipment_number: string | null
+          shipment_type: string | null
+          special_instructions: string | null
+          status: string | null
+          submitted_at: string | null
+          transporter_address: string | null
+          transporter_license: string | null
+          transporter_name: string | null
+          transporter_phone: string | null
+          unit: string | null
+          updated_at: string | null
+          vehicle_plate: string | null
+          vehicle_type: string | null
+          waste_description: string | null
+          waste_state: string | null
+          waste_type: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          delivery_address?: string | null
+          delivery_date?: string | null
+          destination_address?: string | null
+          destination_license?: string | null
+          destination_name?: string | null
+          destination_phone?: string | null
+          destination_type?: string | null
+          disposal_method?: string | null
+          driver_license?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          generator_address?: string | null
+          generator_license?: string | null
+          generator_name?: string | null
+          generator_phone?: string | null
+          hazard_level?: string | null
+          id?: string
+          is_submitted?: boolean | null
+          notes?: string | null
+          organization_id: string
+          packaging_method?: string | null
+          pickup_address?: string | null
+          pickup_date?: string | null
+          price?: number | null
+          price_notes?: string | null
+          quantity?: number | null
+          share_code?: string | null
+          shipment_number?: string | null
+          shipment_type?: string | null
+          special_instructions?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          transporter_address?: string | null
+          transporter_license?: string | null
+          transporter_name?: string | null
+          transporter_phone?: string | null
+          unit?: string | null
+          updated_at?: string | null
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
+          waste_description?: string | null
+          waste_state?: string | null
+          waste_type?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          delivery_address?: string | null
+          delivery_date?: string | null
+          destination_address?: string | null
+          destination_license?: string | null
+          destination_name?: string | null
+          destination_phone?: string | null
+          destination_type?: string | null
+          disposal_method?: string | null
+          driver_license?: string | null
+          driver_name?: string | null
+          driver_phone?: string | null
+          generator_address?: string | null
+          generator_license?: string | null
+          generator_name?: string | null
+          generator_phone?: string | null
+          hazard_level?: string | null
+          id?: string
+          is_submitted?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          packaging_method?: string | null
+          pickup_address?: string | null
+          pickup_date?: string | null
+          price?: number | null
+          price_notes?: string | null
+          quantity?: number | null
+          share_code?: string | null
+          shipment_number?: string | null
+          shipment_type?: string | null
+          special_instructions?: string | null
+          status?: string | null
+          submitted_at?: string | null
+          transporter_address?: string | null
+          transporter_license?: string | null
+          transporter_name?: string | null
+          transporter_phone?: string | null
+          unit?: string | null
+          updated_at?: string | null
+          vehicle_plate?: string | null
+          vehicle_type?: string | null
+          waste_description?: string | null
+          waste_state?: string | null
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "manual_shipment_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "manual_shipment_drafts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       map_search_history: {
         Row: {
           confidence: string | null

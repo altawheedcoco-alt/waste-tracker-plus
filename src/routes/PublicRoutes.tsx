@@ -39,6 +39,7 @@ const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 const SharedDocumentView = lazy(() => import("@/pages/SharedDocumentView"));
 const RecyclingHistory = lazy(() => import("@/pages/RecyclingHistory"));
 const SharedResourcePage = lazy(() => import("@/pages/SharedResourcePage"));
+const SharedShipmentEdit = lazy(() => import("@/pages/SharedShipmentEdit"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -53,6 +54,7 @@ export const publicRoutes = (
     <Route path="/shipment/:token" element={<QuickShipment />} />
     <Route path="/driver/:token" element={<QuickDriver />} />
     <Route path="/quick-ship/:code" element={<QuickShip />} />
+    <Route path="/shared-shipment/:code" element={<SharedShipmentEdit />} />
     <Route path="/verify" element={<Verify />} />
     <Route path="/qr-verify" element={<QRVerify />} />
     <Route path="/scan" element={<QRVerify />} />
