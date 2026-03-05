@@ -11,13 +11,12 @@ import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import {
-  ShieldCheck, Building2, FileText, Users, ClipboardCheck,
+  ShieldCheck, Building2, FileText, ClipboardCheck,
   BarChart3, Eye, Loader2, AlertTriangle, Package,
   CheckCircle2, Briefcase, MapPin, Bell,
-  Bot, Send, Sparkles, Calendar, Clock, TrendingUp,
+  Bot, Send, Sparkles, Calendar, Clock,
   Target, Award, Star, Lightbulb, UserCheck,
-  Scale, Leaf, Gavel, Globe, Shield, Lock,
-  Pen, ArrowLeftRight,
+  Scale, Pen, Globe, HardHat,
 } from 'lucide-react';
 import { History as HistoryIcon } from 'lucide-react';
 import OrganizationScopeSelector from '@/components/consultant/OrganizationScopeSelector';
@@ -29,23 +28,17 @@ const ConsultantAlertsWidget = lazy(() => import('@/components/consultant/Consul
 const ShipmentReviewPanel = lazy(() => import('@/components/consultant/ShipmentReviewPanel'));
 const ApprovalsPanel = lazy(() => import('@/components/consultant/ApprovalsPanel'));
 const TechnicalReportsPanel = lazy(() => import('@/components/consultant/TechnicalReportsPanel'));
-const LegalDashboardPanel = lazy(() => import('@/components/consultant/LegalDashboardPanel'));
-const GreenPointsPanel = lazy(() => import('@/components/consultant/GreenPointsPanel'));
 const ConsultantDocumentWorkbench = lazy(() => import('@/components/consultant/ConsultantDocumentWorkbench'));
 const ConsultantFieldOpsPanel = lazy(() => import('@/components/consultant/ConsultantFieldOpsPanel'));
 const ConsultantAutoReviewPanel = lazy(() => import('@/components/consultant/ConsultantAutoReviewPanel'));
-const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
-const OfficeMembershipsPanel = lazy(() => import('@/components/consultant/OfficeMembershipsPanel'));
 const ConsultantClientsPanel = lazy(() => import('@/components/consultant/ConsultantClientsPanel'));
 const ConsultantLicensesPanel = lazy(() => import('@/components/consultant/ConsultantLicensesPanel'));
-const ConsultantDelegationsPanel = lazy(() => import('@/components/consultant/ConsultantDelegationsPanel'));
 const ConsultantActivityLog = lazy(() => import('@/components/consultant/ConsultantActivityLog'));
 const ConsultantSigningCenter = lazy(() => import('@/components/consultant/ConsultantSigningCenter'));
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
-const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
-
+const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
 
@@ -223,6 +216,14 @@ const ConsultantDashboard = memo(() => {
     return assignments.filter((a: any) => a.organization?.id === selectedOrgId);
   }, [assignments, selectedOrgId]);
 
+  // Check if current scope allows safety visibility
+  const canViewSafety = useMemo(() => {
+    if (!selectedOrgId) return true; // Show all when no filter
+    const assignment = assignments.find((a: any) => a.organization?.id === selectedOrgId);
+    // Safety visibility tied to compliance visibility permission
+    return assignment?.can_view_compliance !== false;
+  }, [selectedOrgId, assignments]);
+
   if (loadingProfile) {
     return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>;
   }
@@ -252,12 +253,8 @@ const ConsultantDashboard = memo(() => {
           <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/environmental-consultants')} className="gap-1.5">
             <Briefcase className="w-4 h-4" />ملفي المهني
           </Button>
-          <Button variant="outline" size="sm" onClick={() => navigate('/consultant-portal')} className="gap-1.5">
-            <FileText className="w-4 h-4" />بوابة التسجيل
-          </Button>
         </div>
       </div>
-
 
       {/* Consultant Info Card */}
       {consultantProfile && (
@@ -303,7 +300,6 @@ const ConsultantDashboard = memo(() => {
           selectedOrgId={selectedOrgId}
           onSelectOrg={(orgId) => {
             setSelectedOrgId(orgId);
-            // Reset to overview when switching context
             if (activeTab === 'organizations') setActiveTab('overview');
           }}
         />
@@ -325,34 +321,28 @@ const ConsultantDashboard = memo(() => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
-          <TabsTrigger value="field-ops" className="gap-1.5"><Shield className="w-4 h-4" />العمليات الميدانية</TabsTrigger>
-          <TabsTrigger value="auto-review" className="gap-1.5"><Lock className="w-4 h-4" />الاعتماد الفني</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />مركز المستندات</TabsTrigger>
-          <TabsTrigger value="approvals" className="gap-1.5"><ShieldCheck className="w-4 h-4" />الاعتمادات</TabsTrigger>
-          <TabsTrigger value="reports" className="gap-1.5"><Leaf className="w-4 h-4" />التقارير الفنية</TabsTrigger>
-          <TabsTrigger value="esg" className="gap-1.5"><TrendingUp className="w-4 h-4" />تقارير ESG</TabsTrigger>
-          <TabsTrigger value="legal" className="gap-1.5"><Gavel className="w-4 h-4" />التواصل القانوني</TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-1.5"><Scale className="w-4 h-4" />امتثال العملاء</TabsTrigger>
+          <TabsTrigger value="field-ops" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />العمليات الميدانية</TabsTrigger>
+          <TabsTrigger value="compliance" className="gap-1.5"><Scale className="w-4 h-4" />الامتثال</TabsTrigger>
           <TabsTrigger value="shipments" className="gap-1.5"><Package className="w-4 h-4" />مراجعة الشحنات</TabsTrigger>
+          <TabsTrigger value="signing-center" className="gap-1.5"><Pen className="w-4 h-4" />التوقيع والاعتماد</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />المستندات</TabsTrigger>
+          <TabsTrigger value="reports" className="gap-1.5"><FileText className="w-4 h-4" />التقارير</TabsTrigger>
+          {canViewSafety && (
+            <TabsTrigger value="safety" className="gap-1.5"><HardHat className="w-4 h-4" />السلامة والصحة المهنية</TabsTrigger>
+          )}
           <TabsTrigger value="alerts" className="gap-1.5"><Bell className="w-4 h-4" />التنبيهات</TabsTrigger>
           {!selectedOrgId && (
             <TabsTrigger value="organizations" className="gap-1.5"><Building2 className="w-4 h-4" />الجهات ({assignments.length})</TabsTrigger>
           )}
-          <TabsTrigger value="signing-center" className="gap-1.5"><Pen className="w-4 h-4" />الاعتماد والتوقيع</TabsTrigger>
-          <TabsTrigger value="licenses" className="gap-1.5"><Award className="w-4 h-4" />التراخيص</TabsTrigger>
-          <TabsTrigger value="delegations" className="gap-1.5"><ArrowLeftRight className="w-4 h-4" />التفويضات</TabsTrigger>
-          <TabsTrigger value="activity-log" className="gap-1.5"><HistoryIcon className="w-4 h-4" />سجل الأنشطة</TabsTrigger>
           <TabsTrigger value="my-clients" className="gap-1.5"><Briefcase className="w-4 h-4" />جهاتي</TabsTrigger>
-          <TabsTrigger value="office-memberships" className="gap-1.5"><Building2 className="w-4 h-4" />عضويات المكاتب</TabsTrigger>
-          <TabsTrigger value="green-points" className="gap-1.5"><Leaf className="w-4 h-4" />النقاط الخضراء</TabsTrigger>
+          <TabsTrigger value="licenses" className="gap-1.5"><Award className="w-4 h-4" />التراخيص</TabsTrigger>
+          <TabsTrigger value="activity-log" className="gap-1.5"><HistoryIcon className="w-4 h-4" />سجل الأنشطة</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
-          <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
-          <TabsTrigger value="kpis" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />مؤشرات KPI</TabsTrigger>
-          <TabsTrigger value="wmis-events" className="gap-1.5"><AlertTriangle className="w-4 h-4" />أحداث WMIS</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1.5"><BarChart3 className="w-4 h-4" />التحليلات والمؤشرات</TabsTrigger>
         </TabsList>
 
+        {/* ═══ نظرة عامة ═══ */}
         <TabsContent value="overview" className="space-y-6 mt-4">
-          {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <StatCard icon={Building2} label={selectedOrg ? 'الجهة' : 'الجهات المرتبطة'}
               value={selectedOrg ? selectedOrg.name?.slice(0, 10) : assignments.length}
@@ -362,13 +352,13 @@ const ConsultantDashboard = memo(() => {
             <StatCard icon={Star} label="التقييم" value="4.8" color="text-purple-600" isText />
           </div>
 
-          {/* Quick Actions — زر ← وظيفة ← نتيجة ← أثر */}
+          {/* Quick Actions */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {[
-              { icon: ShieldCheck, label: 'اعتماد شحنة', desc: 'مطابقة قانونية', color: 'bg-emerald-500', tab: 'approvals' },
+              { icon: ShieldCheck, label: 'اعتماد شحنة', desc: 'مطابقة قانونية', color: 'bg-emerald-500', tab: 'signing-center' },
               { icon: Package, label: 'مراجعة المانيفست', desc: 'تتبع سلسلة الحيازة', color: 'bg-indigo-500', tab: 'shipments' },
               { icon: AlertTriangle, label: 'تقرير عدم مطابقة', desc: 'إصدار إنذار بيئي', color: 'bg-amber-500', tab: 'reports' },
-              { icon: Award, label: 'شهادة تخلص آمن', desc: 'اعتماد نهائي', color: 'bg-blue-500', tab: 'legal' },
+              { icon: HardHat, label: 'تفتيش السلامة', desc: 'تفتيش صحة وسلامة مهنية', color: 'bg-orange-500', tab: 'safety' },
             ].map((action, i) => (
               <motion.button key={i}
                 onClick={() => setActiveTab(action.tab)}
@@ -400,66 +390,79 @@ const ConsultantDashboard = memo(() => {
           </div>
         </TabsContent>
 
+        {/* ═══ العمليات الميدانية ═══ */}
         <TabsContent value="field-ops" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantFieldOpsPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="auto-review" className="mt-4">
+        {/* ═══ الامتثال (يجمع امتثال العملاء + الاعتماد الفني) ═══ */}
+        <TabsContent value="compliance" className="mt-4 space-y-6">
+          <Suspense fallback={<LazyLoader />}>
+            <ClientComplianceDashboard assignments={scopedAssignments} />
+          </Suspense>
           <Suspense fallback={<LazyLoader />}>
             <ConsultantAutoReviewPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} entityType={(consultantProfile as any)?.entity_type || 'individual'} />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="documents" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantDocumentWorkbench assignments={scopedAssignments} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="approvals" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ApprovalsPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="reports" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <TechnicalReportsPanel assignments={scopedAssignments} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="esg" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ESGReportPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="legal" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <LegalDashboardPanel assignments={scopedAssignments} />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="compliance" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ClientComplianceDashboard assignments={scopedAssignments} />
-          </Suspense>
-        </TabsContent>
-
+        {/* ═══ مراجعة الشحنات ═══ */}
         <TabsContent value="shipments" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ShipmentReviewPanel assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
+        {/* ═══ التوقيع والاعتماد ═══ */}
+        <TabsContent value="signing-center" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantSigningCenter />
+          </Suspense>
+        </TabsContent>
+
+        {/* ═══ المستندات ═══ */}
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantDocumentWorkbench assignments={scopedAssignments} />
+          </Suspense>
+        </TabsContent>
+
+        {/* ═══ التقارير الفنية ═══ */}
+        <TabsContent value="reports" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <TechnicalReportsPanel assignments={scopedAssignments} />
+          </Suspense>
+        </TabsContent>
+
+        {/* ═══ السلامة والصحة المهنية ═══ */}
+        {canViewSafety && (
+          <TabsContent value="safety" className="mt-4">
+            <Suspense fallback={<LazyLoader />}>
+              <SafetyManagerDashboard />
+            </Suspense>
+            {selectedOrg && (
+              <div className="mt-3 p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+                  <Eye className="w-3.5 h-3.5" />
+                  بيانات السلامة معروضة لجهة: <strong>{selectedOrg.name}</strong> — الرؤية تخضع لصلاحيات التعيين
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        )}
+
+        {/* ═══ التنبيهات ═══ */}
         <TabsContent value="alerts" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantAlertsWidget assignments={scopedAssignments} />
           </Suspense>
         </TabsContent>
 
+        {/* ═══ الجهات ═══ */}
         {!selectedOrgId && (
           <TabsContent value="organizations" className="mt-4">
             <Card>
@@ -517,70 +520,43 @@ const ConsultantDashboard = memo(() => {
           </TabsContent>
         )}
 
-        <TabsContent value="office-memberships" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <OfficeMembershipsPanel />
-          </Suspense>
-        </TabsContent>
-
+        {/* ═══ جهاتي ═══ */}
         <TabsContent value="my-clients" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantClientsPanel />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="signing-center" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantSigningCenter />
-          </Suspense>
-        </TabsContent>
-
+        {/* ═══ التراخيص ═══ */}
         <TabsContent value="licenses" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantLicensesPanel />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="delegations" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantDelegationsPanel />
-          </Suspense>
-        </TabsContent>
-
+        {/* ═══ سجل الأنشطة ═══ */}
         <TabsContent value="activity-log" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantActivityLog />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="green-points" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <GreenPointsPanel assignments={scopedAssignments} />
-          </Suspense>
-        </TabsContent>
-
+        {/* ═══ المساعد الذكي ═══ */}
         <TabsContent value="ai-assistant" className="mt-4 space-y-6">
           <AIComplianceAssistant consultantProfile={consultantProfile} assignments={assignments} selectedOrgId={selectedOrgId} />
         </TabsContent>
 
-        <TabsContent value="analytics" className="mt-4">
+        {/* ═══ التحليلات والمؤشرات (مدمج) ═══ */}
+        <TabsContent value="analytics" className="mt-4 space-y-6">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantAnalyticsPanel consultantId={(consultantProfile as any)?.id} mode="individual" />
           </Suspense>
-        </TabsContent>
-
-        <TabsContent value="kpis" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ConsultantKPIsWidget />
           </Suspense>
         </TabsContent>
-
-        <TabsContent value="wmis-events" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <WMISEventsFeed />
-          </Suspense>
-        </TabsContent>
       </Tabs>
+
       <Suspense fallback={null}>
         <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       </Suspense>

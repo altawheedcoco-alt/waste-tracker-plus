@@ -12,7 +12,7 @@ import {
   Boxes, GitCompareArrows, FolderOpen, Inbox, TreePine, Store, GraduationCap,
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
-  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video,
+  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -181,9 +181,9 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: ClipboardCheck, labelAr: 'عمليات التدقيق', labelEn: 'Audits', path: '/dashboard/audit-sessions', key: 'consultant-audits' },
       { icon: FileText, labelAr: 'التقارير البيئية', labelEn: 'Reports', path: '/dashboard/consultant-reports', key: 'consultant-reports' },
       { icon: Shield, labelAr: 'تقييم الامتثال', labelEn: 'Compliance', path: '/dashboard/compliance-assessment', key: 'consultant-compliance' },
+      { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'consultant-safety' },
       { icon: Building2, labelAr: 'العملاء', labelEn: 'Clients', path: '/dashboard/consultant-clients', key: 'consultant-clients' },
       { icon: Award, labelAr: 'الشهادات والتراخيص', labelEn: 'Certifications', path: '/dashboard/consultant-certifications', key: 'consultant-certifications' },
-      { icon: BookOpen, labelAr: 'قاعدة المعرفة', labelEn: 'Knowledge', path: '/dashboard/consultant-knowledge', key: 'consultant-knowledge' },
     ],
   },
 
