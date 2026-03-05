@@ -100,6 +100,7 @@ export async function saveDocumentSignature({
         document_hash: documentHash,
         signature_hash: signatureHash,
         status: 'signed',
+        timestamp_signed: new Date().toISOString(),
       } as any)
       .select('id, platform_seal_number')
       .single();
