@@ -415,6 +415,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Bell, labelAr: 'الإشعارات', labelEn: 'Notifications', path: '/dashboard/notifications', key: 'notifications' },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'all-system-status' },
       { icon: Wallet, labelAr: 'إدارة الاشتراك', labelEn: 'Subscription', path: '/dashboard/subscription', key: 'subscription' },
+      { icon: Database, labelAr: 'تصدير البيانات', labelEn: 'Data Export', path: '/dashboard/data-export', key: 'data-export' },
       { icon: WifiOff, labelAr: 'وضع بدون إنترنت', labelEn: 'Offline Mode', path: '/dashboard/offline-mode', key: 'offline-mode' },
       { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform' },
       { icon: Settings, labelAr: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', key: 'settings' },
