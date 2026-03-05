@@ -177,26 +177,30 @@ Deno.serve(async (req) => {
       }
       const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
 
-      // If document URL provided, send file via WaPilot send-message with file field
+      // If document URL provided, download it and upload as multipart to WaPilot send-file
       if (docUrl) {
         try {
-          const filePayload = {
-            chat_id: chatId,
-            text: `📄 ${docFilename || 'بيان شحنة'}`,
-            file: {
-              url: docUrl,
-              filename: docFilename || "shipment-document.pdf",
-              mimetype: "application/pdf",
-            },
-          };
-          console.log("[WaPilot] Sending file via send-message with file field");
-          const fileRes = await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-message`, {
+          console.log("[WaPilot] Downloading file from:", docUrl);
+          const fileResponse = await fetch(docUrl);
+          if (!fileResponse.ok) throw new Error(`Failed to download file: ${fileResponse.status}`);
+          
+          const fileBlob = await fileResponse.blob();
+          const fname = docFilename || "shipment-document.pdf";
+          
+          // Build multipart/form-data
+          const formData = new FormData();
+          formData.append("chat_id", chatId);
+          formData.append("caption", fname);
+          formData.append("media", new File([fileBlob], fname, { type: "application/pdf" }));
+
+          console.log("[WaPilot] Uploading file via send-file (multipart)");
+          const fileRes = await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-file`, {
             method: "POST",
-            headers: { token: WAPILOT_TOKEN, "Content-Type": "application/json" },
-            body: JSON.stringify(filePayload),
+            headers: { token: WAPILOT_TOKEN },
+            body: formData,
           });
           const fileResult = await fileRes.text();
-          console.log(`[WaPilot] File send response (${fileRes.status}):`, fileResult);
+          console.log(`[WaPilot] send-file response (${fileRes.status}):`, fileResult);
         } catch (e) {
           console.warn("[WaPilot] File send failed:", e.message);
         }
