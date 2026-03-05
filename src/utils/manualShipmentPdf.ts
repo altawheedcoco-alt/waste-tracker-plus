@@ -1,4 +1,5 @@
 import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 import { ManualShipmentData } from '@/hooks/useManualShipmentDraft';
 
 const wasteTypeLabels: Record<string, string> = {
@@ -20,164 +21,208 @@ const disposalLabels: Record<string, string> = {
   landfill: 'دفن صحي', incineration: 'حرق', treatment: 'معالجة', reuse: 'إعادة استخدام',
 };
 
-export function generateManualShipmentPDF(form: ManualShipmentData) {
-  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+function val(v: string | undefined | null): string {
+  return v || '-';
+}
 
-  // Register Arabic-compatible font fallback
-  doc.setFont('helvetica');
-  
-  const pageWidth = 210;
-  const margin = 15;
-  const contentWidth = pageWidth - margin * 2;
-  let y = 20;
+function generateHTML(form: ManualShipmentData): string {
+  const shipTypeLabel = form.shipment_type === 'urgent' ? 'عاجلة' : form.shipment_type === 'scheduled' ? 'مجدولة' : 'عادية';
+  const destTypeLabel = form.destination_type === 'disposal' ? 'تخلص' : 'تدوير';
+  const destSectionTitle = form.destination_type === 'disposal' ? 'جهة التخلص' : 'جهة التدوير';
 
-  const addTitle = (text: string) => {
-    doc.setFontSize(16);
-    doc.setFont('helvetica', 'bold');
-    doc.text(text, pageWidth / 2, y, { align: 'center' });
-    y += 10;
-  };
+  const row = (label: string, value: string) => `
+    <tr>
+      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-weight:bold;text-align:right;width:35%;color:#374151;font-size:12px;">${label}</td>
+      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;color:#1f2937;font-size:12px;">${val(value)}</td>
+    </tr>`;
 
-  const addSectionHeader = (text: string) => {
-    if (y > 260) { doc.addPage(); y = 20; }
-    doc.setFillColor(240, 240, 240);
-    doc.rect(margin, y - 5, contentWidth, 8, 'F');
-    doc.setFontSize(11);
-    doc.setFont('helvetica', 'bold');
-    doc.text(text, pageWidth - margin, y, { align: 'right' });
-    y += 10;
-  };
+  const section = (title: string, rows: string) => `
+    <div style="margin-bottom:14px;">
+      <div style="background:#059669;color:white;padding:7px 12px;font-size:13px;font-weight:bold;border-radius:4px 4px 0 0;">${title}</div>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-top:none;">
+        ${rows}
+      </table>
+    </div>`;
 
-  const addRow = (label: string, value: string) => {
-    if (y > 275) { doc.addPage(); y = 20; }
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'normal');
-    doc.text(value || '-', margin + 5, y);
-    doc.setFont('helvetica', 'bold');
-    doc.text(label + ':', pageWidth - margin, y, { align: 'right' });
-    y += 7;
-  };
-
-  const addLine = () => {
-    doc.setDrawColor(200);
-    doc.line(margin, y, pageWidth - margin, y);
-    y += 5;
-  };
+  let html = `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size:12px; color:#1a1a1a; direction:rtl; padding:20px; background:white; }
+</style></head><body>`;
 
   // Header
-  addTitle('Shipment Manifest / نموذج شحنة');
-  doc.setFontSize(9);
-  doc.setFont('helvetica', 'normal');
-  doc.text(`Date: ${new Date().toLocaleDateString('en-GB')}`, pageWidth - margin, y, { align: 'right' });
-  y += 8;
-  addLine();
+  html += `<div style="text-align:center;border-bottom:3px solid #059669;padding-bottom:12px;margin-bottom:16px;">
+    <h1 style="font-size:22px;color:#059669;margin-bottom:4px;">♻ بيان شحنة / Shipment Manifest</h1>
+    <div style="font-size:11px;color:#666;">التاريخ: ${new Date().toLocaleDateString('ar-EG')} | رقم الشحنة: ${val(form.shipment_number)}</div>
+  </div>`;
 
   // Shipment Info
-  addSectionHeader('Shipment Info / بيانات الشحنة');
-  addRow('Shipment No / رقم الشحنة', form.shipment_number);
-  addRow('Type / نوع النقلة', form.shipment_type === 'urgent' ? 'Urgent / عاجلة' : form.shipment_type === 'scheduled' ? 'Scheduled / مجدولة' : 'Regular / عادية');
-  addRow('Destination / الوجهة', form.destination_type === 'disposal' ? 'Disposal / تخلص' : 'Recycling / تدوير');
-  y += 3;
+  html += section('بيانات الشحنة',
+    row('رقم الشحنة', form.shipment_number) +
+    row('نوع النقلة', shipTypeLabel) +
+    row('الوجهة', destTypeLabel)
+  );
 
   // Generator
-  addSectionHeader('Generator / المولّد');
-  addRow('Name / الاسم', form.generator_name);
-  addRow('Address / العنوان', form.generator_address);
-  addRow('Phone / الهاتف', form.generator_phone);
-  addRow('Email / البريد', form.generator_email);
-  addRow('License / الترخيص', form.generator_license);
-  addRow('Commercial Reg. / السجل التجاري', form.generator_commercial_register);
-  addRow('Tax ID / الرقم الضريبي', form.generator_tax_id);
-  addRow('Representative / الممثل القانوني', form.generator_representative);
-  y += 3;
+  html += section('المولّد (Generator)',
+    row('الاسم', form.generator_name) +
+    row('العنوان', form.generator_address) +
+    row('الهاتف', form.generator_phone) +
+    row('البريد الإلكتروني', form.generator_email) +
+    row('الترخيص', form.generator_license) +
+    row('السجل التجاري', form.generator_commercial_register) +
+    row('الرقم الضريبي', form.generator_tax_id) +
+    row('الممثل القانوني', form.generator_representative)
+  );
 
   // Transporter
-  addSectionHeader('Transporter / الناقل');
-  addRow('Name / الاسم', form.transporter_name);
-  addRow('Address / العنوان', form.transporter_address);
-  addRow('Phone / الهاتف', form.transporter_phone);
-  addRow('Email / البريد', form.transporter_email);
-  addRow('License / الترخيص', form.transporter_license);
-  addRow('Commercial Reg. / السجل التجاري', form.transporter_commercial_register);
-  addRow('Tax ID / الرقم الضريبي', form.transporter_tax_id);
-  addRow('Representative / الممثل القانوني', form.transporter_representative);
-  y += 3;
+  html += section('الناقل (Transporter)',
+    row('الاسم', form.transporter_name) +
+    row('العنوان', form.transporter_address) +
+    row('الهاتف', form.transporter_phone) +
+    row('البريد الإلكتروني', form.transporter_email) +
+    row('الترخيص', form.transporter_license) +
+    row('السجل التجاري', form.transporter_commercial_register) +
+    row('الرقم الضريبي', form.transporter_tax_id) +
+    row('الممثل القانوني', form.transporter_representative)
+  );
 
   // Destination
-  addSectionHeader(form.destination_type === 'disposal' ? 'Disposal Facility / جهة التخلص' : 'Recycler / جهة التدوير');
-  addRow('Name / الاسم', form.destination_name);
-  addRow('Address / العنوان', form.destination_address);
-  addRow('Phone / الهاتف', form.destination_phone);
-  addRow('Email / البريد', form.destination_email);
-  addRow('License / الترخيص', form.destination_license);
-  addRow('Commercial Reg. / السجل التجاري', form.destination_commercial_register);
-  addRow('Tax ID / الرقم الضريبي', form.destination_tax_id);
-  addRow('Representative / الممثل القانوني', form.destination_representative);
-  y += 3;
+  html += section(`${destSectionTitle} (Destination)`,
+    row('الاسم', form.destination_name) +
+    row('العنوان', form.destination_address) +
+    row('الهاتف', form.destination_phone) +
+    row('البريد الإلكتروني', form.destination_email) +
+    row('الترخيص', form.destination_license) +
+    row('السجل التجاري', form.destination_commercial_register) +
+    row('الرقم الضريبي', form.destination_tax_id) +
+    row('الممثل القانوني', form.destination_representative)
+  );
 
-  // Waste
-  addSectionHeader('Waste Details / بيانات المخلفات');
-  addRow('Waste Type / نوع المخلف', wasteTypeLabels[form.waste_type] || form.waste_type);
-  addRow('Description / الوصف', form.waste_description);
-  addRow('Hazard Level / الخطورة', hazardLabels[form.hazard_level] || form.hazard_level);
-  addRow('Quantity / الكمية', `${form.quantity} ${unitLabels[form.unit] || form.unit}`);
-  addRow('Disposal Method / طريقة المعالجة', disposalLabels[form.disposal_method] || form.disposal_method);
-  y += 3;
+  // Waste Details
+  html += section('بيانات المخلفات',
+    row('نوع المخلف', wasteTypeLabels[form.waste_type] || form.waste_type) +
+    row('الوصف', form.waste_description) +
+    row('مستوى الخطورة', hazardLabels[form.hazard_level] || form.hazard_level) +
+    row('الكمية', `${form.quantity || '-'} ${unitLabels[form.unit] || form.unit || ''}`) +
+    row('طريقة المعالجة', disposalLabels[form.disposal_method] || form.disposal_method)
+  );
 
-  // Driver
-  addSectionHeader('Driver & Vehicle / السائق والمركبة');
-  addRow('Driver / السائق', form.driver_name);
-  addRow('Phone / الهاتف', form.driver_phone);
-  addRow('Vehicle Plate / اللوحة', form.vehicle_plate);
-  addRow('Vehicle Type / نوع المركبة', form.vehicle_type);
-  y += 3;
+  // Driver & Vehicle
+  html += section('السائق والمركبة',
+    row('السائق', form.driver_name) +
+    row('هاتف السائق', form.driver_phone) +
+    row('لوحة المركبة', form.vehicle_plate) +
+    row('نوع المركبة', form.vehicle_type)
+  );
 
   // Logistics
-  addSectionHeader('Logistics / التحميل والتسليم');
-  addRow('Pickup / موقع التحميل', form.pickup_address);
-  addRow('Delivery / موقع التسليم', form.delivery_address);
-  addRow('Pickup Date / تاريخ التحميل', form.pickup_date);
-  addRow('Delivery Date / تاريخ التسليم', form.delivery_date);
-  y += 3;
+  html += section('التحميل والتسليم',
+    row('موقع التحميل', form.pickup_address) +
+    row('موقع التسليم', form.delivery_address) +
+    row('تاريخ التحميل', form.pickup_date) +
+    row('تاريخ التسليم', form.delivery_date)
+  );
 
   // Financial
   if (form.price) {
-    addSectionHeader('Financial / البيانات المالية');
-    addRow('Price / السعر', form.price);
-    addRow('Notes / ملاحظات', form.price_notes);
-    y += 3;
+    html += section('البيانات المالية',
+      row('السعر', form.price) +
+      row('ملاحظات السعر', form.price_notes)
+    );
   }
 
   // Notes
   if (form.notes || form.special_instructions) {
-    addSectionHeader('Notes / ملاحظات');
-    if (form.notes) addRow('General / عامة', form.notes);
-    if (form.special_instructions) addRow('Special Instructions / تعليمات', form.special_instructions);
-    y += 3;
+    let noteRows = '';
+    if (form.notes) noteRows += row('ملاحظات عامة', form.notes);
+    if (form.special_instructions) noteRows += row('تعليمات خاصة', form.special_instructions);
+    html += section('ملاحظات', noteRows);
   }
 
   // Signature area
-  if (y > 230) { doc.addPage(); y = 20; }
-  y += 10;
-  addLine();
-  y += 5;
+  html += `<div style="margin-top:24px;border-top:2px solid #059669;padding-top:16px;">
+    <table style="width:100%;text-align:center;">
+      <tr>
+        <td style="width:33%;padding:10px;">
+          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">المولّد</div>
+          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        </td>
+        <td style="width:33%;padding:10px;">
+          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">الناقل</div>
+          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        </td>
+        <td style="width:33%;padding:10px;">
+          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">المستقبل</div>
+          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        </td>
+      </tr>
+    </table>
+  </div>`;
 
-  const sigWidth = contentWidth / 3;
-  const sigLabels = ['Generator / المولّد', 'Transporter / الناقل', 'Receiver / المستقبل'];
-  sigLabels.forEach((label, i) => {
-    const x = margin + (sigWidth * i) + sigWidth / 2;
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.text(label, x, y, { align: 'center' });
-    doc.line(margin + sigWidth * i + 5, y + 20, margin + sigWidth * (i + 1) - 5, y + 20);
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(7);
-    doc.text('Name, Signature & Stamp', x, y + 25, { align: 'center' });
+  // Footer
+  html += `<div style="margin-top:16px;text-align:center;font-size:9px;color:#999;border-top:1px solid #e5e7eb;padding-top:8px;">
+    تم الإنشاء بواسطة منصة iRecycle لإدارة المخلفات | ${new Date().toLocaleDateString('ar-EG')}
+  </div>`;
+
+  html += `</body></html>`;
+  return html;
+}
+
+export async function generateManualShipmentPDF(form: ManualShipmentData) {
+  // Create offscreen iframe
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.left = '-9999px';
+  iframe.style.width = '794px';
+  iframe.style.height = '1123px';
+  document.body.appendChild(iframe);
+
+  const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+  if (!iframeDoc) throw new Error('Could not access iframe');
+
+  const htmlContent = generateHTML(form);
+  iframeDoc.open();
+  iframeDoc.write(htmlContent);
+  iframeDoc.close();
+
+  // Wait for rendering
+  await new Promise(resolve => setTimeout(resolve, 500));
+
+  const canvas = await html2canvas(iframeDoc.body, {
+    scale: 2,
+    useCORS: true,
+    logging: false,
+    width: 794,
+    windowWidth: 794,
+    backgroundColor: '#ffffff',
   });
 
-  // Save
+  document.body.removeChild(iframe);
+
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const imgWidth = pageWidth;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+  let heightLeft = imgHeight;
+  let position = 0;
+
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+
+  while (heightLeft > 0) {
+    position = -(imgHeight - heightLeft);
+    pdf.addPage();
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+  }
+
   const fileName = form.shipment_number
     ? `shipment-${form.shipment_number}.pdf`
     : `shipment-draft-${new Date().toISOString().slice(0, 10)}.pdf`;
-  doc.save(fileName);
+  pdf.save(fileName);
 }
