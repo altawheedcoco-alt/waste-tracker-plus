@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { MessageCircle } from 'lucide-react';
 import { 
   Save, Download, Share2, Send, RotateCcw, FileText, Printer,
   User, Truck, Factory, Package, MapPin, Calendar, Scale, DollarSign, 
@@ -78,6 +79,24 @@ const ManualShipmentForm = ({
     }
   };
 
+  const handleWhatsAppShare = async () => {
+    const code = savedShareCode || await onSave();
+    if (!code) return;
+
+    const shareUrl = `${window.location.origin}/shared-shipment/${code}`;
+    const shipmentNo = form.shipment_number ? ` رقم ${form.shipment_number}` : '';
+    const generator = form.generator_name ? `\nالمولّد: ${form.generator_name}` : '';
+    const transporter = form.transporter_name ? `\nالناقل: ${form.transporter_name}` : '';
+    const destination = form.destination_name ? `\nالوجهة: ${form.destination_name}` : '';
+    const waste = form.waste_type ? `\nنوع المخلف: ${form.waste_type}` : '';
+    const qty = form.quantity ? `\nالكمية: ${form.quantity} ${form.unit === 'ton' ? 'طن' : form.unit === 'kg' ? 'كجم' : form.unit}` : '';
+
+    const message = `📋 *نموذج شحنة${shipmentNo}*${generator}${transporter}${destination}${waste}${qty}\n\n🔗 رابط النموذج (قابل للتعديل):\n${shareUrl}`;
+
+    const waUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(waUrl, '_blank');
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -119,6 +138,10 @@ const ManualShipmentForm = ({
         <Button onClick={onSubmit} variant="default" className="gap-2 bg-primary">
           <Send className="w-4 h-4" />
           إرسال
+        </Button>
+        <Button onClick={handleWhatsAppShare} variant="outline" className="gap-2 text-emerald-600 border-emerald-200 hover:bg-emerald-50">
+          <MessageCircle className="w-4 h-4" />
+          إرسال واتساب
         </Button>
         <div className="flex-1" />
         <Button onClick={onReset} variant="ghost" size="sm" className="gap-1 text-destructive">
