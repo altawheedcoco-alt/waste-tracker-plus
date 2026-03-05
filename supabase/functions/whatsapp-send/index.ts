@@ -177,23 +177,28 @@ Deno.serve(async (req) => {
       }
       const chatId = formattedPhone.endsWith("@c.us") ? formattedPhone : `${formattedPhone}@c.us`;
 
-      // If document URL provided, send as media first then text
+      // If document URL provided, send file via WaPilot send-message with file field
       if (docUrl) {
         try {
-          const mediaPayload = {
+          const filePayload = {
             chat_id: chatId,
-            media_url: docUrl,
-            media_type: "document",
-            caption: docFilename || "shipment-document.pdf",
-            filename: docFilename || "shipment-document.pdf",
+            text: `📄 ${docFilename || 'بيان شحنة'}`,
+            file: {
+              url: docUrl,
+              filename: docFilename || "shipment-document.pdf",
+              mimetype: "application/pdf",
+            },
           };
-          await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-media`, {
+          console.log("[WaPilot] Sending file via send-message with file field");
+          const fileRes = await fetch(`${WAPILOT_BASE}/${activeInstanceId}/send-message`, {
             method: "POST",
             headers: { token: WAPILOT_TOKEN, "Content-Type": "application/json" },
-            body: JSON.stringify(mediaPayload),
+            body: JSON.stringify(filePayload),
           });
+          const fileResult = await fileRes.text();
+          console.log(`[WaPilot] File send response (${fileRes.status}):`, fileResult);
         } catch (e) {
-          console.warn("Media send failed, falling back to text only:", e.message);
+          console.warn("[WaPilot] File send failed:", e.message);
         }
       }
 
