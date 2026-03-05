@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import LicenseComplianceBanner from '@/components/wmis/LicenseComplianceBanner';
 import { LicenseCheckResult } from '@/hooks/useWMIS';
@@ -34,6 +34,7 @@ import { cn } from '@/lib/utils';
 interface CreateShipmentFormProps {
   onSuccess?: () => void;
   onClose?: () => void;
+  loadLastOnMount?: boolean;
 }
 
 // Section wrapper component
@@ -79,7 +80,7 @@ const FormSection = ({
   </motion.div>
 );
 
-const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => {
+const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: CreateShipmentFormProps) => {
   const {
     loading,
     formData,
@@ -110,9 +111,17 @@ const CreateShipmentForm = ({ onSuccess, onClose }: CreateShipmentFormProps) => 
     getCurrentRecyclerInfo,
     handleApplyPinnedParties,
     fetchDriverCurrentLocation,
+    loadLastShipment,
     navigate,
     organization,
   } = useCreateShipment();
+
+  // Load last shipment data on mount if requested
+  useEffect(() => {
+    if (loadLastOnMount) {
+      loadLastShipment();
+    }
+  }, []);
 
   const [pickupCoords, setPickupCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [deliveryCoords, setDeliveryCoords] = useState<{ lat: number; lng: number } | null>(null);

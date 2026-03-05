@@ -802,6 +802,12 @@ export const useCreateShipment = () => {
       }
 
       toast.success('تم إنشاء الشحنة بنجاح');
+
+      // Save form data for repeat functionality
+      try {
+        const savedData = { ...formData, pickup_date: '', expected_delivery_date: '' };
+        localStorage.setItem('last_shipment_form', JSON.stringify(savedData));
+      } catch { /* ignore quota errors */ }
       
       if (onSuccess) {
         onSuccess();
@@ -873,6 +879,24 @@ export const useCreateShipment = () => {
     }));
   };
 
+  const loadLastShipment = () => {
+    try {
+      const saved = localStorage.getItem('last_shipment_form');
+      if (saved) {
+        const parsed = JSON.parse(saved) as Partial<ShipmentFormData>;
+        setFormData(prev => ({ ...prev, ...parsed, pickup_date: '', expected_delivery_date: '' }));
+        toast.success('تم تحميل بيانات آخر شحنة');
+        return true;
+      }
+      toast.info('لا توجد شحنة سابقة محفوظة');
+      return false;
+    } catch {
+      return false;
+    }
+  };
+
+  const hasLastShipment = !!localStorage.getItem('last_shipment_form');
+
   return {
     // State
     loading,
@@ -910,6 +934,8 @@ export const useCreateShipment = () => {
     handleApplyPinnedParties,
     getWasteStateLabel,
     fetchDriverCurrentLocation,
+    loadLastShipment,
+    hasLastShipment,
     
     // Navigation
     navigate,
