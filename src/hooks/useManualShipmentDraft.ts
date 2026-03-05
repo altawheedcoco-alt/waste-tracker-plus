@@ -325,6 +325,29 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
               .from('shipment-documents')
               .getPublicUrl(filePath);
             pdfPublicUrl = urlData?.publicUrl;
+
+            // Archive PDF in entity_documents
+            if (pdfPublicUrl && organization?.id) {
+              try {
+                await supabase.from('entity_documents').insert({
+                  organization_id: organization.id,
+                  uploaded_by: user.id,
+                  title: `بيان شحنة يدوي - ${form.shipment_number || savedDraftId}`,
+                  file_name: pdfFilename,
+                  file_url: pdfPublicUrl,
+                  file_type: 'application/pdf',
+                  file_size: pdfBlob.size,
+                  document_type: 'shipment',
+                  document_category: 'shipment',
+                  reference_number: form.shipment_number || null,
+                  description: `بيان شحنة يدوي - ${form.waste_type || 'مخلفات'} - ${form.generator_name || 'غير محدد'}`,
+                  tags: ['manual-shipment', 'pdf', form.waste_type].filter(Boolean) as string[],
+                  document_date: new Date().toISOString().split('T')[0],
+                });
+              } catch (archiveErr) {
+                console.warn('[ManualShipment] Archive to entity_documents failed:', archiveErr);
+              }
+            }
           } else {
             console.warn('[ManualShipment] PDF upload failed:', uploadErr.message);
           }
