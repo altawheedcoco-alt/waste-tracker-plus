@@ -1014,9 +1014,16 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Permits Button */}
+          {/* Floating Actions: Permits + Quick Sign */}
           <FloatingActionsStack
             actions={[
+              {
+                id: 'quick-sign',
+                icon: <PenTool size={isMobile ? 16 : 22} />,
+                onClick: () => navigate('/dashboard/signing-inbox'),
+                label: 'التوقيع السريع',
+                variant: 'accent',
+              },
               {
                 id: 'permits',
                 icon: <FileText size={isMobile ? 16 : 22} />,
