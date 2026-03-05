@@ -238,7 +238,14 @@ Deno.serve(async (req) => {
     }
 
     // Handle broadcast_to_users: resolve phones from profiles
-    if (action === "broadcast_to_users" && body.user_ids?.length > 0) {
+    if (action === "broadcast_to_users") {
+      if (!body.user_ids?.length) {
+        return new Response(
+          JSON.stringify({ success: true, sent: 0, total: 0, skipped: "no_user_ids" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       const { data: profiles } = await supabase
         .from("profiles")
         .select("id, phone")
@@ -260,6 +267,7 @@ Deno.serve(async (req) => {
             status: result.error ? "failed" : "sent",
             error_message: result.error || null,
             metadata,
+            interactive_buttons: interactive_buttons || null,
           });
           if (!result.error) sentCount++;
         } catch (e) {
