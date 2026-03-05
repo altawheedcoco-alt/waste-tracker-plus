@@ -232,6 +232,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: FolderOpen, labelAr: 'مركز المستندات', labelEn: 'Document Center', path: '/dashboard/document-center', key: 'document-center' },
+      { icon: Scale, labelAr: 'المستندات التنظيمية', labelEn: 'Regulatory Documents', path: '/dashboard/regulatory-documents', key: 'regulatory-documents',
+        visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'admin'] },
       { icon: FolderOpen, labelAr: 'الأرشيف', labelEn: 'Archive', path: '/dashboard/document-center?tab=archive', key: 'doc-center-archive' },
       { icon: PenTool, labelAr: 'التوقيعات والأختام', labelEn: 'Signatures & Stamps', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures' },
       { icon: CircleDot, labelAr: 'QR وباركود', labelEn: 'QR & Barcode', path: '/dashboard/document-center?tab=qr-barcode', key: 'doc-center-qr' },

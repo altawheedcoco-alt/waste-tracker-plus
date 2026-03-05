@@ -16,7 +16,7 @@ import {
   ShieldCheck, ClipboardCheck, TrendingUp,
   AlertTriangle, Bot, Send,
   Sparkles, Target, UserPlus, Star, Award,
-  Lightbulb, Activity, Clock, Shield,
+  Lightbulb, Activity, Clock, Shield, Scale,
   Stamp, Settings, Upload,
 } from 'lucide-react';
 
@@ -31,6 +31,7 @@ const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/Consulta
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
 const ConsultantSmartAlerts = lazy(() => import('@/components/consultant/ConsultantSmartAlerts'));
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
+const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
 
 
 const LazyLoader = () => <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>;
@@ -325,6 +326,7 @@ const ConsultingOfficeDashboard = memo(() => {
           </TabsTrigger>
           <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />المستندات والتفويضات</TabsTrigger>
           <TabsTrigger value="licenses" className="gap-1.5"><ShieldCheck className="w-4 h-4" />التراخيص</TabsTrigger>
+          <TabsTrigger value="regulatory" className="gap-1.5"><Scale className="w-4 h-4" />المستندات التنظيمية</TabsTrigger>
           <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5"><Settings className="w-4 h-4" />الإعدادات</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
@@ -391,6 +393,12 @@ const ConsultingOfficeDashboard = memo(() => {
         <TabsContent value="licenses" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <OfficeLicensesPanel />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="regulatory" className="mt-4">
+          <Suspense fallback={<LazyLoader />}>
+            <RegulatoryDocumentsCenter />
           </Suspense>
         </TabsContent>
 
