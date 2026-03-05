@@ -76,33 +76,39 @@ const emptyForm: ManualShipmentData = {
 export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
   const { user, organization } = useAuth();
   const navigate = useNavigate();
-  const [form, setForm] = useState<ManualShipmentData>({ ...emptyForm });
+  const [initialized, setInitialized] = useState(false);
+  const [form, setForm] = useState<ManualShipmentData>(() => {
+    // Initialize from localStorage immediately to avoid race condition
+    if (!draftId && !shareCode) {
+      try {
+        const saved = localStorage.getItem('manual_shipment_draft');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          return { ...emptyForm, ...parsed };
+        }
+      } catch { /* ignore */ }
+    }
+    return { ...emptyForm };
+  });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [savedDraftId, setSavedDraftId] = useState<string | null>(draftId || null);
   const [savedShareCode, setSavedShareCode] = useState<string | null>(null);
 
-  // Load existing draft
+  // Load existing draft from DB
   useEffect(() => {
     if (draftId) loadById(draftId);
     else if (shareCode) loadByShareCode(shareCode);
-    else loadFromLocalStorage();
+    else setInitialized(true);
   }, [draftId, shareCode]);
 
-  // Auto-save to localStorage on change
+  // Auto-save to localStorage on change (only after initialization)
   useEffect(() => {
-    localStorage.setItem('manual_shipment_draft', JSON.stringify(form));
-  }, [form]);
+    if (initialized) {
+      localStorage.setItem('manual_shipment_draft', JSON.stringify(form));
+    }
+  }, [form, initialized]);
 
-  const loadFromLocalStorage = () => {
-    try {
-      const saved = localStorage.getItem('manual_shipment_draft');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        setForm(prev => ({ ...prev, ...parsed }));
-      }
-    } catch { /* ignore */ }
-  };
 
   const loadById = async (id: string) => {
     setLoading(true);
@@ -117,6 +123,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       setSavedDraftId(data.id);
       setSavedShareCode(data.share_code);
     }
+    setInitialized(true);
   };
 
   const loadByShareCode = async (code: string) => {
@@ -134,6 +141,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     } else {
       toast.error('لم يتم العثور على النموذج المطلوب');
     }
+    setInitialized(true);
   };
 
   const mapDbToForm = (data: any) => {
