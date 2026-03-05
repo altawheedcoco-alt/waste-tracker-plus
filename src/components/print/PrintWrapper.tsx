@@ -90,15 +90,8 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         <div className="print-watermark">{watermarkText}</div>
       )}
 
-      {/* ===== HEADER: QR + Title + Barcode ===== */}
+      {/* ===== HEADER: Title ===== */}
       <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}` }}>
-        {/* QR Code */}
-        {showQR && (
-          <div className="text-center print-qr flex-shrink-0">
-            <QRCodeSVG value={qrContent} size={60} level="M" includeMargin={false} />
-            <p className="text-[7pt] mt-1 text-gray-500">امسح للتحقق</p>
-          </div>
-        )}
 
         {/* Title Section */}
         <div className="text-center flex-1 px-3">
@@ -124,16 +117,11 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
           </div>
         </div>
 
-        {/* Barcode / Logo */}
-        <div className="text-center print-barcode flex-shrink-0">
-          {organizationLogo ? (
+        {/* Logo */}
+        <div className="text-center flex-shrink-0">
+          {organizationLogo && (
             <img src={organizationLogo} alt={organizationName || 'Logo'} className="h-12 mx-auto mb-1 object-contain" crossOrigin="anonymous" />
-          ) : showBarcode && barcodeContent ? (
-            <>
-              <Barcode value={barcodeContent} width={1} height={30} fontSize={7} displayValue={false} />
-              <p className="text-[7pt] font-mono mt-0.5">{barcodeContent}</p>
-            </>
-          ) : null}
+          )}
           {organizationName && <p className="text-[7pt] text-gray-600 mt-0.5">{organizationName}</p>}
         </div>
       </header>
@@ -163,11 +151,6 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
                 )}
                 <p className="text-[7pt] font-bold text-gray-800 truncate">{partner.name}</p>
                 <p className="text-[6pt] text-gray-500">{partner.role}</p>
-                {partner.barcode && (
-                  <div className="mt-1">
-                    <Barcode value={partner.barcode} width={0.8} height={18} fontSize={6} displayValue={true} />
-                  </div>
-                )}
               </div>
             ))}
           </div>
@@ -181,10 +164,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       {showFooter && (
         <footer className="print-footer mt-6 pt-3 border-t-2 text-center text-[8pt] text-gray-500" style={{ borderColor: accentColor }}>
           {/* Footer QR + Verification */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-1">
-              <QRCodeSVG value={qrContent} size={30} level="L" />
-            </div>
+          <div className="flex items-center justify-center mb-2">
             <div className="text-center flex-1">
               <p>{footerText || 'هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل'}</p>
               <p className="mt-0.5">
@@ -195,12 +175,9 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
                 <p className="mt-0.5">تاريخ وصول الشحنة: {format(new Date(arrivalDate), 'PPp', { locale: ar })}</p>
               )}
             </div>
-            <div>
-              {showBarcode && <Barcode value={barcodeContent} width={0.7} height={20} fontSize={0} displayValue={false} />}
-            </div>
           </div>
           <p className="text-gray-400 text-[7pt]">
-            هذه الوثيقة تم إنشاؤها آلياً ومؤمّنة بتشفير رقمي — يمكن التحقق من صحتها عبر مسح رمز QR أو إدخال كود التحقق
+            هذه الوثيقة تم إنشاؤها آلياً ومؤمّنة بتشفير رقمي
           </p>
         </footer>
       )}
@@ -348,9 +325,6 @@ export const PrintSignatureSection = ({
 
             {/* Signer QR + Seal info */}
             <div className="mt-3 pt-2 border-t border-dashed border-gray-200 flex items-center justify-center gap-3">
-              {sigVerifyUrl && (
-                <QRCodeSVG value={sigVerifyUrl} size={35} level="L" />
-              )}
               <div className="text-right">
                 {sig.sealNumber && (
                   <p className="text-[7pt] font-mono text-gray-600">
