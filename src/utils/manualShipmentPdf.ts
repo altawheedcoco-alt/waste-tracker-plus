@@ -84,7 +84,11 @@ export function generateManualShipmentPDF(form: ManualShipmentData) {
   addRow('Name / الاسم', form.generator_name);
   addRow('Address / العنوان', form.generator_address);
   addRow('Phone / الهاتف', form.generator_phone);
+  addRow('Email / البريد', form.generator_email);
   addRow('License / الترخيص', form.generator_license);
+  addRow('Commercial Reg. / السجل التجاري', form.generator_commercial_register);
+  addRow('Tax ID / الرقم الضريبي', form.generator_tax_id);
+  addRow('Representative / الممثل القانوني', form.generator_representative);
   y += 3;
 
   // Transporter
@@ -92,7 +96,11 @@ export function generateManualShipmentPDF(form: ManualShipmentData) {
   addRow('Name / الاسم', form.transporter_name);
   addRow('Address / العنوان', form.transporter_address);
   addRow('Phone / الهاتف', form.transporter_phone);
+  addRow('Email / البريد', form.transporter_email);
   addRow('License / الترخيص', form.transporter_license);
+  addRow('Commercial Reg. / السجل التجاري', form.transporter_commercial_register);
+  addRow('Tax ID / الرقم الضريبي', form.transporter_tax_id);
+  addRow('Representative / الممثل القانوني', form.transporter_representative);
   y += 3;
 
   // Destination
@@ -100,7 +108,11 @@ export function generateManualShipmentPDF(form: ManualShipmentData) {
   addRow('Name / الاسم', form.destination_name);
   addRow('Address / العنوان', form.destination_address);
   addRow('Phone / الهاتف', form.destination_phone);
+  addRow('Email / البريد', form.destination_email);
   addRow('License / الترخيص', form.destination_license);
+  addRow('Commercial Reg. / السجل التجاري', form.destination_commercial_register);
+  addRow('Tax ID / الرقم الضريبي', form.destination_tax_id);
+  addRow('Representative / الممثل القانوني', form.destination_representative);
   y += 3;
 
   // Waste

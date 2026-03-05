@@ -18306,18 +18306,26 @@ export type Database = {
           delivery_address: string | null
           delivery_date: string | null
           destination_address: string | null
+          destination_commercial_register: string | null
+          destination_email: string | null
           destination_license: string | null
           destination_name: string | null
           destination_phone: string | null
+          destination_representative: string | null
+          destination_tax_id: string | null
           destination_type: string | null
           disposal_method: string | null
           driver_license: string | null
           driver_name: string | null
           driver_phone: string | null
           generator_address: string | null
+          generator_commercial_register: string | null
+          generator_email: string | null
           generator_license: string | null
           generator_name: string | null
           generator_phone: string | null
+          generator_representative: string | null
+          generator_tax_id: string | null
           hazard_level: string | null
           id: string
           is_submitted: boolean | null
@@ -18336,9 +18344,13 @@ export type Database = {
           status: string | null
           submitted_at: string | null
           transporter_address: string | null
+          transporter_commercial_register: string | null
+          transporter_email: string | null
           transporter_license: string | null
           transporter_name: string | null
           transporter_phone: string | null
+          transporter_representative: string | null
+          transporter_tax_id: string | null
           unit: string | null
           updated_at: string | null
           vehicle_plate: string | null
@@ -18353,18 +18365,26 @@ export type Database = {
           delivery_address?: string | null
           delivery_date?: string | null
           destination_address?: string | null
+          destination_commercial_register?: string | null
+          destination_email?: string | null
           destination_license?: string | null
           destination_name?: string | null
           destination_phone?: string | null
+          destination_representative?: string | null
+          destination_tax_id?: string | null
           destination_type?: string | null
           disposal_method?: string | null
           driver_license?: string | null
           driver_name?: string | null
           driver_phone?: string | null
           generator_address?: string | null
+          generator_commercial_register?: string | null
+          generator_email?: string | null
           generator_license?: string | null
           generator_name?: string | null
           generator_phone?: string | null
+          generator_representative?: string | null
+          generator_tax_id?: string | null
           hazard_level?: string | null
           id?: string
           is_submitted?: boolean | null
@@ -18383,9 +18403,13 @@ export type Database = {
           status?: string | null
           submitted_at?: string | null
           transporter_address?: string | null
+          transporter_commercial_register?: string | null
+          transporter_email?: string | null
           transporter_license?: string | null
           transporter_name?: string | null
           transporter_phone?: string | null
+          transporter_representative?: string | null
+          transporter_tax_id?: string | null
           unit?: string | null
           updated_at?: string | null
           vehicle_plate?: string | null
@@ -18400,18 +18424,26 @@ export type Database = {
           delivery_address?: string | null
           delivery_date?: string | null
           destination_address?: string | null
+          destination_commercial_register?: string | null
+          destination_email?: string | null
           destination_license?: string | null
           destination_name?: string | null
           destination_phone?: string | null
+          destination_representative?: string | null
+          destination_tax_id?: string | null
           destination_type?: string | null
           disposal_method?: string | null
           driver_license?: string | null
           driver_name?: string | null
           driver_phone?: string | null
           generator_address?: string | null
+          generator_commercial_register?: string | null
+          generator_email?: string | null
           generator_license?: string | null
           generator_name?: string | null
           generator_phone?: string | null
+          generator_representative?: string | null
+          generator_tax_id?: string | null
           hazard_level?: string | null
           id?: string
           is_submitted?: boolean | null
@@ -18430,9 +18462,13 @@ export type Database = {
           status?: string | null
           submitted_at?: string | null
           transporter_address?: string | null
+          transporter_commercial_register?: string | null
+          transporter_email?: string | null
           transporter_license?: string | null
           transporter_name?: string | null
           transporter_phone?: string | null
+          transporter_representative?: string | null
+          transporter_tax_id?: string | null
           unit?: string | null
           updated_at?: string | null
           vehicle_plate?: string | null
