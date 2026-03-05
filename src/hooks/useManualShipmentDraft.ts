@@ -303,6 +303,119 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       .eq('id', savedDraftId);
     
     toast.success('تم إرسال النموذج بنجاح');
+
+    // Send WhatsApp notifications to all phone numbers in the form
+    try {
+      const wasteTypeLabels: Record<string, string> = {
+        plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
+        electronic: 'إلكترونيات', organic: 'عضوي', chemical: 'كيميائي',
+        medical: 'طبي', construction: 'مخلفات بناء', other: 'أخرى',
+      };
+      const disposalLabels: Record<string, string> = {
+        recycling: 'إعادة تدوير', remanufacturing: 'إعادة تصنيع',
+        landfill: 'دفن صحي', incineration: 'حرق', treatment: 'معالجة', reuse: 'إعادة استخدام',
+      };
+      const shipmentTypeLabels: Record<string, string> = {
+        regular: 'عادية', urgent: 'عاجلة', scheduled: 'مجدولة',
+      };
+
+      const lines: string[] = [];
+      lines.push(`📦 *تم إنشاء شحنة يدوية جديدة*`);
+      lines.push(`━━━━━━━━━━━━━━━━━━`);
+      if (form.shipment_number) lines.push(`🔢 رقم الشحنة: ${form.shipment_number}`);
+      if (form.shipment_type) lines.push(`📋 نوع النقلة: ${shipmentTypeLabels[form.shipment_type] || form.shipment_type}`);
+      lines.push('');
+
+      // Generator
+      if (form.generator_name) {
+        lines.push(`🏭 *المولّد (مصدر المخلفات)*`);
+        lines.push(`   الاسم: ${form.generator_name}`);
+        if (form.generator_address) lines.push(`   العنوان: ${form.generator_address}`);
+        if (form.generator_phone) lines.push(`   الهاتف: ${form.generator_phone}`);
+        if (form.generator_representative) lines.push(`   المسؤول: ${form.generator_representative}`);
+        lines.push('');
+      }
+
+      // Transporter
+      if (form.transporter_name) {
+        lines.push(`🚛 *الناقل*`);
+        lines.push(`   الاسم: ${form.transporter_name}`);
+        if (form.transporter_address) lines.push(`   العنوان: ${form.transporter_address}`);
+        if (form.transporter_phone) lines.push(`   الهاتف: ${form.transporter_phone}`);
+        if (form.transporter_representative) lines.push(`   المسؤول: ${form.transporter_representative}`);
+        lines.push('');
+      }
+
+      // Destination
+      if (form.destination_name) {
+        lines.push(`♻️ *الجهة المستقبلة*`);
+        lines.push(`   الاسم: ${form.destination_name}`);
+        if (form.destination_address) lines.push(`   العنوان: ${form.destination_address}`);
+        if (form.destination_phone) lines.push(`   الهاتف: ${form.destination_phone}`);
+        if (form.destination_representative) lines.push(`   المسؤول: ${form.destination_representative}`);
+        lines.push('');
+      }
+
+      // Waste info
+      lines.push(`📦 *بيانات المخلفات*`);
+      if (form.waste_type) lines.push(`   النوع: ${wasteTypeLabels[form.waste_type] || form.waste_type}`);
+      if (form.waste_description) lines.push(`   الوصف: ${form.waste_description}`);
+      if (form.quantity) lines.push(`   الكمية: ${form.quantity} ${form.unit || 'طن'}`);
+      if (form.disposal_method) lines.push(`   طريقة التخلص: ${disposalLabels[form.disposal_method] || form.disposal_method}`);
+      lines.push('');
+
+      // Driver
+      if (form.driver_name) {
+        lines.push(`👤 *السائق*`);
+        lines.push(`   الاسم: ${form.driver_name}`);
+        if (form.driver_phone) lines.push(`   الهاتف: ${form.driver_phone}`);
+        if (form.vehicle_plate) lines.push(`   لوحة المركبة: ${form.vehicle_plate}`);
+        if (form.vehicle_type) lines.push(`   نوع المركبة: ${form.vehicle_type}`);
+        lines.push('');
+      }
+
+      // Locations & dates
+      if (form.pickup_address) lines.push(`📍 الاستلام من: ${form.pickup_address}`);
+      if (form.delivery_address) lines.push(`📍 التسليم إلى: ${form.delivery_address}`);
+      if (form.pickup_date) lines.push(`📅 تاريخ الاستلام: ${form.pickup_date}`);
+      if (form.delivery_date) lines.push(`📅 تاريخ التسليم: ${form.delivery_date}`);
+      if (form.price) lines.push(`💰 السعر: ${form.price} ${form.price_notes || ''}`);
+      if (form.notes) lines.push(`📝 ملاحظات: ${form.notes}`);
+
+      lines.push('');
+      lines.push(`━━━━━━━━━━━━━━━━━━`);
+      const baseUrl = window.location.origin;
+      lines.push(`🔗 عرض الشحنة: ${baseUrl}/share/${code}`);
+      lines.push(`🕐 ${new Date().toLocaleString('ar-EG')}`);
+
+      const messageText = lines.join('\n');
+
+      // Collect unique phone numbers
+      const phones = new Set<string>();
+      [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
+        .filter(Boolean)
+        .forEach(p => phones.add(p.replace(/\s/g, '')));
+
+      // Send to each phone via edge function
+      const sendPromises = Array.from(phones).map(phone =>
+        supabase.functions.invoke('whatsapp-send', {
+          body: {
+            action: 'send',
+            to_phone: phone,
+            message_text: messageText,
+            organization_id: organization?.id,
+          },
+        })
+      );
+
+      await Promise.allSettled(sendPromises);
+      if (phones.size > 0) {
+        toast.success(`تم إرسال إشعار واتساب إلى ${phones.size} جهة`);
+      }
+    } catch (err) {
+      console.error('[ManualShipment] WhatsApp notification error:', err);
+      // Non-blocking: don't fail the submission
+    }
   };
 
   const resetForm = () => {
