@@ -3,7 +3,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
-import { generateManualShipmentPDFBlob } from '@/utils/manualShipmentPdf';
 
 export interface ManualShipmentData {
   id?: string;
@@ -303,135 +302,9 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       .update({ is_submitted: true, submitted_at: new Date().toISOString(), status: 'submitted' })
       .eq('id', savedDraftId);
     
-    toast.success('تم إرسال النموذج بنجاح');
-
-    // Send WhatsApp notifications with PDF attachment
+    // Generate PDF server-side and send WhatsApp notifications
     try {
-      // Generate PDF blob and upload to storage
-      let pdfPublicUrl: string | undefined;
-      const pdfFilename = `shipment-${form.shipment_number || savedDraftId}.pdf`;
-      
-      try {
-        toast.info('جارٍ تجهيز ملف PDF...');
-        const pdfBlob = await generateManualShipmentPDFBlob(form);
-        if (pdfBlob) {
-          const filePath = `manual/${savedDraftId}/${pdfFilename}`;
-          const { error: uploadErr } = await supabase.storage
-            .from('shipment-documents')
-            .upload(filePath, pdfBlob, { contentType: 'application/pdf', upsert: true });
-
-          if (!uploadErr) {
-            const { data: urlData } = supabase.storage
-              .from('shipment-documents')
-              .getPublicUrl(filePath);
-            pdfPublicUrl = urlData?.publicUrl;
-
-            // Archive PDF in entity_documents
-            if (pdfPublicUrl && organization?.id) {
-              try {
-                await supabase.from('entity_documents').insert({
-                  organization_id: organization.id,
-                  uploaded_by: user.id,
-                  title: `بيان شحنة يدوي - ${form.shipment_number || savedDraftId}`,
-                  file_name: pdfFilename,
-                  file_url: pdfPublicUrl,
-                  file_type: 'application/pdf',
-                  file_size: pdfBlob.size,
-                  document_type: 'shipment',
-                  document_category: 'shipment',
-                  reference_number: form.shipment_number || null,
-                  description: `بيان شحنة يدوي - ${form.waste_type || 'مخلفات'} - ${form.generator_name || 'غير محدد'}`,
-                  tags: ['manual-shipment', 'pdf', form.waste_type].filter(Boolean) as string[],
-                  document_date: new Date().toISOString().split('T')[0],
-                });
-              } catch (archiveErr) {
-                console.warn('[ManualShipment] Archive to entity_documents failed:', archiveErr);
-              }
-            }
-          } else {
-            console.warn('[ManualShipment] PDF upload failed:', uploadErr.message);
-          }
-        }
-      } catch (pdfErr) {
-        console.warn('[ManualShipment] PDF generation failed:', pdfErr);
-      }
-
-      const wasteTypeLabels: Record<string, string> = {
-        plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
-        electronic: 'إلكترونيات', organic: 'عضوي', chemical: 'كيميائي',
-        medical: 'طبي', construction: 'مخلفات بناء', other: 'أخرى',
-      };
-      const disposalLabels: Record<string, string> = {
-        recycling: 'إعادة تدوير', remanufacturing: 'إعادة تصنيع',
-        landfill: 'دفن صحي', incineration: 'حرق', treatment: 'معالجة', reuse: 'إعادة استخدام',
-      };
-      const shipmentTypeLabels: Record<string, string> = {
-        regular: 'عادية', urgent: 'عاجلة', scheduled: 'مجدولة',
-      };
-
-      const lines: string[] = [];
-      lines.push(`📦 *تم إنشاء شحنة يدوية جديدة*`);
-      lines.push(`━━━━━━━━━━━━━━━━━━`);
-      if (form.shipment_number) lines.push(`🔢 رقم الشحنة: ${form.shipment_number}`);
-      if (form.shipment_type) lines.push(`📋 نوع النقلة: ${shipmentTypeLabels[form.shipment_type] || form.shipment_type}`);
-      lines.push('');
-
-      if (form.generator_name) {
-        lines.push(`🏭 *المولّد (مصدر المخلفات)*`);
-        lines.push(`   الاسم: ${form.generator_name}`);
-        if (form.generator_address) lines.push(`   العنوان: ${form.generator_address}`);
-        if (form.generator_phone) lines.push(`   الهاتف: ${form.generator_phone}`);
-        if (form.generator_representative) lines.push(`   المسؤول: ${form.generator_representative}`);
-        lines.push('');
-      }
-
-      if (form.transporter_name) {
-        lines.push(`🚛 *الناقل*`);
-        lines.push(`   الاسم: ${form.transporter_name}`);
-        if (form.transporter_address) lines.push(`   العنوان: ${form.transporter_address}`);
-        if (form.transporter_phone) lines.push(`   الهاتف: ${form.transporter_phone}`);
-        if (form.transporter_representative) lines.push(`   المسؤول: ${form.transporter_representative}`);
-        lines.push('');
-      }
-
-      if (form.destination_name) {
-        lines.push(`♻️ *الجهة المستقبلة*`);
-        lines.push(`   الاسم: ${form.destination_name}`);
-        if (form.destination_address) lines.push(`   العنوان: ${form.destination_address}`);
-        if (form.destination_phone) lines.push(`   الهاتف: ${form.destination_phone}`);
-        if (form.destination_representative) lines.push(`   المسؤول: ${form.destination_representative}`);
-        lines.push('');
-      }
-
-      lines.push(`📦 *بيانات المخلفات*`);
-      if (form.waste_type) lines.push(`   النوع: ${wasteTypeLabels[form.waste_type] || form.waste_type}`);
-      if (form.waste_description) lines.push(`   الوصف: ${form.waste_description}`);
-      if (form.quantity) lines.push(`   الكمية: ${form.quantity} ${form.unit || 'طن'}`);
-      if (form.disposal_method) lines.push(`   طريقة التخلص: ${disposalLabels[form.disposal_method] || form.disposal_method}`);
-      lines.push('');
-
-      if (form.driver_name) {
-        lines.push(`👤 *السائق*`);
-        lines.push(`   الاسم: ${form.driver_name}`);
-        if (form.driver_phone) lines.push(`   الهاتف: ${form.driver_phone}`);
-        if (form.vehicle_plate) lines.push(`   لوحة المركبة: ${form.vehicle_plate}`);
-        if (form.vehicle_type) lines.push(`   نوع المركبة: ${form.vehicle_type}`);
-        lines.push('');
-      }
-
-      if (form.pickup_address) lines.push(`📍 الاستلام من: ${form.pickup_address}`);
-      if (form.delivery_address) lines.push(`📍 التسليم إلى: ${form.delivery_address}`);
-      if (form.pickup_date) lines.push(`📅 تاريخ الاستلام: ${form.pickup_date}`);
-      if (form.delivery_date) lines.push(`📅 تاريخ التسليم: ${form.delivery_date}`);
-      if (form.price) lines.push(`💰 السعر: ${form.price} ${form.price_notes || ''}`);
-      if (form.notes) lines.push(`📝 ملاحظات: ${form.notes}`);
-
-      lines.push('');
-      lines.push(`━━━━━━━━━━━━━━━━━━`);
-      if (pdfPublicUrl) lines.push(`📄 بيان الشحنة PDF مرفق أعلاه`);
-      lines.push(`🕐 ${new Date().toLocaleString('ar-EG')}`);
-
-      const messageText = lines.join('\n');
+      toast.info('جارٍ تجهيز بيان الشحنة PDF...');
 
       // Collect unique phone numbers
       const phones = new Set<string>();
@@ -439,26 +312,67 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
         .filter(Boolean)
         .forEach(p => phones.add(p.replace(/\s/g, '')));
 
-      // Send to each phone via edge function (with PDF document if available)
-      const sendPromises = Array.from(phones).map(phone =>
-        supabase.functions.invoke('whatsapp-send', {
-          body: {
-            action: 'send',
-            to_phone: phone,
-            message_text: messageText,
-            organization_id: organization?.id,
-            ...(pdfPublicUrl ? { attachment_url: pdfPublicUrl, attachment_filename: pdfFilename } : {}),
-          },
-        })
-      );
+      const firstPhone = Array.from(phones)[0];
 
-      await Promise.allSettled(sendPromises);
+      // Call edge function to generate PDF + send to first phone
+      const { data: pdfResult, error: pdfError } = await supabase.functions.invoke('generate-manual-shipment-pdf', {
+        body: {
+          draft_id: savedDraftId,
+          send_whatsapp: !!firstPhone,
+          to_phone: firstPhone || undefined,
+        },
+      });
+
+      if (pdfError) {
+        console.error('[ManualShipment] PDF edge function error:', pdfError);
+      }
+
+      const pdfPublicUrl = pdfResult?.pdf_url;
+      const pdfFilename = pdfResult?.filename || `shipment-${form.shipment_number || savedDraftId}.pdf`;
+
+      // Archive PDF in entity_documents
+      if (pdfPublicUrl && organization?.id) {
+        try {
+          await supabase.from('entity_documents').insert({
+            organization_id: organization.id,
+            uploaded_by: user?.id,
+            title: `بيان شحنة يدوي - ${form.shipment_number || savedDraftId}`,
+            file_name: pdfFilename,
+            file_url: pdfPublicUrl,
+            file_type: 'application/pdf',
+            document_type: 'shipment',
+            document_category: 'shipment',
+            reference_number: form.shipment_number || null,
+            description: `بيان شحنة يدوي - ${form.waste_type || 'مخلفات'} - ${form.generator_name || 'غير محدد'}`,
+            tags: ['manual-shipment', 'pdf', form.waste_type].filter(Boolean) as string[],
+            document_date: new Date().toISOString().split('T')[0],
+          });
+        } catch (archiveErr) {
+          console.warn('[ManualShipment] Archive to entity_documents failed:', archiveErr);
+        }
+      }
+
+      // Send to remaining phones via whatsapp-send with the generated PDF URL
+      const remainingPhones = Array.from(phones).slice(1);
+      if (remainingPhones.length > 0 && pdfPublicUrl) {
+        const sendPromises = remainingPhones.map(phone =>
+          supabase.functions.invoke('generate-manual-shipment-pdf', {
+            body: {
+              send_existing_file: true,
+              file_url: pdfPublicUrl,
+              to_phone: phone,
+              caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
+            },
+          })
+        );
+        await Promise.allSettled(sendPromises);
+      }
+
       if (phones.size > 0) {
-        toast.success(`تم إرسال إشعار واتساب${pdfPublicUrl ? ' مع ملف PDF' : ''} إلى ${phones.size} جهة`);
+        toast.success(`تم إرسال بيان الشحنة PDF إلى ${phones.size} جهة عبر واتساب`);
       }
     } catch (err) {
       console.error('[ManualShipment] WhatsApp notification error:', err);
-      // Non-blocking: don't fail the submission
     }
   };
 
