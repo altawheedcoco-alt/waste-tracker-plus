@@ -22,7 +22,10 @@ import {
   Clock,
   Navigation,
   Loader2,
+  Download,
 } from 'lucide-react';
+import { useRef } from 'react';
+import { useOptimizedPDF } from '@/hooks/useOptimizedPDF';
 
 interface DriverDetails {
   id: string;
@@ -67,6 +70,8 @@ const DriverDetailsPage = () => {
   const { driverId } = useParams();
   const { user, organization, loading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const contentRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, isExporting } = useOptimizedPDF({ filename: 'driver-report' });
   
   const [driver, setDriver] = useState<DriverDetails | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
@@ -244,16 +249,29 @@ const DriverDetailsPage = () => {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/drivers')}>
-            <ArrowRight className="h-5 w-5" />
-          </Button>
-          <div>
-            <h1 className="text-2xl font-bold">{driver.profile.full_name}</h1>
-            <p className="text-muted-foreground">تفاصيل السائق وتتبع الرحلات</p>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/drivers')}>
+              <ArrowRight className="h-5 w-5" />
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">{driver.profile.full_name}</h1>
+              <p className="text-muted-foreground">تفاصيل السائق وتتبع الرحلات</p>
+            </div>
           </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => exportToPDF(contentRef.current, `driver-${driver.profile.full_name}`)}
+            disabled={isExporting}
+            className="gap-2"
+          >
+            {isExporting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+            تحميل PDF
+          </Button>
         </div>
 
+        <div ref={contentRef}>
         {/* Driver info cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
@@ -481,6 +499,7 @@ const DriverDetailsPage = () => {
               )}
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </DashboardLayout>
