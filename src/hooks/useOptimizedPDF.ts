@@ -76,8 +76,8 @@ export const useOptimizedPDF = (options: UseOptimizedPDFOptions = {}) => {
     element: HTMLElement | null, 
     customFilename?: string
   ) => {
-    if (!element) {
-      toast.error('لا يوجد محتوى للتصدير');
+    if (!element || isExporting) {
+      if (!element) toast.error('لا يوجد محتوى للتصدير');
       return;
     }
 
@@ -133,7 +133,7 @@ export const useOptimizedPDF = (options: UseOptimizedPDFOptions = {}) => {
       setIsExporting(false);
       setProgress(0);
     }
-  }, [options]);
+  }, [options, isExporting]);
 
   const previewPDF = useCallback(async (element: HTMLElement | null) => {
     if (!element) {
