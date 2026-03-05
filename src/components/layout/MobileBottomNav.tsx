@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   LayoutDashboard, Package, Bell, Settings, User, 
-  MapPin, Truck, Building2, Recycle, Factory
+  MapPin, Truck, Building2, Recycle, Factory, Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
@@ -53,11 +53,21 @@ const MobileBottomNav = memo(() => {
       ? '/dashboard/transporter-shipments' 
       : '/dashboard/shipments';
 
+    // Consulting office gets specialized bottom nav
+    if (orgType === 'consulting_office') {
+      return [
+        { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
+        { id: 'team', icon: Users, label: 'الفريق', path: '/dashboard/environmental-consultants' },
+        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: unreadCount },
+        { id: 'org', icon: Building2, label: 'المكتب', path: '/dashboard/organization-profile' },
+        { id: 'settings', icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
+      ];
+    }
+
     const orgIcon = orgType === 'transporter' ? Truck 
       : orgType === 'recycler' ? Recycle 
       : orgType === 'disposal' ? Factory 
       : orgType === 'consultant' ? User
-      : orgType === 'consulting_office' ? Building2
       : Building2;
 
     return [

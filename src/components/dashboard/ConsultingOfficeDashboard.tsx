@@ -12,22 +12,20 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Building2, Users, FileText, BarChart3, Eye, Loader2,
-  Briefcase, ShieldCheck, ClipboardCheck, TrendingUp,
-  AlertTriangle, CheckCircle2, Bot, Send,
+  Building2, Users, FileText, BarChart3, Loader2,
+  ShieldCheck, ClipboardCheck, TrendingUp,
+  AlertTriangle, Bot, Send,
   Sparkles, Target, UserPlus, Star, Award,
-  Lightbulb, Activity, Clock, Leaf, Shield,
-  Stamp, Settings, Gavel, Scale, Bell, Wallet,
+  Lightbulb, Activity, Clock, Shield,
+  Stamp, Settings, Upload,
 } from 'lucide-react';
 
 // Lazy load panels
 const OfficeTeamPanel = lazy(() => import('@/components/consulting-office/OfficeTeamPanel'));
 const OfficeClientsPanel = lazy(() => import('@/components/consulting-office/OfficeClientsPanel'));
-const SigningPoliciesPanel = lazy(() => import('@/components/consulting-office/SigningPoliciesPanel'));
 const ApprovalQueuePanel = lazy(() => import('@/components/consulting-office/ApprovalQueuePanel'));
 const OfficeDocumentsPanel = lazy(() => import('@/components/consulting-office/OfficeDocumentsPanel'));
 const OfficeLicensesPanel = lazy(() => import('@/components/consulting-office/OfficeLicensesPanel'));
-const OfficeFinancePanel = lazy(() => import('@/components/consulting-office/OfficeFinancePanel'));
 const OfficeSettingsPanel = lazy(() => import('@/components/consulting-office/OfficeSettingsPanel'));
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
 const ConsultantAnalyticsPanel = lazy(() => import('@/components/consultant/ConsultantAnalyticsPanel'));
@@ -292,14 +290,13 @@ const ConsultingOfficeDashboard = memo(() => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
           { icon: UserPlus, label: 'إضافة استشاري', desc: 'ربط أو إنشاء', tab: 'team' },
           { icon: Building2, label: 'تعيين جهة', desc: 'ربط عميل جديد', tab: 'clients' },
-          { icon: Shield, label: 'سياسات التوقيع', desc: 'ضبط القواعد', tab: 'signing-policies' },
           { icon: Stamp, label: 'اعتماد مستند', desc: `${pendingApprovals.length} معلق`, tab: 'approvals' },
-          { icon: FileText, label: 'تقرير شامل', desc: 'تقارير المكتب', tab: 'overview' },
-          { icon: Award, label: 'شهادات المكتب', desc: 'إصدار واعتماد', tab: 'overview' },
+          { icon: Upload, label: 'تفويضات وتوكيلات', desc: 'رفع مستندات رسمية', tab: 'documents' },
+          { icon: Award, label: 'التراخيص', desc: 'تراخيص المكتب والفريق', tab: 'licenses' },
         ].map((action, i) => (
           <motion.button key={i} onClick={() => setActiveTab(action.tab)}
             whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
@@ -316,23 +313,20 @@ const ConsultingOfficeDashboard = memo(() => {
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="w-full justify-start overflow-x-auto flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="overview" className="gap-1.5"><BarChart3 className="w-4 h-4" />نظرة عامة</TabsTrigger>
-          <TabsTrigger value="team" className="gap-1.5"><Users className="w-4 h-4" />فريق العمل ({members.length})</TabsTrigger>
+          <TabsTrigger value="team" className="gap-1.5"><Users className="w-4 h-4" />الفريق ({members.length})</TabsTrigger>
           <TabsTrigger value="clients" className="gap-1.5"><Building2 className="w-4 h-4" />العملاء ({clients.length})</TabsTrigger>
-          <TabsTrigger value="signing-policies" className="gap-1.5"><Shield className="w-4 h-4" />سياسات التوقيع</TabsTrigger>
           <TabsTrigger value="approvals" className="gap-1.5 relative">
-            <Stamp className="w-4 h-4" />طلبات الاعتماد
+            <Stamp className="w-4 h-4" />التوقيع والاعتماد
             {pendingApprovals.length > 0 && (
               <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-destructive text-destructive-foreground text-[9px] flex items-center justify-center">
                 {pendingApprovals.length}
               </span>
             )}
           </TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-1.5"><ClipboardCheck className="w-4 h-4" />الامتثال</TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />المستندات</TabsTrigger>
+          <TabsTrigger value="documents" className="gap-1.5"><FileText className="w-4 h-4" />المستندات والتفويضات</TabsTrigger>
           <TabsTrigger value="licenses" className="gap-1.5"><ShieldCheck className="w-4 h-4" />التراخيص</TabsTrigger>
-          <TabsTrigger value="finance" className="gap-1.5"><Wallet className="w-4 h-4" />المالية</TabsTrigger>
-          <TabsTrigger value="settings" className="gap-1.5"><Settings className="w-4 h-4" />الإعدادات</TabsTrigger>
           <TabsTrigger value="analytics" className="gap-1.5"><TrendingUp className="w-4 h-4" />التحليلات</TabsTrigger>
+          <TabsTrigger value="settings" className="gap-1.5"><Settings className="w-4 h-4" />الإعدادات</TabsTrigger>
           <TabsTrigger value="ai-assistant" className="gap-1.5"><Bot className="w-4 h-4" />المساعد الذكي</TabsTrigger>
         </TabsList>
 
@@ -367,25 +361,28 @@ const ConsultingOfficeDashboard = memo(() => {
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="signing-policies" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <SigningPoliciesPanel />
-          </Suspense>
-        </TabsContent>
-
         <TabsContent value="approvals" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <ApprovalQueuePanel />
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="compliance" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantKPIsWidget />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="documents" className="mt-4">
+        <TabsContent value="documents" className="mt-4 space-y-6">
+          {/* Delegations & Authorizations Notice */}
+          <Card className="border-amber-200/50 bg-amber-50/30 dark:bg-amber-950/10">
+            <CardContent className="p-4">
+              <div className="flex items-start gap-3">
+                <Upload className="w-5 h-5 text-amber-600 mt-0.5 shrink-0" />
+                <div>
+                  <p className="font-semibold text-sm">التفويضات والتوكيلات الرسمية</p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    يعمل المكتب وموظفوه مع الجهات بموجب مستندات قانونية رسمية (توكيلات، تفويضات، عقود). 
+                    يجب رفع هذه المستندات هنا لتوثيقها وربطها بالجهات المعنية.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           <Suspense fallback={<LazyLoader />}>
             <OfficeDocumentsPanel />
           </Suspense>
@@ -397,21 +394,15 @@ const ConsultingOfficeDashboard = memo(() => {
           </Suspense>
         </TabsContent>
 
-        <TabsContent value="finance" className="mt-4">
+        <TabsContent value="analytics" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
-            <OfficeFinancePanel />
+            <ConsultantAnalyticsPanel officeId={office?.id} mode="office" />
           </Suspense>
         </TabsContent>
 
         <TabsContent value="settings" className="mt-4">
           <Suspense fallback={<LazyLoader />}>
             <OfficeSettingsPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="analytics" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantAnalyticsPanel officeId={office?.id} mode="office" />
           </Suspense>
         </TabsContent>
 
