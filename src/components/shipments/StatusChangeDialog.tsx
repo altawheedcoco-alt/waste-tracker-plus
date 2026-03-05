@@ -3,6 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
 import { notifyOrganizationMembers } from '@/services/unifiedNotifier';
+import { 
+  fetchRichShipmentData, 
+  buildRichWhatsAppMessage, 
+  buildRichInAppMessage,
+  getStatusButtons,
+  resolveOrgType 
+} from '@/services/richNotificationBuilder';
 import { useImpactRecorder } from '@/hooks/useImpactRecorder';
 import DeliveryDeclarationDialog from './DeliveryDeclarationDialog';
 import ShipmentPhotoUpload from './ShipmentPhotoUpload';
@@ -349,29 +356,69 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         previousStatus: shipment.status,
       });
 
-      // === Dual Notification: إشعار داخلي + واتساب لجميع الأطراف ===
+      // === Rich Dual Notification: إشعار داخلي + واتساب بالبيانات الكاملة ===
       try {
         const statusLabel = statusConfig?.labelAr || selectedStatus;
-        const notifTitle = `📦 تحديث شحنة ${shipment.shipment_number || ''}`;
-        const notifMessage = `تم تغيير حالة الشحنة إلى "${statusLabel}"`;
         const orgIds = [
           shipment.generator_id,
           shipment.transporter_id,
           shipment.recycler_id,
         ].filter(Boolean) as string[];
 
-        // Send to all relevant organizations in parallel
+        // Fetch rich shipment data for WhatsApp
+        const richData = await fetchRichShipmentData(shipment.id, statusLabel, dbStatus);
+        const whatsappText = richData ? buildRichWhatsAppMessage(richData) : `📦 تحديث شحنة ${shipment.shipment_number}: ${statusLabel}`;
+        const inAppMessage = richData ? buildRichInAppMessage(richData) : `تم تغيير حالة الشحنة إلى "${statusLabel}"`;
+        const notifTitle = `📦 تحديث شحنة ${shipment.shipment_number || ''}`;
+
+        // Send to all relevant organizations with rich data + buttons
         await Promise.allSettled(
-          orgIds.map(orgId =>
-            notifyOrganizationMembers(orgId, notifTitle, notifMessage, {
-              type: 'shipment_status',
-              reference_id: shipment.id,
-              reference_type: 'shipment',
-              excludeUserIds: profile?.id ? [profile.id] : undefined,
-            })
-          )
+          orgIds.map(async (orgId) => {
+            const orgType = resolveOrgType(orgId, shipment.generator_id, shipment.transporter_id, shipment.recycler_id);
+            const buttons = getStatusButtons(dbStatus, shipment.id, orgType);
+
+            // 1. In-app notification
+            const { data: members } = await supabase
+              .from('profiles')
+              .select('id')
+              .eq('organization_id', orgId);
+
+            const memberIds = (members || [])
+              .map((m: any) => m.id)
+              .filter((id: string) => !profile?.id || id !== profile.id);
+
+            if (memberIds.length > 0) {
+              await supabase.from('notifications').insert(
+                memberIds.map((uid: string) => ({
+                  user_id: uid,
+                  title: notifTitle,
+                  message: inAppMessage,
+                  type: 'shipment_status',
+                  is_read: false,
+                }))
+              );
+            }
+
+            // 2. WhatsApp with rich data + buttons
+            await supabase.functions.invoke('whatsapp-send', {
+              body: {
+                action: 'broadcast_to_users',
+                user_ids: memberIds,
+                message_text: whatsappText,
+                organization_id: orgId,
+                notification_type: 'shipment_status',
+                interactive_buttons: buttons,
+                metadata: {
+                  shipment_id: shipment.id,
+                  shipment_number: shipment.shipment_number,
+                  new_status: dbStatus,
+                  direct_link: richData?.direct_link,
+                },
+              },
+            });
+          })
         );
-        console.log('[DualNotify] Status change notifications sent to', orgIds.length, 'orgs');
+        console.log('[DualNotify] Rich notifications sent to', orgIds.length, 'orgs');
       } catch (notifErr) {
         console.warn('[DualNotify] Non-blocking notification error:', notifErr);
       }
