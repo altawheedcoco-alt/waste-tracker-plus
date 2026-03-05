@@ -12,14 +12,26 @@ export interface ManualShipmentData {
   generator_address: string;
   generator_phone: string;
   generator_license: string;
+  generator_commercial_register: string;
+  generator_tax_id: string;
+  generator_representative: string;
+  generator_email: string;
   transporter_name: string;
   transporter_address: string;
   transporter_phone: string;
   transporter_license: string;
+  transporter_commercial_register: string;
+  transporter_tax_id: string;
+  transporter_representative: string;
+  transporter_email: string;
   destination_name: string;
   destination_address: string;
   destination_phone: string;
   destination_license: string;
+  destination_commercial_register: string;
+  destination_tax_id: string;
+  destination_representative: string;
+  destination_email: string;
   destination_type: string;
   waste_type: string;
   waste_description: string;
@@ -48,8 +60,11 @@ export interface ManualShipmentData {
 const emptyForm: ManualShipmentData = {
   shipment_number: '',
   generator_name: '', generator_address: '', generator_phone: '', generator_license: '',
+  generator_commercial_register: '', generator_tax_id: '', generator_representative: '', generator_email: '',
   transporter_name: '', transporter_address: '', transporter_phone: '', transporter_license: '',
+  transporter_commercial_register: '', transporter_tax_id: '', transporter_representative: '', transporter_email: '',
   destination_name: '', destination_address: '', destination_phone: '', destination_license: '',
+  destination_commercial_register: '', destination_tax_id: '', destination_representative: '', destination_email: '',
   destination_type: 'recycling',
   waste_type: '', waste_description: '', waste_state: 'solid', hazard_level: 'non_hazardous',
   quantity: '', unit: 'ton', packaging_method: '', disposal_method: '',
@@ -130,14 +145,26 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       generator_address: data.generator_address || '',
       generator_phone: data.generator_phone || '',
       generator_license: data.generator_license || '',
+      generator_commercial_register: data.generator_commercial_register || '',
+      generator_tax_id: data.generator_tax_id || '',
+      generator_representative: data.generator_representative || '',
+      generator_email: data.generator_email || '',
       transporter_name: data.transporter_name || '',
       transporter_address: data.transporter_address || '',
       transporter_phone: data.transporter_phone || '',
       transporter_license: data.transporter_license || '',
+      transporter_commercial_register: data.transporter_commercial_register || '',
+      transporter_tax_id: data.transporter_tax_id || '',
+      transporter_representative: data.transporter_representative || '',
+      transporter_email: data.transporter_email || '',
       destination_name: data.destination_name || '',
       destination_address: data.destination_address || '',
       destination_phone: data.destination_phone || '',
       destination_license: data.destination_license || '',
+      destination_commercial_register: data.destination_commercial_register || '',
+      destination_tax_id: data.destination_tax_id || '',
+      destination_representative: data.destination_representative || '',
+      destination_email: data.destination_email || '',
       destination_type: data.destination_type || 'recycling',
       waste_type: data.waste_type || '',
       waste_description: data.waste_description || '',
@@ -183,14 +210,26 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       generator_address: form.generator_address || null,
       generator_phone: form.generator_phone || null,
       generator_license: form.generator_license || null,
+      generator_commercial_register: form.generator_commercial_register || null,
+      generator_tax_id: form.generator_tax_id || null,
+      generator_representative: form.generator_representative || null,
+      generator_email: form.generator_email || null,
       transporter_name: form.transporter_name || null,
       transporter_address: form.transporter_address || null,
       transporter_phone: form.transporter_phone || null,
       transporter_license: form.transporter_license || null,
+      transporter_commercial_register: form.transporter_commercial_register || null,
+      transporter_tax_id: form.transporter_tax_id || null,
+      transporter_representative: form.transporter_representative || null,
+      transporter_email: form.transporter_email || null,
       destination_name: form.destination_name || null,
       destination_address: form.destination_address || null,
       destination_phone: form.destination_phone || null,
       destination_license: form.destination_license || null,
+      destination_commercial_register: form.destination_commercial_register || null,
+      destination_tax_id: form.destination_tax_id || null,
+      destination_representative: form.destination_representative || null,
+      destination_email: form.destination_email || null,
       destination_type: form.destination_type || 'recycling',
       waste_type: form.waste_type || null,
       waste_description: form.waste_description || null,

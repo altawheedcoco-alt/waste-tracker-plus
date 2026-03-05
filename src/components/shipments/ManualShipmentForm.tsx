@@ -174,7 +174,11 @@ const ManualShipmentForm = ({
             <FormField label="اسم الجهة المولدة" value={form.generator_name} onChange={v => updateField('generator_name', v)} placeholder="شركة ..." required />
             <FormField label="العنوان" value={form.generator_address} onChange={v => updateField('generator_address', v)} placeholder="المدينة - الحي" />
             <FormField label="رقم الهاتف" value={form.generator_phone} onChange={v => updateField('generator_phone', v)} placeholder="01xxxxxxxxx" />
-            <FormField label="رقم الترخيص" value={form.generator_license} onChange={v => updateField('generator_license', v)} placeholder="رقم الموافقة البيئية" />
+            <FormField label="البريد الإلكتروني" value={form.generator_email} onChange={v => updateField('generator_email', v)} placeholder="info@company.com" />
+            <FormField label="رقم الترخيص البيئي" value={form.generator_license} onChange={v => updateField('generator_license', v)} placeholder="رقم الموافقة البيئية" />
+            <FormField label="السجل التجاري" value={form.generator_commercial_register} onChange={v => updateField('generator_commercial_register', v)} placeholder="رقم السجل التجاري" />
+            <FormField label="الرقم الضريبي" value={form.generator_tax_id} onChange={v => updateField('generator_tax_id', v)} placeholder="رقم التسجيل الضريبي" />
+            <FormField label="الممثل القانوني" value={form.generator_representative} onChange={v => updateField('generator_representative', v)} placeholder="اسم المفوض بالتوقيع" />
           </CardContent>
         </Card>
 
@@ -187,7 +191,11 @@ const ManualShipmentForm = ({
             <FormField label="اسم الجهة الناقلة" value={form.transporter_name} onChange={v => updateField('transporter_name', v)} placeholder="شركة النقل" required />
             <FormField label="العنوان" value={form.transporter_address} onChange={v => updateField('transporter_address', v)} />
             <FormField label="رقم الهاتف" value={form.transporter_phone} onChange={v => updateField('transporter_phone', v)} />
+            <FormField label="البريد الإلكتروني" value={form.transporter_email} onChange={v => updateField('transporter_email', v)} placeholder="info@transport.com" />
             <FormField label="رقم ترخيص النقل" value={form.transporter_license} onChange={v => updateField('transporter_license', v)} placeholder="ترخيص WMRA" />
+            <FormField label="السجل التجاري" value={form.transporter_commercial_register} onChange={v => updateField('transporter_commercial_register', v)} placeholder="رقم السجل التجاري" />
+            <FormField label="الرقم الضريبي" value={form.transporter_tax_id} onChange={v => updateField('transporter_tax_id', v)} placeholder="رقم التسجيل الضريبي" />
+            <FormField label="الممثل القانوني" value={form.transporter_representative} onChange={v => updateField('transporter_representative', v)} placeholder="اسم المفوض بالتوقيع" />
           </CardContent>
         </Card>
 
@@ -200,7 +208,11 @@ const ManualShipmentForm = ({
             <FormField label="اسم الجهة" value={form.destination_name} onChange={v => updateField('destination_name', v)} required />
             <FormField label="العنوان" value={form.destination_address} onChange={v => updateField('destination_address', v)} />
             <FormField label="رقم الهاتف" value={form.destination_phone} onChange={v => updateField('destination_phone', v)} />
+            <FormField label="البريد الإلكتروني" value={form.destination_email} onChange={v => updateField('destination_email', v)} placeholder="info@facility.com" />
             <FormField label="رقم الترخيص" value={form.destination_license} onChange={v => updateField('destination_license', v)} />
+            <FormField label="السجل التجاري" value={form.destination_commercial_register} onChange={v => updateField('destination_commercial_register', v)} placeholder="رقم السجل التجاري" />
+            <FormField label="الرقم الضريبي" value={form.destination_tax_id} onChange={v => updateField('destination_tax_id', v)} placeholder="رقم التسجيل الضريبي" />
+            <FormField label="الممثل القانوني" value={form.destination_representative} onChange={v => updateField('destination_representative', v)} placeholder="اسم المفوض بالتوقيع" />
           </CardContent>
         </Card>
 
