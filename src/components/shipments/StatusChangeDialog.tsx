@@ -395,6 +395,8 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
                   message: inAppMessage,
                   type: 'shipment_status',
                   is_read: false,
+                  reference_id: shipment.id,
+                  reference_type: 'shipment',
                 }))
               );
             }
