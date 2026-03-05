@@ -22,6 +22,9 @@ import {
   AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
   AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import UniversalSignatureDialog from '@/components/signatures/UniversalSignatureDialog';
+import { saveDocumentSignature } from '@/components/signatures/signatureService';
+import type { SignatureData } from '@/components/signatures/UniversalSignatureDialog';
 
 const ManualShipmentDrafts = () => {
   const { user, organization } = useAuth();
@@ -29,6 +32,8 @@ const ManualShipmentDrafts = () => {
   const [drafts, setDrafts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [signingDraft, setSigningDraft] = useState<any | null>(null);
+  const [signLoading, setSignLoading] = useState(false);
 
   useEffect(() => {
     if (organization?.id) fetchDrafts();
@@ -130,6 +135,31 @@ const ManualShipmentDrafts = () => {
     const url = `${window.location.origin}/shared-shipment/${draft.share_code}`;
     navigator.clipboard.writeText(url);
     toast.success('تم نسخ الرابط');
+  };
+
+  const handleSignDocument = async (data: SignatureData) => {
+    if (!signingDraft || !user?.id || !organization?.id) return;
+    setSignLoading(true);
+    try {
+      const result = await saveDocumentSignature({
+        signatureData: data,
+        documentType: 'shipment',
+        documentId: signingDraft.id,
+        organizationId: organization.id,
+        userId: user.id,
+      });
+      if (result.success) {
+        setSigningDraft(null);
+        toast.success('تم توقيع المستند بنجاح', {
+          description: result.sealNumber ? `رقم الختم: ${result.sealNumber}` : undefined,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error('فشل في توقيع المستند');
+    } finally {
+      setSignLoading(false);
+    }
   };
 
   const getStatusBadge = (draft: any) => {
@@ -287,8 +317,8 @@ const ManualShipmentDrafts = () => {
                       <Button
                         size="sm"
                         variant="outline"
-                        className="gap-1.5 text-xs text-indigo-600 border-indigo-200 hover:bg-indigo-50"
-                        onClick={() => navigate(`/dashboard/document-center?tab=signing&draft=${draft.id}`)}
+                        className="gap-1.5 text-xs text-primary border-primary/20 hover:bg-primary/5"
+                        onClick={() => setSigningDraft(draft)}
                       >
                         <PenTool className="w-3.5 h-3.5" />
                         توقيع
@@ -335,6 +365,24 @@ const ManualShipmentDrafts = () => {
           <div className="mt-4 text-center text-xs text-muted-foreground">
             إجمالي النماذج: {drafts.length} — المسودات: {drafts.filter(d => d.status !== 'submitted').length} — المرسلة: {drafts.filter(d => d.status === 'submitted').length}
           </div>
+        )}
+
+        {/* Signature Dialog */}
+        {signingDraft && (
+          <UniversalSignatureDialog
+            open={!!signingDraft}
+            onOpenChange={(open) => { if (!open) setSigningDraft(null); }}
+            onSign={handleSignDocument}
+            documentType="shipment"
+            documentId={signingDraft.id}
+            documentTitle={signingDraft.shipment_number || 'نموذج شحنة يدوي'}
+            organizationId={organization?.id || ''}
+            signerDefaults={{
+              name: user?.user_metadata?.full_name || user?.email || '',
+              title: '',
+            }}
+            loading={signLoading}
+          />
         )}
       </div>
     </DashboardLayout>
