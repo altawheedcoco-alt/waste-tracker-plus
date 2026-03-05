@@ -92,7 +92,7 @@ function generatePDF(doc: any, form: any): void {
   doc.setFontSize(9);
   doc.setFont("Amiri", "normal");
   doc.setTextColor(100);
-  doc.text('Waste Shipment Manifest — Official Document', pageWidth / 2, y, { align: 'center' });
+  doc.text('مستند رسمي — منصة iRecycle لإدارة المخلفات', pageWidth / 2, y, { align: 'center' });
   y += 4;
   doc.setTextColor(0);
 
@@ -118,7 +118,7 @@ function generatePDF(doc: any, form: any): void {
   y += 6;
 
   // ===== GENERATOR =====
-  y = drawTable(doc, y, 'أولاً: المولّد (Generator)', [
+  y = drawTable(doc, y, 'أولاً: بيانات المولّد', [
     ['الاسم', v(form.generator_name)],
     ['العنوان', v(form.generator_address)],
     ['الهاتف', v(form.generator_phone)],
@@ -130,7 +130,7 @@ function generatePDF(doc: any, form: any): void {
   ], pageWidth, margin);
 
   // ===== TRANSPORTER =====
-  y = drawTable(doc, y, 'ثانياً: الناقل (Transporter)', [
+  y = drawTable(doc, y, 'ثانياً: بيانات الناقل', [
     ['الاسم', v(form.transporter_name)],
     ['العنوان', v(form.transporter_address)],
     ['الهاتف', v(form.transporter_phone)],
@@ -142,7 +142,7 @@ function generatePDF(doc: any, form: any): void {
   ], pageWidth, margin);
 
   // ===== DESTINATION =====
-  const destTitle = form.destination_type === 'disposal' ? 'ثالثاً: جهة التخلص النهائي (Destination)' : 'ثالثاً: جهة إعادة التدوير (Destination)';
+  const destTitle = form.destination_type === 'disposal' ? 'ثالثاً: جهة التخلص النهائي' : 'ثالثاً: جهة إعادة التدوير';
   y = drawTable(doc, y, destTitle, [
     ['الاسم', v(form.destination_name)],
     ['العنوان', v(form.destination_address)],
@@ -262,8 +262,8 @@ function generatePDF(doc: any, form: any): void {
   doc.setTextColor(130);
   doc.setDrawColor(150);
   doc.line(margin, 285, pageWidth - margin, 285);
-  doc.text(`مستند صادر إلكترونياً من منصة iRecycle لإدارة المخلفات — ${dateStr}`, pageWidth - margin, 289, { align: 'right' });
-  doc.text('صفحة 1', margin, 289, { align: 'left' });
+    doc.text(`مستند صادر إلكترونياً من منصة iRecycle لإدارة المخلفات — ${dateStr}`, pageWidth - margin, 289, { align: 'right' });
+  doc.text('الصفحة ١', margin, 289, { align: 'left' });
   doc.setTextColor(0);
 }
 
@@ -407,7 +407,7 @@ Deno.serve(async (req) => {
         const chatId = `${formattedPhone}@c.us`;
 
         try {
-          // Send PDF file
+          // 1) Send the generated PDF file
           const formData = new FormData();
           formData.append("chat_id", chatId);
           formData.append("caption", `📄 بيان شحنة رقم ${draft.shipment_number || ''}`);
@@ -422,8 +422,67 @@ Deno.serve(async (req) => {
           const fileResult = await fileRes.text();
           console.log(`[PDF] WhatsApp file (${fileRes.status}):`, fileResult);
 
-          // Also send text summary
-          const textMsg = `📦 *بيان شحنة رقم: ${draft.shipment_number || ''}*\n━━━━━━━━━━━━━━━━━━\n🏭 المولّد: ${draft.generator_name || '—'}\n🚛 الناقل: ${draft.transporter_name || '—'}\n♻️ المدوّر: ${draft.destination_name || '—'}\n📋 النفايات: ${draft.waste_description || '—'}\n⚖️ الكمية: ${draft.quantity || '—'} ${unitLabels[draft.unit] || draft.unit || ''}\n🚚 السائق: ${draft.driver_name || '—'}\n📅 التاريخ: ${draft.pickup_date || '—'}\n\n📎 المستند الرسمي PDF مرفق أعلاه`;
+          // 2) Send any original saved attachments from the draft
+          const attachmentUrls: string[] = [];
+          // Check for attachment fields in the draft
+          const attachmentFields = ['attachment_url', 'document_url', 'weighbridge_photo_url', 'payment_proof_url'];
+          for (const field of attachmentFields) {
+            if (draft[field]) attachmentUrls.push(draft[field]);
+          }
+          // Check attachments array
+          if (Array.isArray(draft.attachments)) {
+            for (const att of draft.attachments) {
+              if (typeof att === 'string') attachmentUrls.push(att);
+              else if (att?.url) attachmentUrls.push(att.url);
+            }
+          }
+
+          // Also check for any files stored in storage under this draft
+          try {
+            const { data: storedFiles } = await supabase.storage
+              .from("shipment-documents")
+              .list(`manual-shipments/${draft.id}`, { limit: 10 });
+            
+            if (storedFiles && storedFiles.length > 0) {
+              for (const sf of storedFiles) {
+                const { data: sfUrl } = supabase.storage
+                  .from("shipment-documents")
+                  .getPublicUrl(`manual-shipments/${draft.id}/${sf.name}`);
+                if (sfUrl?.publicUrl) attachmentUrls.push(sfUrl.publicUrl);
+              }
+            }
+          } catch (e) {
+            console.warn("[PDF] Storage list error:", e.message);
+          }
+
+          // Send each original file
+          for (const attUrl of attachmentUrls) {
+            try {
+              console.log("[PDF] Sending original attachment:", attUrl);
+              const attRes = await fetch(attUrl);
+              if (!attRes.ok) continue;
+              const attBytes = new Uint8Array(await attRes.arrayBuffer());
+              const attName = attUrl.split('/').pop() || 'مرفق';
+              const attType = attRes.headers.get('content-type') || 'application/octet-stream';
+              
+              const attFormData = new FormData();
+              attFormData.append("chat_id", chatId);
+              attFormData.append("caption", `📎 مرفق أصلي: ${decodeURIComponent(attName)}`);
+              attFormData.append("media", new File([attBytes], decodeURIComponent(attName), { type: attType }));
+
+              const attSendRes = await fetch(`${WAPILOT_BASE}/${instanceId}/send-file`, {
+                method: "POST",
+                headers: { token: WAPILOT_TOKEN },
+                body: attFormData,
+              });
+              console.log(`[PDF] Attachment sent (${attSendRes.status})`);
+            } catch (e) {
+              console.warn("[PDF] Attachment send error:", e.message);
+            }
+          }
+
+          // 3) Send text summary
+          const textMsg = `📦 *بيان شحنة رقم: ${draft.shipment_number || ''}*\n━━━━━━━━━━━━━━━━━━\n🏭 المولّد: ${draft.generator_name || '—'}\n🚛 الناقل: ${draft.transporter_name || '—'}\n♻️ المدوّر: ${draft.destination_name || '—'}\n📋 النفايات: ${draft.waste_description || '—'}\n⚖️ الكمية: ${draft.quantity || '—'} ${unitLabels[draft.unit] || draft.unit || ''}\n🚚 السائق: ${draft.driver_name || '—'}\n📅 التاريخ: ${draft.pickup_date || '—'}\n\n📎 المستند الرسمي PDF + المرفقات الأصلية مرسلة أعلاه`;
 
           const msgRes = await fetch(`${WAPILOT_BASE}/${instanceId}/send-message`, {
             method: "POST",
@@ -437,6 +496,7 @@ Deno.serve(async (req) => {
             file_sent: fileRes.ok,
             file_response: JSON.parse(fileResult),
             text_sent: msgRes.ok,
+            attachments_sent: attachmentUrls.length,
           };
         } catch (e) {
           console.error("[PDF] WhatsApp error:", e.message);
