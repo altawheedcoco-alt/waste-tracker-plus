@@ -18,11 +18,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Download, FileText, Package, Receipt, FileSignature, Users,
   Building2, Shield, Clock, CheckCircle2, AlertTriangle,
-  FileSpreadsheet, Loader2, FolderOpen, Lock, HardDrive,
+  FileSpreadsheet, Loader2, FolderOpen, Lock, HardDrive, FileDown,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
+import jsPDF from 'jspdf';
 
 interface ExportCategory {
   id: string;
@@ -98,78 +99,161 @@ const DataExport = () => {
     URL.revokeObjectURL(url);
   };
 
+  // Generate PDF from data
+  const generatePDF = (allData: { label: string; data: any[] }[], orgName: string, userName: string) => {
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    // Title
+    doc.setFontSize(16);
+    doc.text(`Data Export — ${orgName}`, pageW / 2, y, { align: 'center' });
+    y += 8;
+    doc.setFontSize(10);
+    doc.text(`Date: ${format(new Date(), 'yyyy-MM-dd HH:mm')} | User: ${userName}`, pageW / 2, y, { align: 'center' });
+    y += 12;
+
+    allData.forEach((section) => {
+      if (section.data.length === 0) return;
+
+      // Section header
+      if (y > 270) { doc.addPage(); y = 15; }
+      doc.setFontSize(12);
+      doc.setTextColor(30, 64, 175);
+      doc.text(`${section.label} (${section.data.length})`, 14, y);
+      y += 6;
+      doc.setTextColor(0, 0, 0);
+
+      const headers = Object.keys(section.data[0]);
+      const colW = Math.min(35, (pageW - 28) / headers.length);
+
+      // Table header
+      doc.setFontSize(7);
+      doc.setFillColor(240, 240, 240);
+      doc.rect(14, y - 3.5, pageW - 28, 5, 'F');
+      headers.forEach((h, i) => {
+        doc.text(h.substring(0, 15), 14 + i * colW, y, { maxWidth: colW - 1 });
+      });
+      y += 5;
+
+      // Table rows
+      doc.setFontSize(6.5);
+      section.data.slice(0, 100).forEach((row) => {
+        if (y > 280) { doc.addPage(); y = 15; }
+        headers.forEach((h, i) => {
+          const val = row[h];
+          const str = val === null || val === undefined ? '' : typeof val === 'object' ? JSON.stringify(val).substring(0, 40) : String(val).substring(0, 40);
+          doc.text(str, 14 + i * colW, y, { maxWidth: colW - 1 });
+        });
+        y += 4;
+      });
+
+      if (section.data.length > 100) {
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text(`... and ${section.data.length - 100} more records`, 14, y);
+        doc.setTextColor(0, 0, 0);
+        y += 5;
+      }
+      y += 6;
+    });
+
+    return doc;
+  };
+
+  // Fetch data for selected categories (shared logic)
+  const fetchSelectedData = async (): Promise<{ label: string; data: any[] }[]> => {
+    if (!organization?.id) return [];
+    const selected = exportCategories.filter(c => selectedCategories.has(c.id));
+    const results: { label: string; data: any[] }[] = [];
+
+    for (let i = 0; i < selected.length; i++) {
+      const cat = selected[i];
+      setCurrentStep(cat.label);
+      setProgress(Math.round(((i) / selected.length) * 100));
+
+      try {
+        let data: any[] = [];
+        if (cat.id === 'shipments') {
+          const [g, t, r] = await Promise.all([
+            supabase.from('shipments').select(cat.columns).eq('generator_id', organization.id).limit(1000),
+            supabase.from('shipments').select(cat.columns).eq('transporter_id', organization.id).limit(1000),
+            supabase.from('shipments').select(cat.columns).eq('recycler_id', organization.id).limit(1000),
+          ]);
+          const all = [...(g.data || []), ...(t.data || []), ...(r.data || [])] as any[];
+          data = Array.from(new Map(all.map((s: any) => [s.id, s])).values());
+        } else if (cat.id === 'profile') {
+          const { data: d } = await supabase.from(cat.table as any).select(cat.columns).eq(cat.filterKey, organization.id);
+          data = d || [];
+        } else {
+          const { data: d } = await supabase.from(cat.table as any).select(cat.columns).eq(cat.filterKey, organization.id).limit(1000);
+          data = d || [];
+        }
+        if (data.length > 0) results.push({ label: cat.label, data });
+      } catch (err) {
+        console.warn(`Export ${cat.id} failed:`, err);
+      }
+    }
+    return results;
+  };
+
   const handleExportCSV = useCallback(async () => {
     if (!organization?.id || selectedCategories.size === 0) {
       toast.error('اختر فئة واحدة على الأقل');
       return;
     }
-
     setExporting(true);
     setProgress(0);
-
     try {
-      const selected = exportCategories.filter(c => selectedCategories.has(c.id));
-      const allCSVs: string[] = [];
-      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-
-      for (let i = 0; i < selected.length; i++) {
-        const cat = selected[i];
-        setCurrentStep(cat.label);
-        setProgress(Math.round(((i) / selected.length) * 100));
-
-        try {
-          let query;
-          if (cat.id === 'profile') {
-            query = supabase.from(cat.table as any).select(cat.columns).eq(cat.filterKey, organization.id);
-          } else if (cat.id === 'shipments') {
-            // Shipments can be generator, transporter, or recycler
-            const { data: genData } = await supabase.from('shipments').select(cat.columns).eq('generator_id', organization.id).limit(1000);
-            const { data: transData } = await supabase.from('shipments').select(cat.columns).eq('transporter_id', organization.id).limit(1000);
-            const { data: recData } = await supabase.from('shipments').select(cat.columns).eq('recycler_id', organization.id).limit(1000);
-            
-            const allShipments = [...(genData || []), ...(transData || []), ...(recData || [])] as any[];
-            // Deduplicate by id
-            const unique = Array.from(new Map(allShipments.map((s: any) => [s.id, s])).values());
-            
-            if (unique.length > 0) {
-              const csv = toCSV(unique, cat.id);
-              allCSVs.push(`\n\n=== ${cat.label} (${unique.length} سجل) ===\n${csv}`);
-            }
-            continue;
-          } else {
-            query = supabase.from(cat.table as any).select(cat.columns).eq(cat.filterKey, organization.id).limit(1000);
-          }
-
-          const { data, error } = await query;
-          if (error) {
-            console.warn(`Export ${cat.id} error:`, error.message);
-            continue;
-          }
-          if (data && data.length > 0) {
-            const csv = toCSV(data, cat.id);
-            allCSVs.push(`\n\n=== ${cat.label} (${data.length} سجل) ===\n${csv}`);
-          }
-        } catch (err) {
-          console.warn(`Export ${cat.id} failed:`, err);
-        }
-      }
-
+      const results = await fetchSelectedData();
       setProgress(100);
       setCurrentStep('جاري التحميل...');
 
-      if (allCSVs.length === 0) {
+      if (results.length === 0) {
         toast.info('لا توجد بيانات للتصدير');
         return;
       }
 
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
       const header = `# تصدير بيانات — ${organization.name}\n# التاريخ: ${timestamp}\n# المستخدم: ${profile?.full_name || 'غير محدد'}\n`;
-      const fullCSV = header + allCSVs.join('');
-
-      downloadFile(fullCSV, `data-export_${organization.name}_${timestamp}.csv`, 'text/csv');
-      toast.success(`تم تصدير ${allCSVs.length} فئات بنجاح`);
+      const allCSVs = results.map(r => `\n\n=== ${r.label} (${r.data.length} سجل) ===\n${toCSV(r.data, r.label)}`);
+      downloadFile(header + allCSVs.join(''), `data-export_${organization.name}_${timestamp}.csv`, 'text/csv');
+      toast.success(`تم تصدير ${results.length} فئات بنجاح`);
     } catch (err) {
       console.error('Export error:', err);
       toast.error('حدث خطأ أثناء التصدير');
+    } finally {
+      setExporting(false);
+      setProgress(0);
+      setCurrentStep('');
+    }
+  }, [organization, profile, selectedCategories]);
+
+  const handleExportPDF = useCallback(async () => {
+    if (!organization?.id || selectedCategories.size === 0) {
+      toast.error('اختر فئة واحدة على الأقل');
+      return;
+    }
+    setExporting(true);
+    setProgress(0);
+    try {
+      const results = await fetchSelectedData();
+      setProgress(90);
+      setCurrentStep('جاري إنشاء PDF...');
+
+      if (results.length === 0) {
+        toast.info('لا توجد بيانات للتصدير');
+        return;
+      }
+
+      const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
+      const doc = generatePDF(results, organization.name || '', profile?.full_name || '');
+      doc.save(`data-export_${organization.name}_${timestamp}.pdf`);
+      setProgress(100);
+      toast.success(`تم تصدير ${results.length} فئات كـ PDF`);
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.error('حدث خطأ أثناء إنشاء PDF');
     } finally {
       setExporting(false);
       setProgress(0);
@@ -231,7 +315,7 @@ const DataExport = () => {
               تصدير البيانات
             </h1>
             <p className="text-sm text-muted-foreground">
-              حمّل نسخة كاملة من بياناتك بصيغة CSV — حقك في الوصول لبياناتك
+              حمّل نسخة كاملة من بياناتك بصيغة CSV أو PDF — حقك في الوصول لبياناتك
             </p>
           </div>
         </div>
@@ -317,7 +401,7 @@ const DataExport = () => {
           </Card>
         )}
 
-        {/* Export Button */}
+        {/* Export Buttons */}
         <div className="flex gap-3">
           <Button
             size="lg"
@@ -330,7 +414,24 @@ const DataExport = () => {
             ) : (
               <FileSpreadsheet className="w-5 h-5" />
             )}
-            تصدير الكل كـ CSV
+            تصدير CSV
+            {selectedCategories.size > 0 && (
+              <Badge variant="secondary" className="mr-1">{selectedCategories.size} فئات</Badge>
+            )}
+          </Button>
+          <Button
+            size="lg"
+            variant="outline"
+            className="flex-1 gap-2"
+            onClick={handleExportPDF}
+            disabled={exporting || selectedCategories.size === 0}
+          >
+            {exporting ? (
+              <Loader2 className="w-5 h-5 animate-spin" />
+            ) : (
+              <FileDown className="w-5 h-5" />
+            )}
+            تصدير PDF
             {selectedCategories.size > 0 && (
               <Badge variant="secondary" className="mr-1">{selectedCategories.size} فئات</Badge>
             )}
