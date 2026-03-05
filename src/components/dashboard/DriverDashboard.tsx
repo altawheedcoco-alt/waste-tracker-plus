@@ -50,6 +50,7 @@ const DigitalManifest = lazy(() => import('@/components/driver/DigitalManifest')
 const DriverAcademy = lazy(() => import('@/components/driver/DriverAcademy'));
 const SmartRouteOptimizer = lazy(() => import('@/components/driver/SmartRouteOptimizer'));
 const DriverOfferPopup = lazy(() => import('@/components/driver/DriverOfferPopup'));
+const EnhancedDestinationPicker = lazy(() => import('@/components/driver/DestinationPicker'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -543,6 +544,13 @@ const DriverDashboard = () => {
             <DriverOwnLinkingCode />
             <DriverCredentialsEditor />
             <DriverLinkedOrganizations />
+
+            {/* محدد الوجهات المتقدم */}
+            {driverInfo && (
+              <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+                <EnhancedDestinationPicker driverId={driverInfo.id} onDestinationAdded={fetchDriverData} />
+              </Suspense>
+            )}
 
             {/* Academy & Safety Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

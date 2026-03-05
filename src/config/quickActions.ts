@@ -220,10 +220,14 @@ export const driverQuickActions: QuickActionConfig[] = [
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'مسح مانيفست الشحنة', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'primary' },
 
   // 2️⃣ ثانوي مهم
+  { id: 'navigation-demo', title: 'نظام الملاحة', subtitle: 'تتبع وتوجيه الرحلات', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'secondary' },
+  { id: 'saved-locations', title: 'المواقع المحفوظة', subtitle: 'عناوينك المحفوظة والمتكررة', icon: Bookmark, path: '/dashboard/saved-locations', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'secondary' },
   { id: 'driver-profile', title: 'ملف السائق', subtitle: 'بياناتك ورخصتك ومركبتك', icon: User, path: '/dashboard/driver-profile', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'secondary' },
   { id: 'chat', title: 'المحادثات', subtitle: 'التواصل مع الفريق والإدارة', icon: MessageCircle, path: '/dashboard/chat', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'secondary' },
 
-  // 3️⃣ دعم
+  // 3️⃣ أدوات وسجلات
+  { id: 'my-requests', title: 'طلباتي', subtitle: 'طلباتي ومراسلات الإدارة', icon: Send, path: '/dashboard/my-requests', iconBgClass: 'bg-gradient-to-br from-purple-500 to-indigo-600', category: 'utility' },
+  { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع عملياتك', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'support', title: 'الدعم الفني', subtitle: 'تواصل مع فريق الدعم', icon: Headphones, path: '/dashboard/support', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
   { id: 'settings', title: 'الإعدادات', subtitle: 'إعدادات حسابك', icon: Settings, onClick: 'openSettings', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
 ];
