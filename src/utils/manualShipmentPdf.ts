@@ -1,4 +1,6 @@
 import { ManualShipmentData } from '@/hooks/useManualShipmentDraft';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
@@ -528,4 +530,71 @@ export async function generateManualShipmentPDF(form: ManualShipmentData) {
     setTimeout(() => { printWindow.print(); }, 800);
   };
   setTimeout(() => { printWindow.print(); }, 2000);
+}
+
+/**
+ * Generate PDF as Blob for uploading/sending via WhatsApp
+ */
+export async function generateManualShipmentPDFBlob(form: ManualShipmentData): Promise<Blob | null> {
+  try {
+    const htmlContent = generateFullHTML(form);
+    
+    // Create hidden container
+    const container = document.createElement('div');
+    container.style.position = 'fixed';
+    container.style.left = '-9999px';
+    container.style.top = '0';
+    container.style.width = '794px';
+    container.style.background = 'white';
+    container.style.zIndex = '-1';
+    document.body.appendChild(container);
+
+    // Create iframe for isolated rendering
+    const iframe = document.createElement('iframe');
+    iframe.style.width = '794px';
+    iframe.style.height = '1123px';
+    iframe.style.border = 'none';
+    container.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) {
+      document.body.removeChild(container);
+      return null;
+    }
+
+    doc.open();
+    doc.write(htmlContent);
+    doc.close();
+
+    // Wait for fonts and content to load
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Capture each page
+    const pages = doc.querySelectorAll('.page');
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pdfWidth = 210;
+    const pdfHeight = 297;
+
+    for (let i = 0; i < pages.length; i++) {
+      if (i > 0) pdf.addPage();
+      
+      const canvas = await html2canvas(pages[i] as HTMLElement, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
+    }
+
+    document.body.removeChild(container);
+    return pdf.output('blob');
+  } catch (err) {
+    console.error('[ManualShipmentPDF] Blob generation failed:', err);
+    return null;
+  }
 }
