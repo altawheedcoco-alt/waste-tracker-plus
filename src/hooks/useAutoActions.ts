@@ -102,7 +102,7 @@ export const useAutoActions = (organizationId: string | undefined) => {
       return data as unknown as AutoActionsSettings;
     },
     enabled: !!organizationId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 0, // Always refetch to ensure latest state
   });
 
   const updateMutation = useMutation({
@@ -114,11 +114,26 @@ export const useAutoActions = (organizationId: string | undefined) => {
         .eq('organization_id', organizationId);
       if (error) throw error;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['auto-actions', organizationId] });
+    onMutate: async (updates) => {
+      // Cancel outgoing refetches
+      await queryClient.cancelQueries({ queryKey: ['auto-actions', organizationId] });
+      // Snapshot previous value
+      const previous = queryClient.getQueryData(['auto-actions', organizationId]);
+      // Optimistically update
+      queryClient.setQueryData(['auto-actions', organizationId], (old: any) => 
+        old ? { ...old, ...updates } : old
+      );
+      return { previous };
     },
-    onError: (err: any) => {
+    onError: (err: any, _updates, context) => {
+      // Rollback on error
+      if (context?.previous) {
+        queryClient.setQueryData(['auto-actions', organizationId], context.previous);
+      }
       toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['auto-actions', organizationId] });
     },
   });
 
