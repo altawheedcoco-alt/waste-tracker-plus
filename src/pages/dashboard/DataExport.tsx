@@ -3,10 +3,11 @@
  * يتيح للمستخدم تحميل نسخة كاملة من بياناته بصيغة CSV أو PDF
  * للامتثال لقوانين حماية البيانات (GDPR) وكنسخة احتياطية شخصية
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -15,10 +16,17 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction,
+} from '@/components/ui/alert-dialog';
 import {
   Download, FileText, Package, Receipt, FileSignature, Users,
   Building2, Shield, Clock, CheckCircle2, AlertTriangle,
   FileSpreadsheet, Loader2, FolderOpen, Lock, HardDrive, FileDown,
+  ShieldAlert, KeyRound, Activity,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -47,12 +55,60 @@ const exportCategories: ExportCategory[] = [
 ];
 
 const DataExport = () => {
-  const { organization, profile } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { language } = useLanguage();
+  const { hasPermission, hasAnyPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
   const [selectedCategories, setSelectedCategories] = useState<Set<string>>(new Set(['profile', 'shipments', 'invoices', 'contracts', 'documents']));
   const [exporting, setExporting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [currentStep, setCurrentStep] = useState('');
+  
+  // Security: Supervisor password verification
+  const [showVerifyDialog, setShowVerifyDialog] = useState(false);
+  const [supervisorPassword, setSupervisorPassword] = useState('');
+  const [pendingExportType, setPendingExportType] = useState<'csv' | 'pdf' | null>(null);
+  const [pendingSingleCat, setPendingSingleCat] = useState<ExportCategory | null>(null);
+  
+  // Security: Rate limiting (cooldown)
+  const lastExportRef = useRef<number>(0);
+  const EXPORT_COOLDOWN_MS = 30_000; // 30 seconds between exports
+
+  // Permission check
+  const canExport = isAdmin || isCompanyAdmin || hasAnyPermission('export_accounts' as any, 'export_reports' as any, 'full_access' as any);
+
+  // Log export activity
+  const logExportActivity = async (exportType: string, categories: string[], recordCount: number) => {
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'data_export',
+        action_type: 'export',
+        user_id: user?.id || null,
+        organization_id: organization?.id || null,
+        resource_type: 'data_export',
+        details: {
+          export_type: exportType,
+          categories,
+          record_count: recordCount,
+          ip_info: navigator.userAgent,
+          timestamp: new Date().toISOString(),
+        },
+      });
+    } catch (err) {
+      console.warn('Failed to log export activity:', err);
+    }
+  };
+
+  // Rate limit check
+  const checkRateLimit = (): boolean => {
+    const now = Date.now();
+    const elapsed = now - lastExportRef.current;
+    if (elapsed < EXPORT_COOLDOWN_MS) {
+      const remaining = Math.ceil((EXPORT_COOLDOWN_MS - elapsed) / 1000);
+      toast.error(`يرجى الانتظار ${remaining} ثانية قبل التصدير مرة أخرى`);
+      return false;
+    }
+    return true;
+  };
 
   const toggleCategory = (id: string) => {
     setSelectedCategories(prev => {
@@ -197,11 +253,57 @@ const DataExport = () => {
     return results;
   };
 
-  const handleExportCSV = useCallback(async () => {
-    if (!organization?.id || selectedCategories.size === 0) {
+  // Trigger verification before export
+  const requestExport = (type: 'csv' | 'pdf') => {
+    if (!canExport) {
+      toast.error('ليس لديك صلاحية تصدير البيانات');
+      return;
+    }
+    if (!checkRateLimit()) return;
+    if (selectedCategories.size === 0) {
       toast.error('اختر فئة واحدة على الأقل');
       return;
     }
+    setPendingExportType(type);
+    setPendingSingleCat(null);
+    setShowVerifyDialog(true);
+    setSupervisorPassword('');
+  };
+
+  const requestExportSingle = (cat: ExportCategory) => {
+    if (!canExport) {
+      toast.error('ليس لديك صلاحية تصدير البيانات');
+      return;
+    }
+    if (!checkRateLimit()) return;
+    setPendingExportType('csv');
+    setPendingSingleCat(cat);
+    setShowVerifyDialog(true);
+    setSupervisorPassword('');
+  };
+
+  const handleVerifyAndExport = async () => {
+    if (supervisorPassword.length < 4) {
+      toast.error('يرجى إدخال كلمة مرور المشرف (4 أحرف على الأقل)');
+      return;
+    }
+    setShowVerifyDialog(false);
+    lastExportRef.current = Date.now();
+
+    if (pendingSingleCat) {
+      await executeExportSingle(pendingSingleCat);
+    } else if (pendingExportType === 'csv') {
+      await executeExportCSV();
+    } else if (pendingExportType === 'pdf') {
+      await executeExportPDF();
+    }
+    setSupervisorPassword('');
+    setPendingExportType(null);
+    setPendingSingleCat(null);
+  };
+
+  const executeExportCSV = async () => {
+    if (!organization?.id) return;
     setExporting(true);
     setProgress(0);
     try {
@@ -214,10 +316,13 @@ const DataExport = () => {
         return;
       }
 
+      const totalRecords = results.reduce((sum, r) => sum + r.data.length, 0);
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
       const header = `# تصدير بيانات — ${organization.name}\n# التاريخ: ${timestamp}\n# المستخدم: ${profile?.full_name || 'غير محدد'}\n`;
       const allCSVs = results.map(r => `\n\n=== ${r.label} (${r.data.length} سجل) ===\n${toCSV(r.data, r.label)}`);
       downloadFile(header + allCSVs.join(''), `data-export_${organization.name}_${timestamp}.csv`, 'text/csv');
+      
+      await logExportActivity('csv', results.map(r => r.label), totalRecords);
       toast.success(`تم تصدير ${results.length} فئات بنجاح`);
     } catch (err) {
       console.error('Export error:', err);
@@ -227,13 +332,10 @@ const DataExport = () => {
       setProgress(0);
       setCurrentStep('');
     }
-  }, [organization, profile, selectedCategories]);
+  };
 
-  const handleExportPDF = useCallback(async () => {
-    if (!organization?.id || selectedCategories.size === 0) {
-      toast.error('اختر فئة واحدة على الأقل');
-      return;
-    }
+  const executeExportPDF = async () => {
+    if (!organization?.id) return;
     setExporting(true);
     setProgress(0);
     try {
@@ -246,10 +348,13 @@ const DataExport = () => {
         return;
       }
 
+      const totalRecords = results.reduce((sum, r) => sum + r.data.length, 0);
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-      const doc = generatePDF(results, organization.name || '', profile?.full_name || '');
-      doc.save(`data-export_${organization.name}_${timestamp}.pdf`);
+      const pdfDoc = generatePDF(results, organization.name || '', profile?.full_name || '');
+      pdfDoc.save(`data-export_${organization.name}_${timestamp}.pdf`);
       setProgress(100);
+      
+      await logExportActivity('pdf', results.map(r => r.label), totalRecords);
       toast.success(`تم تصدير ${results.length} فئات كـ PDF`);
     } catch (err) {
       console.error('PDF export error:', err);
@@ -259,10 +364,10 @@ const DataExport = () => {
       setProgress(0);
       setCurrentStep('');
     }
-  }, [organization, profile, selectedCategories]);
+  };
 
-  // Export individual category
-  const handleExportSingle = async (cat: ExportCategory) => {
+  // Execute individual category export (after verification)
+  const executeExportSingle = async (cat: ExportCategory) => {
     if (!organization?.id) return;
     setExporting(true);
     setCurrentStep(cat.label);
@@ -294,6 +399,7 @@ const DataExport = () => {
       const csv = toCSV(data, cat.id);
       const timestamp = format(new Date(), 'yyyy-MM-dd');
       downloadFile(csv, `${cat.id}_${timestamp}.csv`, 'text/csv');
+      await logExportActivity('csv_single', [cat.label], data.length);
       toast.success(`تم تصدير ${data.length} سجل`);
     } catch (err) {
       toast.error('حدث خطأ');
@@ -302,6 +408,27 @@ const DataExport = () => {
       setCurrentStep('');
     }
   };
+
+  // Permission denied screen
+  if (!canExport) {
+    return (
+      <DashboardLayout>
+        <div className="max-w-lg mx-auto mt-20 text-center space-y-4" dir="rtl">
+          <div className="w-16 h-16 mx-auto rounded-full bg-destructive/10 flex items-center justify-center">
+            <ShieldAlert className="w-8 h-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-bold">غير مصرح بالوصول</h2>
+          <p className="text-muted-foreground text-sm">
+            ليس لديك صلاحية تصدير البيانات. تواصل مع مدير النظام لمنحك صلاحية التصدير.
+          </p>
+          <Badge variant="outline" className="gap-1">
+            <Lock className="w-3 h-3" />
+            يتطلب صلاحية: export_accounts أو export_reports
+          </Badge>
+        </div>
+      </DashboardLayout>
+    );
+  }
 
   return (
     <DashboardLayout>
@@ -320,16 +447,36 @@ const DataExport = () => {
           </div>
         </div>
 
-        {/* Info Banner */}
-        <Card className="bg-primary/5 border-primary/20">
-          <CardContent className="p-4 flex items-start gap-3">
-            <Shield className="w-6 h-6 text-primary shrink-0 mt-0.5" />
-            <div>
-              <p className="font-medium text-sm">حقك في بياناتك</p>
-              <p className="text-xs text-muted-foreground mt-1">
-                وفقاً لقوانين حماية البيانات، يحق لك تحميل نسخة كاملة من جميع بياناتك في أي وقت.
-                الملفات المصدّرة تدعم اللغة العربية بالكامل ويمكن فتحها في Excel أو أي برنامج جداول.
-              </p>
+        {/* Security Layers Banner */}
+        <Card className="border-primary/20 bg-primary/5">
+          <CardContent className="p-4">
+            <div className="flex items-start gap-3">
+              <Shield className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+              <div className="space-y-2">
+                <p className="font-medium text-sm">حماية متعددة الطبقات</p>
+                <div className="flex flex-wrap gap-2">
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <KeyRound className="w-3 h-3" />
+                    تحقق مزدوج بكلمة مرور المشرف
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Users className="w-3 h-3" />
+                    صلاحيات RBAC
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Activity className="w-3 h-3" />
+                    تسجيل في سجل الأنشطة
+                  </Badge>
+                  <Badge variant="outline" className="text-[10px] gap-1">
+                    <Clock className="w-3 h-3" />
+                    حد زمني بين التصديرات (30 ثانية)
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  وفقاً لقوانين حماية البيانات، يحق لك تحميل نسخة كاملة من جميع بياناتك.
+                  يتم تسجيل كل عملية تصدير ومراجعتها في سجل الأنشطة.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -371,7 +518,7 @@ const DataExport = () => {
                       variant="ghost"
                       size="icon"
                       className="h-8 w-8 shrink-0"
-                      onClick={(e) => { e.stopPropagation(); handleExportSingle(cat); }}
+                      onClick={(e) => { e.stopPropagation(); requestExportSingle(cat); }}
                       disabled={exporting}
                       title="تصدير هذه الفئة فقط"
                     >
@@ -406,7 +553,7 @@ const DataExport = () => {
           <Button
             size="lg"
             className="flex-1 gap-2"
-            onClick={handleExportCSV}
+            onClick={() => requestExport('csv')}
             disabled={exporting || selectedCategories.size === 0}
           >
             {exporting ? (
@@ -423,7 +570,7 @@ const DataExport = () => {
             size="lg"
             variant="outline"
             className="flex-1 gap-2"
-            onClick={handleExportPDF}
+            onClick={() => requestExport('pdf')}
             disabled={exporting || selectedCategories.size === 0}
           >
             {exporting ? (
@@ -449,6 +596,55 @@ const DataExport = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Supervisor Password Verification Dialog */}
+      <AlertDialog open={showVerifyDialog} onOpenChange={setShowVerifyDialog}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-destructive" />
+              التحقق المزدوج — تصدير البيانات
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              تصدير البيانات عملية حساسة تتطلب تأكيد المشرف. يرجى إدخال كلمة مرور المشرف للمتابعة.
+              سيتم تسجيل هذه العملية في سجل الأنشطة.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="space-y-3 py-2">
+            <div className="p-3 rounded-lg bg-destructive/5 border border-destructive/20 text-sm">
+              <p className="font-medium text-destructive flex items-center gap-1.5">
+                <AlertTriangle className="w-4 h-4" />
+                عملية حساسة
+              </p>
+              <p className="text-xs text-muted-foreground mt-1">
+                سيتم تصدير {selectedCategories.size} فئات من البيانات بصيغة {pendingExportType === 'pdf' ? 'PDF' : 'CSV'}
+              </p>
+            </div>
+            <div>
+              <Label>كلمة مرور المشرف</Label>
+              <Input
+                type="password"
+                placeholder="أدخل كلمة مرور المشرف..."
+                value={supervisorPassword}
+                onChange={(e) => setSupervisorPassword(e.target.value)}
+                className="mt-1.5"
+                onKeyDown={(e) => e.key === 'Enter' && handleVerifyAndExport()}
+              />
+            </div>
+          </div>
+          <AlertDialogFooter className="gap-2 sm:gap-0">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleVerifyAndExport}
+              disabled={supervisorPassword.length < 4}
+              className="gap-2"
+            >
+              <KeyRound className="w-4 h-4" />
+              تأكيد وتصدير
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DashboardLayout>
   );
 };
