@@ -22,161 +22,276 @@ const disposalLabels: Record<string, string> = {
 };
 
 function val(v: string | undefined | null): string {
-  return v || '-';
+  return v || '—';
 }
 
 function generateHTML(form: ManualShipmentData): string {
   const shipTypeLabel = form.shipment_type === 'urgent' ? 'عاجلة' : form.shipment_type === 'scheduled' ? 'مجدولة' : 'عادية';
-  const destTypeLabel = form.destination_type === 'disposal' ? 'تخلص' : 'تدوير';
-  const destSectionTitle = form.destination_type === 'disposal' ? 'جهة التخلص' : 'جهة التدوير';
+  const destTypeLabel = form.destination_type === 'disposal' ? 'تخلص نهائي' : 'إعادة تدوير';
+  const destSectionTitle = form.destination_type === 'disposal' ? 'جهة التخلص النهائي' : 'جهة إعادة التدوير';
+  const dateNow = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
+  const timeNow = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
+  const hazardClass = form.hazard_level === 'highly_hazardous' ? '#dc2626' : form.hazard_level === 'hazardous' ? '#ea580c' : '#16a34a';
 
-  const row = (label: string, value: string) => `
+  const row = (label: string, value: string, icon?: string) => `
     <tr>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-weight:bold;text-align:right;width:35%;color:#374151;font-size:12px;">${label}</td>
-      <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;color:#1f2937;font-size:12px;">${val(value)}</td>
+      <td style="padding:5px 12px;border-bottom:1px solid #f0f0f0;font-weight:600;text-align:right;width:38%;color:#475569;font-size:11px;white-space:nowrap;">
+        ${icon ? `<span style="margin-left:4px;">${icon}</span>` : ''}${label}
+      </td>
+      <td style="padding:5px 12px;border-bottom:1px solid #f0f0f0;text-align:right;color:#1e293b;font-size:11.5px;font-weight:500;">${val(value)}</td>
     </tr>`;
 
-  const section = (title: string, rows: string) => `
-    <div style="margin-bottom:14px;">
-      <div style="background:#059669;color:white;padding:7px 12px;font-size:13px;font-weight:bold;border-radius:4px 4px 0 0;">${title}</div>
-      <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-top:none;">
+  const section = (title: string, icon: string, rows: string, color: string = '#059669') => `
+    <div style="margin-bottom:12px;break-inside:avoid;">
+      <div style="background:linear-gradient(135deg, ${color}, ${color}dd);color:white;padding:6px 14px;font-size:12px;font-weight:700;border-radius:6px 6px 0 0;display:flex;align-items:center;gap:6px;letter-spacing:0.3px;">
+        <span style="font-size:14px;">${icon}</span>
+        ${title}
+      </div>
+      <table style="width:100%;border-collapse:collapse;border:1px solid #e2e8f0;border-top:none;border-radius:0 0 6px 6px;overflow:hidden;">
         ${rows}
       </table>
     </div>`;
 
   let html = `<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8">
 <style>
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4; margin: 0; }
   * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size:12px; color:#1a1a1a; direction:rtl; padding:20px; background:white; }
-</style></head><body>`;
+  body {
+    font-family: 'Segoe UI', Tahoma, Arial, sans-serif;
+    font-size: 11px;
+    color: #1e293b;
+    direction: rtl;
+    padding: 0;
+    background: white;
+    width: 794px;
+  }
+  .page-container {
+    padding: 24px 28px;
+    position: relative;
+  }
+  .watermark {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-35deg);
+    font-size: 90px;
+    color: rgba(5, 150, 105, 0.035);
+    font-weight: 900;
+    pointer-events: none;
+    z-index: 0;
+    letter-spacing: 8px;
+  }
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+</style></head><body>
+<div class="watermark">iRecycle</div>
+<div class="page-container">`;
 
-  // Header
-  html += `<div style="text-align:center;border-bottom:3px solid #059669;padding-bottom:12px;margin-bottom:16px;">
-    <h1 style="font-size:22px;color:#059669;margin-bottom:4px;">♻ بيان شحنة / Shipment Manifest</h1>
-    <div style="font-size:11px;color:#666;">التاريخ: ${new Date().toLocaleDateString('ar-EG')} | رقم الشحنة: ${val(form.shipment_number)}</div>
+  // ===== HEADER =====
+  html += `
+  <div style="border-bottom:3px solid #059669;padding-bottom:14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-start;">
+    <div style="flex:1;text-align:right;">
+      <div style="display:flex;align-items:center;gap:10px;justify-content:flex-start;">
+        <div style="width:52px;height:52px;background:linear-gradient(135deg,#059669,#10b981);border-radius:12px;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;font-weight:900;box-shadow:0 4px 12px rgba(5,150,105,0.3);">♻</div>
+        <div>
+          <h1 style="font-size:20px;color:#059669;margin:0;font-weight:800;letter-spacing:0.5px;">بيان شحنة مخلفات</h1>
+          <div style="font-size:11px;color:#64748b;font-weight:500;">Waste Shipment Manifest</div>
+        </div>
+      </div>
+      <div style="margin-top:8px;display:flex;gap:12px;flex-wrap:wrap;">
+        <span style="background:#f0fdf4;border:1px solid #bbf7d0;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;color:#166534;">
+          📋 رقم: ${val(form.shipment_number)}
+        </span>
+        <span style="background:#eff6ff;border:1px solid #bfdbfe;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;color:#1e40af;">
+          🚛 ${shipTypeLabel}
+        </span>
+        <span style="background:${hazardClass}15;border:1px solid ${hazardClass}40;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;color:${hazardClass};">
+          ⚠ ${hazardLabels[form.hazard_level] || 'غير محدد'}
+        </span>
+      </div>
+    </div>
+    <div style="text-align:left;font-size:10px;color:#94a3b8;line-height:1.8;min-width:140px;">
+      <div><strong style="color:#64748b;">التاريخ:</strong> ${dateNow}</div>
+      <div><strong style="color:#64748b;">الوقت:</strong> ${timeNow}</div>
+      <div><strong style="color:#64748b;">الوجهة:</strong> ${destTypeLabel}</div>
+      <div style="margin-top:4px;padding:3px 8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;text-align:center;font-size:9px;">
+        وثيقة رسمية
+      </div>
+    </div>
   </div>`;
 
-  // Shipment Info
-  html += section('بيانات الشحنة',
-    row('رقم الشحنة', form.shipment_number) +
-    row('نوع النقلة', shipTypeLabel) +
-    row('الوجهة', destTypeLabel)
-  );
+  // ===== PARTIES (2 columns) =====
+  html += `<div class="two-col">`;
 
   // Generator
-  html += section('المولّد (Generator)',
+  html += section('المولّد / Generator', '🏭',
     row('الاسم', form.generator_name) +
     row('العنوان', form.generator_address) +
     row('الهاتف', form.generator_phone) +
-    row('البريد الإلكتروني', form.generator_email) +
+    row('البريد', form.generator_email) +
     row('الترخيص', form.generator_license) +
     row('السجل التجاري', form.generator_commercial_register) +
     row('الرقم الضريبي', form.generator_tax_id) +
-    row('الممثل القانوني', form.generator_representative)
+    row('الممثل القانوني', form.generator_representative),
+    '#0369a1'
   );
 
   // Transporter
-  html += section('الناقل (Transporter)',
+  html += section('الناقل / Transporter', '🚛',
     row('الاسم', form.transporter_name) +
     row('العنوان', form.transporter_address) +
     row('الهاتف', form.transporter_phone) +
-    row('البريد الإلكتروني', form.transporter_email) +
+    row('البريد', form.transporter_email) +
     row('الترخيص', form.transporter_license) +
     row('السجل التجاري', form.transporter_commercial_register) +
     row('الرقم الضريبي', form.transporter_tax_id) +
-    row('الممثل القانوني', form.transporter_representative)
+    row('الممثل القانوني', form.transporter_representative),
+    '#059669'
   );
 
-  // Destination
-  html += section(`${destSectionTitle} (Destination)`,
+  html += `</div>`;
+
+  // Destination (full width)
+  html += section(`${destSectionTitle} / Destination`, '🏗️',
     row('الاسم', form.destination_name) +
     row('العنوان', form.destination_address) +
     row('الهاتف', form.destination_phone) +
-    row('البريد الإلكتروني', form.destination_email) +
+    row('البريد', form.destination_email) +
     row('الترخيص', form.destination_license) +
     row('السجل التجاري', form.destination_commercial_register) +
     row('الرقم الضريبي', form.destination_tax_id) +
-    row('الممثل القانوني', form.destination_representative)
+    row('الممثل القانوني', form.destination_representative),
+    '#7c3aed'
   );
 
-  // Waste Details
-  html += section('بيانات المخلفات',
+  // ===== WASTE + DRIVER (2 columns) =====
+  html += `<div class="two-col">`;
+
+  html += section('بيانات المخلفات', '☣️',
     row('نوع المخلف', wasteTypeLabels[form.waste_type] || form.waste_type) +
     row('الوصف', form.waste_description) +
     row('مستوى الخطورة', hazardLabels[form.hazard_level] || form.hazard_level) +
-    row('الكمية', `${form.quantity || '-'} ${unitLabels[form.unit] || form.unit || ''}`) +
-    row('طريقة المعالجة', disposalLabels[form.disposal_method] || form.disposal_method)
+    row('الكمية', `${form.quantity || '—'} ${unitLabels[form.unit] || form.unit || ''}`) +
+    row('طريقة المعالجة', disposalLabels[form.disposal_method] || form.disposal_method),
+    '#dc2626'
   );
 
-  // Driver & Vehicle
-  html += section('السائق والمركبة',
-    row('السائق', form.driver_name) +
+  html += section('السائق والمركبة', '👤',
+    row('اسم السائق', form.driver_name) +
     row('هاتف السائق', form.driver_phone) +
     row('لوحة المركبة', form.vehicle_plate) +
-    row('نوع المركبة', form.vehicle_type)
+    row('نوع المركبة', form.vehicle_type),
+    '#ca8a04'
   );
 
-  // Logistics
-  html += section('التحميل والتسليم',
-    row('موقع التحميل', form.pickup_address) +
-    row('موقع التسليم', form.delivery_address) +
-    row('تاريخ التحميل', form.pickup_date) +
-    row('تاريخ التسليم', form.delivery_date)
+  html += `</div>`;
+
+  // ===== LOGISTICS (full width) =====
+  html += section('التحميل والتسليم / Logistics', '📍',
+    `<tr>
+      <td colspan="2" style="padding:0;">
+        <table style="width:100%;border-collapse:collapse;">
+          <tr>
+            <td style="width:50%;padding:6px 12px;border-left:1px solid #e2e8f0;border-bottom:1px solid #f0f0f0;vertical-align:top;">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px;">📦 موقع التحميل</div>
+              <div style="font-size:11px;font-weight:600;color:#1e293b;">${val(form.pickup_address)}</div>
+              <div style="font-size:10px;color:#64748b;margin-top:2px;">📅 ${val(form.pickup_date)}</div>
+            </td>
+            <td style="width:50%;padding:6px 12px;border-bottom:1px solid #f0f0f0;vertical-align:top;">
+              <div style="font-size:10px;color:#94a3b8;margin-bottom:2px;">📬 موقع التسليم</div>
+              <div style="font-size:11px;font-weight:600;color:#1e293b;">${val(form.delivery_address)}</div>
+              <div style="font-size:10px;color:#64748b;margin-top:2px;">📅 ${val(form.delivery_date)}</div>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>`,
+    '#0891b2'
   );
 
-  // Financial
-  if (form.price) {
-    html += section('البيانات المالية',
-      row('السعر', form.price) +
-      row('ملاحظات السعر', form.price_notes)
-    );
+  // ===== FINANCIAL + NOTES =====
+  if (form.price || form.notes || form.special_instructions) {
+    html += `<div class="two-col">`;
+    if (form.price) {
+      html += section('البيانات المالية', '💰',
+        row('السعر', form.price) +
+        row('ملاحظات', form.price_notes),
+        '#b45309'
+      );
+    }
+    if (form.notes || form.special_instructions) {
+      let noteRows = '';
+      if (form.notes) noteRows += row('ملاحظات عامة', form.notes);
+      if (form.special_instructions) noteRows += row('تعليمات خاصة', form.special_instructions);
+      html += section('ملاحظات وتعليمات', '📝', noteRows, '#6b7280');
+    }
+    html += `</div>`;
   }
 
-  // Notes
-  if (form.notes || form.special_instructions) {
-    let noteRows = '';
-    if (form.notes) noteRows += row('ملاحظات عامة', form.notes);
-    if (form.special_instructions) noteRows += row('تعليمات خاصة', form.special_instructions);
-    html += section('ملاحظات', noteRows);
-  }
-
-  // Signature area
-  html += `<div style="margin-top:24px;border-top:2px solid #059669;padding-top:16px;">
-    <table style="width:100%;text-align:center;">
+  // ===== SIGNATURE AREA =====
+  html += `
+  <div style="margin-top:18px;border:2px solid #059669;border-radius:8px;overflow:hidden;break-inside:avoid;">
+    <div style="background:linear-gradient(135deg,#059669,#10b981);color:white;padding:6px 14px;font-size:12px;font-weight:700;text-align:center;letter-spacing:1px;">
+      ✍️ التوقيعات والأختام / Signatures & Stamps
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
       <tr>
-        <td style="width:33%;padding:10px;">
-          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">المولّد</div>
-          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        <td style="width:33.33%;padding:12px;text-align:center;border-left:1px solid #e2e8f0;">
+          <div style="font-weight:700;font-size:12px;color:#0369a1;margin-bottom:6px;">🏭 المولّد</div>
+          <div style="font-size:10px;color:#94a3b8;">Generator</div>
+          <div style="height:55px;margin:8px 0;border:1px dashed #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:9px;color:#cbd5e1;">التوقيع هنا</span>
+          </div>
+          <div style="border-top:1px solid #cbd5e1;padding-top:4px;font-size:9px;color:#94a3b8;">الاسم والتوقيع والختم</div>
         </td>
-        <td style="width:33%;padding:10px;">
-          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">الناقل</div>
-          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        <td style="width:33.33%;padding:12px;text-align:center;border-left:1px solid #e2e8f0;">
+          <div style="font-weight:700;font-size:12px;color:#059669;margin-bottom:6px;">🚛 الناقل</div>
+          <div style="font-size:10px;color:#94a3b8;">Transporter</div>
+          <div style="height:55px;margin:8px 0;border:1px dashed #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:9px;color:#cbd5e1;">التوقيع هنا</span>
+          </div>
+          <div style="border-top:1px solid #cbd5e1;padding-top:4px;font-size:9px;color:#94a3b8;">الاسم والتوقيع والختم</div>
         </td>
-        <td style="width:33%;padding:10px;">
-          <div style="font-weight:bold;font-size:12px;margin-bottom:30px;">المستقبل</div>
-          <div style="border-top:1px solid #999;padding-top:4px;font-size:10px;color:#666;">الاسم والتوقيع والختم</div>
+        <td style="width:33.33%;padding:12px;text-align:center;">
+          <div style="font-weight:700;font-size:12px;color:#7c3aed;margin-bottom:6px;">🏗️ المستقبل</div>
+          <div style="font-size:10px;color:#94a3b8;">Receiver</div>
+          <div style="height:55px;margin:8px 0;border:1px dashed #cbd5e1;border-radius:6px;display:flex;align-items:center;justify-content:center;">
+            <span style="font-size:9px;color:#cbd5e1;">التوقيع هنا</span>
+          </div>
+          <div style="border-top:1px solid #cbd5e1;padding-top:4px;font-size:9px;color:#94a3b8;">الاسم والتوقيع والختم</div>
         </td>
       </tr>
     </table>
   </div>`;
 
-  // Footer
-  html += `<div style="margin-top:16px;text-align:center;font-size:9px;color:#999;border-top:1px solid #e5e7eb;padding-top:8px;">
-    تم الإنشاء بواسطة منصة iRecycle لإدارة المخلفات | ${new Date().toLocaleDateString('ar-EG')}
+  // ===== FOOTER =====
+  html += `
+  <div style="margin-top:14px;padding-top:10px;border-top:2px solid #059669;display:flex;justify-content:space-between;align-items:center;">
+    <div style="font-size:8px;color:#94a3b8;line-height:1.6;">
+      <div>هذا المستند صادر إلكترونياً من منصة <strong style="color:#059669;">iRecycle</strong> لإدارة المخلفات</div>
+      <div>وثيقة رسمية — لا تحتاج إلى توقيع إلكتروني إلا إذا نُصّ على خلاف ذلك</div>
+    </div>
+    <div style="text-align:left;font-size:8px;color:#94a3b8;">
+      <div>${dateNow} — ${timeNow}</div>
+      <div style="margin-top:2px;padding:2px 8px;background:#f0fdf4;border-radius:4px;color:#059669;font-weight:600;font-size:7px;text-align:center;">
+        Powered by iRecycle ♻
+      </div>
+    </div>
   </div>`;
 
-  html += `</body></html>`;
+  html += `</div></body></html>`;
   return html;
 }
 
 export async function generateManualShipmentPDF(form: ManualShipmentData) {
-  // Create offscreen iframe
   const iframe = document.createElement('iframe');
   iframe.style.position = 'fixed';
   iframe.style.left = '-9999px';
   iframe.style.width = '794px';
-  iframe.style.height = '1123px';
+  iframe.style.height = '2400px';
   document.body.appendChild(iframe);
 
   const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -187,8 +302,7 @@ export async function generateManualShipmentPDF(form: ManualShipmentData) {
   iframeDoc.write(htmlContent);
   iframeDoc.close();
 
-  // Wait for rendering
-  await new Promise(resolve => setTimeout(resolve, 500));
+  await new Promise(resolve => setTimeout(resolve, 600));
 
   const canvas = await html2canvas(iframeDoc.body, {
     scale: 2,
