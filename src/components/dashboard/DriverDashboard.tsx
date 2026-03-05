@@ -10,8 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package, Truck, Mail, Phone, Settings, CheckCircle2,
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
-  Wallet, Camera, FileText, ClipboardCheck, PenTool,
-  Radiation, QrCode, GraduationCap, Route, Wrench, User, DollarSign,
+  Wallet, Camera, ClipboardCheck, PenTool,
+  Radiation, QrCode, GraduationCap, Route, Wrench, User,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -21,7 +21,6 @@ import ShipmentCard from '@/components/shipments/ShipmentCard';
 import QuickLocationButton from '@/components/tracking/QuickLocationButton';
 import LiveLocationIndicator from '@/components/tracking/LiveLocationIndicator';
 import TrackingWatcherIndicator from '@/components/tracking/TrackingWatcherIndicator';
-import EnhancedDestinationPicker from '@/components/driver/EnhancedDestinationPicker';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
@@ -40,9 +39,7 @@ const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrack
 const FullNavigationView = lazy(() => import('@/components/driver/FullNavigationView'));
 const DriverRewardsPanel = lazy(() => import('@/components/driver/DriverRewardsPanel'));
 const DriverWalletPanel = lazy(() => import('@/components/driver/DriverWalletPanel'));
-const DriverLeaderboard = lazy(() => import('@/components/driver/DriverLeaderboard'));
 const DriverSmartCamera = lazy(() => import('@/components/driver/DriverSmartCamera'));
-const DriverAutoReport = lazy(() => import('@/components/driver/DriverAutoReport'));
 const DriverSOSButton = lazy(() => import('@/components/driver/DriverSOSButton'));
 const DriverPreTripChecklist = lazy(() => import('@/components/driver/DriverPreTripChecklist'));
 const DriverFatigueMonitor = lazy(() => import('@/components/driver/DriverFatigueMonitor'));
@@ -495,7 +492,6 @@ const DriverDashboard = () => {
                 <DriverEarningsDashboard />
                 <DriverWalletPanel />
                 <DriverRewardsPanel />
-                <DriverLeaderboard />
               </div>
             </Suspense>
           </TabsContent>
@@ -548,13 +544,6 @@ const DriverDashboard = () => {
             <DriverCredentialsEditor />
             <DriverLinkedOrganizations />
 
-            {driverInfo && (
-              <EnhancedDestinationPicker 
-                driverId={driverInfo.id} 
-                onDestinationAdded={fetchDriverData}
-              />
-            )}
-
             {/* Academy & Safety Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="cursor-pointer hover:border-primary/30 transition-colors">
@@ -586,20 +575,6 @@ const DriverDashboard = () => {
               </Card>
             </div>
 
-            {/* Daily Auto Report */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="flex items-center gap-2 text-sm">
-                  <FileText className="w-4 h-4 text-primary" />
-                  التقرير اليومي التلقائي
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="pt-0">
-                <Suspense fallback={<Skeleton className="h-32 w-full rounded-lg" />}>
-                  <DriverAutoReport />
-                </Suspense>
-              </CardContent>
-            </Card>
 
             <QuickActionsGrid
               actions={quickActions}
