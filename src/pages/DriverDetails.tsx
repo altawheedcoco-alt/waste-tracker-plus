@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -71,7 +71,8 @@ const DriverDetailsPage = () => {
   const { user, organization, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const contentRef = useRef<HTMLDivElement>(null);
-  const { exportToPDF, isExporting } = useOptimizedPDF({ filename: 'driver-report' });
+  const pdfOptions = useMemo(() => ({ filename: 'driver-report' }), []);
+  const { exportToPDF, isExporting } = useOptimizedPDF(pdfOptions);
   
   const [driver, setDriver] = useState<DriverDetails | null>(null);
   const [shipments, setShipments] = useState<Shipment[]>([]);
