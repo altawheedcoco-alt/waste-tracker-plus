@@ -1,10 +1,12 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, Wrench, BarChart3, Users, FileText, Settings, Leaf } from 'lucide-react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale } from 'lucide-react';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+
+const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -26,19 +28,16 @@ import DisposalRecentOperations from '@/components/dashboard/disposal/DisposalRe
 import OperationalAlertsWidget from '@/components/dashboard/operations/OperationalAlertsWidget';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
-import DocumentVerificationWidget from '@/components/dashboard/DocumentVerificationWidget';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import StoryCircles from '@/components/stories/StoryCircles';
 import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
 import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
 import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
-import CreateShipmentButton from '@/components/dashboard/CreateShipmentButton';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
@@ -87,7 +86,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
-  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -191,9 +189,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <StoryCircles />
-
-
       {/* Mission Control Button */}
       <Button
         className="w-full gap-3 h-14 text-base bg-gradient-to-r from-destructive to-primary hover:opacity-90 shadow-lg"
@@ -219,7 +214,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
       <AutomationSettingsDialog organizationType="disposal" />
 
-      {/* Main Tabs */}
+      {/* Main Tabs — 6 optimized tabs */}
       <Tabs defaultValue="operations" className="w-full">
         <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
           <TabsTrigger value="operations" className="gap-1 text-xs sm:text-sm">
@@ -229,20 +224,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
             <Truck className="w-3.5 h-3.5" /> الشحنات الواردة
           </TabsTrigger>
           <TabsTrigger value="compliance" className="gap-1 text-xs sm:text-sm">
-            <Shield className="w-3.5 h-3.5" /> الامتثال
+            <Shield className="w-3.5 h-3.5" /> الامتثال والسلامة
           </TabsTrigger>
-          <TabsTrigger value="documents" className="gap-1 text-xs sm:text-sm">
-            <FileText className="w-3.5 h-3.5" /> المستندات
+          <TabsTrigger value="regulatory" className="gap-1 text-xs sm:text-sm">
+            <Scale className="w-3.5 h-3.5" /> المستندات التنظيمية
           </TabsTrigger>
           <TabsTrigger value="fleet" className="gap-1 text-xs sm:text-sm">
             <Truck className="w-3.5 h-3.5" /> الأسطول
           </TabsTrigger>
-          <TabsTrigger value="esg" className="gap-1 text-xs sm:text-sm">
-            <Leaf className="w-3.5 h-3.5" /> تقارير ESG
+          <TabsTrigger value="reports" className="gap-1 text-xs sm:text-sm">
+            <BarChart3 className="w-3.5 h-3.5" /> التقارير
           </TabsTrigger>
         </TabsList>
 
-        {/* Operations Tab */}
+        {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
           <DisposalDailyOperations />
           <OperationalAlertsWidget />
@@ -263,7 +258,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           <DisposalRecentOperations />
         </TabsContent>
 
-        {/* Shipments Tab */}
+        {/* 2. Incoming Shipments Tab */}
         <TabsContent value="shipments" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
@@ -307,7 +302,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
                 <div className="text-center py-8">
                   <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
                   <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-                  <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -320,7 +314,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           </Card>
         </TabsContent>
 
-        {/* Compliance Tab */}
+        {/* 3. Compliance & Safety Tab */}
         <TabsContent value="compliance" className="mt-4 space-y-4">
           <Suspense fallback={<div className="animate-pulse h-32 bg-muted rounded-lg" />}>
             {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
@@ -328,33 +322,67 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           </Suspense>
           <LegalComplianceWidget />
           <IncidentReportManager />
+          
+          {/* Safety & OHS Section */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 justify-end">
+                <HardHat className="w-5 h-5 text-accent-foreground" />
+                السلامة والصحة المهنية
+              </CardTitle>
+              <CardDescription>تقييم المخاطر والتفتيشات الميدانية لمرفق التخلص</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button variant="outline" className="w-full gap-2" onClick={() => navigate('/dashboard/safety')}>
+                <HardHat className="w-4 h-4" />
+                فتح لوحة السلامة الكاملة
+              </Button>
+            </CardContent>
+          </Card>
         </TabsContent>
 
-        {/* Documents Tab */}
-        <TabsContent value="documents" className="mt-4 space-y-4">
+        {/* 4. Regulatory Documents Tab */}
+        <TabsContent value="regulatory" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <RegulatoryDocumentsCenter />
+          </Suspense>
           <UnifiedDocumentSearch />
-          <DocumentVerificationWidget />
-          <DriverCodeLookup />
         </TabsContent>
 
-        {/* Fleet Tab */}
+        {/* 5. Fleet Tab */}
         <TabsContent value="fleet" className="mt-4 space-y-4">
           <VehicleComplianceManager />
           <DriverComplianceManager />
+          <DriverCodeLookup />
         </TabsContent>
 
-        {/* ESG Tab */}
-        <TabsContent value="esg" className="mt-4 space-y-4">
+        {/* 6. Reports Tab (ESG + Performance) */}
+        <TabsContent value="reports" className="mt-4 space-y-4">
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             <ESGReportPanel />
           </Suspense>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Button variant="outline" className="h-20 gap-3" onClick={() => navigate('/dashboard/disposal/reports')}>
+              <BarChart3 className="w-6 h-6 text-primary" />
+              <div className="text-right">
+                <p className="font-semibold">تقارير التخلص</p>
+                <p className="text-xs text-muted-foreground">تقارير الأداء والعمليات</p>
+              </div>
+            </Button>
+            <Button variant="outline" className="h-20 gap-3" onClick={() => navigate('/dashboard/environmental-sustainability')}>
+              <Leaf className="w-6 h-6 text-primary" />
+              <div className="text-right">
+                <p className="font-semibold">تقارير الاستدامة</p>
+                <p className="text-xs text-muted-foreground">تحليل الأداء البيئي</p>
+              </div>
+            </Button>
+          </div>
         </TabsContent>
       </Tabs>
 
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 };

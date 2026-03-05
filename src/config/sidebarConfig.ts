@@ -149,6 +149,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FolderCheck, labelAr: 'شهادات التخلص', labelEn: 'Disposal Certs', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
       { icon: BarChart3, labelAr: 'تقارير التخلص', labelEn: 'Disposal Reports', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
       { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
+      { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety' },
     ],
   },
 
