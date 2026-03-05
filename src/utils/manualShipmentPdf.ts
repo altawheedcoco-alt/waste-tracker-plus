@@ -267,6 +267,31 @@ function generateHTML(form: ManualShipmentData): string {
     </table>
   </div>`;
 
+  // ===== LEGAL DECLARATIONS =====
+  html += `
+  <div style="margin-top:16px;border:1.5px solid #334155;border-radius:8px;overflow:hidden;break-inside:avoid;">
+    <div style="background:linear-gradient(135deg,#1e293b,#334155);color:white;padding:6px 14px;font-size:11px;font-weight:700;text-align:center;letter-spacing:0.5px;">
+      ⚖️ الإقرارات القانونية والبيئية / Legal & Environmental Declarations
+    </div>
+    <div style="padding:10px 14px;font-size:9.5px;line-height:1.9;color:#334155;">
+      <div style="margin-bottom:8px;">
+        <span style="font-weight:700;color:#0369a1;">🏭 إقرار المولّد (Generator Declaration):</span><br/>
+        يُقر المولّد بأن المخلفات المذكورة أعلاه ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات الواردة في هذا البيان، وأنه ملتزم بيئياً وفقاً لأحكام القانون رقم 202 لسنة 2020 بشأن تنظيم إدارة المخلفات والقانون رقم 4 لسنة 1994 بشأن البيئة ولوائحهما التنفيذية، ويتحمل كامل المسؤولية القانونية عن أي مخالفة أو بيانات غير صحيحة.
+      </div>
+      <div style="margin-bottom:8px;">
+        <span style="font-weight:700;color:#059669;">🚛 إقرار الناقل (Transporter Declaration):</span><br/>
+        يُقر الناقل بأنه طبّق جميع المعايير القانونية والبيئية المعمول بها في جمهورية مصر العربية أثناء عملية النقل، والتزم بكافة الاشتراطات الصادرة عن وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، بما يشمل معايير السلامة والتغليف والتتبع، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال فترة النقل حتى تسليمها للجهة المستقبلة.
+      </div>
+      <div style="margin-bottom:8px;">
+        <span style="font-weight:700;color:#7c3aed;">🏗️ إقرار ${destSectionTitle} (Receiver Declaration):</span><br/>
+        يُقر المستقبل بأنه استلم المخلفات المبيّنة أعلاه وأنه سيقوم بتطبيق كافة المعايير البيئية والتنظيمية في عمليات ${form.destination_type === 'disposal' ? 'التخلص النهائي' : 'إعادة التدوير'} وفقاً للترخيص الممنوح له، مع الالتزام بمعايير جهاز تنظيم إدارة المخلفات (WMRA) والقوانين البيئية السارية.
+      </div>
+      <div style="padding:6px 10px;background:#fef3c7;border:1px solid #fbbf24;border-radius:4px;font-size:9px;color:#92400e;">
+        ⚠️ <strong>إخلاء مسؤولية المنصة:</strong> منصة iRecycle هي أداة رقمية لتسهيل التوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات المدخلة أو صحتها أو عن أي أضرار ناتجة عن العمليات المذكورة. المسؤولية الكاملة تقع على عاتق الأطراف الموقّعة أعلاه.
+      </div>
+    </div>
+  </div>`;
+
   // ===== FOOTER =====
   html += `
   <div style="margin-top:14px;padding-top:10px;border-top:2px solid #059669;display:flex;justify-content:space-between;align-items:center;">
