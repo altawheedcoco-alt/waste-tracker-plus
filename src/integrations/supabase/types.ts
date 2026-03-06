@@ -18456,6 +18456,11 @@ export type Database = {
           driver_name: string | null
           driver_phone: string | null
           extra_costs: number | null
+          finance_visibility: string | null
+          finance_visible_to_destination: boolean | null
+          finance_visible_to_driver: boolean | null
+          finance_visible_to_generator: boolean | null
+          finance_visible_to_transporter: boolean | null
           generator_address: string | null
           generator_commercial_register: string | null
           generator_email: string | null
@@ -18523,6 +18528,11 @@ export type Database = {
           driver_name?: string | null
           driver_phone?: string | null
           extra_costs?: number | null
+          finance_visibility?: string | null
+          finance_visible_to_destination?: boolean | null
+          finance_visible_to_driver?: boolean | null
+          finance_visible_to_generator?: boolean | null
+          finance_visible_to_transporter?: boolean | null
           generator_address?: string | null
           generator_commercial_register?: string | null
           generator_email?: string | null
@@ -18590,6 +18600,11 @@ export type Database = {
           driver_name?: string | null
           driver_phone?: string | null
           extra_costs?: number | null
+          finance_visibility?: string | null
+          finance_visible_to_destination?: boolean | null
+          finance_visible_to_driver?: boolean | null
+          finance_visible_to_generator?: boolean | null
+          finance_visible_to_transporter?: boolean | null
           generator_address?: string | null
           generator_commercial_register?: string | null
           generator_email?: string | null

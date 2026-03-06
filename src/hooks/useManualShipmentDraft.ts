@@ -62,6 +62,11 @@ export interface ManualShipmentData {
   extra_costs: string;
   amount_paid: string;
   price_notes: string;
+  finance_visibility: string; // 'all' | 'none' | 'custom'
+  finance_visible_to_generator: string; // 'true' | 'false'
+  finance_visible_to_transporter: string;
+  finance_visible_to_destination: string;
+  finance_visible_to_driver: string;
   notes: string;
   special_instructions: string;
 }
