@@ -403,7 +403,7 @@ export default function TransporterAnnualPlan() {
           <p className="text-xs text-muted-foreground">معتمدة</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
-          <p className="text-2xl font-bold text-yellow-600">{plans.filter((p: any) => p.status === 'submitted').length}</p>
+          <p className="text-2xl font-bold text-accent-foreground">{plans.filter((p: any) => p.status === 'submitted').length}</p>
           <p className="text-xs text-muted-foreground">مقدمة</p>
         </CardContent></Card>
         <Card><CardContent className="p-4 text-center">
