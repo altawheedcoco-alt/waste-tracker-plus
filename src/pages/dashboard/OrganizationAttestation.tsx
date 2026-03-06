@@ -76,7 +76,7 @@ const OrganizationAttestation = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active': return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border-emerald-200">سارية</Badge>;
+      case 'active': return <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800">سارية</Badge>;
       case 'revoked': return <Badge variant="destructive">ملغاة</Badge>;
       case 'expired': return <Badge variant="secondary">منتهية</Badge>;
       default: return <Badge variant="outline">{status}</Badge>;
@@ -208,8 +208,8 @@ const OrganizationAttestation = () => {
                           className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
                         >
                           <div className="flex items-center gap-3">
-                            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-blue-100 dark:bg-blue-950/40">
-                              <Shield className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                            <div className="h-9 w-9 rounded-full flex items-center justify-center bg-primary/10">
+                              <Shield className="h-4 w-4 text-primary" />
                             </div>
                             <div>
                               <p className="font-medium text-sm">
