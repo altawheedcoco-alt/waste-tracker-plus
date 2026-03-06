@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 const SharedShipmentEdit = () => {
   const { code } = useParams<{ code: string }>();
   const {
-    form, updateField,
+    form, setForm, updateField,
     loading, saving,
     savedDraftId, savedShareCode,
     saveDraft, submitDraft, resetForm,
