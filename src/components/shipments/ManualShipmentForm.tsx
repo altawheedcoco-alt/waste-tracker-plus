@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { MessageCircle } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   Save, Download, Share2, Send, RotateCcw, FileText, Printer,
   User, Truck, Factory, Package, MapPin, Calendar, Scale, DollarSign, 
