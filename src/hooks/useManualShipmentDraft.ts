@@ -374,14 +374,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + تنزيل + أرشفة
   const saveAndDownloadPDF = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-    const { pdfUrl, filename } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl, filename } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       // Auto-download
@@ -400,14 +400,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + إرسال واتساب
   const saveAndSendWhatsApp = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز وإرسال بيان الشحنة...');
-    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       await sendPDFToWhatsApp(pdfUrl);
@@ -437,19 +437,19 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // إرسال كامل (حفظ + PDF + أرشفة + واتساب)
   const submitDraft = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) return;
+    const result = await saveDraft();
+    if (!result) return;
     
     await supabase
       .from('manual_shipment_drafts')
       .update({ is_submitted: true, submitted_at: new Date().toISOString(), status: 'submitted' })
-      .eq('id', savedDraftId);
+      .eq('id', result.draftId);
     
     toast.success('تم إرسال النموذج بنجاح');
 
     try {
       toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-      const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+      const { pdfUrl } = await generateAndArchivePDF(result.draftId);
       
       if (pdfUrl) {
         await sendPDFToWhatsApp(pdfUrl);
