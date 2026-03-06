@@ -87,7 +87,8 @@ const emptyForm: ManualShipmentData = {
   shipment_type: 'regular', price: '', price_per_unit: '', 
   vat_enabled: 'false', vat_amount: '', labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '',
   extra_costs: '', amount_paid: '',
-  price_notes: '', notes: '', special_instructions: '',
+  price_notes: '', finance_visibility: 'all', finance_visible_to_generator: 'true', finance_visible_to_transporter: 'true', finance_visible_to_destination: 'true', finance_visible_to_driver: 'true',
+  notes: '', special_instructions: '',
 };
 
 export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
