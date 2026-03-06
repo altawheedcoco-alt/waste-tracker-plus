@@ -17701,6 +17701,7 @@ export type Database = {
           id: string
           issue_date: string | null
           issuing_authority: string
+          issuing_authority_code: string | null
           license_category: string
           license_name: string
           license_name_en: string | null
@@ -17723,6 +17724,7 @@ export type Database = {
           id?: string
           issue_date?: string | null
           issuing_authority: string
+          issuing_authority_code?: string | null
           license_category: string
           license_name: string
           license_name_en?: string | null
@@ -17745,6 +17747,7 @@ export type Database = {
           id?: string
           issue_date?: string | null
           issuing_authority?: string
+          issuing_authority_code?: string | null
           license_category?: string
           license_name?: string
           license_name_en?: string | null
@@ -26464,6 +26467,57 @@ export type Database = {
             referencedColumns: ["level_code"]
           },
         ]
+      }
+      regulator_jurisdictions: {
+        Row: {
+          can_inspect: boolean | null
+          can_issue_license: boolean | null
+          can_penalize: boolean | null
+          can_revoke_license: boolean | null
+          created_at: string | null
+          hierarchy_priority: number | null
+          id: string
+          is_primary_authority: boolean | null
+          legal_reference: string | null
+          legal_reference_ar: string | null
+          license_types: string[] | null
+          regulator_level_code: string
+          supervised_org_type: string
+          supervision_scope: string
+        }
+        Insert: {
+          can_inspect?: boolean | null
+          can_issue_license?: boolean | null
+          can_penalize?: boolean | null
+          can_revoke_license?: boolean | null
+          created_at?: string | null
+          hierarchy_priority?: number | null
+          id?: string
+          is_primary_authority?: boolean | null
+          legal_reference?: string | null
+          legal_reference_ar?: string | null
+          license_types?: string[] | null
+          regulator_level_code: string
+          supervised_org_type: string
+          supervision_scope?: string
+        }
+        Update: {
+          can_inspect?: boolean | null
+          can_issue_license?: boolean | null
+          can_penalize?: boolean | null
+          can_revoke_license?: boolean | null
+          created_at?: string | null
+          hierarchy_priority?: number | null
+          id?: string
+          is_primary_authority?: boolean | null
+          legal_reference?: string | null
+          legal_reference_ar?: string | null
+          license_types?: string[] | null
+          regulator_level_code?: string
+          supervised_org_type?: string
+          supervision_scope?: string
+        }
+        Relationships: []
       }
       regulator_levels: {
         Row: {
