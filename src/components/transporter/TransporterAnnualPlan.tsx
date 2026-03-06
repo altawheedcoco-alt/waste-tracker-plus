@@ -585,6 +585,46 @@ export default function TransporterAnnualPlan() {
               </Card>
             )}
 
+            {/* Org Structure */}
+            {activeSection === 'org_structure' && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm">الهيكل التنظيمي (طبقاً لقانون 202/2020)</CardTitle>
+                  <Button size="sm" variant="outline" onClick={addOrgEntry} className="gap-1 text-xs"><Plus className="h-3 w-3" /> إضافة</Button>
+                </CardHeader>
+                <CardContent>
+                  {form.org_structure.length === 0 ? (
+                    <p className="text-center text-muted-foreground text-sm py-4">لا توجد بيانات - اضغط "توليد تلقائي" لإنشاء الهيكل</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs p-1">الإدارة</TableHead>
+                          <TableHead className="text-xs p-1">المنصب</TableHead>
+                          <TableHead className="text-xs p-1">الاسم</TableHead>
+                          <TableHead className="text-xs p-1">الهاتف</TableHead>
+                          <TableHead className="text-xs p-1">المسؤوليات</TableHead>
+                          <TableHead className="text-xs p-1 w-8"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {form.org_structure.map((o, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="p-1"><Input value={o.department} onChange={e => updateOrgEntry(i, 'department', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.position} onChange={e => updateOrgEntry(i, 'position', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.person_name} onChange={e => updateOrgEntry(i, 'person_name', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.phone} onChange={e => updateOrgEntry(i, 'phone', e.target.value)} className="h-6 text-xs w-28" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.responsibilities} onChange={e => updateOrgEntry(i, 'responsibilities', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removeOrgEntry(i)}><X className="h-3 w-3 text-destructive" /></Button></TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
             {/* Waste Categories */}
             {activeSection === 'waste' && (
               <Card>
