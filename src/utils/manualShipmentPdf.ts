@@ -318,6 +318,9 @@ function generateFullHTML(form: ManualShipmentData): string {
     </tbody>
   </table>
 
+  <!-- Page 3: Financial Data — always on a separate page -->
+  <div style="page-break-before: always;"></div>
+  <div class="sec-title" style="margin-top:0;">صفحة البيانات المالية</div>
   ${(() => {
     const basePrice = parseFloat(form.price) || 0;
     const unitPrice = parseFloat(form.price_per_unit) || 0;
@@ -332,7 +335,11 @@ function generateFullHTML(form: ManualShipmentData): string {
     const paid = parseFloat(form.amount_paid) || 0;
     const remaining = grandTotal - paid;
 
-    if (!basePrice && !unitPrice) return '';
+    if (!basePrice && !unitPrice) return `
+    <table class="classic">
+      <thead><tr><th colspan="4">سابعاً: البيانات المالية</th></tr></thead>
+      <tbody><tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">لم يتم إدخال بيانات مالية</td></tr></tbody>
+    </table>`;
 
     return `
     <table class="classic">
