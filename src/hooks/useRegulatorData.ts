@@ -150,18 +150,43 @@ export const useRegulatoryPenalties = (limit = 50) => {
   });
 };
 
-export const useAllOrganizations = () => {
+export const useAllOrganizations = (supervisedTypes?: string[]) => {
   const { organization } = useAuth();
   return useQuery({
-    queryKey: ['all-organizations-for-regulator', organization?.id],
+    queryKey: ['all-organizations-for-regulator', organization?.id, supervisedTypes],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from('organizations')
         .select('id, name, name_en, organization_type, is_verified, governorate, created_at, logo_url')
-        .neq('organization_type', 'regulator')
-        .order('name');
+        .neq('organization_type', 'regulator');
+      
+      // Filter by supervised types if provided (non-WMRA regulators)
+      if (supervisedTypes && supervisedTypes.length > 0) {
+        query = query.in('organization_type', supervisedTypes);
+      }
+      
+      const { data } = await query.order('name');
       return data || [];
     },
     enabled: !!organization?.id,
+  });
+};
+
+// Fetch licenses for a specific organization with issuing authority info
+export const useOrganizationLicenses = (organizationId?: string) => {
+  return useQuery({
+    queryKey: ['org-licenses-regulator', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const { data } = await supabase
+        .from('legal_licenses')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('expiry_date', { ascending: true });
+      return data || [];
+    },
+    enabled: !!organizationId,
+  });
+};
   });
 };
