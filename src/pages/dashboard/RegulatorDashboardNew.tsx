@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck } from 'lucide-react';
+import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck, Search } from 'lucide-react';
 import RegulatorOverview from '@/components/regulator/RegulatorOverview';
 import FieldInspectionPanel from '@/components/regulator/FieldInspectionPanel';
 import ViolationsPanel from '@/components/regulator/ViolationsPanel';
@@ -12,6 +12,7 @@ import PenaltiesPanel from '@/components/regulator/PenaltiesPanel';
 import OrganizationsRegistry from '@/components/regulator/OrganizationsRegistry';
 import JurisdictionPanel from '@/components/regulator/JurisdictionPanel';
 import LicenseManagementPanel from '@/components/regulator/LicenseManagementPanel';
+import RegulatorDocumentVerification from '@/components/regulator/RegulatorDocumentVerification';
 
 const RegulatorDashboardNew = () => {
   const { user, roles } = useAuth();
@@ -53,6 +54,9 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="jurisdiction" className="gap-1.5 text-xs sm:text-sm">
               <Scale className="w-4 h-4" /> الاختصاصات
             </TabsTrigger>
+            <TabsTrigger value="verify" className="gap-1.5 text-xs sm:text-sm">
+              <Search className="w-4 h-4" /> التحقق من المستندات
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
@@ -81,6 +85,10 @@ const RegulatorDashboardNew = () => {
 
           <TabsContent value="jurisdiction" className="mt-4">
             <JurisdictionPanel />
+          </TabsContent>
+
+          <TabsContent value="verify" className="mt-4">
+            <RegulatorDocumentVerification />
           </TabsContent>
         </Tabs>
       </div>
