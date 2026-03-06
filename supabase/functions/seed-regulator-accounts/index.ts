@@ -132,7 +132,6 @@ Deno.serve(async (req) => {
             email: account.email,
             phone: account.phone,
             address: account.address,
-            governorate: account.governorate,
             is_verified: true,
             is_active: true,
           })
