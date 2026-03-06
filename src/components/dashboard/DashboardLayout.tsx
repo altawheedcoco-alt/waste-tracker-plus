@@ -8,6 +8,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
+import LiveClock from './LiveClock';
 import {
   LayoutDashboard,
   Package,
@@ -742,6 +743,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {/* Right side - Responsive spacing */}
             <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+              <LiveClock />
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
 
