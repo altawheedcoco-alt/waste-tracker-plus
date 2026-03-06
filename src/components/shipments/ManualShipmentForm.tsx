@@ -362,6 +362,12 @@ const ManualShipmentForm = ({
                   )}
                   <Badge variant="outline" className="text-xs">مخلف {idx + 1}</Badge>
                 </div>
+
+                {/* Weighbridge Receipt Scanner per waste item */}
+                <WeighbridgeReceiptScanner
+                  wasteItemIndex={idx}
+                  onDataExtracted={handleWeighbridgeData}
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
