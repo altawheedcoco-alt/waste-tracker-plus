@@ -493,6 +493,62 @@ const NotificationDetailDialog = ({
             <p className="text-sm leading-relaxed">{notification.message}</p>
           </div>
 
+          {/* Priority */}
+          {notification.priority && notification.priority !== 'normal' && (
+            <div className="flex items-center gap-2">
+              <Tag className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm text-muted-foreground">الأولوية:</span>
+              <Badge variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'}>
+                {notification.priority === 'high' ? 'عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'منخفضة' : notification.priority}
+              </Badge>
+            </div>
+          )}
+
+          {/* Metadata Analysis */}
+          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
+            <div className="p-4 rounded-lg bg-muted/30 border space-y-3">
+              <div className="flex items-center gap-2 text-sm font-medium">
+                <Sparkles className="w-4 h-4 text-primary" />
+                <span>تحليل البيانات التفصيلية</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {Object.entries(notification.metadata).map(([key, value]) => {
+                  if (value === null || value === undefined || value === '') return null;
+                  if (typeof value === 'object' && !Array.isArray(value)) return null;
+                  const label = getMetadataLabel(key);
+                  const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
+                  return (
+                    <div key={key} className="flex flex-col gap-0.5 p-2 rounded bg-background border border-border/50">
+                      <span className="text-[10px] text-muted-foreground">{label}</span>
+                      <span className="text-sm font-medium truncate" title={displayValue}>{displayValue}</span>
+                    </div>
+                  );
+                })}
+              </div>
+              {/* Nested objects */}
+              {Object.entries(notification.metadata).map(([key, value]) => {
+                if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+                const label = getMetadataLabel(key);
+                return (
+                  <div key={key} className="pt-2 border-t space-y-1.5">
+                    <p className="text-xs font-medium text-muted-foreground">{label}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      {Object.entries(value as Record<string, any>).map(([sk, sv]) => {
+                        if (sv === null || sv === undefined || sv === '') return null;
+                        return (
+                          <div key={sk} className="flex flex-col gap-0.5 p-2 rounded bg-background border border-border/50">
+                            <span className="text-[10px] text-muted-foreground">{getMetadataLabel(sk)}</span>
+                            <span className="text-sm font-medium truncate">{String(sv)}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
           {/* PDF Attachment Section */}
           {notification.pdf_url && (
             <div className="p-4 rounded-lg bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800">
