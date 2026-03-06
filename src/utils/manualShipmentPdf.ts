@@ -1,4 +1,4 @@
-import { ManualShipmentData } from '@/hooks/useManualShipmentDraft';
+import { ManualShipmentData, WasteItem } from '@/hooks/useManualShipmentDraft';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
