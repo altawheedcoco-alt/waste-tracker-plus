@@ -169,6 +169,24 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId && !!organization?.id,
   });
 
+  // Fetch manual shipment ledger entries
+  const { data: manualShipmentEntries = [] } = useQuery({
+    queryKey: ['partner-manual-shipment-entries', partnerId, organization?.id],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      const { data, error } = await (supabase
+        .from('accounting_ledger')
+        .select('*') as any)
+        .eq('organization_id', organization.id)
+        .eq('entry_category', 'manual_shipment')
+        .not('manual_draft_id', 'is', null)
+        .order('entry_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
   // Calculate shipment totals with pricing - exclude cancelled
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
