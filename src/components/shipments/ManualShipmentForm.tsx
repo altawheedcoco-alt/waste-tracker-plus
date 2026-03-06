@@ -278,14 +278,42 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 5. Waste Items (Multi) */}
+        {/* 5. Waste Items — single vs multi toggle */}
         <Card>
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <Button type="button" variant="outline" size="sm" onClick={addWasteItem} className="gap-1">
-                <Plus className="w-4 h-4" /> إضافة مخلف
-              </Button>
-              <SectionHeader icon={Package} title={`بيانات المخلفات (${form.waste_items.length})`} />
+          <CardHeader className="pb-3 space-y-3">
+            <SectionHeader icon={Package} title="بيانات المخلفات" />
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-2 bg-muted/40 rounded-lg p-1 border">
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={form.waste_items.length <= 1 ? 'default' : 'ghost'}
+                  className="text-xs h-8 px-3"
+                  onClick={() => {
+                    if (form.waste_items.length > 1) {
+                      setForm(prev => ({ ...prev, waste_items: [prev.waste_items[0]] }));
+                    }
+                  }}
+                >
+                  نوع واحد
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={form.waste_items.length > 1 ? 'default' : 'ghost'}
+                  className="text-xs h-8 px-3"
+                  onClick={() => {
+                    if (form.waste_items.length <= 1) addWasteItem();
+                  }}
+                >
+                  أنواع متعددة
+                </Button>
+              </div>
+              {form.waste_items.length > 1 && (
+                <Button type="button" variant="outline" size="sm" onClick={addWasteItem} className="gap-1 text-xs">
+                  <Plus className="w-3.5 h-3.5" /> إضافة مخلف آخر
+                </Button>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
