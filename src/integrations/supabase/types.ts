@@ -33082,6 +33082,96 @@ export type Database = {
           },
         ]
       }
+      transporter_annual_plans: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          company_data: Json | null
+          created_at: string
+          created_by: string | null
+          disposal_plan: Json | null
+          id: string
+          notes: string | null
+          operations_data: Json | null
+          organization_id: string
+          plan_number: string
+          plan_type: string
+          plan_year: number
+          safety_procedures: Json | null
+          status: string
+          subcontractors: Json | null
+          submitted_at: string | null
+          submitted_by: string | null
+          updated_at: string
+          vehicles_data: Json | null
+          waste_categories: string[] | null
+          workforce_data: Json | null
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_data?: Json | null
+          created_at?: string
+          created_by?: string | null
+          disposal_plan?: Json | null
+          id?: string
+          notes?: string | null
+          operations_data?: Json | null
+          organization_id: string
+          plan_number?: string
+          plan_type?: string
+          plan_year?: number
+          safety_procedures?: Json | null
+          status?: string
+          subcontractors?: Json | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          vehicles_data?: Json | null
+          waste_categories?: string[] | null
+          workforce_data?: Json | null
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          company_data?: Json | null
+          created_at?: string
+          created_by?: string | null
+          disposal_plan?: Json | null
+          id?: string
+          notes?: string | null
+          operations_data?: Json | null
+          organization_id?: string
+          plan_number?: string
+          plan_type?: string
+          plan_year?: number
+          safety_procedures?: Json | null
+          status?: string
+          subcontractors?: Json | null
+          submitted_at?: string | null
+          submitted_by?: string | null
+          updated_at?: string
+          vehicles_data?: Json | null
+          waste_categories?: string[] | null
+          workforce_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transporter_annual_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transporter_annual_plans_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transporter_declarations: {
         Row: {
           created_at: string
