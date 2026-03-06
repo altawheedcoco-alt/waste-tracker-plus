@@ -392,7 +392,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     toast.success('تم فتح نافذة الطباعة');
   };
 
-  // إرسال كامل (حفظ + PDF + أرشفة + واتساب)
+  // إرسال كامل (حفظ + تحديث الحالة)
   const submitDraft = async () => {
     const result = await saveDraft();
     if (!result) return;
@@ -403,17 +403,6 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       .eq('id', result.draftId);
     
     toast.success('تم إرسال النموذج بنجاح');
-
-    try {
-      toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-      const { pdfUrl } = await generateAndArchivePDF(result.draftId);
-      
-      if (pdfUrl) {
-        await sendPDFToWhatsApp(pdfUrl);
-      }
-    } catch (err) {
-      console.error('[ManualShipment] WhatsApp notification error:', err);
-    }
   };
 
   const resetForm = () => {
