@@ -18437,6 +18437,7 @@ export type Database = {
       }
       manual_shipment_drafts: {
         Row: {
+          amount_paid: number | null
           created_at: string | null
           created_by: string
           delivery_address: string | null
@@ -18454,6 +18455,7 @@ export type Database = {
           driver_license: string | null
           driver_name: string | null
           driver_phone: string | null
+          extra_costs: number | null
           generator_address: string | null
           generator_commercial_register: string | null
           generator_email: string | null
@@ -18465,6 +18467,9 @@ export type Database = {
           hazard_level: string | null
           id: string
           is_submitted: boolean | null
+          labor_tax_amount: number | null
+          labor_tax_enabled: boolean | null
+          labor_tax_percent: number | null
           notes: string | null
           organization_id: string
           packaging_method: string | null
@@ -18472,6 +18477,7 @@ export type Database = {
           pickup_date: string | null
           price: number | null
           price_notes: string | null
+          price_per_unit: number | null
           quantity: number | null
           share_code: string | null
           shipment_number: string | null
@@ -18489,6 +18495,8 @@ export type Database = {
           transporter_tax_id: string | null
           unit: string | null
           updated_at: string | null
+          vat_amount: number | null
+          vat_enabled: boolean | null
           vehicle_plate: string | null
           vehicle_type: string | null
           waste_description: string | null
@@ -18496,6 +18504,7 @@ export type Database = {
           waste_type: string | null
         }
         Insert: {
+          amount_paid?: number | null
           created_at?: string | null
           created_by: string
           delivery_address?: string | null
@@ -18513,6 +18522,7 @@ export type Database = {
           driver_license?: string | null
           driver_name?: string | null
           driver_phone?: string | null
+          extra_costs?: number | null
           generator_address?: string | null
           generator_commercial_register?: string | null
           generator_email?: string | null
@@ -18524,6 +18534,9 @@ export type Database = {
           hazard_level?: string | null
           id?: string
           is_submitted?: boolean | null
+          labor_tax_amount?: number | null
+          labor_tax_enabled?: boolean | null
+          labor_tax_percent?: number | null
           notes?: string | null
           organization_id: string
           packaging_method?: string | null
@@ -18531,6 +18544,7 @@ export type Database = {
           pickup_date?: string | null
           price?: number | null
           price_notes?: string | null
+          price_per_unit?: number | null
           quantity?: number | null
           share_code?: string | null
           shipment_number?: string | null
@@ -18548,6 +18562,8 @@ export type Database = {
           transporter_tax_id?: string | null
           unit?: string | null
           updated_at?: string | null
+          vat_amount?: number | null
+          vat_enabled?: boolean | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
           waste_description?: string | null
@@ -18555,6 +18571,7 @@ export type Database = {
           waste_type?: string | null
         }
         Update: {
+          amount_paid?: number | null
           created_at?: string | null
           created_by?: string
           delivery_address?: string | null
@@ -18572,6 +18589,7 @@ export type Database = {
           driver_license?: string | null
           driver_name?: string | null
           driver_phone?: string | null
+          extra_costs?: number | null
           generator_address?: string | null
           generator_commercial_register?: string | null
           generator_email?: string | null
@@ -18583,6 +18601,9 @@ export type Database = {
           hazard_level?: string | null
           id?: string
           is_submitted?: boolean | null
+          labor_tax_amount?: number | null
+          labor_tax_enabled?: boolean | null
+          labor_tax_percent?: number | null
           notes?: string | null
           organization_id?: string
           packaging_method?: string | null
@@ -18590,6 +18611,7 @@ export type Database = {
           pickup_date?: string | null
           price?: number | null
           price_notes?: string | null
+          price_per_unit?: number | null
           quantity?: number | null
           share_code?: string | null
           shipment_number?: string | null
@@ -18607,6 +18629,8 @@ export type Database = {
           transporter_tax_id?: string | null
           unit?: string | null
           updated_at?: string | null
+          vat_amount?: number | null
+          vat_enabled?: boolean | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
           waste_description?: string | null
