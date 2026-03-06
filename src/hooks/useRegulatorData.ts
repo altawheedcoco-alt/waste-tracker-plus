@@ -162,7 +162,7 @@ export const useAllOrganizations = (supervisedTypes?: readonly string[]) => {
       
       // Filter by supervised types if provided (non-WMRA regulators)
       if (supervisedTypes && supervisedTypes.length > 0) {
-        query = query.in('organization_type', supervisedTypes);
+        query = query.in('organization_type', supervisedTypes as any);
       }
       
       const { data } = await query.order('name');
