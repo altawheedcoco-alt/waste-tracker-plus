@@ -150,6 +150,7 @@ Deno.serve(async (req) => {
       // 3. Upsert profile
       await supabase.from('profiles').upsert({
         id: userId,
+        user_id: userId,
         full_name: account.fullName,
         email: account.email,
         organization_id: orgId,
@@ -168,7 +169,7 @@ Deno.serve(async (req) => {
         await supabase.from('user_organizations').insert({
           user_id: userId,
           organization_id: orgId,
-          role: 'owner',
+          role_in_organization: 'owner',
           is_primary: true,
         });
       }
