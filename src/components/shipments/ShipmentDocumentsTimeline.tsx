@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import {
   FileSignature,
   FileCheck,
@@ -31,6 +32,10 @@ import {
   Paperclip,
   CreditCard,
   ExternalLink,
+  Stamp,
+  PenTool,
+  Fingerprint,
+  Hash,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -99,6 +104,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
   const [rejecting, setRejecting] = useState(false);
   const [generatingDocs, setGeneratingDocs] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [eSignMap, setESignMap] = useState<Record<string, boolean>>({});
   
   const printRef = useRef<HTMLDivElement>(null);
   const { exportToPDF, printContent, isExporting } = usePDFExport({
@@ -213,7 +219,56 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
   const latestReceipt = receipts[receipts.length - 1] as any;
 
   const isGenerator = organization?.id === shipment.generator_id;
+  const isTransporter = organization?.id === shipment.transporter_id;
   const isRecycler = organization?.id === shipment.recycler_id;
+
+  // Generate verification code for e-signature
+  const getVerificationCode = (stepKey: string) => {
+    const base = shipment.shipment_number?.replace('SHP-', '') || shipment.id.slice(0, 8);
+    const partyCode = stepKey === 'generator_handover' ? 'GEN' : stepKey === 'transporter_delivery' ? 'TRN' : stepKey === 'recycler_receipt' ? 'RCY' : 'DOC';
+    return `${partyCode}-${base}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+  };
+
+  // Check if the current user can sign/stamp this step
+  const canActOnStep = (stepKey: string): boolean => {
+    if (stepKey === 'generator_handover') return isGenerator;
+    if (stepKey === 'transporter_delivery') return isTransporter;
+    if (stepKey === 'recycler_receipt') return isRecycler;
+    return false;
+  };
+
+  // Handle quick e-signature (QR/barcode/verification code)
+  const handleQuickESign = async (stepKey: string) => {
+    if (!profile?.id || !organization?.id) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return;
+    }
+    const vCode = getVerificationCode(stepKey);
+    try {
+      await supabase.from('activity_logs').insert({
+        user_id: profile.user_id,
+        organization_id: organization.id,
+        action: 'توقيع إلكتروني',
+        action_type: 'e_signature',
+        resource_type: 'shipment_declaration',
+        resource_id: shipment.id,
+        details: {
+          step: stepKey,
+          verification_code: vCode,
+          signer_name: profile.full_name,
+          organization_name: organization.name,
+          shipment_number: shipment.shipment_number,
+        },
+      });
+      setESignMap(prev => ({ ...prev, [stepKey]: true }));
+      toast.success(`تم التوقيع الإلكتروني — كود التحقق: ${vCode}`);
+    } catch {
+      toast.error('فشل في تسجيل التوقيع الإلكتروني');
+    }
+  };
+
+  const isMainPartyStep = (key: string) =>
+    ['generator_handover', 'transporter_delivery', 'recycler_receipt'].includes(key);
 
   const handleReject = async () => {
     if (!rejectingDeclaration || !rejectionReason.trim()) return;
@@ -784,6 +839,56 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                         </div>
                       )}
 
+                      {/* Quick Action Buttons: Sign + Stamp + E-Signature */}
+                      {isMainPartyStep(step.key) && canActOnStep(step.key) && isCompleted && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-dashed border-muted-foreground/20">
+                          {/* Sign Button */}
+                          <SignDocumentButton
+                            documentType="shipment"
+                            documentId={`${shipment.id}_${step.key}`}
+                            documentTitle={`${step.label} — ${shipment.shipment_number}`}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[10px] px-2 gap-1"
+                          >
+                            <PenTool className="w-3 h-3" />
+                            التوقيع
+                          </SignDocumentButton>
+
+                          {/* Stamp Button */}
+                          <SignDocumentButton
+                            documentType="shipment"
+                            documentId={`${shipment.id}_${step.key}_stamp`}
+                            documentTitle={`ختم ${step.label} — ${shipment.shipment_number}`}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[10px] px-2 gap-1"
+                          >
+                            <Stamp className="w-3 h-3" />
+                            الختم
+                          </SignDocumentButton>
+
+                          {/* Electronic Signature (QR/Barcode/Verification Code) */}
+                          {!eSignMap[step.key] ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-[10px] px-2 gap-1"
+                              onClick={() => handleQuickESign(step.key)}
+                            >
+                              <Fingerprint className="w-3 h-3" />
+                              توقيع إلكتروني
+                            </Button>
+                          ) : (
+                            <Badge variant="secondary" className="h-7 text-[10px] px-2 gap-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3 h-3" />
+                              تم التوقيع الإلكتروني
+                            </Badge>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Pending action - original button */}
                       {!isCompleted && !isRejected && step.actionAvailable && (
                         <Button
                           variant="eco"
@@ -798,6 +903,50 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
                           <FileSignature className="w-3 h-3 ml-1" />
                           توقيع الإقرار
                         </Button>
+                      )}
+
+                      {/* Quick action buttons for pending steps too - if party matches */}
+                      {!isCompleted && !isRejected && !step.actionAvailable && isMainPartyStep(step.key) && canActOnStep(step.key) && (
+                        <div className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-dashed border-muted-foreground/20">
+                          <SignDocumentButton
+                            documentType="shipment"
+                            documentId={`${shipment.id}_${step.key}`}
+                            documentTitle={`${step.label} — ${shipment.shipment_number}`}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[10px] px-2 gap-1"
+                          >
+                            <PenTool className="w-3 h-3" />
+                            التوقيع
+                          </SignDocumentButton>
+                          <SignDocumentButton
+                            documentType="shipment"
+                            documentId={`${shipment.id}_${step.key}_stamp`}
+                            documentTitle={`ختم ${step.label} — ${shipment.shipment_number}`}
+                            variant="outline"
+                            size="sm"
+                            className="h-7 text-[10px] px-2 gap-1"
+                          >
+                            <Stamp className="w-3 h-3" />
+                            الختم
+                          </SignDocumentButton>
+                          {!eSignMap[step.key] ? (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="h-7 text-[10px] px-2 gap-1"
+                              onClick={() => handleQuickESign(step.key)}
+                            >
+                              <Fingerprint className="w-3 h-3" />
+                              توقيع إلكتروني
+                            </Button>
+                          ) : (
+                            <Badge variant="secondary" className="h-7 text-[10px] px-2 gap-1 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+                              <CheckCircle2 className="w-3 h-3" />
+                              تم التوقيع الإلكتروني
+                            </Badge>
+                          )}
+                        </div>
                       )}
                     </div>
                   </div>
