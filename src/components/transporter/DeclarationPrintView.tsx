@@ -2,7 +2,6 @@ import { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer } from 'lucide-react';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
 
 const WASTE_TYPE_LABELS: Record<string, string> = {
   plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
@@ -55,8 +54,13 @@ export default function DeclarationPrintView({ declaration, organization }: Prop
   };
 
   const data = declaration.declaration_data as any;
-  const generators = data?.generators || [];
-  const recyclers = data?.recyclers || [];
+  const generators = (data?.generators || []).filter((g: any) => g.included !== false);
+  const recyclers = (data?.recyclers || []).filter((r: any) => r.included !== false);
+
+  const fmtDate = (d: string | null | undefined) => {
+    if (!d) return '-';
+    try { return format(new Date(d), 'yyyy/MM/dd'); } catch { return d; }
+  };
 
   return (
     <div className="space-y-4">
@@ -68,44 +72,21 @@ export default function DeclarationPrintView({ declaration, organization }: Prop
       </div>
 
       <div ref={printRef}>
-        {/* Header */}
         <div className="header">
           <h1>إقرار ناقل المخلفات</h1>
           <p style={{ fontSize: '13px', fontWeight: 'bold' }}>{CATEGORY_LABELS[declaration.waste_category] || declaration.waste_category}</p>
-          <p style={{ fontSize: '10px', color: '#666' }}>
-            مقدم إلى: جهاز تنظيم إدارة المخلفات (WMRA)
-          </p>
+          <p style={{ fontSize: '10px', color: '#666' }}>مقدم إلى: جهاز تنظيم إدارة المخلفات (WMRA)</p>
         </div>
 
-        {/* Meta */}
         <div className="meta-grid">
-          <div className="meta-item">
-            <span className="meta-label">رقم الإقرار: </span>
-            {declaration.declaration_number}
-          </div>
-          <div className="meta-item">
-            <span className="meta-label">نوع الإقرار: </span>
-            {declaration.declaration_type === 'auto' ? 'تلقائي' : 'يدوي'}
-          </div>
-          <div className="meta-item">
-            <span className="meta-label">الفترة من: </span>
-            {format(new Date(declaration.period_from), 'yyyy/MM/dd')}
-          </div>
-          <div className="meta-item">
-            <span className="meta-label">الفترة إلى: </span>
-            {format(new Date(declaration.period_to), 'yyyy/MM/dd')}
-          </div>
-          <div className="meta-item">
-            <span className="meta-label">اسم الناقل: </span>
-            {organization?.name || ''}
-          </div>
-          <div className="meta-item">
-            <span className="meta-label">إجمالي الشحنات: </span>
-            {declaration.total_shipments}
-          </div>
+          <div className="meta-item"><span className="meta-label">رقم الإقرار: </span>{declaration.declaration_number}</div>
+          <div className="meta-item"><span className="meta-label">نوع الإقرار: </span>{declaration.declaration_type === 'auto' ? 'تلقائي' : 'يدوي'}</div>
+          <div className="meta-item"><span className="meta-label">الفترة من: </span>{fmtDate(declaration.period_from)}</div>
+          <div className="meta-item"><span className="meta-label">الفترة إلى: </span>{fmtDate(declaration.period_to)}</div>
+          <div className="meta-item"><span className="meta-label">اسم الناقل: </span>{organization?.name || ''}</div>
+          <div className="meta-item"><span className="meta-label">إجمالي الشحنات: </span>{declaration.total_shipments}</div>
         </div>
 
-        {/* Transporter Legal Info */}
         <h2>بيانات الناقل</h2>
         <div className="entity-info">
           <div><span className="meta-label">السجل التجاري: </span>{organization?.commercial_register || '-'}</div>
@@ -116,109 +97,100 @@ export default function DeclarationPrintView({ declaration, organization }: Prop
           <div><span className="meta-label">الهاتف: </span>{organization?.phone || '-'}</div>
         </div>
 
-        {/* Generators Section */}
         <h2>أولاً: الجهات المولدة والمخلفات المستلمة</h2>
         {generators.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#999', padding: '12px' }}>لا توجد بيانات</p>
-        ) : (
-          generators.map((gen: any, gi: number) => (
-            <div key={gi}>
-              <h3>{gi + 1}. {gen.name}</h3>
-              <div className="entity-info">
-                <div><span className="meta-label">سجل تجاري: </span>{gen.commercial_register || '-'}</div>
-                <div><span className="meta-label">ترخيص بيئي: </span>{gen.environmental_license || '-'}</div>
-                <div><span className="meta-label">الممثل القانوني: </span>{gen.representative_name || '-'}</div>
-                <div><span className="meta-label">العنوان: </span>{gen.address || '-'} {gen.city ? `- ${gen.city}` : ''}</div>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>رقم الشحنة</th>
-                    <th>نوع المخلف</th>
-                    <th>الكمية</th>
-                    <th>الوحدة</th>
-                    <th>تاريخ الاستلام</th>
-                    <th>تاريخ التسليم</th>
-                    <th>اسم السائق</th>
-                    <th>لوحة المركبة</th>
-                    <th>رقم الرخصة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {gen.shipments.map((sh: any, si: number) => (
-                    <tr key={si}>
-                      <td>{sh.shipment_number}</td>
-                      <td>{WASTE_TYPE_LABELS[sh.waste_type] || sh.waste_type}</td>
-                      <td>{sh.quantity}</td>
-                      <td>{sh.unit}</td>
-                      <td>{sh.pickup_date ? format(new Date(sh.pickup_date), 'MM/dd') : '-'}</td>
-                      <td>{sh.delivery_date ? format(new Date(sh.delivery_date), 'MM/dd') : '-'}</td>
-                      <td>{sh.driver_name || '-'}</td>
-                      <td>{sh.vehicle_plate || '-'}</td>
-                      <td>{sh.license_number || '-'}</td>
-                    </tr>
-                  ))}
-                  <tr className="total-row">
-                    <td colSpan={2}>الإجمالي</td>
-                    <td>{gen.shipments.reduce((s: number, sh: any) => s + sh.quantity, 0).toFixed(2)}</td>
-                    <td colSpan={6}>{gen.shipments.length} شحنة</td>
-                  </tr>
-                </tbody>
-              </table>
+        ) : generators.map((gen: any, gi: number) => (
+          <div key={gi}>
+            <h3>{gi + 1}. {gen.name}</h3>
+            <div className="entity-info">
+              <div><span className="meta-label">سجل تجاري: </span>{gen.commercial_register || '-'}</div>
+              <div><span className="meta-label">ترخيص بيئي: </span>{gen.environmental_license || '-'}</div>
+              <div><span className="meta-label">الممثل القانوني: </span>{gen.representative_name || '-'}</div>
+              <div><span className="meta-label">العنوان: </span>{gen.address || '-'} {gen.city ? `- ${gen.city}` : ''}</div>
             </div>
-          ))
-        )}
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الشحنة</th>
+                  <th>نوع المخلف</th>
+                  <th>الكمية</th>
+                  <th>الوحدة</th>
+                  <th>تاريخ التسليم</th>
+                  <th>اسم السائق</th>
+                  <th>لوحة المركبة</th>
+                  <th>رقم الرخصة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(gen.shipments || []).map((sh: any, si: number) => (
+                  <tr key={si}>
+                    <td>{sh.shipment_number}</td>
+                    <td>{WASTE_TYPE_LABELS[sh.waste_type] || sh.waste_type}</td>
+                    <td>{sh.quantity}</td>
+                    <td>{sh.unit}</td>
+                    <td>{fmtDate(sh.date || sh.pickup_date || sh.delivery_date)}</td>
+                    <td>{sh.driver_name || '-'}</td>
+                    <td>{sh.vehicle_plate || '-'}</td>
+                    <td>{sh.license_number || '-'}</td>
+                  </tr>
+                ))}
+                <tr className="total-row">
+                  <td colSpan={2}>الإجمالي</td>
+                  <td>{(gen.shipments || []).reduce((s: number, sh: any) => s + (sh.quantity || 0), 0).toFixed(2)}</td>
+                  <td colSpan={5}>{(gen.shipments || []).length} شحنة</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ))}
 
-        {/* Recyclers Section */}
         <h2>ثانياً: جهات التدوير / التخلص والمخلفات المسلمة</h2>
         {recyclers.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#999', padding: '12px' }}>لا توجد بيانات</p>
-        ) : (
-          recyclers.map((rec: any, ri: number) => (
-            <div key={ri}>
-              <h3>{ri + 1}. {rec.name}</h3>
-              <div className="entity-info">
-                <div><span className="meta-label">سجل تجاري: </span>{rec.commercial_register || '-'}</div>
-                <div><span className="meta-label">ترخيص بيئي: </span>{rec.environmental_license || '-'}</div>
-                <div><span className="meta-label">الممثل القانوني: </span>{rec.representative_name || '-'}</div>
-                <div><span className="meta-label">العنوان: </span>{rec.address || '-'} {rec.city ? `- ${rec.city}` : ''}</div>
-              </div>
-              <table>
-                <thead>
-                  <tr>
-                    <th>رقم الشحنة</th>
-                    <th>نوع المخلف</th>
-                    <th>الكمية</th>
-                    <th>الوحدة</th>
-                    <th>تاريخ التسليم</th>
-                    <th>اسم السائق</th>
-                    <th>لوحة المركبة</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rec.shipments.map((sh: any, si: number) => (
-                    <tr key={si}>
-                      <td>{sh.shipment_number}</td>
-                      <td>{WASTE_TYPE_LABELS[sh.waste_type] || sh.waste_type}</td>
-                      <td>{sh.quantity}</td>
-                      <td>{sh.unit}</td>
-                      <td>{sh.delivery_date ? format(new Date(sh.delivery_date), 'MM/dd') : '-'}</td>
-                      <td>{sh.driver_name || '-'}</td>
-                      <td>{sh.vehicle_plate || '-'}</td>
-                    </tr>
-                  ))}
-                  <tr className="total-row">
-                    <td colSpan={2}>الإجمالي</td>
-                    <td>{rec.shipments.reduce((s: number, sh: any) => s + sh.quantity, 0).toFixed(2)}</td>
-                    <td colSpan={4}>{rec.shipments.length} شحنة</td>
-                  </tr>
-                </tbody>
-              </table>
+        ) : recyclers.map((rec: any, ri: number) => (
+          <div key={ri}>
+            <h3>{ri + 1}. {rec.name}</h3>
+            <div className="entity-info">
+              <div><span className="meta-label">سجل تجاري: </span>{rec.commercial_register || '-'}</div>
+              <div><span className="meta-label">ترخيص بيئي: </span>{rec.environmental_license || '-'}</div>
+              <div><span className="meta-label">الممثل القانوني: </span>{rec.representative_name || '-'}</div>
+              <div><span className="meta-label">العنوان: </span>{rec.address || '-'} {rec.city ? `- ${rec.city}` : ''}</div>
             </div>
-          ))
-        )}
+            <table>
+              <thead>
+                <tr>
+                  <th>رقم الشحنة</th>
+                  <th>نوع المخلف</th>
+                  <th>الكمية</th>
+                  <th>الوحدة</th>
+                  <th>تاريخ التسليم</th>
+                  <th>اسم السائق</th>
+                  <th>لوحة المركبة</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(rec.shipments || []).map((sh: any, si: number) => (
+                  <tr key={si}>
+                    <td>{sh.shipment_number}</td>
+                    <td>{WASTE_TYPE_LABELS[sh.waste_type] || sh.waste_type}</td>
+                    <td>{sh.quantity}</td>
+                    <td>{sh.unit}</td>
+                    <td>{fmtDate(sh.date || sh.delivery_date)}</td>
+                    <td>{sh.driver_name || '-'}</td>
+                    <td>{sh.vehicle_plate || '-'}</td>
+                  </tr>
+                ))}
+                <tr className="total-row">
+                  <td colSpan={2}>الإجمالي</td>
+                  <td>{(rec.shipments || []).reduce((s: number, sh: any) => s + (sh.quantity || 0), 0).toFixed(2)}</td>
+                  <td colSpan={4}>{(rec.shipments || []).length} شحنة</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        ))}
 
-        {/* Notes */}
         {declaration.notes && (
           <>
             <h2>ملاحظات</h2>
@@ -226,7 +198,6 @@ export default function DeclarationPrintView({ declaration, organization }: Prop
           </>
         )}
 
-        {/* Footer signatures */}
         <div className="footer">
           <div className="sig-box">
             <p style={{ fontWeight: 'bold', marginBottom: '40px' }}>توقيع وختم الناقل</p>
