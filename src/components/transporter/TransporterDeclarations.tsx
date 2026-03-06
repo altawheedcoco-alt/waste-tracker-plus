@@ -217,7 +217,7 @@ export default function TransporterDeclarations() {
           waste_type: s.waste_type,
           quantity: s.quantity,
           unit: s.unit,
-          delivery_date: s.actual_delivery_date,
+          delivery_date: s.delivered_at,
           driver_name: driver?.profile?.full_name || s.manual_driver_name || '',
           vehicle_plate: driver?.vehicle_plate || s.manual_vehicle_plate || '',
         });
