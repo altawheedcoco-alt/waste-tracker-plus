@@ -271,6 +271,60 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
+  // Create ledger entries per waste item
+  const createLedgerEntriesForDraft = async (
+    draftId: string, formData: ManualShipmentData, orgId: string, userId: string
+  ) => {
+    try {
+      // Delete previous ledger entries for this draft (in case of re-save)
+      await supabase
+        .from('accounting_ledger')
+        .delete()
+        .eq('manual_draft_id' as any, draftId);
+
+      const items = formData.waste_items || [];
+      if (items.length === 0) return;
+
+      const entries = items.map((item, idx) => {
+        const base = parseFloat(item.price) || 0;
+        const extra = parseFloat(item.extra_costs) || 0;
+        const vatAmt = item.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+        const laborPct = parseFloat(item.labor_tax_percent) || 0;
+        const laborAmt = item.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+        const totalAmount = base + extra + vatAmt + laborAmt;
+        if (totalAmount <= 0) return null;
+
+        const wasteLabel = item.waste_type || `مخلف ${idx + 1}`;
+        const desc = `بيان يدوي #${formData.shipment_number || '—'} | ${wasteLabel} | ${item.quantity || 0} ${item.unit || ''} × ${item.price_per_unit || 0} ج.م`;
+
+        return {
+          organization_id: orgId,
+          entry_type: 'credit',
+          entry_category: 'manual_shipment',
+          amount: totalAmount,
+          description: desc,
+          entry_date: formData.pickup_date || new Date().toISOString().split('T')[0],
+          created_by: userId,
+          reference_number: `MS-${draftId.substring(0, 8).toUpperCase()}-${idx + 1}`,
+          manual_draft_id: draftId,
+          waste_item_id: item.id,
+          ledger_merged: true,
+        };
+      }).filter(Boolean);
+
+      if (entries.length > 0) {
+        const { error } = await supabase
+          .from('accounting_ledger')
+          .insert(entries as any[]);
+        if (error) {
+          console.error('Failed to create ledger entries:', error);
+        }
+      }
+    } catch (err) {
+      console.error('Ledger creation error:', err);
+    }
+  };
+
   const saveDraft = async (): Promise<{ shareCode: string; draftId: string } | null> => {
     if (!organization?.id || !user?.id) {
       toast.error('يجب تسجيل الدخول أولاً');
