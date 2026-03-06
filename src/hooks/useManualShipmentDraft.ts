@@ -234,6 +234,9 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       unit: data.unit || 'ton',
       packaging_method: data.packaging_method || '',
       disposal_method: data.disposal_method || '',
+      waste_items: Array.isArray(data.waste_items) && data.waste_items.length > 0 
+        ? data.waste_items.map((w: any) => ({ ...createEmptyWasteItem(), ...w }))
+        : [createEmptyWasteItem()],
       driver_name: data.driver_name || '',
       driver_phone: data.driver_phone || '',
       driver_license: data.driver_license || '',
