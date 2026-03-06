@@ -290,7 +290,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     setSavedDraftId(result.data.id);
     setSavedShareCode(result.data.share_code);
     toast.success('تم حفظ المسودة بنجاح');
-    return result.data.share_code;
+    return { shareCode: result.data.share_code, draftId: result.data.id };
   };
 
   // Core: generate PDF server-side, archive it, return URL
