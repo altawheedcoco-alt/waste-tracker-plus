@@ -428,8 +428,27 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
-      window.open(pdfUrl, '_blank');
-      toast.success('تم فتح بيان الشحنة — اطبعه من المتصفح');
+      // Open PDF in hidden iframe and trigger print
+      const printFrame = document.createElement('iframe');
+      printFrame.style.position = 'fixed';
+      printFrame.style.left = '-9999px';
+      printFrame.style.top = '-9999px';
+      printFrame.style.width = '0';
+      printFrame.style.height = '0';
+      document.body.appendChild(printFrame);
+      
+      printFrame.onload = () => {
+        try {
+          printFrame.contentWindow?.print();
+        } catch {
+          // Fallback: open in new tab for manual print
+          window.open(pdfUrl, '_blank');
+        }
+        setTimeout(() => document.body.removeChild(printFrame), 5000);
+      };
+      
+      printFrame.src = pdfUrl;
+      toast.success('جارٍ فتح نافذة الطباعة...');
     } else {
       toast.error('فشل في توليد ملف PDF');
     }
