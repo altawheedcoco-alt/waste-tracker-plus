@@ -20,16 +20,16 @@ const ORG_NAMES: Record<string, string> = {
 };
 
 const DEMO_ACCOUNTS = [
-  { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', orgName: 'شركة المولد التجريبية', role: 'company_admin', phone: '01000000001' },
-  { email: 'demo-recycler@irecycle.test', fullName: 'معيد تدوير', orgType: 'recycler', orgName: 'شركة التدوير التجريبية', role: 'company_admin', phone: '01000000002' },
-  { email: 'demo-transporter@irecycle.test', fullName: 'ناقل مخلفات', orgType: 'transporter', orgName: 'شركة النقل التجريبية', role: 'company_admin', phone: '01000000003' },
-  { email: 'demo-transport-office@irecycle.test', fullName: 'مكتب نقل', orgType: 'transporter', orgName: 'مكتب النقل التجريبي', role: 'company_admin', phone: '01000000011' },
-  { email: 'demo-disposal@irecycle.test', fullName: 'جهة تخلص آمن', orgType: 'disposal', orgName: 'شركة التخلص الآمن التجريبية', role: 'company_admin', phone: '01000000004' },
-  { email: 'demo-driver@irecycle.test', fullName: 'سائق تجريبي', orgType: 'transporter', orgName: 'التوحيد لتجارة مخلفات الاخشاب', role: 'driver', phone: '01000000005' },
-  { email: 'demo-employee@irecycle.test', fullName: 'موظف تجريبي', orgType: 'transporter', orgName: 'التوحيد لتجارة مخلفات الاخشاب', role: 'employee', phone: '01000000006' },
-  { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', orgName: 'مكتب الاستشارات البيئية التجريبي', role: 'company_admin', phone: '01000000008' },
-  { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', orgName: 'المكتب الاستشاري التجريبي', role: 'company_admin', phone: '01000000009' },
-  { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', orgName: 'جهة الأيزو التجريبية', role: 'company_admin', phone: '01000000010' },
+  { email: 'demo-generator@irecycle.test', fullName: 'مولد مخلفات', orgType: 'generator', orgName: 'شركة المولد التجريبية', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-recycler@irecycle.test', fullName: 'معيد تدوير', orgType: 'recycler', orgName: 'شركة التدوير التجريبية', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-transporter@irecycle.test', fullName: 'ناقل مخلفات', orgType: 'transporter', orgName: 'شركة النقل التجريبية', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-transport-office@irecycle.test', fullName: 'مكتب نقل', orgType: 'transporter', orgName: 'مكتب النقل التجريبي', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-disposal@irecycle.test', fullName: 'جهة تخلص آمن', orgType: 'disposal', orgName: 'شركة التخلص الآمن التجريبية', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-driver@irecycle.test', fullName: 'سائق تجريبي', orgType: 'transporter', orgName: 'التوحيد لتجارة مخلفات الاخشاب', role: 'driver', phone: '01157570643' },
+  { email: 'demo-employee@irecycle.test', fullName: 'موظف تجريبي', orgType: 'transporter', orgName: 'التوحيد لتجارة مخلفات الاخشاب', role: 'employee', phone: '01157570643' },
+  { email: 'demo-consultant@irecycle.test', fullName: 'استشاري بيئي', orgType: 'consultant', orgName: 'مكتب الاستشارات البيئية التجريبي', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-consulting-office@irecycle.test', fullName: 'مكتب استشاري', orgType: 'consulting_office', orgName: 'المكتب الاستشاري التجريبي', role: 'company_admin', phone: '01157570643' },
+  { email: 'demo-iso-body@irecycle.test', fullName: 'جهة مانحة للأيزو', orgType: 'iso_body', orgName: 'جهة الأيزو التجريبية', role: 'company_admin', phone: '01157570643' },
   // === حسابات عبدالله التجريبية ===
   { email: 'abdullah-recycler@irecycle.test', fullName: 'عبدالله المدور', orgType: 'recycler', orgName: 'عبدالله المدور للتدوير', role: 'company_admin', phone: '01157570643' },
   { email: 'abdullah-generator@irecycle.test', fullName: 'عبدالله المولد', orgType: 'generator', orgName: 'عبدالله المولد للمخلفات', role: 'company_admin', phone: '01157570643' },
