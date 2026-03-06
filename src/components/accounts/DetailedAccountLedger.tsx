@@ -50,6 +50,8 @@ import {
   ExternalLink,
   Trash2,
   AlertTriangle,
+  Link,
+  Unlink,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
