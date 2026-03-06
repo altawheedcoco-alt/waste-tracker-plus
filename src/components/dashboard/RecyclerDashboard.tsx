@@ -451,6 +451,12 @@ const RecyclerDashboard = () => {
             <WMISEventsFeed />
           </Suspense>
         </TabsContent>
+
+        <TabsContent value="declarations" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <RecyclerDeclarations />
+          </Suspense>
+        </TabsContent>
       </Tabs>
 
       {/* Dialogs */}
