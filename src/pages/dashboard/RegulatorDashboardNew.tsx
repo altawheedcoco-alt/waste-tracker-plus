@@ -54,6 +54,9 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="jurisdiction" className="gap-1.5 text-xs sm:text-sm">
               <Scale className="w-4 h-4" /> الاختصاصات
             </TabsTrigger>
+            <TabsTrigger value="verify" className="gap-1.5 text-xs sm:text-sm">
+              <Search className="w-4 h-4" /> التحقق من المستندات
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
