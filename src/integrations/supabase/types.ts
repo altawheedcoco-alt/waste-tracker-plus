@@ -33082,6 +33082,98 @@ export type Database = {
           },
         ]
       }
+      transporter_declarations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          declaration_data: Json | null
+          declaration_number: string
+          declaration_type: string
+          id: string
+          notes: string | null
+          organization_id: string
+          period_from: string
+          period_to: string
+          status: string
+          submitted_at: string | null
+          submitted_by: string | null
+          submitted_to: string | null
+          total_quantity: number | null
+          total_shipments: number | null
+          updated_at: string
+          waste_category: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          declaration_data?: Json | null
+          declaration_number: string
+          declaration_type?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          period_from: string
+          period_to: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_to?: string | null
+          total_quantity?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+          waste_category: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          declaration_data?: Json | null
+          declaration_number?: string
+          declaration_type?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          period_from?: string
+          period_to?: string
+          status?: string
+          submitted_at?: string | null
+          submitted_by?: string | null
+          submitted_to?: string | null
+          total_quantity?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+          waste_category?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transporter_declarations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transporter_declarations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transporter_declarations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transporter_declarations_submitted_by_fkey"
+            columns: ["submitted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       transporter_green_ratings: {
         Row: {
           compliance_score: number
