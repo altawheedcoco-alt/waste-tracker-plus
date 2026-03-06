@@ -24,6 +24,7 @@ const TransportOfficeDashboard = lazy(() => import('@/components/dashboard/Trans
 const ConsultantDashboard = lazy(() => import('@/components/dashboard/ConsultantDashboard'));
 const ConsultingOfficeDashboard = lazy(() => import('@/components/dashboard/ConsultingOfficeDashboard'));
 const ISOBodyDashboard = lazy(() => import('@/components/dashboard/ISOBodyDashboard'));
+const RegulatorDashboardNew = lazy(() => import('@/pages/dashboard/RegulatorDashboardNew'));
 
 // Deferred widgets — loaded after main dashboard renders
 const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
@@ -115,6 +116,7 @@ const Dashboard = () => {
         case 'consultant': return <ConsultantDashboard />;
         case 'consulting_office': return <ConsultingOfficeDashboard />;
         case 'iso_body': return <ISOBodyDashboard />;
+        case 'regulator': return <RegulatorDashboardNew />;
         default: return <AdminDashboard />;
       }
     }
@@ -127,6 +129,7 @@ const Dashboard = () => {
       case 'consultant': return <ConsultantDashboard />;
       case 'consulting_office': return <ConsultingOfficeDashboard />;
       case 'iso_body': return <ISOBodyDashboard />;
+      case 'regulator': return <RegulatorDashboardNew />;
       default: return <GeneratorDashboard />;
     }
   };
