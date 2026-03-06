@@ -315,6 +315,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       unit: form.unit || 'ton',
       packaging_method: form.packaging_method || null,
       disposal_method: form.disposal_method || null,
+      waste_items: form.waste_items || [],
       driver_name: form.driver_name || null,
       driver_phone: form.driver_phone || null,
       driver_license: form.driver_license || null,
