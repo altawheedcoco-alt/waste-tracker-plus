@@ -535,8 +535,8 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 </html>`;
 }
 
-export async function generateManualShipmentPDF(form: ManualShipmentData) {
-  const htmlContent = generateFullHTML(form);
+export async function generateManualShipmentPDF(form: ManualShipmentData, options?: PdfOptions) {
+  const htmlContent = generateFullHTML(form, options);
 
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   if (!printWindow) {
@@ -572,9 +572,9 @@ export async function generateManualShipmentPDF(form: ManualShipmentData) {
 /**
  * Generate PDF as Blob for uploading/sending via WhatsApp
  */
-export async function generateManualShipmentPDFBlob(form: ManualShipmentData): Promise<Blob | null> {
+export async function generateManualShipmentPDFBlob(form: ManualShipmentData, options?: PdfOptions): Promise<Blob | null> {
   try {
-    const htmlContent = generateFullHTML(form);
+    const htmlContent = generateFullHTML(form, options);
     
     // Create hidden container
     const container = document.createElement('div');
