@@ -392,17 +392,53 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     toast.success('تم فتح نافذة الطباعة');
   };
 
-  // إرسال كامل (حفظ + تحديث الحالة)
+  // إرسال كامل (حفظ + تحديث الحالة + توليد PDF + إرسال واتساب)
   const submitDraft = async () => {
     const result = await saveDraft();
     if (!result) return;
     
-    await supabase
+    const { error } = await supabase
       .from('manual_shipment_drafts')
       .update({ is_submitted: true, submitted_at: new Date().toISOString(), status: 'submitted' })
       .eq('id', result.draftId);
+
+    if (error) {
+      console.error('[ManualShipment] Submit error:', error);
+      toast.error('فشل في إرسال النموذج');
+      return;
+    }
     
     toast.success('تم إرسال النموذج بنجاح');
+
+    // توليد PDF وإرسال واتساب تلقائياً
+    try {
+      const phones = new Set<string>();
+      [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
+        .filter(p => p && p.length > 3)
+        .forEach(p => phones.add(p.replace(/\s/g, '')));
+
+      if (phones.size > 0) {
+        toast.info('جارٍ تجهيز وإرسال بيان الشحنة عبر واتساب...');
+        const blob = await generateManualShipmentPDFBlob(form);
+        if (blob) {
+          const filename = `manual-shipments/${result.draftId}/${Date.now()}.pdf`;
+          const { error: uploadError } = await supabase.storage
+            .from('shipment-documents')
+            .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
+
+          if (!uploadError) {
+            const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
+            const pdfUrl = urlData?.publicUrl;
+            const firstPhone = Array.from(phones)[0];
+            const waUrl = `https://wa.me/${firstPhone}?text=${encodeURIComponent(`📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`)}`;
+            window.open(waUrl, '_blank');
+            toast.success(`تم فتح واتساب لإرسال بيان الشحنة`);
+          }
+        }
+      }
+    } catch (err) {
+      console.error('[ManualShipment] WhatsApp notification error:', err);
+    }
   };
 
   const resetForm = () => {
