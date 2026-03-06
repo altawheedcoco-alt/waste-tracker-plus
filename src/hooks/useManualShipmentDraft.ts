@@ -428,27 +428,37 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
-      // Open PDF in hidden iframe and trigger print
-      const printFrame = document.createElement('iframe');
-      printFrame.style.position = 'fixed';
-      printFrame.style.left = '-9999px';
-      printFrame.style.top = '-9999px';
-      printFrame.style.width = '0';
-      printFrame.style.height = '0';
-      document.body.appendChild(printFrame);
-      
-      printFrame.onload = () => {
-        try {
-          printFrame.contentWindow?.print();
-        } catch {
-          // Fallback: open in new tab for manual print
-          window.open(pdfUrl, '_blank');
+      try {
+        // Fetch PDF as blob to avoid CORS issues
+        const response = await fetch(pdfUrl);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+
+        const printWindow = window.open(blobUrl, '_blank');
+        if (printWindow) {
+          printWindow.addEventListener('load', () => {
+            setTimeout(() => {
+              printWindow.print();
+              // Cleanup after print dialog closes
+              printWindow.addEventListener('afterprint', () => {
+                URL.revokeObjectURL(blobUrl);
+              });
+            }, 500);
+          });
+          toast.success('جارٍ فتح نافذة الطباعة...');
+        } else {
+          // Popup blocked fallback
+          const link = document.createElement('a');
+          link.href = blobUrl;
+          link.download = `manifest-${form.shipment_number || result.draftId}.pdf`;
+          link.click();
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+          toast.success('تم تنزيل الملف — افتحه للطباعة');
         }
-        setTimeout(() => document.body.removeChild(printFrame), 5000);
-      };
-      
-      printFrame.src = pdfUrl;
-      toast.success('جارٍ فتح نافذة الطباعة...');
+      } catch {
+        window.open(pdfUrl, '_blank');
+        toast.success('تم فتح الملف — اطبعه من المتصفح');
+      }
     } else {
       toast.error('فشل في توليد ملف PDF');
     }
