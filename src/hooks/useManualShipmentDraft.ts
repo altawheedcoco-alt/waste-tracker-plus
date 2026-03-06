@@ -351,7 +351,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     }
   };
 
-  // حفظ + إرسال واتساب (النظام القديم)
+  // حفظ + إرسال واتساب عبر WaPilot
   const saveAndSendWhatsApp = async () => {
     const result = await saveDraft();
     if (!result) {
@@ -369,7 +369,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       return;
     }
 
-    toast.info('جارٍ تجهيز وإرسال بيان الشحنة...');
+    toast.info('جارٍ تجهيز وإرسال بيان الشحنة عبر واتساب...');
     try {
       const blob = await generateManualShipmentPDFBlob(form);
       if (!blob) {
@@ -377,29 +377,42 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
         return;
       }
 
-      // Upload PDF to storage for sharing
+      // Upload PDF to storage
       const filename = `manual-shipments/${result.draftId}/${Date.now()}.pdf`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
+      const { error: uploadError } = await supabase.storage
         .from('shipment-documents')
         .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
 
       if (uploadError) {
         console.error('[ManualShipment] Upload error:', uploadError);
-        // Fallback: open WhatsApp with text only
-        const firstPhone = Array.from(phones)[0];
-        const waUrl = `https://wa.me/${firstPhone}?text=${encodeURIComponent(`📄 بيان شحنة رقم ${form.shipment_number || ''}`)}`;
-        window.open(waUrl, '_blank');
-        toast.success('تم فتح واتساب — أرفق الملف يدوياً');
+        toast.error('فشل في رفع الملف');
         return;
       }
 
       const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
       const pdfUrl = urlData?.publicUrl;
+      const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
 
-      const firstPhone = Array.from(phones)[0];
-      const waUrl = `https://wa.me/${firstPhone}?text=${encodeURIComponent(`📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`)}`;
-      window.open(waUrl, '_blank');
-      toast.success(`تم فتح واتساب لإرسال بيان الشحنة`);
+      // Send to all phones via WaPilot
+      let sentCount = 0;
+      for (const phone of phones) {
+        const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+        const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
+          body: {
+            action: 'send-message',
+            chat_id: rawPhone,
+            text: message,
+          },
+        });
+        if (!sendError) sentCount++;
+        else console.error(`[WhatsApp] Failed to send to ${phone}:`, sendError);
+      }
+
+      if (sentCount > 0) {
+        toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
+      } else {
+        toast.error('فشل في إرسال الرسائل عبر واتساب');
+      }
     } catch (err) {
       console.error('[ManualShipment] WhatsApp error:', err);
       toast.error('فشل في إرسال بيان الشحنة');
