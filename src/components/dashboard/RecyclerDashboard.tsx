@@ -2,7 +2,7 @@ import { useState, useEffect, lazy, Suspense } from 'react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -58,6 +58,7 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const RecyclerDeclarations = lazy(() => import('@/components/recycler/RecyclerDeclarations'));
 
 interface RecentShipment {
   id: string;
@@ -265,6 +266,7 @@ const RecyclerDashboard = () => {
           <TabsTrigger value="carbon" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />البصمة الكربونية</TabsTrigger>
           <TabsTrigger value="esg" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />تقارير ESG</TabsTrigger>
           <TabsTrigger value="wmis" className="gap-1 text-xs"><AlertCircle className="w-3.5 h-3.5" />WMIS</TabsTrigger>
+          <TabsTrigger value="declarations" className="gap-1 text-xs"><FileText className="w-3.5 h-3.5" />الإقرارات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
@@ -447,6 +449,12 @@ const RecyclerDashboard = () => {
           <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
             {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
             <WMISEventsFeed />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="declarations" className="mt-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <RecyclerDeclarations />
           </Suspense>
         </TabsContent>
       </Tabs>
