@@ -10,7 +10,7 @@ import { Separator } from '@/components/ui/separator';
 import { MessageCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
-  Save, Download, Share2, Send, RotateCcw, FileText, Printer,
+  Save, Download, Share2, Send, RotateCcw, FileText, Printer, Plus, Trash2,
   User, Truck, Factory, Package, MapPin, Calendar, Scale, DollarSign, 
   FileCheck, AlertTriangle, ClipboardList
 } from 'lucide-react';
