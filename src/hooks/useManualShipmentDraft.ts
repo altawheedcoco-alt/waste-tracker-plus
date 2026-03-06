@@ -277,10 +277,10 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
   ) => {
     try {
       // Delete previous ledger entries for this draft (in case of re-save)
-      await supabase
+      await (supabase
         .from('accounting_ledger')
-        .delete()
-        .eq('manual_draft_id' as any, draftId);
+        .delete() as any)
+        .eq('manual_draft_id', draftId);
 
       const items = formData.waste_items || [];
       if (items.length === 0) return;
