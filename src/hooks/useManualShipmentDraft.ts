@@ -203,7 +203,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const saveDraft = async (): Promise<string | null> => {
+  const saveDraft = async (): Promise<{ shareCode: string; draftId: string } | null> => {
     if (!organization?.id || !user?.id) {
       toast.error('يجب تسجيل الدخول أولاً');
       return null;
@@ -418,14 +418,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + طباعة
   const saveAndPrintPDF = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز بيان الشحنة للطباعة...');
-    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       window.open(pdfUrl, '_blank');
