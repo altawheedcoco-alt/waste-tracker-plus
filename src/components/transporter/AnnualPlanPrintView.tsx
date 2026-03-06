@@ -52,12 +52,16 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
 
   const cd = plan.company_data || {};
   const vehicles = plan.vehicles_data || [];
-  const routes = (plan.operations_data as any)?.routes || [];
+  const od = plan.operations_data || {};
+  const routes = (od as any)?.routes || [];
+  const orgStructure = (od as any)?.org_structure || [];
   const dp = plan.disposal_plan || {};
   const sp = plan.safety_procedures || {};
   const workforce = (plan.workforce_data as any)?.workforce || [];
   const subs = plan.subcontractors || [];
   const cats = plan.waste_categories || [];
+  const entityType = plan.entity_type || 'transporter';
+  const entityLabel = entityType === 'disposal' ? 'جهة التخلص النهائي' : 'الجهة الناقلة';
 
   return (
     <div className="space-y-4">
@@ -68,13 +72,13 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
       <div ref={printRef}>
         <div className="header">
           <p style={{ fontSize: '12px', color: '#666' }}>جمهورية مصر العربية - جهاز تنظيم إدارة المخلفات (WMRA)</p>
-          <h1>خطة العمل السنوية للجهة الناقلة</h1>
+          <h1>خطة العمل السنوية - {entityLabel}</h1>
           <p style={{ fontSize: '13px', fontWeight: 'bold' }}>وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020</p>
           <p style={{ fontSize: '11px', color: '#666' }}>رقم الخطة: {plan.plan_number} | السنة: {plan.plan_year}</p>
         </div>
 
         {/* Section 1: Company Data */}
-        <h2>أولاً: بيانات الجهة الناقلة</h2>
+        <h2>أولاً: بيانات {entityLabel}</h2>
         <div className="meta-grid">
           <div className="meta-item"><span className="meta-label">اسم الشركة: </span>{cd.name || organization?.name || '-'}</div>
           <div className="meta-item"><span className="meta-label">السجل التجاري: </span>{cd.commercial_register || '-'}</div>
@@ -86,16 +90,33 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
           <div className="meta-item"><span className="meta-label">البريد الإلكتروني: </span>{cd.email || '-'}</div>
         </div>
 
-        {/* Section 2: Waste Types */}
-        <h2>ثانياً: أنواع المخلفات المنقولة</h2>
+        {/* Section 2: Org Structure */}
+        <h2>ثانياً: الهيكل التنظيمي</h2>
+        {orgStructure.length === 0 ? (
+          <p style={{ textAlign: 'center', color: '#999', padding: '8px' }}>لم يتم تحديد الهيكل التنظيمي</p>
+        ) : (
+          <table>
+            <thead>
+              <tr><th>الإدارة</th><th>المنصب</th><th>الاسم</th><th>الهاتف</th><th>المسؤوليات</th></tr>
+            </thead>
+            <tbody>
+              {orgStructure.map((o: any, i: number) => (
+                <tr key={i}><td>{o.department}</td><td>{o.position}</td><td>{o.person_name || '-'}</td><td>{o.phone || '-'}</td><td>{o.responsibilities}</td></tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+
+        {/* Section 3: Waste Types */}
+        <h2>ثالثاً: أنواع المخلفات {entityType === 'disposal' ? 'المستقبَلة' : 'المنقولة'}</h2>
         <div style={{ padding: '8px' }}>
           {cats.length === 0 ? <p>غير محدد</p> : cats.map((c: string) => (
             <span key={c} className="badge">{WASTE_CAT_LABELS[c] || c}</span>
           ))}
         </div>
 
-        {/* Section 3: Vehicles */}
-        <h2>ثالثاً: بيان المعدات والمركبات</h2>
+        {/* Section 4: Vehicles */}
+        <h2>رابعاً: بيان المعدات والمركبات</h2>
         {vehicles.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#999', padding: '8px' }}>لا توجد بيانات</p>
         ) : (
@@ -130,8 +151,8 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
         )}
         <p style={{ fontSize: '10px', color: '#666' }}>إجمالي المركبات: {vehicles.length}</p>
 
-        {/* Section 4: Routes */}
-        <h2>رابعاً: منظومة التشغيل والمسارات</h2>
+        {/* Section 5: Routes */}
+        <h2>خامساً: منظومة التشغيل والمسارات</h2>
         {routes.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#999', padding: '8px' }}>لا توجد مسارات</p>
         ) : (
@@ -161,10 +182,10 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
           </table>
         )}
 
-        {/* Section 5: Subcontractors */}
+        {/* Section 6: Subcontractors */}
         {subs.length > 0 && (
           <>
-            <h2>خامساً: المقاولون من الباطن</h2>
+            <h2>سادساً: المقاولون من الباطن</h2>
             <table>
               <thead>
                 <tr><th>م</th><th>اسم المقاول</th><th>السجل التجاري</th><th>رقم الترخيص</th><th>نطاق العمل</th></tr>
@@ -179,22 +200,20 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
         )}
 
         {/* Section 6: Disposal */}
-        <h2>{subs.length > 0 ? 'سادساً' : 'خامساً'}: خطة التخلص الآمن</h2>
+        <h2>{subs.length > 0 ? 'سابعاً' : 'سادساً'}: خطة التخلص الآمن</h2>
         <div className="meta-grid">
           <div className="meta-item"><span className="meta-label">موقع التخلص النهائي: </span>{dp.disposal_site || '-'}</div>
           <div className="meta-item"><span className="meta-label">نوع التخلص: </span>{dp.disposal_type || '-'}</div>
           <div className="meta-item"><span className="meta-label">مرجع العقد: </span>{dp.contract_reference || '-'}</div>
         </div>
 
-        {/* Section 7: Safety */}
-        <h2>{subs.length > 0 ? 'سابعاً' : 'سادساً'}: إجراءات السلامة البيئية</h2>
+        <h2>{subs.length > 0 ? 'ثامناً' : 'سابعاً'}: إجراءات السلامة البيئية</h2>
         {sp.spill_response && <><p style={{ fontWeight: 'bold', fontSize: '10px' }}>إجراءات التعامل مع الانسكابات والحوادث:</p><div className="section-text">{sp.spill_response}</div></>}
         {sp.odor_control && <><p style={{ fontWeight: 'bold', fontSize: '10px' }}>تدابير الحد من الروائح وتناثر المخلفات:</p><div className="section-text">{sp.odor_control}</div></>}
         {sp.ppe_policy && <><p style={{ fontWeight: 'bold', fontSize: '10px' }}>سياسة معدات الحماية الشخصية:</p><div className="section-text">{sp.ppe_policy}</div></>}
         {sp.emergency_contacts && <><p style={{ fontWeight: 'bold', fontSize: '10px' }}>جهات اتصال الطوارئ:</p><div className="section-text">{sp.emergency_contacts}</div></>}
 
-        {/* Section 8: Workforce */}
-        <h2>{subs.length > 0 ? 'ثامناً' : 'سابعاً'}: العمالة والتدريب</h2>
+        <h2>{subs.length > 0 ? 'تاسعاً' : 'ثامناً'}: العمالة والتدريب</h2>
         {workforce.length === 0 ? (
           <p style={{ textAlign: 'center', color: '#999', padding: '8px' }}>لا توجد بيانات</p>
         ) : (
@@ -225,7 +244,7 @@ export default function AnnualPlanPrintView({ plan, organization }: Props) {
 
         <div className="footer" style={{ marginTop: '30px' }}>
           <div className="sig-box">
-            <p style={{ fontWeight: 'bold', marginBottom: '40px' }}>توقيع وختم الجهة الناقلة</p>
+            <p style={{ fontWeight: 'bold', marginBottom: '40px' }}>توقيع وختم {entityLabel}</p>
             <p>الاسم: {cd.representative || '.........................'}</p>
             <p>التاريخ: {format(new Date(), 'yyyy/MM/dd')}</p>
           </div>

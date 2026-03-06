@@ -1,5 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
-import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale } from 'lucide-react';
+import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList } from 'lucide-react';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
@@ -7,6 +7,7 @@ const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
+const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -235,6 +236,9 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           <TabsTrigger value="reports" className="gap-1 text-xs sm:text-sm">
             <BarChart3 className="w-3.5 h-3.5" /> التقارير
           </TabsTrigger>
+          <TabsTrigger value="annual_plan" className="gap-1 text-xs sm:text-sm">
+            <ClipboardList className="w-3.5 h-3.5" /> الخطة السنوية
+          </TabsTrigger>
         </TabsList>
 
         {/* 1. Operations Tab */}
@@ -377,6 +381,13 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
               </div>
             </Button>
           </div>
+        </TabsContent>
+
+        {/* 7. Annual Plan Tab */}
+        <TabsContent value="annual_plan" className="mt-4 space-y-4">
+          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
+            <DisposalAnnualPlan />
+          </Suspense>
         </TabsContent>
       </Tabs>
 

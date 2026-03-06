@@ -64,6 +64,14 @@ interface WorkforceEntry {
   training_status: string;
 }
 
+interface OrgStructureEntry {
+  department: string;
+  position: string;
+  person_name: string;
+  phone: string;
+  responsibilities: string;
+}
+
 interface FormState {
   plan_year: number;
   plan_type: 'manual' | 'auto';
@@ -78,6 +86,7 @@ interface FormState {
     phone: string;
     email: string;
   };
+  org_structure: OrgStructureEntry[];
   vehicles: VehicleEntry[];
   routes: RouteEntry[];
   disposal_plan: {
@@ -101,6 +110,7 @@ const defaultForm = (): FormState => ({
   plan_type: 'auto',
   waste_categories: [],
   company_data: { name: '', commercial_register: '', tax_card: '', previous_license: '', address: '', representative: '', phone: '', email: '' },
+  org_structure: [],
   vehicles: [],
   routes: [],
   disposal_plan: { disposal_site: '', disposal_type: '', contract_reference: '' },
@@ -183,6 +193,16 @@ export default function TransporterAnnualPlan() {
             { role: 'مشرف', count: 0, training_status: '' },
           ],
         }));
+        // Auto-generate org structure
+        const defaultOrgStructure: OrgStructureEntry[] = [
+          { department: 'الإدارة العليا', position: 'صاحب الشركة / المدير العام', person_name: (org as any)?.representative_name || '', phone: (org as any)?.phone || '', responsibilities: 'الإشراف العام واتخاذ القرارات الاستراتيجية' },
+          { department: 'الإدارة العليا', position: 'المدير التنفيذي', person_name: '', phone: '', responsibilities: 'إدارة العمليات اليومية والتنسيق بين الإدارات' },
+          { department: 'الإدارة الفنية/التشغيلية', position: 'مدير العمليات', person_name: '', phone: '', responsibilities: 'إدارة عمليات جمع ونقل المخلفات والنطاق المكاني' },
+          { department: 'الإدارة الفنية/التشغيلية', position: 'مشرف الأسطول', person_name: '', phone: '', responsibilities: 'متابعة صلاحية المركبات وجدول الصيانة' },
+          { department: 'إدارة السلامة والصحة المهنية', position: 'مسؤول السلامة', person_name: '', phone: '', responsibilities: 'الالتزام بمعايير تداول المخلفات والاشتراطات البيئية' },
+          { department: 'نظام تتبع المعدات', position: 'مسؤول التتبع', person_name: '', phone: '', responsibilities: 'متابعة حركة المركبات وضمان نقلها للمدافن والمحطات المعتمدة' },
+        ];
+        setForm(prev => ({ ...prev, org_structure: defaultOrgStructure }));
       }
 
       // Fetch partners (recyclers/disposal as disposal destinations, subcontractors)
@@ -338,7 +358,7 @@ export default function TransporterAnnualPlan() {
         waste_categories: form.waste_categories,
         company_data: form.company_data,
         vehicles_data: form.vehicles,
-        operations_data: { routes: form.routes },
+        operations_data: { routes: form.routes, org_structure: form.org_structure },
         disposal_plan: form.disposal_plan,
         safety_procedures: form.safety_procedures,
         workforce_data: { workforce: form.workforce },
@@ -390,6 +410,7 @@ export default function TransporterAnnualPlan() {
       plan_type: plan.plan_type,
       waste_categories: plan.waste_categories || [],
       company_data: { name: cd.name || '', commercial_register: cd.commercial_register || '', tax_card: cd.tax_card || '', previous_license: cd.previous_license || '', address: cd.address || '', representative: cd.representative || '', phone: cd.phone || '', email: cd.email || '' },
+      org_structure: od.org_structure || [],
       vehicles: plan.vehicles_data || [],
       routes: od.routes || [],
       disposal_plan: { disposal_site: dp.disposal_site || '', disposal_type: dp.disposal_type || '', contract_reference: dp.contract_reference || '' },
@@ -401,8 +422,19 @@ export default function TransporterAnnualPlan() {
     setShowCreate(true);
   };
 
+  const addOrgEntry = () => setForm(prev => ({ ...prev, org_structure: [...prev.org_structure, { department: '', position: '', person_name: '', phone: '', responsibilities: '' }] }));
+  const removeOrgEntry = (i: number) => setForm(prev => ({ ...prev, org_structure: prev.org_structure.filter((_, idx) => idx !== i) }));
+  const updateOrgEntry = (i: number, field: keyof OrgStructureEntry, value: string) => {
+    setForm(prev => {
+      const os = [...prev.org_structure];
+      os[i] = { ...os[i], [field]: value };
+      return { ...prev, org_structure: os };
+    });
+  };
+
   const sections = [
     { id: 'company', label: 'بيانات الشركة', icon: Factory },
+    { id: 'org_structure', label: 'الهيكل التنظيمي', icon: Users },
     { id: 'waste', label: 'أنواع المخلفات', icon: ClipboardList },
     { id: 'vehicles', label: 'المعدات والمركبات', icon: Truck },
     { id: 'routes', label: 'المسارات التشغيلية', icon: MapPin },
@@ -549,6 +581,46 @@ export default function TransporterAnnualPlan() {
                   <div><Label className="text-xs">الممثل القانوني</Label><Input value={form.company_data.representative} onChange={e => updateCompany('representative', e.target.value)} className="h-8 text-sm" /></div>
                   <div><Label className="text-xs">الهاتف</Label><Input value={form.company_data.phone} onChange={e => updateCompany('phone', e.target.value)} className="h-8 text-sm" /></div>
                   <div className="col-span-2"><Label className="text-xs">البريد الإلكتروني</Label><Input value={form.company_data.email} onChange={e => updateCompany('email', e.target.value)} className="h-8 text-sm" /></div>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Org Structure */}
+            {activeSection === 'org_structure' && (
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="text-sm">الهيكل التنظيمي (طبقاً لقانون 202/2020)</CardTitle>
+                  <Button size="sm" variant="outline" onClick={addOrgEntry} className="gap-1 text-xs"><Plus className="h-3 w-3" /> إضافة</Button>
+                </CardHeader>
+                <CardContent>
+                  {form.org_structure.length === 0 ? (
+                    <p className="text-center text-muted-foreground text-sm py-4">لا توجد بيانات - اضغط "توليد تلقائي" لإنشاء الهيكل</p>
+                  ) : (
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="text-xs p-1">الإدارة</TableHead>
+                          <TableHead className="text-xs p-1">المنصب</TableHead>
+                          <TableHead className="text-xs p-1">الاسم</TableHead>
+                          <TableHead className="text-xs p-1">الهاتف</TableHead>
+                          <TableHead className="text-xs p-1">المسؤوليات</TableHead>
+                          <TableHead className="text-xs p-1 w-8"></TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {form.org_structure.map((o, i) => (
+                          <TableRow key={i}>
+                            <TableCell className="p-1"><Input value={o.department} onChange={e => updateOrgEntry(i, 'department', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.position} onChange={e => updateOrgEntry(i, 'position', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.person_name} onChange={e => updateOrgEntry(i, 'person_name', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.phone} onChange={e => updateOrgEntry(i, 'phone', e.target.value)} className="h-6 text-xs w-28" /></TableCell>
+                            <TableCell className="p-1"><Input value={o.responsibilities} onChange={e => updateOrgEntry(i, 'responsibilities', e.target.value)} className="h-6 text-xs" /></TableCell>
+                            <TableCell className="p-1"><Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => removeOrgEntry(i)}><X className="h-3 w-3 text-destructive" /></Button></TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  )}
                 </CardContent>
               </Card>
             )}
