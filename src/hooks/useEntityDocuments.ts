@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { getTabChannelName } from '@/lib/tabSession';
 
 export interface EntityDocument {
   id: string;
@@ -120,6 +121,32 @@ export function useEntityDocuments(filters: DocumentFilters = {}) {
     enabled: !!organization?.id,
   });
 
+  // Realtime subscription — تحديث فوري عند أي تغيير
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    const channel = supabase
+      .channel(getTabChannelName('entity-docs-realtime'))
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'entity_documents',
+          filter: `organization_id=eq.${organization.id}`,
+        },
+        () => {
+          queryClient.invalidateQueries({ queryKey: ['entity-documents'] });
+          queryClient.invalidateQueries({ queryKey: ['entity-timeline'] });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [organization?.id, queryClient]);
+
   const uploadDocument = useMutation({
     mutationFn: async (params: UploadDocumentParams) => {
       if (!organization?.id || !user?.id) {
@@ -172,9 +199,46 @@ export function useEntityDocuments(filters: DocumentFilters = {}) {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
+    onSuccess: async (data, params) => {
       queryClient.invalidateQueries({ queryKey: ['entity-documents'] });
+      queryClient.invalidateQueries({ queryKey: ['entity-timeline'] });
       toast.success('تم رفع المستند بنجاح');
+
+      // إشعار الأطراف المرتبطة فورياً
+      try {
+        const partnerOrgId = params.partnerId;
+        if (partnerOrgId) {
+          // جلب أعضاء الجهة المرتبطة
+          const { data: members } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('organization_id', partnerOrgId)
+            .limit(50);
+
+          if (members && members.length > 0) {
+            const orgName = (organization as any)?.name || 'جهة';
+            const { sendBulkDualNotification } = await import('@/services/unifiedNotifier');
+            await sendBulkDualNotification({
+              user_ids: members.map(m => m.id),
+              title: '📄 مستند جديد وارد',
+              message: `تم إصدار مستند "${params.title}" من ${orgName} — محقق رقمياً بالكود والباركود`,
+              type: 'document_issued',
+              organization_id: partnerOrgId,
+              reference_id: data?.id,
+              reference_type: 'entity_document',
+              metadata: {
+                document_type: params.documentType,
+                document_category: params.documentCategory,
+                issuer_org: orgName,
+                file_url: data?.file_url,
+                has_verification: true,
+              },
+            });
+          }
+        }
+      } catch (err) {
+        console.warn('[EntityDocs] إشعار الأطراف فشل (غير مؤثر):', err);
+      }
     },
     onError: (error: Error) => {
       toast.error(`فشل رفع المستند: ${error.message}`);
