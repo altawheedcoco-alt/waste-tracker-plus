@@ -86,6 +86,11 @@ const RegulatorDashboardNew = () => {
           <TabsContent value="jurisdiction" className="mt-4">
             <JurisdictionPanel />
           </TabsContent>
+
+          <TabsContent value="verify" className="mt-4">
+            <RegulatorDocumentVerification />
+          </TabsContent>
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
