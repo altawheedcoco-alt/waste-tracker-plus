@@ -6,7 +6,7 @@ interface FocusTrack {
   nameAr: string;
   icon: string;
   url: string;
-  category: 'nature' | 'piano' | 'ambient' | 'calm';
+  category: 'nature' | 'piano' | 'ambient' | 'calm' | 'international' | 'instrumental';
 }
 
 // Split contexts for optimized re-renders
@@ -61,6 +61,22 @@ const focusTracks: FocusTrack[] = [
   { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://cdn.pixabay.com/download/audio/2024/08/14/audio_81aade7b3c.mp3?filename=floating-abstract-142819.mp3', category: 'calm' },
   { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://cdn.pixabay.com/download/audio/2024/10/03/audio_d94393a2ea.mp3?filename=relaxing-music-for-stress-relief-calm-amp-peaceful-ambient-244554.mp3', category: 'calm' },
   { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://cdn.pixabay.com/download/audio/2024/07/10/audio_c2ec1a3dd0.mp3?filename=zen-meditation-230822.mp3', category: 'calm' },
+
+  // ── International / Pop & Cinematic ──
+  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0c3ab2c59.mp3?filename=cinematic-music-sketches-11-cinematic-percussion-amp-bass-24083.mp3', category: 'international' },
+  { id: 'intl2', name: 'Pop Energy', nameAr: 'بوب حيوي', icon: '🎤', url: 'https://cdn.pixabay.com/download/audio/2023/09/20/audio_8c63e4b4c1.mp3?filename=good-night-160166.mp3', category: 'international' },
+  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://cdn.pixabay.com/download/audio/2022/10/25/audio_946ac70977.mp3?filename=please-calm-my-mind-125566.mp3', category: 'international' },
+  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://cdn.pixabay.com/download/audio/2024/09/19/audio_a635e94472.mp3?filename=smooth-jazz-saxophone-241588.mp3', category: 'international' },
+  { id: 'intl5', name: 'Electronic Chill', nameAr: 'إلكترونيك', icon: '🔊', url: 'https://cdn.pixabay.com/download/audio/2022/05/27/audio_1808fbf07a.mp3?filename=satisfying-lofi-for-focus-study-amp-calm-chill-hop-beats-20291.mp3', category: 'international' },
+  { id: 'intl6', name: 'Indie Folk', nameAr: 'إندي فولك', icon: '🪕', url: 'https://cdn.pixabay.com/download/audio/2023/07/30/audio_e00485a805.mp3?filename=weeknds-122592.mp3', category: 'international' },
+
+  // ── Instrumental / Melodies ──
+  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://cdn.pixabay.com/download/audio/2022/08/25/audio_4f3b0a816e.mp3?filename=acoustic-guitar-relaxing-and-calm-soft-background-music-21641.mp3', category: 'instrumental' },
+  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://cdn.pixabay.com/download/audio/2024/03/25/audio_ab0928a6d0.mp3?filename=inspiring-cinematic-ambient-116199.mp3', category: 'instrumental' },
+  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://cdn.pixabay.com/download/audio/2022/08/14/audio_925c8c83dc.mp3?filename=asian-meditation-music-19984.mp3', category: 'instrumental' },
+  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://cdn.pixabay.com/download/audio/2022/03/15/audio_c7f76a4af2.mp3?filename=inspiring-cinematic-ambient-116199.mp3', category: 'instrumental' },
+  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://cdn.pixabay.com/download/audio/2023/09/25/audio_0cbce02ee2.mp3?filename=ambient-classical-guitar-144998.mp3', category: 'instrumental' },
+  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://cdn.pixabay.com/download/audio/2022/11/22/audio_0f65b25edf.mp3?filename=lofi-study-112191.mp3', category: 'instrumental' },
 ];
 
 const FocusMusicStateContext = createContext<FocusMusicStateContextType | undefined>(undefined);

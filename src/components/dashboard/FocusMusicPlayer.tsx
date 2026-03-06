@@ -76,9 +76,11 @@ const FocusMusicPlayer = () => {
             <TabsTrigger value="piano" className="text-xs">🎹 بيانو</TabsTrigger>
             <TabsTrigger value="nature" className="text-xs">🌿 طبيعة</TabsTrigger>
             <TabsTrigger value="ambient" className="text-xs">🎵 أجواء</TabsTrigger>
+            <TabsTrigger value="international" className="text-xs">🌍 أجنبية</TabsTrigger>
+            <TabsTrigger value="instrumental" className="text-xs">🎻 ألحان</TabsTrigger>
           </TabsList>
           
-          {(['calm', 'piano', 'nature', 'ambient'] as const).map((category) => (
+          {(['calm', 'piano', 'nature', 'ambient', 'international', 'instrumental'] as const).map((category) => (
             <TabsContent key={category} value={category} className="mt-0">
               <div className="p-3 grid grid-cols-3 gap-2 max-h-56 overflow-y-auto">
                 {tracks
