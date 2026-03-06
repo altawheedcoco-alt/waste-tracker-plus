@@ -501,6 +501,40 @@ export default function PartnerAccountDetails() {
                 }}
                 onDepositUpdated={refreshDeposits}
               />
+              {/* Separated manual shipment entries */}
+              {manualShipmentEntries.filter((e: any) => !e.ledger_merged).length > 0 && (
+                <Card className="mt-4 border-dashed">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      قيود بيانات يدوية منفصلة ({manualShipmentEntries.filter((e: any) => !e.ledger_merged).length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {manualShipmentEntries.filter((e: any) => !e.ledger_merged).map((entry: any) => (
+                      <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border text-sm">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 gap-1 text-xs"
+                            onClick={async () => {
+                              await (supabase.from('accounting_ledger').update({ ledger_merged: true } as any) as any).eq('id', entry.id);
+                              queryClient.invalidateQueries({ queryKey: ['partner-manual-shipment-entries'] });
+                            }}
+                          >
+                            دمج مع الحسابات
+                          </Button>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{entry.description}</p>
+                          <p className="text-xs text-muted-foreground">{entry.reference_number} | {new Intl.NumberFormat('ar-EG').format(entry.amount)} ج.م</p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 
