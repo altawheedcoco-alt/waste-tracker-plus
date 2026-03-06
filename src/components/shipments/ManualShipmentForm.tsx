@@ -363,13 +363,126 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 8. Financial */}
+        {/* 8. Financial — Auto-calculated */}
         <Card>
           <CardHeader className="pb-3">
             <SectionHeader icon={DollarSign} title="البيانات المالية" />
           </CardHeader>
-          <CardContent className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <FormField label="السعر / التكلفة" value={form.price} onChange={v => updateField('price', v)} type="number" placeholder="0.00" />
+          <CardContent className="space-y-4">
+            {/* Row 1: Unit price × quantity = subtotal */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
+              <FormField label="سعر الوحدة (ج.م)" value={form.price_per_unit} onChange={v => {
+                updateField('price_per_unit', v);
+                const qty = parseFloat(form.quantity) || 0;
+                const unitPrice = parseFloat(v) || 0;
+                updateField('price', (qty * unitPrice).toFixed(2));
+              }} type="number" placeholder="0.00" />
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-right block">الكمية</Label>
+                <Input value={form.quantity} readOnly className="bg-muted/50 text-right" dir="rtl" />
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-medium text-right block">إجمالي السعر قبل الضرائب (ج.م)</Label>
+                <Input value={form.price || '0.00'} readOnly className="bg-muted/50 font-bold text-right" dir="rtl" />
+              </div>
+              <FormField label="مصاريف إضافية (ج.م)" value={form.extra_costs} onChange={v => updateField('extra_costs', v)} type="number" placeholder="0.00" />
+            </div>
+
+            {/* Row 2: Taxes */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* VAT 14% */}
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2 justify-end">
+                  <Label className="text-xs font-medium">ضريبة القيمة المضافة (14%)</Label>
+                  <Checkbox 
+                    checked={form.vat_enabled === 'true'} 
+                    onCheckedChange={(checked) => {
+                      updateField('vat_enabled', checked ? 'true' : 'false');
+                      if (!checked) updateField('vat_amount', '');
+                    }} 
+                  />
+                </div>
+                {form.vat_enabled === 'true' && (
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
+                    <Input 
+                      value={(() => {
+                        const base = parseFloat(form.price) || 0;
+                        const extra = parseFloat(form.extra_costs) || 0;
+                        return ((base + extra) * 0.14).toFixed(2);
+                      })()}
+                      readOnly className="bg-muted/50 text-right" dir="rtl" 
+                    />
+                  </div>
+                )}
+              </div>
+
+              {/* Labor tax */}
+              <div className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center gap-2 justify-end">
+                  <Label className="text-xs font-medium">ضريبة العمل / ضريبة أخرى</Label>
+                  <Checkbox 
+                    checked={form.labor_tax_enabled === 'true'} 
+                    onCheckedChange={(checked) => {
+                      updateField('labor_tax_enabled', checked ? 'true' : 'false');
+                      if (!checked) {
+                        updateField('labor_tax_percent', '');
+                        updateField('labor_tax_amount', '');
+                      }
+                    }} 
+                  />
+                </div>
+                {form.labor_tax_enabled === 'true' && (
+                  <div className="grid grid-cols-2 gap-2">
+                    <FormField label="النسبة %" value={form.labor_tax_percent} onChange={v => updateField('labor_tax_percent', v)} type="number" placeholder="0" />
+                    <div className="space-y-1.5">
+                      <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
+                      <Input 
+                        value={(() => {
+                          const base = parseFloat(form.price) || 0;
+                          const extra = parseFloat(form.extra_costs) || 0;
+                          const pct = parseFloat(form.labor_tax_percent) || 0;
+                          return ((base + extra) * pct / 100).toFixed(2);
+                        })()}
+                        readOnly className="bg-muted/50 text-right" dir="rtl" 
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Row 3: Total + Paid + Remaining */}
+            {(() => {
+              const base = parseFloat(form.price) || 0;
+              const extra = parseFloat(form.extra_costs) || 0;
+              const vat = form.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+              const laborPct = parseFloat(form.labor_tax_percent) || 0;
+              const laborTax = form.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+              const grandTotal = base + extra + vat + laborTax;
+              const paid = parseFloat(form.amount_paid) || 0;
+              const remaining = grandTotal - paid;
+
+              return (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 bg-muted/30 rounded-lg p-4 border">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-right block">💰 الإجمالي الكلي (ج.م)</Label>
+                    <Input value={grandTotal.toFixed(2)} readOnly className="bg-background font-bold text-lg text-right border-primary/30" dir="rtl" />
+                  </div>
+                  <FormField label="💵 المبلغ المدفوع (ج.م)" value={form.amount_paid} onChange={v => updateField('amount_paid', v)} type="number" placeholder="0.00" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-bold text-right block">📊 المتبقي (ج.م)</Label>
+                    <Input 
+                      value={remaining.toFixed(2)} 
+                      readOnly 
+                      className={`bg-background font-bold text-lg text-right ${remaining > 0 ? 'text-destructive border-destructive/30' : 'text-emerald-600 border-emerald-300'}`} 
+                      dir="rtl" 
+                    />
+                  </div>
+                </div>
+              );
+            })()}
+
             <FormField label="ملاحظات مالية" value={form.price_notes} onChange={v => updateField('price_notes', v)} placeholder="طريقة الدفع أو ملاحظات" />
           </CardContent>
         </Card>
