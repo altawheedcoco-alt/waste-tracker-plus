@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -15,7 +15,7 @@ import {
   FileCheck, AlertTriangle, ClipboardList
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ManualShipmentData } from '@/hooks/useManualShipmentDraft';
+import { ManualShipmentData, WasteItem, createEmptyWasteItem } from '@/hooks/useManualShipmentDraft';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
