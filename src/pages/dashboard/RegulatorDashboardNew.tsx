@@ -89,10 +89,10 @@ const RegulatorDashboardNew = () => {
           <TabsContent value="verify" className="mt-4">
             <RegulatorDocumentVerification />
           </TabsContent>
-        </Tabs>
-      </div>
-    </DashboardLayout>
+      </Tabs>
+    </div>
   );
+};
 };
 
 export default RegulatorDashboardNew;
