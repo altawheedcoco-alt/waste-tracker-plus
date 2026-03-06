@@ -330,6 +330,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Scale, labelAr: 'السجل التنظيمي', labelEn: 'Regulatory', path: '/dashboard/regulatory-updates', key: 'regulatory' },
       { icon: ClipboardList, labelAr: 'الخطط التشغيلية', labelEn: 'Plans', path: '/dashboard/operational-plans', key: 'operational-plans' },
       { icon: Users, labelAr: 'حسابات الشركاء', labelEn: 'Partner Accounts', path: '/dashboard/partner-accounts', key: 'partner-accounts', badgeKey: 'partner-accounts' },
+      { icon: BookOpen, labelAr: 'القوانين واللوائح', labelEn: 'Laws & Regulations', path: '/dashboard/laws-regulations', key: 'laws-regulations',
+        visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'admin'] },
     ],
   },
 
