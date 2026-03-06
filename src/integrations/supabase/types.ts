@@ -197,6 +197,8 @@ export type Database = {
           external_partner_id: string | null
           id: string
           invoice_id: string | null
+          ledger_merged: boolean | null
+          manual_draft_id: string | null
           organization_id: string
           partner_organization_id: string | null
           payment_proof_url: string | null
@@ -205,6 +207,7 @@ export type Database = {
           verified: boolean | null
           verified_at: string | null
           verified_by: string | null
+          waste_item_id: string | null
           weighbridge_photo_url: string | null
         }
         Insert: {
@@ -221,6 +224,8 @@ export type Database = {
           external_partner_id?: string | null
           id?: string
           invoice_id?: string | null
+          ledger_merged?: boolean | null
+          manual_draft_id?: string | null
           organization_id: string
           partner_organization_id?: string | null
           payment_proof_url?: string | null
@@ -229,6 +234,7 @@ export type Database = {
           verified?: boolean | null
           verified_at?: string | null
           verified_by?: string | null
+          waste_item_id?: string | null
           weighbridge_photo_url?: string | null
         }
         Update: {
@@ -245,6 +251,8 @@ export type Database = {
           external_partner_id?: string | null
           id?: string
           invoice_id?: string | null
+          ledger_merged?: boolean | null
+          manual_draft_id?: string | null
           organization_id?: string
           partner_organization_id?: string | null
           payment_proof_url?: string | null
@@ -253,6 +261,7 @@ export type Database = {
           verified?: boolean | null
           verified_at?: string | null
           verified_by?: string | null
+          waste_item_id?: string | null
           weighbridge_photo_url?: string | null
         }
         Relationships: [
@@ -282,6 +291,13 @@ export type Database = {
             columns: ["invoice_id"]
             isOneToOne: false
             referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "accounting_ledger_manual_draft_id_fkey"
+            columns: ["manual_draft_id"]
+            isOneToOne: false
+            referencedRelation: "manual_shipment_drafts"
             referencedColumns: ["id"]
           },
           {

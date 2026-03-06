@@ -169,6 +169,24 @@ export default function PartnerAccountDetails() {
     enabled: !!partnerId && !!organization?.id,
   });
 
+  // Fetch manual shipment ledger entries
+  const { data: manualShipmentEntries = [] } = useQuery({
+    queryKey: ['partner-manual-shipment-entries', partnerId, organization?.id],
+    queryFn: async () => {
+      if (!partnerId || !organization?.id) return [];
+      const { data, error } = await (supabase
+        .from('accounting_ledger')
+        .select('*') as any)
+        .eq('organization_id', organization.id)
+        .eq('entry_category', 'manual_shipment')
+        .not('manual_draft_id', 'is', null)
+        .order('entry_date', { ascending: false });
+      if (error) throw error;
+      return data || [];
+    },
+    enabled: !!partnerId && !!organization?.id,
+  });
+
   // Calculate shipment totals with pricing - exclude cancelled
   const shipmentsWithPricing = useMemo(() => {
     return shipments.map(shipment => {
@@ -311,9 +329,25 @@ export default function PartnerAccountDetails() {
       });
     });
 
+    // Add manual shipment entries (merged ones only by default)
+    manualShipmentEntries.forEach((entry: any) => {
+      if (!entry.ledger_merged) return; // Skip if user chose to separate
+      const amount = Number(entry.amount) || 0;
+      entries.push({
+        id: `manual-${entry.id}`,
+        date: entry.entry_date,
+        type: 'shipment',
+        description: `📋 ${entry.description || 'بيان يدوي'}`,
+        debit: isGenerator ? 0 : amount,
+        credit: isGenerator ? amount : 0,
+        reference: entry.reference_number || '-',
+        notes: entry.waste_item_id ? `صنف: ${entry.waste_item_id.substring(0, 8)}` : '',
+      });
+    });
+
     // Sort by date
     return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [shipmentsWithPricing, invoices, deposits, weightEntries, isGenerator]);
+  }, [shipmentsWithPricing, invoices, deposits, weightEntries, manualShipmentEntries, isGenerator]);
 
   if (partnerLoading) {
     return (
@@ -467,6 +501,40 @@ export default function PartnerAccountDetails() {
                 }}
                 onDepositUpdated={refreshDeposits}
               />
+              {/* Separated manual shipment entries */}
+              {manualShipmentEntries.filter((e: any) => !e.ledger_merged).length > 0 && (
+                <Card className="mt-4 border-dashed">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-muted-foreground" />
+                      قيود بيانات يدوية منفصلة ({manualShipmentEntries.filter((e: any) => !e.ledger_merged).length})
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-2">
+                    {manualShipmentEntries.filter((e: any) => !e.ledger_merged).map((entry: any) => (
+                      <div key={entry.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/30 border text-sm">
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 gap-1 text-xs"
+                            onClick={async () => {
+                              await (supabase.from('accounting_ledger').update({ ledger_merged: true } as any) as any).eq('id', entry.id);
+                              queryClient.invalidateQueries({ queryKey: ['partner-manual-shipment-entries'] });
+                            }}
+                          >
+                            دمج مع الحسابات
+                          </Button>
+                        </div>
+                        <div className="text-right">
+                          <p className="font-medium">{entry.description}</p>
+                          <p className="text-xs text-muted-foreground">{entry.reference_number} | {new Intl.NumberFormat('ar-EG').format(entry.amount)} ج.م</p>
+                        </div>
+                      </div>
+                    ))}
+                  </CardContent>
+                </Card>
+              )}
             </div>
           </TabsContent>
 

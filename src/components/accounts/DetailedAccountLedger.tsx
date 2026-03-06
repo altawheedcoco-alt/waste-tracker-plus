@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +51,8 @@ import {
   ExternalLink,
   Trash2,
   AlertTriangle,
+  Link,
+  Unlink,
 } from 'lucide-react';
 import { LedgerEntry } from './AccountLedger';
 import { cn } from '@/lib/utils';
@@ -134,6 +137,22 @@ export default function DetailedAccountLedger({
   const [editingNotesId, setEditingNotesId] = useState<string | null>(null);
   const [notesValue, setNotesValue] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
+
+  const [togglingMergeId, setTogglingMergeId] = useState<string | null>(null);
+
+  const handleToggleMerge = async (entryId: string, currentMerged: boolean) => {
+    const realId = entryId.replace('manual-', '');
+    setTogglingMergeId(realId);
+    try {
+      await (supabase.from('accounting_ledger').update({ ledger_merged: !currentMerged } as any) as any)
+        .eq('id', realId);
+      queryClient.invalidateQueries({ queryKey: ['partner-manual-shipment-entries'] });
+      toast.success(currentMerged ? 'تم فصل القيد من الحسابات المدمجة' : 'تم دمج القيد مع الحسابات');
+    } catch {
+      toast.error('فشل في تحديث حالة الدمج');
+    }
+    setTogglingMergeId(null);
+  };
 
   const { exportToPDF, previewPDF, printContent } = usePDFExport({
     filename: `سجل-حساب-${partnerName}`,
@@ -1242,6 +1261,33 @@ export default function DetailedAccountLedger({
                               <Pencil className="h-3 w-3 text-muted-foreground/50" />
                             </div>
                           )
+                        ) : entry.id.startsWith('manual-') ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 gap-1 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleMerge(entry.id, true);
+                                  }}
+                                  disabled={togglingMergeId === entry.id.replace('manual-', '')}
+                                >
+                                  {togglingMergeId === entry.id.replace('manual-', '') ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Unlink className="h-3 w-3" />
+                                  )}
+                                  فصل
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>فصل هذا القيد من حسابات الشريك</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
