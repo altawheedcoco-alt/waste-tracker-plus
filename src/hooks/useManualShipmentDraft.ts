@@ -428,36 +428,20 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
-      try {
-        // Fetch PDF as blob to avoid CORS issues
-        const response = await fetch(pdfUrl);
-        const blob = await response.blob();
-        const blobUrl = URL.createObjectURL(blob);
-
-        const printWindow = window.open(blobUrl, '_blank');
-        if (printWindow) {
-          printWindow.addEventListener('load', () => {
-            setTimeout(() => {
-              printWindow.print();
-              // Cleanup after print dialog closes
-              printWindow.addEventListener('afterprint', () => {
-                URL.revokeObjectURL(blobUrl);
-              });
-            }, 500);
-          });
-          toast.success('جارٍ فتح نافذة الطباعة...');
-        } else {
-          // Popup blocked fallback
-          const link = document.createElement('a');
-          link.href = blobUrl;
-          link.download = `manifest-${form.shipment_number || result.draftId}.pdf`;
-          link.click();
-          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-          toast.success('تم تنزيل الملف — افتحه للطباعة');
-        }
-      } catch {
-        window.open(pdfUrl, '_blank');
-        toast.success('تم فتح الملف — اطبعه من المتصفح');
+      // Open the actual stored PDF directly in browser's PDF viewer for printing
+      const printTab = window.open(pdfUrl, '_blank');
+      if (printTab) {
+        toast.success('تم فتح ملف PDF الأصلي — اطبعه من المتصفح (Ctrl+P)');
+      } else {
+        // Popup blocked — download instead
+        const link = document.createElement('a');
+        link.href = pdfUrl;
+        link.download = `manifest-${form.shipment_number || result.draftId}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('تم تنزيل ملف PDF — افتحه للطباعة');
       }
     } else {
       toast.error('فشل في توليد ملف PDF');
