@@ -380,6 +380,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/document-center" element={<DocumentCenter />} />
     <Route path="/dashboard/data-export" element={<DataExport />} />
     <Route path="/dashboard/regulatory-documents" element={<RegulatoryDocuments />} />
+    <Route path="/dashboard/laws-regulations" element={<LawsAndRegulations />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
