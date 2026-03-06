@@ -292,8 +292,26 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
           </div>
         </div>
 
+        {/* Legal Disclaimer Footer */}
+        <div className="mt-6 pt-3 border-t-2 border-gray-300 print:break-inside-avoid">
+          <div className="bg-gray-50 border border-gray-200 rounded p-3 mb-3">
+            <p className="text-[9px] font-bold text-gray-700 text-center mb-1">
+              ⚖️ إخلاء مسؤولية قانوني
+            </p>
+            <p className="text-[8px] text-gray-600 text-center leading-relaxed">
+              تُعتبر منصة iRecycle جهة وسيطة تقنية (Service Provider) تعمل على تنظيم وتسهيل الربط المعلوماتي واللوجستي.
+              المنصة غير مسؤولة قانوناً عن صحة البيانات المدخلة من قبل المستخدمين، أو عن طبيعة المواد المنقولة فعلياً،
+              أو عن أي مخالفات تشغيلية تقع من أطراف التعاقد خارج النطاق الرقمي للمنصة.
+              تقع المسؤولية القانونية والبيئية والضريبية الكاملة على عاتق المستخدم/المنشأة صاحب الحساب.
+            </p>
+            <p className="text-[8px] text-gray-500 text-center mt-1">
+              مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي — وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004
+            </p>
+          </div>
+        </div>
+
         {/* Footer */}
-        <div className="mt-8 pt-4 border-t text-center text-xs text-gray-500">
+        <div className="pt-2 text-center text-xs text-gray-500">
           <p>تم إنشاء هذه الوثيقة إلكترونياً من منصة iRecycle لإدارة المخلفات الصناعية</p>
           <p className="mt-1">
             رقم التحقق: EG-I-RECYCLE-TA-{acceptance.id.slice(0, 8).toUpperCase()}
