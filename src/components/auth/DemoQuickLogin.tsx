@@ -119,7 +119,6 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         window.location.href = '/dashboard';
         return;
       }
-      }
     } catch (err: any) {
       toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
     } finally {
