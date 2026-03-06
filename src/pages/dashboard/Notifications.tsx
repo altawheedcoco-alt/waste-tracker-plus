@@ -47,12 +47,98 @@ import {
   BarChart3,
   Shield,
   Stamp,
+  Sparkles,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { normalizeRelation } from '@/lib/supabaseHelpers';
+
+// Helper: translate metadata keys to Arabic descriptive labels
+const getMetadataFieldLabel = (key: string): { label: string } => {
+  const labels: Record<string, string> = {
+    // Shipment related
+    shipment_id: 'معرّف الشحنة',
+    shipment_number: 'رقم الشحنة',
+    waste_type: 'نوع المخلفات',
+    quantity: 'الكمية',
+    unit: 'وحدة القياس',
+    weight: 'الوزن',
+    status: 'الحالة',
+    previous_status: 'الحالة السابقة',
+    new_status: 'الحالة الجديدة',
+    // Parties
+    generator_name: 'الجهة المولدة',
+    transporter_name: 'الجهة الناقلة',
+    recycler_name: 'جهة المعالجة',
+    driver_name: 'اسم السائق',
+    partner_name: 'اسم الشريك',
+    organization_name: 'اسم المنظمة',
+    sender_name: 'المرسِل',
+    receiver_name: 'المستلِم',
+    // Location
+    pickup_location: 'موقع الاستلام',
+    delivery_location: 'موقع التسليم',
+    pickup_address: 'عنوان الاستلام',
+    delivery_address: 'عنوان التسليم',
+    location: 'الموقع',
+    // Vehicle & Driver
+    plate_number: 'رقم لوحة المركبة',
+    vehicle_type: 'نوع المركبة',
+    vehicle_plate: 'لوحة المركبة',
+    // Financial
+    amount: 'المبلغ',
+    total_amount: 'المبلغ الإجمالي',
+    invoice_number: 'رقم الفاتورة',
+    invoice_id: 'معرّف الفاتورة',
+    payment_method: 'طريقة الدفع',
+    currency: 'العملة',
+    price_per_unit: 'السعر لكل وحدة',
+    // Documents
+    document_type: 'نوع المستند',
+    document_name: 'اسم المستند',
+    document_id: 'معرّف المستند',
+    file_name: 'اسم الملف',
+    // Camera
+    camera_event_id: 'معرّف حدث الكاميرا',
+    photo_url: 'رابط الصورة',
+    confidence_score: 'نسبة الثقة',
+    arrival_verified: 'تم تأكيد الوصول',
+    // Reports
+    report_id: 'معرّف التقرير',
+    certificate_id: 'معرّف الشهادة',
+    recycling_rate: 'معدل إعادة التدوير',
+    // Dates
+    pickup_date: 'تاريخ الاستلام',
+    delivery_date: 'تاريخ التسليم',
+    due_date: 'تاريخ الاستحقاق',
+    expires_at: 'تاريخ الانتهاء',
+    scheduled_date: 'التاريخ المجدول',
+    // System
+    action: 'الإجراء',
+    reason: 'السبب',
+    notes: 'ملاحظات',
+    priority: 'الأولوية',
+    type: 'النوع',
+    category: 'التصنيف',
+    source: 'المصدر',
+    event_type: 'نوع الحدث',
+    // Generic
+    count: 'العدد',
+    total: 'الإجمالي',
+    percentage: 'النسبة',
+    description: 'الوصف',
+    reference: 'المرجع',
+    reference_number: 'الرقم المرجعي',
+    approval_status: 'حالة الموافقة',
+    request_type: 'نوع الطلب',
+    matched: 'تطابق',
+    verified: 'تم التحقق',
+  };
+  return { label: labels[key] || key };
+};
+
 
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
