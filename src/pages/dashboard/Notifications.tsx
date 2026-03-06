@@ -254,6 +254,9 @@ interface Notification {
   shipment_id: string | null;
   request_id: string | null;
   pdf_url?: string | null;
+  priority?: string | null;
+  metadata?: Record<string, any> | null;
+  organization_id?: string | null;
 }
 
 interface ShipmentDetails {
