@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { ManualShipmentData, WasteItem, createEmptyWasteItem } from '@/hooks/useManualShipmentDraft';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import WeighbridgeReceiptScanner from './WeighbridgeReceiptScanner';
 
 interface ManualShipmentFormProps {
   form: ManualShipmentData;
