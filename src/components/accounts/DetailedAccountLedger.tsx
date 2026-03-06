@@ -1261,6 +1261,33 @@ export default function DetailedAccountLedger({
                               <Pencil className="h-3 w-3 text-muted-foreground/50" />
                             </div>
                           )
+                        ) : entry.id.startsWith('manual-') ? (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7 gap-1 text-xs"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleToggleMerge(entry.id, true);
+                                  }}
+                                  disabled={togglingMergeId === entry.id.replace('manual-', '')}
+                                >
+                                  {togglingMergeId === entry.id.replace('manual-', '') ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    <Unlink className="h-3 w-3" />
+                                  )}
+                                  فصل
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>فصل هذا القيد من حسابات الشريك</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         ) : (
                           <span className="text-muted-foreground">-</span>
                         )}
