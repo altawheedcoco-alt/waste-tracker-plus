@@ -17783,6 +17783,139 @@ export type Database = {
           },
         ]
       }
+      license_renewal_requests: {
+        Row: {
+          auto_requested: boolean | null
+          completed_at: string | null
+          created_at: string
+          current_license_expiry: string | null
+          current_license_number: string | null
+          documents: Json | null
+          fee_amount: number | null
+          fee_confirmed_by: string | null
+          fee_paid_at: string | null
+          fee_payment_method: string | null
+          fee_payment_proof_url: string | null
+          id: string
+          license_id: string | null
+          license_type: string | null
+          new_license_expiry: string | null
+          new_license_number: string | null
+          notes: string | null
+          organization_id: string
+          regulator_level_code: string
+          regulator_organization_id: string
+          rejection_reason: string | null
+          request_type: string
+          requested_at: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          auto_requested?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          current_license_expiry?: string | null
+          current_license_number?: string | null
+          documents?: Json | null
+          fee_amount?: number | null
+          fee_confirmed_by?: string | null
+          fee_paid_at?: string | null
+          fee_payment_method?: string | null
+          fee_payment_proof_url?: string | null
+          id?: string
+          license_id?: string | null
+          license_type?: string | null
+          new_license_expiry?: string | null
+          new_license_number?: string | null
+          notes?: string | null
+          organization_id: string
+          regulator_level_code: string
+          regulator_organization_id: string
+          rejection_reason?: string | null
+          request_type?: string
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          auto_requested?: boolean | null
+          completed_at?: string | null
+          created_at?: string
+          current_license_expiry?: string | null
+          current_license_number?: string | null
+          documents?: Json | null
+          fee_amount?: number | null
+          fee_confirmed_by?: string | null
+          fee_paid_at?: string | null
+          fee_payment_method?: string | null
+          fee_payment_proof_url?: string | null
+          id?: string
+          license_id?: string | null
+          license_type?: string | null
+          new_license_expiry?: string | null
+          new_license_number?: string | null
+          notes?: string | null
+          organization_id?: string
+          regulator_level_code?: string
+          regulator_organization_id?: string
+          rejection_reason?: string | null
+          request_type?: string
+          requested_at?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "license_renewal_requests_license_id_fkey"
+            columns: ["license_id"]
+            isOneToOne: false
+            referencedRelation: "legal_licenses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_renewal_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "license_renewal_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "license_renewal_requests_regulator_level_code_fkey"
+            columns: ["regulator_level_code"]
+            isOneToOne: false
+            referencedRelation: "regulator_levels"
+            referencedColumns: ["level_code"]
+          },
+          {
+            foreignKeyName: "license_renewal_requests_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "license_renewal_requests_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lms_categories: {
         Row: {
           color: string | null
@@ -26575,6 +26708,115 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "regulator_levels"
             referencedColumns: ["level_code"]
+          },
+        ]
+      }
+      regulatory_attestations: {
+        Row: {
+          attestation_number: string
+          attestation_type: string
+          created_at: string
+          id: string
+          issued_at: string
+          issued_by: string | null
+          max_validity_days: number
+          notes: string | null
+          organization_data: Json
+          organization_id: string
+          regulator_level_code: string
+          regulator_organization_id: string
+          renewal_request_id: string | null
+          revocation_reason: string | null
+          revoked_at: string | null
+          revoked_by: string | null
+          status: string
+          updated_at: string
+          valid_until: string
+        }
+        Insert: {
+          attestation_number: string
+          attestation_type: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          max_validity_days?: number
+          notes?: string | null
+          organization_data?: Json
+          organization_id: string
+          regulator_level_code: string
+          regulator_organization_id: string
+          renewal_request_id?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          updated_at?: string
+          valid_until: string
+        }
+        Update: {
+          attestation_number?: string
+          attestation_type?: string
+          created_at?: string
+          id?: string
+          issued_at?: string
+          issued_by?: string | null
+          max_validity_days?: number
+          notes?: string | null
+          organization_data?: Json
+          organization_id?: string
+          regulator_level_code?: string
+          regulator_organization_id?: string
+          renewal_request_id?: string | null
+          revocation_reason?: string | null
+          revoked_at?: string | null
+          revoked_by?: string | null
+          status?: string
+          updated_at?: string
+          valid_until?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "regulatory_attestations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_attestations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_attestations_regulator_level_code_fkey"
+            columns: ["regulator_level_code"]
+            isOneToOne: false
+            referencedRelation: "regulator_levels"
+            referencedColumns: ["level_code"]
+          },
+          {
+            foreignKeyName: "regulatory_attestations_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "regulatory_attestations_regulator_organization_id_fkey"
+            columns: ["regulator_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "regulatory_attestations_renewal_request_id_fkey"
+            columns: ["renewal_request_id"]
+            isOneToOne: false
+            referencedRelation: "license_renewal_requests"
+            referencedColumns: ["id"]
           },
         ]
       }
@@ -36608,6 +36850,7 @@ export type Database = {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
       }
+      generate_attestation_number: { Args: never; Returns: string }
       generate_compliance_cert_number: { Args: never; Returns: string }
       generate_contract_verification_code: { Args: never; Returns: string }
       generate_invitation_token: { Args: never; Returns: string }
