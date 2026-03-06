@@ -44,7 +44,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList } from 'lucide-react';
 
 // Lazy load heavy tab content
 
@@ -90,6 +90,7 @@ const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWa
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
 const TransporterDeclarations = lazy(() => import('@/components/transporter/TransporterDeclarations'));
+const TransporterAnnualPlan = lazy(() => import('@/components/transporter/TransporterAnnualPlan'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -122,6 +123,7 @@ const tabItems = [
   { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
   { value: 'licenses', label: 'التراخيص', icon: FileCheck },
   { value: 'declarations', label: 'الإقرارات', icon: FileText },
+  { value: 'annual_plan', label: 'الخطة السنوية', icon: ClipboardList },
   { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
 
@@ -455,6 +457,14 @@ const TransporterDashboard = () => {
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في الإقرارات">
                 <TransporterDeclarations />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="annual_plan" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في الخطة السنوية">
+                <TransporterAnnualPlan />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
