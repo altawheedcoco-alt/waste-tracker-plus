@@ -188,5 +188,3 @@ export const useOrganizationLicenses = (organizationId?: string) => {
     enabled: !!organizationId,
   });
 };
-  });
-};
