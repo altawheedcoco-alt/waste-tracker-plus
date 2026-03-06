@@ -53,6 +53,14 @@ export interface ManualShipmentData {
   delivery_date: string;
   shipment_type: string;
   price: string;
+  price_per_unit: string;
+  vat_enabled: string;
+  vat_amount: string;
+  labor_tax_enabled: string;
+  labor_tax_percent: string;
+  labor_tax_amount: string;
+  extra_costs: string;
+  amount_paid: string;
   price_notes: string;
   notes: string;
   special_instructions: string;
@@ -71,7 +79,10 @@ const emptyForm: ManualShipmentData = {
   quantity: '', unit: 'ton', packaging_method: '', disposal_method: '',
   driver_name: '', driver_phone: '', driver_license: '', vehicle_plate: '', vehicle_type: '',
   pickup_address: '', delivery_address: '', pickup_date: '', delivery_date: '',
-  shipment_type: 'regular', price: '', price_notes: '', notes: '', special_instructions: '',
+  shipment_type: 'regular', price: '', price_per_unit: '', 
+  vat_enabled: 'false', vat_amount: '', labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '',
+  extra_costs: '', amount_paid: '',
+  price_notes: '', notes: '', special_instructions: '',
 };
 
 export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
@@ -194,6 +205,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       delivery_date: data.delivery_date || '',
       shipment_type: data.shipment_type || 'regular',
       price: data.price?.toString() || '',
+      price_per_unit: data.price_per_unit?.toString() || '',
+      vat_enabled: data.vat_enabled?.toString() || 'false',
+      vat_amount: data.vat_amount?.toString() || '',
+      labor_tax_enabled: data.labor_tax_enabled?.toString() || 'false',
+      labor_tax_percent: data.labor_tax_percent?.toString() || '',
+      labor_tax_amount: data.labor_tax_amount?.toString() || '',
+      extra_costs: data.extra_costs?.toString() || '',
+      amount_paid: data.amount_paid?.toString() || '',
       price_notes: data.price_notes || '',
       notes: data.notes || '',
       special_instructions: data.special_instructions || '',
@@ -259,6 +278,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       delivery_date: form.delivery_date || null,
       shipment_type: form.shipment_type || 'regular',
       price: form.price ? parseFloat(form.price) : null,
+      price_per_unit: form.price_per_unit ? parseFloat(form.price_per_unit) : null,
+      vat_enabled: form.vat_enabled === 'true',
+      vat_amount: form.vat_amount ? parseFloat(form.vat_amount) : null,
+      labor_tax_enabled: form.labor_tax_enabled === 'true',
+      labor_tax_percent: form.labor_tax_percent ? parseFloat(form.labor_tax_percent) : null,
+      labor_tax_amount: form.labor_tax_amount ? parseFloat(form.labor_tax_amount) : null,
+      extra_costs: form.extra_costs ? parseFloat(form.extra_costs) : null,
+      amount_paid: form.amount_paid ? parseFloat(form.amount_paid) : null,
       price_notes: form.price_notes || null,
       notes: form.notes || null,
       special_instructions: form.special_instructions || null,
