@@ -847,6 +847,66 @@ const Notifications = () => {
                             </div>
                           )}
 
+                          {/* Priority Badge */}
+                          {notification.priority && notification.priority !== 'normal' && (
+                            <Badge 
+                              variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'} 
+                              className="text-[10px] gap-1"
+                            >
+                              <AlertCircle className="w-3 h-3" />
+                              {notification.priority === 'high' ? 'أولوية عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'أولوية منخفضة' : notification.priority}
+                            </Badge>
+                          )}
+
+                          {/* Metadata Analysis Section */}
+                          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
+                            <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 mt-1 border border-border/30">
+                              <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                بيانات تفصيلية
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                {Object.entries(notification.metadata).map(([key, value]) => {
+                                  if (value === null || value === undefined || value === '') return null;
+                                  // Skip nested objects/arrays for now (show simple values)
+                                  if (typeof value === 'object' && !Array.isArray(value)) return null;
+                                  
+                                  const fieldLabel = getMetadataFieldLabel(key);
+                                  const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
+                                  
+                                  return (
+                                    <div key={key} className="flex items-start gap-1.5 text-xs">
+                                      <span className="text-[10px] text-muted-foreground/70 shrink-0 min-w-[60px]">{fieldLabel.label}:</span>
+                                      <span className="font-medium text-foreground/80 truncate" title={displayValue}>{displayValue}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {/* Nested metadata objects */}
+                              {Object.entries(notification.metadata).map(([key, value]) => {
+                                if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+                                const fieldLabel = getMetadataFieldLabel(key);
+                                return (
+                                  <div key={key} className="pt-1 border-t border-border/20">
+                                    <p className="text-[10px] text-muted-foreground/70 mb-1">{fieldLabel.label}:</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                      {Object.entries(value as Record<string, any>).map(([subKey, subVal]) => {
+                                        if (subVal === null || subVal === undefined || subVal === '') return null;
+                                        const subLabel = getMetadataFieldLabel(subKey);
+                                        return (
+                                          <div key={subKey} className="flex items-start gap-1.5 text-xs">
+                                            <span className="text-[10px] text-muted-foreground/70 shrink-0">{subLabel.label}:</span>
+                                            <span className="font-medium text-foreground/80 truncate">{String(subVal)}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          )}
+
                           {/* Time + Quick Action */}
                           <div className="flex items-center justify-between gap-2">
                             <div className="flex items-center gap-1 text-xs text-muted-foreground">
