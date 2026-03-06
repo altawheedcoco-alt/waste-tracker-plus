@@ -278,92 +278,130 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 5. Waste Info */}
+        {/* 5. Waste Items (Multi) */}
         <Card>
           <CardHeader className="pb-3">
-            <SectionHeader icon={Package} title="بيانات المخلفات" />
+            <div className="flex items-center justify-between">
+              <Button type="button" variant="outline" size="sm" onClick={addWasteItem} className="gap-1">
+                <Plus className="w-4 h-4" /> إضافة مخلف
+              </Button>
+              <SectionHeader icon={Package} title={`بيانات المخلفات (${form.waste_items.length})`} />
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
-                <Select value={form.waste_type} onValueChange={v => updateField('waste_type', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر نوع المخلف" /></SelectTrigger>
-                  <SelectContent>
-                    {wasteTypes.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+          <CardContent className="space-y-6">
+            {form.waste_items.map((item, idx) => (
+              <div key={item.id} className="border rounded-lg p-4 space-y-4 relative bg-muted/10">
+                <div className="flex items-center justify-between">
+                  {form.waste_items.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeWasteItem(idx)} className="text-destructive hover:bg-destructive/10 h-7 w-7">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Badge variant="outline" className="text-xs">مخلف {idx + 1}</Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
+                    <Select value={item.waste_type} onValueChange={v => updateWasteItem(idx, 'waste_type', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر نوع المخلف" /></SelectTrigger>
+                      <SelectContent>
+                        {wasteTypes.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">حالة المخلف</Label>
+                    <Select value={item.waste_state} onValueChange={v => updateWasteItem(idx, 'waste_state', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="solid">صلب</SelectItem>
+                        <SelectItem value="liquid">سائل</SelectItem>
+                        <SelectItem value="gas">غازي</SelectItem>
+                        <SelectItem value="sludge">حمأة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">مستوى الخطورة</Label>
+                    <Select value={item.hazard_level} onValueChange={v => updateWasteItem(idx, 'hazard_level', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="non_hazardous">غير خطر</SelectItem>
+                        <SelectItem value="hazardous">خطر</SelectItem>
+                        <SelectItem value="highly_hazardous">شديد الخطورة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <FormField label="الكمية" value={item.quantity} onChange={v => updateWasteItem(idx, 'quantity', v)} placeholder="0.00" type="number" required />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">الوحدة</Label>
+                    <Select value={item.unit} onValueChange={v => updateWasteItem(idx, 'unit', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ton">طن</SelectItem>
+                        <SelectItem value="kg">كيلوجرام</SelectItem>
+                        <SelectItem value="liter">لتر</SelectItem>
+                        <SelectItem value="m3">متر مكعب</SelectItem>
+                        <SelectItem value="unit">وحدة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">طريقة التعبئة</Label>
+                    <Select value={item.packaging_method} onValueChange={v => updateWasteItem(idx, 'packaging_method', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="packaged">معبأ</SelectItem>
+                        <SelectItem value="unpackaged">غير معبأ</SelectItem>
+                        <SelectItem value="drums">براميل</SelectItem>
+                        <SelectItem value="bags">أكياس</SelectItem>
+                        <SelectItem value="containers">حاويات</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField label="وصف المخلف" value={item.waste_description} onChange={v => updateWasteItem(idx, 'waste_description', v)} placeholder="وصف تفصيلي للمخلف" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">طريقة المعالجة / التخلص</Label>
+                    <Select value={item.disposal_method} onValueChange={v => updateWasteItem(idx, 'disposal_method', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectContent>
+                        {disposalMethods.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Per-item financials */}
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <FormField label="سعر الوحدة (ج.م)" value={item.price_per_unit} onChange={v => updateWasteItem(idx, 'price_per_unit', v)} type="number" placeholder="0.00" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground text-right block">إجمالي الصنف</Label>
+                    <Input value={item.price || '0.00'} readOnly className="bg-muted/50 font-bold text-right" dir="rtl" />
+                  </div>
+                  <FormField label="مصاريف إضافية" value={item.extra_costs} onChange={v => updateWasteItem(idx, 'extra_costs', v)} type="number" placeholder="0.00" />
+                  <div className="space-y-1.5 flex items-end gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1 justify-end mb-1">
+                        <Label className="text-xs">ض.ق.م 14%</Label>
+                        <Checkbox checked={item.vat_enabled === 'true'} onCheckedChange={c => updateWasteItem(idx, 'vat_enabled', c ? 'true' : 'false')} />
+                      </div>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Label className="text-xs">ض.عمل</Label>
+                        <Checkbox checked={item.labor_tax_enabled === 'true'} onCheckedChange={c => updateWasteItem(idx, 'labor_tax_enabled', c ? 'true' : 'false')} />
+                      </div>
+                      {item.labor_tax_enabled === 'true' && (
+                        <FormField label="نسبة %" value={item.labor_tax_percent} onChange={v => updateWasteItem(idx, 'labor_tax_percent', v)} type="number" placeholder="0" />
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">حالة المخلف</Label>
-                <Select value={form.waste_state} onValueChange={v => updateField('waste_state', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solid">صلب</SelectItem>
-                    <SelectItem value="liquid">سائل</SelectItem>
-                    <SelectItem value="gas">غازي</SelectItem>
-                    <SelectItem value="sludge">حمأة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">مستوى الخطورة</Label>
-                <Select value={form.hazard_level} onValueChange={v => updateField('hazard_level', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="non_hazardous">غير خطر</SelectItem>
-                    <SelectItem value="hazardous">خطر</SelectItem>
-                    <SelectItem value="highly_hazardous">شديد الخطورة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <FormField label="الكمية" value={form.quantity} onChange={v => {
-                updateField('quantity', v);
-                const qty = parseFloat(v) || 0;
-                const unitPrice = parseFloat(form.price_per_unit) || 0;
-                if (unitPrice > 0) updateField('price', (qty * unitPrice).toFixed(2));
-              }} placeholder="0.00" type="number" required />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">الوحدة</Label>
-                <Select value={form.unit} onValueChange={v => updateField('unit', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ton">طن</SelectItem>
-                    <SelectItem value="kg">كيلوجرام</SelectItem>
-                    <SelectItem value="liter">لتر</SelectItem>
-                    <SelectItem value="m3">متر مكعب</SelectItem>
-                    <SelectItem value="unit">وحدة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">طريقة التعبئة</Label>
-                <Select value={form.packaging_method} onValueChange={v => updateField('packaging_method', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="packaged">معبأ</SelectItem>
-                    <SelectItem value="unpackaged">غير معبأ</SelectItem>
-                    <SelectItem value="drums">براميل</SelectItem>
-                    <SelectItem value="bags">أكياس</SelectItem>
-                    <SelectItem value="containers">حاويات</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="وصف المخلف" value={form.waste_description} onChange={v => updateField('waste_description', v)} placeholder="وصف تفصيلي للمخلف" />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">طريقة المعالجة / التخلص</Label>
-                <Select value={form.disposal_method} onValueChange={v => updateField('disposal_method', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
-                  <SelectContent>
-                    {disposalMethods.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            ))}
           </CardContent>
         </Card>
 
