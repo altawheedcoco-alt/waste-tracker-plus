@@ -103,6 +103,9 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     setLoading(email);
     onLoginStart?.();
     try {
+      // Sign out first to clear any stale session/cache
+      await supabase.auth.signOut();
+      
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {
@@ -112,6 +115,10 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         }
       } else {
         toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
+        // Force full page reload to clear all cached data
+        window.location.href = '/dashboard';
+        return;
+      }
       }
     } catch (err: any) {
       toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
