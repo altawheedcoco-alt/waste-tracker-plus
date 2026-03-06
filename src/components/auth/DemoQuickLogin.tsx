@@ -5,6 +5,7 @@ import {
   Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award,
   ClipboardCheck, Users, Landmark, Leaf, HardHat,
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
