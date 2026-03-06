@@ -188,6 +188,7 @@ const WaPilotManagement = lazy(() => import("@/pages/dashboard/WaPilotManagement
 const DocumentCenter = lazy(() => import("@/pages/dashboard/DocumentCenter"));
 const DataExport = lazy(() => import("@/pages/dashboard/DataExport"));
 const RegulatoryDocuments = lazy(() => import("@/pages/dashboard/RegulatoryDocuments"));
+const LawsAndRegulations = lazy(() => import("@/pages/dashboard/LawsAndRegulations"));
 
 export const dashboardRoutes = (
   <>
