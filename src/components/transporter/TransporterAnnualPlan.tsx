@@ -193,6 +193,16 @@ export default function TransporterAnnualPlan() {
             { role: 'مشرف', count: 0, training_status: '' },
           ],
         }));
+        // Auto-generate org structure
+        const defaultOrgStructure: OrgStructureEntry[] = [
+          { department: 'الإدارة العليا', position: 'صاحب الشركة / المدير العام', person_name: (org as any)?.representative_name || '', phone: (org as any)?.phone || '', responsibilities: 'الإشراف العام واتخاذ القرارات الاستراتيجية' },
+          { department: 'الإدارة العليا', position: 'المدير التنفيذي', person_name: '', phone: '', responsibilities: 'إدارة العمليات اليومية والتنسيق بين الإدارات' },
+          { department: 'الإدارة الفنية/التشغيلية', position: 'مدير العمليات', person_name: '', phone: '', responsibilities: 'إدارة عمليات جمع ونقل المخلفات والنطاق المكاني' },
+          { department: 'الإدارة الفنية/التشغيلية', position: 'مشرف الأسطول', person_name: '', phone: '', responsibilities: 'متابعة صلاحية المركبات وجدول الصيانة' },
+          { department: 'إدارة السلامة والصحة المهنية', position: 'مسؤول السلامة', person_name: '', phone: '', responsibilities: 'الالتزام بمعايير تداول المخلفات والاشتراطات البيئية' },
+          { department: 'نظام تتبع المعدات', position: 'مسؤول التتبع', person_name: '', phone: '', responsibilities: 'متابعة حركة المركبات وضمان نقلها للمدافن والمحطات المعتمدة' },
+        ];
+        setForm(prev => ({ ...prev, org_structure: defaultOrgStructure }));
       }
 
       // Fetch partners (recyclers/disposal as disposal destinations, subcontractors)
@@ -348,7 +358,7 @@ export default function TransporterAnnualPlan() {
         waste_categories: form.waste_categories,
         company_data: form.company_data,
         vehicles_data: form.vehicles,
-        operations_data: { routes: form.routes },
+        operations_data: { routes: form.routes, org_structure: form.org_structure },
         disposal_plan: form.disposal_plan,
         safety_procedures: form.safety_procedures,
         workforce_data: { workforce: form.workforce },
@@ -400,6 +410,7 @@ export default function TransporterAnnualPlan() {
       plan_type: plan.plan_type,
       waste_categories: plan.waste_categories || [],
       company_data: { name: cd.name || '', commercial_register: cd.commercial_register || '', tax_card: cd.tax_card || '', previous_license: cd.previous_license || '', address: cd.address || '', representative: cd.representative || '', phone: cd.phone || '', email: cd.email || '' },
+      org_structure: od.org_structure || [],
       vehicles: plan.vehicles_data || [],
       routes: od.routes || [],
       disposal_plan: { disposal_site: dp.disposal_site || '', disposal_type: dp.disposal_type || '', contract_reference: dp.contract_reference || '' },
@@ -411,8 +422,19 @@ export default function TransporterAnnualPlan() {
     setShowCreate(true);
   };
 
+  const addOrgEntry = () => setForm(prev => ({ ...prev, org_structure: [...prev.org_structure, { department: '', position: '', person_name: '', phone: '', responsibilities: '' }] }));
+  const removeOrgEntry = (i: number) => setForm(prev => ({ ...prev, org_structure: prev.org_structure.filter((_, idx) => idx !== i) }));
+  const updateOrgEntry = (i: number, field: keyof OrgStructureEntry, value: string) => {
+    setForm(prev => {
+      const os = [...prev.org_structure];
+      os[i] = { ...os[i], [field]: value };
+      return { ...prev, org_structure: os };
+    });
+  };
+
   const sections = [
     { id: 'company', label: 'بيانات الشركة', icon: Factory },
+    { id: 'org_structure', label: 'الهيكل التنظيمي', icon: Users },
     { id: 'waste', label: 'أنواع المخلفات', icon: ClipboardList },
     { id: 'vehicles', label: 'المعدات والمركبات', icon: Truck },
     { id: 'routes', label: 'المسارات التشغيلية', icon: MapPin },
