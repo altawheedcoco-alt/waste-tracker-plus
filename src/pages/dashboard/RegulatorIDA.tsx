@@ -2,7 +2,7 @@ import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Factory, FileCheck, HardHat, ClipboardCheck, Building2, BarChart3, AlertTriangle, TrendingUp, Shield, Recycle } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';

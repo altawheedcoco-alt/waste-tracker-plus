@@ -38,7 +38,7 @@ const RegulatorWMRA = () => {
     queryFn: async () => {
       const [total, pending, delivered] = await Promise.all([
         supabase.from('shipments').select('id', { count: 'exact', head: true }),
-        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
+        supabase.from('shipments').select('id', { count: 'exact', head: true }).in('status', ['new', 'collecting', 'in_transit', 'confirmed']),
         supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('status', 'delivered'),
       ]);
       return {
