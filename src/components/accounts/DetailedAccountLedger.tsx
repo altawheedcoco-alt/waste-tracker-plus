@@ -137,6 +137,22 @@ export default function DetailedAccountLedger({
   const [notesValue, setNotesValue] = useState('');
   const [savingNotes, setSavingNotes] = useState(false);
 
+  const [togglingMergeId, setTogglingMergeId] = useState<string | null>(null);
+
+  const handleToggleMerge = async (entryId: string, currentMerged: boolean) => {
+    const realId = entryId.replace('manual-', '');
+    setTogglingMergeId(realId);
+    try {
+      await (supabase.from('accounting_ledger').update({ ledger_merged: !currentMerged } as any) as any)
+        .eq('id', realId);
+      queryClient.invalidateQueries({ queryKey: ['partner-manual-shipment-entries'] });
+      toast.success(currentMerged ? 'تم فصل القيد من الحسابات المدمجة' : 'تم دمج القيد مع الحسابات');
+    } catch {
+      toast.error('فشل في تحديث حالة الدمج');
+    }
+    setTogglingMergeId(null);
+  };
+
   const { exportToPDF, previewPDF, printContent } = usePDFExport({
     filename: `سجل-حساب-${partnerName}`,
     orientation: 'portrait',
