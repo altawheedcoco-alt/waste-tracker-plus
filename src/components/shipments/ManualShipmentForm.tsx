@@ -1,4 +1,4 @@
-import { useRef, useMemo } from 'react';
+import { useRef, useMemo, useCallback } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -10,18 +10,19 @@ import { Separator } from '@/components/ui/separator';
 import { MessageCircle } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { 
-  Save, Download, Share2, Send, RotateCcw, FileText, Printer,
+  Save, Download, Share2, Send, RotateCcw, FileText, Printer, Plus, Trash2,
   User, Truck, Factory, Package, MapPin, Calendar, Scale, DollarSign, 
   FileCheck, AlertTriangle, ClipboardList
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { ManualShipmentData } from '@/hooks/useManualShipmentDraft';
+import { ManualShipmentData, WasteItem, createEmptyWasteItem } from '@/hooks/useManualShipmentDraft';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
 interface ManualShipmentFormProps {
   form: ManualShipmentData;
   updateField: (field: keyof ManualShipmentData, value: string) => void;
+  setForm: React.Dispatch<React.SetStateAction<ManualShipmentData>>;
   saving: boolean;
   savedShareCode: string | null;
   onSave: () => Promise<{ shareCode: string; draftId: string } | null>;
@@ -62,11 +63,36 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
 );
 
 const ManualShipmentForm = ({
-  form, updateField, saving, savedShareCode,
+  form, updateField, setForm, saving, savedShareCode,
   onSave, onSubmit, onReset, onExportPDF,
   onSaveAndDownloadPDF, onSaveAndSendWhatsApp, onSaveAndPrintPDF,
 }: ManualShipmentFormProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+
+  const updateWasteItem = useCallback((index: number, field: keyof WasteItem, value: string) => {
+    setForm(prev => {
+      const items = [...prev.waste_items];
+      items[index] = { ...items[index], [field]: value };
+      // Auto-calc price for this item
+      if (field === 'price_per_unit' || field === 'quantity') {
+        const qty = parseFloat(field === 'quantity' ? value : items[index].quantity) || 0;
+        const unitPrice = parseFloat(field === 'price_per_unit' ? value : items[index].price_per_unit) || 0;
+        items[index].price = (qty * unitPrice).toFixed(2);
+      }
+      return { ...prev, waste_items: items };
+    });
+  }, [setForm]);
+
+  const addWasteItem = useCallback(() => {
+    setForm(prev => ({ ...prev, waste_items: [...prev.waste_items, createEmptyWasteItem()] }));
+  }, [setForm]);
+
+  const removeWasteItem = useCallback((index: number) => {
+    setForm(prev => {
+      if (prev.waste_items.length <= 1) return prev;
+      return { ...prev, waste_items: prev.waste_items.filter((_, i) => i !== index) };
+    });
+  }, [setForm]);
 
   const handleShare = async () => {
     const code = savedShareCode || await onSave();
@@ -252,92 +278,130 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 5. Waste Info */}
+        {/* 5. Waste Items (Multi) */}
         <Card>
           <CardHeader className="pb-3">
-            <SectionHeader icon={Package} title="بيانات المخلفات" />
+            <div className="flex items-center justify-between">
+              <Button type="button" variant="outline" size="sm" onClick={addWasteItem} className="gap-1">
+                <Plus className="w-4 h-4" /> إضافة مخلف
+              </Button>
+              <SectionHeader icon={Package} title={`بيانات المخلفات (${form.waste_items.length})`} />
+            </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
-                <Select value={form.waste_type} onValueChange={v => updateField('waste_type', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر نوع المخلف" /></SelectTrigger>
-                  <SelectContent>
-                    {wasteTypes.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
+          <CardContent className="space-y-6">
+            {form.waste_items.map((item, idx) => (
+              <div key={item.id} className="border rounded-lg p-4 space-y-4 relative bg-muted/10">
+                <div className="flex items-center justify-between">
+                  {form.waste_items.length > 1 && (
+                    <Button type="button" variant="ghost" size="icon" onClick={() => removeWasteItem(idx)} className="text-destructive hover:bg-destructive/10 h-7 w-7">
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                  <Badge variant="outline" className="text-xs">مخلف {idx + 1}</Badge>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
+                    <Select value={item.waste_type} onValueChange={v => updateWasteItem(idx, 'waste_type', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر نوع المخلف" /></SelectTrigger>
+                      <SelectContent>
+                        {wasteTypes.map(w => <SelectItem key={w.value} value={w.value}>{w.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">حالة المخلف</Label>
+                    <Select value={item.waste_state} onValueChange={v => updateWasteItem(idx, 'waste_state', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="solid">صلب</SelectItem>
+                        <SelectItem value="liquid">سائل</SelectItem>
+                        <SelectItem value="gas">غازي</SelectItem>
+                        <SelectItem value="sludge">حمأة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">مستوى الخطورة</Label>
+                    <Select value={item.hazard_level} onValueChange={v => updateWasteItem(idx, 'hazard_level', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="non_hazardous">غير خطر</SelectItem>
+                        <SelectItem value="hazardous">خطر</SelectItem>
+                        <SelectItem value="highly_hazardous">شديد الخطورة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <FormField label="الكمية" value={item.quantity} onChange={v => updateWasteItem(idx, 'quantity', v)} placeholder="0.00" type="number" required />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">الوحدة</Label>
+                    <Select value={item.unit} onValueChange={v => updateWasteItem(idx, 'unit', v)}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="ton">طن</SelectItem>
+                        <SelectItem value="kg">كيلوجرام</SelectItem>
+                        <SelectItem value="liter">لتر</SelectItem>
+                        <SelectItem value="m3">متر مكعب</SelectItem>
+                        <SelectItem value="unit">وحدة</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">طريقة التعبئة</Label>
+                    <Select value={item.packaging_method} onValueChange={v => updateWasteItem(idx, 'packaging_method', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="packaged">معبأ</SelectItem>
+                        <SelectItem value="unpackaged">غير معبأ</SelectItem>
+                        <SelectItem value="drums">براميل</SelectItem>
+                        <SelectItem value="bags">أكياس</SelectItem>
+                        <SelectItem value="containers">حاويات</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <FormField label="وصف المخلف" value={item.waste_description} onChange={v => updateWasteItem(idx, 'waste_description', v)} placeholder="وصف تفصيلي للمخلف" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs font-medium text-right block">طريقة المعالجة / التخلص</Label>
+                    <Select value={item.disposal_method} onValueChange={v => updateWasteItem(idx, 'disposal_method', v)}>
+                      <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
+                      <SelectContent>
+                        {disposalMethods.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Per-item financials */}
+                <Separator />
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                  <FormField label="سعر الوحدة (ج.م)" value={item.price_per_unit} onChange={v => updateWasteItem(idx, 'price_per_unit', v)} type="number" placeholder="0.00" />
+                  <div className="space-y-1.5">
+                    <Label className="text-xs text-muted-foreground text-right block">إجمالي الصنف</Label>
+                    <Input value={item.price || '0.00'} readOnly className="bg-muted/50 font-bold text-right" dir="rtl" />
+                  </div>
+                  <FormField label="مصاريف إضافية" value={item.extra_costs} onChange={v => updateWasteItem(idx, 'extra_costs', v)} type="number" placeholder="0.00" />
+                  <div className="space-y-1.5 flex items-end gap-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-1 justify-end mb-1">
+                        <Label className="text-xs">ض.ق.م 14%</Label>
+                        <Checkbox checked={item.vat_enabled === 'true'} onCheckedChange={c => updateWasteItem(idx, 'vat_enabled', c ? 'true' : 'false')} />
+                      </div>
+                      <div className="flex items-center gap-1 justify-end">
+                        <Label className="text-xs">ض.عمل</Label>
+                        <Checkbox checked={item.labor_tax_enabled === 'true'} onCheckedChange={c => updateWasteItem(idx, 'labor_tax_enabled', c ? 'true' : 'false')} />
+                      </div>
+                      {item.labor_tax_enabled === 'true' && (
+                        <FormField label="نسبة %" value={item.labor_tax_percent} onChange={v => updateWasteItem(idx, 'labor_tax_percent', v)} type="number" placeholder="0" />
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">حالة المخلف</Label>
-                <Select value={form.waste_state} onValueChange={v => updateField('waste_state', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="solid">صلب</SelectItem>
-                    <SelectItem value="liquid">سائل</SelectItem>
-                    <SelectItem value="gas">غازي</SelectItem>
-                    <SelectItem value="sludge">حمأة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">مستوى الخطورة</Label>
-                <Select value={form.hazard_level} onValueChange={v => updateField('hazard_level', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="non_hazardous">غير خطر</SelectItem>
-                    <SelectItem value="hazardous">خطر</SelectItem>
-                    <SelectItem value="highly_hazardous">شديد الخطورة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <FormField label="الكمية" value={form.quantity} onChange={v => {
-                updateField('quantity', v);
-                const qty = parseFloat(v) || 0;
-                const unitPrice = parseFloat(form.price_per_unit) || 0;
-                if (unitPrice > 0) updateField('price', (qty * unitPrice).toFixed(2));
-              }} placeholder="0.00" type="number" required />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">الوحدة</Label>
-                <Select value={form.unit} onValueChange={v => updateField('unit', v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ton">طن</SelectItem>
-                    <SelectItem value="kg">كيلوجرام</SelectItem>
-                    <SelectItem value="liter">لتر</SelectItem>
-                    <SelectItem value="m3">متر مكعب</SelectItem>
-                    <SelectItem value="unit">وحدة</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">طريقة التعبئة</Label>
-                <Select value={form.packaging_method} onValueChange={v => updateField('packaging_method', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="packaged">معبأ</SelectItem>
-                    <SelectItem value="unpackaged">غير معبأ</SelectItem>
-                    <SelectItem value="drums">براميل</SelectItem>
-                    <SelectItem value="bags">أكياس</SelectItem>
-                    <SelectItem value="containers">حاويات</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <FormField label="وصف المخلف" value={form.waste_description} onChange={v => updateField('waste_description', v)} placeholder="وصف تفصيلي للمخلف" />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">طريقة المعالجة / التخلص</Label>
-                <Select value={form.disposal_method} onValueChange={v => updateField('disposal_method', v)}>
-                  <SelectTrigger><SelectValue placeholder="اختر" /></SelectTrigger>
-                  <SelectContent>
-                    {disposalMethods.map(d => <SelectItem key={d.value} value={d.value}>{d.label}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+            ))}
           </CardContent>
         </Card>
 
@@ -368,103 +432,64 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 8. Financial — Auto-calculated */}
+        {/* 8. Financial Summary — Auto-calculated from waste items */}
         <Card>
           <CardHeader className="pb-3">
-            <SectionHeader icon={DollarSign} title="البيانات المالية" />
+            <SectionHeader icon={DollarSign} title="ملخص البيانات المالية" />
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Row 1: Unit price × quantity = subtotal */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-              <FormField label="سعر الوحدة (ج.م)" value={form.price_per_unit} onChange={v => {
-                updateField('price_per_unit', v);
-                const qty = parseFloat(form.quantity) || 0;
-                const unitPrice = parseFloat(v) || 0;
-                updateField('price', (qty * unitPrice).toFixed(2));
-              }} type="number" placeholder="0.00" />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">الكمية</Label>
-                <Input value={form.quantity} readOnly className="bg-muted/50 text-right" dir="rtl" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">إجمالي السعر قبل الضرائب (ج.م)</Label>
-                <Input value={form.price || '0.00'} readOnly className="bg-muted/50 font-bold text-right" dir="rtl" />
-              </div>
-              <FormField label="مصاريف إضافية (ج.م)" value={form.extra_costs} onChange={v => updateField('extra_costs', v)} type="number" placeholder="0.00" />
+            {/* Per-item summary table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse" dir="rtl">
+                <thead>
+                  <tr className="border-b bg-muted/30">
+                    <th className="p-2 text-right font-bold">الصنف</th>
+                    <th className="p-2 text-right font-bold">الكمية</th>
+                    <th className="p-2 text-right font-bold">سعر الوحدة</th>
+                    <th className="p-2 text-right font-bold">إجمالي</th>
+                    <th className="p-2 text-right font-bold">مصاريف</th>
+                    <th className="p-2 text-right font-bold">ض.ق.م</th>
+                    <th className="p-2 text-right font-bold">ض.عمل</th>
+                    <th className="p-2 text-right font-bold">صافي الصنف</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {form.waste_items.map((item, idx) => {
+                    const base = parseFloat(item.price) || 0;
+                    const extra = parseFloat(item.extra_costs) || 0;
+                    const vat = item.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+                    const laborPct = parseFloat(item.labor_tax_percent) || 0;
+                    const labor = item.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+                    const itemTotal = base + extra + vat + labor;
+                    const wLabel = wasteTypes.find(w => w.value === item.waste_type)?.label || `مخلف ${idx + 1}`;
+                    return (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2">{wLabel}</td>
+                        <td className="p-2">{item.quantity || '—'}</td>
+                        <td className="p-2">{item.price_per_unit || '—'}</td>
+                        <td className="p-2">{base.toFixed(2)}</td>
+                        <td className="p-2">{extra ? extra.toFixed(2) : '—'}</td>
+                        <td className="p-2">{vat ? vat.toFixed(2) : '—'}</td>
+                        <td className="p-2">{labor ? labor.toFixed(2) : '—'}</td>
+                        <td className="p-2 font-bold">{itemTotal.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
-            {/* Row 2: Taxes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* VAT 14% */}
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center gap-2 justify-end">
-                  <Label className="text-xs font-medium">ضريبة القيمة المضافة (14%)</Label>
-                  <Checkbox 
-                    checked={form.vat_enabled === 'true'} 
-                    onCheckedChange={(checked) => {
-                      updateField('vat_enabled', checked ? 'true' : 'false');
-                      if (!checked) updateField('vat_amount', '');
-                    }} 
-                  />
-                </div>
-                {form.vat_enabled === 'true' && (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
-                    <Input 
-                      value={(() => {
-                        const base = parseFloat(form.price) || 0;
-                        const extra = parseFloat(form.extra_costs) || 0;
-                        return ((base + extra) * 0.14).toFixed(2);
-                      })()}
-                      readOnly className="bg-muted/50 text-right" dir="rtl" 
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Labor tax */}
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center gap-2 justify-end">
-                  <Label className="text-xs font-medium">ضريبة العمل / ضريبة أخرى</Label>
-                  <Checkbox 
-                    checked={form.labor_tax_enabled === 'true'} 
-                    onCheckedChange={(checked) => {
-                      updateField('labor_tax_enabled', checked ? 'true' : 'false');
-                      if (!checked) {
-                        updateField('labor_tax_percent', '');
-                        updateField('labor_tax_amount', '');
-                      }
-                    }} 
-                  />
-                </div>
-                {form.labor_tax_enabled === 'true' && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <FormField label="النسبة %" value={form.labor_tax_percent} onChange={v => updateField('labor_tax_percent', v)} type="number" placeholder="0" />
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
-                      <Input 
-                        value={(() => {
-                          const base = parseFloat(form.price) || 0;
-                          const extra = parseFloat(form.extra_costs) || 0;
-                          const pct = parseFloat(form.labor_tax_percent) || 0;
-                          return ((base + extra) * pct / 100).toFixed(2);
-                        })()}
-                        readOnly className="bg-muted/50 text-right" dir="rtl" 
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Row 3: Total + Paid + Remaining */}
+            {/* Grand total + Paid + Remaining */}
             {(() => {
-              const base = parseFloat(form.price) || 0;
-              const extra = parseFloat(form.extra_costs) || 0;
-              const vat = form.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
-              const laborPct = parseFloat(form.labor_tax_percent) || 0;
-              const laborTax = form.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
-              const grandTotal = base + extra + vat + laborTax;
+              let grandTotal = 0;
+              form.waste_items.forEach(item => {
+                const base = parseFloat(item.price) || 0;
+                const extra = parseFloat(item.extra_costs) || 0;
+                const vat = item.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+                const laborPct = parseFloat(item.labor_tax_percent) || 0;
+                const labor = item.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+                grandTotal += base + extra + vat + labor;
+              });
               const paid = parseFloat(form.amount_paid) || 0;
               const remaining = grandTotal - paid;
 

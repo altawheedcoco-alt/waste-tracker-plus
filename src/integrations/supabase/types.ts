@@ -18505,6 +18505,7 @@ export type Database = {
           vehicle_plate: string | null
           vehicle_type: string | null
           waste_description: string | null
+          waste_items: Json | null
           waste_state: string | null
           waste_type: string | null
         }
@@ -18577,6 +18578,7 @@ export type Database = {
           vehicle_plate?: string | null
           vehicle_type?: string | null
           waste_description?: string | null
+          waste_items?: Json | null
           waste_state?: string | null
           waste_type?: string | null
         }
@@ -18649,6 +18651,7 @@ export type Database = {
           vehicle_plate?: string | null
           vehicle_type?: string | null
           waste_description?: string | null
+          waste_items?: Json | null
           waste_state?: string | null
           waste_type?: string | null
         }

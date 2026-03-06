@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppNavigate } from '@/hooks/useAppNavigate';
 import { generateManualShipmentPDF } from '@/utils/manualShipmentPdf';
+import { createEmptyWasteItem } from '@/hooks/useManualShipmentDraft';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -105,6 +106,9 @@ const ManualShipmentDrafts = () => {
       unit: draft.unit || 'ton',
       packaging_method: draft.packaging_method || '',
       disposal_method: draft.disposal_method || '',
+      waste_items: Array.isArray(draft.waste_items) && draft.waste_items.length > 0
+        ? draft.waste_items.map((w: any) => ({ ...createEmptyWasteItem(), ...w }))
+        : [createEmptyWasteItem()],
       driver_name: draft.driver_name || '',
       driver_phone: draft.driver_phone || '',
       driver_license: draft.driver_license || '',

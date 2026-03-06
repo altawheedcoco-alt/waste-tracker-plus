@@ -5,6 +5,36 @@ import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { generateManualShipmentPDF, generateManualShipmentPDFBlob } from '@/utils/manualShipmentPdf';
 
+export interface WasteItem {
+  id: string;
+  waste_type: string;
+  waste_description: string;
+  waste_state: string;
+  hazard_level: string;
+  quantity: string;
+  unit: string;
+  packaging_method: string;
+  disposal_method: string;
+  price_per_unit: string;
+  price: string;
+  vat_enabled: string;
+  vat_amount: string;
+  labor_tax_enabled: string;
+  labor_tax_percent: string;
+  labor_tax_amount: string;
+  extra_costs: string;
+}
+
+export function createEmptyWasteItem(): WasteItem {
+  return {
+    id: crypto.randomUUID(),
+    waste_type: '', waste_description: '', waste_state: 'solid', hazard_level: 'non_hazardous',
+    quantity: '', unit: 'ton', packaging_method: '', disposal_method: '',
+    price_per_unit: '', price: '', vat_enabled: 'false', vat_amount: '',
+    labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '', extra_costs: '',
+  };
+}
+
 export interface ManualShipmentData {
   id?: string;
   share_code?: string;
@@ -34,6 +64,7 @@ export interface ManualShipmentData {
   destination_representative: string;
   destination_email: string;
   destination_type: string;
+  // Legacy single-waste fields (kept for backward compat)
   waste_type: string;
   waste_description: string;
   waste_state: string;
@@ -42,6 +73,8 @@ export interface ManualShipmentData {
   unit: string;
   packaging_method: string;
   disposal_method: string;
+  // Multi-waste items
+  waste_items: WasteItem[];
   driver_name: string;
   driver_phone: string;
   driver_license: string;
@@ -62,8 +95,8 @@ export interface ManualShipmentData {
   extra_costs: string;
   amount_paid: string;
   price_notes: string;
-  finance_visibility: string; // 'all' | 'none' | 'custom'
-  finance_visible_to_generator: string; // 'true' | 'false'
+  finance_visibility: string;
+  finance_visible_to_generator: string;
   finance_visible_to_transporter: string;
   finance_visible_to_destination: string;
   finance_visible_to_driver: string;
@@ -82,9 +115,10 @@ const emptyForm: ManualShipmentData = {
   destination_type: 'recycling',
   waste_type: '', waste_description: '', waste_state: 'solid', hazard_level: 'non_hazardous',
   quantity: '', unit: 'ton', packaging_method: '', disposal_method: '',
+  waste_items: [createEmptyWasteItem()],
   driver_name: '', driver_phone: '', driver_license: '', vehicle_plate: '', vehicle_type: '',
   pickup_address: '', delivery_address: '', pickup_date: '', delivery_date: '',
-  shipment_type: 'regular', price: '', price_per_unit: '', 
+  shipment_type: 'regular', price: '', price_per_unit: '',
   vat_enabled: 'false', vat_amount: '', labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '',
   extra_costs: '', amount_paid: '',
   price_notes: '', finance_visibility: 'all', finance_visible_to_generator: 'true', finance_visible_to_transporter: 'true', finance_visible_to_destination: 'true', finance_visible_to_driver: 'true',
@@ -200,6 +234,9 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       unit: data.unit || 'ton',
       packaging_method: data.packaging_method || '',
       disposal_method: data.disposal_method || '',
+      waste_items: Array.isArray(data.waste_items) && data.waste_items.length > 0 
+        ? data.waste_items.map((w: any) => ({ ...createEmptyWasteItem(), ...w }))
+        : [createEmptyWasteItem()],
       driver_name: data.driver_name || '',
       driver_phone: data.driver_phone || '',
       driver_license: data.driver_license || '',
@@ -278,6 +315,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       unit: form.unit || 'ton',
       packaging_method: form.packaging_method || null,
       disposal_method: form.disposal_method || null,
+      waste_items: form.waste_items || [],
       driver_name: form.driver_name || null,
       driver_phone: form.driver_phone || null,
       driver_license: form.driver_license || null,

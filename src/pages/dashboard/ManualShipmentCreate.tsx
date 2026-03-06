@@ -11,7 +11,7 @@ const ManualShipmentCreate = () => {
   const draftId = searchParams.get('draft') || undefined;
 
   const {
-    form, updateField,
+    form, setForm, updateField,
     loading, saving,
     savedDraftId, savedShareCode,
     saveDraft, submitDraft, resetForm,
@@ -49,6 +49,7 @@ const ManualShipmentCreate = () => {
         <ManualShipmentForm
           form={form}
           updateField={updateField}
+          setForm={setForm}
           saving={saving}
           savedShareCode={savedShareCode}
           onSave={saveDraft}
