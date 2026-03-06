@@ -219,7 +219,56 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
   const latestReceipt = receipts[receipts.length - 1] as any;
 
   const isGenerator = organization?.id === shipment.generator_id;
+  const isTransporter = organization?.id === shipment.transporter_id;
   const isRecycler = organization?.id === shipment.recycler_id;
+
+  // Generate verification code for e-signature
+  const getVerificationCode = (stepKey: string) => {
+    const base = shipment.shipment_number?.replace('SHP-', '') || shipment.id.slice(0, 8);
+    const partyCode = stepKey === 'generator_handover' ? 'GEN' : stepKey === 'transporter_delivery' ? 'TRN' : stepKey === 'recycler_receipt' ? 'RCY' : 'DOC';
+    return `${partyCode}-${base}-${Date.now().toString(36).slice(-4).toUpperCase()}`;
+  };
+
+  // Check if the current user can sign/stamp this step
+  const canActOnStep = (stepKey: string): boolean => {
+    if (stepKey === 'generator_handover') return isGenerator;
+    if (stepKey === 'transporter_delivery') return isTransporter;
+    if (stepKey === 'recycler_receipt') return isRecycler;
+    return false;
+  };
+
+  // Handle quick e-signature (QR/barcode/verification code)
+  const handleQuickESign = async (stepKey: string) => {
+    if (!profile?.id || !organization?.id) {
+      toast.error('يجب تسجيل الدخول أولاً');
+      return;
+    }
+    const vCode = getVerificationCode(stepKey);
+    try {
+      await supabase.from('activity_logs').insert({
+        user_id: profile.user_id,
+        organization_id: organization.id,
+        action: 'توقيع إلكتروني',
+        action_type: 'e_signature',
+        resource_type: 'shipment_declaration',
+        resource_id: shipment.id,
+        details: {
+          step: stepKey,
+          verification_code: vCode,
+          signer_name: profile.full_name,
+          organization_name: organization.name,
+          shipment_number: shipment.shipment_number,
+        },
+      });
+      setESignMap(prev => ({ ...prev, [stepKey]: true }));
+      toast.success(`تم التوقيع الإلكتروني — كود التحقق: ${vCode}`);
+    } catch {
+      toast.error('فشل في تسجيل التوقيع الإلكتروني');
+    }
+  };
+
+  const isMainPartyStep = (key: string) =>
+    ['generator_handover', 'transporter_delivery', 'recycler_receipt'].includes(key);
 
   const handleReject = async () => {
     if (!rejectingDeclaration || !rejectionReason.trim()) return;
