@@ -19,6 +19,48 @@ export const useRegulatorConfig = () => {
   });
 };
 
+// Fetch jurisdiction mappings for the current regulator's level
+export const useRegulatorJurisdictions = () => {
+  const { data: config } = useRegulatorConfig();
+  const levelCode = config?.regulator_level_code;
+
+  return useQuery({
+    queryKey: ['regulator-jurisdictions', levelCode],
+    queryFn: async () => {
+      if (!levelCode) return [];
+      // For WMRA (hierarchy_priority=100), fetch all jurisdictions
+      // For others, fetch only their own + lower priority overlaps
+      const { data } = await supabase
+        .from('regulator_jurisdictions')
+        .select('*')
+        .eq('regulator_level_code', levelCode)
+        .order('hierarchy_priority', { ascending: false });
+      return data || [];
+    },
+    enabled: !!levelCode,
+  });
+};
+
+// Get supervised org types for current regulator
+export const useSupervisedOrgTypes = () => {
+  const { data: jurisdictions = [] } = useRegulatorJurisdictions();
+  return [...new Set(jurisdictions.map((j: any) => j.supervised_org_type))];
+};
+
+// Get all regulator levels for reference
+export const useAllRegulatorLevels = () => {
+  return useQuery({
+    queryKey: ['all-regulator-levels'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('regulator_levels')
+        .select('*')
+        .order('level_code');
+      return data || [];
+    },
+  });
+};
+
 export const useRegulatorStats = () => {
   const { organization } = useAuth();
   return useQuery({
@@ -108,18 +150,41 @@ export const useRegulatoryPenalties = (limit = 50) => {
   });
 };
 
-export const useAllOrganizations = () => {
+export const useAllOrganizations = (supervisedTypes?: readonly string[]) => {
   const { organization } = useAuth();
   return useQuery({
-    queryKey: ['all-organizations-for-regulator', organization?.id],
+    queryKey: ['all-organizations-for-regulator', organization?.id, supervisedTypes],
     queryFn: async () => {
-      const { data } = await supabase
+      let query = supabase
         .from('organizations')
         .select('id, name, name_en, organization_type, is_verified, governorate, created_at, logo_url')
-        .neq('organization_type', 'regulator')
-        .order('name');
+        .neq('organization_type', 'regulator');
+      
+      // Filter by supervised types if provided (non-WMRA regulators)
+      if (supervisedTypes && supervisedTypes.length > 0) {
+        query = query.in('organization_type', supervisedTypes as any);
+      }
+      
+      const { data } = await query.order('name');
       return data || [];
     },
     enabled: !!organization?.id,
+  });
+};
+
+// Fetch licenses for a specific organization with issuing authority info
+export const useOrganizationLicenses = (organizationId?: string) => {
+  return useQuery({
+    queryKey: ['org-licenses-regulator', organizationId],
+    queryFn: async () => {
+      if (!organizationId) return [];
+      const { data } = await supabase
+        .from('legal_licenses')
+        .select('*')
+        .eq('organization_id', organizationId)
+        .order('expiry_date', { ascending: true });
+      return data || [];
+    },
+    enabled: !!organizationId,
   });
 };

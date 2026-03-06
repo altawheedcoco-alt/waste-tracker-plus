@@ -4,12 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, MapPin, BarChart3 } from 'lucide-react';
+import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale } from 'lucide-react';
 import RegulatorOverview from '@/components/regulator/RegulatorOverview';
 import FieldInspectionPanel from '@/components/regulator/FieldInspectionPanel';
 import ViolationsPanel from '@/components/regulator/ViolationsPanel';
 import PenaltiesPanel from '@/components/regulator/PenaltiesPanel';
 import OrganizationsRegistry from '@/components/regulator/OrganizationsRegistry';
+import JurisdictionPanel from '@/components/regulator/JurisdictionPanel';
 
 const RegulatorDashboardNew = () => {
   const { user, roles } = useAuth();
@@ -48,6 +49,9 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="penalties" className="gap-1.5 text-xs sm:text-sm">
               <Gavel className="w-4 h-4" /> العقوبات
             </TabsTrigger>
+            <TabsTrigger value="jurisdiction" className="gap-1.5 text-xs sm:text-sm">
+              <Scale className="w-4 h-4" /> الاختصاصات
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="overview" className="mt-4">
@@ -68,6 +72,10 @@ const RegulatorDashboardNew = () => {
 
           <TabsContent value="penalties" className="mt-4">
             <PenaltiesPanel />
+          </TabsContent>
+
+          <TabsContent value="jurisdiction" className="mt-4">
+            <JurisdictionPanel />
           </TabsContent>
         </Tabs>
       </div>
