@@ -34,6 +34,11 @@ const allAccounts = [
   { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
   // أيزو
   { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', desc: 'جهة مانحة للأيزو', icon: Award, color: 'from-emerald-600 to-green-800' },
+  // === الجهات الرقابية ===
+  { email: 'wmra@irecycle.demo', label: '🏛️ WMRA', desc: 'جهاز تنظيم إدارة المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
+  { email: 'eeaa@irecycle.demo', label: '🌿 EEAA', desc: 'جهاز شؤون البيئة', icon: ShieldCheck, color: 'from-green-600 to-green-800' },
+  { email: 'ltra@irecycle.demo', label: '🚛 LTRA', desc: 'جهاز تنظيم النقل البري', icon: Truck, color: 'from-blue-600 to-blue-800' },
+  { email: 'ida@irecycle.demo', label: '🏭 IDA', desc: 'هيئة التنمية الصناعية', icon: Factory, color: 'from-amber-600 to-amber-800' },
   // سائق وموظف
   { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
   { email: 'driver@demo.com', label: 'سائق التوصيل - النقل السريع', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
