@@ -93,6 +93,5 @@ const RegulatorDashboardNew = () => {
     </div>
   );
 };
-};
 
 export default RegulatorDashboardNew;
