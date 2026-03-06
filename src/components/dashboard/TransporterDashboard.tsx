@@ -44,7 +44,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText } from 'lucide-react';
 
 // Lazy load heavy tab content
 
