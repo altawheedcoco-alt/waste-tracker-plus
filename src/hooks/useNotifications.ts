@@ -17,6 +17,9 @@ interface Notification {
   pdf_url: string | null;
   organization_id?: string | null;
   document_id?: string | null;
+  priority: string | null;
+  metadata: Record<string, any> | null;
+  user_id: string;
 }
 
 export const useNotifications = () => {

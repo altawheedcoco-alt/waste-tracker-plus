@@ -47,12 +47,98 @@ import {
   BarChart3,
   Shield,
   Stamp,
+  Sparkles,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { normalizeRelation } from '@/lib/supabaseHelpers';
+
+// Helper: translate metadata keys to Arabic descriptive labels
+const getMetadataFieldLabel = (key: string): { label: string } => {
+  const labels: Record<string, string> = {
+    // Shipment related
+    shipment_id: 'معرّف الشحنة',
+    shipment_number: 'رقم الشحنة',
+    waste_type: 'نوع المخلفات',
+    quantity: 'الكمية',
+    unit: 'وحدة القياس',
+    weight: 'الوزن',
+    status: 'الحالة',
+    previous_status: 'الحالة السابقة',
+    new_status: 'الحالة الجديدة',
+    // Parties
+    generator_name: 'الجهة المولدة',
+    transporter_name: 'الجهة الناقلة',
+    recycler_name: 'جهة المعالجة',
+    driver_name: 'اسم السائق',
+    partner_name: 'اسم الشريك',
+    organization_name: 'اسم المنظمة',
+    sender_name: 'المرسِل',
+    receiver_name: 'المستلِم',
+    // Location
+    pickup_location: 'موقع الاستلام',
+    delivery_location: 'موقع التسليم',
+    pickup_address: 'عنوان الاستلام',
+    delivery_address: 'عنوان التسليم',
+    location: 'الموقع',
+    // Vehicle & Driver
+    plate_number: 'رقم لوحة المركبة',
+    vehicle_type: 'نوع المركبة',
+    vehicle_plate: 'لوحة المركبة',
+    // Financial
+    amount: 'المبلغ',
+    total_amount: 'المبلغ الإجمالي',
+    invoice_number: 'رقم الفاتورة',
+    invoice_id: 'معرّف الفاتورة',
+    payment_method: 'طريقة الدفع',
+    currency: 'العملة',
+    price_per_unit: 'السعر لكل وحدة',
+    // Documents
+    document_type: 'نوع المستند',
+    document_name: 'اسم المستند',
+    document_id: 'معرّف المستند',
+    file_name: 'اسم الملف',
+    // Camera
+    camera_event_id: 'معرّف حدث الكاميرا',
+    photo_url: 'رابط الصورة',
+    confidence_score: 'نسبة الثقة',
+    arrival_verified: 'تم تأكيد الوصول',
+    // Reports
+    report_id: 'معرّف التقرير',
+    certificate_id: 'معرّف الشهادة',
+    recycling_rate: 'معدل إعادة التدوير',
+    // Dates
+    pickup_date: 'تاريخ الاستلام',
+    delivery_date: 'تاريخ التسليم',
+    due_date: 'تاريخ الاستحقاق',
+    expires_at: 'تاريخ الانتهاء',
+    scheduled_date: 'التاريخ المجدول',
+    // System
+    action: 'الإجراء',
+    reason: 'السبب',
+    notes: 'ملاحظات',
+    priority: 'الأولوية',
+    type: 'النوع',
+    category: 'التصنيف',
+    source: 'المصدر',
+    event_type: 'نوع الحدث',
+    // Generic
+    count: 'العدد',
+    total: 'الإجمالي',
+    percentage: 'النسبة',
+    description: 'الوصف',
+    reference: 'المرجع',
+    reference_number: 'الرقم المرجعي',
+    approval_status: 'حالة الموافقة',
+    request_type: 'نوع الطلب',
+    matched: 'تطابق',
+    verified: 'تم التحقق',
+  };
+  return { label: labels[key] || key };
+};
+
 
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
@@ -254,6 +340,9 @@ interface Notification {
   shipment_id: string | null;
   request_id: string | null;
   pdf_url?: string | null;
+  priority?: string | null;
+  metadata?: Record<string, any> | null;
+  organization_id?: string | null;
 }
 
 interface ShipmentDetails {
@@ -841,6 +930,66 @@ const Notifications = () => {
                                    {t('notificationDetails.request')}: {notification.request_id.slice(0, 6)}
                                  </Badge>
                               )}
+                            </div>
+                          )}
+
+                          {/* Priority Badge */}
+                          {notification.priority && notification.priority !== 'normal' && (
+                            <Badge 
+                              variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'} 
+                              className="text-[10px] gap-1"
+                            >
+                              <AlertCircle className="w-3 h-3" />
+                              {notification.priority === 'high' ? 'أولوية عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'أولوية منخفضة' : notification.priority}
+                            </Badge>
+                          )}
+
+                          {/* Metadata Analysis Section */}
+                          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
+                            <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 mt-1 border border-border/30">
+                              <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
+                                <Sparkles className="w-3 h-3" />
+                                بيانات تفصيلية
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+                                {Object.entries(notification.metadata).map(([key, value]) => {
+                                  if (value === null || value === undefined || value === '') return null;
+                                  // Skip nested objects/arrays for now (show simple values)
+                                  if (typeof value === 'object' && !Array.isArray(value)) return null;
+                                  
+                                  const fieldLabel = getMetadataFieldLabel(key);
+                                  const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
+                                  
+                                  return (
+                                    <div key={key} className="flex items-start gap-1.5 text-xs">
+                                      <span className="text-[10px] text-muted-foreground/70 shrink-0 min-w-[60px]">{fieldLabel.label}:</span>
+                                      <span className="font-medium text-foreground/80 truncate" title={displayValue}>{displayValue}</span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                              {/* Nested metadata objects */}
+                              {Object.entries(notification.metadata).map(([key, value]) => {
+                                if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
+                                const fieldLabel = getMetadataFieldLabel(key);
+                                return (
+                                  <div key={key} className="pt-1 border-t border-border/20">
+                                    <p className="text-[10px] text-muted-foreground/70 mb-1">{fieldLabel.label}:</p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                                      {Object.entries(value as Record<string, any>).map(([subKey, subVal]) => {
+                                        if (subVal === null || subVal === undefined || subVal === '') return null;
+                                        const subLabel = getMetadataFieldLabel(subKey);
+                                        return (
+                                          <div key={subKey} className="flex items-start gap-1.5 text-xs">
+                                            <span className="text-[10px] text-muted-foreground/70 shrink-0">{subLabel.label}:</span>
+                                            <span className="font-medium text-foreground/80 truncate">{String(subVal)}</span>
+                                          </div>
+                                        );
+                                      })}
+                                    </div>
+                                  </div>
+                                );
+                              })}
                             </div>
                           )}
 
