@@ -58,6 +58,7 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const RecyclerDeclarations = lazy(() => import('@/components/recycler/RecyclerDeclarations'));
 
 interface RecentShipment {
   id: string;
