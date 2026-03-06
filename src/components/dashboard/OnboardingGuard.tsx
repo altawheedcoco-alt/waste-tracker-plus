@@ -23,6 +23,10 @@ interface OnboardingStatus {
 }
 
 const OnboardingGuard = ({ children }: { children: React.ReactNode }) => {
+  // Onboarding enforcement is currently disabled — bypass all checks
+  return <>{children}</>;
+
+  /* --- Original logic (re-enable when needed) ---
   const { organization, roles } = useAuth();
   const navigate = useNavigate();
   const isAdmin = roles.includes('admin');
