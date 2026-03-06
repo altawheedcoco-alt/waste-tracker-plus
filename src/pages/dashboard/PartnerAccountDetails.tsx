@@ -329,9 +329,25 @@ export default function PartnerAccountDetails() {
       });
     });
 
+    // Add manual shipment entries (merged ones only by default)
+    manualShipmentEntries.forEach((entry: any) => {
+      if (!entry.ledger_merged) return; // Skip if user chose to separate
+      const amount = Number(entry.amount) || 0;
+      entries.push({
+        id: `manual-${entry.id}`,
+        date: entry.entry_date,
+        type: 'shipment',
+        description: `📋 ${entry.description || 'بيان يدوي'}`,
+        debit: isGenerator ? 0 : amount,
+        credit: isGenerator ? amount : 0,
+        reference: entry.reference_number || '-',
+        notes: entry.waste_item_id ? `صنف: ${entry.waste_item_id.substring(0, 8)}` : '',
+      });
+    });
+
     // Sort by date
     return entries.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  }, [shipmentsWithPricing, invoices, deposits, weightEntries, isGenerator]);
+  }, [shipmentsWithPricing, invoices, deposits, weightEntries, manualShipmentEntries, isGenerator]);
 
   if (partnerLoading) {
     return (
