@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { ManualShipmentData, WasteItem, createEmptyWasteItem } from '@/hooks/useManualShipmentDraft';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import WeighbridgeReceiptScanner from './WeighbridgeReceiptScanner';
 
 interface ManualShipmentFormProps {
   form: ManualShipmentData;
@@ -93,6 +94,40 @@ const ManualShipmentForm = ({
       return { ...prev, waste_items: prev.waste_items.filter((_, i) => i !== index) };
     });
   }, [setForm]);
+
+  const handleWeighbridgeData = useCallback((index: number, data: {
+    net_weight?: string; unit?: string; vehicle_number?: string; driver_name?: string;
+    material_type?: string; date?: string; company_name?: string; ticket_number?: string;
+  }) => {
+    // Auto-fill the waste item quantity from net weight
+    if (data.net_weight) {
+      const weight = parseFloat(data.net_weight.replace(/[^\d.]/g, ''));
+      if (!isNaN(weight)) {
+        updateWasteItem(index, 'quantity', weight.toString());
+      }
+    }
+    // Auto-fill unit
+    if (data.unit) {
+      const unitMap: Record<string, string> = {
+        'كجم': 'kg', 'كيلو': 'kg', 'kg': 'kg', 'كيلوجرام': 'kg',
+        'طن': 'ton', 'ton': 'ton', 't': 'ton',
+        'لتر': 'liter', 'liter': 'liter', 'l': 'liter',
+      };
+      const mapped = unitMap[data.unit.toLowerCase().trim()];
+      if (mapped) updateWasteItem(index, 'unit', mapped);
+    }
+    // Auto-fill vehicle plate and driver at form level (shared)
+    if (data.vehicle_number && !form.vehicle_plate) {
+      updateField('vehicle_plate', data.vehicle_number);
+    }
+    if (data.driver_name && !form.driver_name) {
+      updateField('driver_name', data.driver_name);
+    }
+    // Auto-fill date
+    if (data.date && !form.pickup_date) {
+      updateField('pickup_date', data.date);
+    }
+  }, [updateWasteItem, updateField, form.vehicle_plate, form.driver_name, form.pickup_date]);
 
   const handleShare = async () => {
     const code = savedShareCode || await onSave();
@@ -327,6 +362,12 @@ const ManualShipmentForm = ({
                   )}
                   <Badge variant="outline" className="text-xs">مخلف {idx + 1}</Badge>
                 </div>
+
+                {/* Weighbridge Receipt Scanner per waste item */}
+                <WeighbridgeReceiptScanner
+                  wasteItemIndex={idx}
+                  onDataExtracted={handleWeighbridgeData}
+                />
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-right block">نوع المخلف <span className="text-destructive">*</span></Label>
