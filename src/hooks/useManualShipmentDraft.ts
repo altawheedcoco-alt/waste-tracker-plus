@@ -497,43 +497,45 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     
     toast.success('تم إرسال النموذج بنجاح');
 
-    // توليد PDF وإرسال واتساب تلقائياً عبر WaPilot
+    // توليد PDF وإرسال واتساب تلقائياً عبر WaPilot مع تحكم رؤية البيانات المالية
     try {
-      const phones = new Set<string>();
-      [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
-        .filter(p => p && p.length > 3)
-        .forEach(p => phones.add(p.replace(/\s/g, '')));
+      const recipientPhones: Array<{ phone: string; type: 'generator' | 'transporter' | 'destination' | 'driver' }> = [];
+      if (form.generator_phone?.length > 3) recipientPhones.push({ phone: form.generator_phone.replace(/\s/g, ''), type: 'generator' });
+      if (form.transporter_phone?.length > 3) recipientPhones.push({ phone: form.transporter_phone.replace(/\s/g, ''), type: 'transporter' });
+      if (form.destination_phone?.length > 3) recipientPhones.push({ phone: form.destination_phone.replace(/\s/g, ''), type: 'destination' });
+      if (form.driver_phone?.length > 3) recipientPhones.push({ phone: form.driver_phone.replace(/\s/g, ''), type: 'driver' });
 
-      if (phones.size > 0) {
+      const seen = new Set<string>();
+      const unique = recipientPhones.filter(r => { if (seen.has(r.phone)) return false; seen.add(r.phone); return true; });
+
+      if (unique.length > 0) {
         toast.info('جارٍ تجهيز وإرسال بيان الشحنة عبر واتساب...');
-        const blob = await generateManualShipmentPDFBlob(form);
-        if (blob) {
-          const filename = `manual-shipments/${result.draftId}/${Date.now()}.pdf`;
+        const withFinance = unique.filter(r => shouldShowFinance(r.type));
+        const withoutFinance = unique.filter(r => !shouldShowFinance(r.type));
+
+        let sentCount = 0;
+        const sendGroup = async (recipients: typeof unique, includeFinance: boolean) => {
+          if (recipients.length === 0) return;
+          const blob = await generateManualShipmentPDFBlob(form, { includeFinance });
+          if (!blob) return;
+          const suffix = includeFinance ? 'full' : 'no-finance';
+          const filename = `manual-shipments/${result.draftId}/${Date.now()}-${suffix}.pdf`;
           const { error: uploadError } = await supabase.storage
             .from('shipment-documents')
             .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
-
-          if (!uploadError) {
-            const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-            const pdfUrl = urlData?.publicUrl;
-            const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
-
-            let sentCount = 0;
-            for (const phone of phones) {
-              const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
-              const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
-                body: {
-                  action: 'send-message',
-                  chat_id: rawPhone,
-                  text: message,
-                },
-              });
-              if (!sendError) sentCount++;
-              else console.error(`[WhatsApp] Submit send failed for ${phone}:`, sendError);
-            }
-            if (sentCount > 0) toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
+          if (uploadError) return;
+          const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
+          const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${urlData?.publicUrl}`;
+          for (const { phone } of recipients) {
+            const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+            const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
+              body: { action: 'send-message', chat_id: rawPhone, text: message },
+            });
+            if (!sendError) sentCount++;
           }
-        }
+        };
+        await Promise.all([sendGroup(withFinance, true), sendGroup(withoutFinance, false)]);
+        if (sentCount > 0) toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
       }
     } catch (err) {
       console.error('[ManualShipment] WhatsApp notification error:', err);
