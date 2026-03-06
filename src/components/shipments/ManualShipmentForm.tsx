@@ -432,103 +432,64 @@ const ManualShipmentForm = ({
           </CardContent>
         </Card>
 
-        {/* 8. Financial — Auto-calculated */}
+        {/* 8. Financial Summary — Auto-calculated from waste items */}
         <Card>
           <CardHeader className="pb-3">
-            <SectionHeader icon={DollarSign} title="البيانات المالية" />
+            <SectionHeader icon={DollarSign} title="ملخص البيانات المالية" />
           </CardHeader>
           <CardContent className="space-y-4">
-            {/* Row 1: Unit price × quantity = subtotal */}
-            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 items-end">
-              <FormField label="سعر الوحدة (ج.م)" value={form.price_per_unit} onChange={v => {
-                updateField('price_per_unit', v);
-                const qty = parseFloat(form.quantity) || 0;
-                const unitPrice = parseFloat(v) || 0;
-                updateField('price', (qty * unitPrice).toFixed(2));
-              }} type="number" placeholder="0.00" />
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">الكمية</Label>
-                <Input value={form.quantity} readOnly className="bg-muted/50 text-right" dir="rtl" />
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs font-medium text-right block">إجمالي السعر قبل الضرائب (ج.م)</Label>
-                <Input value={form.price || '0.00'} readOnly className="bg-muted/50 font-bold text-right" dir="rtl" />
-              </div>
-              <FormField label="مصاريف إضافية (ج.م)" value={form.extra_costs} onChange={v => updateField('extra_costs', v)} type="number" placeholder="0.00" />
+            {/* Per-item summary table */}
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs border-collapse" dir="rtl">
+                <thead>
+                  <tr className="border-b bg-muted/30">
+                    <th className="p-2 text-right font-bold">الصنف</th>
+                    <th className="p-2 text-right font-bold">الكمية</th>
+                    <th className="p-2 text-right font-bold">سعر الوحدة</th>
+                    <th className="p-2 text-right font-bold">إجمالي</th>
+                    <th className="p-2 text-right font-bold">مصاريف</th>
+                    <th className="p-2 text-right font-bold">ض.ق.م</th>
+                    <th className="p-2 text-right font-bold">ض.عمل</th>
+                    <th className="p-2 text-right font-bold">صافي الصنف</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {form.waste_items.map((item, idx) => {
+                    const base = parseFloat(item.price) || 0;
+                    const extra = parseFloat(item.extra_costs) || 0;
+                    const vat = item.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+                    const laborPct = parseFloat(item.labor_tax_percent) || 0;
+                    const labor = item.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+                    const itemTotal = base + extra + vat + labor;
+                    const wLabel = wasteTypes.find(w => w.value === item.waste_type)?.label || `مخلف ${idx + 1}`;
+                    return (
+                      <tr key={item.id} className="border-b">
+                        <td className="p-2">{wLabel}</td>
+                        <td className="p-2">{item.quantity || '—'}</td>
+                        <td className="p-2">{item.price_per_unit || '—'}</td>
+                        <td className="p-2">{base.toFixed(2)}</td>
+                        <td className="p-2">{extra ? extra.toFixed(2) : '—'}</td>
+                        <td className="p-2">{vat ? vat.toFixed(2) : '—'}</td>
+                        <td className="p-2">{labor ? labor.toFixed(2) : '—'}</td>
+                        <td className="p-2 font-bold">{itemTotal.toFixed(2)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
             </div>
 
-            {/* Row 2: Taxes */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* VAT 14% */}
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center gap-2 justify-end">
-                  <Label className="text-xs font-medium">ضريبة القيمة المضافة (14%)</Label>
-                  <Checkbox 
-                    checked={form.vat_enabled === 'true'} 
-                    onCheckedChange={(checked) => {
-                      updateField('vat_enabled', checked ? 'true' : 'false');
-                      if (!checked) updateField('vat_amount', '');
-                    }} 
-                  />
-                </div>
-                {form.vat_enabled === 'true' && (
-                  <div className="space-y-1.5">
-                    <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
-                    <Input 
-                      value={(() => {
-                        const base = parseFloat(form.price) || 0;
-                        const extra = parseFloat(form.extra_costs) || 0;
-                        return ((base + extra) * 0.14).toFixed(2);
-                      })()}
-                      readOnly className="bg-muted/50 text-right" dir="rtl" 
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Labor tax */}
-              <div className="border rounded-lg p-3 space-y-2">
-                <div className="flex items-center gap-2 justify-end">
-                  <Label className="text-xs font-medium">ضريبة العمل / ضريبة أخرى</Label>
-                  <Checkbox 
-                    checked={form.labor_tax_enabled === 'true'} 
-                    onCheckedChange={(checked) => {
-                      updateField('labor_tax_enabled', checked ? 'true' : 'false');
-                      if (!checked) {
-                        updateField('labor_tax_percent', '');
-                        updateField('labor_tax_amount', '');
-                      }
-                    }} 
-                  />
-                </div>
-                {form.labor_tax_enabled === 'true' && (
-                  <div className="grid grid-cols-2 gap-2">
-                    <FormField label="النسبة %" value={form.labor_tax_percent} onChange={v => updateField('labor_tax_percent', v)} type="number" placeholder="0" />
-                    <div className="space-y-1.5">
-                      <Label className="text-xs text-muted-foreground text-right block">مبلغ الضريبة (ج.م)</Label>
-                      <Input 
-                        value={(() => {
-                          const base = parseFloat(form.price) || 0;
-                          const extra = parseFloat(form.extra_costs) || 0;
-                          const pct = parseFloat(form.labor_tax_percent) || 0;
-                          return ((base + extra) * pct / 100).toFixed(2);
-                        })()}
-                        readOnly className="bg-muted/50 text-right" dir="rtl" 
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Row 3: Total + Paid + Remaining */}
+            {/* Grand total + Paid + Remaining */}
             {(() => {
-              const base = parseFloat(form.price) || 0;
-              const extra = parseFloat(form.extra_costs) || 0;
-              const vat = form.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
-              const laborPct = parseFloat(form.labor_tax_percent) || 0;
-              const laborTax = form.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
-              const grandTotal = base + extra + vat + laborTax;
+              let grandTotal = 0;
+              form.waste_items.forEach(item => {
+                const base = parseFloat(item.price) || 0;
+                const extra = parseFloat(item.extra_costs) || 0;
+                const vat = item.vat_enabled === 'true' ? (base + extra) * 0.14 : 0;
+                const laborPct = parseFloat(item.labor_tax_percent) || 0;
+                const labor = item.labor_tax_enabled === 'true' ? (base + extra) * laborPct / 100 : 0;
+                grandTotal += base + extra + vat + labor;
+              });
               const paid = parseFloat(form.amount_paid) || 0;
               const remaining = grandTotal - paid;
 
