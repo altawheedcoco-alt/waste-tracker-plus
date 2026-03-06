@@ -1,48 +1,87 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield, Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award, ClipboardCheck } from 'lucide-react';
+import {
+  Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield,
+  Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award,
+  ClipboardCheck, Users, Landmark, Leaf, HardHat,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DEMO_PASSWORD = '57575757';
 const ACCESS_PIN = '575757';
 
-const allAccounts = [
-  // === حسابات عبدالله التجريبية (واتساب: 01157570643) ===
-  { email: 'abdullah-recycler@irecycle.test', label: '♻️ عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
-  { email: 'abdullah-generator@irecycle.test', label: '🏭 عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
-  { email: 'abdullah-transporter@irecycle.test', label: '🚛 عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
-  { email: 'abdullah-driver@irecycle.test', label: '🚗 عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
-  // مدير النظام
-  { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'iRecycle Waste Management System', icon: Shield, color: 'from-yellow-500 to-amber-700' },
-  // مولدات
-  { email: 'generator@demo.com', label: 'شركة التوليد للنفايات', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-  { email: 'demo-generator@irecycle.test', label: 'شركة المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-  { email: 'generator2@demo.com', label: 'مصنع الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
-  // ناقلات
-  { email: 'transporter@demo.com', label: 'شركة النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
-  { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل التجريبي', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
-  // معالجات
-  { email: 'recycler@demo.com', label: 'شركة إعادة التدوير الخضراء', desc: 'معيد تدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
-  { email: 'demo-recycler@irecycle.test', label: 'شركة التدوير التجريبية', desc: 'معيد تدوير', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
-  // تخلص آمن
-  { email: 'disposal@demo.com', label: 'شركة الأمان للتخلص الآمن', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
-  { email: 'demo-disposal@irecycle.test', label: 'شركة التخلص الآمن التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
-  // استشاريون
-  { email: 'demo-consultant@irecycle.test', label: 'مكتب الاستشارات البيئية', desc: 'استشاري بيئي', icon: Briefcase, color: 'from-teal-500 to-teal-700' },
-  { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
-  // أيزو
-  { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', desc: 'جهة مانحة للأيزو', icon: Award, color: 'from-emerald-600 to-green-800' },
-  // === الجهات الرقابية ===
-  { email: 'wmra@irecycle.demo', label: '🏛️ WMRA', desc: 'جهاز تنظيم إدارة المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
-  { email: 'eeaa@irecycle.demo', label: '🌿 EEAA', desc: 'جهاز شؤون البيئة', icon: ShieldCheck, color: 'from-green-600 to-green-800' },
-  { email: 'ltra@irecycle.demo', label: '🚛 LTRA', desc: 'جهاز تنظيم النقل البري', icon: Truck, color: 'from-blue-600 to-blue-800' },
-  { email: 'ida@irecycle.demo', label: '🏭 IDA', desc: 'هيئة التنمية الصناعية', icon: Factory, color: 'from-amber-600 to-amber-800' },
-  // سائق وموظف
-  { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
-  { email: 'driver@demo.com', label: 'سائق التوصيل - النقل السريع', desc: 'سائق مركبات', icon: Car, color: 'from-rose-500 to-red-600' },
-  { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف شركة', icon: UserCog, color: 'from-slate-500 to-slate-700' },
+interface DemoAccount {
+  email: string;
+  label: string;
+  desc: string;
+  icon: any;
+  color: string;
+}
+
+const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccount[] }[] = [
+  {
+    id: 'abdullah',
+    label: 'عبدالله',
+    icon: Users,
+    accounts: [
+      { email: 'abdullah-generator@irecycle.test', label: 'عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
+      { email: 'abdullah-transporter@irecycle.test', label: 'عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'abdullah-recycler@irecycle.test', label: 'عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
+      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
+    ],
+  },
+  {
+    id: 'operators',
+    label: 'الشركات',
+    icon: Building2,
+    accounts: [
+      { email: 'generator@demo.com', label: 'شركة التوليد', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'demo-generator@irecycle.test', label: 'المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'generator2@demo.com', label: 'الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
+      { email: 'transporter@demo.com', label: 'النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
+      { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
+      { email: 'recycler@demo.com', label: 'التدوير الخضراء', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+      { email: 'demo-recycler@irecycle.test', label: 'التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
+      { email: 'disposal@demo.com', label: 'الأمان للتخلص', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+      { email: 'demo-disposal@irecycle.test', label: 'التخلص التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+    ],
+  },
+  {
+    id: 'consultants',
+    label: 'استشاريون',
+    icon: Briefcase,
+    accounts: [
+      { email: 'demo-consultant@irecycle.test', label: 'الاستشارات البيئية', desc: 'استشاري بيئي', icon: Briefcase, color: 'from-teal-500 to-teal-700' },
+      { email: 'demo-consulting-office@irecycle.test', label: 'المكتب الاستشاري', desc: 'مكتب استشاري', icon: ClipboardCheck, color: 'from-indigo-500 to-indigo-700' },
+      { email: 'demo-iso-body@irecycle.test', label: 'جهة الأيزو', desc: 'جهة مانحة', icon: Award, color: 'from-emerald-600 to-green-800' },
+    ],
+  },
+  {
+    id: 'regulators',
+    label: 'رقابة',
+    icon: Landmark,
+    accounts: [
+      { email: 'wmra@irecycle.demo', label: 'WMRA', desc: 'تنظيم المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
+      { email: 'eeaa@irecycle.demo', label: 'EEAA', desc: 'شؤون البيئة', icon: Leaf, color: 'from-green-600 to-green-800' },
+      { email: 'ltra@irecycle.demo', label: 'LTRA', desc: 'تنظيم النقل', icon: Truck, color: 'from-blue-600 to-blue-800' },
+      { email: 'ida@irecycle.demo', label: 'IDA', desc: 'التنمية الصناعية', icon: HardHat, color: 'from-amber-600 to-amber-800' },
+    ],
+  },
+  {
+    id: 'staff',
+    label: 'موظفون',
+    icon: UserCog,
+    accounts: [
+      { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+      { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'driver@demo.com', label: 'سائق - النقل السريع', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف', icon: UserCog, color: 'from-slate-500 to-slate-700' },
+    ],
+  },
 ];
 
 interface DemoQuickLoginProps {
@@ -59,37 +98,33 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const { signIn } = useAuth();
   const { toast } = useToast();
 
-  const handleQuickLogin = async (email: string) => {
+  const handleQuickLogin = async (email: string, label: string) => {
     setLoading(email);
     onLoginStart?.();
     try {
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {
-          toast({
-            title: 'بيانات الدخول غير صحيحة',
-            description: 'تأكد من أن الحساب مفعل وكلمة المرور صحيحة',
-            variant: 'destructive',
-          });
+          toast({ title: 'بيانات الدخول غير صحيحة', description: 'تأكد من أن الحساب مفعل', variant: 'destructive' });
         } else {
           throw error;
         }
       } else {
-        const account = allAccounts.find(a => a.email === email);
-        toast({
-          title: 'تم الدخول بنجاح ✅',
-          description: `تم تسجيل الدخول كـ ${account?.label || email}`,
-        });
+        toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
       }
     } catch (err: any) {
-      toast({
-        title: 'خطأ في الدخول',
-        description: err.message,
-        variant: 'destructive',
-      });
+      toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
     } finally {
       setLoading(null);
       onLoginEnd?.();
+    }
+  };
+
+  const verifyPin = () => {
+    if (pinInput === ACCESS_PIN) {
+      setPinVerified(true);
+    } else {
+      setPinError(true);
     }
   };
 
@@ -119,74 +154,62 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                     type="password"
                     placeholder="أدخل رمز الدخول"
                     value={pinInput}
-                    onChange={(e) => {
-                      setPinInput(e.target.value);
-                      setPinError(false);
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        if (pinInput === ACCESS_PIN) {
-                          setPinVerified(true);
-                        } else {
-                          setPinError(true);
-                        }
-                      }
-                    }}
+                    onChange={(e) => { setPinInput(e.target.value); setPinError(false); }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') verifyPin(); }}
                     className={`flex-1 px-3 py-2 text-sm rounded-lg border ${pinError ? 'border-destructive' : 'border-border'} bg-background text-center`}
                     dir="ltr"
                   />
-                  <Button
-                    type="button"
-                    size="sm"
-                    onClick={() => {
-                      if (pinInput === ACCESS_PIN) {
-                        setPinVerified(true);
-                      } else {
-                        setPinError(true);
-                      }
-                    }}
-                  >
-                    دخول
-                  </Button>
+                  <Button type="button" size="sm" onClick={verifyPin}>دخول</Button>
                 </div>
-                {pinError && (
-                  <p className="text-xs text-destructive text-center">رمز الدخول غير صحيح</p>
-                )}
+                {pinError && <p className="text-xs text-destructive text-center">رمز الدخول غير صحيح</p>}
               </div>
             ) : (
-              <div className="pt-3 space-y-3">
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-[420px] overflow-y-auto">
-                  {allAccounts.map((account, i) => (
-                    <motion.button
-                      key={account.email}
-                      type="button"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      transition={{ delay: i * 0.03 }}
-                      whileHover={{ scale: 1.03 }}
-                      whileTap={{ scale: 0.97 }}
-                      onClick={() => handleQuickLogin(account.email)}
-                      disabled={loading !== null}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:border-primary/40 bg-card/50 hover:bg-primary/5 transition-all disabled:opacity-50"
-                    >
-                      <div className={`w-9 h-9 rounded-lg bg-gradient-to-br ${account.color} flex items-center justify-center shadow-sm`}>
-                        {loading === account.email ? (
-                          <Loader2 className="w-4 h-4 text-white animate-spin" />
-                        ) : (
-                          <account.icon className="w-4 h-4 text-white" />
-                        )}
-                      </div>
-                      <span className="text-[11px] font-medium text-foreground/80 leading-tight text-center line-clamp-2">
-                        {account.label}
-                      </span>
-                      <span className="text-[9px] text-muted-foreground">
-                        {account.desc}
-                      </span>
-                    </motion.button>
-                  ))}
-                </div>
+              <div className="pt-3 space-y-2">
+                <Tabs defaultValue="abdullah" dir="rtl">
+                  <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1 rounded-xl">
+                    {accountGroups.map(g => (
+                      <TabsTrigger key={g.id} value={g.id} className="text-[11px] gap-1 px-2 py-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg">
+                        <g.icon className="w-3 h-3" />
+                        {g.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
 
-                <p className="text-[10px] text-muted-foreground text-center">
+                  {accountGroups.map(group => (
+                    <TabsContent key={group.id} value={group.id} className="mt-2">
+                      <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
+                        {group.accounts.map((account, i) => (
+                          <motion.button
+                            key={account.email}
+                            type="button"
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: i * 0.04 }}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.97 }}
+                            onClick={() => handleQuickLogin(account.email, account.label)}
+                            disabled={loading !== null}
+                            className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/40 bg-card/50 hover:bg-primary/5 transition-all disabled:opacity-50 text-right"
+                          >
+                            <div className={`w-9 h-9 shrink-0 rounded-lg bg-gradient-to-br ${account.color} flex items-center justify-center shadow-sm`}>
+                              {loading === account.email ? (
+                                <Loader2 className="w-4 h-4 text-white animate-spin" />
+                              ) : (
+                                <account.icon className="w-4 h-4 text-white" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-[11px] font-semibold text-foreground/90 truncate">{account.label}</p>
+                              <p className="text-[9px] text-muted-foreground">{account.desc}</p>
+                            </div>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </TabsContent>
+                  ))}
+                </Tabs>
+
+                <p className="text-[10px] text-muted-foreground text-center pt-1">
                   كلمة المرور: <span dir="ltr" className="font-mono">57575757</span>
                 </p>
               </div>
