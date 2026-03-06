@@ -187,19 +187,19 @@ export default function TransporterAnnualPlan() {
 
       // Fetch recent routes from shipments
       const { data: shipments } = await supabase.from('shipments')
-        .select('pickup_location, destination_location, waste_type, generator_id, recycler_id')
+        .select('pickup_location, delivery_address, waste_type, generator_id, recycler_id')
         .eq('transporter_id', orgId)
         .limit(100);
 
       if (shipments?.length) {
         const routeMap = new Map<string, RouteEntry>();
-        shipments.forEach(s => {
-          const key = `${s.pickup_location || ''}-${s.destination_location || ''}`;
+        shipments.forEach((s: any) => {
+          const key = `${s.pickup_location || ''}-${s.delivery_address || ''}`;
           if (!routeMap.has(key)) {
             routeMap.set(key, {
               route_name: `مسار ${routeMap.size + 1}`,
               collection_point: s.pickup_location || '',
-              destination: s.destination_location || '',
+              destination: s.delivery_address || '',
               waste_type: s.waste_type || '',
               frequency: 'يومي',
             });
@@ -209,7 +209,7 @@ export default function TransporterAnnualPlan() {
 
         // Auto-detect waste categories
         const cats = new Set<string>();
-        shipments.forEach(s => {
+        shipments.forEach((s: any) => {
           if (['chemical', 'electronic'].includes(s.waste_type)) cats.add('hazardous');
           else if (s.waste_type === 'medical') cats.add('medical');
           else if (s.waste_type === 'construction') cats.add('construction');
