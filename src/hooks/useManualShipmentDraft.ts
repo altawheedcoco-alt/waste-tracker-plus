@@ -3,6 +3,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
+import { generateManualShipmentPDF, generateManualShipmentPDFBlob } from '@/utils/manualShipmentPdf';
 
 export interface ManualShipmentData {
   id?: string;
