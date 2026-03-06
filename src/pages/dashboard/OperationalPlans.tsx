@@ -1175,9 +1175,14 @@ const OperationalPlans = () => {
                   )}
 
                   {/* Footer */}
-                  <div className="print:block hidden text-center text-sm text-muted-foreground pt-8 border-t">
+                  <div className="print:block hidden text-center text-[8px] text-muted-foreground pt-4 border-t mt-4">
+                    <p className="leading-relaxed mb-2">
+                      هذا المستند صدر آلياً من منصة iRecycle. البيانات الواردة به تم إدخالها بواسطة المستخدم وتحت مسؤوليته الكاملة.
+                      لا تتحمل إدارة المنصة أي مسؤولية قانونية أو مدنية تجاه الغير بخصوص صحة هذه البيانات.
+                    </p>
                     <p>تم إنشاء هذه الخطة التشغيلية بواسطة نظام إدارة المخلفات</p>
                     <p className="mt-1">تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</p>
+                    <p className="text-[7px] mt-1 text-gray-400">مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي</p>
                   </div>
                 </div>
               )}
