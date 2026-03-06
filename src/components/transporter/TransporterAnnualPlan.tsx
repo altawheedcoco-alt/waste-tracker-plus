@@ -241,7 +241,7 @@ export default function TransporterAnnualPlan() {
 
       // Fetch legal licenses for previous license info
       const { data: licenses } = await supabase.from('legal_licenses')
-        .select('license_number, license_type, expiry_date')
+        .select('license_number, license_name, license_category, expiry_date')
         .eq('organization_id', orgId)
         .order('expiry_date', { ascending: false })
         .limit(1);
@@ -251,7 +251,7 @@ export default function TransporterAnnualPlan() {
           ...prev,
           company_data: {
             ...prev.company_data,
-            previous_license: prev.company_data.previous_license || `${licenses[0].license_type || ''} - ${licenses[0].license_number || ''}`,
+            previous_license: prev.company_data.previous_license || `${licenses[0].license_category || ''} - ${licenses[0].license_number || ''}`,
           },
         }));
       }
