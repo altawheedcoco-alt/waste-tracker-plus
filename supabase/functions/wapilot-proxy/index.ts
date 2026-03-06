@@ -50,7 +50,7 @@ Deno.serve(async (req) => {
     const resolvedInstanceId = instance_id || defaultInstanceId;
 
     // Actions that require instance_id
-    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-list', 'list-messages', 'list-chats', 'get-chat-messages', 'get-qr', 'restart-instance', 'connect-instance', 'disconnect-instance', 'instance-info'];
+    const actionsRequiringInstance = ['instance-status', 'send-message', 'send-media', 'send-list', 'list-messages', 'list-chats', 'get-chat-messages', 'get-qr', 'restart-instance', 'connect-instance', 'disconnect-instance', 'instance-info'];
 
     if (actionsRequiringInstance.includes(action) && !resolvedInstanceId) {
       return new Response(JSON.stringify({ error: 'Instance ID is required. Set WAPILOT_INSTANCE_ID or provide instance_id.' }), {
@@ -145,6 +145,24 @@ Deno.serve(async (req) => {
           send_at: params.send_at,
         });
         break;
+      case 'send-media': {
+        url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-media`;
+        method = 'POST';
+        let mediaChat = params.chat_id || '';
+        if (mediaChat) {
+          const rawP = mediaChat.replace('@c.us', '').replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+          const fixedP = /^1\d{9}$/.test(rawP) ? '20' + rawP : rawP;
+          mediaChat = fixedP + '@c.us';
+        }
+        fetchBody = JSON.stringify({
+          chat_id: mediaChat,
+          media_url: params.media_url,
+          media_type: params.media_type || 'document',
+          caption: params.caption || '',
+          filename: params.filename || 'document.pdf',
+        });
+        break;
+      }
       case 'send-list':
         url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-list`;
         method = 'POST';

@@ -438,12 +438,20 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
         const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
         const pdfUrl = urlData?.publicUrl;
-        const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
+        const pdfFilename = `بيان-شحنة-${form.shipment_number || result.draftId}.pdf`;
 
         for (const { phone } of recipients) {
           const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+          // Send PDF as document attachment directly
           const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
-            body: { action: 'send-message', chat_id: rawPhone, text: message },
+            body: {
+              action: 'send-media',
+              chat_id: rawPhone,
+              media_url: pdfUrl,
+              media_type: 'document',
+              caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
+              filename: pdfFilename,
+            },
           });
           if (!sendError) sentCount++;
           else console.error(`[WhatsApp] Failed to send to ${phone}:`, sendError);
@@ -525,11 +533,19 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
             .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
           if (uploadError) return;
           const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-          const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${urlData?.publicUrl}`;
+          const pdfUrl = urlData?.publicUrl;
+          const pdfFilename = `بيان-شحنة-${form.shipment_number || result.draftId}.pdf`;
           for (const { phone } of recipients) {
             const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
             const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
-              body: { action: 'send-message', chat_id: rawPhone, text: message },
+              body: {
+                action: 'send-media',
+                chat_id: rawPhone,
+                media_url: pdfUrl,
+                media_type: 'document',
+                caption: `📄 بيان شحنة رقم ${form.shipment_number || ''}`,
+                filename: pdfFilename,
+              },
             });
             if (!sendError) sentCount++;
           }
