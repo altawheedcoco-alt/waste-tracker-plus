@@ -548,6 +548,31 @@ const VerificationResult = ({ result, onScanAgain, onViewDetails }: Verification
         )}
       </AnimatePresence>
 
+      {/* رسالة التحقق الرسمية للجهات الرقابية */}
+      {result.isValid && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.6 }}>
+          <Card className="border-emerald-200 bg-gradient-to-b from-emerald-50/50 to-white">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center gap-2 mb-2 justify-center">
+                <Shield className="w-4 h-4 text-emerald-600" />
+                <span className="font-bold text-sm text-emerald-800">رسالة التحقق الرسمية</span>
+              </div>
+              <p className="text-xs text-center text-emerald-700 leading-relaxed">
+                نظام iRecycle: تم التحقق من صحة هذا المستند.
+                الجهة المصدرة: <strong>{result.data?.generator || result.data?.organization_name || result.data?.signer_name || '—'}</strong>.
+                {result.data?.license_status && <> حالة التراخيص وقت الإصدار: <strong>{result.data.license_status === 'active' ? 'سارية' : 'غير سارية'}</strong>.</>}
+                {' '}المنصة تعمل كوسيط تقني لتوثيق حركة المخلفات رقمياً لضمان الشفافية.
+              </p>
+              <Separator className="my-2" />
+              <p className="text-[10px] text-muted-foreground text-center leading-relaxed">
+                البيانات الواردة تم إدخالها بواسطة المستخدم وتحت مسؤوليته الكاملة. لا تتحمل إدارة المنصة أي مسؤولية قانونية
+                بخصوص صحة هذه البيانات أو طبيعة المواد المشحونة فعلياً.
+              </p>
+            </CardContent>
+          </Card>
+        </motion.div>
+      )}
+
       {/* أزرار الإجراءات */}
       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }} className="flex gap-3 justify-center">
         <Button onClick={onScanAgain} variant="outline" className="gap-2">

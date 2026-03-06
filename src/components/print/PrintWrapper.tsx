@@ -163,6 +163,15 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       {/* ===== SECURE FOOTER ===== */}
       {showFooter && (
         <footer className="print-footer mt-6 pt-3 border-t-2 text-center text-[8pt] text-gray-500" style={{ borderColor: accentColor }}>
+          {/* Legal Disclaimer */}
+          <div className="mb-2 px-2">
+            <p className="text-[7pt] text-gray-600 leading-relaxed">
+              هذا المستند صدر آلياً من منصة iRecycle. البيانات الواردة به تم إدخالها بواسطة المستخدم وتحت مسؤوليته الكاملة.
+              لا تتحمل إدارة المنصة أي مسؤولية قانونية أو مدنية تجاه الغير بخصوص صحة هذه البيانات أو طبيعة المواد المشحونة فعلياً.
+              يعتبر رمز التحقق (QR Code) والباركود المرفق هو المرجع الوحيد لإثبات صحة صدور المستند من النظام،
+              ولا يتطلب المستند توقيعاً خطياً أو ختماً يدوياً للاعتداد به رقمياً.
+            </p>
+          </div>
           {/* Footer QR + Verification */}
           <div className="flex items-center justify-center mb-2">
             <div className="text-center flex-1">
@@ -177,7 +186,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
             </div>
           </div>
           <p className="text-gray-400 text-[7pt]">
-            هذه الوثيقة تم إنشاؤها آلياً ومؤمّنة بتشفير رقمي
+            مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي — وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004
           </p>
         </footer>
       )}

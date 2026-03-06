@@ -671,6 +671,14 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
         </div>
       )}
 
+      {/* Legal Disclaimer */}
+      <div style={{ borderTop: '1px solid #cbd5e1', paddingTop: '8px', marginBottom: '8px' }}>
+        <p style={{ fontSize: '7px', color: '#64748b', textAlign: 'center', lineHeight: '1.6' }}>
+          هذا المستند صدر آلياً من منصة iRecycle. البيانات الواردة به تم إدخالها بواسطة المستخدم وتحت مسؤوليته الكاملة.
+          لا تتحمل إدارة المنصة أي مسؤولية قانونية أو مدنية تجاه الغير بخصوص صحة هذه البيانات أو طبيعة المواد المشحونة فعلياً.
+          مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي — وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004.
+        </p>
+      </div>
       {/* Footer */}
       <div style={{ borderTop: '2px solid #e2e8f0', paddingTop: '12px', display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: '#94a3b8' }}>
         <div>تاريخ الطباعة: {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}</div>
