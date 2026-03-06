@@ -159,87 +159,110 @@ export const sidebarGroups: SidebarGroupConfig[] = [
   {
     id: 'regulator-command',
     icon: Shield,
-    labelAr: 'مركز القيادة الرقابي',
-    labelEn: 'Regulatory Command Center',
+    labelAr: 'الرقابة والإشراف',
+    labelEn: 'Oversight & Supervision',
     visibleFor: ['regulator'],
     items: [
-      { icon: BarChart3, labelAr: 'لوحة الرقابة الرئيسية', labelEn: 'Oversight Dashboard', path: '/dashboard/regulator', key: 'regulator-dashboard' },
-      { icon: Building2, labelAr: 'سجل المنظمات الخاضعة', labelEn: 'Supervised Entities', path: '/dashboard/regulator?tab=organizations', key: 'regulator-orgs' },
-      { icon: ClipboardCheck, labelAr: 'التفتيش الميداني', labelEn: 'Field Inspections', path: '/dashboard/regulator?tab=inspections', key: 'regulator-inspections' },
-      { icon: AlertTriangle, labelAr: 'المخالفات والإنذارات', labelEn: 'Violations & Warnings', path: '/dashboard/regulator?tab=violations', key: 'regulator-violations' },
-      { icon: Scale, labelAr: 'القرارات والعقوبات', labelEn: 'Penalties & Decisions', path: '/dashboard/regulator?tab=penalties', key: 'regulator-penalties' },
-      { icon: FileCheck, labelAr: 'التراخيص والإفادات', labelEn: 'Licenses & Attestations', path: '/dashboard/regulator?tab=licenses', key: 'regulator-licenses' },
-      { icon: Scale, labelAr: 'نطاق الاختصاص', labelEn: 'Jurisdiction', path: '/dashboard/regulator?tab=jurisdiction', key: 'regulator-jurisdiction' },
-      { icon: Search, labelAr: 'التحقق من المستندات', labelEn: 'Document Verification', path: '/dashboard/regulator?tab=verify', key: 'regulator-verify' },
+      { icon: BarChart3, labelAr: 'لوحة المؤشرات الرقابية', labelEn: 'Oversight Dashboard', path: '/dashboard/regulator', key: 'regulator-dashboard' },
+      { icon: Building2, labelAr: 'سجل الجهات الخاضعة للرقابة', labelEn: 'Supervised Entities', path: '/dashboard/regulator?tab=organizations', key: 'regulator-orgs' },
+      { icon: Search, labelAr: 'التحقق من المستندات والتراخيص', labelEn: 'Document Verification', path: '/dashboard/regulator?tab=verify', key: 'regulator-verify' },
+      { icon: Scale, labelAr: 'نطاق الاختصاص القانوني', labelEn: 'Legal Jurisdiction', path: '/dashboard/regulator?tab=jurisdiction', key: 'regulator-jurisdiction' },
     ],
   },
 
-  // ═══════════════ 7A. أدوات WMRA (جهاز تنظيم إدارة المخلفات) ═══════════════
+  // ═══════════════ 7A. التفتيش والمخالفات ═══════════════
+  {
+    id: 'regulator-enforcement',
+    icon: AlertTriangle,
+    labelAr: 'التفتيش والمخالفات',
+    labelEn: 'Inspections & Violations',
+    visibleFor: ['regulator'],
+    items: [
+      { icon: ClipboardCheck, labelAr: 'حملات التفتيش الميداني', labelEn: 'Field Inspections', path: '/dashboard/regulator?tab=inspections', key: 'regulator-inspections' },
+      { icon: AlertTriangle, labelAr: 'سجل المخالفات', labelEn: 'Violations Registry', path: '/dashboard/regulator?tab=violations', key: 'regulator-violations' },
+      { icon: FileText, labelAr: 'الإنذارات والتحذيرات', labelEn: 'Warnings & Notices', path: '/dashboard/regulator?tab=warnings', key: 'regulator-warnings' },
+      { icon: Scale, labelAr: 'القرارات والجزاءات', labelEn: 'Penalties & Sanctions', path: '/dashboard/regulator?tab=penalties', key: 'regulator-penalties' },
+      { icon: Activity, labelAr: 'متابعة تنفيذ الجزاءات', labelEn: 'Enforcement Tracking', path: '/dashboard/regulator?tab=enforcement', key: 'regulator-enforcement' },
+    ],
+  },
+
+  // ═══════════════ 7B. التراخيص والإفادات ═══════════════
+  {
+    id: 'regulator-licensing',
+    icon: FileCheck,
+    labelAr: 'التراخيص والإفادات',
+    labelEn: 'Licenses & Attestations',
+    visibleFor: ['regulator'],
+    items: [
+      { icon: FileCheck, labelAr: 'إصدار وتجديد التراخيص', labelEn: 'License Management', path: '/dashboard/regulator?tab=licenses', key: 'regulator-licenses' },
+      { icon: FileSpreadsheet, labelAr: 'طلبات التراخيص الواردة', labelEn: 'License Applications', path: '/dashboard/regulator?tab=license-apps', key: 'regulator-license-apps' },
+      { icon: FileText, labelAr: 'إصدار الإفادات الرسمية', labelEn: 'Official Attestations', path: '/dashboard/regulator?tab=attestations', key: 'regulator-attestations' },
+      { icon: AlertTriangle, labelAr: 'تراخيص قاربت على الانتهاء', labelEn: 'Expiring Licenses', path: '/dashboard/regulator?tab=expiring', key: 'regulator-expiring' },
+    ],
+  },
+
+  // ═══════════════ 7C. أدوات WMRA (جهاز تنظيم إدارة المخلفات) ═══════════════
   {
     id: 'wmra-tools',
     icon: Recycle,
-    labelAr: 'أدوات WMRA',
-    labelEn: 'WMRA Tools',
+    labelAr: 'رقابة المخلفات (WMRA)',
+    labelEn: 'Waste Oversight (WMRA)',
     visibleFor: ['regulator'],
     items: [
-      { icon: Recycle, labelAr: 'رقابة سلسلة المخلفات', labelEn: 'Waste Chain Oversight', path: '/dashboard/regulator-wmra?tab=waste-chain', key: 'wmra-waste-chain' },
-      { icon: MapPin, labelAr: 'تتبع مركبات النقل', labelEn: 'Vehicle Tracking', path: '/dashboard/driver-tracking', key: 'wmra-tracking' },
-      { icon: Package, labelAr: 'مراقبة المانيفست', labelEn: 'Manifest Monitoring', path: '/dashboard/regulator-wmra?tab=manifests', key: 'wmra-manifests' },
-      { icon: Building2, labelAr: 'الشركات المنظمة', labelEn: 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'wmra-regulated' },
-      { icon: Layers, labelAr: 'تصنيف المخلفات', labelEn: 'Waste Classification', path: '/dashboard/waste-types', key: 'wmra-waste-types' },
+      { icon: Recycle, labelAr: 'مراقبة سلسلة الحيازة', labelEn: 'Chain of Custody Monitor', path: '/dashboard/regulator-wmra?tab=waste-chain', key: 'wmra-waste-chain' },
+      { icon: Package, labelAr: 'تدقيق بيانات المانيفست', labelEn: 'Manifest Audit', path: '/dashboard/regulator-wmra?tab=manifests', key: 'wmra-manifests' },
+      { icon: Layers, labelAr: 'مراجعة تصنيف المخلفات', labelEn: 'Waste Classification Review', path: '/dashboard/waste-types', key: 'wmra-waste-types' },
       { icon: Activity, labelAr: 'خريطة تدفق المخلفات', labelEn: 'Waste Flow Map', path: '/dashboard/waste-flow-heatmap', key: 'wmra-waste-flow' },
+      { icon: FileText, labelAr: 'تقارير الإقرارات الدورية', labelEn: 'Periodic Declaration Reports', path: '/dashboard/regulator-wmra?tab=declarations', key: 'wmra-declarations' },
       { icon: Leaf, labelAr: 'مؤشرات الاستدامة', labelEn: 'Sustainability KPIs', path: '/dashboard/environmental-sustainability', key: 'wmra-sustainability' },
-      { icon: FileText, labelAr: 'تقارير ESG', labelEn: 'ESG Reports', path: '/dashboard/esg-reports', key: 'wmra-esg' },
     ],
   },
 
-  // ═══════════════ 7B. أدوات EEAA (جهاز شؤون البيئة) ═══════════════
+  // ═══════════════ 7D. أدوات EEAA (جهاز شؤون البيئة) ═══════════════
   {
     id: 'eeaa-tools',
     icon: Leaf,
-    labelAr: 'أدوات EEAA',
-    labelEn: 'EEAA Tools',
+    labelAr: 'الرقابة البيئية (EEAA)',
+    labelEn: 'Environmental Oversight (EEAA)',
     visibleFor: ['regulator'],
     items: [
-      { icon: Leaf, labelAr: 'الرصد البيئي', labelEn: 'Environmental Monitoring', path: '/dashboard/regulator-eeaa?tab=monitoring', key: 'eeaa-monitoring' },
-      { icon: AlertTriangle, labelAr: 'تقييم الأثر البيئي', labelEn: 'EIA Reviews', path: '/dashboard/regulator-eeaa?tab=eia', key: 'eeaa-eia' },
-      { icon: FileSpreadsheet, labelAr: 'الموافقات البيئية', labelEn: 'Environmental Approvals', path: '/dashboard/regulator-eeaa?tab=approvals', key: 'eeaa-approvals' },
-      { icon: BarChart3, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'eeaa-carbon' },
+      { icon: Leaf, labelAr: 'الرصد البيئي والتلوث', labelEn: 'Pollution Monitoring', path: '/dashboard/regulator-eeaa?tab=monitoring', key: 'eeaa-monitoring' },
+      { icon: AlertTriangle, labelAr: 'مراجعة دراسات الأثر البيئي', labelEn: 'EIA Reviews', path: '/dashboard/regulator-eeaa?tab=eia', key: 'eeaa-eia' },
+      { icon: FileSpreadsheet, labelAr: 'الموافقات البيئية المعلقة', labelEn: 'Pending Approvals', path: '/dashboard/regulator-eeaa?tab=approvals', key: 'eeaa-approvals' },
       { icon: Activity, labelAr: 'الانبعاثات والملوثات', labelEn: 'Emissions Tracking', path: '/dashboard/regulator-eeaa?tab=emissions', key: 'eeaa-emissions' },
-      { icon: Shield, labelAr: 'تقارير السلامة البيئية', labelEn: 'Environmental Safety', path: '/dashboard/ohs-reports', key: 'eeaa-safety' },
+      { icon: BarChart3, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'eeaa-carbon' },
     ],
   },
 
-  // ═══════════════ 7C. أدوات LTRA (جهاز تنظيم النقل البري) ═══════════════
+  // ═══════════════ 7E. أدوات LTRA (جهاز تنظيم النقل البري) ═══════════════
   {
     id: 'ltra-tools',
     icon: Truck,
-    labelAr: 'أدوات LTRA',
-    labelEn: 'LTRA Tools',
+    labelAr: 'رقابة النقل (LTRA)',
+    labelEn: 'Transport Oversight (LTRA)',
     visibleFor: ['regulator'],
     items: [
-      { icon: Truck, labelAr: 'رقابة أساطيل النقل', labelEn: 'Fleet Oversight', path: '/dashboard/regulator-ltra?tab=fleet', key: 'ltra-fleet' },
-      { icon: MapPin, labelAr: 'تتبع المركبات لحظياً', labelEn: 'Live Vehicle Tracking', path: '/dashboard/driver-tracking', key: 'ltra-tracking' },
-      { icon: Users, labelAr: 'سجل السائقين والرخص', labelEn: 'Driver Licenses', path: '/dashboard/regulator-ltra?tab=drivers', key: 'ltra-drivers' },
-      { icon: Shield, labelAr: 'تصاريح نقل المواد الخطرة', labelEn: 'Hazmat Permits', path: '/dashboard/regulator-ltra?tab=hazmat', key: 'ltra-hazmat' },
-      { icon: FileCheck, labelAr: 'ترخيص المركبات', labelEn: 'Vehicle Registration', path: '/dashboard/regulator-ltra?tab=vehicles', key: 'ltra-vehicles' },
-      { icon: BarChart3, labelAr: 'تقارير الحوادث', labelEn: 'Incident Reports', path: '/dashboard/regulator-ltra?tab=incidents', key: 'ltra-incidents' },
+      { icon: Truck, labelAr: 'مراقبة أساطيل النقل المرخصة', labelEn: 'Licensed Fleet Oversight', path: '/dashboard/regulator-ltra?tab=fleet', key: 'ltra-fleet' },
+      { icon: Users, labelAr: 'تدقيق رخص السائقين', labelEn: 'Driver License Audit', path: '/dashboard/regulator-ltra?tab=drivers', key: 'ltra-drivers' },
+      { icon: Shield, labelAr: 'تصاريح نقل المواد الخطرة', labelEn: 'Hazmat Transport Permits', path: '/dashboard/regulator-ltra?tab=hazmat', key: 'ltra-hazmat' },
+      { icon: FileCheck, labelAr: 'ترخيص وفحص المركبات', labelEn: 'Vehicle Inspection', path: '/dashboard/regulator-ltra?tab=vehicles', key: 'ltra-vehicles' },
+      { icon: BarChart3, labelAr: 'بلاغات الحوادث والمخالفات', labelEn: 'Incident Reports', path: '/dashboard/regulator-ltra?tab=incidents', key: 'ltra-incidents' },
     ],
   },
 
-  // ═══════════════ 7D. أدوات IDA (الهيئة العامة للتنمية الصناعية) ═══════════════
+  // ═══════════════ 7F. أدوات IDA (الهيئة العامة للتنمية الصناعية) ═══════════════
   {
     id: 'ida-tools',
     icon: Factory,
-    labelAr: 'أدوات IDA',
-    labelEn: 'IDA Tools',
+    labelAr: 'الرقابة الصناعية (IDA)',
+    labelEn: 'Industrial Oversight (IDA)',
     visibleFor: ['regulator'],
     items: [
-      { icon: Factory, labelAr: 'السجل الصناعي', labelEn: 'Industrial Registry', path: '/dashboard/regulator-ida?tab=registry', key: 'ida-registry' },
-      { icon: FileCheck, labelAr: 'تراخيص التشغيل', labelEn: 'Operating Licenses', path: '/dashboard/regulator-ida?tab=licenses', key: 'ida-licenses' },
-      { icon: HardHat, labelAr: 'السلامة الصناعية', labelEn: 'Industrial Safety', path: '/dashboard/regulator-ida?tab=safety', key: 'ida-safety' },
-      { icon: ClipboardCheck, labelAr: 'التفتيش الصناعي', labelEn: 'Industrial Inspections', path: '/dashboard/regulator-ida?tab=inspections', key: 'ida-inspections' },
-      { icon: Building2, labelAr: 'المنشآت الصناعية', labelEn: 'Industrial Facilities', path: '/dashboard/regulator-ida?tab=facilities', key: 'ida-facilities' },
+      { icon: Factory, labelAr: 'السجل الصناعي الموحد', labelEn: 'Industrial Registry', path: '/dashboard/regulator-ida?tab=registry', key: 'ida-registry' },
+      { icon: FileCheck, labelAr: 'تدقيق تراخيص التشغيل', labelEn: 'Operating License Audit', path: '/dashboard/regulator-ida?tab=licenses', key: 'ida-licenses' },
+      { icon: HardHat, labelAr: 'التفتيش على السلامة الصناعية', labelEn: 'Industrial Safety Inspection', path: '/dashboard/regulator-ida?tab=safety', key: 'ida-safety' },
+      { icon: ClipboardCheck, labelAr: 'جولات التفتيش الصناعي', labelEn: 'Industrial Inspections', path: '/dashboard/regulator-ida?tab=inspections', key: 'ida-inspections' },
+      { icon: Building2, labelAr: 'قاعدة بيانات المنشآت', labelEn: 'Facilities Database', path: '/dashboard/regulator-ida?tab=facilities', key: 'ida-facilities' },
     ],
   },
 
