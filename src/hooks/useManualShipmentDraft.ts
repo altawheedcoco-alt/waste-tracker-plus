@@ -371,7 +371,11 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     
     setSavedDraftId(result.data.id);
     setSavedShareCode(result.data.share_code);
-    toast.success('تم حفظ المسودة بنجاح');
+
+    // Auto-create ledger entries per waste item
+    await createLedgerEntriesForDraft(result.data.id, form, organization.id, user.id);
+
+    toast.success('تم حفظ المسودة وتسجيل القيود المالية');
     return { shareCode: result.data.share_code, draftId: result.data.id };
   };
 
