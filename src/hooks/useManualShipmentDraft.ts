@@ -62,6 +62,11 @@ export interface ManualShipmentData {
   extra_costs: string;
   amount_paid: string;
   price_notes: string;
+  finance_visibility: string; // 'all' | 'none' | 'custom'
+  finance_visible_to_generator: string; // 'true' | 'false'
+  finance_visible_to_transporter: string;
+  finance_visible_to_destination: string;
+  finance_visible_to_driver: string;
   notes: string;
   special_instructions: string;
 }
@@ -82,7 +87,8 @@ const emptyForm: ManualShipmentData = {
   shipment_type: 'regular', price: '', price_per_unit: '', 
   vat_enabled: 'false', vat_amount: '', labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '',
   extra_costs: '', amount_paid: '',
-  price_notes: '', notes: '', special_instructions: '',
+  price_notes: '', finance_visibility: 'all', finance_visible_to_generator: 'true', finance_visible_to_transporter: 'true', finance_visible_to_destination: 'true', finance_visible_to_driver: 'true',
+  notes: '', special_instructions: '',
 };
 
 export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
@@ -214,6 +220,11 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       extra_costs: data.extra_costs?.toString() || '',
       amount_paid: data.amount_paid?.toString() || '',
       price_notes: data.price_notes || '',
+      finance_visibility: data.finance_visibility || 'all',
+      finance_visible_to_generator: data.finance_visible_to_generator?.toString() ?? 'true',
+      finance_visible_to_transporter: data.finance_visible_to_transporter?.toString() ?? 'true',
+      finance_visible_to_destination: data.finance_visible_to_destination?.toString() ?? 'true',
+      finance_visible_to_driver: data.finance_visible_to_driver?.toString() ?? 'true',
       notes: data.notes || '',
       special_instructions: data.special_instructions || '',
     });
@@ -287,6 +298,11 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       extra_costs: form.extra_costs ? parseFloat(form.extra_costs) : null,
       amount_paid: form.amount_paid ? parseFloat(form.amount_paid) : null,
       price_notes: form.price_notes || null,
+      finance_visibility: form.finance_visibility || 'all',
+      finance_visible_to_generator: form.finance_visible_to_generator === 'true',
+      finance_visible_to_transporter: form.finance_visible_to_transporter === 'true',
+      finance_visible_to_destination: form.finance_visible_to_destination === 'true',
+      finance_visible_to_driver: form.finance_visible_to_driver === 'true',
       notes: form.notes || null,
       special_instructions: form.special_instructions || null,
       updated_at: new Date().toISOString(),
@@ -351,7 +367,25 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     }
   };
 
-  // حفظ + إرسال واتساب عبر WaPilot
+  // Helper: determine if finance page should be included for a given recipient
+  const shouldShowFinance = (recipientType: 'generator' | 'transporter' | 'destination' | 'driver'): boolean => {
+    if (form.finance_visibility === 'all') return true;
+    if (form.finance_visibility === 'none') return false;
+    // custom
+    const key = `finance_visible_to_${recipientType}` as keyof ManualShipmentData;
+    return form[key] === 'true';
+  };
+
+  // Helper: get recipient type from phone
+  const getRecipientType = (phone: string): 'generator' | 'transporter' | 'destination' | 'driver' => {
+    const clean = phone.replace(/\s/g, '');
+    if (form.generator_phone?.replace(/\s/g, '') === clean) return 'generator';
+    if (form.transporter_phone?.replace(/\s/g, '') === clean) return 'transporter';
+    if (form.destination_phone?.replace(/\s/g, '') === clean) return 'destination';
+    return 'driver';
+  };
+
+  // حفظ + إرسال واتساب عبر WaPilot مع تحكم رؤية البيانات المالية
   const saveAndSendWhatsApp = async () => {
     const result = await saveDraft();
     if (!result) {
@@ -359,54 +393,67 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       return;
     }
 
-    const phones = new Set<string>();
-    [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
-      .filter(Boolean)
-      .forEach(p => phones.add(p.replace(/\s/g, '')));
+    const recipientPhones: Array<{ phone: string; type: 'generator' | 'transporter' | 'destination' | 'driver' }> = [];
+    if (form.generator_phone) recipientPhones.push({ phone: form.generator_phone.replace(/\s/g, ''), type: 'generator' });
+    if (form.transporter_phone) recipientPhones.push({ phone: form.transporter_phone.replace(/\s/g, ''), type: 'transporter' });
+    if (form.destination_phone) recipientPhones.push({ phone: form.destination_phone.replace(/\s/g, ''), type: 'destination' });
+    if (form.driver_phone) recipientPhones.push({ phone: form.driver_phone.replace(/\s/g, ''), type: 'driver' });
 
-    if (phones.size === 0) {
+    // Deduplicate by phone
+    const seen = new Set<string>();
+    const uniqueRecipients = recipientPhones.filter(r => {
+      if (seen.has(r.phone)) return false;
+      seen.add(r.phone);
+      return true;
+    });
+
+    if (uniqueRecipients.length === 0) {
       toast.error('لا توجد أرقام هاتف لإرسال الواتساب');
       return;
     }
 
     toast.info('جارٍ تجهيز وإرسال بيان الشحنة عبر واتساب...');
     try {
-      const blob = await generateManualShipmentPDFBlob(form);
-      if (!blob) {
-        toast.error('فشل في توليد ملف PDF');
-        return;
-      }
+      // Group recipients by finance visibility to minimize PDF generation
+      const withFinance = uniqueRecipients.filter(r => shouldShowFinance(r.type));
+      const withoutFinance = uniqueRecipients.filter(r => !shouldShowFinance(r.type));
 
-      // Upload PDF to storage
-      const filename = `manual-shipments/${result.draftId}/${Date.now()}.pdf`;
-      const { error: uploadError } = await supabase.storage
-        .from('shipment-documents')
-        .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
-
-      if (uploadError) {
-        console.error('[ManualShipment] Upload error:', uploadError);
-        toast.error('فشل في رفع الملف');
-        return;
-      }
-
-      const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-      const pdfUrl = urlData?.publicUrl;
-      const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
-
-      // Send to all phones via WaPilot
       let sentCount = 0;
-      for (const phone of phones) {
-        const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
-        const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
-          body: {
-            action: 'send-message',
-            chat_id: rawPhone,
-            text: message,
-          },
-        });
-        if (!sendError) sentCount++;
-        else console.error(`[WhatsApp] Failed to send to ${phone}:`, sendError);
-      }
+
+      const sendToGroup = async (recipients: typeof uniqueRecipients, includeFinance: boolean) => {
+        if (recipients.length === 0) return;
+        const blob = await generateManualShipmentPDFBlob(form, { includeFinance });
+        if (!blob) return;
+
+        const suffix = includeFinance ? 'full' : 'no-finance';
+        const filename = `manual-shipments/${result.draftId}/${Date.now()}-${suffix}.pdf`;
+        const { error: uploadError } = await supabase.storage
+          .from('shipment-documents')
+          .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
+
+        if (uploadError) {
+          console.error('[ManualShipment] Upload error:', uploadError);
+          return;
+        }
+
+        const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
+        const pdfUrl = urlData?.publicUrl;
+        const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
+
+        for (const { phone } of recipients) {
+          const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+          const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
+            body: { action: 'send-message', chat_id: rawPhone, text: message },
+          });
+          if (!sendError) sentCount++;
+          else console.error(`[WhatsApp] Failed to send to ${phone}:`, sendError);
+        }
+      };
+
+      await Promise.all([
+        sendToGroup(withFinance, true),
+        sendToGroup(withoutFinance, false),
+      ]);
 
       if (sentCount > 0) {
         toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
@@ -450,43 +497,45 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     
     toast.success('تم إرسال النموذج بنجاح');
 
-    // توليد PDF وإرسال واتساب تلقائياً عبر WaPilot
+    // توليد PDF وإرسال واتساب تلقائياً عبر WaPilot مع تحكم رؤية البيانات المالية
     try {
-      const phones = new Set<string>();
-      [form.generator_phone, form.transporter_phone, form.destination_phone, form.driver_phone]
-        .filter(p => p && p.length > 3)
-        .forEach(p => phones.add(p.replace(/\s/g, '')));
+      const recipientPhones: Array<{ phone: string; type: 'generator' | 'transporter' | 'destination' | 'driver' }> = [];
+      if (form.generator_phone?.length > 3) recipientPhones.push({ phone: form.generator_phone.replace(/\s/g, ''), type: 'generator' });
+      if (form.transporter_phone?.length > 3) recipientPhones.push({ phone: form.transporter_phone.replace(/\s/g, ''), type: 'transporter' });
+      if (form.destination_phone?.length > 3) recipientPhones.push({ phone: form.destination_phone.replace(/\s/g, ''), type: 'destination' });
+      if (form.driver_phone?.length > 3) recipientPhones.push({ phone: form.driver_phone.replace(/\s/g, ''), type: 'driver' });
 
-      if (phones.size > 0) {
+      const seen = new Set<string>();
+      const unique = recipientPhones.filter(r => { if (seen.has(r.phone)) return false; seen.add(r.phone); return true; });
+
+      if (unique.length > 0) {
         toast.info('جارٍ تجهيز وإرسال بيان الشحنة عبر واتساب...');
-        const blob = await generateManualShipmentPDFBlob(form);
-        if (blob) {
-          const filename = `manual-shipments/${result.draftId}/${Date.now()}.pdf`;
+        const withFinance = unique.filter(r => shouldShowFinance(r.type));
+        const withoutFinance = unique.filter(r => !shouldShowFinance(r.type));
+
+        let sentCount = 0;
+        const sendGroup = async (recipients: typeof unique, includeFinance: boolean) => {
+          if (recipients.length === 0) return;
+          const blob = await generateManualShipmentPDFBlob(form, { includeFinance });
+          if (!blob) return;
+          const suffix = includeFinance ? 'full' : 'no-finance';
+          const filename = `manual-shipments/${result.draftId}/${Date.now()}-${suffix}.pdf`;
           const { error: uploadError } = await supabase.storage
             .from('shipment-documents')
             .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
-
-          if (!uploadError) {
-            const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-            const pdfUrl = urlData?.publicUrl;
-            const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${pdfUrl}`;
-
-            let sentCount = 0;
-            for (const phone of phones) {
-              const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
-              const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
-                body: {
-                  action: 'send-message',
-                  chat_id: rawPhone,
-                  text: message,
-                },
-              });
-              if (!sendError) sentCount++;
-              else console.error(`[WhatsApp] Submit send failed for ${phone}:`, sendError);
-            }
-            if (sentCount > 0) toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
+          if (uploadError) return;
+          const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
+          const message = `📄 بيان شحنة رقم ${form.shipment_number || ''}\n\n${urlData?.publicUrl}`;
+          for (const { phone } of recipients) {
+            const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');
+            const { error: sendError } = await supabase.functions.invoke('wapilot-proxy', {
+              body: { action: 'send-message', chat_id: rawPhone, text: message },
+            });
+            if (!sendError) sentCount++;
           }
-        }
+        };
+        await Promise.all([sendGroup(withFinance, true), sendGroup(withoutFinance, false)]);
+        if (sentCount > 0) toast.success(`تم إرسال بيان الشحنة عبر واتساب إلى ${sentCount} جهة`);
       }
     } catch (err) {
       console.error('[ManualShipment] WhatsApp notification error:', err);

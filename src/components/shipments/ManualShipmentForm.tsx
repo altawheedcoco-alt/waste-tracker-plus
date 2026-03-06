@@ -489,6 +489,47 @@ const ManualShipmentForm = ({
             })()}
 
             <FormField label="ملاحظات مالية" value={form.price_notes} onChange={v => updateField('price_notes', v)} placeholder="طريقة الدفع أو ملاحظات" />
+
+            {/* Finance visibility controls */}
+            <div className="border rounded-lg p-4 space-y-3 bg-muted/20">
+              <div className="flex items-center gap-2 justify-end">
+                <Label className="text-xs font-bold">🔒 التحكم في إظهار البيانات المالية في النموذج المرسل</Label>
+              </div>
+              <Select value={form.finance_visibility} onValueChange={v => updateField('finance_visibility', v)}>
+                <SelectTrigger className="text-right" dir="rtl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">إظهار لجميع الأطراف</SelectItem>
+                  <SelectItem value="none">إخفاء عن جميع الأطراف</SelectItem>
+                  <SelectItem value="custom">تحديد الجهات يدوياً</SelectItem>
+                </SelectContent>
+              </Select>
+              {form.finance_visibility === 'custom' && (
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2">
+                  {[
+                    { key: 'finance_visible_to_generator' as const, label: 'المولّد' },
+                    { key: 'finance_visible_to_transporter' as const, label: 'الناقل' },
+                    { key: 'finance_visible_to_destination' as const, label: 'المستقبل' },
+                    { key: 'finance_visible_to_driver' as const, label: 'السائق' },
+                  ].map(({ key, label }) => (
+                    <div key={key} className="flex items-center gap-2 justify-end border rounded-md p-2">
+                      <Label className="text-xs">{label}</Label>
+                      <Checkbox
+                        checked={form[key] === 'true'}
+                        onCheckedChange={(checked) => updateField(key, checked ? 'true' : 'false')}
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+              {form.finance_visibility === 'none' && (
+                <p className="text-xs text-muted-foreground text-right">❌ لن تظهر صفحة البيانات المالية في أي نموذج مرسل</p>
+              )}
+              {form.finance_visibility === 'custom' && (
+                <p className="text-xs text-muted-foreground text-right">✅ ستظهر البيانات المالية فقط للجهات المحددة أعلاه</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 

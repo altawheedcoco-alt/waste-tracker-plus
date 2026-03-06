@@ -25,7 +25,48 @@ function v(s: string | undefined | null): string {
   return s || '—';
 }
 
-function generateFullHTML(form: ManualShipmentData): string {
+function generateFinanceHTML(form: ManualShipmentData): string {
+  const basePrice = parseFloat(form.price) || 0;
+  const unitPrice = parseFloat(form.price_per_unit) || 0;
+  const qty = parseFloat(form.quantity) || 0;
+  const extra = parseFloat(form.extra_costs) || 0;
+  const vatEnabled = form.vat_enabled === 'true';
+  const vatAmt = vatEnabled ? (basePrice + extra) * 0.14 : 0;
+  const laborEnabled = form.labor_tax_enabled === 'true';
+  const laborPct = parseFloat(form.labor_tax_percent) || 0;
+  const laborAmt = laborEnabled ? (basePrice + extra) * laborPct / 100 : 0;
+  const grandTotal = basePrice + extra + vatAmt + laborAmt;
+  const paid = parseFloat(form.amount_paid) || 0;
+  const remaining = grandTotal - paid;
+
+  let rows = '';
+  if (!basePrice && !unitPrice) {
+    rows = `<tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">لم يتم إدخال بيانات مالية</td></tr>`;
+  } else {
+    if (unitPrice) rows += `<tr><td class="k">سعر الوحدة</td><td>${unitPrice.toFixed(2)} ج.م</td><td class="k">الكمية</td><td>${qty} ${form.unit === 'ton' ? 'طن' : form.unit === 'kg' ? 'كجم' : form.unit || ''}</td></tr>`;
+    rows += `<tr><td class="k">إجمالي قبل الضرائب</td><td>${basePrice.toFixed(2)} ج.م</td><td class="k">مصاريف إضافية</td><td>${extra ? extra.toFixed(2) + ' ج.م' : '—'}</td></tr>`;
+    if (vatEnabled) rows += `<tr><td class="k">ضريبة القيمة المضافة (14%)</td><td>${vatAmt.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>`;
+    if (laborEnabled) rows += `<tr><td class="k">ضريبة العمل (${laborPct}%)</td><td>${laborAmt.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>`;
+    rows += `<tr style="background:#f0f0e8;font-weight:700;"><td class="k" style="font-size:10px;">الإجمالي الكلي</td><td style="font-size:10px;">${grandTotal.toFixed(2)} ج.م</td><td class="k">المدفوع</td><td>${paid ? paid.toFixed(2) + ' ج.م' : '—'}</td></tr>`;
+    if (paid) rows += `<tr><td class="k">المتبقي</td><td style="color:${remaining > 0 ? '#dc2626' : '#16a34a'};font-weight:700;">${remaining.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>`;
+    if (form.price_notes) rows += `<tr><td class="k">ملاحظات مالية</td><td colspan="3">${v(form.price_notes)}</td></tr>`;
+  }
+
+  return `
+  <div style="page-break-before: always;"></div>
+  <div class="sec-title" style="margin-top:0;">صفحة البيانات المالية</div>
+  <table class="classic">
+    <thead><tr><th colspan="4">سابعاً: البيانات المالية</th></tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
+}
+
+interface PdfOptions {
+  includeFinance?: boolean;
+}
+
+function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): string {
+  const { includeFinance = true } = options;
   const shipTypeLabel = form.shipment_type === 'urgent' ? 'عاجلة' : form.shipment_type === 'scheduled' ? 'مجدولة' : 'عادية';
   const destTypeLabel = form.destination_type === 'disposal' ? 'تخلص نهائي' : 'إعادة تدوير';
   const destSectionTitle = form.destination_type === 'disposal' ? 'جهة التخلص النهائي' : 'جهة إعادة التدوير';
@@ -318,43 +359,7 @@ function generateFullHTML(form: ManualShipmentData): string {
     </tbody>
   </table>
 
-  <!-- Page 3: Financial Data — always on a separate page -->
-  <div style="page-break-before: always;"></div>
-  <div class="sec-title" style="margin-top:0;">صفحة البيانات المالية</div>
-  ${(() => {
-    const basePrice = parseFloat(form.price) || 0;
-    const unitPrice = parseFloat(form.price_per_unit) || 0;
-    const qty = parseFloat(form.quantity) || 0;
-    const extra = parseFloat(form.extra_costs) || 0;
-    const vatEnabled = form.vat_enabled === 'true';
-    const vatAmt = vatEnabled ? (basePrice + extra) * 0.14 : 0;
-    const laborEnabled = form.labor_tax_enabled === 'true';
-    const laborPct = parseFloat(form.labor_tax_percent) || 0;
-    const laborAmt = laborEnabled ? (basePrice + extra) * laborPct / 100 : 0;
-    const grandTotal = basePrice + extra + vatAmt + laborAmt;
-    const paid = parseFloat(form.amount_paid) || 0;
-    const remaining = grandTotal - paid;
-
-    if (!basePrice && !unitPrice) return `
-    <table class="classic">
-      <thead><tr><th colspan="4">سابعاً: البيانات المالية</th></tr></thead>
-      <tbody><tr><td colspan="4" style="text-align:center;padding:20px;color:#888;">لم يتم إدخال بيانات مالية</td></tr></tbody>
-    </table>`;
-
-    return `
-    <table class="classic">
-      <thead><tr><th colspan="4">سابعاً: البيانات المالية</th></tr></thead>
-      <tbody>
-        ${unitPrice ? `<tr><td class="k">سعر الوحدة</td><td>${unitPrice.toFixed(2)} ج.م</td><td class="k">الكمية</td><td>${qty} ${form.unit === 'ton' ? 'طن' : form.unit === 'kg' ? 'كجم' : form.unit || ''}</td></tr>` : ''}
-        <tr><td class="k">إجمالي قبل الضرائب</td><td>${basePrice.toFixed(2)} ج.م</td><td class="k">مصاريف إضافية</td><td>${extra ? extra.toFixed(2) + ' ج.م' : '—'}</td></tr>
-        ${vatEnabled ? `<tr><td class="k">ضريبة القيمة المضافة (14%)</td><td>${vatAmt.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>` : ''}
-        ${laborEnabled ? `<tr><td class="k">ضريبة العمل (${laborPct}%)</td><td>${laborAmt.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>` : ''}
-        <tr style="background:#f0f0e8;font-weight:700;"><td class="k" style="font-size:10px;">الإجمالي الكلي</td><td style="font-size:10px;">${grandTotal.toFixed(2)} ج.م</td><td class="k">المدفوع</td><td>${paid ? paid.toFixed(2) + ' ج.م' : '—'}</td></tr>
-        ${paid ? `<tr><td class="k">المتبقي</td><td style="color:${remaining > 0 ? '#dc2626' : '#16a34a'};font-weight:700;">${remaining.toFixed(2)} ج.م</td><td class="k"></td><td></td></tr>` : ''}
-        ${form.price_notes ? `<tr><td class="k">ملاحظات مالية</td><td colspan="3">${v(form.price_notes)}</td></tr>` : ''}
-      </tbody>
-    </table>`;
-  })()}
+  ${includeFinance ? generateFinanceHTML(form) : ''}
 
   ${(form.notes || form.special_instructions) ? `
   <table class="classic">
@@ -530,8 +535,8 @@ function generateFullHTML(form: ManualShipmentData): string {
 </html>`;
 }
 
-export async function generateManualShipmentPDF(form: ManualShipmentData) {
-  const htmlContent = generateFullHTML(form);
+export async function generateManualShipmentPDF(form: ManualShipmentData, options?: PdfOptions) {
+  const htmlContent = generateFullHTML(form, options);
 
   const printWindow = window.open('', '_blank', 'width=800,height=600');
   if (!printWindow) {
@@ -567,9 +572,9 @@ export async function generateManualShipmentPDF(form: ManualShipmentData) {
 /**
  * Generate PDF as Blob for uploading/sending via WhatsApp
  */
-export async function generateManualShipmentPDFBlob(form: ManualShipmentData): Promise<Blob | null> {
+export async function generateManualShipmentPDFBlob(form: ManualShipmentData, options?: PdfOptions): Promise<Blob | null> {
   try {
-    const htmlContent = generateFullHTML(form);
+    const htmlContent = generateFullHTML(form, options);
     
     // Create hidden container
     const container = document.createElement('div');

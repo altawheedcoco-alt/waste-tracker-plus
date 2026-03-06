@@ -125,6 +125,11 @@ const ManualShipmentDrafts = () => {
       extra_costs: draft.extra_costs?.toString() || '',
       amount_paid: draft.amount_paid?.toString() || '',
       price_notes: draft.price_notes || '',
+      finance_visibility: draft.finance_visibility || 'all',
+      finance_visible_to_generator: draft.finance_visible_to_generator?.toString() ?? 'true',
+      finance_visible_to_transporter: draft.finance_visible_to_transporter?.toString() ?? 'true',
+      finance_visible_to_destination: draft.finance_visible_to_destination?.toString() ?? 'true',
+      finance_visible_to_driver: draft.finance_visible_to_driver?.toString() ?? 'true',
       notes: draft.notes || '',
       special_instructions: draft.special_instructions || '',
     });
