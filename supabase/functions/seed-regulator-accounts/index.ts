@@ -152,7 +152,8 @@ Deno.serve(async (req) => {
         id: userId,
         full_name: account.fullName,
         email: account.email,
-        role: 'company_admin',
+        organization_id: orgId,
+        active_organization_id: orgId,
       }, { onConflict: 'id' });
 
       // 4. Link user to organization
