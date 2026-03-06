@@ -116,6 +116,7 @@ const Dashboard = () => {
         case 'consultant': return <ConsultantDashboard />;
         case 'consulting_office': return <ConsultingOfficeDashboard />;
         case 'iso_body': return <ISOBodyDashboard />;
+        case 'regulator': return <RegulatorDashboardNew />;
         default: return <AdminDashboard />;
       }
     }
@@ -128,6 +129,7 @@ const Dashboard = () => {
       case 'consultant': return <ConsultantDashboard />;
       case 'consulting_office': return <ConsultingOfficeDashboard />;
       case 'iso_body': return <ISOBodyDashboard />;
+      case 'regulator': return <RegulatorDashboardNew />;
       default: return <GeneratorDashboard />;
     }
   };
