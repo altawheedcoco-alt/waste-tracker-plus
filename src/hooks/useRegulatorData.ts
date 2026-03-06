@@ -19,6 +19,48 @@ export const useRegulatorConfig = () => {
   });
 };
 
+// Fetch jurisdiction mappings for the current regulator's level
+export const useRegulatorJurisdictions = () => {
+  const { data: config } = useRegulatorConfig();
+  const levelCode = config?.regulator_level_code;
+
+  return useQuery({
+    queryKey: ['regulator-jurisdictions', levelCode],
+    queryFn: async () => {
+      if (!levelCode) return [];
+      // For WMRA (hierarchy_priority=100), fetch all jurisdictions
+      // For others, fetch only their own + lower priority overlaps
+      const { data } = await supabase
+        .from('regulator_jurisdictions')
+        .select('*')
+        .eq('regulator_level_code', levelCode)
+        .order('hierarchy_priority', { ascending: false });
+      return data || [];
+    },
+    enabled: !!levelCode,
+  });
+};
+
+// Get supervised org types for current regulator
+export const useSupervisedOrgTypes = () => {
+  const { data: jurisdictions = [] } = useRegulatorJurisdictions();
+  return [...new Set(jurisdictions.map((j: any) => j.supervised_org_type))];
+};
+
+// Get all regulator levels for reference
+export const useAllRegulatorLevels = () => {
+  return useQuery({
+    queryKey: ['all-regulator-levels'],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('regulator_levels')
+        .select('*')
+        .order('level_code');
+      return data || [];
+    },
+  });
+};
+
 export const useRegulatorStats = () => {
   const { organization } = useAuth();
   return useQuery({
