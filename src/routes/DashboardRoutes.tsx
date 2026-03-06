@@ -347,6 +347,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
     <Route path="/dashboard/notes" element={<AllNotes />} />
     <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
+    <Route path="/dashboard/regulator-wmra" element={<RegulatorWMRA />} />
+    <Route path="/dashboard/regulator-eeaa" element={<RegulatorEEAA />} />
+    <Route path="/dashboard/regulator-ltra" element={<RegulatorLTRA />} />
+    <Route path="/dashboard/regulator-ida" element={<RegulatorIDA />} />
     <Route path="/dashboard/regulated-companies" element={<RegulatedCompanies />} />
     <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
     <Route path="/dashboard/smart-insurance" element={<SmartInsurance />} />
