@@ -146,22 +146,41 @@ Deno.serve(async (req) => {
         });
         break;
       case 'send-media': {
-        url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-media`;
-        method = 'POST';
+        // WaPilot uses send-file with multipart FormData, not send-media JSON
         let mediaChat = params.chat_id || '';
         if (mediaChat) {
           const rawP = mediaChat.replace('@c.us', '').replace(/[\s+\-()]/g, '').replace(/^0+/, '');
           const fixedP = /^1\d{9}$/.test(rawP) ? '20' + rawP : rawP;
           mediaChat = fixedP + '@c.us';
         }
-        fetchBody = JSON.stringify({
-          chat_id: mediaChat,
-          media_url: params.media_url,
-          media_type: params.media_type || 'document',
-          caption: params.caption || '',
-          filename: params.filename || 'document.pdf',
+
+        // Download file from URL
+        const fileRes = await fetch(params.media_url);
+        if (!fileRes.ok) {
+          return new Response(JSON.stringify({ error: 'Failed to download media file', status: fileRes.status }), {
+            status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          });
+        }
+        const fileBlob = await fileRes.blob();
+        const fname = params.filename || 'document.pdf';
+        const contentType = fileBlob.type || 'application/pdf';
+
+        const formData = new FormData();
+        formData.append('chat_id', mediaChat);
+        if (params.caption) formData.append('caption', params.caption);
+        formData.append('media', new File([fileBlob], fname, { type: contentType }));
+
+        const sendFileRes = await fetch(`${WAPILOT_BASE}/${resolvedInstanceId}/send-file`, {
+          method: 'POST',
+          headers: { token: token! },
+          body: formData,
         });
-        break;
+        const sendFileData = await sendFileRes.json().catch(() => ({}));
+
+        return new Response(JSON.stringify(sendFileData), {
+          status: sendFileRes.status,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
       }
       case 'send-list':
         url = `${WAPILOT_BASE}/${resolvedInstanceId}/send-list`;
