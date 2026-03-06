@@ -63,11 +63,36 @@ const FormField = ({ label, value, onChange, placeholder, type = 'text', require
 );
 
 const ManualShipmentForm = ({
-  form, updateField, saving, savedShareCode,
+  form, updateField, setForm, saving, savedShareCode,
   onSave, onSubmit, onReset, onExportPDF,
   onSaveAndDownloadPDF, onSaveAndSendWhatsApp, onSaveAndPrintPDF,
 }: ManualShipmentFormProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+
+  const updateWasteItem = useCallback((index: number, field: keyof WasteItem, value: string) => {
+    setForm(prev => {
+      const items = [...prev.waste_items];
+      items[index] = { ...items[index], [field]: value };
+      // Auto-calc price for this item
+      if (field === 'price_per_unit' || field === 'quantity') {
+        const qty = parseFloat(field === 'quantity' ? value : items[index].quantity) || 0;
+        const unitPrice = parseFloat(field === 'price_per_unit' ? value : items[index].price_per_unit) || 0;
+        items[index].price = (qty * unitPrice).toFixed(2);
+      }
+      return { ...prev, waste_items: items };
+    });
+  }, [setForm]);
+
+  const addWasteItem = useCallback(() => {
+    setForm(prev => ({ ...prev, waste_items: [...prev.waste_items, createEmptyWasteItem()] }));
+  }, [setForm]);
+
+  const removeWasteItem = useCallback((index: number) => {
+    setForm(prev => {
+      if (prev.waste_items.length <= 1) return prev;
+      return { ...prev, waste_items: prev.waste_items.filter((_, i) => i !== index) };
+    });
+  }, [setForm]);
 
   const handleShare = async () => {
     const code = savedShareCode || await onSave();
