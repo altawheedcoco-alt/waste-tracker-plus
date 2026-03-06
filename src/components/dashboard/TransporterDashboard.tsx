@@ -451,6 +451,14 @@ const TransporterDashboard = () => {
             </Suspense>
           </TabsContent>
 
+          <TabsContent value="declarations" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في الإقرارات">
+                <TransporterDeclarations />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
           <TabsContent value="ohs" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
