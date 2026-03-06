@@ -23,7 +23,7 @@ interface ManualShipmentFormProps {
   updateField: (field: keyof ManualShipmentData, value: string) => void;
   saving: boolean;
   savedShareCode: string | null;
-  onSave: () => Promise<string | null>;
+  onSave: () => Promise<{ shareCode: string; draftId: string } | null>;
   onSubmit: () => Promise<void>;
   onReset: () => void;
   onExportPDF: () => void;

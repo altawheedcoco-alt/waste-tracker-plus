@@ -203,7 +203,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     setForm(prev => ({ ...prev, [field]: value }));
   };
 
-  const saveDraft = async (): Promise<string | null> => {
+  const saveDraft = async (): Promise<{ shareCode: string; draftId: string } | null> => {
     if (!organization?.id || !user?.id) {
       toast.error('يجب تسجيل الدخول أولاً');
       return null;
@@ -290,7 +290,7 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
     setSavedDraftId(result.data.id);
     setSavedShareCode(result.data.share_code);
     toast.success('تم حفظ المسودة بنجاح');
-    return result.data.share_code;
+    return { shareCode: result.data.share_code, draftId: result.data.id };
   };
 
   // Core: generate PDF server-side, archive it, return URL
@@ -374,14 +374,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + تنزيل + أرشفة
   const saveAndDownloadPDF = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-    const { pdfUrl, filename } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl, filename } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       // Auto-download
@@ -400,14 +400,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + إرسال واتساب
   const saveAndSendWhatsApp = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز وإرسال بيان الشحنة...');
-    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       await sendPDFToWhatsApp(pdfUrl);
@@ -418,14 +418,14 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // حفظ + توليد PDF + طباعة
   const saveAndPrintPDF = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) {
+    const result = await saveDraft();
+    if (!result) {
       toast.error('يجب حفظ المسودة أولاً');
       return;
     }
 
     toast.info('جارٍ تجهيز بيان الشحنة للطباعة...');
-    const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+    const { pdfUrl } = await generateAndArchivePDF(result.draftId);
     
     if (pdfUrl) {
       window.open(pdfUrl, '_blank');
@@ -437,19 +437,19 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
 
   // إرسال كامل (حفظ + PDF + أرشفة + واتساب)
   const submitDraft = async () => {
-    const code = await saveDraft();
-    if (!code || !savedDraftId) return;
+    const result = await saveDraft();
+    if (!result) return;
     
     await supabase
       .from('manual_shipment_drafts')
       .update({ is_submitted: true, submitted_at: new Date().toISOString(), status: 'submitted' })
-      .eq('id', savedDraftId);
+      .eq('id', result.draftId);
     
     toast.success('تم إرسال النموذج بنجاح');
 
     try {
       toast.info('جارٍ تجهيز بيان الشحنة PDF...');
-      const { pdfUrl } = await generateAndArchivePDF(savedDraftId);
+      const { pdfUrl } = await generateAndArchivePDF(result.draftId);
       
       if (pdfUrl) {
         await sendPDFToWhatsApp(pdfUrl);
