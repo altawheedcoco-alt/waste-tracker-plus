@@ -53,6 +53,14 @@ export interface ManualShipmentData {
   delivery_date: string;
   shipment_type: string;
   price: string;
+  price_per_unit: string;
+  vat_enabled: string;
+  vat_amount: string;
+  labor_tax_enabled: string;
+  labor_tax_percent: string;
+  labor_tax_amount: string;
+  extra_costs: string;
+  amount_paid: string;
   price_notes: string;
   notes: string;
   special_instructions: string;
