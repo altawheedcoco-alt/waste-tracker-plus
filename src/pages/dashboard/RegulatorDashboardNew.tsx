@@ -4,21 +4,19 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale } from 'lucide-react';
+import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck } from 'lucide-react';
 import RegulatorOverview from '@/components/regulator/RegulatorOverview';
 import FieldInspectionPanel from '@/components/regulator/FieldInspectionPanel';
 import ViolationsPanel from '@/components/regulator/ViolationsPanel';
 import PenaltiesPanel from '@/components/regulator/PenaltiesPanel';
 import OrganizationsRegistry from '@/components/regulator/OrganizationsRegistry';
 import JurisdictionPanel from '@/components/regulator/JurisdictionPanel';
+import LicenseManagementPanel from '@/components/regulator/LicenseManagementPanel';
 
 const RegulatorDashboardNew = () => {
   const { user, roles } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('overview');
-
-  // Allow admin and regulator org members
-  // Access control is handled by RLS
 
   return (
     <DashboardLayout>
@@ -40,6 +38,9 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="organizations" className="gap-1.5 text-xs sm:text-sm">
               <Building2 className="w-4 h-4" /> المنظمات
             </TabsTrigger>
+            <TabsTrigger value="licenses" className="gap-1.5 text-xs sm:text-sm">
+              <FileCheck className="w-4 h-4" /> التراخيص والإفادات
+            </TabsTrigger>
             <TabsTrigger value="inspections" className="gap-1.5 text-xs sm:text-sm">
               <ClipboardCheck className="w-4 h-4" /> التفتيش
             </TabsTrigger>
@@ -60,6 +61,10 @@ const RegulatorDashboardNew = () => {
 
           <TabsContent value="organizations" className="mt-4">
             <OrganizationsRegistry />
+          </TabsContent>
+
+          <TabsContent value="licenses" className="mt-4">
+            <LicenseManagementPanel />
           </TabsContent>
 
           <TabsContent value="inspections" className="mt-4">
