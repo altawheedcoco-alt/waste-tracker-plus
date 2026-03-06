@@ -66,7 +66,7 @@ export const useCreateRenewalRequest = () => {
     mutationFn: async (request: Record<string, any>) => {
       const { data, error } = await supabase
         .from('license_renewal_requests')
-        .insert(request)
+        .insert(request as any)
         .select()
         .single();
       if (error) throw error;
@@ -95,7 +95,7 @@ export const useIssueAttestation = () => {
           ...attestation,
           attestation_number: attestationNumber,
           issued_by: user?.id,
-        })
+        } as any)
         .select()
         .single();
       if (error) throw error;
