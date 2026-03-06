@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck } from 'lucide-react';
+import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck, Search } from 'lucide-react';
 import RegulatorOverview from '@/components/regulator/RegulatorOverview';
 import FieldInspectionPanel from '@/components/regulator/FieldInspectionPanel';
 import ViolationsPanel from '@/components/regulator/ViolationsPanel';
@@ -12,6 +12,7 @@ import PenaltiesPanel from '@/components/regulator/PenaltiesPanel';
 import OrganizationsRegistry from '@/components/regulator/OrganizationsRegistry';
 import JurisdictionPanel from '@/components/regulator/JurisdictionPanel';
 import LicenseManagementPanel from '@/components/regulator/LicenseManagementPanel';
+import RegulatorDocumentVerification from '@/components/regulator/RegulatorDocumentVerification';
 
 const RegulatorDashboardNew = () => {
   const { user, roles } = useAuth();
