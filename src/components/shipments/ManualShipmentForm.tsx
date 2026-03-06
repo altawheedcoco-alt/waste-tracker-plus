@@ -22,6 +22,7 @@ import { ar } from 'date-fns/locale';
 interface ManualShipmentFormProps {
   form: ManualShipmentData;
   updateField: (field: keyof ManualShipmentData, value: string) => void;
+  setForm: React.Dispatch<React.SetStateAction<ManualShipmentData>>;
   saving: boolean;
   savedShareCode: string | null;
   onSave: () => Promise<{ shareCode: string; draftId: string } | null>;
