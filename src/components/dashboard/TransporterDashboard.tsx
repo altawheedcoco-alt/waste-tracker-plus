@@ -121,6 +121,7 @@ const tabItems = [
   { value: 'compliance', label: 'الامتثال', icon: Shield },
   { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
   { value: 'licenses', label: 'التراخيص', icon: FileCheck },
+  { value: 'declarations', label: 'الإقرارات', icon: FileText },
   { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
 
