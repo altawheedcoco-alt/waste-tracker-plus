@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import {
   FileSignature,
   FileCheck,
@@ -31,6 +32,10 @@ import {
   Paperclip,
   CreditCard,
   ExternalLink,
+  Stamp,
+  PenTool,
+  Fingerprint,
+  Hash,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
