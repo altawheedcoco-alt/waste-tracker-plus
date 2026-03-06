@@ -56,27 +56,27 @@ function generateFullHTML(form: ManualShipmentData): string {
 <title>بيان شحنة - ${v(form.shipment_number)}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
-  @page { size: A4; margin: 14mm 16mm; }
+  @page { size: A4; margin: 10mm 12mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Amiri', 'Cairo', 'Times New Roman', serif;
-    font-size: 9px;
+    font-size: 10px;
     color: #222;
     direction: rtl;
     background: #fff;
-    line-height: 1.6;
+    line-height: 1.5;
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .page { padding: 0; page-break-after: always; }
+  .page { padding: 8mm 10mm; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
   /* Classic Header */
   .header {
     text-align: center;
     border-bottom: 2px double #333;
-    padding-bottom: 8px;
-    margin-bottom: 10px;
+    padding-bottom: 6px;
+    margin-bottom: 8px;
   }
   .header h1 {
     font-size: 16px;
@@ -93,8 +93,8 @@ function generateFullHTML(form: ManualShipmentData): string {
   .header-meta {
     display: table;
     width: 100%;
-    margin-top: 6px;
-    font-size: 8px;
+    margin-top: 4px;
+    font-size: 9px;
     color: #444;
   }
   .header-meta .right { display: table-cell; text-align: right; }
@@ -104,14 +104,14 @@ function generateFullHTML(form: ManualShipmentData): string {
   table.classic {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 8px;
-    font-size: 8.5px;
+    margin-bottom: 6px;
+    font-size: 9.5px;
   }
   table.classic th {
     background: #f5f5f0;
     border: 1px solid #999;
-    padding: 3px 8px;
-    font-size: 9px;
+    padding: 3px 6px;
+    font-size: 10px;
     font-weight: 700;
     text-align: right;
     color: #1a1a1a;
@@ -119,89 +119,91 @@ function generateFullHTML(form: ManualShipmentData): string {
   }
   table.classic td {
     border: 1px solid #bbb;
-    padding: 2.5px 8px;
+    padding: 2px 6px;
     text-align: right;
     vertical-align: top;
+    word-break: break-word;
   }
   table.classic td.k {
     background: #fafaf7;
     font-weight: 700;
-    width: 30%;
+    width: 28%;
     color: #333;
     font-family: 'Cairo', sans-serif;
-    font-size: 8px;
+    font-size: 9px;
+    white-space: nowrap;
   }
 
   /* Two column layout */
   .row { display: table; width: 100%; table-layout: fixed; }
   .row .cell { display: table-cell; vertical-align: top; }
-  .row .cell:first-child { padding-left: 4px; }
-  .row .cell:last-child { padding-right: 4px; }
+  .row .cell:first-child { padding-left: 3px; }
+  .row .cell:last-child { padding-right: 3px; }
 
   /* Section titles */
   .sec-title {
     font-family: 'Cairo', sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 700;
     color: #1a1a1a;
     border-bottom: 1px solid #999;
     padding-bottom: 2px;
-    margin: 10px 0 5px;
+    margin: 8px 0 4px;
   }
   .sec-title span { font-size: 8px; color: #777; font-weight: 400; margin-right: 6px; }
 
   /* Declarations */
   .decl-block {
     border: 1px solid #bbb;
-    padding: 6px 10px;
-    margin-bottom: 8px;
-    font-size: 8px;
-    line-height: 1.8;
+    padding: 5px 8px;
+    margin-bottom: 6px;
+    font-size: 8.5px;
+    line-height: 1.7;
   }
   .decl-block .dt {
     font-weight: 700;
     font-family: 'Cairo', sans-serif;
-    font-size: 8.5px;
+    font-size: 9px;
     text-decoration: underline;
     margin-bottom: 2px;
   }
   .decl-warn {
     border: 1px solid #b45309;
     background: #fffbeb;
-    padding: 4px 8px;
-    font-size: 7.5px;
-    margin-top: 6px;
+    padding: 3px 6px;
+    font-size: 8px;
+    margin-top: 4px;
     text-align: center;
     color: #92400e;
   }
 
   /* Signatures */
-  .sig-row { display: table; width: 100%; margin-top: 8px; }
-  .sig-cell { display: table-cell; width: 33.33%; text-align: center; vertical-align: top; padding: 4px 6px; }
+  .sig-row { display: table; width: 100%; margin-top: 6px; }
+  .sig-cell { display: table-cell; width: 33.33%; text-align: center; vertical-align: top; padding: 3px 5px; }
   .sig-cell + .sig-cell { border-right: 1px solid #bbb; }
   .sig-label { font-family: 'Cairo', sans-serif; font-size: 9px; font-weight: 700; margin-bottom: 2px; }
-  .sig-box { height: 40px; border-bottom: 1px solid #333; margin: 6px 20px 4px; }
+  .sig-box { height: 35px; border-bottom: 1px solid #333; margin: 4px 16px 3px; }
   .sig-hint { font-size: 7px; color: #888; }
 
   /* Verification */
-  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 6px; }
-  .verify-cell { display: table-cell; vertical-align: middle; padding: 6px; text-align: center; }
-  .qr-img { width: 64px; height: 64px; border: 1px solid #ccc; }
-  .barcode-img { height: 24px; max-width: 180px; margin-top: 4px; }
-  .v-code { font-family: 'Courier New', monospace; font-size: 11px; font-weight: 700; letter-spacing: 1.5px; }
+  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 5px; }
+  .verify-cell { display: table-cell; vertical-align: middle; padding: 4px; text-align: center; }
+  .qr-img { width: 56px; height: 56px; border: 1px solid #ccc; }
+  .barcode-img { height: 22px; max-width: 160px; margin-top: 3px; }
+  .v-code { font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
   .stamp-circle {
-    width: 56px; height: 56px;
+    width: 50px; height: 50px;
     border: 2px solid #333;
     border-radius: 50%;
     display: inline-block;
     line-height: 1.2;
-    padding-top: 10px;
+    padding-top: 8px;
   }
 
   /* Footer */
   .footer {
-    margin-top: 8px;
-    padding-top: 5px;
+    margin-top: 6px;
+    padding-top: 4px;
     border-top: 1px solid #999;
     font-size: 7px;
     color: #888;
@@ -209,32 +211,33 @@ function generateFullHTML(form: ManualShipmentData): string {
     width: 100%;
   }
   .footer .r { display: table-cell; text-align: right; }
-  .footer .l { display: table-cell; text-align: left; width: 120px; }
+  .footer .l { display: table-cell; text-align: left; width: 100px; }
 
   /* Terms page */
-  .terms-body { font-size: 8.5px; line-height: 2; }
+  .terms-body { font-size: 9px; line-height: 1.9; }
   .terms-notice {
     border: 1px solid #333;
-    padding: 5px 10px;
+    padding: 4px 8px;
     text-align: center;
-    font-size: 8.5px;
+    font-size: 9px;
     font-weight: 700;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
     font-family: 'Cairo', sans-serif;
   }
-  .t-sec { margin-bottom: 8px; }
+  .t-sec { margin-bottom: 6px; }
   .t-sec-title {
     font-family: 'Cairo', sans-serif;
     font-weight: 700;
-    font-size: 9.5px;
+    font-size: 10px;
     border-bottom: 1px solid #bbb;
     padding-bottom: 2px;
     margin-bottom: 3px;
   }
-  .t-sec-body { padding: 0 6px; font-size: 8px; }
+  .t-sec-body { padding: 0 6px; font-size: 8.5px; }
 
   @media print {
     body { background: #fff; }
+    .page { padding: 0; }
     .no-print { display: none !important; }
   }
 </style>
