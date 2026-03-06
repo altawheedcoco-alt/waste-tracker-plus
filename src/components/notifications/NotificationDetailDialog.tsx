@@ -30,6 +30,7 @@ import {
   Printer,
   Eye,
   Scale,
+  Tag,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { normalizeShipment, normalizeRelation } from '@/lib/supabaseHelpers';
@@ -48,6 +49,8 @@ interface Notification {
   pdf_url?: string | null;
   organization_id?: string | null;
   document_id?: string | null;
+  priority?: string | null;
+  metadata?: Record<string, any> | null;
 }
 
 interface SenderReceiverInfo {
