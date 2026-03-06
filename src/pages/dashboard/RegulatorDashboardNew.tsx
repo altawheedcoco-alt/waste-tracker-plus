@@ -90,7 +90,6 @@ const RegulatorDashboardNew = () => {
           <TabsContent value="verify" className="mt-4">
             <RegulatorDocumentVerification />
           </TabsContent>
-          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
