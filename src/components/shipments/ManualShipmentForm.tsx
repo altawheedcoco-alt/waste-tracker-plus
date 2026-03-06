@@ -293,7 +293,12 @@ const ManualShipmentForm = ({
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <FormField label="الكمية" value={form.quantity} onChange={v => updateField('quantity', v)} placeholder="0.00" type="number" required />
+              <FormField label="الكمية" value={form.quantity} onChange={v => {
+                updateField('quantity', v);
+                const qty = parseFloat(v) || 0;
+                const unitPrice = parseFloat(form.price_per_unit) || 0;
+                if (unitPrice > 0) updateField('price', (qty * unitPrice).toFixed(2));
+              }} placeholder="0.00" type="number" required />
               <div className="space-y-1.5">
                 <Label className="text-xs font-medium text-right block">الوحدة</Label>
                 <Select value={form.unit} onValueChange={v => updateField('unit', v)}>
