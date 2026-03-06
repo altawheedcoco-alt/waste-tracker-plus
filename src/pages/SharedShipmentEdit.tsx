@@ -53,6 +53,7 @@ const SharedShipmentEdit = () => {
         <ManualShipmentForm
           form={form}
           updateField={updateField}
+          setForm={setForm}
           saving={saving}
           savedShareCode={savedShareCode}
           onSave={saveDraft}
