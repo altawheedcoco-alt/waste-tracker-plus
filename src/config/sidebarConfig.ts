@@ -197,7 +197,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileCheck, labelAr: 'إصدار وتجديد التراخيص', labelEn: 'License Management', path: '/dashboard/regulator?tab=licenses', key: 'regulator-licenses' },
       { icon: FileSpreadsheet, labelAr: 'طلبات التراخيص الواردة', labelEn: 'License Applications', path: '/dashboard/regulator?tab=license-apps', key: 'regulator-license-apps' },
       { icon: FileText, labelAr: 'إصدار الإفادات الرسمية', labelEn: 'Official Attestations', path: '/dashboard/regulator?tab=attestations', key: 'regulator-attestations' },
-      { icon: Clock, labelAr: 'تراخيص قاربت على الانتهاء', labelEn: 'Expiring Licenses', path: '/dashboard/regulator?tab=expiring', key: 'regulator-expiring' },
+      { icon: AlertTriangle, labelAr: 'تراخيص قاربت على الانتهاء', labelEn: 'Expiring Licenses', path: '/dashboard/regulator?tab=expiring', key: 'regulator-expiring' },
     ],
   },
 
