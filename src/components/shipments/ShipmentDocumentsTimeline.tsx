@@ -104,6 +104,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
   const [rejecting, setRejecting] = useState(false);
   const [generatingDocs, setGeneratingDocs] = useState(false);
   const [showPrintPreview, setShowPrintPreview] = useState(false);
+  const [eSignMap, setESignMap] = useState<Record<string, boolean>>({});
   
   const printRef = useRef<HTMLDivElement>(null);
   const { exportToPDF, printContent, isExporting } = usePDFExport({
