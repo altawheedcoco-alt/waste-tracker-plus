@@ -266,6 +266,7 @@ const RecyclerDashboard = () => {
           <TabsTrigger value="carbon" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />البصمة الكربونية</TabsTrigger>
           <TabsTrigger value="esg" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />تقارير ESG</TabsTrigger>
           <TabsTrigger value="wmis" className="gap-1 text-xs"><AlertCircle className="w-3.5 h-3.5" />WMIS</TabsTrigger>
+          <TabsTrigger value="declarations" className="gap-1 text-xs"><FileText className="w-3.5 h-3.5" />الإقرارات</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-6 mt-4">
