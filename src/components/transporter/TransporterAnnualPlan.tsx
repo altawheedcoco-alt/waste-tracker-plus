@@ -185,6 +185,27 @@ export default function TransporterAnnualPlan() {
         }));
       }
 
+      // Fetch partners (recyclers/disposal as disposal destinations, subcontractors)
+      const { data: partners } = await supabase.from('organizations')
+        .select('id, name, organization_type, commercial_register, environmental_license')
+        .in('id', (await supabase.from('shipments')
+          .select('recycler_id')
+          .eq('transporter_id', orgId)
+          .not('recycler_id', 'is', null)
+          .limit(50)).data?.map((s: any) => s.recycler_id).filter(Boolean) || []);
+
+      if (partners?.length) {
+        const disposalPartner = partners[0];
+        setForm(prev => ({
+          ...prev,
+          disposal_plan: {
+            ...prev.disposal_plan,
+            disposal_site: (disposalPartner as any)?.name || '',
+            disposal_type: (disposalPartner as any)?.organization_type === 'recycler' ? 'تدوير' : 'تخلص آمن',
+          },
+        }));
+      }
+
       // Fetch recent routes from shipments
       const { data: shipments } = await supabase.from('shipments')
         .select('pickup_location, delivery_address, waste_type, generator_id, recycler_id')
@@ -216,6 +237,23 @@ export default function TransporterAnnualPlan() {
           else cats.add('municipal_solid');
         });
         setForm(prev => ({ ...prev, waste_categories: Array.from(cats) }));
+      }
+
+      // Fetch legal licenses for previous license info
+      const { data: licenses } = await supabase.from('legal_licenses')
+        .select('license_number, license_type, expiry_date')
+        .eq('organization_id', orgId)
+        .order('expiry_date', { ascending: false })
+        .limit(1);
+
+      if (licenses?.length) {
+        setForm(prev => ({
+          ...prev,
+          company_data: {
+            ...prev.company_data,
+            previous_license: prev.company_data.previous_license || `${licenses[0].license_type || ''} - ${licenses[0].license_number || ''}`,
+          },
+        }));
       }
 
       toast.success('تم توليد البيانات تلقائياً من النظام');
