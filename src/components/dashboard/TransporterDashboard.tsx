@@ -89,6 +89,7 @@ const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
+const TransporterDeclarations = lazy(() => import('@/components/transporter/TransporterDeclarations'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
