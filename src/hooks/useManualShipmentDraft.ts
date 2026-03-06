@@ -79,7 +79,10 @@ const emptyForm: ManualShipmentData = {
   quantity: '', unit: 'ton', packaging_method: '', disposal_method: '',
   driver_name: '', driver_phone: '', driver_license: '', vehicle_plate: '', vehicle_type: '',
   pickup_address: '', delivery_address: '', pickup_date: '', delivery_date: '',
-  shipment_type: 'regular', price: '', price_notes: '', notes: '', special_instructions: '',
+  shipment_type: 'regular', price: '', price_per_unit: '', 
+  vat_enabled: 'false', vat_amount: '', labor_tax_enabled: 'false', labor_tax_percent: '', labor_tax_amount: '',
+  extra_costs: '', amount_paid: '',
+  price_notes: '', notes: '', special_instructions: '',
 };
 
 export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
