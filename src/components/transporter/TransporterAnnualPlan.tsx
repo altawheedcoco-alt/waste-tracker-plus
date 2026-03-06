@@ -64,6 +64,14 @@ interface WorkforceEntry {
   training_status: string;
 }
 
+interface OrgStructureEntry {
+  department: string;
+  position: string;
+  person_name: string;
+  phone: string;
+  responsibilities: string;
+}
+
 interface FormState {
   plan_year: number;
   plan_type: 'manual' | 'auto';
@@ -78,6 +86,7 @@ interface FormState {
     phone: string;
     email: string;
   };
+  org_structure: OrgStructureEntry[];
   vehicles: VehicleEntry[];
   routes: RouteEntry[];
   disposal_plan: {
@@ -101,6 +110,7 @@ const defaultForm = (): FormState => ({
   plan_type: 'auto',
   waste_categories: [],
   company_data: { name: '', commercial_register: '', tax_card: '', previous_license: '', address: '', representative: '', phone: '', email: '' },
+  org_structure: [],
   vehicles: [],
   routes: [],
   disposal_plan: { disposal_site: '', disposal_type: '', contract_reference: '' },
