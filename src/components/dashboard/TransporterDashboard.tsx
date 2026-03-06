@@ -44,7 +44,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck } from 'lucide-react';
 
 // Lazy load heavy tab content
 
@@ -88,6 +88,7 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -118,6 +119,7 @@ const tabItems = [
   { value: 'esg', label: 'تقارير ESG', icon: Leaf },
   { value: 'compliance', label: 'الامتثال', icon: Shield },
   { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
+  { value: 'licenses', label: 'التراخيص', icon: FileCheck },
   { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
 ];
 
@@ -435,6 +437,14 @@ const TransporterDashboard = () => {
               <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
                 {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
                 <WMISEventsFeed />
+              </ErrorBoundary>
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="licenses" className="space-y-4 mt-6">
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في التراخيص">
+                <TransporterLicenseRenewal />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
