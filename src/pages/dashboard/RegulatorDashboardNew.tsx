@@ -20,7 +20,6 @@ const RegulatorDashboardNew = () => {
   const [activeTab, setActiveTab] = useState('overview');
 
   return (
-    <DashboardLayout>
       <div className="space-y-6 p-4 sm:p-6">
         <BackButton />
         <div className="flex items-center gap-3">
@@ -90,9 +89,8 @@ const RegulatorDashboardNew = () => {
           <TabsContent value="verify" className="mt-4">
             <RegulatorDocumentVerification />
           </TabsContent>
-        </Tabs>
-      </div>
-    </DashboardLayout>
+      </Tabs>
+    </div>
   );
 };
 
