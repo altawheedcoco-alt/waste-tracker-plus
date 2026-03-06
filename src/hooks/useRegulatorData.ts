@@ -150,7 +150,7 @@ export const useRegulatoryPenalties = (limit = 50) => {
   });
 };
 
-export const useAllOrganizations = (supervisedTypes?: string[]) => {
+export const useAllOrganizations = (supervisedTypes?: readonly string[]) => {
   const { organization } = useAuth();
   return useQuery({
     queryKey: ['all-organizations-for-regulator', organization?.id, supervisedTypes],
