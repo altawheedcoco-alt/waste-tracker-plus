@@ -136,6 +136,10 @@ const SigningInbox = lazy(() => import("@/pages/dashboard/SigningInbox"));
 const AllNotes = lazy(() => import("@/pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("@/pages/dashboard/SystemCommands"));
 const RegulatorDashboard = lazy(() => import("@/pages/dashboard/RegulatorDashboardNew"));
+const RegulatorWMRA = lazy(() => import("@/pages/dashboard/RegulatorWMRA"));
+const RegulatorEEAA = lazy(() => import("@/pages/dashboard/RegulatorEEAA"));
+const RegulatorLTRA = lazy(() => import("@/pages/dashboard/RegulatorLTRA"));
+const RegulatorIDA = lazy(() => import("@/pages/dashboard/RegulatorIDA"));
 const RegulatedCompanies = lazy(() => import("@/pages/dashboard/RegulatedCompanies"));
 const CollectionRequests = lazy(() => import("@/pages/dashboard/CollectionRequests"));
 const SmartInsurance = lazy(() => import("@/pages/dashboard/SmartInsurance"));
@@ -343,6 +347,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
     <Route path="/dashboard/notes" element={<AllNotes />} />
     <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
+    <Route path="/dashboard/regulator-wmra" element={<RegulatorWMRA />} />
+    <Route path="/dashboard/regulator-eeaa" element={<RegulatorEEAA />} />
+    <Route path="/dashboard/regulator-ltra" element={<RegulatorLTRA />} />
+    <Route path="/dashboard/regulator-ida" element={<RegulatorIDA />} />
     <Route path="/dashboard/regulated-companies" element={<RegulatedCompanies />} />
     <Route path="/dashboard/collection-requests" element={<CollectionRequests />} />
     <Route path="/dashboard/smart-insurance" element={<SmartInsurance />} />
