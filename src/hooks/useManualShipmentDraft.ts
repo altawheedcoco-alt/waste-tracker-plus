@@ -220,6 +220,11 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
       extra_costs: data.extra_costs?.toString() || '',
       amount_paid: data.amount_paid?.toString() || '',
       price_notes: data.price_notes || '',
+      finance_visibility: data.finance_visibility || 'all',
+      finance_visible_to_generator: data.finance_visible_to_generator?.toString() ?? 'true',
+      finance_visible_to_transporter: data.finance_visible_to_transporter?.toString() ?? 'true',
+      finance_visible_to_destination: data.finance_visible_to_destination?.toString() ?? 'true',
+      finance_visible_to_driver: data.finance_visible_to_driver?.toString() ?? 'true',
       notes: data.notes || '',
       special_instructions: data.special_instructions || '',
     });
