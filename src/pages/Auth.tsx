@@ -994,6 +994,7 @@ const Auth = () => {
                       </button>
                     </div>
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                    <PasswordStrengthMeter password={jobseekerData.password} />
                   </div>
 
                   {/* Social Login for Job Seekers */}
