@@ -194,6 +194,10 @@ const DataExport = lazy(() => import("@/pages/dashboard/DataExport"));
 const RegulatoryDocuments = lazy(() => import("@/pages/dashboard/RegulatoryDocuments"));
 const LawsAndRegulations = lazy(() => import("@/pages/dashboard/LawsAndRegulations"));
 const MyDataCenter = lazy(() => import("@/pages/dashboard/MyDataCenter"));
+const ExecutiveDashboard = lazy(() => import("@/pages/dashboard/ExecutiveDashboard"));
+const RecurringShipments = lazy(() => import("@/pages/dashboard/RecurringShipments"));
+const EmployeeTaskBoard = lazy(() => import("@/pages/dashboard/EmployeeTaskBoard"));
+const CVBuilder = lazy(() => import("@/pages/dashboard/CVBuilder"));
 
 export const dashboardRoutes = (
   <>
@@ -391,6 +395,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/regulatory-documents" element={<RegulatoryDocuments />} />
     <Route path="/dashboard/laws-regulations" element={<LawsAndRegulations />} />
     <Route path="/dashboard/my-data" element={<MyDataCenter />} />
+    <Route path="/dashboard/executive" element={<ExecutiveDashboard />} />
+    <Route path="/dashboard/recurring-shipments" element={<RecurringShipments />} />
+    <Route path="/dashboard/task-board" element={<EmployeeTaskBoard />} />
+    <Route path="/dashboard/cv-builder" element={<CVBuilder />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );

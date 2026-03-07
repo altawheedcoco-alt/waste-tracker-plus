@@ -13,6 +13,7 @@ import {
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
+  CalendarClock,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -82,6 +83,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
+      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
       { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs' },
     ],
@@ -311,6 +313,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Gauge, labelAr: 'لوحة العمليات', labelEn: 'Operations Dashboard', path: '/dashboard/operations', key: 'operations' },
+      { icon: CheckSquare, labelAr: 'لوحة المهام', labelEn: 'Task Board', path: '/dashboard/task-board', key: 'task-board' },
       { icon: ClipboardList, labelAr: 'سجل الأنشطة', labelEn: 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log' },
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records' },
       { icon: MapPin, labelAr: 'إعدادات GPS', labelEn: 'GPS Settings', path: '/dashboard/gps-settings', key: 'gps-settings' },
@@ -461,6 +464,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
       { icon: BookOpen, labelAr: 'دليل المستخدم', labelEn: 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
       { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center' },
+      { icon: FileText, labelAr: 'منشئ السيرة الذاتية', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder' },
     ],
   },
 
@@ -472,6 +476,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'System Admin',
     visibleFor: ['admin'],
     items: [
+      { icon: Zap, labelAr: 'اللوحة التنفيذية', labelEn: 'Executive Dashboard', path: '/dashboard/executive', key: 'executive-dashboard' },
       { icon: Brain, labelAr: 'العين الذكية', labelEn: 'Smart Eye', path: '/dashboard/smart-insights', key: 'smart-insights' },
       { icon: Shield, labelAr: 'مراجعة التسجيل', labelEn: 'Onboarding', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'system-status' },
