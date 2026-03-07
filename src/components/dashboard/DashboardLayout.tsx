@@ -268,64 +268,38 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   };
 
   const getOrganizationLabel = () => {
-    if (isAdmin) {
-      return 'جهة الإدارة والمراقبة';
-    }
+    if (isAdmin) return t('dashboard.orgTypes.admin');
     switch (organization?.organization_type as string) {
-      case 'generator':
-        return 'الجهة المولدة';
-      case 'transporter':
-        return 'الجهة الناقلة';
-      case 'recycler':
-        return 'الجهة المدورة';
-      case 'disposal':
-        return 'جهة التخلص النهائي';
-      case 'regulator':
-        return 'الجهة الرقابية';
-      case 'consultant':
-        return 'استشاري بيئي';
-      case 'consulting_office':
-        return 'مكتب استشارات بيئية';
-      default:
-        return 'جهة';
+      case 'generator': return t('dashboard.orgTypes.generator');
+      case 'transporter': return t('dashboard.orgTypes.transporter');
+      case 'recycler': return t('dashboard.orgTypes.recycler');
+      case 'disposal': return t('dashboard.orgTypes.disposal');
+      case 'regulator': return t('dashboard.orgTypes.regulator');
+      case 'consultant': return t('dashboard.orgTypes.consultant');
+      case 'consulting_office': return t('dashboard.orgTypes.consultingOffice');
+      default: return t('dashboard.orgTypes.entity');
     }
   };
 
   const getEntityTypeLabel = () => {
-    if (isAdmin) {
-      return 'جهة الإدارة والمراقبة';
-    }
-    if (isDriver && !organization) {
-      return 'سائق';
-    }
+    if (isAdmin) return t('dashboard.orgTypes.admin');
+    if (isDriver && !organization) return t('dashboard.orgTypes.driver');
     switch (organization?.organization_type as string) {
-      case 'generator':
-        return 'الجهة المولدة';
-      case 'transporter':
-        return 'الجهة الناقلة';
-      case 'recycler':
-        return 'الجهة المدورة';
-      case 'disposal':
-        return 'جهة التخلص النهائي';
-      case 'regulator':
-        return 'الجهة الرقابية';
-      case 'consultant':
-        return 'استشاري بيئي';
-      case 'consulting_office':
-        return 'مكتب استشارات بيئية';
-      default:
-        return 'الجهة';
+      case 'generator': return t('dashboard.orgTypes.generator');
+      case 'transporter': return t('dashboard.orgTypes.transporter');
+      case 'recycler': return t('dashboard.orgTypes.recycler');
+      case 'disposal': return t('dashboard.orgTypes.disposal');
+      case 'regulator': return t('dashboard.orgTypes.regulator');
+      case 'consultant': return t('dashboard.orgTypes.consultant');
+      case 'consulting_office': return t('dashboard.orgTypes.consultingOffice');
+      default: return t('dashboard.orgTypes.entity');
     }
   };
 
   const getEntityName = () => {
-    if (isAdmin) {
-      return 'مدير النظام';
-    }
-    if (isDriver && !organization) {
-      return profile?.full_name || 'سائق';
-    }
-    return organization?.name || profile?.full_name || 'المستخدم';
+    if (isAdmin) return t('dashboard.orgTypes.systemAdmin');
+    if (isDriver && !organization) return profile?.full_name || t('dashboard.orgTypes.driver');
+    return organization?.name || profile?.full_name || t('dashboard.orgTypes.user');
   };
 
   const OrgIcon = getOrganizationIcon();
@@ -555,7 +529,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       trigger={
                         <Button variant="ghost" size="sm" className="h-7 text-xs gap-1.5 text-muted-foreground hover:text-primary">
                           <Settings className="w-3.5 h-3.5" />
-                          {language === 'ar' ? 'تخصيص القائمة' : 'Customize'}
+                          {t('dashboard.customizeMenu')}
                         </Button>
                       }
                     />
@@ -800,7 +774,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                             <BadgeCheck className="w-4 h-4 text-primary" />
                           </TooltipTrigger>
                           <TooltipContent>
-                            <p>جهة موثقة ومعتمدة</p>
+                            <p>{t('dashboard.verifiedAndApproved')}</p>
                           </TooltipContent>
                         </Tooltip>
                       )}
@@ -812,24 +786,24 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       {organization?.is_verified && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
                           <BadgeCheck className="w-3 h-3" />
-                          جهة موثقة
+                          {t('dashboard.verifiedEntity')}
                         </span>
                       )}
                       {isLegalDataComplete && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                           <Scale className="w-3 h-3" />
-                          بيانات قانونية
+                          {t('dashboard.legalData')}
                         </span>
                       )}
                       {isDocumentsComplete && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
                           <FolderCheck className="w-3 h-3" />
-                          وثائق مكتملة
+                          {t('dashboard.docsComplete')}
                         </span>
                       )}
                       {!organization?.is_verified && !isLegalDataComplete && !isDocumentsComplete && (
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                          يرجى استكمال البيانات
+                          {t('dashboard.pleaseCompleteData')}
                         </span>
                       )}
                     </div>
@@ -855,7 +829,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   >
                     <div className="flex items-center w-full cursor-pointer text-primary">
                       <Send className="ml-2 h-4 w-4" />
-                      إرسال طلب للإدارة
+                      {t('dashboard.sendRequestToAdmin')}
                     </div>
                   </CreateRequestButton>
                   <DropdownMenuSeparator />
@@ -1023,14 +997,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 id: 'quick-sign',
                 icon: <PenTool size={isMobile ? 16 : 22} />,
                 onClick: () => navigate('/dashboard/signing-inbox'),
-                label: 'التوقيع السريع',
+                label: t('dashboard.quickSign'),
                 variant: 'accent',
               },
               {
                 id: 'permits',
                 icon: <FileText size={isMobile ? 16 : 22} />,
                 onClick: () => navigate('/dashboard/driver-permits'),
-                label: 'التصاريح العامة',
+                label: t('dashboard.generalPermits'),
                 variant: 'primary',
               },
             ]}
