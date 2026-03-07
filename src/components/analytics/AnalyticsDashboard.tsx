@@ -6,7 +6,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { 
   BarChart3, TrendingUp, PieChart, Activity,
-  Calendar as CalendarIcon, Download, RefreshCw,
+  Calendar as CalendarIcon, RefreshCw,
   DollarSign, Leaf, Gauge
 } from 'lucide-react';
 import { format, subDays, subMonths } from 'date-fns';
@@ -23,6 +23,9 @@ import EnvironmentalChart from './charts/EnvironmentalChart';
 import OperationalChart from './charts/OperationalChart';
 import KPICards from './KPICards';
 import AnalyticsFilters from './AnalyticsFilters';
+import AIInsightsPanel from './AIInsightsPanel';
+import ComparisonBanner from './ComparisonBanner';
+import AnalyticsSummaryExport from './AnalyticsSummaryExport';
 import BackButton from '@/components/ui/back-button';
 
 type DateRange = { from: Date; to: Date };
@@ -89,10 +92,7 @@ const AnalyticsDashboard = () => {
             <RefreshCw className={cn("h-4 w-4 ml-2", isRefreshing && "animate-spin")} />
             تحديث
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="h-4 w-4 ml-2" />
-            تصدير
-          </Button>
+          <AnalyticsSummaryExport organizationId={orgId} dateRange={dateRange} />
         </div>
       </div>
 
@@ -148,8 +148,14 @@ const AnalyticsDashboard = () => {
         </CardContent>
       </Card>
 
+      {/* Comparison Banner */}
+      <ComparisonBanner organizationId={orgId} dateRange={dateRange} />
+
       {/* KPI Cards */}
       <KPICards organizationId={orgId} dateRange={dateRange} />
+
+      {/* AI Insights */}
+      <AIInsightsPanel organizationId={orgId} dateRange={dateRange} />
 
       {/* Main Analytics Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
@@ -162,7 +168,7 @@ const AnalyticsDashboard = () => {
           ))}
         </TabsList>
 
-        {/* Filters - only show for overview/trends/distribution/performance */}
+        {/* Filters */}
         {['overview', 'trends', 'distribution', 'performance'].includes(activeTab) && (
           <AnalyticsFilters
             organizationId={orgId}
@@ -173,7 +179,6 @@ const AnalyticsDashboard = () => {
           />
         )}
 
-        {/* Overview Tab */}
         <TabsContent value="overview" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <ShipmentsChart organizationId={orgId} dateRange={dateRange} wasteTypes={selectedWasteTypes} />
@@ -181,27 +186,22 @@ const AnalyticsDashboard = () => {
           </div>
         </TabsContent>
 
-        {/* Financial Tab */}
         <TabsContent value="financial" className="space-y-4">
           <FinancialChart organizationId={orgId} dateRange={dateRange} />
         </TabsContent>
 
-        {/* Operational Tab */}
         <TabsContent value="operational" className="space-y-4">
           <OperationalChart organizationId={orgId} dateRange={dateRange} />
         </TabsContent>
 
-        {/* Environmental Tab */}
         <TabsContent value="environmental" className="space-y-4">
           <EnvironmentalChart organizationId={orgId} dateRange={dateRange} />
         </TabsContent>
 
-        {/* Trends Tab */}
         <TabsContent value="trends" className="space-y-4">
           <TrendAnalysisChart organizationId={orgId} dateRange={dateRange} wasteTypes={selectedWasteTypes} />
         </TabsContent>
 
-        {/* Distribution Tab */}
         <TabsContent value="distribution" className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <WasteTypeDistribution organizationId={orgId} dateRange={dateRange} detailed />
@@ -213,7 +213,6 @@ const AnalyticsDashboard = () => {
           </div>
         </TabsContent>
 
-        {/* Performance Tab */}
         <TabsContent value="performance" className="space-y-4">
           <PartnerPerformanceChart organizationId={orgId} dateRange={dateRange} selectedPartners={selectedPartners} />
         </TabsContent>
