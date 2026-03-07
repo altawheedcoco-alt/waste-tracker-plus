@@ -157,6 +157,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: BarChart3, labelAr: 'تقارير التخلص', labelEn: 'Disposal Reports', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
       { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety' },
+      { icon: GaugeIcon, labelAr: 'إدارة السعة', labelEn: 'Capacity Management', path: '/dashboard/capacity-management', key: 'capacity-management' },
     ],
   },
 
@@ -188,6 +189,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'الإنذارات والتحذيرات', labelEn: 'Warnings & Notices', path: '/dashboard/regulator?tab=warnings', key: 'regulator-warnings' },
       { icon: Scale, labelAr: 'القرارات والجزاءات', labelEn: 'Penalties & Sanctions', path: '/dashboard/regulator?tab=penalties', key: 'regulator-penalties' },
       { icon: Activity, labelAr: 'متابعة تنفيذ الجزاءات', labelEn: 'Enforcement Tracking', path: '/dashboard/regulator?tab=enforcement', key: 'regulator-enforcement' },
+      { icon: AlertTriangle, labelAr: 'نظام المخالفات المتقدم', labelEn: 'Violations System', path: '/dashboard/regulatory-violations', key: 'regulatory-violations' },
     ],
   },
 
@@ -285,6 +287,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'consultant-safety' },
       { icon: Building2, labelAr: 'العملاء', labelEn: 'Clients', path: '/dashboard/consultant-clients', key: 'consultant-clients' },
       { icon: Award, labelAr: 'الشهادات والتراخيص', labelEn: 'Certifications', path: '/dashboard/consultant-certifications', key: 'consultant-certifications' },
+      { icon: Users, labelAr: 'بوابة الاستشاري', labelEn: 'Consultant Portal', path: '/dashboard/consultant-portal', key: 'consultant-portal' },
     ],
   },
 
@@ -412,6 +415,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Store, labelAr: 'بورصة المخلفات', labelEn: 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' },
       { icon: Globe, labelAr: 'بورصة السلع العالمية', labelEn: 'Commodity Exchange', path: '/dashboard/commodity-exchange', key: 'commodity-exchange' },
+      { icon: ShoppingCart, labelAr: 'سوق B2B', labelEn: 'B2B Marketplace', path: '/dashboard/b2b-marketplace', key: 'b2b-marketplace' },
     ],
   },
 

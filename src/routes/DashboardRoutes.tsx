@@ -203,6 +203,10 @@ const PreventiveMaintenance = lazy(() => import("@/pages/dashboard/PreventiveMai
 const SmartJobRecommendations = lazy(() => import("@/pages/dashboard/SmartJobRecommendations"));
 const DriverRewards = lazy(() => import("@/pages/dashboard/DriverRewards"));
 const ProductionDashboard = lazy(() => import("@/pages/dashboard/ProductionDashboard"));
+const B2BMarketplace = lazy(() => import("@/pages/dashboard/B2BMarketplace"));
+const RegulatoryViolations = lazy(() => import("@/pages/dashboard/RegulatoryViolations"));
+const ConsultantPortal = lazy(() => import("@/pages/dashboard/ConsultantPortal"));
+const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManagement"));
 
 export const dashboardRoutes = (
   <>
@@ -409,6 +413,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/smart-job-recommendations" element={<SmartJobRecommendations />} />
     <Route path="/dashboard/driver-rewards" element={<DriverRewards />} />
     <Route path="/dashboard/production" element={<ProductionDashboard />} />
+    <Route path="/dashboard/b2b-marketplace" element={<B2BMarketplace />} />
+    <Route path="/dashboard/regulatory-violations" element={<RegulatoryViolations />} />
+    <Route path="/dashboard/consultant-portal" element={<ConsultantPortal />} />
+    <Route path="/dashboard/capacity-management" element={<CapacityManagement />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
