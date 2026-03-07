@@ -244,6 +244,10 @@ const TransporterDashboard = () => {
               <TransporterPerformanceCharts />
             </ErrorBoundary>
 
+            <Suspense fallback={<TabFallback />}>
+              <SmartPriorityQueue shipments={shipments} />
+            </Suspense>
+
             <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
               <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
                 <OrgPerformanceRadar />
@@ -337,7 +341,9 @@ const TransporterDashboard = () => {
           <TabsContent value="fleet" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
-                <PredictiveFleetMaintenance />
+               <PredictiveFleetMaintenance />
+               <ContainerManagement />
+               <VehicleReassignment />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
@@ -398,6 +404,7 @@ const TransporterDashboard = () => {
 
           <TabsContent value="intelligence" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
+              <ShiftScheduler />
               <SmartSchedulerPanel />
               <RouteOptimizerPanel driverId="" destinations={[]} />
               <PartnerProfitabilityPanel />
@@ -407,6 +414,8 @@ const TransporterDashboard = () => {
           <TabsContent value="partners" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <SustainabilityReportGenerator />
+              <SLADashboard />
+              <ProfitabilityReport />
               <PartnerRatingsWidget />
               <PartnersView />
             </Suspense>
