@@ -74,13 +74,13 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'رصد تلاعب بالأوزان والبيانات عبر الأطراف',
   },
 
-  // ── مخاطر الشركاء: شركاء ──
+  // ── مخاطر الشركاء: هجين (تقييم امتثال مرئي للرقيب) ──
   risk: {
-    type: 'partner',
-    involvedParties: ['self', 'generator', 'recycler'],
+    type: 'hybrid',
+    involvedParties: ['self', 'generator', 'recycler', 'regulator'],
     adminVisible: true,
     requiresPartner: true,
-    contextHint: 'تقييم موثوقية ومخاطر الشركاء المرتبطين',
+    contextHint: 'تقييم موثوقية ومخاطر الشركاء مع تقارير امتثال رقابية',
   },
 
   // ── سلسلة الحفظ: هجين (يتتبع عبر كل الأطراف) ──
@@ -204,12 +204,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'خطة تشغيلية سنوية مرتبطة بالامتثال',
   },
 
-  // ── السلامة المهنية: داخلي ──
+  // ── السلامة المهنية: هجين (تقارير حوادث ترسل للجهات الرقابية) ──
   ohs: {
-    type: 'internal',
-    involvedParties: ['self', 'driver'],
+    type: 'hybrid',
+    involvedParties: ['self', 'driver', 'regulator'],
     adminVisible: true,
-    contextHint: 'إدارة السلامة والصحة المهنية للعاملين',
+    contextHint: 'إدارة السلامة والصحة المهنية مع إفصاحات رقابية',
   },
 };
 
@@ -221,7 +221,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-shipments': 'hybrid',
   'transporter-rejected': 'partner',
   'transporter-receipts': 'hybrid',
-  'transporter-declarations': 'partner',
+  'transporter-declarations': 'admin',
   'transporter-certs': 'hybrid',
   'transporter-guilloche': 'internal',
   'collection-requests': 'partner',
