@@ -5,6 +5,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Download, FileSpreadsheet, FileText, Printer, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -16,6 +17,7 @@ interface AnalyticsSummaryExportProps {
 
 const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryExportProps) => {
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [isExporting, setIsExporting] = useState(false);
 
   const fetchData = async () => {
@@ -30,18 +32,18 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
       .order('created_at', { ascending: false });
 
     return (shipments || []).map(s => ({
-      'رقم الشحنة': s.id.slice(0, 8),
-      'الحالة': s.status,
-      'نوع النفايات': s.waste_type || '-',
-      'الكمية (كجم)': s.quantity || 0,
-      'تاريخ الإنشاء': format(new Date(s.created_at), 'dd/MM/yyyy', { locale: ar }),
+      [t('shipments.shipmentNumber')]: s.id.slice(0, 8),
+      [t('common.status')]: s.status,
+      [t('shipments.wasteType')]: s.waste_type || '-',
+      [`${t('shipments.quantity')} (${t('analytics.kg')})`]: s.quantity || 0,
+      [t('common.date')]: format(new Date(s.created_at), 'dd/MM/yyyy', { locale: ar }),
     }));
   };
 
   const exportCSV = async () => {
     const data = await fetchData();
     if (!data.length) {
-      toast({ title: 'لا توجد بيانات', variant: 'destructive' });
+      toast({ title: t('analytics.noDataExport'), variant: 'destructive' });
       return;
     }
 
@@ -67,7 +69,7 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
   const exportPDF = async () => {
     const data = await fetchData();
     if (!data.length) {
-      toast({ title: 'لا توجد بيانات', variant: 'destructive' });
+      toast({ title: t('analytics.noDataExport'), variant: 'destructive' });
       return;
     }
 
@@ -75,13 +77,12 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
     const doc = new jsPDF({ orientation: 'landscape' });
 
     doc.setFontSize(18);
-    doc.text('تقرير التحليلات المتقدمة', 14, 20);
+    doc.text(t('analytics.title'), 14, 20);
     doc.setFontSize(10);
-    doc.text(`الفترة: ${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}`, 14, 28);
-    doc.text(`عدد السجلات: ${data.length}`, 14, 34);
+    doc.text(`${t('analytics.period')}: ${format(dateRange.from, 'dd/MM/yyyy')} - ${format(dateRange.to, 'dd/MM/yyyy')}`, 14, 28);
 
     const headers = Object.keys(data[0]);
-    const startY = 42;
+    const startY = 38;
     const colWidth = (doc.internal.pageSize.width - 28) / headers.length;
 
     doc.setFillColor(13, 148, 136);
@@ -106,19 +107,15 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
     doc.save(`analytics_${format(dateRange.from, 'yyyy-MM-dd')}.pdf`);
   };
 
-  const printReport = () => {
-    window.print();
-  };
-
   const handleExport = async (type: 'csv' | 'pdf' | 'print') => {
     setIsExporting(true);
     try {
       if (type === 'csv') await exportCSV();
       else if (type === 'pdf') await exportPDF();
-      else printReport();
-      if (type !== 'print') toast({ title: 'تم التصدير بنجاح' });
+      else window.print();
+      if (type !== 'print') toast({ title: t('analytics.exportSuccess') });
     } catch {
-      toast({ title: 'خطأ في التصدير', variant: 'destructive' });
+      toast({ title: t('analytics.exportError'), variant: 'destructive' });
     } finally {
       setIsExporting(false);
     }
@@ -128,22 +125,22 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm" disabled={isExporting}>
-          {isExporting ? <Loader2 className="h-4 w-4 animate-spin ml-2" /> : <Download className="h-4 w-4 ml-2" />}
-          تصدير
+          {isExporting ? <Loader2 className="h-4 w-4 animate-spin ml-2 rtl:ml-2 ltr:mr-2" /> : <Download className="h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2" />}
+          {t('analytics.export')}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => handleExport('csv')}>
-          <FileSpreadsheet className="h-4 w-4 ml-2" />
-          تصدير CSV
+          <FileSpreadsheet className="h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2" />
+          {t('analytics.exportCSV')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleExport('pdf')}>
-          <FileText className="h-4 w-4 ml-2" />
-          تصدير PDF
+          <FileText className="h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2" />
+          {t('analytics.exportPDF')}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => handleExport('print')}>
-          <Printer className="h-4 w-4 ml-2" />
-          طباعة التقرير
+          <Printer className="h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2" />
+          {t('analytics.printReport')}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

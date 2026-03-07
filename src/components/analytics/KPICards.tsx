@@ -7,19 +7,15 @@ import {
   Package, 
   Scale, 
   DollarSign, 
-  Users,
-  Truck,
   CheckCircle
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface KPICardsProps {
   organizationId: string | null;
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
+  dateRange: { from: Date; to: Date };
 }
 
 interface KPIData {
@@ -27,8 +23,6 @@ interface KPIData {
   totalQuantity: number;
   totalRevenue: number;
   completionRate: number;
-  activePartners: number;
-  avgProcessingTime: number;
   shipmentsChange: number;
   quantityChange: number;
   revenueChange: number;
@@ -36,25 +30,15 @@ interface KPIData {
 }
 
 const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
+  const { t } = useLanguage();
+
   const { data: kpiData, isLoading } = useQuery({
     queryKey: ['analytics-kpi', organizationId, dateRange.from, dateRange.to],
     queryFn: async (): Promise<KPIData> => {
       if (!organizationId) {
-        return {
-          totalShipments: 0,
-          totalQuantity: 0,
-          totalRevenue: 0,
-          completionRate: 0,
-          activePartners: 0,
-          avgProcessingTime: 0,
-          shipmentsChange: 0,
-          quantityChange: 0,
-          revenueChange: 0,
-          completionChange: 0,
-        };
+        return { totalShipments: 0, totalQuantity: 0, totalRevenue: 0, completionRate: 0, shipmentsChange: 0, quantityChange: 0, revenueChange: 0, completionChange: 0 };
       }
 
-      // Current period
       const { data: currentShipments } = await supabase
         .from('shipments')
         .select('id, quantity, status, created_at, updated_at')
@@ -62,19 +46,16 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
         .gte('created_at', dateRange.from.toISOString())
         .lte('created_at', dateRange.to.toISOString());
 
-      // Previous period for comparison
       const periodLength = dateRange.to.getTime() - dateRange.from.getTime();
       const prevFrom = new Date(dateRange.from.getTime() - periodLength);
-      const prevTo = dateRange.from;
 
       const { data: prevShipments } = await supabase
         .from('shipments')
         .select('id, quantity, status')
         .or(`generator_id.eq.${organizationId},transporter_id.eq.${organizationId},recycler_id.eq.${organizationId}`)
         .gte('created_at', prevFrom.toISOString())
-        .lte('created_at', prevTo.toISOString());
+        .lte('created_at', dateRange.from.toISOString());
 
-      // Invoices for revenue
       const { data: invoices } = await supabase
         .from('invoices')
         .select('total_amount')
@@ -87,41 +68,27 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
         .select('total_amount')
         .eq('organization_id', organizationId)
         .gte('created_at', prevFrom.toISOString())
-        .lte('created_at', prevTo.toISOString());
-
-      // Count unique partners from shipments
-      const { data: partnerShipments } = await supabase
-        .from('shipments')
-        .select('generator_id, transporter_id, recycler_id')
-        .or(`generator_id.eq.${organizationId},transporter_id.eq.${organizationId},recycler_id.eq.${organizationId}`);
-
-      const uniquePartners = new Set<string>();
-      (partnerShipments || []).forEach(s => {
-        if (s.generator_id && s.generator_id !== organizationId) uniquePartners.add(s.generator_id);
-        if (s.transporter_id && s.transporter_id !== organizationId) uniquePartners.add(s.transporter_id);
-        if (s.recycler_id && s.recycler_id !== organizationId) uniquePartners.add(s.recycler_id);
-      });
-      const partnersCount = uniquePartners.size;
+        .lte('created_at', dateRange.from.toISOString());
 
       const shipments = currentShipments || [];
-      const prevShipmentsList = prevShipments || [];
+      const prevList = prevShipments || [];
 
       const totalShipments = shipments.length;
       const totalQuantity = shipments.reduce((acc, s) => acc + (s.quantity || 0), 0);
       const confirmedShipments = shipments.filter(s => s.status === 'confirmed').length;
       const completionRate = totalShipments > 0 ? (confirmedShipments / totalShipments) * 100 : 0;
 
-      const prevTotal = prevShipmentsList.length;
-      const prevQuantity = prevShipmentsList.reduce((acc, s) => acc + (s.quantity || 0), 0);
-      const prevConfirmed = prevShipmentsList.filter(s => s.status === 'confirmed').length;
+      const prevTotal = prevList.length;
+      const prevQuantity = prevList.reduce((acc, s) => acc + (s.quantity || 0), 0);
+      const prevConfirmed = prevList.filter(s => s.status === 'confirmed').length;
       const prevCompletionRate = prevTotal > 0 ? (prevConfirmed / prevTotal) * 100 : 0;
 
       const totalRevenue = (invoices || []).reduce((acc, i) => acc + (i.total_amount || 0), 0);
       const prevRevenue = (prevInvoices || []).reduce((acc, i) => acc + (i.total_amount || 0), 0);
 
-      const calculateChange = (current: number, previous: number) => {
-        if (previous === 0) return current > 0 ? 100 : 0;
-        return ((current - previous) / previous) * 100;
+      const calcChange = (c: number, p: number) => {
+        if (p === 0) return c > 0 ? 100 : 0;
+        return ((c - p) / p) * 100;
       };
 
       return {
@@ -129,11 +96,9 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
         totalQuantity,
         totalRevenue,
         completionRate: Math.round(completionRate),
-        activePartners: partnersCount || 0,
-        avgProcessingTime: 24, // placeholder
-        shipmentsChange: Math.round(calculateChange(totalShipments, prevTotal)),
-        quantityChange: Math.round(calculateChange(totalQuantity, prevQuantity)),
-        revenueChange: Math.round(calculateChange(totalRevenue, prevRevenue)),
+        shipmentsChange: Math.round(calcChange(totalShipments, prevTotal)),
+        quantityChange: Math.round(calcChange(totalQuantity, prevQuantity)),
+        revenueChange: Math.round(calcChange(totalRevenue, prevRevenue)),
         completionChange: Math.round(completionRate - prevCompletionRate),
       };
     },
@@ -143,7 +108,7 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
 
   const kpis = [
     {
-      title: 'إجمالي الشحنات',
+      title: t('analytics.totalShipments'),
       value: kpiData?.totalShipments || 0,
       change: kpiData?.shipmentsChange || 0,
       icon: Package,
@@ -152,25 +117,25 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
       bgColor: 'bg-blue-100',
     },
     {
-      title: 'إجمالي الكمية',
+      title: t('analytics.totalQuantity'),
       value: kpiData?.totalQuantity || 0,
       change: kpiData?.quantityChange || 0,
       icon: Scale,
-      format: (v: number) => `${v.toLocaleString('en-US')} كجم`,
+      format: (v: number) => `${v.toLocaleString('en-US')} ${t('analytics.kg')}`,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
     },
     {
-      title: 'الإيرادات',
+      title: t('analytics.revenue'),
       value: kpiData?.totalRevenue || 0,
       change: kpiData?.revenueChange || 0,
       icon: DollarSign,
-      format: (v: number) => `${v.toLocaleString('en-US')} ج.م`,
+      format: (v: number) => `${v.toLocaleString('en-US')} ${t('analytics.egp')}`,
       color: 'text-amber-600',
       bgColor: 'bg-amber-100',
     },
     {
-      title: 'معدل الإنجاز',
+      title: t('analytics.completionRate'),
       value: kpiData?.completionRate || 0,
       change: kpiData?.completionChange || 0,
       icon: CheckCircle,
@@ -203,33 +168,23 @@ const KPICards = ({ organizationId, dateRange }: KPICardsProps) => {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-sm font-medium text-muted-foreground">
-                  {kpi.title}
-                </p>
-                <p className="text-2xl font-bold">
-                  {kpi.format(kpi.value)}
-                </p>
+                <p className="text-sm font-medium text-muted-foreground">{kpi.title}</p>
+                <p className="text-2xl font-bold">{kpi.format(kpi.value)}</p>
               </div>
               <div className={cn("p-3 rounded-full", kpi.bgColor)}>
                 <kpi.icon className={cn("h-6 w-6", kpi.color)} />
               </div>
             </div>
-            
             <div className="mt-4 flex items-center gap-2">
               {kpi.change >= 0 ? (
                 <TrendingUp className="h-4 w-4 text-green-600" />
               ) : (
                 <TrendingDown className="h-4 w-4 text-red-600" />
               )}
-              <span className={cn(
-                "text-sm font-medium",
-                kpi.change >= 0 ? "text-green-600" : "text-red-600"
-              )}>
+              <span className={cn("text-sm font-medium", kpi.change >= 0 ? "text-green-600" : "text-red-600")}>
                 {kpi.change >= 0 ? '+' : ''}{kpi.change}%
               </span>
-              <span className="text-sm text-muted-foreground">
-                مقارنة بالفترة السابقة
-              </span>
+              <span className="text-sm text-muted-foreground">{t('analytics.comparedToPrevious')}</span>
             </div>
           </CardContent>
         </Card>
