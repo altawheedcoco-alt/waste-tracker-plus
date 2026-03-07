@@ -2280,6 +2280,58 @@ export type Database = {
         }
         Relationships: []
       }
+      binding_audit_reports: {
+        Row: {
+          audit_metadata: Json | null
+          created_at: string
+          created_by: string
+          id: string
+          org_type: string
+          organization_id: string
+          report_content: string
+        }
+        Insert: {
+          audit_metadata?: Json | null
+          created_at?: string
+          created_by: string
+          id?: string
+          org_type: string
+          organization_id: string
+          report_content: string
+        }
+        Update: {
+          audit_metadata?: Json | null
+          created_at?: string
+          created_by?: string
+          id?: string
+          org_type?: string
+          organization_id?: string
+          report_content?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "binding_audit_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "binding_audit_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "binding_audit_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       biometric_credentials: {
         Row: {
           biometric_type: string
