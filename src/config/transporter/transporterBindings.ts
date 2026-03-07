@@ -221,7 +221,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-shipments': 'hybrid',
   'transporter-rejected': 'partner',
   'transporter-receipts': 'hybrid',
-  'transporter-declarations': 'partner',
+  'transporter-declarations': 'admin',
   'transporter-certs': 'hybrid',
   'transporter-guilloche': 'internal',
   'collection-requests': 'partner',
