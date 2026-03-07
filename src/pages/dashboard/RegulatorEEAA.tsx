@@ -1,16 +1,25 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import {
-  Leaf, AlertTriangle, FileSpreadsheet, BarChart3, Activity,
+  Leaf, AlertTriangle, FileSpreadsheet, Activity,
   Shield, Building2, FileCheck, Eye, Scale, Search,
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useRegulatorConfig, useRegulatorStats } from '@/hooks/useRegulatorData';
-import { Skeleton } from '@/components/ui/skeleton';
+import DashboardV2Header from '@/components/dashboard/shared/DashboardV2Header';
+import V2TabsNav from '@/components/dashboard/shared/V2TabsNav';
+import { KPICard } from '@/components/shared/KPICard';
+
+const tabItems = [
+  { value: 'monitoring', label: 'الرصد البيئي', icon: Leaf },
+  { value: 'eia', label: 'دراسات الأثر', icon: AlertTriangle },
+  { value: 'approvals', label: 'الموافقات المعلقة', icon: FileSpreadsheet },
+  { value: 'emissions', label: 'الانبعاثات', icon: Activity },
+];
 
 const RegulatorEEAA = () => {
   const [searchParams] = useSearchParams();
@@ -27,58 +36,38 @@ const RegulatorEEAA = () => {
       <div className="space-y-6 p-4 sm:p-6">
         <BackButton />
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-green-500/10">
-            <Leaf className="w-7 h-7 text-green-600" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">جهاز شؤون البيئة (EEAA)</h1>
-            <p className="text-muted-foreground text-sm">
-              الرقابة البيئية ومكافحة التلوث • قانون 4 لسنة 1994
-            </p>
-          </div>
-          {!isEEAA && <Badge variant="outline" className="mr-auto">عرض رقابي مرجعي</Badge>}
-        </div>
+        <DashboardV2Header
+          userName="EEAA"
+          orgName="جهاز شؤون البيئة"
+          orgLabel="قانون 4 لسنة 1994"
+          icon={Leaf}
+          gradient="from-emerald-600 to-emerald-500"
+        >
+          {!isEEAA && <Badge variant="outline">عرض رقابي مرجعي</Badge>}
+        </DashboardV2Header>
 
-        {/* Oversight KPIs */}
+        {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'منشآت تحت الرقابة البيئية', value: stats?.totalOrganizations || 0, icon: Building2, color: 'text-primary', bg: 'bg-primary/10' },
-            { label: 'زيارات تفتيش بيئي', value: stats?.totalInspections || 0, icon: FileCheck, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-            { label: 'مخالفات بيئية مفتوحة', value: stats?.openViolations || 0, icon: AlertTriangle, color: 'text-destructive', bg: 'bg-destructive/10' },
-            { label: 'معدل الامتثال البيئي', value: stats?.totalOrganizations ? `${Math.round(((stats.totalOrganizations - (stats.openViolations || 0)) / stats.totalOrganizations) * 100)}%` : '—', icon: Shield, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
-          ].map(c => (
-            <Card key={c.label}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${c.bg}`}>
-                    <c.icon className={`w-5 h-5 ${c.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{c.label}</p>
-                    <p className="text-2xl font-bold">{c.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <KPICard icon={Building2} value={stats?.totalOrganizations || 0} label="منشآت تحت الرقابة البيئية" />
+          <KPICard icon={FileCheck} value={stats?.totalInspections || 0} label="زيارات تفتيش بيئي" iconClassName="text-blue-500" />
+          <KPICard icon={AlertTriangle} value={stats?.openViolations || 0} label="مخالفات بيئية مفتوحة" iconClassName="text-destructive" />
+          <KPICard
+            icon={Shield}
+            value={stats?.totalOrganizations ? `${Math.round(((stats.totalOrganizations - (stats.openViolations || 0)) / stats.totalOrganizations) * 100)}%` : '—'}
+            label="معدل الامتثال البيئي"
+            iconClassName="text-emerald-500"
+          />
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
-            <TabsTrigger value="monitoring" className="gap-1.5 text-xs"><Leaf className="w-3.5 h-3.5" /> الرصد البيئي</TabsTrigger>
-            <TabsTrigger value="eia" className="gap-1.5 text-xs"><AlertTriangle className="w-3.5 h-3.5" /> دراسات الأثر</TabsTrigger>
-            <TabsTrigger value="approvals" className="gap-1.5 text-xs"><FileSpreadsheet className="w-3.5 h-3.5" /> الموافقات المعلقة</TabsTrigger>
-            <TabsTrigger value="emissions" className="gap-1.5 text-xs"><Activity className="w-3.5 h-3.5" /> الانبعاثات</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
+          <V2TabsNav tabs={tabItems} />
 
           <TabsContent value="monitoring" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Eye className="w-5 h-5 text-green-600" />
+                  <Eye className="w-5 h-5 text-emerald-600" />
                   الرصد البيئي ومراقبة التلوث
                 </CardTitle>
               </CardHeader>
@@ -104,7 +93,6 @@ const RegulatorEEAA = () => {
                 <div className="text-center py-12">
                   <Search className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-muted-foreground">فحص دراسات الأثر البيئي — قريباً</p>
-                  <p className="text-xs text-muted-foreground mt-1">مراجعة واعتماد أو رفض دراسات الأثر البيئي المقدمة من المنشآت</p>
                 </div>
               </CardContent>
             </Card>
@@ -122,7 +110,6 @@ const RegulatorEEAA = () => {
                 <div className="text-center py-12">
                   <FileSpreadsheet className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-muted-foreground">طلبات الموافقة البيئية — قريباً</p>
-                  <p className="text-xs text-muted-foreground mt-1">مراجعة طلبات الموافقات البيئية وإصدار القرارات</p>
                 </div>
               </CardContent>
             </Card>
@@ -132,7 +119,7 @@ const RegulatorEEAA = () => {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-base">
-                  <Activity className="w-5 h-5 text-red-600" />
+                  <Activity className="w-5 h-5 text-destructive" />
                   رصد الانبعاثات والملوثات
                 </CardTitle>
               </CardHeader>
@@ -140,7 +127,6 @@ const RegulatorEEAA = () => {
                 <div className="text-center py-12">
                   <Activity className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
                   <p className="text-muted-foreground">نظام رصد الانبعاثات — قريباً</p>
-                  <p className="text-xs text-muted-foreground mt-1">مراقبة الانبعاثات الغازية والسائلة من المنشآت الخاضعة</p>
                 </div>
               </CardContent>
             </Card>
@@ -148,15 +134,14 @@ const RegulatorEEAA = () => {
         </Tabs>
 
         {/* Regulatory Notice */}
-        <Card className="border-green-200 bg-green-50/30 dark:bg-green-950/10">
+        <Card className="border-emerald-200 bg-emerald-50/30 dark:bg-emerald-950/10">
           <CardContent className="p-4">
             <div className="flex items-start gap-3">
-              <Shield className="w-5 h-5 text-green-600 mt-0.5 shrink-0" />
+              <Shield className="w-5 h-5 text-emerald-600 mt-0.5 shrink-0" />
               <div>
-                <p className="font-bold text-sm text-green-800 dark:text-green-400">الصلاحية الرقابية</p>
+                <p className="font-bold text-sm text-emerald-800 dark:text-emerald-400">الصلاحية الرقابية</p>
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   يختص جهاز شؤون البيئة بالرقابة على الالتزام بالمعايير البيئية وحماية البيئة من التلوث وفقاً لقانون 4 لسنة 1994.
-                  يحق للجهاز إصدار إنذارات وتحذيرات وفرض غرامات وإيقاف الأنشطة المخالفة.
                 </p>
               </div>
             </div>
