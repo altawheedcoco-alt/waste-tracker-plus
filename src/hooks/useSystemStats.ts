@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealtimeSync } from './useRealtimeSync';
 
 export interface SystemStats {
   totalShipments: number;
@@ -23,6 +24,18 @@ export interface SystemStats {
 }
 
 export const useSystemStats = () => {
+  useRealtimeSync([
+    { table: 'shipments', queryKeys: ['system-stats'] },
+    { table: 'organizations', queryKeys: ['system-stats'] },
+    { table: 'drivers', queryKeys: ['system-stats'] },
+    { table: 'contracts', queryKeys: ['system-stats'] },
+    { table: 'approval_requests', queryKeys: ['system-stats'] },
+    { table: 'support_tickets', queryKeys: ['system-stats'] },
+    { table: 'organization_documents', queryKeys: ['system-stats'] },
+    { table: 'recycling_reports', queryKeys: ['system-stats'] },
+    { table: 'profiles', queryKeys: ['system-stats'] },
+  ]);
+
   return useQuery({
     queryKey: ['system-stats'],
     queryFn: async (): Promise<SystemStats> => {
