@@ -42,12 +42,14 @@ const AdvancedSignatureVerification = ({ signatureId, documentId, onVerified }: 
       const otp = Math.floor(100000 + Math.random() * 900000).toString();
       const expiresAt = new Date(Date.now() + 5 * 60 * 1000).toISOString(); // 5 minutes
 
+      const { data: userData } = await supabase.auth.getUser();
       const { data, error } = await (supabase.from('signature_verifications') as any).insert({
         signature_id: signatureId || null,
         verification_type: 'otp',
-        otp_code: otp, // In production, this would be hashed
+        otp_code: otp,
         otp_expires_at: expiresAt,
         verification_data: { document_id: documentId, method: 'otp' },
+        created_by: userData.user?.id,
       }).select('id').single();
 
       if (error) throw error;
@@ -121,6 +123,7 @@ const AdvancedSignatureVerification = ({ signatureId, documentId, onVerified }: 
         await crypto.subtle.digest('SHA-256', encoder.encode(nationalId))
       )).map(b => b.toString(16).padStart(2, '0')).join('');
 
+      const { data: userData } = await supabase.auth.getUser();
       await (supabase.from('signature_verifications') as any).insert({
         signature_id: signatureId || null,
         verification_type: 'national_id',
@@ -128,6 +131,7 @@ const AdvancedSignatureVerification = ({ signatureId, documentId, onVerified }: 
         is_verified: true,
         verified_at: new Date().toISOString(),
         verification_data: { chain_hash: hash, document_id: documentId },
+        created_by: userData.user?.id,
       });
 
       setChainHash(hash);
