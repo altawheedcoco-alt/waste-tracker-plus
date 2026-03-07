@@ -414,6 +414,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Store, labelAr: 'بورصة المخلفات', labelEn: 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' },
       { icon: Globe, labelAr: 'بورصة السلع العالمية', labelEn: 'Commodity Exchange', path: '/dashboard/commodity-exchange', key: 'commodity-exchange' },
+      { icon: ShoppingCart, labelAr: 'سوق B2B', labelEn: 'B2B Marketplace', path: '/dashboard/b2b-marketplace', key: 'b2b-marketplace' },
     ],
   },
 
