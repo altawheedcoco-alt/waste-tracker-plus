@@ -24,7 +24,7 @@ import { AdminExchangePanel } from '@/components/waste-exchange/AdminExchangePan
 import { BrokerDashboard } from '@/components/waste-exchange/BrokerDashboard';
 
 const WasteExchange = () => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   const { profile, organization, roles } = useAuth();
   const isAdmin = roles?.includes('admin');
@@ -184,9 +184,9 @@ const WasteExchange = () => {
         <Card className="max-w-md">
           <CardContent className="p-8 text-center">
             <ShieldCheck className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-xl font-bold mb-2">{isRTL ? 'غير مصرح' : 'Access Restricted'}</h2>
+            <h2 className="text-xl font-bold mb-2">{t('exchangePage.accessRestricted')}</h2>
             <p className="text-muted-foreground">
-              {isRTL ? 'بورصة المخلفات متاحة فقط للجهات الناقلة والمدورة ومدير النظام' : 'Waste Exchange is only available for Transporters, Recyclers and System Admin'}
+              {t('exchangePage.accessRestrictedDesc')}
             </p>
           </CardContent>
         </Card>
@@ -203,10 +203,10 @@ const WasteExchange = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Store className="w-7 h-7 text-primary" />
-              {isRTL ? 'بورصة المخلفات' : 'Waste Exchange'}
+              {t('exchangePage.title')}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isRTL ? 'سوق إلكتروني لتداول المخلفات بين الجهات الناقلة والمدورة' : 'Digital marketplace for waste trading between transporters and recyclers'}
+              {t('exchangePage.subtitle')}
             </p>
           </div>
         </div>
@@ -221,10 +221,10 @@ const WasteExchange = () => {
       {/* Summary Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {[
-          { label: isRTL ? 'عروض نشطة' : 'Active Listings', value: listings.length, icon: Tag, color: 'text-green-500' },
-          { label: isRTL ? 'عروضي' : 'My Listings', value: myListings.length, icon: Store, color: 'text-blue-500' },
-          { label: isRTL ? 'عروض أسعاري' : 'My Bids', value: myBids.length, icon: ShoppingCart, color: 'text-amber-500' },
-          { label: isRTL ? 'المتابعة' : 'Watchlist', value: watchlist.length, icon: Heart, color: 'text-red-500' },
+          { label: t('exchangePage.activeListings'), value: listings.length, icon: Tag, color: 'text-green-500' },
+          { label: t('exchangePage.myListings'), value: myListings.length, icon: Store, color: 'text-blue-500' },
+          { label: t('exchangePage.myBids'), value: myBids.length, icon: ShoppingCart, color: 'text-amber-500' },
+          { label: t('exchangePage.watchlist'), value: watchlist.length, icon: Heart, color: 'text-red-500' },
         ].map((s, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card className="cursor-pointer" onClick={() => {
@@ -246,14 +246,14 @@ const WasteExchange = () => {
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value="marketplace">{isRTL ? 'السوق' : 'Market'}</TabsTrigger>
+          <TabsTrigger value="marketplace">{t('exchangePage.market')}</TabsTrigger>
           <TabsTrigger value="broker" className="gap-1">
             <Briefcase className="w-3 h-3" />
-            {isRTL ? 'الوسيط' : 'Broker'}
+            {t('exchangePage.broker')}
           </TabsTrigger>
-          <TabsTrigger value="my-listings">{isRTL ? 'عروضي' : 'My Listings'}</TabsTrigger>
-          <TabsTrigger value="my-bids">{isRTL ? 'عروض أسعاري' : 'My Bids'}</TabsTrigger>
-          <TabsTrigger value="price-index">{isRTL ? 'مؤشر الأسعار' : 'Price Index'}</TabsTrigger>
+          <TabsTrigger value="my-listings">{t('exchangePage.myListings')}</TabsTrigger>
+          <TabsTrigger value="my-bids">{t('exchangePage.myBids')}</TabsTrigger>
+          <TabsTrigger value="price-index">{t('exchangePage.priceIndex')}</TabsTrigger>
         </TabsList>
 
         {/* Marketplace */}
@@ -262,28 +262,28 @@ const WasteExchange = () => {
           <div className="flex items-center gap-2 flex-wrap">
             <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input className="ps-9" placeholder={isRTL ? 'بحث في العروض...' : 'Search listings...'}
+              <Input className="ps-9" placeholder={t('exchangePage.searchListings')}
                 value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-[120px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRTL ? 'الكل' : 'All'}</SelectItem>
-                <SelectItem value="sell">{isRTL ? 'بيع' : 'Sell'}</SelectItem>
-                <SelectItem value="buy">{isRTL ? 'شراء' : 'Buy'}</SelectItem>
+                <SelectItem value="all">{t('exchangePage.all')}</SelectItem>
+                <SelectItem value="sell">{t('exchangePage.sell')}</SelectItem>
+                <SelectItem value="buy">{t('exchangePage.buy')}</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filterWaste} onValueChange={setFilterWaste}>
               <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">{isRTL ? 'كل الأنواع' : 'All Types'}</SelectItem>
-                <SelectItem value="metals">{isRTL ? 'معادن' : 'Metals'}</SelectItem>
-                <SelectItem value="paper">{isRTL ? 'ورق' : 'Paper'}</SelectItem>
-                <SelectItem value="plastics">{isRTL ? 'بلاستيك' : 'Plastics'}</SelectItem>
-                <SelectItem value="wood">{isRTL ? 'خشب' : 'Wood'}</SelectItem>
-                <SelectItem value="glass">{isRTL ? 'زجاج' : 'Glass'}</SelectItem>
-                <SelectItem value="organic">{isRTL ? 'عضوي' : 'Organic'}</SelectItem>
-                <SelectItem value="rdf">{isRTL ? 'RDF' : 'RDF'}</SelectItem>
+                <SelectItem value="all">{t('exchangePage.allTypes')}</SelectItem>
+                <SelectItem value="metals">{t('exchange.metals')}</SelectItem>
+                <SelectItem value="paper">{t('exchange.paperCardboard')}</SelectItem>
+                <SelectItem value="plastics">{t('exchange.plastics')}</SelectItem>
+                <SelectItem value="wood">{t('exchange.wood')}</SelectItem>
+                <SelectItem value="glass">{t('exchange.glass')}</SelectItem>
+                <SelectItem value="organic">{t('exchange.organic')}</SelectItem>
+                <SelectItem value="rdf">{t('exchange.rdf')}</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -296,8 +296,8 @@ const WasteExchange = () => {
             <Card>
               <CardContent className="p-12 text-center text-muted-foreground">
                 <Store className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                <p className="text-lg">{isRTL ? 'لا توجد عروض حالياً' : 'No listings available'}</p>
-                <p className="text-sm">{isRTL ? 'كن أول من ينشر عرضاً!' : 'Be the first to publish!'}</p>
+                <p className="text-lg">{t('exchangePage.noListings')}</p>
+                <p className="text-sm">{t('exchangePage.beFirst')}</p>
               </CardContent>
             </Card>
           ) : (
