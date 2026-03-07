@@ -115,7 +115,7 @@ const QuickActionsGrid = ({
                 trigger={
                   <Button variant="outline" size="sm" className="gap-2">
                     <Settings2 className="h-4 w-4" />
-                    {!isMobile && <span>تخصيص</span>}
+                    {!isMobile && <span>{t('dashboard.categories.customize')}</span>}
                   </Button>
                 }
               />
