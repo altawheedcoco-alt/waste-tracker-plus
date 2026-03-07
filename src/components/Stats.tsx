@@ -4,6 +4,8 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { withTimeout, logNetworkError } from "@/lib/networkGuard";
+import { motion, useInView } from "framer-motion";
+import GradientMesh from "@/components/animations/GradientMesh";
 
 const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) => {
   const [count, setCount] = useState(0);
@@ -38,6 +40,9 @@ const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) =
 
 const Stats = () => {
   const { t } = useLanguage();
+  const sectionRef = useRef(null);
+  const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
+
   const { data: liveStats } = useQuery({
     queryKey: ['landing-live-stats'],
     queryFn: async () => {
@@ -76,13 +81,17 @@ const Stats = () => {
   const badges = [t('stats.envLaw'), t('stats.wasteLaw'), t('stats.dataProtection')];
 
   return (
-    <section id="stats" className="py-16 sm:py-28 relative overflow-hidden">
-      {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.03] via-transparent to-accent/[0.03]" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl" />
+    <section id="stats" className="py-16 sm:py-28 relative overflow-hidden" ref={sectionRef}>
+      {/* Animated gradient mesh background */}
+      <GradientMesh />
       
       <div className="container px-4 relative">
-        <div className="text-center mb-10 sm:mb-20 animate-fade-in">
+        <motion.div 
+          className="text-center mb-10 sm:mb-20"
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.6 }}
+        >
           <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-primary/10 text-primary font-bold text-sm mb-5 border border-primary/20">
             <TrendingUp className="w-4 h-4" />{t('stats.badge')}
           </span>
@@ -90,28 +99,40 @@ const Stats = () => {
             {t('stats.title')} <span className="text-gradient-eco">{t('stats.titleHighlight')}</span>
           </h2>
           <p className="text-sm sm:text-base text-muted-foreground max-w-2xl mx-auto">{t('stats.desc')}</p>
-        </div>
+        </motion.div>
 
         <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {stats.map((stat, i) => (
-            <div 
-              key={stat.label} 
-              className="text-center p-5 sm:p-10 rounded-2xl sm:rounded-3xl bg-card border border-border/50 group animate-fade-up hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-              style={{ animationDelay: `${i * 0.08}s` }}
+            <motion.div 
+              key={stat.label}
+              initial={{ opacity: 0, y: 30, scale: 0.95 }}
+              animate={isInView ? { opacity: 1, y: 0, scale: 1 } : {}}
+              transition={{ duration: 0.5, delay: i * 0.08 }}
+              whileHover={{ y: -6, boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}
+              className="text-center p-5 sm:p-10 rounded-2xl sm:rounded-3xl bg-card border border-border/50 group card-shine cursor-default"
             >
-              <div className={`w-12 h-12 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mx-auto mb-3 sm:mb-5 group-hover:scale-110 transition-transform duration-300 shadow-lg`}>
+              <motion.div 
+                className={`w-12 h-12 sm:w-18 sm:h-18 rounded-xl sm:rounded-2xl bg-gradient-to-br ${stat.gradient} flex items-center justify-center mx-auto mb-3 sm:mb-5 shadow-lg`}
+                whileHover={{ scale: 1.15, rotate: 5 }}
+                transition={{ type: 'spring', stiffness: 300 }}
+              >
                 <stat.icon className="w-6 h-6 sm:w-9 sm:h-9 text-white" />
-              </div>
+              </motion.div>
               <div className="text-2xl sm:text-5xl md:text-6xl font-black mb-1.5 sm:mb-3 text-foreground">
                 <AnimatedCounter value={stat.value} suffix={stat.suffix} />
               </div>
               <p className="font-bold text-foreground mb-0.5 sm:mb-1 text-xs sm:text-base">{stat.label}</p>
               <p className="text-[10px] sm:text-xs text-muted-foreground hidden sm:block">{stat.description}</p>
-            </div>
+            </motion.div>
           ))}
         </div>
 
-        <div className="mt-10 sm:mt-20 text-center animate-fade-in">
+        <motion.div 
+          className="mt-10 sm:mt-20 text-center"
+          initial={{ opacity: 0, y: 20 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
           <div className="inline-flex flex-wrap items-center justify-center gap-3 sm:gap-6 px-6 sm:px-8 py-4 sm:py-5 rounded-2xl bg-card border border-border/50 shadow-sm">
             {badges.map((badge, i) => (
               <span key={i} className="inline-flex items-center gap-1.5 text-[10px] sm:text-sm font-semibold text-muted-foreground">
@@ -119,7 +140,7 @@ const Stats = () => {
               </span>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
     </section>
   );
