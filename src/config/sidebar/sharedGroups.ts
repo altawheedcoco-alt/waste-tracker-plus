@@ -26,7 +26,7 @@ export const sharedGroups: SidebarGroupConfig[] = [
       { icon: Newspaper, labelAr: 'منشورات المنظمة', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
       { icon: Fingerprint, labelAr: 'بطاقة الهوية الرقمية', labelEn: 'Digital Identity', path: '/dashboard/digital-identity-card', key: 'digital-identity-card' },
       { icon: Shield, labelAr: 'الحوكمة والرقابة', labelEn: 'Governance', path: '/dashboard/governance', key: 'governance' },
-      { icon: Brain, labelAr: 'الأرشفة الذكية', labelEn: 'Smart Archive', path: '/dashboard/smart-archive', key: 'smart-archive' },
+      { icon: Brain, labelAr: 'الأرشفة الذكية', labelEn: 'Smart Archive', path: '/dashboard/smart-archive', key: 'smart-archive', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'regulator', 'consultant', 'consulting_office', 'admin'] },
     ],
   },
 ];
