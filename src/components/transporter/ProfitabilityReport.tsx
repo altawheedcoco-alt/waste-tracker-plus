@@ -51,7 +51,7 @@ const ProfitabilityReport = () => {
       .from('shipments')
       .select('id, generator_id, recycler_id, pickup_location, delivery_location, total_cost, status, created_at')
       .eq('transporter_id', organization.id)
-      .in('status', ['delivered', 'confirmed', 'completed'])
+      .in('status', ['delivered', 'confirmed'])
       .order('created_at', { ascending: false })
       .limit(500);
 

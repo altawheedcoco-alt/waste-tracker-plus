@@ -115,7 +115,7 @@ const ShiftScheduler = () => {
       assigned_zone: formZone || null,
       max_shipments: parseInt(formMaxShipments) || 10,
       notes: formNotes || null,
-    } as any);
+    } as Record<string, unknown>);
 
     if (error) {
       toast.error(isAr ? 'خطأ في إضافة الوردية' : 'Error adding shift');
