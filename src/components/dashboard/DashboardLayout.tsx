@@ -568,6 +568,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             {/* Binding Legend */}
             <BindingLegend isCollapsed={!isSidebarOpen} />
 
+            {/* Action Chains Tree */}
+            {isSidebarOpen && currentOrgChains && (
+              <div className="pt-3 mt-3 border-t border-border/30">
+                <ActionChainTree orgChains={currentOrgChains} />
+              </div>
+            )}
+
             {/* Quick Actions Section */}
             {filteredQuickActions.length > 0 && (
               <div className="pt-4 mt-4 border-t border-border">
@@ -940,6 +947,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     
                     {/* Binding Legend */}
                     <BindingLegend isCollapsed={false} />
+
+                    {/* Action Chains Tree */}
+                    {currentOrgChains && (
+                      <div className="pt-3 mt-3 border-t border-border/30">
+                        <ActionChainTree orgChains={currentOrgChains} />
+                      </div>
+                    )}
 
                     {/* Quick Actions Section */}
                     {filteredQuickActions.length > 0 && (
