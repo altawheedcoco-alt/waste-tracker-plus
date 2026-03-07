@@ -1,5 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList } from 'lucide-react';
+import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
+import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
