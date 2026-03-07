@@ -191,7 +191,7 @@ const OrganizationsRegistry = () => {
                             <span className="text-muted-foreground text-xs">-</span>
                           )}
                         </td>
-                        <td className="p-2 text-muted-foreground">{org.governorate || '-'}</td>
+                        <td className="p-2 text-muted-foreground">{org.city || org.region || '-'}</td>
                         <td className="p-2">
                           {org.is_verified ? (
                             <CheckCircle className="w-4 h-4 text-emerald-600" />
