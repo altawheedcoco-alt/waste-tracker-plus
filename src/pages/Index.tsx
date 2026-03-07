@@ -1,4 +1,5 @@
 import { lazy, Suspense, memo, useRef, useState, useEffect } from "react";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcas
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
+const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
