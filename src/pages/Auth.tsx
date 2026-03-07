@@ -84,11 +84,36 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('rememberEmail') ? true : false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   
   const { user, signIn, signUp, signUpDriver } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  // Check lockout on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('loginLockout');
+    if (stored) {
+      const lockTime = parseInt(stored, 10);
+      if (lockTime > Date.now()) {
+        setLockedUntil(lockTime);
+        setLoginAttempts(MAX_LOGIN_ATTEMPTS);
+      } else {
+        localStorage.removeItem('loginLockout');
+        localStorage.removeItem('loginAttempts');
+      }
+    }
+    const attempts = parseInt(localStorage.getItem('loginAttempts') || '0', 10);
+    setLoginAttempts(attempts);
+  }, []);
+
+  const getRemainingLockoutMinutes = useCallback(() => {
+    if (!lockedUntil) return 0;
+    return Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
+  }, [lockedUntil]);
 
   // Company form state
   const [companyData, setCompanyData] = useState({
