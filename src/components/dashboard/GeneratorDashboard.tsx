@@ -227,7 +227,7 @@ const GeneratorDashboard = () => {
       <DashboardV2Header
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
-        orgLabel="الجهة المولدة"
+        orgLabel={t('dashboard.orgTypes.generator')}
         icon={Package}
         gradient="from-primary to-primary/70"
       >
@@ -268,13 +268,13 @@ const GeneratorDashboard = () => {
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <V2TabsNav tabs={[
-          { value: 'overview', label: 'نظرة عامة', icon: Package },
-          { value: 'shipments', label: 'الشحنات', icon: Package },
-          { value: 'operations', label: 'العمليات', icon: Truck },
-          { value: 'work-orders', label: 'أوامر الشغل', icon: ClipboardList },
-          { value: 'partners', label: 'الجهات المرتبطة', icon: Eye },
-          { value: 'compliance', label: 'الامتثال القانوني', icon: FileCheck },
-          { value: 'geofence', label: 'تتبع الشحنات', icon: MapPin },
+          { value: 'overview', label: t('dashboard.tabs.overview'), icon: Package },
+          { value: 'shipments', label: t('dashboard.tabs.shipments'), icon: Package },
+          { value: 'operations', label: t('dashboard.tabs.operations'), icon: Truck },
+          { value: 'work-orders', label: t('dashboard.tabs.workOrders'), icon: ClipboardList },
+          { value: 'partners', label: t('dashboard.tabs.partners'), icon: Eye },
+          { value: 'compliance', label: t('dashboard.tabs.legalCompliance'), icon: FileCheck },
+          { value: 'geofence', label: t('dashboard.tabs.shipmentTracking'), icon: MapPin },
         ] as TabItem[]} />
 
         {/* ── نظرة عامة ── */}
@@ -300,8 +300,8 @@ const GeneratorDashboard = () => {
 
           <QuickActionsGrid
             actions={quickActions}
-            title="الإجراءات السريعة"
-            subtitle="الوظائف المستخدمة بكثرة"
+            title={t('dashboard.quickActions')}
+            subtitle={t('dashboard.quickActionsSubtitle')}
           />
 
           <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
@@ -335,25 +335,25 @@ const GeneratorDashboard = () => {
                   </Suspense>
                   <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
                     <Eye className="ml-2 h-4 w-4" />
-                    عرض الكل
+                    {t('dashboard.viewAll')}
                   </Button>
                 </div>
                 <div className="text-right">
                   <CardTitle className="flex items-center gap-2 justify-end">
                     <Package className="w-5 h-5" />
-                    أحدث الشحنات
+                    {t('dashboard.latestShipments')}
                   </CardTitle>
-                  <CardDescription>آخر 10 شحنات تم إنشاؤها</CardDescription>
+                  <CardDescription>{t('dashboard.last10Shipments')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
             <CardContent>
               {loading ? (
-                <div className="text-center py-8 text-muted-foreground">جاري التحميل...</div>
+                <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
               ) : recentShipments.length === 0 ? (
                 <div className="text-center py-8">
                   <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">لا توجد شحنات حتى الآن</p>
+                  <p className="text-muted-foreground">{t('dashboard.noShipmentsYet')}</p>
                 </div>
               ) : (
                 <div className="space-y-3">

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav, { TabItem } from './shared/V2TabsNav';
@@ -97,6 +98,7 @@ interface RecentShipment {
 }
 
 const RecyclerDashboard = () => {
+  const { t } = useLanguage();
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -215,10 +217,10 @@ const RecyclerDashboard = () => {
   ];
 
   const statCards: StatCardItem[] = [
-    { title: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10', detailSections: buildRecyclerDetails(), detailTitle: 'تفاصيل الشحنات' },
-    { title: 'شحنات واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10', detailSections: buildRecyclerDetails() },
-    { title: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-purple-500', bgColor: 'bg-purple-500/10', detailSections: buildRecyclerDetails() },
-    { title: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10', detailSections: buildRecyclerDetails() },
+    { title: t('dashboard.totalShipments'), value: stats.total, icon: Package, color: 'text-blue-500', bgColor: 'bg-blue-500/10', detailSections: buildRecyclerDetails(), detailTitle: t('dashboard.shipmentDetails') },
+    { title: t('dashboard.incomingShipments'), value: stats.incoming, icon: Truck, color: 'text-amber-500', bgColor: 'bg-amber-500/10', detailSections: buildRecyclerDetails() },
+    { title: t('dashboard.inProcessing'), value: stats.processing, icon: Clock, color: 'text-purple-500', bgColor: 'bg-purple-500/10', detailSections: buildRecyclerDetails() },
+    { title: t('dashboard.confirmed'), value: stats.completed, icon: CheckCircle2, color: 'text-green-500', bgColor: 'bg-green-500/10', detailSections: buildRecyclerDetails() },
   ];
 
   const handleRefresh = () => {
@@ -238,7 +240,7 @@ const RecyclerDashboard = () => {
       <DashboardV2Header
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
-        orgLabel="الجهة المدورة"
+        orgLabel={t('dashboard.orgTypes.recycler')}
         icon={Recycle}
         gradient="from-emerald-500 to-teal-600"
       >
@@ -296,8 +298,8 @@ const RecyclerDashboard = () => {
               openDepositDialog: () => setShowDepositDialog(true),
               openSmartWeightUpload: () => setShowSmartWeightUpload(true),
             }})}
-            title="الإجراءات السريعة"
-            subtitle="وظائف التدوير المستخدمة بكثرة"
+            title={t('dashboard.quickActions')}
+            subtitle={t('dashboard.quickActionsRecycler')}
           />
 
           <Card>
@@ -323,7 +325,7 @@ const RecyclerDashboard = () => {
                   />
                   <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
                     <Eye className="ml-2 h-4 w-4" />
-                    عرض الكل
+                    {t('dashboard.viewAll')}
                   </Button>
                 </div>
                 <div className="text-right">

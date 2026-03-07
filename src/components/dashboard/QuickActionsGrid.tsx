@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { LucideIcon, Settings2, Search, Star, Layers, Wrench, ChevronDown, ChevronUp, Grid3X3 } from 'lucide-react';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ResponsiveGrid from './ResponsiveGrid';
 import QuickActionsCustomizer from './QuickActionsCustomizer';
 import { cn } from '@/lib/utils';
@@ -32,25 +33,26 @@ interface QuickActionsGridProps {
 
 type CategoryFilter = 'all' | 'primary' | 'secondary' | 'utility';
 
-const categoryConfig: Record<CategoryFilter, { label: string; icon: LucideIcon; color: string }> = {
-  all: { label: 'الكل', icon: Grid3X3, color: 'text-foreground' },
-  primary: { label: 'أساسي', icon: Star, color: 'text-amber-500' },
-  secondary: { label: 'ثانوي', icon: Layers, color: 'text-blue-500' },
-  utility: { label: 'أدوات', icon: Wrench, color: 'text-muted-foreground' },
-};
-
 const QuickActionsGrid = ({ 
   actions, 
-  title = 'الإجراءات السريعة', 
-  subtitle = 'الوظائف الإدارية المستخدمة بكثرة',
+  title,
+  subtitle,
   userType,
   showCustomizer = false,
 }: QuickActionsGridProps) => {
   const navigate = useNavigate();
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
   const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const categoryConfig: Record<CategoryFilter, { label: string; icon: LucideIcon; color: string }> = {
+    all: { label: t('dashboard.categories.all'), icon: Grid3X3, color: 'text-foreground' },
+    primary: { label: t('dashboard.categories.primary'), icon: Star, color: 'text-amber-500' },
+    secondary: { label: t('dashboard.categories.secondary'), icon: Layers, color: 'text-blue-500' },
+    utility: { label: t('dashboard.categories.utility'), icon: Wrench, color: 'text-muted-foreground' },
+  };
 
   const filteredActions = useMemo(() => {
     let result = actions;
@@ -113,7 +115,7 @@ const QuickActionsGrid = ({
                 trigger={
                   <Button variant="outline" size="sm" className="gap-2">
                     <Settings2 className="h-4 w-4" />
-                    {!isMobile && <span>تخصيص</span>}
+                    {!isMobile && <span>{t('dashboard.categories.customize')}</span>}
                   </Button>
                 }
               />
@@ -153,7 +155,7 @@ const QuickActionsGrid = ({
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   <Input
-                    placeholder="ابحث عن إجراء..."
+                    placeholder={t('dashboard.searchAction')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pr-9 h-9 text-sm bg-muted/30 border-border/50 focus-visible:ring-1"
@@ -198,7 +200,7 @@ const QuickActionsGrid = ({
               {filteredActions.length === 0 ? (
                 <div className="text-center py-8 text-muted-foreground">
                   <Search className="h-8 w-8 mx-auto mb-2 opacity-40" />
-                  <p className="text-sm">لا توجد نتائج مطابقة</p>
+                  <p className="text-sm">{t('dashboard.noMatchingResults')}</p>
                 </div>
               ) : (
                 <ResponsiveGrid cols={{ mobile: 2, tablet: 3, desktop: 4 }} gap="sm">
@@ -272,7 +274,7 @@ const QuickActionsGrid = ({
 
               {searchQuery && filteredActions.length > 0 && (
                 <p className="text-[11px] text-muted-foreground text-center">
-                  عرض {filteredActions.length} من {actions.length} إجراء
+                  {t('dashboard.showing')} {filteredActions.length} {t('dashboard.of')} {actions.length} {t('dashboard.action')}
                 </p>
               )}
             </CardContent>

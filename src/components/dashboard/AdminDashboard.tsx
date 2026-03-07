@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -204,41 +205,42 @@ interface UserProfile {
 }
 
 // All admin tabs
-const adminTabItems = [
-  { value: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
-  { value: 'generators', label: 'المولدين', icon: Factory },
-  { value: 'transporters', label: 'الناقلين', icon: Truck },
-  { value: 'recyclers', label: 'المعالجين', icon: Recycle },
-  { value: 'operations', label: 'العمليات', icon: Activity },
-  { value: 'work-orders', label: 'أوامر الشغل', icon: ClipboardList },
-  { value: 'ai', label: 'الذكاء الاصطناعي', icon: Brain },
-  { value: 'performance', label: 'الأداء والتكاليف', icon: BarChart3 },
-  { value: 'fleet', label: 'الأسطول والصيانة', icon: Wrench },
-  { value: 'pricing', label: 'التسعير الذكي', icon: DollarSign },
-  { value: 'marketplace', label: 'السوق', icon: Store },
-  { value: 'fraud', label: 'كشف الاحتيال', icon: AlertTriangle },
-  { value: 'risk', label: 'مخاطر الشركاء', icon: ShieldAlert },
-  { value: 'custody', label: 'سلسلة الحفظ', icon: Link2 },
-  { value: 'disposal', label: 'التخلص النهائي', icon: Factory },
-  { value: 'drivers', label: 'السائقون', icon: Users },
-  { value: 'partners', label: 'الجهات المرتبطة', icon: Handshake },
-  { value: 'tracking', label: 'تتبع السائقين', icon: MapPin },
-  { value: 'geofence', label: 'الجيوفنس', icon: Navigation },
-  { value: 'compliance', label: 'الامتثال الشامل', icon: Shield },
-  { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
-  { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
-  { value: 'consulting', label: 'المكتب الاستشاري', icon: Briefcase },
-  { value: 'calendar', label: 'التقويم', icon: CalendarDays },
-  { value: 'government', label: 'البوابة الحكومية', icon: Building2 },
-  { value: 'carbon', label: 'أرصدة الكربون', icon: Leaf },
-  { value: 'iot', label: 'IoT', icon: Wifi },
-  { value: 'esg', label: 'تقارير ESG', icon: Leaf },
-  { value: 'impact', label: 'سلسلة الأثر', icon: Activity },
+const adminTabKeys = [
+  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
+  { value: 'generators', labelKey: 'dashboard.tabs.generators', icon: Factory },
+  { value: 'transporters', labelKey: 'dashboard.tabs.transporters', icon: Truck },
+  { value: 'recyclers', labelKey: 'dashboard.tabs.recyclers', icon: Recycle },
+  { value: 'operations', labelKey: 'dashboard.tabs.operations', icon: Activity },
+  { value: 'work-orders', labelKey: 'dashboard.tabs.workOrders', icon: ClipboardList },
+  { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
+  { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
+  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
+  { value: 'pricing', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
+  { value: 'marketplace', labelKey: 'dashboard.tabs.marketplace', icon: Store },
+  { value: 'fraud', labelKey: 'dashboard.tabs.fraud', icon: AlertTriangle },
+  { value: 'risk', labelKey: 'dashboard.tabs.risk', icon: ShieldAlert },
+  { value: 'custody', labelKey: 'dashboard.tabs.custody', icon: Link2 },
+  { value: 'disposal', labelKey: 'dashboard.tabs.disposal', icon: Factory },
+  { value: 'drivers', labelKey: 'dashboard.tabs.drivers', icon: Users },
+  { value: 'partners', labelKey: 'dashboard.tabs.partners', icon: Handshake },
+  { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
+  { value: 'geofence', labelKey: 'dashboard.tabs.geofence', icon: Navigation },
+  { value: 'compliance', labelKey: 'dashboard.tabs.compliance', icon: Shield },
+  { value: 'wmis', labelKey: 'dashboard.tabs.wmis', icon: ShieldAlert },
+  { value: 'ohs', labelKey: 'dashboard.tabs.ohs', icon: HardHat },
+  { value: 'consulting', labelKey: 'dashboard.tabs.consulting', icon: Briefcase },
+  { value: 'calendar', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
+  { value: 'government', labelKey: 'dashboard.tabs.government', icon: Building2 },
+  { value: 'carbon', labelKey: 'dashboard.tabs.carbon', icon: Leaf },
+  { value: 'iot', labelKey: 'dashboard.tabs.iot', icon: Wifi },
+  { value: 'esg', labelKey: 'dashboard.tabs.esg', icon: Leaf },
+  { value: 'impact', labelKey: 'dashboard.tabs.impact', icon: Activity },
 ];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
   const [stats, setStats] = useState<DashboardStats>({
     totalShipments: 0, activeShipments: 0, registeredCompanies: 0,
@@ -305,10 +307,10 @@ const AdminDashboard = () => {
   };
 
   const statCards: StatCard[] = [
-    { title: 'إجمالي الشحنات', value: stats.totalShipments, subtitle: 'جميع الشحنات', icon: FileText },
-    { title: 'الشحنات النشطة', value: stats.activeShipments, subtitle: 'قيد التنفيذ حالياً', icon: Truck },
-    { title: 'الجهات المسجلة', value: stats.registeredCompanies, subtitle: 'جميع الفئات', icon: Building2 },
-    { title: 'السائقون النشطون', value: stats.activeDrivers, subtitle: `من أصل ${stats.totalDrivers}`, icon: Users },
+    { title: t('dashboard.totalShipments'), value: stats.totalShipments, subtitle: t('dashboard.allShipments'), icon: FileText },
+    { title: t('dashboard.activeShipments'), value: stats.activeShipments, subtitle: t('dashboard.currentlyActive'), icon: Truck },
+    { title: t('dashboard.registeredEntities'), value: stats.registeredCompanies, subtitle: t('dashboard.allCategories'), icon: Building2 },
+    { title: t('dashboard.activeDrivers'), value: stats.activeDrivers, subtitle: `${t('dashboard.outOf')} ${stats.totalDrivers}`, icon: Users },
   ];
 
   const quickActions = useQuickActions({ type: 'admin' });
@@ -348,33 +350,33 @@ const AdminDashboard = () => {
       {/* Header */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="text-right">
-          <h1 className="text-2xl font-bold">لوحة تحكم جهة الإدارة والمراقبة</h1>
-          <p className="text-primary">مرحباً بك، مدير النظام — رؤية شاملة لجميع الجهات</p>
+          <h1 className="text-2xl font-bold">{t('dashboard.adminPanel')}</h1>
+          <p className="text-primary">{t('dashboard.welcomeAdmin')}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/50">
             <Bot className="h-4 w-4 text-primary" />
-            <span className="text-sm font-medium">المساعد الذكي</span>
-            <Switch checked={aiEnabled} onCheckedChange={(checked) => { toggleAI(checked); sonnerToast(checked ? 'تم تفعيل المساعد الذكي' : 'تم إيقاف المساعد الذكي'); }} />
+            <span className="text-sm font-medium">{t('dashboard.smartAssistant')}</span>
+            <Switch checked={aiEnabled} onCheckedChange={(checked) => { toggleAI(checked); sonnerToast(checked ? t('dashboard.smartAssistantEnabled') : t('dashboard.smartAssistantDisabled')); }} />
           </div>
           <DashboardPrintReports />
           <AdminCredentialControl />
           <AdminDashboardSwitcher />
-          <SmartRequestDialog buttonText="طلب تقارير" buttonVariant="outline" />
+          <SmartRequestDialog buttonText={t('dashboard.requestReports')} buttonVariant="outline" />
           <Button variant="outline" size="sm" onClick={() => setShowWorkOrder(true)} className="gap-1.5">
-            <ClipboardList className="h-4 w-4" />أمر شغل
+            <ClipboardList className="h-4 w-4" />{t('dashboard.workOrder')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowSmartWeightUpload(true)} className="gap-1.5">
-            <Scale className="h-4 w-4" />وزن ذكي
+            <Scale className="h-4 w-4" />{t('dashboard.smartWeight')}
           </Button>
           <Button variant="outline" size="sm" onClick={() => setShowDepositDialog(true)} className="gap-1.5">
-            <Wallet className="h-4 w-4" />إيداع
+            <Wallet className="h-4 w-4" />{t('dashboard.deposit')}
           </Button>
           <Button variant="outline" onClick={() => navigate('/dashboard/shipments')}>
-            <FileText className="ml-2 h-4 w-4" />عرض الشحنات
+            <FileText className="ml-2 h-4 w-4" />{t('dashboard.viewShipments')}
           </Button>
           <Button variant="eco" onClick={() => navigate('/dashboard/shipments/new')}>
-            <Plus className="ml-2 h-4 w-4" />إنشاء شحنة
+            <Plus className="ml-2 h-4 w-4" />{t('dashboard.createShipment')}
           </Button>
         </div>
       </motion.div>
@@ -441,14 +443,14 @@ const AdminDashboard = () => {
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
           <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
-            {adminTabItems.map((tab) => (
+            {adminTabKeys.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
                 className="text-[9px] sm:text-xs whitespace-nowrap gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:text-foreground hover:bg-muted/50 transition-all duration-300"
               >
                 <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline font-medium">{tab.label}</span>
+                <span className="hidden sm:inline font-medium">{t(tab.labelKey)}</span>
               </TabsTrigger>
             ))}
           </TabsList>
@@ -487,7 +489,7 @@ const AdminDashboard = () => {
             </Suspense>
           </ErrorBoundary>
 
-          <QuickActionsGrid actions={quickActions} title="الإجراءات السريعة" subtitle="إدارة الشحنات والجهات والتقارير" />
+          <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsAdmin')} />
 
           <AdminRecentShipments shipments={recentShipments} onRefresh={fetchDashboardData} />
         </TabsContent>
