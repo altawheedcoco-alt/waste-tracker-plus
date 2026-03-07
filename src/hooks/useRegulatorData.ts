@@ -157,7 +157,7 @@ export const useAllOrganizations = (supervisedTypes?: readonly string[]) => {
     queryFn: async () => {
       let query = supabase
         .from('organizations')
-        .select('id, name, name_en, organization_type, is_verified, governorate, created_at, logo_url')
+        .select('id, name, name_en, organization_type, is_verified, city, region, created_at, logo_url')
         .neq('organization_type', 'regulator');
       
       // Filter by supervised types if provided (non-WMRA regulators)
