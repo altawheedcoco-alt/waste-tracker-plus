@@ -7,24 +7,21 @@
 @tailwind components;
 @tailwind utilities;
 
-/* آي ريسايكل - Design System */
+/* آي ريسايكل v2.0 - Design System */
 
 @layer base {
   :root {
-    /* ========================================
-       الألوان الثابتة للصفحة الرئيسية العامة
-       ======================================== */
-    --landing-background: 140 20% 98%;
-    --landing-foreground: 150 30% 15%;
-    --landing-primary: 142 71% 45%;
+    --landing-background: 160 15% 97%;
+    --landing-foreground: 170 25% 12%;
+    --landing-primary: 162 72% 42%;
     --landing-primary-foreground: 0 0% 100%;
-    --landing-muted: 140 15% 93%;
-    --landing-muted-foreground: 150 10% 45%;
-    --landing-accent: 160 84% 39%;
+    --landing-muted: 165 12% 92%;
+    --landing-muted-foreground: 170 8% 42%;
+    --landing-accent: 175 80% 36%;
     --landing-accent-foreground: 0 0% 100%;
-    --landing-border: 140 20% 88%;
+    --landing-border: 165 15% 87%;
     --landing-card: 0 0% 100%;
-    --landing-card-foreground: 150 30% 15%;
+    --landing-card-foreground: 170 25% 12%;
 
     /* ========================================
        التسلسل الهرمي البصري - الوضع الفاتح
