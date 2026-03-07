@@ -44,25 +44,36 @@ const WasteClassifierCamera = ({ driverId, shipmentId, onClassified }: WasteClas
   const [preview, setPreview] = useState<string | null>(null);
   const [result, setResult] = useState<ClassificationResult | null>(null);
 
-  const handleCapture = useCallback(async (file: File) => {
-    const reader = new FileReader();
-    reader.onload = (e) => setPreview(e.target?.result as string);
-    reader.readAsDataURL(file);
+  const compressImage = useCallback(async (file: File, maxWidth = 800, quality = 0.6): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let w = img.width, h = img.height;
+        if (w > maxWidth) { h = (maxWidth / w) * h; w = maxWidth; }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+        resolve(canvas.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }, []);
 
+  const handleCapture = useCallback(async (file: File) => {
     setIsAnalyzing(true);
     setResult(null);
 
     try {
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const r = new FileReader();
-        r.readAsDataURL(file);
-        r.onload = () => resolve(r.result as string);
-        r.onerror = reject;
+      const compressed = await compressImage(file);
+      setPreview(compressed);
+
+      const { data: aiResult, error: fnError } = await supabase.functions.invoke('classify-waste-photo', {
+        body: { image: compressed, shipmentId },
       });
 
-      const { data: aiResult } = await supabase.functions.invoke('classify-waste-photo', {
-        body: { image: base64, shipmentId },
-      });
+      if (fnError) throw fnError;
 
       if (aiResult) {
         setResult(aiResult);
@@ -79,7 +90,7 @@ const WasteClassifierCamera = ({ driverId, shipmentId, onClassified }: WasteClas
     } finally {
       setIsAnalyzing(false);
     }
-  }, [shipmentId, onClassified, toast]);
+  }, [shipmentId, onClassified, toast, compressImage]);
 
   const risk = result ? riskConfig[result.risk_level] : null;
   const RiskIcon = risk?.icon || Info;
