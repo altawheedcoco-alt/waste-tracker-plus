@@ -4,7 +4,6 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { componentTagger } from "lovable-tagger";
 
-
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   server: {
@@ -29,6 +28,7 @@ export default defineConfig(({ mode }) => ({
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('@supabase/')) return 'supabase';
+          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-popover') || id.includes('@radix-ui/react-dropdown-menu')) return 'ui-overlays';
           if (id.includes('@radix-ui/')) return 'ui';
           if (id.includes('recharts') || id.includes('d3-')) return 'charts';
           if (id.includes('mapbox-gl') || id.includes('leaflet')) return 'maps';
@@ -38,6 +38,8 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('date-fns')) return 'date-utils';
           if (id.includes('zod') || id.includes('react-hook-form') || id.includes('@hookform/')) return 'forms';
           if (id.includes('html2canvas') || id.includes('jspdf') || id.includes('jszip')) return 'export-tools';
+          if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype')) return 'markdown';
+          if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) return 'codes';
         },
       },
     },
