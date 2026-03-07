@@ -6462,6 +6462,157 @@ export type Database = {
           },
         ]
       }
+      cyber_defense_rules: {
+        Row: {
+          action_config: Json | null
+          action_type: string
+          cooldown_minutes: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          is_enabled: boolean | null
+          last_triggered_at: string | null
+          rule_name: string
+          rule_name_en: string | null
+          severity_trigger: string
+          threat_type: string
+          trigger_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_config?: Json | null
+          action_type: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_triggered_at?: string | null
+          rule_name: string
+          rule_name_en?: string | null
+          severity_trigger?: string
+          threat_type: string
+          trigger_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_config?: Json | null
+          action_type?: string
+          cooldown_minutes?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_enabled?: boolean | null
+          last_triggered_at?: string | null
+          rule_name?: string
+          rule_name_en?: string | null
+          severity_trigger?: string
+          threat_type?: string
+          trigger_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      cyber_threats: {
+        Row: {
+          ai_analysis: string | null
+          ai_confidence: number | null
+          attack_vector: string | null
+          auto_response_at: string | null
+          auto_response_taken: string | null
+          created_at: string | null
+          description: string
+          description_en: string | null
+          detected_at: string | null
+          evidence: Json | null
+          id: string
+          organization_id: string | null
+          pattern_signature: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: string
+          source_ip: string | null
+          source_user_id: string | null
+          status: string
+          target_resource: string | null
+          target_table: string | null
+          threat_type: string
+        }
+        Insert: {
+          ai_analysis?: string | null
+          ai_confidence?: number | null
+          attack_vector?: string | null
+          auto_response_at?: string | null
+          auto_response_taken?: string | null
+          created_at?: string | null
+          description: string
+          description_en?: string | null
+          detected_at?: string | null
+          evidence?: Json | null
+          id?: string
+          organization_id?: string | null
+          pattern_signature?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source_ip?: string | null
+          source_user_id?: string | null
+          status?: string
+          target_resource?: string | null
+          target_table?: string | null
+          threat_type: string
+        }
+        Update: {
+          ai_analysis?: string | null
+          ai_confidence?: number | null
+          attack_vector?: string | null
+          auto_response_at?: string | null
+          auto_response_taken?: string | null
+          created_at?: string | null
+          description?: string
+          description_en?: string | null
+          detected_at?: string | null
+          evidence?: Json | null
+          id?: string
+          organization_id?: string | null
+          pattern_signature?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: string
+          source_ip?: string | null
+          source_user_id?: string | null
+          status?: string
+          target_resource?: string | null
+          target_table?: string | null
+          threat_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cyber_threats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "cyber_threats_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cyber_threats_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dashboard_widget_preferences: {
         Row: {
           created_at: string
@@ -33268,6 +33419,45 @@ export type Database = {
           reviewed_by?: string | null
           status?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      threat_patterns: {
+        Row: {
+          first_seen_at: string | null
+          id: string
+          is_whitelisted: boolean | null
+          last_seen_at: string | null
+          notes: string | null
+          occurrence_count: number | null
+          pattern_name: string
+          pattern_signature: Json
+          pattern_type: string
+          risk_score: number | null
+        }
+        Insert: {
+          first_seen_at?: string | null
+          id?: string
+          is_whitelisted?: boolean | null
+          last_seen_at?: string | null
+          notes?: string | null
+          occurrence_count?: number | null
+          pattern_name: string
+          pattern_signature: Json
+          pattern_type: string
+          risk_score?: number | null
+        }
+        Update: {
+          first_seen_at?: string | null
+          id?: string
+          is_whitelisted?: boolean | null
+          last_seen_at?: string | null
+          notes?: string | null
+          occurrence_count?: number | null
+          pattern_name?: string
+          pattern_signature?: Json
+          pattern_type?: string
+          risk_score?: number | null
         }
         Relationships: []
       }
