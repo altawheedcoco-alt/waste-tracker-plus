@@ -95,6 +95,12 @@ const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
 const TransporterDeclarations = lazy(() => import('@/components/transporter/TransporterDeclarations'));
 const TransporterAnnualPlan = lazy(() => import('@/components/transporter/TransporterAnnualPlan'));
+const ShiftScheduler = lazy(() => import('@/components/transporter/ShiftScheduler'));
+const SLADashboard = lazy(() => import('@/components/transporter/SLADashboard'));
+const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPriorityQueue'));
+const ProfitabilityReport = lazy(() => import('@/components/transporter/ProfitabilityReport'));
+const ContainerManagement = lazy(() => import('@/components/transporter/ContainerManagement'));
+const VehicleReassignment = lazy(() => import('@/components/transporter/VehicleReassignment'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -238,6 +244,10 @@ const TransporterDashboard = () => {
               <TransporterPerformanceCharts />
             </ErrorBoundary>
 
+            <Suspense fallback={<TabFallback />}>
+              <SmartPriorityQueue shipments={shipments} />
+            </Suspense>
+
             <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
               <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
                 <OrgPerformanceRadar />
@@ -331,7 +341,9 @@ const TransporterDashboard = () => {
           <TabsContent value="fleet" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
-                <PredictiveFleetMaintenance />
+               <PredictiveFleetMaintenance />
+               <ContainerManagement />
+               <VehicleReassignment />
               </ErrorBoundary>
             </Suspense>
           </TabsContent>
@@ -392,6 +404,7 @@ const TransporterDashboard = () => {
 
           <TabsContent value="intelligence" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
+              <ShiftScheduler />
               <SmartSchedulerPanel />
               <RouteOptimizerPanel driverId="" destinations={[]} />
               <PartnerProfitabilityPanel />
@@ -401,6 +414,8 @@ const TransporterDashboard = () => {
           <TabsContent value="partners" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
               <SustainabilityReportGenerator />
+              <SLADashboard />
+              <ProfitabilityReport />
               <PartnerRatingsWidget />
               <PartnersView />
             </Suspense>

@@ -10116,6 +10116,92 @@ export type Database = {
           },
         ]
       }
+      driver_shifts: {
+        Row: {
+          actual_shipments: number | null
+          assigned_vehicle_id: string | null
+          assigned_zone: string | null
+          created_at: string
+          created_by: string | null
+          driver_id: string
+          end_time: string
+          id: string
+          max_shipments: number | null
+          notes: string | null
+          organization_id: string
+          shift_date: string
+          shift_type: string
+          start_time: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          actual_shipments?: number | null
+          assigned_vehicle_id?: string | null
+          assigned_zone?: string | null
+          created_at?: string
+          created_by?: string | null
+          driver_id: string
+          end_time?: string
+          id?: string
+          max_shipments?: number | null
+          notes?: string | null
+          organization_id: string
+          shift_date: string
+          shift_type?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          actual_shipments?: number | null
+          assigned_vehicle_id?: string | null
+          assigned_zone?: string | null
+          created_at?: string
+          created_by?: string | null
+          driver_id?: string
+          end_time?: string
+          id?: string
+          max_shipments?: number | null
+          notes?: string | null
+          organization_id?: string
+          shift_date?: string
+          shift_type?: string
+          start_time?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_shifts_assigned_vehicle_id_fkey"
+            columns: ["assigned_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shifts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shifts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_shifts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_shipment_assignments: {
         Row: {
           accepted_at: string | null
@@ -14764,6 +14850,111 @@ export type Database = {
           {
             foreignKeyName: "financial_transactions_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fleet_containers: {
+        Row: {
+          assigned_generator_id: string | null
+          assigned_vehicle_id: string | null
+          capacity_liters: number | null
+          condition: string | null
+          container_code: string
+          container_type: string
+          created_at: string
+          current_latitude: number | null
+          current_location: string | null
+          current_longitude: number | null
+          id: string
+          last_cleaned_at: string | null
+          last_maintenance_at: string | null
+          next_maintenance_at: string | null
+          notes: string | null
+          organization_id: string
+          purchase_cost: number | null
+          purchase_date: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_generator_id?: string | null
+          assigned_vehicle_id?: string | null
+          capacity_liters?: number | null
+          condition?: string | null
+          container_code: string
+          container_type?: string
+          created_at?: string
+          current_latitude?: number | null
+          current_location?: string | null
+          current_longitude?: number | null
+          id?: string
+          last_cleaned_at?: string | null
+          last_maintenance_at?: string | null
+          next_maintenance_at?: string | null
+          notes?: string | null
+          organization_id: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_generator_id?: string | null
+          assigned_vehicle_id?: string | null
+          capacity_liters?: number | null
+          condition?: string | null
+          container_code?: string
+          container_type?: string
+          created_at?: string
+          current_latitude?: number | null
+          current_location?: string | null
+          current_longitude?: number | null
+          id?: string
+          last_cleaned_at?: string | null
+          last_maintenance_at?: string | null
+          next_maintenance_at?: string | null
+          notes?: string | null
+          organization_id?: string
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fleet_containers_assigned_generator_id_fkey"
+            columns: ["assigned_generator_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fleet_containers_assigned_generator_id_fkey"
+            columns: ["assigned_generator_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_containers_assigned_vehicle_id_fkey"
+            columns: ["assigned_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fleet_containers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fleet_containers_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -24331,6 +24522,89 @@ export type Database = {
           },
           {
             foreignKeyName: "partner_risk_scores_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      partner_sla_metrics: {
+        Row: {
+          avg_delivery_delay_minutes: number | null
+          avg_pickup_delay_minutes: number | null
+          complaints_count: number | null
+          created_at: string
+          damage_incidents: number | null
+          id: string
+          on_time_deliveries: number | null
+          on_time_pickups: number | null
+          organization_id: string
+          partner_organization_id: string
+          period_month: string
+          sla_score: number | null
+          total_shipments: number | null
+          updated_at: string
+          weight_accuracy_percentage: number | null
+        }
+        Insert: {
+          avg_delivery_delay_minutes?: number | null
+          avg_pickup_delay_minutes?: number | null
+          complaints_count?: number | null
+          created_at?: string
+          damage_incidents?: number | null
+          id?: string
+          on_time_deliveries?: number | null
+          on_time_pickups?: number | null
+          organization_id: string
+          partner_organization_id: string
+          period_month: string
+          sla_score?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+          weight_accuracy_percentage?: number | null
+        }
+        Update: {
+          avg_delivery_delay_minutes?: number | null
+          avg_pickup_delay_minutes?: number | null
+          complaints_count?: number | null
+          created_at?: string
+          damage_incidents?: number | null
+          id?: string
+          on_time_deliveries?: number | null
+          on_time_pickups?: number | null
+          organization_id?: string
+          partner_organization_id?: string
+          period_month?: string
+          sla_score?: number | null
+          total_shipments?: number | null
+          updated_at?: string
+          weight_accuracy_percentage?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "partner_sla_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_sla_metrics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "partner_sla_metrics_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "partner_sla_metrics_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -35270,6 +35544,104 @@ export type Database = {
           },
           {
             foreignKeyName: "vehicle_plate_verifications_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      vehicle_reassignment_log: {
+        Row: {
+          created_at: string
+          id: string
+          notes: string | null
+          organization_id: string
+          original_driver_id: string | null
+          original_vehicle_id: string
+          reason: string
+          reassigned_at: string | null
+          reassigned_by: string | null
+          replacement_driver_id: string | null
+          replacement_vehicle_id: string | null
+          shipment_id: string | null
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          original_driver_id?: string | null
+          original_vehicle_id: string
+          reason?: string
+          reassigned_at?: string | null
+          reassigned_by?: string | null
+          replacement_driver_id?: string | null
+          replacement_vehicle_id?: string | null
+          shipment_id?: string | null
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          original_driver_id?: string | null
+          original_vehicle_id?: string
+          reason?: string
+          reassigned_at?: string | null
+          reassigned_by?: string | null
+          replacement_driver_id?: string | null
+          replacement_vehicle_id?: string | null
+          shipment_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicle_reassignment_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_original_driver_id_fkey"
+            columns: ["original_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_original_vehicle_id_fkey"
+            columns: ["original_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_replacement_driver_id_fkey"
+            columns: ["replacement_driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_replacement_vehicle_id_fkey"
+            columns: ["replacement_vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "fleet_vehicles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicle_reassignment_log_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
