@@ -157,6 +157,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: BarChart3, labelAr: 'تقارير التخلص', labelEn: 'Disposal Reports', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
       { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety' },
+      { icon: GaugeIcon, labelAr: 'إدارة السعة', labelEn: 'Capacity Management', path: '/dashboard/capacity-management', key: 'capacity-management' },
     ],
   },
 
@@ -285,6 +286,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'consultant-safety' },
       { icon: Building2, labelAr: 'العملاء', labelEn: 'Clients', path: '/dashboard/consultant-clients', key: 'consultant-clients' },
       { icon: Award, labelAr: 'الشهادات والتراخيص', labelEn: 'Certifications', path: '/dashboard/consultant-certifications', key: 'consultant-certifications' },
+      { icon: Users, labelAr: 'بوابة الاستشاري', labelEn: 'Consultant Portal', path: '/dashboard/consultant-portal', key: 'consultant-portal' },
     ],
   },
 
