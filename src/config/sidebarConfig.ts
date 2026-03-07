@@ -3,7 +3,7 @@
  * Merges similar sections and filters irrelevant items per role.
  */
 import {
-  LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle,
+  LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle, Wrench,
   User, MapPin, BarChart3, FileText, Handshake, BadgeCheck, Scale, FolderCheck,
   Search, ClipboardList, FileSpreadsheet, AlertTriangle, Layers, Send,
   MessageCircle, Newspaper, Rss, Info, BookOpen, Banknote, Activity, Headphones,
