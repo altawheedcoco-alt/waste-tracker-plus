@@ -213,6 +213,15 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* Visitor Counter - before footer */}
+          <LazySection>
+            <div className="container px-4 py-6">
+              <div className="rounded-2xl bg-card border border-border/50 shadow-sm px-6 py-4">
+                <VisitorCounter />
+              </div>
+            </div>
+          </LazySection>
+
           {isVisible('footer') && <LazySection><Footer /></LazySection>}
         </div>
       </LandingWrapper>
