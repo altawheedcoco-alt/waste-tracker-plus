@@ -930,6 +930,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       </div>
                     )}
                     
+                    {/* Binding Legend */}
+                    <BindingLegend isCollapsed={false} />
+
                     {/* Quick Actions Section */}
                     {filteredQuickActions.length > 0 && (
                       <div className="pt-4 mt-4 border-t border-border">
