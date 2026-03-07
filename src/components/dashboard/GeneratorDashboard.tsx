@@ -267,17 +267,15 @@ const GeneratorDashboard = () => {
 
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0 scrollbar-hide">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="shipments" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الشحنات</TabsTrigger>
-            <TabsTrigger value="operations" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">العمليات</TabsTrigger>
-            <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">أوامر الشغل</TabsTrigger>
-            <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الجهات المرتبطة</TabsTrigger>
-            <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الامتثال القانوني</TabsTrigger>
-            <TabsTrigger value="geofence" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">تتبع الشحنات</TabsTrigger>
-          </TabsList>
-        </div>
+        <V2TabsNav tabs={[
+          { value: 'overview', label: 'نظرة عامة', icon: Package },
+          { value: 'shipments', label: 'الشحنات', icon: Package },
+          { value: 'operations', label: 'العمليات', icon: Truck },
+          { value: 'work-orders', label: 'أوامر الشغل', icon: ClipboardList },
+          { value: 'partners', label: 'الجهات المرتبطة', icon: Eye },
+          { value: 'compliance', label: 'الامتثال القانوني', icon: FileCheck },
+          { value: 'geofence', label: 'تتبع الشحنات', icon: MapPin },
+        ] as TabItem[]} />
 
         {/* ── نظرة عامة ── */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">

@@ -232,42 +232,43 @@ const RecyclerDashboard = () => {
     <div className="space-y-6">
       <StoryCircles />
 
-
-      <FacilityDashboardHeader
+      {/* V2.0 Header */}
+      <DashboardV2Header
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
         orgLabel="الجهة المدورة"
-        orgLogoUrl={organization?.logo_url}
         icon={Recycle}
-        iconGradient="from-emerald-500 to-green-600"
-        facility={facility}
-        onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
-        onRefresh={handleRefresh}
-      />
+        gradient="from-emerald-500 to-teal-600"
+      >
+        <DashboardWidgetCustomizer orgType="recycler" />
+        <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size="sm" className="gap-2 rounded-xl">
+          <Sparkles className="w-4 h-4" />
+        </Button>
+      </DashboardV2Header>
 
       {facility && <FacilityCapacityCard facility={facility} />}
 
-      {/* Tabs Navigation */}
+      {/* Tabs Navigation - Reorganized for v2.0 */}
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-        <TabsList className="w-full overflow-x-auto flex justify-start gap-1 bg-muted/50 p-1 h-auto flex-wrap">
-          <TabsTrigger value="overview" className="gap-1 text-xs"><Recycle className="w-3.5 h-3.5" />نظرة عامة</TabsTrigger>
-          <TabsTrigger value="twin" className="gap-1 text-xs"><Cpu className="w-3.5 h-3.5" />التوأم الرقمي</TabsTrigger>
-          <TabsTrigger value="equipment" className="gap-1 text-xs"><Cog className="w-3.5 h-3.5" />المعدات</TabsTrigger>
-          <TabsTrigger value="predictive" className="gap-1 text-xs"><Wrench className="w-3.5 h-3.5" />صيانة تنبؤية</TabsTrigger>
-          <TabsTrigger value="quality" className="gap-1 text-xs"><Beaker className="w-3.5 h-3.5" />فحص الجودة</TabsTrigger>
-          <TabsTrigger value="workorders" className="gap-1 text-xs"><ClipboardList className="w-3.5 h-3.5" />أوامر التشغيل</TabsTrigger>
-          <TabsTrigger value="production" className="gap-1 text-xs"><Factory className="w-3.5 h-3.5" />الإنتاج</TabsTrigger>
-          <TabsTrigger value="optimizer" className="gap-1 text-xs"><Lightbulb className="w-3.5 h-3.5" />مُحسّن ذكي</TabsTrigger>
-          <TabsTrigger value="traceability" className="gap-1 text-xs"><Link2 className="w-3.5 h-3.5" />تتبع الدُفعات</TabsTrigger>
-          <TabsTrigger value="utilities" className="gap-1 text-xs"><Zap className="w-3.5 h-3.5" />المرافق</TabsTrigger>
-          <TabsTrigger value="cost" className="gap-1 text-xs"><Calculator className="w-3.5 h-3.5" />التكلفة</TabsTrigger>
-          <TabsTrigger value="certificates" className="gap-1 text-xs"><Award className="w-3.5 h-3.5" />الشهادات</TabsTrigger>
-          <TabsTrigger value="market" className="gap-1 text-xs"><BarChart3 className="w-3.5 h-3.5" />البورصة</TabsTrigger>
-          <TabsTrigger value="carbon" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />البصمة الكربونية</TabsTrigger>
-          <TabsTrigger value="esg" className="gap-1 text-xs"><Leaf className="w-3.5 h-3.5" />تقارير ESG</TabsTrigger>
-          <TabsTrigger value="wmis" className="gap-1 text-xs"><AlertCircle className="w-3.5 h-3.5" />WMIS</TabsTrigger>
-          <TabsTrigger value="declarations" className="gap-1 text-xs"><FileText className="w-3.5 h-3.5" />الإقرارات</TabsTrigger>
-        </TabsList>
+        <V2TabsNav tabs={[
+          { value: 'overview', label: 'نظرة عامة', icon: Recycle },
+          { value: 'twin', label: 'التوأم الرقمي', icon: Cpu },
+          { value: 'production', label: 'الإنتاج', icon: Factory },
+          { value: 'quality', label: 'فحص الجودة', icon: Beaker },
+          { value: 'equipment', label: 'المعدات', icon: Cog },
+          { value: 'predictive', label: 'صيانة تنبؤية', icon: Wrench },
+          { value: 'workorders', label: 'أوامر التشغيل', icon: ClipboardList },
+          { value: 'optimizer', label: 'مُحسّن ذكي', icon: Lightbulb },
+          { value: 'traceability', label: 'تتبع الدُفعات', icon: Link2 },
+          { value: 'utilities', label: 'المرافق', icon: Zap },
+          { value: 'cost', label: 'التكلفة', icon: Calculator },
+          { value: 'certificates', label: 'الشهادات', icon: Award },
+          { value: 'market', label: 'البورصة', icon: BarChart3 },
+          { value: 'carbon', label: 'البصمة الكربونية', icon: Leaf },
+          { value: 'esg', label: 'تقارير ESG', icon: Leaf },
+          { value: 'wmis', label: 'WMIS', icon: AlertCircle },
+          { value: 'declarations', label: 'الإقرارات', icon: FileText },
+        ] as TabItem[]} />
 
         <TabsContent value="overview" className="space-y-6 mt-4">
           <RecyclerCommandCenter />
