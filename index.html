@@ -83,9 +83,8 @@
       </div>
     </div>
     <script>
-      // Cache-bust on new deploy + recovery fallback
+      // Recovery fallback for slow connections
       (function() {
-        if ('caches' in window) caches.keys().then(function(n) { n.forEach(function(c) { caches.delete(c); }); });
         setTimeout(function() {
           if (window.__APP_BOOTSTRAPPED__) return;
           var loader = document.getElementById('initial-loader');
