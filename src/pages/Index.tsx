@@ -31,6 +31,7 @@ const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentSho
 const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcase"));
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
+const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
@@ -166,6 +167,11 @@ const Index = () => {
               <Hero />
             </ErrorBoundary>
           )}
+
+          {/* Platform Showcase - immediately after hero */}
+          <LazySection>
+            <PlatformShowcase />
+          </LazySection>
 
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (
