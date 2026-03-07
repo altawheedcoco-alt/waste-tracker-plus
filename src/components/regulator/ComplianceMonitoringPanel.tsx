@@ -199,7 +199,11 @@ const ComplianceMonitoringPanel = () => {
         ].map((item) => {
           const Icon = item.icon;
           return (
-            <Card key={item.label} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => setRiskFilter(riskFilter === item.label === 'حرج' ? 'critical' : item.label === 'مرتفع' ? 'high' : item.label === 'متوسط' ? 'medium' : 'low' ? 'all' : 'all')}>
+            <Card key={item.label} className="cursor-pointer hover:shadow-md transition-shadow" onClick={() => {
+              const riskMap: Record<string, string> = { 'حرج': 'critical', 'مرتفع': 'high', 'متوسط': 'medium', 'منخفض': 'low' };
+              const risk = riskMap[item.label] || 'all';
+              setRiskFilter(riskFilter === risk ? 'all' : risk);
+            }}>
               <CardContent className="p-4 flex items-center gap-3">
                 <div className={`p-2 rounded-lg ${item.bg}`}>
                   <Icon className={`w-5 h-5 ${item.color}`} />

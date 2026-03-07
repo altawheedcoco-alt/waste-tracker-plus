@@ -47,10 +47,10 @@ const ChainOfCustodyPanel = () => {
         .limit(100);
 
       if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter);
+        query = query.eq('status', statusFilter as any);
       }
 
-      const { data } = await query;
+      const { data } = await (query as any);
       return data || [];
     },
   });
@@ -61,11 +61,11 @@ const ChainOfCustodyPanel = () => {
     queryFn: async () => {
       if (!selectedShipment?.id) return [];
       const { data } = await supabase
-        .from('shipment_events')
+        .from('wmis_events' as any)
         .select('*')
         .eq('shipment_id', selectedShipment.id)
-        .order('event_timestamp', { ascending: true });
-      return data || [];
+        .order('created_at', { ascending: true });
+      return (data as any[]) || [];
     },
     enabled: !!selectedShipment?.id,
   });
