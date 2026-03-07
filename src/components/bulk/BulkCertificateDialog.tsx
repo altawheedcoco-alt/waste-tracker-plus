@@ -88,6 +88,8 @@ const BulkCertificateDialog = ({
   onSuccess,
 }: BulkCertificateDialogProps) => {
   const { organization } = useAuth();
+  const { t } = useLanguage();
+  const wasteTypeLabels = getWasteTypeLabels(t);
   const { signatures, stamps, loading: loadingSignatures } = useOrganizationSignatures();
   const printRef = useRef<HTMLDivElement>(null);
 
