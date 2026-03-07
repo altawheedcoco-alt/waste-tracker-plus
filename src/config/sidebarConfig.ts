@@ -13,6 +13,7 @@ import {
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
+  CalendarClock,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -82,6 +83,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
+      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
       { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs' },
     ],
@@ -472,6 +474,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'System Admin',
     visibleFor: ['admin'],
     items: [
+      { icon: Zap, labelAr: 'اللوحة التنفيذية', labelEn: 'Executive Dashboard', path: '/dashboard/executive', key: 'executive-dashboard' },
       { icon: Brain, labelAr: 'العين الذكية', labelEn: 'Smart Eye', path: '/dashboard/smart-insights', key: 'smart-insights' },
       { icon: Shield, labelAr: 'مراجعة التسجيل', labelEn: 'Onboarding', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'system-status' },
