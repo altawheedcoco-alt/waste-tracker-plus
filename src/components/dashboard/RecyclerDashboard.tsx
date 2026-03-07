@@ -97,6 +97,7 @@ interface RecentShipment {
 }
 
 const RecyclerDashboard = () => {
+  const { t } = useLanguage();
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
