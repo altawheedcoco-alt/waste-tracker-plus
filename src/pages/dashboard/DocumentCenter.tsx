@@ -29,6 +29,7 @@ const ContractsPanel = lazy(() => import('@/components/document-center/Contracts
 const CertificatesPanel = lazy(() => import('@/components/document-center/CertificatesPanel'));
 const InvoicesPanel = lazy(() => import('@/components/document-center/InvoicesPanel'));
 const TemplatesPanel = lazy(() => import('@/components/document-center/TemplatesPanel'));
+const AdvancedDocumentUploadPanel = lazy(() => import('@/components/document-center/AdvancedDocumentUploadPanel'));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -37,6 +38,7 @@ const PanelLoader = () => (
 );
 
 const tabs = [
+  { id: 'upload', icon: FolderOpen, labelAr: 'رفع المستندات', labelEn: 'Upload Documents' },
   { id: 'archive', icon: FolderOpen, labelAr: 'الأرشيف والمستندات', labelEn: 'Archive & Documents' },
   { id: 'signatures', icon: PenTool, labelAr: 'التوقيعات والأختام', labelEn: 'Signatures & Stamps' },
   { id: 'qr-barcode', icon: QrCode, labelAr: 'QR وباركود', labelEn: 'QR & Barcode' },
@@ -102,6 +104,7 @@ const DocumentCenter = () => {
 
           <div className="mt-4">
             <Suspense fallback={<PanelLoader />}>
+              <TabsContent value="upload" className="mt-0"><AdvancedDocumentUploadPanel /></TabsContent>
               <TabsContent value="archive" className="mt-0"><DocumentArchivePanel /></TabsContent>
               <TabsContent value="signatures" className="mt-0"><SignaturesStampsPanel /></TabsContent>
               <TabsContent value="qr-barcode" className="mt-0"><QRBarcodePanel /></TabsContent>
