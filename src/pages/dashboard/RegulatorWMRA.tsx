@@ -1,33 +1,38 @@
 import { useState } from 'react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import {
-  Recycle, Package, Layers, Activity, Leaf, FileText, BarChart3,
-  Building2, AlertTriangle, Shield, Eye, Scale, Search, ClipboardCheck,
+  Recycle, Package, Eye, Shield, Building2, AlertTriangle,
+  ClipboardCheck, FileText, Search,
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { useRegulatorConfig, useRegulatorStats } from '@/hooks/useRegulatorData';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
-import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import DashboardV2Header from '@/components/dashboard/shared/DashboardV2Header';
+import V2TabsNav from '@/components/dashboard/shared/V2TabsNav';
+import { KPICard } from '@/components/shared/KPICard';
+
+const tabItems = [
+  { value: 'waste-chain', label: 'سلسلة الحيازة', icon: Recycle },
+  { value: 'manifests', label: 'تدقيق المانيفست', icon: Package },
+  { value: 'declarations', label: 'الإقرارات الدورية', icon: FileText },
+  { value: 'entities', label: 'الجهات الخاضعة', icon: Building2 },
+];
 
 const RegulatorWMRA = () => {
   const [searchParams] = useSearchParams();
   const initialTab = searchParams.get('tab') || 'waste-chain';
   const [activeTab, setActiveTab] = useState(initialTab);
   const { data: config } = useRegulatorConfig();
-  const { data: stats } = useRegulatorStats();
 
   const levelCode = config?.regulator_level_code;
   const isWMRA = levelCode === 'wmra';
 
-  // Oversight: recent shipments for audit
   const { data: recentShipments = [], isLoading: shipmentsLoading } = useQuery({
     queryKey: ['wmra-oversight-shipments'],
     queryFn: async () => {
@@ -52,7 +57,6 @@ const RegulatorWMRA = () => {
     },
   });
 
-  // Organizations under WMRA jurisdiction
   const { data: regulatedOrgs = [] } = useQuery({
     queryKey: ['wmra-regulated-orgs'],
     queryFn: async () => {
@@ -83,54 +87,28 @@ const RegulatorWMRA = () => {
       <div className="space-y-6 p-4 sm:p-6">
         <BackButton />
 
-        {/* Header */}
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 rounded-xl bg-primary/10">
-            <Recycle className="w-7 h-7 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-2xl font-bold">جهاز تنظيم إدارة المخلفات (WMRA)</h1>
-            <p className="text-muted-foreground text-sm">
-              الرقابة والإشراف على منظومة المخلفات • قانون 202 لسنة 2020
-            </p>
-          </div>
-          {!isWMRA && <Badge variant="outline" className="mr-auto">عرض رقابي مرجعي</Badge>}
-        </div>
+        <DashboardV2Header
+          userName="WMRA"
+          orgName="جهاز تنظيم إدارة المخلفات"
+          orgLabel="قانون 202 لسنة 2020"
+          icon={Recycle}
+          gradient="from-primary to-primary/70"
+        >
+          {!isWMRA && <Badge variant="outline">عرض رقابي مرجعي</Badge>}
+        </DashboardV2Header>
 
-        {/* Oversight KPIs */}
+        {/* KPIs */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {[
-            { label: 'إجمالي الشحنات تحت المراقبة', value: wasteStats?.total || 0, icon: Package, color: 'text-primary', bg: 'bg-primary/10' },
-            { label: 'شحنات قيد التتبع', value: wasteStats?.pending || 0, icon: Eye, color: 'text-amber-600', bg: 'bg-amber-500/10' },
-            { label: 'شحنات مكتملة', value: wasteStats?.delivered || 0, icon: Shield, color: 'text-emerald-600', bg: 'bg-emerald-500/10' },
-            { label: 'جهات خاضعة للرقابة', value: regulatedOrgs.length, icon: Building2, color: 'text-blue-600', bg: 'bg-blue-500/10' },
-          ].map(c => (
-            <Card key={c.label}>
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${c.bg}`}>
-                    <c.icon className={`w-5 h-5 ${c.color}`} />
-                  </div>
-                  <div>
-                    <p className="text-xs text-muted-foreground">{c.label}</p>
-                    <p className="text-2xl font-bold">{c.value}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+          <KPICard icon={Package} value={wasteStats?.total || 0} label="إجمالي الشحنات تحت المراقبة" />
+          <KPICard icon={Eye} value={wasteStats?.pending || 0} label="شحنات قيد التتبع" iconClassName="text-amber-500" />
+          <KPICard icon={Shield} value={wasteStats?.delivered || 0} label="شحنات مكتملة" iconClassName="text-emerald-500" />
+          <KPICard icon={Building2} value={regulatedOrgs.length} label="جهات خاضعة للرقابة" iconClassName="text-blue-500" />
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="w-full flex-wrap h-auto gap-1 bg-muted/50 p-1">
-            <TabsTrigger value="waste-chain" className="gap-1.5 text-xs"><Recycle className="w-3.5 h-3.5" /> سلسلة الحيازة</TabsTrigger>
-            <TabsTrigger value="manifests" className="gap-1.5 text-xs"><Package className="w-3.5 h-3.5" /> تدقيق المانيفست</TabsTrigger>
-            <TabsTrigger value="declarations" className="gap-1.5 text-xs"><FileText className="w-3.5 h-3.5" /> الإقرارات الدورية</TabsTrigger>
-            <TabsTrigger value="entities" className="gap-1.5 text-xs"><Building2 className="w-3.5 h-3.5" /> الجهات الخاضعة</TabsTrigger>
-          </TabsList>
+        <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
+          <V2TabsNav tabs={tabItems} />
 
-          {/* سلسلة الحيازة */}
           <TabsContent value="waste-chain" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
@@ -173,7 +151,6 @@ const RegulatorWMRA = () => {
             </Card>
           </TabsContent>
 
-          {/* تدقيق المانيفست */}
           <TabsContent value="manifests" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
@@ -192,7 +169,6 @@ const RegulatorWMRA = () => {
             </Card>
           </TabsContent>
 
-          {/* الإقرارات الدورية */}
           <TabsContent value="declarations" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
@@ -211,7 +187,6 @@ const RegulatorWMRA = () => {
             </Card>
           </TabsContent>
 
-          {/* الجهات الخاضعة */}
           <TabsContent value="entities" className="space-y-4 mt-4">
             <Card>
               <CardHeader>
@@ -251,7 +226,6 @@ const RegulatorWMRA = () => {
                 <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                   هذه اللوحة مخصصة لأغراض الرقابة والإشراف فقط وفقاً لقانون 202 لسنة 2020.
                   يحق للجهاز إصدار تحذيرات وإنذارات وفرض جزاءات على المنشآت المخالفة.
-                  البيانات المعروضة هي كما أُدخلت من قبل المستخدمين وتحت مسؤوليتهم الكاملة.
                 </p>
               </div>
             </div>
