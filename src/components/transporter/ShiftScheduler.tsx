@@ -86,8 +86,7 @@ const ShiftScheduler = () => {
         .lte('shift_date', format(weekEnd, 'yyyy-MM-dd'))
         .order('shift_date')
         .order('start_time'),
-      supabase
-        .from('drivers')
+      (supabase.from('drivers') as any)
         .select('id, profile:profiles(full_name)')
         .eq('organization_id', organization.id)
         .eq('status', 'active')
