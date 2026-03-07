@@ -57,25 +57,25 @@ const Stats = () => {
         );
 
         return {
-          organizations: orgsResult.count || 0,
-          shipments: shipmentsResult.count || 0,
-          drivers: driversResult.count || 0,
+          organizations: orgsResult.count ?? 0,
+          shipments: shipmentsResult.count ?? 0,
+          drivers: driversResult.count ?? 0,
         };
       } catch (error) {
         logNetworkError('landing-live-stats', error);
-        return { organizations: 500, shipments: 15000, drivers: 200 };
+        return { organizations: 0, shipments: 0, drivers: 0 };
       }
     },
     staleTime: 1000 * 60 * 30,
   });
 
   const stats = [
-    { icon: Building2, value: liveStats?.organizations || 500, suffix: "+", label: t('stats.registeredCompanies'), description: t('stats.registeredCompaniesDesc'), gradient: 'from-emerald-500 to-teal-500' },
-    { icon: Truck, value: liveStats?.shipments || 15000, suffix: "+", label: t('stats.processedShipments'), description: t('stats.processedShipmentsDesc'), gradient: 'from-blue-500 to-cyan-500' },
+    { icon: Building2, value: liveStats?.organizations ?? 0, suffix: "+", label: t('stats.registeredCompanies'), description: t('stats.registeredCompaniesDesc'), gradient: 'from-emerald-500 to-teal-500' },
+    { icon: Truck, value: liveStats?.shipments ?? 0, suffix: "+", label: t('stats.processedShipments'), description: t('stats.processedShipmentsDesc'), gradient: 'from-blue-500 to-cyan-500' },
     { icon: Recycle, value: 95, suffix: "%", label: t('stats.recyclingRate'), description: t('stats.recyclingRateDesc'), gradient: 'from-primary to-emerald-600' },
     { icon: ShieldCheck, value: 100, suffix: "%", label: t('stats.legalCompliance'), description: t('stats.legalComplianceDesc'), gradient: 'from-amber-500 to-orange-500' },
     { icon: Target, value: 99, suffix: "%", label: t('stats.trackingAccuracy'), description: t('stats.trackingAccuracyDesc'), gradient: 'from-purple-500 to-violet-500' },
-    { icon: TrendingUp, value: liveStats?.drivers || 200, suffix: "+", label: t('stats.activeDrivers'), description: t('stats.activeDriversDesc'), gradient: 'from-rose-500 to-pink-500' },
+    { icon: TrendingUp, value: liveStats?.drivers ?? 0, suffix: "+", label: t('stats.activeDrivers'), description: t('stats.activeDriversDesc'), gradient: 'from-rose-500 to-pink-500' },
   ];
 
   const badges = [t('stats.envLaw'), t('stats.wasteLaw'), t('stats.dataProtection')];

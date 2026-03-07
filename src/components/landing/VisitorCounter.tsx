@@ -16,7 +16,7 @@ const VisitorCounter = () => {
 
   useEffect(() => {
     const fetchCounter = async () => {
-      const { data } = await (supabase as any)
+      const { data } = await supabase
         .from('visitor_counter')
         .select('total_visits, unique_visitors')
         .eq('id', 'global')
