@@ -8390,6 +8390,178 @@ export type Database = {
           },
         ]
       }
+      document_analysis: {
+        Row: {
+          action_deadline: string | null
+          action_description: string | null
+          analysis_model: string | null
+          analysis_status: string | null
+          analyzed_at: string | null
+          analyzed_by: string | null
+          auto_tags: string[] | null
+          category: string | null
+          compliance_flags: Json | null
+          confidence_score: number | null
+          created_at: string | null
+          created_by: string | null
+          dates_mentioned: Json | null
+          document_id: string | null
+          document_language: string | null
+          document_type: string | null
+          file_name: string
+          file_url: string | null
+          financial_amounts: Json | null
+          id: string
+          key_entities: Json | null
+          keywords: string[] | null
+          organization_id: string
+          referenced_laws: string[] | null
+          related_parties: Json | null
+          requires_action: boolean | null
+          risk_details: string | null
+          risk_level: string | null
+          search_text: string | null
+          sentiment: string | null
+          storage_path: string | null
+          subcategory: string | null
+          suggested_expiry_date: string | null
+          summary: string | null
+        }
+        Insert: {
+          action_deadline?: string | null
+          action_description?: string | null
+          analysis_model?: string | null
+          analysis_status?: string | null
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          auto_tags?: string[] | null
+          category?: string | null
+          compliance_flags?: Json | null
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dates_mentioned?: Json | null
+          document_id?: string | null
+          document_language?: string | null
+          document_type?: string | null
+          file_name: string
+          file_url?: string | null
+          financial_amounts?: Json | null
+          id?: string
+          key_entities?: Json | null
+          keywords?: string[] | null
+          organization_id: string
+          referenced_laws?: string[] | null
+          related_parties?: Json | null
+          requires_action?: boolean | null
+          risk_details?: string | null
+          risk_level?: string | null
+          search_text?: string | null
+          sentiment?: string | null
+          storage_path?: string | null
+          subcategory?: string | null
+          suggested_expiry_date?: string | null
+          summary?: string | null
+        }
+        Update: {
+          action_deadline?: string | null
+          action_description?: string | null
+          analysis_model?: string | null
+          analysis_status?: string | null
+          analyzed_at?: string | null
+          analyzed_by?: string | null
+          auto_tags?: string[] | null
+          category?: string | null
+          compliance_flags?: Json | null
+          confidence_score?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          dates_mentioned?: Json | null
+          document_id?: string | null
+          document_language?: string | null
+          document_type?: string | null
+          file_name?: string
+          file_url?: string | null
+          financial_amounts?: Json | null
+          id?: string
+          key_entities?: Json | null
+          keywords?: string[] | null
+          organization_id?: string
+          referenced_laws?: string[] | null
+          related_parties?: Json | null
+          requires_action?: boolean | null
+          risk_details?: string | null
+          risk_level?: string | null
+          search_text?: string | null
+          sentiment?: string | null
+          storage_path?: string | null
+          subcategory?: string | null
+          suggested_expiry_date?: string | null
+          summary?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_analysis_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_analysis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "document_analysis_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_collection_items: {
+        Row: {
+          added_at: string | null
+          added_by: string | null
+          analysis_id: string
+          collection_id: string
+          id: string
+        }
+        Insert: {
+          added_at?: string | null
+          added_by?: string | null
+          analysis_id: string
+          collection_id: string
+          id?: string
+        }
+        Update: {
+          added_at?: string | null
+          added_by?: string | null
+          analysis_id?: string
+          collection_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_collection_items_analysis_id_fkey"
+            columns: ["analysis_id"]
+            isOneToOne: false
+            referencedRelation: "document_analysis"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_collection_items_collection_id_fkey"
+            columns: ["collection_id"]
+            isOneToOne: false
+            referencedRelation: "smart_archive_collections"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_endorsements: {
         Row: {
           biometric_verified: boolean | null
@@ -31487,6 +31659,70 @@ export type Database = {
             columns: ["timeslot_id"]
             isOneToOne: false
             referencedRelation: "recycler_timeslots"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      smart_archive_collections: {
+        Row: {
+          auto_rules: Json | null
+          collection_name: string
+          collection_name_en: string | null
+          color: string | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          document_count: number | null
+          icon: string | null
+          id: string
+          organization_id: string
+        }
+        Insert: {
+          auto_rules?: Json | null
+          collection_name: string
+          collection_name_en?: string | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          document_count?: number | null
+          icon?: string | null
+          id?: string
+          organization_id: string
+        }
+        Update: {
+          auto_rules?: Json | null
+          collection_name?: string
+          collection_name_en?: string | null
+          color?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          document_count?: number | null
+          icon?: string | null
+          id?: string
+          organization_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "smart_archive_collections_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "smart_archive_collections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "smart_archive_collections_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
