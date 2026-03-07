@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { fileURLToPath } from "url";
 import { componentTagger } from "lovable-tagger";
+import { VitePWA } from "vite-plugin-pwa";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -28,7 +29,6 @@ export default defineConfig(({ mode }) => ({
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('@supabase/')) return 'supabase';
-          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-popover') || id.includes('@radix-ui/react-dropdown-menu')) return 'ui-overlays';
           if (id.includes('@radix-ui/')) return 'ui';
           if (id.includes('recharts') || id.includes('d3-')) return 'charts';
           if (id.includes('mapbox-gl') || id.includes('leaflet')) return 'maps';
@@ -48,6 +48,113 @@ export default defineConfig(({ mode }) => ({
   plugins: [
     react(),
     mode === "development" && componentTagger(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      includeAssets: ['favicon.ico', 'favicon.png', 'irecycle-logo.png', 'robots.txt'],
+      manifest: {
+        name: 'آي ريسايكل - iRecycle',
+        short_name: 'iRecycle',
+        description: 'نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر',
+        theme_color: '#0d9488',
+        background_color: '#ffffff',
+        display: 'standalone',
+        orientation: 'any',
+        dir: 'rtl',
+        lang: 'ar',
+        start_url: '/',
+        scope: '/',
+        categories: ['business', 'utilities', 'productivity'],
+        icons: [
+          {
+            src: '/favicon.png',
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+          {
+            src: '/irecycle-logo.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any',
+          },
+        ],
+        shortcuts: [
+          {
+            name: 'لوحة التحكم',
+            short_name: 'Dashboard',
+            url: '/dashboard',
+          },
+          {
+            name: 'الخريطة التفاعلية',
+            short_name: 'Map',
+            url: '/map',
+          },
+        ],
+      },
+      workbox: {
+        navigateFallbackDenylist: [/^\/~oauth/],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'google-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/fonts\.gstatic\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'gstatic-fonts-cache',
+              expiration: {
+                maxEntries: 10,
+                maxAgeSeconds: 60 * 60 * 24 * 365,
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/rest\/v1\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'api-cache',
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 5, // 5 minutes
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+              networkTimeoutSeconds: 10,
+            },
+          },
+          {
+            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/storage\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'storage-cache',
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+        ],
+      },
+    }),
   ].filter(Boolean),
   optimizeDeps: {
     include: ["react", "react-dom", "react-dom/client", "react/jsx-runtime"],
