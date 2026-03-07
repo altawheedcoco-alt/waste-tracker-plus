@@ -1147,6 +1147,7 @@ const Auth = () => {
                         {errors.password && (
                           <p className="text-sm text-destructive">{errors.password}</p>
                         )}
+                        <PasswordStrengthMeter password={driverData.password} />
                       </div>
                     </div>
                   )}
