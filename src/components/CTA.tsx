@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
-import FloatingParticles from "@/components/animations/FloatingParticles";
+
 
 const CTA = () => {
   const navigate = useNavigate();
@@ -31,15 +31,6 @@ const CTA = () => {
           <div className="absolute inset-0 gradient-eco" />
           <div className="absolute inset-0 opacity-30" style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")` }} />
           
-          {/* Floating particles in CTA */}
-          <FloatingParticles count={25} color="rgba(255, 255, 255, 0.15)" maxSize={3} speed={0.15} />
-          
-          {/* Animated light streak */}
-          <motion.div 
-            className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent"
-            animate={{ x: ['-100%', '200%'] }}
-            transition={{ duration: 4, repeat: Infinity, ease: 'linear', repeatDelay: 3 }}
-          />
 
           <div className="relative py-10 px-4 sm:py-16 sm:px-8 md:py-20 md:px-16">
             <div className="max-w-4xl mx-auto text-center">

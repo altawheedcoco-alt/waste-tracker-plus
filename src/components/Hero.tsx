@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg-egypt-tech.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion } from "framer-motion";
-import FloatingParticles from "@/components/animations/FloatingParticles";
+
 
 const Hero = memo(() => {
   const navigate = useNavigate();
@@ -62,54 +62,7 @@ const Hero = memo(() => {
         {/* v2.0 — Premium cinematic overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-[hsl(210,12%,7%)]/80 via-[hsl(210,12%,7%)]/55 to-[hsl(210,12%,7%)]/85" />
         <div className="absolute inset-0 bg-gradient-to-t from-[hsl(160,15%,97%)]/95 via-transparent to-transparent" />
-        {/* Animated accent glow */}
-        <motion.div 
-          className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[700px] bg-[hsl(162,72%,42%)]/10 rounded-full blur-[140px] pointer-events-none"
-          animate={{ scale: [1, 1.2, 1], opacity: [0.08, 0.15, 0.08] }}
-          transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div 
-          className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-[hsl(200,75%,45%)]/8 rounded-full blur-[100px] pointer-events-none"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.05, 0.12, 0.05] }}
-          transition={{ duration: 10, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
-        />
       </div>
-
-      {/* Floating particles overlay */}
-      <FloatingParticles count={40} color="rgba(255, 255, 255, 0.12)" maxSize={3} speed={0.2} />
-
-      {/* Static decorative icons - desktop only */}
-      <motion.div 
-        className="absolute top-32 right-20 hidden lg:block" 
-        aria-hidden="true"
-        animate={{ y: [0, -12, 0], rotate: [0, 5, 0] }}
-        transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-      >
-        <div className="w-16 h-16 rounded-2xl gradient-eco flex items-center justify-center shadow-eco-lg">
-          <Leaf className="w-8 h-8 text-white" />
-        </div>
-      </motion.div>
-      <motion.div 
-        className="absolute bottom-40 left-20 hidden lg:block" 
-        aria-hidden="true"
-        animate={{ y: [0, -10, 0], rotate: [0, -3, 0] }}
-        transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut', delay: 1 }}
-      >
-        <div className="w-14 h-14 rounded-2xl bg-white/90 shadow-eco-md flex items-center justify-center">
-          <Truck className="w-7 h-7 text-primary" />
-        </div>
-      </motion.div>
-      {/* Additional decorative element */}
-      <motion.div 
-        className="absolute top-1/2 left-10 hidden xl:block" 
-        aria-hidden="true"
-        animate={{ y: [0, -8, 0], x: [0, 5, 0] }}
-        transition={{ duration: 8, repeat: Infinity, ease: 'easeInOut', delay: 3 }}
-      >
-        <div className="w-12 h-12 rounded-xl bg-[hsl(42,92%,55%)]/20 backdrop-blur-sm flex items-center justify-center border border-[hsl(42,92%,55%)]/30">
-          <Recycle className="w-6 h-6 text-[hsl(42,92%,55%)]" />
-        </div>
-      </motion.div>
 
       <div className="container relative z-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
@@ -121,7 +74,7 @@ const Hero = memo(() => {
             transition={{ duration: 0.5, delay: 0.1 }}
           >
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl text-white font-semibold text-[11px] sm:text-sm border border-white/20 shadow-xl relative overflow-hidden">
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent animate-shimmer" />
+              
               <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(42,92%,55%)]" />
               <span className="text-[hsl(42,92%,55%)] font-bold">v2.0</span>
               <span className="w-px h-4 bg-white/30" />

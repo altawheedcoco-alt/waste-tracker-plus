@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { withTimeout, logNetworkError } from "@/lib/networkGuard";
 import { motion, useInView } from "framer-motion";
-import GradientMesh from "@/components/animations/GradientMesh";
+
 
 const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) => {
   const [count, setCount] = useState(0);
@@ -82,8 +82,6 @@ const Stats = () => {
 
   return (
     <section id="stats" className="py-16 sm:py-28 relative overflow-hidden" ref={sectionRef}>
-      {/* Animated gradient mesh background */}
-      <GradientMesh />
       
       <div className="container px-4 relative">
         <motion.div 
