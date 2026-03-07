@@ -189,6 +189,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'الإنذارات والتحذيرات', labelEn: 'Warnings & Notices', path: '/dashboard/regulator?tab=warnings', key: 'regulator-warnings' },
       { icon: Scale, labelAr: 'القرارات والجزاءات', labelEn: 'Penalties & Sanctions', path: '/dashboard/regulator?tab=penalties', key: 'regulator-penalties' },
       { icon: Activity, labelAr: 'متابعة تنفيذ الجزاءات', labelEn: 'Enforcement Tracking', path: '/dashboard/regulator?tab=enforcement', key: 'regulator-enforcement' },
+      { icon: AlertTriangle, labelAr: 'نظام المخالفات المتقدم', labelEn: 'Violations System', path: '/dashboard/regulatory-violations', key: 'regulatory-violations' },
     ],
   },
 
