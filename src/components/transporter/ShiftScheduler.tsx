@@ -79,8 +79,7 @@ const ShiftScheduler = () => {
 
     const weekEnd = addDays(weekStart, 6);
     const [shiftsRes, driversRes] = await Promise.all([
-      supabase
-        .from('driver_shifts')
+      (supabase.from('driver_shifts') as any)
         .select('*')
         .eq('organization_id', organization.id)
         .gte('shift_date', format(weekStart, 'yyyy-MM-dd'))
