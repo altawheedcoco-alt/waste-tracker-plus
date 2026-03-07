@@ -1,4 +1,5 @@
 import { LucideIcon } from 'lucide-react';
+import type { BindingType } from '@/types/bindingTypes';
 
 export interface SidebarGroupConfig {
   id: string;
@@ -17,6 +18,8 @@ export interface SidebarItemConfig {
   key: string;
   badgeKey?: string;
   visibleFor?: string[];
+  /** نوع الارتباط الوظيفي */
+  bindingType?: BindingType;
 }
 
 export type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office' | 'admin' | 'driver';

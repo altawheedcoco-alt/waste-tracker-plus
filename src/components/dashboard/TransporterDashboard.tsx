@@ -46,6 +46,7 @@ import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
 import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck } from 'lucide-react';
+import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
 
@@ -226,7 +227,7 @@ const TransporterDashboard = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
-          <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey) }))} />
+          <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey), bindingType: TRANSPORTER_TAB_BINDINGS[tab.value]?.type }))} />
 
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
