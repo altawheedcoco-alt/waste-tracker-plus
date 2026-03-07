@@ -8607,6 +8607,87 @@ export type Database = {
           },
         ]
       }
+      doc_registry_signers: {
+        Row: {
+          action_type: string
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          id: string
+          last_reminder_at: string | null
+          notification_sent: boolean | null
+          rejection_reason: string | null
+          reminder_count: number | null
+          sign_order: number | null
+          signature_record_id: string | null
+          signed_at: string | null
+          signer_name: string | null
+          signer_organization_id: string | null
+          signer_role: string | null
+          signer_user_id: string | null
+          status: string
+          updated_at: string
+          whatsapp_sent: boolean | null
+        }
+        Insert: {
+          action_type?: string
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          id?: string
+          last_reminder_at?: string | null
+          notification_sent?: boolean | null
+          rejection_reason?: string | null
+          reminder_count?: number | null
+          sign_order?: number | null
+          signature_record_id?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          signer_organization_id?: string | null
+          signer_role?: string | null
+          signer_user_id?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp_sent?: boolean | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          id?: string
+          last_reminder_at?: string | null
+          notification_sent?: boolean | null
+          rejection_reason?: string | null
+          reminder_count?: number | null
+          sign_order?: number | null
+          signature_record_id?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          signer_organization_id?: string | null
+          signer_role?: string | null
+          signer_user_id?: string | null
+          status?: string
+          updated_at?: string
+          whatsapp_sent?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "doc_registry_signers_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "document_registry"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "doc_registry_signers_signature_record_id_fkey"
+            columns: ["signature_record_id"]
+            isOneToOne: false
+            referencedRelation: "document_signatures"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_ai_analysis: {
         Row: {
           ai_confidence: number | null
@@ -9035,6 +9116,87 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      document_registry: {
+        Row: {
+          category: string
+          created_at: string
+          created_by: string | null
+          document_number: string
+          expires_at: string | null
+          file_size_bytes: number | null
+          file_type: string | null
+          file_url: string | null
+          id: string
+          issued_at: string | null
+          metadata: Json | null
+          organization_id: string
+          party_organization_ids: string[] | null
+          source_id: string | null
+          source_table: string | null
+          source_type: string | null
+          status: string
+          sub_category: string | null
+          tags: string[] | null
+          thumbnail_url: string | null
+          title: string
+          total_signatures_completed: number | null
+          total_signatures_required: number | null
+          updated_at: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          document_number?: string
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json | null
+          organization_id: string
+          party_organization_ids?: string[] | null
+          source_id?: string | null
+          source_table?: string | null
+          source_type?: string | null
+          status?: string
+          sub_category?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title: string
+          total_signatures_completed?: number | null
+          total_signatures_required?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          created_by?: string | null
+          document_number?: string
+          expires_at?: string | null
+          file_size_bytes?: number | null
+          file_type?: string | null
+          file_url?: string | null
+          id?: string
+          issued_at?: string | null
+          metadata?: Json | null
+          organization_id?: string
+          party_organization_ids?: string[] | null
+          source_id?: string | null
+          source_table?: string | null
+          source_type?: string | null
+          status?: string
+          sub_category?: string | null
+          tags?: string[] | null
+          thumbnail_url?: string | null
+          title?: string
+          total_signatures_completed?: number | null
+          total_signatures_required?: number | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       document_signatures: {
         Row: {
