@@ -37,6 +37,8 @@ export interface SidebarItemConfig {
   badgeKey?: string;
   /** Which org types can see this item. Empty = all */
   visibleFor?: string[];
+  /** نوع الارتباط الوظيفي */
+  bindingType?: import('@/types/bindingTypes').BindingType;
 }
 
 type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office' | 'admin' | 'driver';
