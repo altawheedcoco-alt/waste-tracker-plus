@@ -6122,6 +6122,110 @@ export type Database = {
           },
         ]
       }
+      cross_impact_log: {
+        Row: {
+          chain_id: string | null
+          completed_at: string | null
+          created_at: string
+          financial_amount: number | null
+          financial_currency: string | null
+          id: string
+          impact_data: Json | null
+          impact_label_ar: string
+          impact_label_en: string | null
+          impact_type: string
+          metadata: Json | null
+          node_id: string | null
+          resource_id: string
+          resource_label: string | null
+          resource_type: string
+          source_command_id: string
+          source_org_type: string
+          source_organization_id: string
+          source_user_id: string
+          status: string
+          target_org_type: string | null
+          target_organization_id: string | null
+        }
+        Insert: {
+          chain_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          financial_amount?: number | null
+          financial_currency?: string | null
+          id?: string
+          impact_data?: Json | null
+          impact_label_ar: string
+          impact_label_en?: string | null
+          impact_type: string
+          metadata?: Json | null
+          node_id?: string | null
+          resource_id: string
+          resource_label?: string | null
+          resource_type: string
+          source_command_id: string
+          source_org_type: string
+          source_organization_id: string
+          source_user_id: string
+          status?: string
+          target_org_type?: string | null
+          target_organization_id?: string | null
+        }
+        Update: {
+          chain_id?: string | null
+          completed_at?: string | null
+          created_at?: string
+          financial_amount?: number | null
+          financial_currency?: string | null
+          id?: string
+          impact_data?: Json | null
+          impact_label_ar?: string
+          impact_label_en?: string | null
+          impact_type?: string
+          metadata?: Json | null
+          node_id?: string | null
+          resource_id?: string
+          resource_label?: string | null
+          resource_type?: string
+          source_command_id?: string
+          source_org_type?: string
+          source_organization_id?: string
+          source_user_id?: string
+          status?: string
+          target_org_type?: string | null
+          target_organization_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cross_impact_log_source_organization_id_fkey"
+            columns: ["source_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "cross_impact_log_source_organization_id_fkey"
+            columns: ["source_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cross_impact_log_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "cross_impact_log_target_organization_id_fkey"
+            columns: ["target_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       custody_chain_events: {
         Row: {
           actor_organization_id: string | null

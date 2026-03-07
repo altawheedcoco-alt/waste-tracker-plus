@@ -136,6 +136,7 @@ const EnvironmentalConsultants = lazy(() => import("@/pages/dashboard/Environmen
 const SigningInbox = lazy(() => import("@/pages/dashboard/SigningInbox"));
 const AllNotes = lazy(() => import("@/pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("@/pages/dashboard/SystemCommands"));
+const CrossImpactDashboard = lazy(() => import("@/pages/dashboard/CrossImpactDashboard"));
 const RegulatorDashboard = lazy(() => import("@/pages/dashboard/RegulatorDashboardNew"));
 const RegulatorWMRA = lazy(() => import("@/pages/dashboard/RegulatorWMRA"));
 const RegulatorEEAA = lazy(() => import("@/pages/dashboard/RegulatorEEAA"));
@@ -292,6 +293,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/map-explorer" element={<MapExplorer />} />
     <Route path="/dashboard/system-status" element={<SystemStatus />} />
     <Route path="/dashboard/system-commands" element={<SystemCommands />} />
+    <Route path="/dashboard/cross-impact" element={<CrossImpactDashboard />} />
     <Route path="/dashboard/support" element={<SupportCenter />} />
     <Route path="/dashboard/api" element={<ApiManagement />} />
     <Route path="/dashboard/security-testing" element={<SecurityPenetrationTesting />} />
