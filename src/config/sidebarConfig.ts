@@ -13,7 +13,7 @@ import {
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
-  CalendarClock,
+  CalendarClock, Gauge as GaugeIcon,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -459,6 +459,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Brain, labelAr: 'أدوات الذكاء الاصطناعي', labelEn: 'AI Tools', path: '/dashboard/ai-tools', key: 'ai-tools' },
+      { icon: TrendingUp, labelAr: 'التنبؤ الذكي', labelEn: 'AI Forecasting', path: '/dashboard/ai-forecasting', key: 'ai-forecasting' },
+      { icon: Sparkles, labelAr: 'توصيات الوظائف', labelEn: 'Smart Jobs', path: '/dashboard/smart-job-recommendations', key: 'smart-jobs' },
       { icon: Trophy, labelAr: 'نظام الإنجازات', labelEn: 'Gamification', path: '/dashboard/gamification', key: 'gamification' },
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates' },
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
