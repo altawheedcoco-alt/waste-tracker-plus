@@ -14695,6 +14695,570 @@ export type Database = {
           },
         ]
       }
+      governance_alerts: {
+        Row: {
+          alert_type: string
+          created_at: string | null
+          description: string | null
+          id: string
+          is_resolved: boolean | null
+          organization_id: string
+          resolved_at: string | null
+          resolved_by: string | null
+          resource_id: string | null
+          resource_type: string | null
+          severity: string | null
+          title: string
+          triggered_by: string | null
+        }
+        Insert: {
+          alert_type: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          organization_id: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          severity?: string | null
+          title: string
+          triggered_by?: string | null
+        }
+        Update: {
+          alert_type?: string
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          organization_id?: string
+          resolved_at?: string | null
+          resolved_by?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
+          severity?: string | null
+          title?: string
+          triggered_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_alerts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_alerts_resolved_by_fkey"
+            columns: ["resolved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_alerts_triggered_by_fkey"
+            columns: ["triggered_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_approval_actions: {
+        Row: {
+          acted_at: string | null
+          acted_by: string
+          action: string
+          comments: string | null
+          id: string
+          instance_id: string
+          step_id: string | null
+          step_order: number
+        }
+        Insert: {
+          acted_at?: string | null
+          acted_by: string
+          action: string
+          comments?: string | null
+          id?: string
+          instance_id: string
+          step_id?: string | null
+          step_order: number
+        }
+        Update: {
+          acted_at?: string | null
+          acted_by?: string
+          action?: string
+          comments?: string | null
+          id?: string
+          instance_id?: string
+          step_id?: string | null
+          step_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_approval_actions_acted_by_fkey"
+            columns: ["acted_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_actions_instance_id_fkey"
+            columns: ["instance_id"]
+            isOneToOne: false
+            referencedRelation: "governance_approval_instances"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_actions_step_id_fkey"
+            columns: ["step_id"]
+            isOneToOne: false
+            referencedRelation: "governance_approval_steps"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_approval_instances: {
+        Row: {
+          amount: number | null
+          completed_at: string | null
+          created_at: string | null
+          current_step: number | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          requested_by: string
+          resource_id: string
+          resource_title: string | null
+          resource_type: string
+          status: string | null
+          workflow_id: string
+        }
+        Insert: {
+          amount?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_step?: number | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          requested_by: string
+          resource_id: string
+          resource_title?: string | null
+          resource_type: string
+          status?: string | null
+          workflow_id: string
+        }
+        Update: {
+          amount?: number | null
+          completed_at?: string | null
+          created_at?: string | null
+          current_step?: number | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          requested_by?: string
+          resource_id?: string
+          resource_title?: string | null
+          resource_type?: string
+          status?: string | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_approval_instances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_approval_instances_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_instances_requested_by_fkey"
+            columns: ["requested_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_instances_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "governance_approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_approval_steps: {
+        Row: {
+          approver_profile_id: string | null
+          approver_role_id: string | null
+          auto_approve_after_hours: number | null
+          created_at: string | null
+          id: string
+          required_count: number | null
+          step_name: string
+          step_order: number
+          workflow_id: string
+        }
+        Insert: {
+          approver_profile_id?: string | null
+          approver_role_id?: string | null
+          auto_approve_after_hours?: number | null
+          created_at?: string | null
+          id?: string
+          required_count?: number | null
+          step_name: string
+          step_order: number
+          workflow_id: string
+        }
+        Update: {
+          approver_profile_id?: string | null
+          approver_role_id?: string | null
+          auto_approve_after_hours?: number | null
+          created_at?: string | null
+          id?: string
+          required_count?: number | null
+          step_name?: string
+          step_order?: number
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_approval_steps_approver_profile_id_fkey"
+            columns: ["approver_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_steps_approver_role_id_fkey"
+            columns: ["approver_role_id"]
+            isOneToOne: false
+            referencedRelation: "governance_roles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_steps_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "governance_approval_workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_approval_workflows: {
+        Row: {
+          condition_type: string | null
+          condition_value: number | null
+          created_at: string | null
+          created_by: string | null
+          enforce_segregation: boolean | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          resource_type: string
+          updated_at: string | null
+          workflow_name: string
+          workflow_name_en: string | null
+        }
+        Insert: {
+          condition_type?: string | null
+          condition_value?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          enforce_segregation?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          resource_type: string
+          updated_at?: string | null
+          workflow_name: string
+          workflow_name_en?: string | null
+        }
+        Update: {
+          condition_type?: string | null
+          condition_value?: number | null
+          created_at?: string | null
+          created_by?: string | null
+          enforce_segregation?: boolean | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          resource_type?: string
+          updated_at?: string | null
+          workflow_name?: string
+          workflow_name_en?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_approval_workflows_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_approval_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_approval_workflows_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_audit_trail: {
+        Row: {
+          action_type: string
+          created_at: string | null
+          id: string
+          ip_address: string | null
+          new_value: Json | null
+          old_value: Json | null
+          organization_id: string
+          resource_id: string | null
+          resource_title: string | null
+          resource_type: string
+          severity: string | null
+          user_agent: string | null
+          user_id: string | null
+          user_name: string | null
+        }
+        Insert: {
+          action_type: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id: string
+          resource_id?: string | null
+          resource_title?: string | null
+          resource_type: string
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Update: {
+          action_type?: string
+          created_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_value?: Json | null
+          old_value?: Json | null
+          organization_id?: string
+          resource_id?: string | null
+          resource_title?: string | null
+          resource_type?: string
+          severity?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          user_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_audit_trail_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_audit_trail_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_audit_trail_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_role_assignments: {
+        Row: {
+          assigned_at: string | null
+          assigned_by: string | null
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          profile_id: string
+          role_id: string
+        }
+        Insert: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          profile_id: string
+          role_id: string
+        }
+        Update: {
+          assigned_at?: string | null
+          assigned_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          profile_id?: string
+          role_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_role_assignments_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_role_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_role_assignments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_role_assignments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_role_assignments_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "governance_roles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      governance_roles: {
+        Row: {
+          can_approve_contracts: boolean | null
+          can_approve_invoices: boolean | null
+          can_approve_payments: boolean | null
+          can_approve_shipments: boolean | null
+          can_export_data: boolean | null
+          can_manage_employees: boolean | null
+          can_manage_settings: boolean | null
+          can_view_financials: boolean | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          hierarchy_level: number | null
+          id: string
+          is_system_role: boolean | null
+          max_approval_amount: number | null
+          organization_id: string
+          permissions: Json | null
+          role_name: string
+          role_name_en: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          can_approve_contracts?: boolean | null
+          can_approve_invoices?: boolean | null
+          can_approve_payments?: boolean | null
+          can_approve_shipments?: boolean | null
+          can_export_data?: boolean | null
+          can_manage_employees?: boolean | null
+          can_manage_settings?: boolean | null
+          can_view_financials?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          hierarchy_level?: number | null
+          id?: string
+          is_system_role?: boolean | null
+          max_approval_amount?: number | null
+          organization_id: string
+          permissions?: Json | null
+          role_name: string
+          role_name_en?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          can_approve_contracts?: boolean | null
+          can_approve_invoices?: boolean | null
+          can_approve_payments?: boolean | null
+          can_approve_shipments?: boolean | null
+          can_export_data?: boolean | null
+          can_manage_employees?: boolean | null
+          can_manage_settings?: boolean | null
+          can_view_financials?: boolean | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          hierarchy_level?: number | null
+          id?: string
+          is_system_role?: boolean | null
+          max_approval_amount?: number | null
+          organization_id?: string
+          permissions?: Json | null
+          role_name?: string
+          role_name_en?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "governance_roles_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "governance_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "governance_roles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       government_reports: {
         Row: {
           compliance_score: number | null
@@ -37372,6 +37936,10 @@ export type Database = {
       is_current_user_admin: { Args: never; Returns: boolean }
       is_office_member: {
         Args: { _office_id: string; _user_id: string }
+        Returns: boolean
+      }
+      is_org_admin: {
+        Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
       is_org_member: {
