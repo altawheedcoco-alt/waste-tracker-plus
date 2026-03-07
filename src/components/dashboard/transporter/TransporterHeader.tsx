@@ -6,6 +6,7 @@ import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DashboardPrintReports from '@/components/dashboard/shared/DashboardPrintReports';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import BindingAuditPanel from '@/components/shared/BindingAuditPanel';
 
 interface TransporterHeaderProps {
   organizationName: string;
@@ -21,6 +22,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
       <div className="flex items-center gap-2 flex-wrap">
         <DashboardPrintReports />
         <AutomationSettingsDialog />
+        <BindingAuditPanel orgType="transporter" />
         <Button
           variant="outline"
           size="sm"
