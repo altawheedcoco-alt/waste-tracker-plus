@@ -9,6 +9,7 @@ import {
   BarChart3, TrendingUp, Volume2, Wind, Eye
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface DigitalEquipment {
   id: string;
@@ -34,14 +35,16 @@ interface ZoneSummary {
   totalThroughput: number;
 }
 
-const statusConfig: Record<string, { label: string; color: string; bg: string; pulse: boolean }> = {
-  running: { label: 'يعمل', color: 'text-emerald-500', bg: 'bg-emerald-500', pulse: true },
-  idle: { label: 'متوقف', color: 'text-amber-500', bg: 'bg-amber-500', pulse: false },
-  maintenance: { label: 'صيانة', color: 'text-blue-500', bg: 'bg-blue-500', pulse: false },
-  alarm: { label: 'تنبيه', color: 'text-destructive', bg: 'bg-destructive', pulse: true },
-};
+const getStatusConfig = (t: (key: string) => string) => ({
+  running: { label: t('factoryTwin.running'), color: 'text-emerald-500', bg: 'bg-emerald-500', pulse: true },
+  idle: { label: t('factoryTwin.idle'), color: 'text-amber-500', bg: 'bg-amber-500', pulse: false },
+  maintenance: { label: t('factoryTwin.maintenance'), color: 'text-blue-500', bg: 'bg-blue-500', pulse: false },
+  alarm: { label: t('factoryTwin.alarm'), color: 'text-destructive', bg: 'bg-destructive', pulse: true },
+});
 
 const FactoryDigitalTwinPanel = () => {
+  const { t } = useLanguage();
+  const statusConfig = getStatusConfig(t);
   const [selectedZone, setSelectedZone] = useState<string | null>(null);
   const [liveTime, setLiveTime] = useState(new Date());
 

@@ -10,6 +10,7 @@ import { ar } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface OperationalAlert {
   id: string;
@@ -23,29 +24,29 @@ interface OperationalAlert {
   timestamp?: Date;
 }
 
-const SEVERITY_CONFIG = {
+const getSeverityConfig = (t: (key: string) => string) => ({
   critical: {
     icon: ShieldAlert,
     color: 'text-red-600',
     bgColor: 'bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800',
     badge: 'destructive' as const,
-    label: 'حرج',
+    label: t('adminAlerts.critical'),
   },
   warning: {
     icon: AlertTriangle,
     color: 'text-amber-600',
     bgColor: 'bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
     badge: 'secondary' as const,
-    label: 'تحذير',
+    label: t('adminAlerts.warning'),
   },
   info: {
     icon: Clock,
     color: 'text-blue-600',
     bgColor: 'bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800',
     badge: 'outline' as const,
-    label: 'معلومة',
+    label: t('adminAlerts.info'),
   },
-};
+});
 
 const TYPE_ICONS: Record<string, typeof Package> = {
   overdue: TrendingDown,
@@ -55,16 +56,19 @@ const TYPE_ICONS: Record<string, typeof Package> = {
   unverified: FileWarning,
 };
 
-const TYPE_LABELS: Record<string, string> = {
-  overdue: 'تأخر تسليم',
-  stale: 'شحنة معلّقة',
-  contract_expiry: 'انتهاء عقد',
-  unpaid: 'فاتورة متأخرة',
-  unverified: 'وثيقة معلّقة',
-};
+const getTypeLabels = (t: (key: string) => string): Record<string, string> => ({
+  overdue: t('adminAlerts.deliveryDelay'),
+  stale: t('adminAlerts.staleShipment'),
+  contract_expiry: t('adminAlerts.contractExpiry'),
+  unpaid: t('adminAlerts.unpaidInvoice'),
+  unverified: t('adminAlerts.unverifiedDoc'),
+});
 
 const AdminOperationalAlerts = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const SEVERITY_CONFIG = getSeverityConfig(t);
+  const TYPE_LABELS = getTypeLabels(t);
   const [dismissedIds, setDismissedIds] = useState<Set<string>>(new Set());
   const [resolvedIds, setResolvedIds] = useState<Set<string>>(new Set());
   const [expandedId, setExpandedId] = useState<string | null>(null);
