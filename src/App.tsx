@@ -13,6 +13,8 @@ import { LanguageProvider } from "@/contexts/LanguageContext";
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
 const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
+const InstallPWA = lazy(() => import("./components/pwa/InstallPWA"));
+const PWAUpdatePrompt = lazy(() => import("./components/pwa/PWAUpdatePrompt"));
 
 // Minimal loading component
 const PageLoader = memo(() => (
@@ -90,6 +92,8 @@ const Providers = memo(() => (
                   <OfflineBanner />
                   <ScrollToTopButton />
                   <CodeProtection />
+                  <InstallPWA />
+                  <PWAUpdatePrompt />
                 </Suspense>
               </AuthProvider>
             </BrowserRouter>
