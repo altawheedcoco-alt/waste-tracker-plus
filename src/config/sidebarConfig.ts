@@ -3,7 +3,7 @@
  * Merges similar sections and filters irrelevant items per role.
  */
 import {
-  LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle,
+  LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle, Wrench,
   User, MapPin, BarChart3, FileText, Handshake, BadgeCheck, Scale, FolderCheck,
   Search, ClipboardList, FileSpreadsheet, AlertTriangle, Layers, Send,
   MessageCircle, Newspaper, Rss, Info, BookOpen, Banknote, Activity, Headphones,
@@ -13,7 +13,7 @@ import {
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
-  CalendarClock,
+  CalendarClock, Gauge as GaugeIcon,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -122,6 +122,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes' },
       { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits' },
       { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
+      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance' },
+      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards' },
     ],
   },
 
@@ -137,6 +139,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'recycler-rejected' },
       { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
       { icon: FolderCheck, labelAr: 'إصدار شهادات التدوير', labelEn: 'Issue Certs', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs', badgeKey: 'issue-certs' },
+      { icon: Factory, labelAr: 'لوحة الإنتاج', labelEn: 'Production Dashboard', path: '/dashboard/production', key: 'production-dashboard' },
     ],
   },
 
@@ -459,6 +462,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Brain, labelAr: 'أدوات الذكاء الاصطناعي', labelEn: 'AI Tools', path: '/dashboard/ai-tools', key: 'ai-tools' },
+      { icon: TrendingUp, labelAr: 'التنبؤ الذكي', labelEn: 'AI Forecasting', path: '/dashboard/ai-forecasting', key: 'ai-forecasting' },
+      { icon: Sparkles, labelAr: 'توصيات الوظائف', labelEn: 'Smart Jobs', path: '/dashboard/smart-job-recommendations', key: 'smart-jobs' },
       { icon: Trophy, labelAr: 'نظام الإنجازات', labelEn: 'Gamification', path: '/dashboard/gamification', key: 'gamification' },
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates' },
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
