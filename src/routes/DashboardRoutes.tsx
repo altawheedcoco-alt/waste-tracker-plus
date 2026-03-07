@@ -210,6 +210,7 @@ const ConsultantPortal = lazy(() => import("@/pages/dashboard/ConsultantPortal")
 const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManagement"));
 const GovernanceDashboard = lazy(() => import("@/pages/dashboard/GovernanceDashboard"));
 const SmartDocumentArchive = lazy(() => import("@/pages/dashboard/SmartDocumentArchive"));
+const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCenter"));
 
 export const dashboardRoutes = (
   <>
@@ -422,6 +423,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/capacity-management" element={<CapacityManagement />} />
     <Route path="/dashboard/governance" element={<GovernanceDashboard />} />
     <Route path="/dashboard/smart-archive" element={<SmartDocumentArchive />} />
+    <Route path="/dashboard/cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
