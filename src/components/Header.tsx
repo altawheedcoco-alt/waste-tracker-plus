@@ -11,7 +11,17 @@ interface DropdownItem {
   href: string;
   icon: React.ElementType;
   desc: string;
+  longDesc?: string;
   badge?: string;
+}
+
+interface NavDropdown {
+  label: string;
+  icon: React.ElementType;
+  items: DropdownItem[];
+  columns?: number;
+  megaShowcase?: boolean;
+  footer?: { label: string; href: string; icon: React.ElementType };
 }
 
 interface NavDropdown {
@@ -37,15 +47,35 @@ const Header = memo(() => {
       label: language === 'ar' ? 'اكتشف المنصة' : 'Discover',
       icon: Eye,
       columns: 2,
+      megaShowcase: true,
       items: [
-        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics', badge: language === 'ar' ? 'متقدم' : 'Pro' },
-        { label: language === 'ar' ? 'إدارة المستندات' : 'Document Management', href: '#doc-ai', icon: FileCheck, desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive', badge: 'AI' },
-        { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support', badge: 'AI' },
-        { label: language === 'ar' ? 'النظام الرقابي' : 'Regulatory System', href: '#features', icon: Shield, desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections' },
-        { label: language === 'ar' ? 'النظام المالي' : 'Financial System', href: '#features', icon: Wallet, desc: language === 'ar' ? 'فوترة وحسابات ودفتر أستاذ متكامل' : 'Invoicing, ledger & financial tracking' },
-        { label: language === 'ar' ? 'سلسلة الحفظ' : 'Chain of Custody', href: '#features', icon: ClipboardCheck, desc: language === 'ar' ? 'تتبع المخلفات من المصدر للتدوير' : 'Track waste from source to recycling' },
-        { label: language === 'ar' ? 'مركز الاتصالات' : 'Call Center', href: '#features', icon: Headphones, desc: language === 'ar' ? 'تسجيل وتحليل مكالمات وتقييم أداء' : 'Record, analyze calls & rate performance' },
-        { label: language === 'ar' ? 'بياناتي' : 'My Data Hub', href: '#features', icon: Database, desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place' },
+        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, 
+          desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics',
+          longDesc: language === 'ar' ? 'تحكّم بكل تفصيلة — 7 تبويبات تحليلية (مالية، تشغيلية، بيئية، اتجاهات) مع تقارير يومية قابلة للطباعة بثلاثة أنماط: إيصال حراري، A4 عادي، وتقرير شامل مفصّل' : 'Control every detail — 7 analytics tabs with printable daily reports in 3 formats',
+          badge: language === 'ar' ? 'متقدم' : 'Pro' },
+        { label: language === 'ar' ? 'إدارة المستندات المتقدمة' : 'Advanced Document Hub', href: '#doc-ai', icon: FileCheck, 
+          desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive',
+          longDesc: language === 'ar' ? 'ارفع عشرات الملفات دفعة واحدة — يُصنّفها النظام تلقائياً حسب نوع مؤسستك (تراخيص، سجلات، موافقات بيئية) مع أرشيف رقمي كامل وبحث فوري' : 'Bulk upload files — auto-categorized by entity type with full digital archive',
+          badge: 'AI' },
+        { label: language === 'ar' ? 'محرك الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, 
+          desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support',
+          longDesc: language === 'ar' ? 'وكيل ذكي يعمل على مدار الساعة — يحلل مستنداتك ويجيب عملائك عبر واتساب وتليجرام ويتنبأ بالمشكلات قبل وقوعها ويُنشئ الطلبات تلقائياً' : 'AI agent working 24/7 — analyzes docs, answers customers & predicts issues',
+          badge: 'AI' },
+        { label: language === 'ar' ? 'النظام الرقابي المتكامل' : 'Regulatory Oversight', href: '#features', icon: Shield, 
+          desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections',
+          longDesc: language === 'ar' ? '11 وحدة رقابية متخصصة — من رصد الامتثال وجدولة التفتيش الميداني إلى إصدار المخالفات والعقوبات وتتبع سلسلة الحفظ الرقمية لكل جهة رقابية' : '11 regulatory modules — from compliance to field inspections & penalty tracking' },
+        { label: language === 'ar' ? 'النظام المالي الذكي' : 'Smart Financial System', href: '#features', icon: Wallet, 
+          desc: language === 'ar' ? 'فوترة آلية ودفتر أستاذ ذكي' : 'Auto-invoicing & smart ledger',
+          longDesc: language === 'ar' ? 'فواتير تُصدر تلقائياً مع كل شحنة — دفتر أستاذ يتتبع كل حركة مالية، وإدارة إيداعات ومطالبات وفترات محاسبية بدقة 100% بدون أخطاء بشرية' : 'Auto-invoices per shipment — ledger tracking every transaction with 100% accuracy' },
+        { label: language === 'ar' ? 'سلسلة الحفظ الرقمية' : 'Digital Chain of Custody', href: '#features', icon: ClipboardCheck, 
+          desc: language === 'ar' ? 'تتبع كل كيلوجرام من المصدر للتدوير' : 'Track every kg from source to recycling',
+          longDesc: language === 'ar' ? 'شفافية لا تقبل التلاعب — تتبع كل شحنة من لحظة خروجها من المولّد حتى وصولها للمُدوّر، مع توثيق الأوزان والتوقيعات والصور في كل محطة' : 'Tamper-proof transparency — track shipments with weight, signatures & photos at every stop' },
+        { label: language === 'ar' ? 'مركز الاتصالات الذكي' : 'Smart Call Center', href: '#features', icon: Headphones, 
+          desc: language === 'ar' ? 'تسجيل وتحليل وتقييم أداء الفريق' : 'Record, analyze & rate team performance',
+          longDesc: language === 'ar' ? 'سجّل كل مكالمة وحلّل أداء فريقك بالذكاء الاصطناعي — مؤشرات KPI فورية ومتوسط زمن الاستجابة وتقييم رضا العملاء وترتيب الوكلاء حسب الأداء' : 'Record calls & analyze team with AI — instant KPIs, response time & satisfaction scores' },
+        { label: language === 'ar' ? 'مركز بياناتي' : 'My Data Hub', href: '#features', icon: Database, 
+          desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place',
+          longDesc: language === 'ar' ? 'لوحة واحدة تجمع كل شيء — بيانات مؤسستك، تراخيصك ومواعيد تجديدها، درجة امتثالك، شركائك، وإحصائياتك المالية والتشغيلية بنظرة واحدة' : 'One dashboard for everything — org data, licenses, compliance score & partner stats' },
       ],
     },
     {
