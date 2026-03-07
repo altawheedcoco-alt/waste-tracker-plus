@@ -105,7 +105,7 @@ const ShiftScheduler = () => {
   const handleAddShift = async () => {
     if (!organization?.id || !formDriverId || !selectedDate) return;
 
-    const { error } = await supabase.from('driver_shifts').insert({
+    const insertData = {
       organization_id: organization.id,
       driver_id: formDriverId,
       shift_date: format(selectedDate, 'yyyy-MM-dd'),
@@ -115,7 +115,8 @@ const ShiftScheduler = () => {
       assigned_zone: formZone || null,
       max_shipments: parseInt(formMaxShipments) || 10,
       notes: formNotes || null,
-    } as Record<string, unknown>);
+    };
+    const { error } = await (supabase.from('driver_shifts') as any).insert(insertData);
 
     if (error) {
       toast.error(isAr ? 'خطأ في إضافة الوردية' : 'Error adding shift');
