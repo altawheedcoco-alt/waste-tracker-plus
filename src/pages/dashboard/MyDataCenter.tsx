@@ -381,7 +381,7 @@ const MyDataCenter = () => {
                   <InfoRow icon={Building2} label="اسم المنظمة" value={orgData?.name} />
                   <InfoRow icon={Building2} label="الاسم بالإنجليزية" value={orgData?.name_en} />
                   <InfoRow icon={Hash} label="السجل التجاري" value={orgData?.commercial_register} />
-                  <InfoRow icon={Hash} label="البطاقة الضريبية" value={orgData?.tax_card_number} />
+                  <InfoRow icon={Hash} label="البطاقة الضريبية" value={orgData?.tax_card} />
                   <InfoRow icon={Scale} label="نوع الجهة" value={orgTypeLabel[orgType] || orgType}
                     badge={{ text: orgType, variant: 'secondary' }} />
                   <InfoRow icon={MapPin} label="العنوان" value={orgData?.address} />
@@ -389,13 +389,13 @@ const MyDataCenter = () => {
                   <InfoRow icon={MapPin} label="المنطقة" value={orgData?.region} />
                   <InfoRow icon={Phone} label="الهاتف" value={orgData?.phone} />
                   <InfoRow icon={Mail} label="البريد الإلكتروني" value={orgData?.email} />
-                  <InfoRow icon={Globe} label="الموقع الإلكتروني" value={orgData?.website} />
+                  <InfoRow icon={Globe} label="الموقع الإلكتروني" value={orgData?.website_url} />
                   <InfoRow icon={Calendar} label="تاريخ التسجيل" value={orgData?.created_at ? format(new Date(orgData.created_at), 'yyyy/MM/dd') : null} />
                   <InfoRow icon={CheckCircle2} label="حالة التحقق"
-                    value={orgData?.verification_status === 'verified' ? 'موثق' : orgData?.verification_status === 'pending' ? 'قيد المراجعة' : 'غير موثق'}
+                    value={orgData?.is_verified ? 'موثق' : 'غير موثق'}
                     badge={{
-                      text: orgData?.verification_status === 'verified' ? '✓' : '⏳',
-                      variant: orgData?.verification_status === 'verified' ? 'default' : 'secondary'
+                      text: orgData?.is_verified ? '✓' : '⏳',
+                      variant: orgData?.is_verified ? 'default' : 'secondary'
                     }}
                   />
                   <InfoRow icon={Fingerprint} label="كود الشراكة" value={orgData?.partner_code} />
