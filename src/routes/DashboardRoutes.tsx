@@ -194,6 +194,10 @@ const DataExport = lazy(() => import("@/pages/dashboard/DataExport"));
 const RegulatoryDocuments = lazy(() => import("@/pages/dashboard/RegulatoryDocuments"));
 const LawsAndRegulations = lazy(() => import("@/pages/dashboard/LawsAndRegulations"));
 const MyDataCenter = lazy(() => import("@/pages/dashboard/MyDataCenter"));
+const ExecutiveDashboard = lazy(() => import("@/pages/dashboard/ExecutiveDashboard"));
+const RecurringShipments = lazy(() => import("@/pages/dashboard/RecurringShipments"));
+const EmployeeTaskBoard = lazy(() => import("@/pages/dashboard/EmployeeTaskBoard"));
+const CVBuilder = lazy(() => import("@/pages/dashboard/CVBuilder"));
 
 export const dashboardRoutes = (
   <>

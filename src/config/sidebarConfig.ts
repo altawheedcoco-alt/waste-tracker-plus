@@ -464,6 +464,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center' },
       { icon: BookOpen, labelAr: 'دليل المستخدم', labelEn: 'User Guide', path: '/dashboard/user-guide', key: 'user-guide' },
       { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center' },
+      { icon: FileText, labelAr: 'منشئ السيرة الذاتية', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder' },
     ],
   },
 
