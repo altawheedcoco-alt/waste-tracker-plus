@@ -1,0 +1,43 @@
+{
+  "name": "آي ريسايكل - iRecycle",
+  "short_name": "iRecycle",
+  "description": "نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d9488",
+  "orientation": "any",
+  "dir": "rtl",
+  "lang": "ar",
+  "scope": "/",
+  "categories": ["business", "utilities", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/irecycle-logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "لوحة التحكم",
+      "short_name": "Dashboard",
+      "url": "/dashboard",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "الخريطة التفاعلية",
+      "short_name": "Map",
+      "url": "/map",
+      "icons": [{ "src": "/favicon.png", "sizes": "192x192" }]
+    }
+  ]
+}
