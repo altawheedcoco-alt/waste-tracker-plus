@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,17 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase, Lock, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import PlatformLogo from '@/components/common/PlatformLogo';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
 import DemoQuickLogin from '@/components/auth/DemoQuickLogin';
+import AuthSidePanel from '@/components/auth/AuthSidePanel';
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter';
 
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 // Validation schemas
 const loginSchema = z.object({
