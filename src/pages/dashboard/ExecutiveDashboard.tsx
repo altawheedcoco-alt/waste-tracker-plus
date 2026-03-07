@@ -28,7 +28,7 @@ const ExecutiveDashboard = () => {
         supabase.from('profiles').select('id', { count: 'exact' }),
         supabase.from('shipments').select('id, status, created_at, total_price', { count: 'exact' }),
         supabase.from('organizations').select('id', { count: 'exact' }).eq('is_verified', false),
-        supabase.from('shipments').select('id', { count: 'exact' }).in('status', ['pending', 'assigned', 'in_transit']),
+        supabase.from('shipments').select('id', { count: 'exact' }).in('status', ['new', 'confirmed', 'in_transit', 'collecting']),
         supabase.from('shipments').select('id, created_at', { count: 'exact' }).gte('created_at', last30),
       ]);
 
