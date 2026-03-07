@@ -102,7 +102,6 @@ const TransporterReceipts = () => {
     if (!organization?.id) return;
     setLoading(true);
     try {
-      console.log('Loading receipts for org:', organization.id);
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select(`
@@ -128,7 +127,6 @@ const TransporterReceipts = () => {
         console.error('Receipt query error:', error);
         throw error;
       }
-      console.log('Receipts loaded:', data?.length || 0);
       setReceipts((data || []) as unknown as Receipt[]);
     } catch (error) {
       console.error('Error loading receipts:', error);

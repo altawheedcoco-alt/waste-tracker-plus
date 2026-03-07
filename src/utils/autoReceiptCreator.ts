@@ -18,10 +18,7 @@ export async function autoCreateReceipt(
     .eq('shipment_id', shipmentId)
     .maybeSingle();
 
-  if (existing) {
-    console.log('Receipt already exists for shipment:', shipmentId);
-    return;
-  }
+  if (existing) return;
 
   // Fetch shipment details
   const { data: shipment, error: shipmentError } = await supabase
@@ -92,5 +89,4 @@ export async function autoCreateReceipt(
     }
   }
 
-  console.log('Auto receipt created for shipment:', shipmentId);
 }

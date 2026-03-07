@@ -117,7 +117,7 @@ export const useRealtimeTracking = ({
         longitude,
       });
 
-      console.log(`[RealtimeTracking] Auto status change: ${newStatus} - ${notes}`);
+      
 
       // Auto-create declarations and receipts based on status
       try {
@@ -159,7 +159,7 @@ export const useRealtimeTracking = ({
                   reference_id: shipmentId,
                   reference_type: 'shipment',
                 });
-                console.log(`[RealtimeTracking] Sent ${userIds.length} dual notifications`);
+                
               }
             }
           } catch (notifErr) {
@@ -169,19 +169,19 @@ export const useRealtimeTracking = ({
           // Generator declaration on approved/registered/in_transit
           if (['approved', 'registered', 'in_transit'].includes(newStatus) && shipmentData.generator_id) {
             await autoCreateGeneratorDeclaration(shipmentId, shipmentData.generator_id, user.id);
-            console.log('[RealtimeTracking] Auto generator declaration created');
+            
           }
 
           // Recycler declaration on delivered/confirmed
           if (['delivered', 'confirmed'].includes(newStatus) && shipmentData.recycler_id) {
             await autoCreateRecyclerDeclaration(shipmentId, shipmentData.recycler_id, user.id);
-            console.log('[RealtimeTracking] Auto recycler declaration created');
+            
           }
 
           // Receipt on in_transit/delivered
           if (['in_transit', 'delivered'].includes(newStatus) && shipmentData.transporter_id) {
             await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
-            console.log('[RealtimeTracking] Auto receipt created');
+            
           }
         }
       } catch (autoErr) {

@@ -65,15 +65,8 @@ export const useDriverPresence = ({
       setIsBeingTracked(activeViewers.length > 0);
     });
 
-    // Handle new viewer joining
-    channel.on('presence', { event: 'join' }, ({ key, newPresences }) => {
-      console.log('Viewer joined:', key, newPresences);
-    });
-
-    // Handle viewer leaving
-    channel.on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
-      console.log('Viewer left:', key, leftPresences);
-    });
+    channel.on('presence', { event: 'join' }, () => {});
+    channel.on('presence', { event: 'leave' }, () => {});
 
     // Subscribe and track presence
     channel.subscribe(async (status) => {

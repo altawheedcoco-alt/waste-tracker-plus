@@ -9,7 +9,7 @@ import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimelin
 import ShipmentDocumentsTimeline from '@/components/shipments/ShipmentDocumentsTimeline';
 import ShipmentDocumentsPanel from '@/components/documents/ShipmentDocumentsPanel';
 import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
-import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
+import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import ShipmentQuickPrint from '@/components/shipments/ShipmentQuickPrint';
 import ShipmentTrackingMap from '@/components/maps/LeafletShipmentTracking';
 import UnifiedShipmentTracker from '@/components/tracking/UnifiedShipmentTracker';

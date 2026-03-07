@@ -60,11 +60,6 @@ export const uploadFile = async (
       compressed = result.compressionRatio > 0;
       compressionRatio = result.compressionRatio;
 
-      if (compressed) {
-        console.log(
-          `📦 ضغط الصورة: ${formatFileSize(originalSize)} → ${formatFileSize(result.compressedSize)} (${compressionRatio}%)`
-        );
-      }
     } catch (err) {
       console.warn('⚠️ فشل ضغط الصورة، سيتم رفع الأصلية:', err);
     }

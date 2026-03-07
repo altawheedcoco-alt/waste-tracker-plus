@@ -59,7 +59,7 @@ import {
 import StatusChangeDialog from './StatusChangeDialog';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import ShipmentQuickPrint from './ShipmentQuickPrint';
-import ShipmentRouteMap from './ShipmentRouteMap';
+import ShipmentRouteMap from '@/components/maps/RouteMapDialog';
 import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';

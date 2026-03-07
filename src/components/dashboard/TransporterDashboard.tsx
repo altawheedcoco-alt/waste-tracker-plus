@@ -31,7 +31,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
-import ShipmentStatusDialog from '@/components/shipments/ShipmentStatusDialog';
+import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
