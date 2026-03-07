@@ -155,7 +155,7 @@ const QuickActionsGrid = ({
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
                   <Input
-                    placeholder="ابحث عن إجراء..."
+                    placeholder={t('dashboard.searchAction')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="pr-9 h-9 text-sm bg-muted/30 border-border/50 focus-visible:ring-1"
