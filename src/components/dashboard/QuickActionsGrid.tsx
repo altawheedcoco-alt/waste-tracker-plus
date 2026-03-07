@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { LucideIcon, Settings2, Search, Star, Layers, Wrench, ChevronDown, ChevronUp, Grid3X3 } from 'lucide-react';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ResponsiveGrid from './ResponsiveGrid';
 import QuickActionsCustomizer from './QuickActionsCustomizer';
 import { cn } from '@/lib/utils';
@@ -32,12 +33,23 @@ interface QuickActionsGridProps {
 
 type CategoryFilter = 'all' | 'primary' | 'secondary' | 'utility';
 
-const categoryConfig: Record<CategoryFilter, { label: string; icon: LucideIcon; color: string }> = {
-  all: { label: 'الكل', icon: Grid3X3, color: 'text-foreground' },
-  primary: { label: 'أساسي', icon: Star, color: 'text-amber-500' },
-  secondary: { label: 'ثانوي', icon: Layers, color: 'text-blue-500' },
-  utility: { label: 'أدوات', icon: Wrench, color: 'text-muted-foreground' },
-};
+const QuickActionsGrid = ({ 
+  actions, 
+  title,
+  subtitle,
+  userType,
+  showCustomizer = false,
+}: QuickActionsGridProps) => {
+  const navigate = useNavigate();
+  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+  const { t } = useLanguage();
+
+  const categoryConfig: Record<CategoryFilter, { label: string; icon: LucideIcon; color: string }> = {
+    all: { label: t('dashboard.categories.all'), icon: Grid3X3, color: 'text-foreground' },
+    primary: { label: t('dashboard.categories.primary'), icon: Star, color: 'text-amber-500' },
+    secondary: { label: t('dashboard.categories.secondary'), icon: Layers, color: 'text-blue-500' },
+    utility: { label: t('dashboard.categories.utility'), icon: Wrench, color: 'text-muted-foreground' },
+  };
 
 const QuickActionsGrid = ({ 
   actions, 
