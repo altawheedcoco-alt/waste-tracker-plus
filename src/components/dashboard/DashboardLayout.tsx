@@ -352,6 +352,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           path: item.path,
           key: item.key,
           badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
+          bindingType: item.bindingType,
         })),
       });
     }
