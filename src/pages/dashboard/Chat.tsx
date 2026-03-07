@@ -220,7 +220,7 @@ const DateSeparator = ({ date }: { date: Date }) => {
 };
 
 // ─── Notes Panel ────────────────────────────────────────
-const NotesPanel = memo(({ conversationId }: { conversationId: string }) => {
+const NotesPanel = memo(({ conversationId, organizationId }: { conversationId: string; organizationId?: string }) => {
   const [noteText, setNoteText] = useState('');
   const { user } = useAuth();
   const queryClient = useQueryClient();
@@ -228,28 +228,28 @@ const NotesPanel = memo(({ conversationId }: { conversationId: string }) => {
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ['conversation-notes', conversationId],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('notes')
-        .select('id, content, created_at, created_by')
-        .eq('entity_type', 'conversation')
-        .eq('entity_id', conversationId)
+        .select('id, content, created_at, author_id')
+        .eq('resource_type', 'conversation')
+        .eq('resource_id', conversationId)
         .order('created_at', { ascending: false })
         .limit(50);
       
       if (!data?.length) return [];
       
-      const userIds = [...new Set(data.map(n => n.created_by).filter(Boolean))];
+      const userIds = [...new Set(data.map((n: any) => n.author_id).filter(Boolean))];
       const { data: profiles } = await supabase
         .from('profiles')
         .select('user_id, full_name')
-        .in('user_id', userIds);
+        .in('user_id', userIds as string[]);
       const profileMap = new Map((profiles || []).map(p => [p.user_id, p.full_name]));
 
-      return data.map(n => ({
+      return data.map((n: any) => ({
         id: n.id,
         content: n.content,
         created_at: n.created_at,
-        author_name: profileMap.get(n.created_by || '') || 'مجهول',
+        author_name: profileMap.get(n.author_id || '') || 'مجهول',
       })) as ConversationNote[];
     },
     enabled: !!conversationId,
@@ -257,11 +257,14 @@ const NotesPanel = memo(({ conversationId }: { conversationId: string }) => {
 
   const addNote = useMutation({
     mutationFn: async (content: string) => {
-      const { error } = await supabase.from('notes').insert({
-        entity_type: 'conversation',
-        entity_id: conversationId,
+      if (!user?.id || !organizationId) throw new Error('Missing user or org');
+      const { error } = await (supabase as any).from('notes').insert({
+        resource_type: 'conversation',
+        resource_id: conversationId,
         content,
-        created_by: user?.id,
+        author_id: user.id,
+        organization_id: organizationId,
+        note_type: 'comment',
       });
       if (error) throw error;
     },
