@@ -81,7 +81,8 @@ export function useChainRuntimeStatus(orgType: string) {
       const entries = Object.entries(nodeQueries);
       const promises = entries.map(async ([nodeId, query]) => {
         try {
-          const { count, error } = await supabase
+          // Use type assertion since these are dynamic table references
+          const { count, error } = await (supabase as any)
             .from(query.table)
             .select('*', { count: 'exact', head: true })
             .eq('organization_id', orgId);
