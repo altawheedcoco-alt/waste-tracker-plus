@@ -37,7 +37,7 @@ const TRANSPORTER_COMMANDS: CommandDefinition[] = [
     orgTypes: ['transporter'],
     chainId: 'shipment-lifecycle',
     nodeId: 'fn-assign-driver',
-    requiredPermissions: ['manage_shipments', 'manage_employees'],
+    requiredPermissions: ['manage_shipments', 'manage_drivers'],
     requireAllPermissions: false,
     dependencies: [
       {
@@ -198,7 +198,7 @@ const TRANSPORTER_COMMANDS: CommandDefinition[] = [
     chainId: 'driver-management',
     nodeId: 'btn-add-driver',
     path: '/dashboard/transporter-drivers',
-    requiredPermissions: ['manage_employees'],
+    requiredPermissions: ['manage_drivers'],
     requireAllPermissions: false,
     dependencies: [],
     impacts: [
@@ -215,7 +215,7 @@ const TRANSPORTER_COMMANDS: CommandDefinition[] = [
     orgTypes: ['transporter'],
     chainId: 'driver-management',
     nodeId: 'fn-permit-check',
-    requiredPermissions: ['manage_employees', 'view_compliance'],
+    requiredPermissions: ['manage_drivers', 'view_reports'],
     requireAllPermissions: false,
     dependencies: [
       {
@@ -294,7 +294,7 @@ const TRANSPORTER_COMMANDS: CommandDefinition[] = [
     chainId: 'compliance-chain',
     nodeId: 'btn-generate-report',
     tab: 'compliance',
-    requiredPermissions: ['view_compliance', 'generate_reports'],
+    requiredPermissions: ['view_reports', 'create_reports'],
     requireAllPermissions: true,
     dependencies: [],
     impacts: [
