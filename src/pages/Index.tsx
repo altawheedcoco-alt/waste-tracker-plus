@@ -99,6 +99,7 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
 };
 
 const Index = () => {
+  useVisitorTracking();
   // Fetch homepage section config from DB
   const { data: sections } = useQuery({
     queryKey: ['homepage-sections'],
