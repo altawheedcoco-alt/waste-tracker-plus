@@ -706,6 +706,26 @@ const Auth = () => {
                   onSubmit={handleLogin}
                   className="space-y-4"
                 >
+                  {/* Lockout Warning */}
+                  {lockedUntil && lockedUntil > Date.now() && (
+                    <Alert className="bg-destructive/10 border-destructive/30">
+                      <Lock className="h-4 w-4 text-destructive" />
+                      <AlertDescription className="text-sm text-destructive">
+                        تم قفل الدخول مؤقتاً بسبب محاولات متعددة. حاول بعد {getRemainingLockoutMinutes()} دقيقة.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Attempts Warning */}
+                  {loginAttempts >= 3 && loginAttempts < MAX_LOGIN_ATTEMPTS && !lockedUntil && (
+                    <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
+                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                      <AlertDescription className="text-sm text-yellow-700 dark:text-yellow-400">
+                        تنبيه: {MAX_LOGIN_ATTEMPTS - loginAttempts} محاولات متبقية قبل قفل الحساب مؤقتاً
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="email">{t('auth.email')}</Label>
                     <Input
@@ -716,6 +736,7 @@ const Auth = () => {
                       onChange={(e) => handleLoginChange('email', e.target.value)}
                       className={errors.email ? 'border-destructive' : ''}
                       dir="ltr"
+                      disabled={!!lockedUntil && lockedUntil > Date.now()}
                     />
                     {errors.email && (
                       <p className="text-sm text-destructive">{errors.email}</p>
@@ -733,6 +754,7 @@ const Auth = () => {
                         onChange={(e) => handleLoginChange('password', e.target.value)}
                         className={errors.password ? 'border-destructive' : ''}
                         dir="ltr"
+                        disabled={!!lockedUntil && lockedUntil > Date.now()}
                       />
                       <button
                         type="button"
@@ -747,7 +769,17 @@ const Auth = () => {
                     )}
                   </div>
 
-                  <div className="text-left">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="rememberMe"
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => setRememberMe(checked === true)}
+                      />
+                      <Label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">
+                        تذكرني
+                      </Label>
+                    </div>
                     <button
                       type="button"
                       onClick={() => navigate('/reset-password')}
