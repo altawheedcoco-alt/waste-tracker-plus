@@ -17,13 +17,15 @@ export function useCSPHeaders() {
       "default-src 'self'",
       "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.supabase.co",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-      "font-src 'self' https://fonts.gstatic.com",
-      "img-src 'self' data: blob: https://*.supabase.co https://*.unsplash.com https://*.googleapis.com",
-      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app",
+      "font-src 'self' https://fonts.gstatic.com data:",
+      "img-src 'self' data: blob: https://*.supabase.co https://*.unsplash.com https://*.googleapis.com https://images.unsplash.com",
+      "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app https://connector-gateway.lovable.dev",
       "frame-src 'self'",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
+      "upgrade-insecure-requests",
+      "block-all-mixed-content",
     ].join('; ');
 
     document.head.appendChild(meta);
