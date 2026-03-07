@@ -43,6 +43,9 @@ const QuickActionsGrid = ({
   const navigate = useNavigate();
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
   const { t } = useLanguage();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const categoryConfig: Record<CategoryFilter, { label: string; icon: LucideIcon; color: string }> = {
     all: { label: t('dashboard.categories.all'), icon: Grid3X3, color: 'text-foreground' },
@@ -50,19 +53,6 @@ const QuickActionsGrid = ({
     secondary: { label: t('dashboard.categories.secondary'), icon: Layers, color: 'text-blue-500' },
     utility: { label: t('dashboard.categories.utility'), icon: Wrench, color: 'text-muted-foreground' },
   };
-
-const QuickActionsGrid = ({ 
-  actions, 
-  title = 'الإجراءات السريعة', 
-  subtitle = 'الوظائف الإدارية المستخدمة بكثرة',
-  userType,
-  showCustomizer = false,
-}: QuickActionsGridProps) => {
-  const navigate = useNavigate();
-  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<CategoryFilter>('all');
-  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const filteredActions = useMemo(() => {
     let result = actions;
