@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { supabase } from '@/integrations/supabase/client';
+import { GENERATOR_TAB_BINDINGS } from '@/config/generator/generatorBindings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -268,13 +269,13 @@ const GeneratorDashboard = () => {
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
         <V2TabsNav tabs={[
-          { value: 'overview', label: t('dashboard.tabs.overview'), icon: Package },
-          { value: 'shipments', label: t('dashboard.tabs.shipments'), icon: Package },
-          { value: 'operations', label: t('dashboard.tabs.operations'), icon: Truck },
-          { value: 'work-orders', label: t('dashboard.tabs.workOrders'), icon: ClipboardList },
-          { value: 'partners', label: t('dashboard.tabs.partners'), icon: Eye },
-          { value: 'compliance', label: t('dashboard.tabs.legalCompliance'), icon: FileCheck },
-          { value: 'geofence', label: t('dashboard.tabs.shipmentTracking'), icon: MapPin },
+          { value: 'overview', label: t('dashboard.tabs.overview'), icon: Package, bindingType: GENERATOR_TAB_BINDINGS['overview']?.type },
+          { value: 'shipments', label: t('dashboard.tabs.shipments'), icon: Package, bindingType: GENERATOR_TAB_BINDINGS['shipments']?.type },
+          { value: 'operations', label: t('dashboard.tabs.operations'), icon: Truck, bindingType: GENERATOR_TAB_BINDINGS['operations']?.type },
+          { value: 'work-orders', label: t('dashboard.tabs.workOrders'), icon: ClipboardList, bindingType: GENERATOR_TAB_BINDINGS['work-orders']?.type },
+          { value: 'partners', label: t('dashboard.tabs.partners'), icon: Eye, bindingType: GENERATOR_TAB_BINDINGS['partners']?.type },
+          { value: 'compliance', label: t('dashboard.tabs.legalCompliance'), icon: FileCheck, bindingType: GENERATOR_TAB_BINDINGS['compliance']?.type },
+          { value: 'geofence', label: t('dashboard.tabs.shipmentTracking'), icon: MapPin, bindingType: GENERATOR_TAB_BINDINGS['geofence']?.type },
         ] as TabItem[]} />
 
         {/* ── نظرة عامة ── */}

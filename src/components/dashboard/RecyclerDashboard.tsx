@@ -3,6 +3,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText } from 'lucide-react';
+import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -255,23 +256,23 @@ const RecyclerDashboard = () => {
       {/* Tabs Navigation - Reorganized for v2.0 */}
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <V2TabsNav tabs={[
-          { value: 'overview', label: 'نظرة عامة', icon: Recycle },
-          { value: 'twin', label: 'التوأم الرقمي', icon: Cpu },
-          { value: 'production', label: 'الإنتاج', icon: Factory },
-          { value: 'quality', label: 'فحص الجودة', icon: Beaker },
-          { value: 'equipment', label: 'المعدات', icon: Cog },
-          { value: 'predictive', label: 'صيانة تنبؤية', icon: Wrench },
-          { value: 'workorders', label: 'أوامر التشغيل', icon: ClipboardList },
-          { value: 'optimizer', label: 'مُحسّن ذكي', icon: Lightbulb },
-          { value: 'traceability', label: 'تتبع الدُفعات', icon: Link2 },
-          { value: 'utilities', label: 'المرافق', icon: Zap },
-          { value: 'cost', label: 'التكلفة', icon: Calculator },
-          { value: 'certificates', label: 'الشهادات', icon: Award },
-          { value: 'market', label: 'البورصة', icon: BarChart3 },
-          { value: 'carbon', label: 'البصمة الكربونية', icon: Leaf },
-          { value: 'esg', label: 'تقارير ESG', icon: Leaf },
-          { value: 'wmis', label: 'WMIS', icon: AlertCircle },
-          { value: 'declarations', label: 'الإقرارات', icon: FileText },
+          { value: 'overview', label: 'نظرة عامة', icon: Recycle, bindingType: RECYCLER_TAB_BINDINGS['overview']?.type },
+          { value: 'twin', label: 'التوأم الرقمي', icon: Cpu, bindingType: RECYCLER_TAB_BINDINGS['twin']?.type },
+          { value: 'production', label: 'الإنتاج', icon: Factory, bindingType: RECYCLER_TAB_BINDINGS['production']?.type },
+          { value: 'quality', label: 'فحص الجودة', icon: Beaker, bindingType: RECYCLER_TAB_BINDINGS['quality']?.type },
+          { value: 'equipment', label: 'المعدات', icon: Cog, bindingType: RECYCLER_TAB_BINDINGS['equipment']?.type },
+          { value: 'predictive', label: 'صيانة تنبؤية', icon: Wrench, bindingType: RECYCLER_TAB_BINDINGS['predictive']?.type },
+          { value: 'workorders', label: 'أوامر التشغيل', icon: ClipboardList, bindingType: RECYCLER_TAB_BINDINGS['workorders']?.type },
+          { value: 'optimizer', label: 'مُحسّن ذكي', icon: Lightbulb, bindingType: RECYCLER_TAB_BINDINGS['optimizer']?.type },
+          { value: 'traceability', label: 'تتبع الدُفعات', icon: Link2, bindingType: RECYCLER_TAB_BINDINGS['traceability']?.type },
+          { value: 'utilities', label: 'المرافق', icon: Zap, bindingType: RECYCLER_TAB_BINDINGS['utilities']?.type },
+          { value: 'cost', label: 'التكلفة', icon: Calculator, bindingType: RECYCLER_TAB_BINDINGS['cost']?.type },
+          { value: 'certificates', label: 'الشهادات', icon: Award, bindingType: RECYCLER_TAB_BINDINGS['certificates']?.type },
+          { value: 'market', label: 'البورصة', icon: BarChart3, bindingType: RECYCLER_TAB_BINDINGS['market']?.type },
+          { value: 'carbon', label: 'البصمة الكربونية', icon: Leaf, bindingType: RECYCLER_TAB_BINDINGS['carbon']?.type },
+          { value: 'esg', label: 'تقارير ESG', icon: Leaf, bindingType: RECYCLER_TAB_BINDINGS['esg']?.type },
+          { value: 'wmis', label: 'WMIS', icon: AlertCircle, bindingType: RECYCLER_TAB_BINDINGS['wmis']?.type },
+          { value: 'declarations', label: 'الإقرارات', icon: FileText, bindingType: RECYCLER_TAB_BINDINGS['declarations']?.type },
         ] as TabItem[]} />
 
         <TabsContent value="overview" className="space-y-6 mt-4">

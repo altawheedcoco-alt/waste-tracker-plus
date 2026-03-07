@@ -13,11 +13,11 @@ const generatorOps: SidebarGroupConfig = {
   labelEn: 'Shipments & Certs',
   visibleFor: ['generator'],
   items: [
-    { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
-    { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
-    { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
-    { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
-    { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs' },
+    { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments', bindingType: 'hybrid' },
+    { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected', bindingType: 'partner' },
+    { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments', bindingType: 'hybrid' },
+    { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts', bindingType: 'hybrid' },
+    { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs', bindingType: 'hybrid' },
   ],
 };
 
@@ -67,11 +67,11 @@ const recyclerOps: SidebarGroupConfig = {
   labelEn: 'Shipments & Certs',
   visibleFor: ['recycler'],
   items: [
-    { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'recycler-shipments', badgeKey: 'recycler-shipments' },
-    { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'recycler-rejected' },
-    { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
-    { icon: FolderCheck, labelAr: 'إصدار شهادات التدوير', labelEn: 'Issue Certs', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs', badgeKey: 'issue-certs' },
-    { icon: Factory, labelAr: 'لوحة الإنتاج', labelEn: 'Production Dashboard', path: '/dashboard/production', key: 'production-dashboard' },
+    { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'recycler-shipments', badgeKey: 'recycler-shipments', bindingType: 'hybrid' },
+    { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'recycler-rejected', bindingType: 'partner' },
+    { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'recycler-declarations', bindingType: 'partner' },
+    { icon: FolderCheck, labelAr: 'إصدار شهادات التدوير', labelEn: 'Issue Certs', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs', badgeKey: 'issue-certs', bindingType: 'hybrid' },
+    { icon: Factory, labelAr: 'لوحة الإنتاج', labelEn: 'Production Dashboard', path: '/dashboard/production', key: 'production-dashboard', bindingType: 'internal' },
   ],
 };
 
@@ -83,12 +83,12 @@ const disposalOps: SidebarGroupConfig = {
   labelEn: 'Disposal Operations',
   visibleFor: ['disposal'],
   items: [
-    { icon: Factory, labelAr: 'العمليات', labelEn: 'Operations', path: '/dashboard/disposal/operations', key: 'disposal-operations' },
-    { icon: Package, labelAr: 'الطلبات الواردة', labelEn: 'Incoming Requests', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
-    { icon: FolderCheck, labelAr: 'شهادات التخلص', labelEn: 'Disposal Certs', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
-    { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities' },
-    { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety' },
-    { icon: Gauge, labelAr: 'إدارة السعة', labelEn: 'Capacity Management', path: '/dashboard/capacity-management', key: 'capacity-management' },
+    { icon: Factory, labelAr: 'العمليات', labelEn: 'Operations', path: '/dashboard/disposal/operations', key: 'disposal-operations', bindingType: 'hybrid' },
+    { icon: Package, labelAr: 'الطلبات الواردة', labelEn: 'Incoming Requests', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming', bindingType: 'partner' },
+    { icon: FolderCheck, labelAr: 'شهادات التخلص', labelEn: 'Disposal Certs', path: '/dashboard/disposal/certificates', key: 'disposal-certs', bindingType: 'hybrid' },
+    { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities', bindingType: 'internal' },
+    { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety', bindingType: 'admin' },
+    { icon: Gauge, labelAr: 'إدارة السعة', labelEn: 'Capacity Management', path: '/dashboard/capacity-management', key: 'capacity-management', bindingType: 'internal' },
   ],
 };
 

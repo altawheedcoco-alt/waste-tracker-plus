@@ -1,5 +1,7 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList } from 'lucide-react';
+import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
+import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
@@ -217,29 +219,15 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       {/* Main Tabs — 6 optimized tabs */}
       <Tabs defaultValue="operations" className="w-full">
-        <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
-          <TabsTrigger value="operations" className="gap-1 text-xs sm:text-sm">
-            <Package className="w-3.5 h-3.5" /> العمليات
-          </TabsTrigger>
-          <TabsTrigger value="shipments" className="gap-1 text-xs sm:text-sm">
-            <Truck className="w-3.5 h-3.5" /> الشحنات الواردة
-          </TabsTrigger>
-          <TabsTrigger value="compliance" className="gap-1 text-xs sm:text-sm">
-            <Shield className="w-3.5 h-3.5" /> الامتثال والسلامة
-          </TabsTrigger>
-          <TabsTrigger value="regulatory" className="gap-1 text-xs sm:text-sm">
-            <Scale className="w-3.5 h-3.5" /> المستندات التنظيمية
-          </TabsTrigger>
-          <TabsTrigger value="fleet" className="gap-1 text-xs sm:text-sm">
-            <Truck className="w-3.5 h-3.5" /> الأسطول
-          </TabsTrigger>
-          <TabsTrigger value="reports" className="gap-1 text-xs sm:text-sm">
-            <BarChart3 className="w-3.5 h-3.5" /> التقارير
-          </TabsTrigger>
-          <TabsTrigger value="annual_plan" className="gap-1 text-xs sm:text-sm">
-            <ClipboardList className="w-3.5 h-3.5" /> الخطة السنوية
-          </TabsTrigger>
-        </TabsList>
+        <V2TabsNav tabs={[
+          { value: 'operations', label: 'العمليات', icon: Package, bindingType: DISPOSAL_TAB_BINDINGS['operations']?.type },
+          { value: 'shipments', label: 'الشحنات الواردة', icon: Truck, bindingType: DISPOSAL_TAB_BINDINGS['shipments']?.type },
+          { value: 'compliance', label: 'الامتثال والسلامة', icon: Shield, bindingType: DISPOSAL_TAB_BINDINGS['compliance']?.type },
+          { value: 'regulatory', label: 'المستندات التنظيمية', icon: Scale, bindingType: DISPOSAL_TAB_BINDINGS['regulatory']?.type },
+          { value: 'fleet', label: 'الأسطول', icon: Truck, bindingType: DISPOSAL_TAB_BINDINGS['fleet']?.type },
+          { value: 'reports', label: 'التقارير', icon: BarChart3, bindingType: DISPOSAL_TAB_BINDINGS['reports']?.type },
+          { value: 'annual_plan', label: 'الخطة السنوية', icon: ClipboardList, bindingType: DISPOSAL_TAB_BINDINGS['annual_plan']?.type },
+        ] as TabItem[]} />
 
         {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
