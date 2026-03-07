@@ -93,7 +93,9 @@ export default {
   				emerald: 'hsl(var(--eco-emerald))',
   				teal: 'hsl(var(--eco-teal))',
   				cream: 'hsl(var(--eco-cream))',
-  				sand: 'hsl(var(--eco-sand))'
+  				sand: 'hsl(var(--eco-sand))',
+  				ocean: 'hsl(var(--eco-ocean))',
+  				gold: 'hsl(var(--eco-gold))',
   			},
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
