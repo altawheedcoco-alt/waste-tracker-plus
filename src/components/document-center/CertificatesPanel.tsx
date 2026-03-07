@@ -2,21 +2,22 @@
  * لوحة الشهادات — شهادات التدوير والتخلص والتدريب
  */
 import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Award, ArrowRight, Recycle, Factory, GraduationCap, Trophy, Shield, FileCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-
-const certTypes = [
-  { icon: Recycle, title: 'شهادات التدوير', desc: 'الشهادات الصادرة للمولدين', path: '/dashboard/recycling-certificates' },
-  { icon: Factory, title: 'شهادات التخلص', desc: 'شهادات التخلص الآمن', path: '/dashboard/disposal/certificates' },
-  { icon: Award, title: 'إصدار شهادات تدوير', desc: 'إصدار شهادات جديدة', path: '/dashboard/issue-recycling-certificates' },
-  { icon: GraduationCap, title: 'شهادات التدريب', desc: 'شهادات الأكاديمية', path: '/dashboard/driver-academy' },
-  { icon: Trophy, title: 'شهادات التميز', desc: 'شهادات الفخر والتميز', path: '/dashboard/pride-certificates' },
-  { icon: FileCheck, title: 'إقرارات التسليم', desc: 'إقرارات استلام وتسليم', path: '/dashboard/delivery-declarations' },
-];
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const CertificatesPanel = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
+
+  const certTypes = [
+    { icon: Recycle, title: t('certificatesPanel.recyclingCerts'), desc: t('certificatesPanel.recyclingCertsDesc'), path: '/dashboard/recycling-certificates' },
+    { icon: Factory, title: t('certificatesPanel.disposalCerts'), desc: t('certificatesPanel.disposalCertsDesc'), path: '/dashboard/disposal/certificates' },
+    { icon: Award, title: t('certificatesPanel.issueRecyclingCerts'), desc: t('certificatesPanel.issueRecyclingCertsDesc'), path: '/dashboard/issue-recycling-certificates' },
+    { icon: GraduationCap, title: t('certificatesPanel.trainingCerts'), desc: t('certificatesPanel.trainingCertsDesc'), path: '/dashboard/driver-academy' },
+    { icon: Trophy, title: t('certificatesPanel.excellenceCerts'), desc: t('certificatesPanel.excellenceCertsDesc'), path: '/dashboard/pride-certificates' },
+    { icon: FileCheck, title: t('certificatesPanel.deliveryDeclarations'), desc: t('certificatesPanel.deliveryDeclarationsDesc'), path: '/dashboard/delivery-declarations' },
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

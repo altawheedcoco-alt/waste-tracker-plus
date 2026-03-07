@@ -24,14 +24,6 @@ interface NavDropdown {
   footer?: { label: string; href: string; icon: React.ElementType };
 }
 
-interface NavDropdown {
-  label: string;
-  icon: React.ElementType;
-  items: DropdownItem[];
-  columns?: number;
-  footer?: { label: string; href: string; icon: React.ElementType };
-}
-
 const Header = memo(() => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -44,89 +36,89 @@ const Header = memo(() => {
 
   const dropdowns: NavDropdown[] = [
     {
-      label: language === 'ar' ? 'اكتشف المنصة' : 'Discover',
+      label: t('header.discover'),
       icon: Eye,
       columns: 2,
       megaShowcase: true,
       items: [
-        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, 
-          desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics',
-          longDesc: language === 'ar' ? 'تحكّم بكل تفصيلة — 7 تبويبات تحليلية (مالية، تشغيلية، بيئية، اتجاهات) مع تقارير يومية قابلة للطباعة بثلاثة أنماط: إيصال حراري، A4 عادي، وتقرير شامل مفصّل' : 'Control every detail — 7 analytics tabs with printable daily reports in 3 formats',
-          badge: language === 'ar' ? 'متقدم' : 'Pro' },
-        { label: language === 'ar' ? 'إدارة المستندات المتقدمة' : 'Advanced Document Hub', href: '#doc-ai', icon: FileCheck, 
-          desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive',
-          longDesc: language === 'ar' ? 'ارفع عشرات الملفات دفعة واحدة — يُصنّفها النظام تلقائياً حسب نوع مؤسستك (تراخيص، سجلات، موافقات بيئية) مع أرشيف رقمي كامل وبحث فوري' : 'Bulk upload files — auto-categorized by entity type with full digital archive',
+        { label: t('header.smartDashboards'), href: '#features', icon: BarChart3, 
+          desc: t('header.smartDashboardsDesc'),
+          longDesc: t('header.smartDashboardsLong'),
+          badge: t('header.pro') },
+        { label: t('header.advancedDocHub'), href: '#doc-ai', icon: FileCheck, 
+          desc: t('header.advancedDocHubDesc'),
+          longDesc: t('header.advancedDocHubLong'),
           badge: 'AI' },
-        { label: language === 'ar' ? 'محرك الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, 
-          desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support',
-          longDesc: language === 'ar' ? 'وكيل ذكي يعمل على مدار الساعة — يحلل مستنداتك ويجيب عملائك عبر واتساب وتليجرام ويتنبأ بالمشكلات قبل وقوعها ويُنشئ الطلبات تلقائياً' : 'AI agent working 24/7 — analyzes docs, answers customers & predicts issues',
+        { label: t('header.aiEngine'), href: '#smart-agent', icon: Brain, 
+          desc: t('header.aiEngineDesc'),
+          longDesc: t('header.aiEngineLong'),
           badge: 'AI' },
-        { label: language === 'ar' ? 'النظام الرقابي المتكامل' : 'Regulatory Oversight', href: '#features', icon: Shield, 
-          desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections',
-          longDesc: language === 'ar' ? '11 وحدة رقابية متخصصة — من رصد الامتثال وجدولة التفتيش الميداني إلى إصدار المخالفات والعقوبات وتتبع سلسلة الحفظ الرقمية لكل جهة رقابية' : '11 regulatory modules — from compliance to field inspections & penalty tracking' },
-        { label: language === 'ar' ? 'النظام المالي الذكي' : 'Smart Financial System', href: '#features', icon: Wallet, 
-          desc: language === 'ar' ? 'فوترة آلية ودفتر أستاذ ذكي' : 'Auto-invoicing & smart ledger',
-          longDesc: language === 'ar' ? 'فواتير تُصدر تلقائياً مع كل شحنة — دفتر أستاذ يتتبع كل حركة مالية، وإدارة إيداعات ومطالبات وفترات محاسبية بدقة 100% بدون أخطاء بشرية' : 'Auto-invoices per shipment — ledger tracking every transaction with 100% accuracy' },
-        { label: language === 'ar' ? 'سلسلة الحفظ الرقمية' : 'Digital Chain of Custody', href: '#features', icon: ClipboardCheck, 
-          desc: language === 'ar' ? 'تتبع كل كيلوجرام من المصدر للتدوير' : 'Track every kg from source to recycling',
-          longDesc: language === 'ar' ? 'شفافية لا تقبل التلاعب — تتبع كل شحنة من لحظة خروجها من المولّد حتى وصولها للمُدوّر، مع توثيق الأوزان والتوقيعات والصور في كل محطة' : 'Tamper-proof transparency — track shipments with weight, signatures & photos at every stop' },
-        { label: language === 'ar' ? 'مركز الاتصالات الذكي' : 'Smart Call Center', href: '#features', icon: Headphones, 
-          desc: language === 'ar' ? 'تسجيل وتحليل وتقييم أداء الفريق' : 'Record, analyze & rate team performance',
-          longDesc: language === 'ar' ? 'سجّل كل مكالمة وحلّل أداء فريقك بالذكاء الاصطناعي — مؤشرات KPI فورية ومتوسط زمن الاستجابة وتقييم رضا العملاء وترتيب الوكلاء حسب الأداء' : 'Record calls & analyze team with AI — instant KPIs, response time & satisfaction scores' },
-        { label: language === 'ar' ? 'مركز بياناتي' : 'My Data Hub', href: '#features', icon: Database, 
-          desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place',
-          longDesc: language === 'ar' ? 'لوحة واحدة تجمع كل شيء — بيانات مؤسستك، تراخيصك ومواعيد تجديدها، درجة امتثالك، شركائك، وإحصائياتك المالية والتشغيلية بنظرة واحدة' : 'One dashboard for everything — org data, licenses, compliance score & partner stats' },
+        { label: t('header.regulatoryOversight'), href: '#features', icon: Shield, 
+          desc: t('header.regulatoryOversightDesc'),
+          longDesc: t('header.regulatoryOversightLong') },
+        { label: t('header.smartFinancial'), href: '#features', icon: Wallet, 
+          desc: t('header.smartFinancialDesc'),
+          longDesc: t('header.smartFinancialLong') },
+        { label: t('header.digitalChain'), href: '#features', icon: ClipboardCheck, 
+          desc: t('header.digitalChainDesc'),
+          longDesc: t('header.digitalChainLong') },
+        { label: t('header.smartCallCenter'), href: '#features', icon: Headphones, 
+          desc: t('header.smartCallCenterDesc'),
+          longDesc: t('header.smartCallCenterLong') },
+        { label: t('header.myDataHub'), href: '#features', icon: Database, 
+          desc: t('header.myDataHubDesc'),
+          longDesc: t('header.myDataHubLong') },
       ],
     },
     {
-      label: language === 'ar' ? 'أقسام الصفحة' : 'Sections',
+      label: t('header.sections'),
       icon: Layers,
       columns: 2,
       items: [
-        { label: language === 'ar' ? 'شركاء النجاح' : 'Trusted Partners', href: '#partners', icon: Building2, desc: language === 'ar' ? 'الجهات الرسمية الشريكة' : 'Official partner organizations' },
-        { label: language === 'ar' ? 'إحصائيات المنصة' : 'Platform Stats', href: '#stats', icon: Rocket, desc: language === 'ar' ? 'أرقام وإنجازات المنصة' : 'Platform numbers & achievements' },
-        { label: language === 'ar' ? 'التحقق من المستندات' : 'Document Verification', href: '#verify', icon: Scale, desc: language === 'ar' ? 'تحقق من صحة الشهادات' : 'Verify certificates authenticity' },
-        { label: language === 'ar' ? 'دليل الاستشاريين' : 'Consultants', href: '#consultants', icon: GraduationCap, desc: language === 'ar' ? 'استشاريون ومكاتب معتمدة' : 'Certified consultants' },
-        { label: language === 'ar' ? 'المبادرة الوطنية' : 'National Initiative', href: '#initiative', icon: Globe, desc: language === 'ar' ? 'رؤية مصر 2030' : 'Egypt Vision 2030' },
-        { label: language === 'ar' ? 'مميزات المنصة' : 'Features', href: '#features', icon: Sparkles, desc: language === 'ar' ? 'إمكانيات وأدوات المنصة' : 'Platform capabilities' },
-        { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Tools', href: '#doc-ai', icon: BookOpen, desc: language === 'ar' ? 'تحليل ذكي للمستندات' : 'AI document analysis', badge: 'AI' },
-        { label: language === 'ar' ? 'الخدمات' : 'Services', href: '#services', icon: Recycle, desc: language === 'ar' ? 'خدمات إدارة المخلفات' : 'Waste services' },
-        { label: language === 'ar' ? 'منصة عُمالنا' : 'Omaluna', href: '#omaluna', icon: Users, desc: language === 'ar' ? 'نظام التوظيف المتكامل' : 'Recruitment system', badge: language === 'ar' ? 'جديد' : 'New' },
-        { label: language === 'ar' ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#whatsapp-notifications', icon: MessageCircle, desc: language === 'ar' ? 'إشعارات فورية عبر واتساب' : 'Instant WhatsApp notifications', badge: language === 'ar' ? 'جديد' : 'New' },
-        { label: language === 'ar' ? 'قصص النجاح' : 'Testimonials', href: '#testimonials', icon: HelpCircle, desc: language === 'ar' ? 'تجارب العملاء' : 'Customer stories' },
+        { label: t('header.trustedPartners'), href: '#partners', icon: Building2, desc: t('header.trustedPartnersDesc') },
+        { label: t('header.platformStats'), href: '#stats', icon: Rocket, desc: t('header.platformStatsDesc') },
+        { label: t('header.docVerification'), href: '#verify', icon: Scale, desc: t('header.docVerificationDesc') },
+        { label: t('header.consultants'), href: '#consultants', icon: GraduationCap, desc: t('header.consultantsDesc') },
+        { label: t('header.nationalInitiative'), href: '#initiative', icon: Globe, desc: t('header.nationalInitiativeDesc') },
+        { label: t('header.platformFeatures'), href: '#features', icon: Sparkles, desc: t('header.platformFeaturesDesc') },
+        { label: t('header.aiTools'), href: '#doc-ai', icon: BookOpen, desc: t('header.aiToolsDesc'), badge: 'AI' },
+        { label: t('header.servicesNav'), href: '#services', icon: Recycle, desc: t('header.servicesNavDesc') },
+        { label: t('header.omaluna'), href: '#omaluna', icon: Users, desc: t('header.omalunaDesc'), badge: t('header.new') },
+        { label: t('header.whatsappAlerts'), href: '#whatsapp-notifications', icon: MessageCircle, desc: t('header.whatsappAlertsDesc'), badge: t('header.new') },
+        { label: t('header.testimonials'), href: '#testimonials', icon: HelpCircle, desc: t('header.testimonialsDesc') },
       ],
     },
     {
-      label: t('nav.resources') || (language === 'ar' ? 'المصادر' : 'Resources'),
+      label: t('nav.resources'),
       icon: BookOpen,
       items: [
-        { label: language === 'ar' ? 'المدونة' : 'Blog', href: '/blog', icon: BookOpen, desc: language === 'ar' ? 'مقالات ونصائح بيئية' : 'Environmental articles & tips' },
-        { label: language === 'ar' ? 'تاريخ التدوير' : 'Recycling History', href: '/recycling-history', icon: Landmark, desc: language === 'ar' ? 'من الفراعنة للعصر الرقمي' : 'From Pharaohs to digital age', badge: language === 'ar' ? 'جديد' : 'New' },
-        { label: language === 'ar' ? 'مركز المساعدة' : 'Help Center', href: '/help', icon: HelpCircle, desc: language === 'ar' ? 'أسئلة شائعة ودعم فني' : 'FAQ & technical support' },
-        { label: language === 'ar' ? 'أكاديمية التدوير' : 'Recycling Academy', href: '/academy', icon: GraduationCap, desc: language === 'ar' ? 'تعلم تصنيف المخلفات' : 'Learn waste classification' },
-        { label: language === 'ar' ? 'التشريعات' : 'Legislation', href: '/legislation', icon: Scale, desc: language === 'ar' ? 'الضوابط القانونية' : 'Legal regulations' },
-        { label: language === 'ar' ? 'عن المنصة' : 'About Us', href: '/about', icon: Building2, desc: language === 'ar' ? 'الرؤية والمهمة' : 'Vision & mission' },
-        { label: language === 'ar' ? 'سياسات المنصة' : 'Policies', href: '/policies', icon: ShieldCheck, desc: language === 'ar' ? 'الإطار القانوني الشامل' : 'Legal framework' },
-        { label: language === 'ar' ? 'الشروط والأحكام' : 'Terms & Conditions', href: '/terms', icon: Scale, desc: language === 'ar' ? 'شروط استخدام المنصة والالتزام القانوني' : 'Platform usage terms & legal compliance' },
+        { label: t('header.blog'), href: '/blog', icon: BookOpen, desc: t('header.blogDesc') },
+        { label: t('header.recyclingHistory'), href: '/recycling-history', icon: Landmark, desc: t('header.recyclingHistoryDesc'), badge: t('header.new') },
+        { label: t('header.helpCenter'), href: '/help', icon: HelpCircle, desc: t('header.helpCenterDesc') },
+        { label: t('header.recyclingAcademy'), href: '/academy', icon: GraduationCap, desc: t('header.recyclingAcademyDesc') },
+        { label: t('header.legislation'), href: '/legislation', icon: Scale, desc: t('header.legislationDesc') },
+        { label: t('header.aboutUs'), href: '/about', icon: Building2, desc: t('header.aboutUsDesc') },
+        { label: t('header.policies'), href: '/policies', icon: ShieldCheck, desc: t('header.policiesDesc') },
+        { label: t('header.termsConditions'), href: '/terms', icon: Scale, desc: t('header.termsConditionsDesc') },
       ],
-      footer: { label: language === 'ar' ? 'عرض جميع المصادر' : 'View all resources', href: '/help', icon: BookOpen },
+      footer: { label: t('header.viewAllResources'), href: '/help', icon: BookOpen },
     },
     {
-      label: t('nav.partners') || (language === 'ar' ? 'الشركاء' : 'Partners'),
+      label: t('nav.partners'),
       icon: Factory,
       items: [
-        { label: language === 'ar' ? 'حلول للمصانع' : 'For Factories', href: '/partnerships', icon: Factory, desc: language === 'ar' ? 'إدارة عوادم الإنتاج' : 'Production waste management' },
-        { label: language === 'ar' ? 'لجامعي المخلفات' : 'For Collectors', href: '/partnerships', icon: Recycle, desc: language === 'ar' ? 'انضم كشريك لوجستي' : 'Join as logistics partner' },
-        { label: language === 'ar' ? 'للجهات الحكومية' : 'For Government', href: '/partnerships', icon: Building2, desc: language === 'ar' ? 'تقارير وبيانات جغرافية' : 'Analytics & geodata' },
+        { label: t('header.forFactories'), href: '/partnerships', icon: Factory, desc: t('header.forFactoriesDesc') },
+        { label: t('header.forCollectors'), href: '/partnerships', icon: Recycle, desc: t('header.forCollectorsDesc') },
+        { label: t('header.forGovernment'), href: '/partnerships', icon: Building2, desc: t('header.forGovernmentDesc') },
       ],
     },
     {
-      label: language === 'ar' ? 'الخرائط' : 'Maps',
+      label: t('header.maps'),
       icon: MapPin,
       items: [
-        { label: language === 'ar' ? 'نقاط الاستلام' : 'Collection Points', href: '/map', icon: MapPin, desc: language === 'ar' ? 'أقرب نقطة تجميع' : 'Nearest collection point' },
-        { label: language === 'ar' ? 'تخطيط النقل' : 'Transport', href: '/track', icon: Route, desc: language === 'ar' ? 'خطط عمليات النقل' : 'Plan transport ops' },
-        { label: language === 'ar' ? 'خريطة مباشرة' : 'Live Map', href: '/map', icon: Map, desc: language === 'ar' ? 'تتبع لحظي' : 'Real-time tracking', badge: 'Live' },
+        { label: t('header.collectionPoints'), href: '/map', icon: MapPin, desc: t('header.collectionPointsDesc') },
+        { label: t('header.transportPlanning'), href: '/track', icon: Route, desc: t('header.transportPlanningDesc') },
+        { label: t('header.liveMap'), href: '/map', icon: Map, desc: t('header.liveMapDesc'), badge: 'Live' },
       ],
     },
   ];
@@ -206,7 +198,7 @@ const Header = memo(() => {
                         <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{dropdown.label}</p>
                         {dropdown.megaShowcase && (
                           <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
-                            {language === 'ar' ? '٨ أنظمة متكاملة' : '8 integrated systems'}
+                            {t('header.integratedSystems')}
                           </span>
                         )}
                       </div>

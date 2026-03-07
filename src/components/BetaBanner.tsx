@@ -1,6 +1,9 @@
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const BetaBanner = () => {
+  const { t } = useLanguage();
+
   return (
     <motion.div
       initial={{ x: -100, opacity: 0 }}
@@ -14,7 +17,7 @@ const BetaBanner = () => {
           borderRadius: '0 0 8px 8px',
         }}
       >
-        <span className="text-sm tracking-widest whitespace-nowrap">بث تجريبي</span>
+        <span className="text-sm tracking-widest whitespace-nowrap">{t('betaBanner.label')}</span>
       </div>
     </motion.div>
   );
