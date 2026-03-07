@@ -211,7 +211,7 @@ const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManageme
 
 export const dashboardRoutes = (
   <>
-    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+    <Route path="/dashboard" element={<ProtectedRoute><DashboardErrorBoundary><Dashboard /></DashboardErrorBoundary></ProtectedRoute>} />
     <Route path="/dashboard/digital-identity-card" element={<DigitalIdentityCardPage />} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
