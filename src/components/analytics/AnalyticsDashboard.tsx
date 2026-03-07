@@ -14,6 +14,7 @@ import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '@/contexts/LanguageContext';
 import ShipmentsChart from './charts/ShipmentsChart';
 import WasteTypeDistribution from './charts/WasteTypeDistribution';
 import PartnerPerformanceChart from './charts/PartnerPerformanceChart';
@@ -34,6 +35,7 @@ type TimePreset = '7d' | '30d' | '90d' | '6m' | '1y' | 'custom';
 const AnalyticsDashboard = () => {
   const { organization } = useAuth();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState('overview');
   const [timePreset, setTimePreset] = useState<TimePreset>('30d');
   const [dateRange, setDateRange] = useState<DateRange>({
@@ -61,55 +63,53 @@ const AnalyticsDashboard = () => {
     setIsRefreshing(true);
     await new Promise(resolve => setTimeout(resolve, 800));
     setIsRefreshing(false);
-    toast({ title: 'تم التحديث', description: 'تم تحديث جميع البيانات بنجاح' });
+    toast({ title: t('analytics.dataUpdated'), description: t('analytics.allDataUpdated') });
   };
 
   const orgId = organization?.id || null;
 
   const tabs = [
-    { value: 'overview', label: 'نظرة عامة', icon: BarChart3 },
-    { value: 'financial', label: 'مالية', icon: DollarSign },
-    { value: 'operational', label: 'تشغيلية', icon: Gauge },
-    { value: 'environmental', label: 'بيئية', icon: Leaf },
-    { value: 'trends', label: 'الاتجاهات', icon: TrendingUp },
-    { value: 'distribution', label: 'التوزيع', icon: PieChart },
-    { value: 'performance', label: 'الأداء', icon: Activity },
+    { value: 'overview', label: t('analytics.overview'), icon: BarChart3 },
+    { value: 'financial', label: t('analytics.financial'), icon: DollarSign },
+    { value: 'operational', label: t('analytics.operational'), icon: Gauge },
+    { value: 'environmental', label: t('analytics.environmental'), icon: Leaf },
+    { value: 'trends', label: t('analytics.trends'), icon: TrendingUp },
+    { value: 'distribution', label: t('analytics.distribution'), icon: PieChart },
+    { value: 'performance', label: t('analytics.performance'), icon: Activity },
+  ];
+
+  const timePresets = [
+    { value: '7d', label: t('analytics.days7') },
+    { value: '30d', label: t('analytics.days30') },
+    { value: '90d', label: t('analytics.months3') },
+    { value: '6m', label: t('analytics.months6') },
+    { value: '1y', label: t('analytics.year1') },
   ];
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <BackButton />
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">التحليلات المتقدمة</h1>
-          <p className="text-muted-foreground">
-            تقارير تفاعلية شاملة: مالية · تشغيلية · بيئية
-          </p>
+          <h1 className="text-2xl font-bold text-foreground">{t('analytics.title')}</h1>
+          <p className="text-muted-foreground">{t('analytics.subtitle')}</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleRefresh} disabled={isRefreshing}>
-            <RefreshCw className={cn("h-4 w-4 ml-2", isRefreshing && "animate-spin")} />
-            تحديث
+            <RefreshCw className={cn("h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2", isRefreshing && "animate-spin")} />
+            {t('analytics.refresh')}
           </Button>
           <AnalyticsSummaryExport organizationId={orgId} dateRange={dateRange} />
         </div>
       </div>
 
-      {/* Time Range Selector */}
       <Card>
         <CardContent className="pt-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-muted-foreground">الفترة:</span>
+              <span className="text-sm font-medium text-muted-foreground">{t('analytics.period')}:</span>
               <div className="flex gap-1 flex-wrap">
-                {[
-                  { value: '7d', label: '7 أيام' },
-                  { value: '30d', label: '30 يوم' },
-                  { value: '90d', label: '3 أشهر' },
-                  { value: '6m', label: '6 أشهر' },
-                  { value: '1y', label: 'سنة' },
-                ].map((preset) => (
+                {timePresets.map((preset) => (
                   <Button
                     key={preset.value}
                     variant={timePreset === preset.value ? 'default' : 'outline'}
@@ -125,7 +125,7 @@ const AnalyticsDashboard = () => {
             <Popover>
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm">
-                  <CalendarIcon className="h-4 w-4 ml-2" />
+                  <CalendarIcon className="h-4 w-4 ml-2 rtl:ml-2 ltr:mr-2" />
                   {format(dateRange.from, 'dd/MM/yyyy', { locale: ar })} - {format(dateRange.to, 'dd/MM/yyyy', { locale: ar })}
                 </Button>
               </PopoverTrigger>
@@ -148,16 +148,10 @@ const AnalyticsDashboard = () => {
         </CardContent>
       </Card>
 
-      {/* Comparison Banner */}
       <ComparisonBanner organizationId={orgId} dateRange={dateRange} />
-
-      {/* KPI Cards */}
       <KPICards organizationId={orgId} dateRange={dateRange} />
-
-      {/* AI Insights */}
       <AIInsightsPanel organizationId={orgId} dateRange={dateRange} />
 
-      {/* Main Analytics Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="grid w-full grid-cols-3 md:grid-cols-7 h-auto">
           {tabs.map(tab => (
@@ -168,7 +162,6 @@ const AnalyticsDashboard = () => {
           ))}
         </TabsList>
 
-        {/* Filters */}
         {['overview', 'trends', 'distribution', 'performance'].includes(activeTab) && (
           <AnalyticsFilters
             organizationId={orgId}
