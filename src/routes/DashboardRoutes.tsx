@@ -1,6 +1,7 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import { DashboardErrorBoundary } from "@/components/shared/DashboardErrorBoundary";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
