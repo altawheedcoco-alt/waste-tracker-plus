@@ -718,9 +718,9 @@ const Auth = () => {
 
                   {/* Attempts Warning */}
                   {loginAttempts >= 3 && loginAttempts < MAX_LOGIN_ATTEMPTS && !lockedUntil && (
-                    <Alert className="bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800">
-                      <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                      <AlertDescription className="text-sm text-yellow-700 dark:text-yellow-400">
+                    <Alert className="bg-accent border-border">
+                      <AlertTriangle className="h-4 w-4 text-accent-foreground" />
+                      <AlertDescription className="text-sm text-accent-foreground">
                         تنبيه: {MAX_LOGIN_ATTEMPTS - loginAttempts} محاولات متبقية قبل قفل الحساب مؤقتاً
                       </AlertDescription>
                     </Alert>
