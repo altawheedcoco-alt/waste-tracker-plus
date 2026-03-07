@@ -198,6 +198,11 @@ const ExecutiveDashboard = lazy(() => import("@/pages/dashboard/ExecutiveDashboa
 const RecurringShipments = lazy(() => import("@/pages/dashboard/RecurringShipments"));
 const EmployeeTaskBoard = lazy(() => import("@/pages/dashboard/EmployeeTaskBoard"));
 const CVBuilder = lazy(() => import("@/pages/dashboard/CVBuilder"));
+const AIForecasting = lazy(() => import("@/pages/dashboard/AIForecasting"));
+const PreventiveMaintenance = lazy(() => import("@/pages/dashboard/PreventiveMaintenance"));
+const SmartJobRecommendations = lazy(() => import("@/pages/dashboard/SmartJobRecommendations"));
+const DriverRewards = lazy(() => import("@/pages/dashboard/DriverRewards"));
+const ProductionDashboard = lazy(() => import("@/pages/dashboard/ProductionDashboard"));
 
 export const dashboardRoutes = (
   <>
@@ -399,6 +404,11 @@ export const dashboardRoutes = (
     <Route path="/dashboard/recurring-shipments" element={<RecurringShipments />} />
     <Route path="/dashboard/task-board" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/cv-builder" element={<CVBuilder />} />
+    <Route path="/dashboard/ai-forecasting" element={<AIForecasting />} />
+    <Route path="/dashboard/preventive-maintenance" element={<PreventiveMaintenance />} />
+    <Route path="/dashboard/smart-job-recommendations" element={<SmartJobRecommendations />} />
+    <Route path="/dashboard/driver-rewards" element={<DriverRewards />} />
+    <Route path="/dashboard/production" element={<ProductionDashboard />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
