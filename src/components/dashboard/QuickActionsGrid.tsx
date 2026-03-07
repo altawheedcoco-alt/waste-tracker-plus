@@ -274,7 +274,7 @@ const QuickActionsGrid = ({
 
               {searchQuery && filteredActions.length > 0 && (
                 <p className="text-[11px] text-muted-foreground text-center">
-                  عرض {filteredActions.length} من {actions.length} إجراء
+                  {t('dashboard.showing')} {filteredActions.length} {t('dashboard.of')} {actions.length} {t('dashboard.action')}
                 </p>
               )}
             </CardContent>
