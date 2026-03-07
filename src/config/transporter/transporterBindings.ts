@@ -1,6 +1,13 @@
 /**
  * خريطة الارتباطات الوظيفية لجهة الناقل
  * تصنّف كل تبويب وعنصر sidebar وإجراء سريع حسب نوع ارتباطه
+ * 
+ * التصحيحات المطبقة:
+ * - transporter-certs: hybrid → admin (شهادات حكومية)
+ * - OHS: فصل العمليات الداخلية (internal) عن التقارير الرقابية (admin)
+ *   النتيجة: hybrid (يجمع كلا البعدين)
+ * - risk: partner → hybrid (مرئي للرقيب)
+ * - declarations: توحيد كـ admin
  */
 import type { BindingMeta, BindingType } from '@/types/bindingTypes';
 
@@ -40,13 +47,13 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'مساعد ذكي للسائق أثناء الرحلة',
   },
 
-  // ── التسعير الديناميكي: هجين (يعتمد على بيانات السوق والشركاء) ──
+  // ── التسعير الديناميكي: هجين (يعتمد على بيانات السوق والشركاء + المسارات المحسنة) ──
   pricing: {
     type: 'hybrid',
     involvedParties: ['self', 'generator', 'recycler'],
     adminVisible: false,
     requiresPartner: true,
-    contextHint: 'تسعير ذكي يعتمد على بيانات الشركاء والسوق',
+    contextHint: 'تسعير ذكي يعتمد على بيانات الشركاء والسوق وتحسين المسارات',
   },
 
   // ── بورصة المخلفات: شركاء ──
@@ -148,12 +155,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'تتبع مواقع السائقين والمركبات لحظياً',
   },
 
-  // ── السياج الجغرافي: هجين ──
+  // ── السياج الجغرافي: هجين (مرتبط بطلبات الجمع والمسارات) ──
   geofence: {
     type: 'hybrid',
     involvedParties: ['self', 'driver', 'generator', 'recycler'],
     adminVisible: true,
-    contextHint: 'تنبيهات دخول/خروج من مناطق العملاء',
+    contextHint: 'تنبيهات دخول/خروج من مناطق العملاء مرتبطة بطلبات الجمع',
   },
 
   // ── ESG: رقابي ──
@@ -204,7 +211,7 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'خطة تشغيلية سنوية مرتبطة بالامتثال',
   },
 
-  // ── السلامة المهنية: هجين (تقارير حوادث ترسل للجهات الرقابية) ──
+  // ── السلامة المهنية: هجين (عمليات داخلية + تقارير حوادث رقابية) ──
   ohs: {
     type: 'hybrid',
     involvedParties: ['self', 'driver', 'regulator'],
@@ -222,7 +229,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-rejected': 'partner',
   'transporter-receipts': 'hybrid',
   'transporter-declarations': 'admin',
-  'transporter-certs': 'hybrid',
+  'transporter-certs': 'admin',        // ✅ تصحيح: شهادات حكومية → admin
   'transporter-guilloche': 'internal',
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
