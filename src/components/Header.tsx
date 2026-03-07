@@ -11,7 +11,17 @@ interface DropdownItem {
   href: string;
   icon: React.ElementType;
   desc: string;
+  longDesc?: string;
   badge?: string;
+}
+
+interface NavDropdown {
+  label: string;
+  icon: React.ElementType;
+  items: DropdownItem[];
+  columns?: number;
+  megaShowcase?: boolean;
+  footer?: { label: string; href: string; icon: React.ElementType };
 }
 
 interface NavDropdown {
@@ -37,15 +47,35 @@ const Header = memo(() => {
       label: language === 'ar' ? 'اكتشف المنصة' : 'Discover',
       icon: Eye,
       columns: 2,
+      megaShowcase: true,
       items: [
-        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics', badge: language === 'ar' ? 'متقدم' : 'Pro' },
-        { label: language === 'ar' ? 'إدارة المستندات' : 'Document Management', href: '#doc-ai', icon: FileCheck, desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive', badge: 'AI' },
-        { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support', badge: 'AI' },
-        { label: language === 'ar' ? 'النظام الرقابي' : 'Regulatory System', href: '#features', icon: Shield, desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections' },
-        { label: language === 'ar' ? 'النظام المالي' : 'Financial System', href: '#features', icon: Wallet, desc: language === 'ar' ? 'فوترة وحسابات ودفتر أستاذ متكامل' : 'Invoicing, ledger & financial tracking' },
-        { label: language === 'ar' ? 'سلسلة الحفظ' : 'Chain of Custody', href: '#features', icon: ClipboardCheck, desc: language === 'ar' ? 'تتبع المخلفات من المصدر للتدوير' : 'Track waste from source to recycling' },
-        { label: language === 'ar' ? 'مركز الاتصالات' : 'Call Center', href: '#features', icon: Headphones, desc: language === 'ar' ? 'تسجيل وتحليل مكالمات وتقييم أداء' : 'Record, analyze calls & rate performance' },
-        { label: language === 'ar' ? 'بياناتي' : 'My Data Hub', href: '#features', icon: Database, desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place' },
+        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, 
+          desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics',
+          longDesc: language === 'ar' ? 'تحكّم بكل تفصيلة — 7 تبويبات تحليلية (مالية، تشغيلية، بيئية، اتجاهات) مع تقارير يومية قابلة للطباعة بثلاثة أنماط: إيصال حراري، A4 عادي، وتقرير شامل مفصّل' : 'Control every detail — 7 analytics tabs with printable daily reports in 3 formats',
+          badge: language === 'ar' ? 'متقدم' : 'Pro' },
+        { label: language === 'ar' ? 'إدارة المستندات المتقدمة' : 'Advanced Document Hub', href: '#doc-ai', icon: FileCheck, 
+          desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive',
+          longDesc: language === 'ar' ? 'ارفع عشرات الملفات دفعة واحدة — يُصنّفها النظام تلقائياً حسب نوع مؤسستك (تراخيص، سجلات، موافقات بيئية) مع أرشيف رقمي كامل وبحث فوري' : 'Bulk upload files — auto-categorized by entity type with full digital archive',
+          badge: 'AI' },
+        { label: language === 'ar' ? 'محرك الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, 
+          desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support',
+          longDesc: language === 'ar' ? 'وكيل ذكي يعمل على مدار الساعة — يحلل مستنداتك ويجيب عملائك عبر واتساب وتليجرام ويتنبأ بالمشكلات قبل وقوعها ويُنشئ الطلبات تلقائياً' : 'AI agent working 24/7 — analyzes docs, answers customers & predicts issues',
+          badge: 'AI' },
+        { label: language === 'ar' ? 'النظام الرقابي المتكامل' : 'Regulatory Oversight', href: '#features', icon: Shield, 
+          desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections',
+          longDesc: language === 'ar' ? '11 وحدة رقابية متخصصة — من رصد الامتثال وجدولة التفتيش الميداني إلى إصدار المخالفات والعقوبات وتتبع سلسلة الحفظ الرقمية لكل جهة رقابية' : '11 regulatory modules — from compliance to field inspections & penalty tracking' },
+        { label: language === 'ar' ? 'النظام المالي الذكي' : 'Smart Financial System', href: '#features', icon: Wallet, 
+          desc: language === 'ar' ? 'فوترة آلية ودفتر أستاذ ذكي' : 'Auto-invoicing & smart ledger',
+          longDesc: language === 'ar' ? 'فواتير تُصدر تلقائياً مع كل شحنة — دفتر أستاذ يتتبع كل حركة مالية، وإدارة إيداعات ومطالبات وفترات محاسبية بدقة 100% بدون أخطاء بشرية' : 'Auto-invoices per shipment — ledger tracking every transaction with 100% accuracy' },
+        { label: language === 'ar' ? 'سلسلة الحفظ الرقمية' : 'Digital Chain of Custody', href: '#features', icon: ClipboardCheck, 
+          desc: language === 'ar' ? 'تتبع كل كيلوجرام من المصدر للتدوير' : 'Track every kg from source to recycling',
+          longDesc: language === 'ar' ? 'شفافية لا تقبل التلاعب — تتبع كل شحنة من لحظة خروجها من المولّد حتى وصولها للمُدوّر، مع توثيق الأوزان والتوقيعات والصور في كل محطة' : 'Tamper-proof transparency — track shipments with weight, signatures & photos at every stop' },
+        { label: language === 'ar' ? 'مركز الاتصالات الذكي' : 'Smart Call Center', href: '#features', icon: Headphones, 
+          desc: language === 'ar' ? 'تسجيل وتحليل وتقييم أداء الفريق' : 'Record, analyze & rate team performance',
+          longDesc: language === 'ar' ? 'سجّل كل مكالمة وحلّل أداء فريقك بالذكاء الاصطناعي — مؤشرات KPI فورية ومتوسط زمن الاستجابة وتقييم رضا العملاء وترتيب الوكلاء حسب الأداء' : 'Record calls & analyze team with AI — instant KPIs, response time & satisfaction scores' },
+        { label: language === 'ar' ? 'مركز بياناتي' : 'My Data Hub', href: '#features', icon: Database, 
+          desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place',
+          longDesc: language === 'ar' ? 'لوحة واحدة تجمع كل شيء — بيانات مؤسستك، تراخيصك ومواعيد تجديدها، درجة امتثالك، شركائك، وإحصائياتك المالية والتشغيلية بنظرة واحدة' : 'One dashboard for everything — org data, licenses, compliance score & partner stats' },
       ],
     },
     {
@@ -165,26 +195,31 @@ const Header = memo(() => {
                   {openDropdown === dropdown.label && (
                     <div
                       className={`absolute top-full mt-2 bg-background border border-border/60 rounded-2xl shadow-2xl shadow-black/8 z-50 overflow-hidden animate-fade-in ${
-                        dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
+                        dropdown.megaShowcase ? 'w-[640px]' : dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
                       }`}
                       style={{ [language === 'ar' ? 'right' : 'left']: 0 }}
                       onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                       onMouseLeave={handleDropdownLeave}
                     >
                       {/* Dropdown header */}
-                      <div className="px-4 pt-4 pb-2">
+                      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
                         <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{dropdown.label}</p>
+                        {dropdown.megaShowcase && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                            {language === 'ar' ? '٨ أنظمة متكاملة' : '8 integrated systems'}
+                          </span>
+                        )}
                       </div>
 
-                      <div className={`px-2 pb-2 ${dropdown.columns === 2 ? 'grid grid-cols-2 gap-0.5' : 'flex flex-col gap-0.5'}`}>
+                      <div className={`px-2 pb-2 ${dropdown.columns === 2 || dropdown.megaShowcase ? 'grid grid-cols-2 gap-0.5' : 'flex flex-col gap-0.5'} ${dropdown.megaShowcase ? 'max-h-[70vh] overflow-y-auto scrollbar-thin' : ''}`}>
                         {dropdown.items.map((item) => (
                           <button
                             key={item.href + item.label}
                             onClick={() => handleNavClick(item.href)}
-                            className="flex items-start gap-3 w-full p-3 rounded-xl hover:bg-accent/70 transition-all duration-150 text-start group/item"
+                            className={`flex items-start gap-3 w-full p-3 rounded-xl hover:bg-accent/70 transition-all duration-150 text-start group/item ${dropdown.megaShowcase ? 'p-4' : ''}`}
                           >
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:from-primary/20 group-hover/item:to-primary/10 group-hover/item:shadow-sm transition-all">
-                              <item.icon className="w-4 h-4 text-primary" />
+                            <div className={`rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:from-primary/20 group-hover/item:to-primary/10 group-hover/item:shadow-sm transition-all ${dropdown.megaShowcase ? 'w-11 h-11' : 'w-9 h-9'}`}>
+                              <item.icon className={`text-primary ${dropdown.megaShowcase ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
@@ -195,7 +230,11 @@ const Header = memo(() => {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
+                              {dropdown.megaShowcase && item.longDesc ? (
+                                <p className="text-[11px] text-muted-foreground mt-1 leading-[1.6] line-clamp-3">{item.longDesc}</p>
+                              ) : (
+                                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
+                              )}
                             </div>
                           </button>
                         ))}
