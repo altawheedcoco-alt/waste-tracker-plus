@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense, useMemo } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
@@ -101,32 +101,32 @@ const TabFallback = () => (
   </div>
 );
 
-const tabItems = [
-  { value: 'overview', label: 'نظرة عامة', icon: LayoutDashboard },
-  { value: 'ai', label: 'الذكاء الاصطناعي', icon: Brain },
-  { value: 'performance', label: 'الأداء والتكاليف', icon: BarChart3 },
-  { value: 'copilot', label: 'مساعد السائق', icon: Navigation },
-  { value: 'pricing', label: 'التسعير الذكي', icon: DollarSign },
-  { value: 'marketplace', label: 'السوق', icon: Store },
-  { value: 'fleet', label: 'صيانة الأسطول', icon: Wrench },
-  { value: 'fraud', label: 'كشف الاحتيال', icon: AlertTriangle },
-  { value: 'risk', label: 'مخاطر الجهات المرتبطة', icon: ShieldAlert },
-  { value: 'custody', label: 'سلسلة الحفظ', icon: Link2 },
-  { value: 'government', label: 'البوابة الحكومية', icon: Building2 },
-  { value: 'carbon', label: 'أرصدة الكربون', icon: Leaf },
-  { value: 'iot', label: 'IoT', icon: Wifi },
-  { value: 'calendar', label: 'التقويم', icon: CalendarDays },
-  { value: 'intelligence', label: 'الأتمتة', icon: Cpu },
-  { value: 'partners', label: 'الجهات المرتبطة', icon: Handshake },
-  { value: 'tracking', label: 'تتبع السائقين', icon: MapPin },
-  { value: 'geofence', label: 'الجيوفنس', icon: AlertTriangle },
-  { value: 'esg', label: 'تقارير ESG', icon: Leaf },
-  { value: 'compliance', label: 'الامتثال', icon: Shield },
-  { value: 'wmis', label: 'WMIS', icon: ShieldAlert },
-  { value: 'licenses', label: 'التراخيص', icon: FileCheck },
-  { value: 'declarations', label: 'الإقرارات', icon: FileText },
-  { value: 'annual_plan', label: 'الخطة السنوية', icon: ClipboardList },
-  { value: 'ohs', label: 'السلامة المهنية', icon: HardHat },
+const tabKeys = [
+  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
+  { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
+  { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
+  { value: 'copilot', labelKey: 'dashboard.tabs.copilot', icon: Navigation },
+  { value: 'pricing', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
+  { value: 'marketplace', labelKey: 'dashboard.tabs.marketplace', icon: Store },
+  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
+  { value: 'fraud', labelKey: 'dashboard.tabs.fraud', icon: AlertTriangle },
+  { value: 'risk', labelKey: 'dashboard.tabs.risk', icon: ShieldAlert },
+  { value: 'custody', labelKey: 'dashboard.tabs.custody', icon: Link2 },
+  { value: 'government', labelKey: 'dashboard.tabs.government', icon: Building2 },
+  { value: 'carbon', labelKey: 'dashboard.tabs.carbon', icon: Leaf },
+  { value: 'iot', labelKey: 'dashboard.tabs.iot', icon: Wifi },
+  { value: 'calendar', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
+  { value: 'intelligence', labelKey: 'dashboard.tabs.intelligence', icon: Cpu },
+  { value: 'partners', labelKey: 'dashboard.tabs.partners', icon: Handshake },
+  { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
+  { value: 'geofence', labelKey: 'dashboard.tabs.geofence', icon: AlertTriangle },
+  { value: 'esg', labelKey: 'dashboard.tabs.esg', icon: Leaf },
+  { value: 'compliance', labelKey: 'dashboard.tabs.compliance', icon: Shield },
+  { value: 'wmis', labelKey: 'dashboard.tabs.wmis', icon: ShieldAlert },
+  { value: 'licenses', labelKey: 'dashboard.tabs.licenses', icon: FileCheck },
+  { value: 'declarations', labelKey: 'dashboard.tabs.declarations', icon: FileText },
+  { value: 'annual_plan', labelKey: 'dashboard.tabs.annualPlan', icon: ClipboardList },
+  { value: 'ohs', labelKey: 'dashboard.tabs.ohs', icon: HardHat },
 ];
 
 const TransporterDashboard = () => {
