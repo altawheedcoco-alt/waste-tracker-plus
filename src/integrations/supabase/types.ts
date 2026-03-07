@@ -36097,6 +36097,105 @@ export type Database = {
           },
         ]
       }
+      visitor_counter: {
+        Row: {
+          id: string
+          total_visits: number | null
+          unique_visitors: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          total_visits?: number | null
+          unique_visitors?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          total_visits?: number | null
+          unique_visitors?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      visitor_tracking: {
+        Row: {
+          browser: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          is_returning: boolean | null
+          language: string | null
+          latitude: number | null
+          longitude: number | null
+          metadata: Json | null
+          organization_id: string | null
+          os: string | null
+          page_url: string | null
+          referrer: string | null
+          region: string | null
+          screen_resolution: string | null
+          session_id: string | null
+          user_agent: string | null
+          user_id: string | null
+          visit_count: number | null
+          visitor_fingerprint: string | null
+        }
+        Insert: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          is_returning?: boolean | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          organization_id?: string | null
+          os?: string | null
+          page_url?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen_resolution?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visit_count?: number | null
+          visitor_fingerprint?: string | null
+        }
+        Update: {
+          browser?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          is_returning?: boolean | null
+          language?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          metadata?: Json | null
+          organization_id?: string | null
+          os?: string | null
+          page_url?: string | null
+          referrer?: string | null
+          region?: string | null
+          screen_resolution?: string | null
+          session_id?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          visit_count?: number | null
+          visitor_fingerprint?: string | null
+        }
+        Relationships: []
+      }
       wallet_transactions: {
         Row: {
           amount: number

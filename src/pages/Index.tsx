@@ -1,4 +1,5 @@
 import { lazy, Suspense, memo, useRef, useState, useEffect } from "react";
+import { useVisitorTracking } from "@/hooks/useVisitorTracking";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,6 +33,7 @@ const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcas
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
+const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
@@ -97,6 +99,7 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
 };
 
 const Index = () => {
+  useVisitorTracking();
   // Fetch homepage section config from DB
   const { data: sections } = useQuery({
     queryKey: ['homepage-sections'],
@@ -209,6 +212,15 @@ const Index = () => {
               <HomepageCustomBlockRenderer block={block} />
             </LazySection>
           ))}
+
+          {/* Visitor Counter - before footer */}
+          <LazySection>
+            <div className="container px-4 py-6">
+              <div className="rounded-2xl bg-card border border-border/50 shadow-sm px-6 py-4">
+                <VisitorCounter />
+              </div>
+            </div>
+          </LazySection>
 
           {isVisible('footer') && <LazySection><Footer /></LazySection>}
         </div>
