@@ -100,6 +100,9 @@ export default function DocumentAIAnalysis({
   compact = false,
 }: DocumentAIAnalysisProps) {
   const { organization, user } = useAuth();
+  const { t } = useLanguage();
+  const DOCUMENT_TYPE_LABELS = getDocumentTypeLabels(t);
+  const RISK_LABELS = getRiskLabels(t);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
