@@ -343,7 +343,7 @@ const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string;
 
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
-  const { user } = useAuth();
+  const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
   const queryClient = useQueryClient();
   const {
