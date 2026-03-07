@@ -258,23 +258,6 @@
     transform: scale(0.95);
   }
 
-  /* Floating animation for decorative elements */
-  @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-8px); }
-  }
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
-  }
-
-  /* Shimmer effect for badges and CTAs */
-  @keyframes shimmer {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  .animate-shimmer {
-    animation: shimmer 3s ease-in-out infinite;
-  }
 
   /* Subtle gradient border */
   .gradient-border {
