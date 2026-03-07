@@ -140,7 +140,21 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 5. العمليات — المدوّر ═══════════════
+  // ═══════════════ 4C. المركز التنظيمي (ناقل فقط) ═══════════════
+  {
+    id: 'transporter-regulatory',
+    icon: Shield,
+    labelAr: 'المركز التنظيمي',
+    labelEn: 'Regulatory Center',
+    visibleFor: ['transporter'],
+    items: [
+      { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'transporter-declarations-reg', bindingType: 'admin' as const },
+      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'transporter-certs-reg', bindingType: 'admin' as const },
+      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits-reg', bindingType: 'admin' as const },
+      { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'transporter-safety', bindingType: 'hybrid' as const },
+    ],
+  },
+
   {
     id: 'recycler-ops',
     icon: Recycle,
