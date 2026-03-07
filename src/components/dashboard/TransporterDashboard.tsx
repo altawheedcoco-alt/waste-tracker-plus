@@ -227,7 +227,7 @@ const TransporterDashboard = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
-          <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey) }))} />
+          <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey), bindingType: TRANSPORTER_TAB_BINDINGS[tab.value]?.type }))} />
 
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
