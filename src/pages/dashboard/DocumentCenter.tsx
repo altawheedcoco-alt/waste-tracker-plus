@@ -16,6 +16,7 @@ import {
   Printer, FileSignature, BadgeCheck, Receipt, FileCheck,
   Inbox, Send, Award, Layers, ScanLine, Building2,
   Download, Eye, Search, Filter, Plus, ArrowRight,
+  Brain, Workflow,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
@@ -30,6 +31,9 @@ const CertificatesPanel = lazy(() => import('@/components/document-center/Certif
 const InvoicesPanel = lazy(() => import('@/components/document-center/InvoicesPanel'));
 const TemplatesPanel = lazy(() => import('@/components/document-center/TemplatesPanel'));
 const AdvancedDocumentUploadPanel = lazy(() => import('@/components/document-center/AdvancedDocumentUploadPanel'));
+const OCRScannerPanel = lazy(() => import('@/components/digitization/OCRScannerPanel'));
+const WorkflowAutomationPanel = lazy(() => import('@/components/digitization/WorkflowAutomationPanel'));
+const AdvancedSignatureVerification = lazy(() => import('@/components/digitization/AdvancedSignatureVerification'));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -41,6 +45,9 @@ const getDocCenterTabs = (t: (key: string) => string) => [
   { id: 'upload', icon: FolderOpen, label: t('docCenter.uploadDocuments') },
   { id: 'archive', icon: FolderOpen, label: t('docCenter.archiveDocs') },
   { id: 'signatures', icon: PenTool, label: t('docCenter.signaturesStamps') },
+  { id: 'ocr-scanner', icon: Brain, label: 'الماسح الذكي OCR' },
+  { id: 'workflow', icon: Workflow, label: 'أتمتة سير العمل' },
+  { id: 'advanced-verify', icon: Shield, label: 'تحقق متقدم' },
   { id: 'qr-barcode', icon: QrCode, label: t('docCenter.qrBarcode') },
   { id: 'verification', icon: Shield, label: t('docCenter.verification') },
   { id: 'print', icon: Printer, label: t('docCenter.printExport') },
@@ -106,6 +113,9 @@ const DocumentCenter = () => {
               <TabsContent value="upload" className="mt-0"><AdvancedDocumentUploadPanel /></TabsContent>
               <TabsContent value="archive" className="mt-0"><DocumentArchivePanel /></TabsContent>
               <TabsContent value="signatures" className="mt-0"><SignaturesStampsPanel /></TabsContent>
+              <TabsContent value="ocr-scanner" className="mt-0"><OCRScannerPanel /></TabsContent>
+              <TabsContent value="workflow" className="mt-0"><WorkflowAutomationPanel /></TabsContent>
+              <TabsContent value="advanced-verify" className="mt-0"><AdvancedSignatureVerification /></TabsContent>
               <TabsContent value="qr-barcode" className="mt-0"><QRBarcodePanel /></TabsContent>
               <TabsContent value="verification" className="mt-0"><VerificationPanel /></TabsContent>
               <TabsContent value="print" className="mt-0"><PrintCenterPanel /></TabsContent>
