@@ -106,6 +106,8 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
+import ActionChainTree from '@/components/shared/ActionChainTree';
+import { getOrgChains } from '@/config/actionChainsRegistry';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
@@ -376,6 +378,12 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [isAdmin, isDriver, organization]);
 
+  // Action chains for current org type
+  const currentOrgChains = useMemo(() => {
+    const orgType = organization?.organization_type as string;
+    return orgType ? getOrgChains(orgType) : undefined;
+  }, [organization?.organization_type]);
+
   // Use quick action preferences hook
   const { applyOrder, preferences: quickActionPrefs } = useQuickActionPreferences();
 
@@ -559,6 +567,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             
             {/* Binding Legend */}
             <BindingLegend isCollapsed={!isSidebarOpen} />
+
+            {/* Action Chains Tree */}
+            {isSidebarOpen && currentOrgChains && (
+              <div className="pt-3 mt-3 border-t border-border/30">
+                <ActionChainTree orgChains={currentOrgChains} />
+              </div>
+            )}
 
             {/* Quick Actions Section */}
             {filteredQuickActions.length > 0 && (
@@ -932,6 +947,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     
                     {/* Binding Legend */}
                     <BindingLegend isCollapsed={false} />
+
+                    {/* Action Chains Tree */}
+                    {currentOrgChains && (
+                      <div className="pt-3 mt-3 border-t border-border/30">
+                        <ActionChainTree orgChains={currentOrgChains} />
+                      </div>
+                    )}
 
                     {/* Quick Actions Section */}
                     {filteredQuickActions.length > 0 && (
