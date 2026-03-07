@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -33,6 +33,21 @@ const Header = memo(() => {
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
 
   const dropdowns: NavDropdown[] = [
+    {
+      label: language === 'ar' ? 'اكتشف المنصة' : 'Discover',
+      icon: Eye,
+      columns: 2,
+      items: [
+        { label: language === 'ar' ? 'لوحات التحكم الذكية' : 'Smart Dashboards', href: '#features', icon: BarChart3, desc: language === 'ar' ? '58 ودجت تخصصي وتحليلات لحظية' : '58 specialized widgets & real-time analytics', badge: language === 'ar' ? 'متقدم' : 'Pro' },
+        { label: language === 'ar' ? 'إدارة المستندات' : 'Document Management', href: '#doc-ai', icon: FileCheck, desc: language === 'ar' ? 'رفع ذكي وتصنيف تلقائي وأرشفة رقمية' : 'Smart upload, auto-categorize & digital archive', badge: 'AI' },
+        { label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Engine', href: '#smart-agent', icon: Brain, desc: language === 'ar' ? 'وكيل ذكي يدير عملياتك ويجيب عملائك' : 'Smart agent for operations & customer support', badge: 'AI' },
+        { label: language === 'ar' ? 'النظام الرقابي' : 'Regulatory System', href: '#features', icon: Shield, desc: language === 'ar' ? 'رصد الامتثال والتفتيش والمخالفات' : 'Compliance monitoring & field inspections' },
+        { label: language === 'ar' ? 'النظام المالي' : 'Financial System', href: '#features', icon: Wallet, desc: language === 'ar' ? 'فوترة وحسابات ودفتر أستاذ متكامل' : 'Invoicing, ledger & financial tracking' },
+        { label: language === 'ar' ? 'سلسلة الحفظ' : 'Chain of Custody', href: '#features', icon: ClipboardCheck, desc: language === 'ar' ? 'تتبع المخلفات من المصدر للتدوير' : 'Track waste from source to recycling' },
+        { label: language === 'ar' ? 'مركز الاتصالات' : 'Call Center', href: '#features', icon: Headphones, desc: language === 'ar' ? 'تسجيل وتحليل مكالمات وتقييم أداء' : 'Record, analyze calls & rate performance' },
+        { label: language === 'ar' ? 'بياناتي' : 'My Data Hub', href: '#features', icon: Database, desc: language === 'ar' ? 'كل بياناتك وتراخيصك في مكان واحد' : 'All your data & licenses in one place' },
+      ],
+    },
     {
       label: language === 'ar' ? 'أقسام الصفحة' : 'Sections',
       icon: Layers,
