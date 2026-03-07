@@ -3198,4 +3198,50 @@ export const ar = {
     kg: 'كجم',
     unknown: 'غير معروف',
   },
+
+  // Waste Exchange Page
+  exchangePage: {
+    accessRestricted: 'غير مصرح',
+    accessRestrictedDesc: 'بورصة المخلفات متاحة فقط للجهات الناقلة والمدورة ومدير النظام',
+    title: 'بورصة المخلفات',
+    subtitle: 'سوق إلكتروني لتداول المخلفات بين الجهات الناقلة والمدورة',
+    activeListings: 'عروض نشطة',
+    myListings: 'عروضي',
+    myBids: 'عروض أسعاري',
+    watchlist: 'المتابعة',
+    market: 'السوق',
+    broker: 'الوسيط',
+    priceIndex: 'مؤشر الأسعار',
+    searchListings: 'بحث في العروض...',
+    all: 'الكل',
+    sell: 'بيع',
+    buy: 'شراء',
+    allTypes: 'كل الأنواع',
+    noListings: 'لا توجد عروض حالياً',
+    beFirst: 'كن أول من ينشر عرضاً!',
+  },
+
+  // Document Center
+  docCenter: {
+    title: 'مركز المستندات',
+    subtitle: 'قاعدة مركزية موحدة لجميع المستندات والتوقيعات والأختام والتحقق',
+    uploadDocuments: 'رفع المستندات',
+    archiveDocs: 'الأرشيف والمستندات',
+    signaturesStamps: 'التوقيعات والأختام',
+    qrBarcode: 'QR وباركود',
+    verification: 'التحقق والأمان',
+    printExport: 'الطباعة والتصدير',
+    contracts: 'العقود والاتفاقيات',
+    certificates: 'الشهادات',
+    invoices: 'الفواتير',
+    templates: 'القوالب والنماذج',
+  },
+
+  // Document Archive extras
+  archiveExtra: {
+    signingRequests: 'طلبات التوقيع',
+    signingRequest: 'طلب توقيع',
+    sentSigningRequest: 'طلب توقيع مُرسل',
+    auto: 'تلقائي',
+  },
 };

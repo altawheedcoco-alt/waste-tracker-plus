@@ -37,21 +37,22 @@ const PanelLoader = () => (
   </div>
 );
 
-const tabs = [
-  { id: 'upload', icon: FolderOpen, labelAr: 'رفع المستندات', labelEn: 'Upload Documents' },
-  { id: 'archive', icon: FolderOpen, labelAr: 'الأرشيف والمستندات', labelEn: 'Archive & Documents' },
-  { id: 'signatures', icon: PenTool, labelAr: 'التوقيعات والأختام', labelEn: 'Signatures & Stamps' },
-  { id: 'qr-barcode', icon: QrCode, labelAr: 'QR وباركود', labelEn: 'QR & Barcode' },
-  { id: 'verification', icon: Shield, labelAr: 'التحقق والأمان', labelEn: 'Verification' },
-  { id: 'print', icon: Printer, labelAr: 'الطباعة والتصدير', labelEn: 'Print & Export' },
-  { id: 'contracts', icon: FileSignature, labelAr: 'العقود والاتفاقيات', labelEn: 'Contracts' },
-  { id: 'certificates', icon: Award, labelAr: 'الشهادات', labelEn: 'Certificates' },
-  { id: 'invoices', icon: Receipt, labelAr: 'الفواتير', labelEn: 'Invoices' },
-  { id: 'templates', icon: Layers, labelAr: 'القوالب والنماذج', labelEn: 'Templates' },
+const getDocCenterTabs = (t: (key: string) => string) => [
+  { id: 'upload', icon: FolderOpen, label: t('docCenter.uploadDocuments') },
+  { id: 'archive', icon: FolderOpen, label: t('docCenter.archiveDocs') },
+  { id: 'signatures', icon: PenTool, label: t('docCenter.signaturesStamps') },
+  { id: 'qr-barcode', icon: QrCode, label: t('docCenter.qrBarcode') },
+  { id: 'verification', icon: Shield, label: t('docCenter.verification') },
+  { id: 'print', icon: Printer, label: t('docCenter.printExport') },
+  { id: 'contracts', icon: FileSignature, label: t('docCenter.contracts') },
+  { id: 'certificates', icon: Award, label: t('docCenter.certificates') },
+  { id: 'invoices', icon: Receipt, label: t('docCenter.invoices') },
+  { id: 'templates', icon: Layers, label: t('docCenter.templates') },
 ];
 
 const DocumentCenter = () => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
+  const tabs = getDocCenterTabs(t);
   const [searchParams, setSearchParams] = useSearchParams();
   const activeTab = searchParams.get('tab') || 'archive';
   const navigate = useNavigate();
@@ -70,12 +71,10 @@ const DocumentCenter = () => {
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <FolderOpen className="w-6 h-6 text-primary" />
-                {language === 'ar' ? 'مركز المستندات' : 'Document Center'}
+                {t('docCenter.title')}
               </h1>
               <p className="text-sm text-muted-foreground">
-                {language === 'ar'
-                  ? 'قاعدة مركزية موحدة لجميع المستندات والتوقيعات والأختام والتحقق'
-                  : 'Unified hub for all documents, signatures, stamps & verification'}
+                {t('docCenter.subtitle')}
               </p>
             </div>
           </div>
@@ -94,7 +93,7 @@ const DocumentCenter = () => {
                     className="gap-1.5 text-xs whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg px-3"
                   >
                     <Icon className="w-4 h-4" />
-                    {language === 'ar' ? tab.labelAr : tab.labelEn}
+                    {tab.label}
                   </TabsTrigger>
                 );
               })}

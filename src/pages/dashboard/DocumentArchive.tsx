@@ -82,7 +82,7 @@ const DocumentArchive = () => {
     weighbridge_photo: { label: t('archive.weighbridgePhotos'), icon: Image, color: 'text-sky-600' },
     deposit: { label: t('archive.deposits'), icon: Banknote, color: 'text-lime-600' },
     entity_document: { label: t('archive.entityDocuments'), icon: FileArchive, color: 'text-rose-600' },
-    signing_request: { label: language === 'ar' ? 'طلبات التوقيع' : 'Signing Requests', icon: FileCheck, color: 'text-violet-600' },
+    signing_request: { label: t('archiveExtra.signingRequests'), icon: FileCheck, color: 'text-violet-600' },
     other: { label: t('archive.otherDocs'), icon: FileText, color: 'text-muted-foreground' },
   }), [t, language]);
 
@@ -307,7 +307,7 @@ const DocumentArchive = () => {
       const docs: ArchiveDoc[] = [];
       (incoming || []).forEach((d: any) => {
         docs.push({
-          id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع' : 'Signing Request'),
+          id: d.id, title: d.document_title || t('archiveExtra.signingRequest'),
           type: 'signing_request', date: d.created_at, source: 'received',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
           referenceId: d.id,
@@ -318,7 +318,7 @@ const DocumentArchive = () => {
       });
       (outgoing || []).forEach((d: any) => {
         docs.push({
-          id: d.id, title: d.document_title || (language === 'ar' ? 'طلب توقيع مُرسل' : 'Sent Signing Request'),
+          id: d.id, title: d.document_title || t('archiveExtra.sentSigningRequest'),
           type: 'signing_request', date: d.created_at, source: 'sent',
           status: d.status, signed: d.status === 'signed', fileUrl: d.signed_document_url || d.document_url,
           referenceId: d.id,
@@ -408,7 +408,7 @@ const DocumentArchive = () => {
       case 'issued': return <Badge variant="outline" className="text-[10px] gap-1"><FolderOpen className="w-3 h-3" /> {t('archive.issued')}</Badge>;
       case 'received': return <Badge variant="secondary" className="text-[10px] gap-1"><Inbox className="w-3 h-3" /> {t('archive.received')}</Badge>;
       case 'sent': return <Badge className="text-[10px] gap-1 bg-primary/10 text-primary"><SendIcon className="w-3 h-3" /> {t('archive.sent')}</Badge>;
-      case 'auto': return <Badge variant="outline" className="text-[10px] gap-1 border-primary/40 text-primary"><Bell className="w-3 h-3" /> {language === 'ar' ? 'تلقائي' : 'Auto'}</Badge>;
+      case 'auto': return <Badge variant="outline" className="text-[10px] gap-1 border-primary/40 text-primary"><Bell className="w-3 h-3" /> {t('archiveExtra.auto')}</Badge>;
       case 'system': return <Badge variant="outline" className="text-[10px] gap-1 border-muted-foreground/30"><FileArchive className="w-3 h-3" /> {t('archive.system')}</Badge>;
       default: return null;
     }
@@ -487,7 +487,7 @@ const DocumentArchive = () => {
         <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
           {[
             { key: 'all', label: t('archive.total'), count: allDocs.length, icon: FileText, bg: 'bg-primary/10', iconColor: 'text-primary' },
-            { key: 'auto', label: language === 'ar' ? 'تلقائي' : 'Auto', count: sourceStats.auto, icon: Bell, bg: 'bg-accent', iconColor: 'text-accent-foreground' },
+            { key: 'auto', label: t('archiveExtra.auto'), count: sourceStats.auto, icon: Bell, bg: 'bg-accent', iconColor: 'text-accent-foreground' },
             { key: 'issued', label: t('archive.issued'), count: sourceStats.issued, icon: FolderOpen, bg: 'bg-primary/5', iconColor: 'text-primary' },
             { key: 'received', label: t('archive.received'), count: sourceStats.received, icon: Inbox, bg: 'bg-secondary', iconColor: 'text-secondary-foreground' },
             { key: 'sent', label: t('archive.sent'), count: sourceStats.sent, icon: SendIcon, bg: 'bg-muted', iconColor: 'text-muted-foreground' },

@@ -3162,4 +3162,50 @@ export const en = {
     kg: 'kg',
     unknown: 'Unknown',
   },
+
+  // Waste Exchange Page
+  exchangePage: {
+    accessRestricted: 'Access Restricted',
+    accessRestrictedDesc: 'Waste Exchange is only available for Transporters, Recyclers and System Admin',
+    title: 'Waste Exchange',
+    subtitle: 'Digital marketplace for waste trading between transporters and recyclers',
+    activeListings: 'Active Listings',
+    myListings: 'My Listings',
+    myBids: 'My Bids',
+    watchlist: 'Watchlist',
+    market: 'Market',
+    broker: 'Broker',
+    priceIndex: 'Price Index',
+    searchListings: 'Search listings...',
+    all: 'All',
+    sell: 'Sell',
+    buy: 'Buy',
+    allTypes: 'All Types',
+    noListings: 'No listings available',
+    beFirst: 'Be the first to publish!',
+  },
+
+  // Document Center
+  docCenter: {
+    title: 'Document Center',
+    subtitle: 'Unified hub for all documents, signatures, stamps & verification',
+    uploadDocuments: 'Upload Documents',
+    archiveDocs: 'Archive & Documents',
+    signaturesStamps: 'Signatures & Stamps',
+    qrBarcode: 'QR & Barcode',
+    verification: 'Verification',
+    printExport: 'Print & Export',
+    contracts: 'Contracts',
+    certificates: 'Certificates',
+    invoices: 'Invoices',
+    templates: 'Templates',
+  },
+
+  // Document Archive extras
+  archiveExtra: {
+    signingRequests: 'Signing Requests',
+    signingRequest: 'Signing Request',
+    sentSigningRequest: 'Sent Signing Request',
+    auto: 'Auto',
+  },
 };
