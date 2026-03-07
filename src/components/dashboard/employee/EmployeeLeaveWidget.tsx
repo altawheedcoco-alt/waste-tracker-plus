@@ -2,35 +2,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { CalendarDays } from 'lucide-react';
 import type { EmployeeDashboardStats } from '@/hooks/useEmployeeDashboardData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   balances: EmployeeDashboardStats['leaveBalances'];
 }
 
-const leaveTypeLabels: Record<string, string> = {
-  annual: 'سنوية',
-  sick: 'مرضية',
-  emergency: 'طارئة',
-  unpaid: 'بدون راتب',
-  maternity: 'أمومة',
-  paternity: 'أبوة',
-  hajj: 'حج',
-  marriage: 'زواج',
-  bereavement: 'عزاء',
-};
-
 const EmployeeLeaveWidget = ({ balances }: Props) => {
+  const { t } = useLanguage();
+
+  const leaveTypeLabels: Record<string, string> = {
+    annual: t('employeeLeave.annual'),
+    sick: t('employeeLeave.sick'),
+    emergency: t('employeeLeave.emergency'),
+    unpaid: t('employeeLeave.unpaid'),
+    maternity: t('employeeLeave.maternity'),
+    paternity: t('employeeLeave.paternity'),
+    hajj: t('employeeLeave.hajj'),
+    marriage: t('employeeLeave.marriage'),
+    bereavement: t('employeeLeave.bereavement'),
+  };
+
   if (balances.length === 0) {
     return (
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="text-base flex items-center gap-2">
             <CalendarDays className="w-4 h-4" />
-            رصيد الإجازات
+            {t('employeeLeave.leaveBalance')}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-muted-foreground text-center py-4">لا توجد أرصدة إجازات مسجلة</p>
+          <p className="text-sm text-muted-foreground text-center py-4">{t('employeeLeave.noLeaveBalance')}</p>
         </CardContent>
       </Card>
     );
@@ -41,7 +44,7 @@ const EmployeeLeaveWidget = ({ balances }: Props) => {
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
           <CalendarDays className="w-4 h-4" />
-          رصيد الإجازات
+          {t('employeeLeave.leaveBalance')}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -55,10 +58,10 @@ const EmployeeLeaveWidget = ({ balances }: Props) => {
             <div key={i} className="space-y-1.5">
               <div className="flex items-center justify-between text-sm">
                 <span className="font-medium">
-                  {leaveTypeLabels[b.leave_type_id] || 'إجازة'}
+                  {leaveTypeLabels[b.leave_type_id] || t('employeeLeave.leave')}
                 </span>
                 <span className="text-muted-foreground">
-                  {remaining} / {total} يوم متبقي
+                  {remaining} / {total} {t('employeeLeave.dayRemaining')}
                 </span>
               </div>
               <Progress value={percentage} className="h-2" />

@@ -42,9 +42,9 @@ const Hero = memo(() => {
   ];
 
   const statsItems = [
-    { value: `${count1}+`, label: language === 'ar' ? 'جهة مسجلة' : 'Registered Entities', icon: Building2 },
-    { value: `${count2}+`, label: language === 'ar' ? 'مديول تشغيلي' : 'Operational Modules', icon: TrendingUp },
-    { value: `${count3}%`, label: language === 'ar' ? 'نسبة الامتثال' : 'Compliance Rate', icon: Shield },
+    { value: `${count1}+`, label: t('heroExtra.registeredEntities'), icon: Building2 },
+    { value: `${count2}+`, label: t('heroExtra.operationalModules'), icon: TrendingUp },
+    { value: `${count3}%`, label: t('heroExtra.complianceRate'), icon: Shield },
   ];
 
   return (
@@ -113,7 +113,7 @@ const Hero = memo(() => {
             transition={{ duration: 0.5, delay: 0.3 }}
             style={{ textShadow: '0 1px 8px rgba(0,0,0,0.4)' }}
           >
-            {language === 'ar' ? '🇪🇬 منصة خدمية وطنية لجمهورية مصر العربية — في إطار مبادرات التحول الأخضر' : '🇪🇬 A National Service Platform for Egypt — Supporting Green Transformation'}
+            {t('heroExtra.nationalPlatform')}
           </motion.p>
 
           <motion.p 

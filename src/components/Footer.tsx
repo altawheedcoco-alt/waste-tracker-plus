@@ -11,8 +11,8 @@ const Footer = () => {
     { label: t('nav.home'), href: '#top' },
     { label: t('nav.features'), href: '#features' },
     { label: t('nav.services'), href: '#services' },
-    { label: language === 'ar' ? 'المدونة' : 'Blog', href: '/blog' },
-    { label: language === 'ar' ? 'الخريطة' : 'Map', href: '/map' },
+    { label: t('footerExtra.blogLink'), href: '/blog' },
+    { label: t('footerExtra.mapLink'), href: '/map' },
   ];
 
   const serviceLinks = [
@@ -23,11 +23,11 @@ const Footer = () => {
   ];
 
   const legalLinks = [
-    { label: language === 'ar' ? 'شروط الاستخدام' : 'Terms of Use', href: '/terms' },
-    { label: language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy', href: '/privacy' },
-    { label: language === 'ar' ? 'التراخيص والتشريعات' : 'Licenses & Legislation', href: '/legislation' },
-    { label: language === 'ar' ? 'الأسئلة الشائعة' : 'FAQ', href: '/help' },
-    { label: language === 'ar' ? 'تواصل معنا' : 'Contact Us', href: '/help' },
+    { label: t('footerExtra.termsOfUse'), href: '/terms' },
+    { label: t('footerExtra.privacyPolicy'), href: '/privacy' },
+    { label: t('footerExtra.licensesLegislation'), href: '/legislation' },
+    { label: t('footerExtra.faq'), href: '/help' },
+    { label: t('footerExtra.contactUsLink'), href: '/help' },
   ];
 
   const handleNavigate = (href: string) => {
@@ -106,7 +106,7 @@ const Footer = () => {
               </li>
             </ul>
 
-            <h4 className="text-sm font-bold mb-3 text-background/80">{language === 'ar' ? 'روابط قانونية' : 'Legal'}</h4>
+            <h4 className="text-sm font-bold mb-3 text-background/80">{t('footerExtra.legal')}</h4>
             <ul className="space-y-2">
               {legalLinks.map((link) => (
                 <FooterLink key={link.href + link.label} onClick={() => handleNavigate(link.href)}>{link.label}</FooterLink>
@@ -119,11 +119,11 @@ const Footer = () => {
         <div className="border-t border-background/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-background/50 text-sm">© {new Date().getFullYear()} {t('footer.allRightsReserved')}</p>
           <div className="flex gap-4 text-background/40 text-xs">
-            <button onClick={() => handleNavigate('/terms')} className="hover:text-primary transition-colors">{language === 'ar' ? 'الشروط' : 'Terms'}</button>
+            <button onClick={() => handleNavigate('/terms')} className="hover:text-primary transition-colors">{t('footerExtra.terms')}</button>
             <span>·</span>
-            <button onClick={() => handleNavigate('/privacy')} className="hover:text-primary transition-colors">{language === 'ar' ? 'الخصوصية' : 'Privacy'}</button>
+            <button onClick={() => handleNavigate('/privacy')} className="hover:text-primary transition-colors">{t('footerExtra.privacy')}</button>
             <span>·</span>
-            <button onClick={() => handleNavigate('/help')} className="hover:text-primary transition-colors">{language === 'ar' ? 'المساعدة' : 'Help'}</button>
+            <button onClick={() => handleNavigate('/help')} className="hover:text-primary transition-colors">{t('footerExtra.help')}</button>
           </div>
         </div>
       </div>

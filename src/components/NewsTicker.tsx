@@ -3,8 +3,11 @@ import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Newspaper, ExternalLink, Sparkles } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const NewsTicker = memo(() => {
+  const { t } = useLanguage();
+
   const { data: newsItems = [] } = useQuery({
     queryKey: ['platform-news-ticker'],
     queryFn: async () => {
@@ -15,31 +18,16 @@ const NewsTicker = memo(() => {
         .order('sort_order', { ascending: true })
         .limit(10);
       return (data || []).map((item: any) => {
-        const emoji = item.badge?.includes('🔥') ? '🔥' : item.badge?.includes('جديد') ? '🆕' : item.badge?.includes('محدّث') ? '✅' : '📢';
+        const emoji = item.badge?.includes('🔥') ? '🔥' : item.badge?.includes('جديد') || item.badge?.includes('New') ? '🆕' : item.badge?.includes('محدّث') || item.badge?.includes('Updated') ? '✅' : '📢';
         return `${emoji} ${item.title}`;
       });
     },
     staleTime: 5 * 60 * 1000,
   });
 
-  const platformPhrases = [
-    '🌍 iRecycle — الركيزة الرقمية الأولى لمنظومة إدارة المخلفات في مصر',
-    '♻️ نظام متكامل لتتبع وإدارة المخلفات الصلبة والخطرة والطبية',
-    '🏭 حلول ذكية للمصانع وشركات التدوير وجامعي المخلفات',
-    '📊 تقارير بيئية فورية متوافقة مع قانون 202 لسنة 2020',
-    '🚛 تتبع GPS لحظي لشاحنات النقل والشحنات',
-    '🔒 شهادات رقمية معتمدة وتحقق إلكتروني فوري',
-    '🗺️ تغطية 27 محافظة بخريطة تفاعلية ذكية',
-    '🇪🇬 مبادرة وطنية لدعم رؤية مصر 2030 للتنمية المستدامة',
-    '⚖️ امتثال كامل لمتطلبات جهاز تنظيم إدارة المخلفات WMRA',
-    '🤖 ذكاء اصطناعي متقدم لتصنيف المخلفات وتحليل البيانات',
-    '📱 تطبيق متجاوب يعمل على جميع الأجهزة بسلاسة',
-    '🏗️ نظام مزادات إلكترونية لبيع وشراء المخلفات القابلة للتدوير',
-    '👷 أكاديمية تدريب رقمية لتأهيل العاملين في قطاع المخلفات',
-    '🌱 اقتصاد دائري — تحويل المخلفات إلى موارد اقتصادية',
-    '📋 إصدار إقرارات رقمية وبوالص شحن إلكترونية تلقائياً',
-    '🔔 إشعارات فورية وتنبيهات ذكية لجميع الأطراف',
-  ];
+  const platformPhrases = Array.from({ length: 16 }, (_, i) => 
+    t(`newsTicker.phrases.p${i + 1}`)
+  );
 
   const displayItems = newsItems.length > 0 
     ? [...newsItems, ...platformPhrases]
@@ -59,7 +47,7 @@ const NewsTicker = memo(() => {
             <span className="text-xs font-semibold text-white/95 truncate">{displayItems[0]}</span>
           </div>
           <Link to="/news" className="ml-2 shrink-0 text-[11px] font-semibold text-amber-300 hover:text-white transition-colors">
-            المزيد
+            {t('newsTicker.more')}
           </Link>
         </div>
       </div>
@@ -72,7 +60,7 @@ const NewsTicker = memo(() => {
           <div className="flex items-center gap-2 px-4 py-2.5 bg-amber-500 shrink-0 z-10 shadow-lg">
             <Sparkles className="w-3.5 h-3.5 text-amber-950 animate-pulse" />
             <Newspaper className="w-4 h-4 text-amber-950" />
-            <span className="text-xs font-black whitespace-nowrap text-amber-950 tracking-wide">آخر الأخبار</span>
+            <span className="text-xs font-black whitespace-nowrap text-amber-950 tracking-wide">{t('newsTicker.latestNews')}</span>
           </div>
 
           <div className="w-0 h-0 border-t-[18px] border-b-[18px] border-r-[12px] border-t-transparent border-b-transparent border-r-amber-500 shrink-0 z-10" />
@@ -93,7 +81,7 @@ const NewsTicker = memo(() => {
             className="flex items-center gap-1.5 px-4 py-2.5 shrink-0 bg-white/10 hover:bg-white/20 backdrop-blur-sm transition-all duration-300 z-10 border-r border-white/10 group"
           >
             <ExternalLink className="w-3.5 h-3.5 text-white/80 group-hover:text-amber-400 transition-colors" />
-            <span className="text-xs font-semibold text-white/80 group-hover:text-white transition-colors">كل الأخبار</span>
+            <span className="text-xs font-semibold text-white/80 group-hover:text-white transition-colors">{t('newsTicker.allNews')}</span>
           </Link>
         </div>
 
