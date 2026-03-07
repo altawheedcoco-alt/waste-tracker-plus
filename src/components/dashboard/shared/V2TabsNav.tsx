@@ -2,11 +2,15 @@ import { memo } from 'react';
 import { TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { BindingType } from '@/types/bindingTypes';
+import BindingIndicator from '@/components/shared/BindingIndicator';
 
 export interface TabItem {
   value: string;
   label: string;
   icon: LucideIcon;
+  /** نوع الارتباط الوظيفي (اختياري) */
+  bindingType?: BindingType;
 }
 
 interface V2TabsNavProps {
@@ -22,7 +26,7 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
             key={tab.value}
             value={tab.value}
             className={cn(
-              "gap-1.5 text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5",
+              "gap-1.5 text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 relative",
               "data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80",
               "data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20",
               "hover:bg-muted/50 transition-all duration-300"
@@ -30,6 +34,9 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
           >
             <tab.icon className="w-3.5 h-3.5" />
             {tab.label}
+            {tab.bindingType && (
+              <BindingIndicator type={tab.bindingType} dotOnly showTooltip />
+            )}
           </TabsTrigger>
         ))}
       </TabsList>
