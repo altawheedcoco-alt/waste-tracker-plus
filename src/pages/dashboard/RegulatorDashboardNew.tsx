@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck, Search } from 'lucide-react';
+import { Shield, ClipboardCheck, AlertTriangle, Gavel, Building2, BarChart3, Scale, FileCheck, Search, Link2, Eye } from 'lucide-react';
 import RegulatorOverview from '@/components/regulator/RegulatorOverview';
 import FieldInspectionPanel from '@/components/regulator/FieldInspectionPanel';
 import ViolationsPanel from '@/components/regulator/ViolationsPanel';
@@ -13,6 +12,9 @@ import OrganizationsRegistry from '@/components/regulator/OrganizationsRegistry'
 import JurisdictionPanel from '@/components/regulator/JurisdictionPanel';
 import LicenseManagementPanel from '@/components/regulator/LicenseManagementPanel';
 import RegulatorDocumentVerification from '@/components/regulator/RegulatorDocumentVerification';
+import ComplianceMonitoringPanel from '@/components/regulator/ComplianceMonitoringPanel';
+import RegulatoryReportsPanel from '@/components/regulator/RegulatoryReportsPanel';
+import ChainOfCustodyPanel from '@/components/regulator/ChainOfCustodyPanel';
 
 const RegulatorDashboardNew = () => {
   const { user, roles } = useAuth();
@@ -26,7 +28,7 @@ const RegulatorDashboardNew = () => {
           <Shield className="w-8 h-8 text-primary" />
           <div>
             <h1 className="text-2xl font-bold">المنظومة الرقابية الحكومية</h1>
-            <p className="text-muted-foreground text-sm">مراقبة الامتثال البيئي • التفتيش الميداني • القرارات والعقوبات</p>
+            <p className="text-muted-foreground text-sm">مراقبة الامتثال البيئي • التفتيش الميداني • القرارات والعقوبات • سلسلة الحيازة</p>
           </div>
         </div>
 
@@ -35,8 +37,14 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="overview" className="gap-1.5 text-xs sm:text-sm">
               <BarChart3 className="w-4 h-4" /> نظرة عامة
             </TabsTrigger>
+            <TabsTrigger value="compliance" className="gap-1.5 text-xs sm:text-sm">
+              <Shield className="w-4 h-4" /> رصد الامتثال
+            </TabsTrigger>
             <TabsTrigger value="organizations" className="gap-1.5 text-xs sm:text-sm">
               <Building2 className="w-4 h-4" /> المنظمات
+            </TabsTrigger>
+            <TabsTrigger value="custody" className="gap-1.5 text-xs sm:text-sm">
+              <Link2 className="w-4 h-4" /> سلسلة الحيازة
             </TabsTrigger>
             <TabsTrigger value="licenses" className="gap-1.5 text-xs sm:text-sm">
               <FileCheck className="w-4 h-4" /> التراخيص والإفادات
@@ -50,11 +58,14 @@ const RegulatorDashboardNew = () => {
             <TabsTrigger value="penalties" className="gap-1.5 text-xs sm:text-sm">
               <Gavel className="w-4 h-4" /> العقوبات
             </TabsTrigger>
+            <TabsTrigger value="reports" className="gap-1.5 text-xs sm:text-sm">
+              <BarChart3 className="w-4 h-4" /> التقارير
+            </TabsTrigger>
             <TabsTrigger value="jurisdiction" className="gap-1.5 text-xs sm:text-sm">
               <Scale className="w-4 h-4" /> الاختصاصات
             </TabsTrigger>
             <TabsTrigger value="verify" className="gap-1.5 text-xs sm:text-sm">
-              <Search className="w-4 h-4" /> التحقق من المستندات
+              <Search className="w-4 h-4" /> التحقق
             </TabsTrigger>
           </TabsList>
 
@@ -62,8 +73,16 @@ const RegulatorDashboardNew = () => {
             <RegulatorOverview />
           </TabsContent>
 
+          <TabsContent value="compliance" className="mt-4">
+            <ComplianceMonitoringPanel />
+          </TabsContent>
+
           <TabsContent value="organizations" className="mt-4">
             <OrganizationsRegistry />
+          </TabsContent>
+
+          <TabsContent value="custody" className="mt-4">
+            <ChainOfCustodyPanel />
           </TabsContent>
 
           <TabsContent value="licenses" className="mt-4">
@@ -80,6 +99,10 @@ const RegulatorDashboardNew = () => {
 
           <TabsContent value="penalties" className="mt-4">
             <PenaltiesPanel />
+          </TabsContent>
+
+          <TabsContent value="reports" className="mt-4">
+            <RegulatoryReportsPanel />
           </TabsContent>
 
           <TabsContent value="jurisdiction" className="mt-4">
