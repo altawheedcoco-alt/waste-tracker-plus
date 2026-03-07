@@ -131,7 +131,7 @@ export function useGovernanceRoles() {
 
   const createRole = useMutation({
     mutationFn: async (role: Partial<GovernanceRole>) => {
-      const { error } = await supabase.from('governance_roles').insert({ ...role, organization_id: orgId! });
+      const { error } = await supabase.from('governance_roles').insert([{ ...role, organization_id: orgId! } as any]);
       if (error) throw error;
     },
     onSuccess: () => { toast.success('تم إنشاء الدور بنجاح'); qc.invalidateQueries({ queryKey: ['governance-roles'] }); },
@@ -221,7 +221,7 @@ export function useApprovalWorkflows() {
     mutationFn: async (wf: Partial<ApprovalWorkflow> & { steps?: Partial<ApprovalStep>[] }) => {
       const { steps, ...wfData } = wf;
       const { data, error } = await supabase.from('governance_approval_workflows')
-        .insert({ ...wfData, organization_id: orgId! })
+        .insert([{ ...wfData, organization_id: orgId! } as any])
         .select('id')
         .single();
       if (error) throw error;
