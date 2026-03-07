@@ -195,26 +195,31 @@ const Header = memo(() => {
                   {openDropdown === dropdown.label && (
                     <div
                       className={`absolute top-full mt-2 bg-background border border-border/60 rounded-2xl shadow-2xl shadow-black/8 z-50 overflow-hidden animate-fade-in ${
-                        dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
+                        dropdown.megaShowcase ? 'w-[640px]' : dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
                       }`}
                       style={{ [language === 'ar' ? 'right' : 'left']: 0 }}
                       onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                       onMouseLeave={handleDropdownLeave}
                     >
                       {/* Dropdown header */}
-                      <div className="px-4 pt-4 pb-2">
+                      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
                         <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{dropdown.label}</p>
+                        {dropdown.megaShowcase && (
+                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                            {language === 'ar' ? '٨ أنظمة متكاملة' : '8 integrated systems'}
+                          </span>
+                        )}
                       </div>
 
-                      <div className={`px-2 pb-2 ${dropdown.columns === 2 ? 'grid grid-cols-2 gap-0.5' : 'flex flex-col gap-0.5'}`}>
+                      <div className={`px-2 pb-2 ${dropdown.columns === 2 || dropdown.megaShowcase ? 'grid grid-cols-2 gap-0.5' : 'flex flex-col gap-0.5'} ${dropdown.megaShowcase ? 'max-h-[70vh] overflow-y-auto scrollbar-thin' : ''}`}>
                         {dropdown.items.map((item) => (
                           <button
                             key={item.href + item.label}
                             onClick={() => handleNavClick(item.href)}
-                            className="flex items-start gap-3 w-full p-3 rounded-xl hover:bg-accent/70 transition-all duration-150 text-start group/item"
+                            className={`flex items-start gap-3 w-full p-3 rounded-xl hover:bg-accent/70 transition-all duration-150 text-start group/item ${dropdown.megaShowcase ? 'p-4' : ''}`}
                           >
-                            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:from-primary/20 group-hover/item:to-primary/10 group-hover/item:shadow-sm transition-all">
-                              <item.icon className="w-4 h-4 text-primary" />
+                            <div className={`rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:from-primary/20 group-hover/item:to-primary/10 group-hover/item:shadow-sm transition-all ${dropdown.megaShowcase ? 'w-11 h-11' : 'w-9 h-9'}`}>
+                              <item.icon className={`text-primary ${dropdown.megaShowcase ? 'w-5 h-5' : 'w-4 h-4'}`} />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
@@ -225,7 +230,11 @@ const Header = memo(() => {
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
+                              {dropdown.megaShowcase && item.longDesc ? (
+                                <p className="text-[11px] text-muted-foreground mt-1 leading-[1.6] line-clamp-3">{item.longDesc}</p>
+                              ) : (
+                                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
+                              )}
                             </div>
                           </button>
                         ))}
