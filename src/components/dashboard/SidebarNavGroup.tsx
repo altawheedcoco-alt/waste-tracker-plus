@@ -4,6 +4,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import type { BindingType } from '@/types/bindingTypes';
+import BindingIndicator from '@/components/shared/BindingIndicator';
 
 export interface SidebarMenuItem {
   icon: LucideIcon;
@@ -11,6 +13,7 @@ export interface SidebarMenuItem {
   path: string;
   key: string;
   badge?: number;
+  bindingType?: BindingType;
   children?: SidebarMenuItem[];
 }
 
