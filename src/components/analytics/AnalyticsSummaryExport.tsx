@@ -23,7 +23,7 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
 
     const { data: shipments } = await supabase
       .from('shipments')
-      .select('id, status, waste_type, quantity, created_at, pickup_location')
+      .select('id, status, waste_type, quantity, created_at')
       .or(`generator_id.eq.${organizationId},transporter_id.eq.${organizationId},recycler_id.eq.${organizationId}`)
       .gte('created_at', dateRange.from.toISOString())
       .lte('created_at', dateRange.to.toISOString())
@@ -34,7 +34,6 @@ const AnalyticsSummaryExport = ({ organizationId, dateRange }: AnalyticsSummaryE
       'الحالة': s.status,
       'نوع النفايات': s.waste_type || '-',
       'الكمية (كجم)': s.quantity || 0,
-      'موقع الاستلام': s.pickup_location || '-',
       'تاريخ الإنشاء': format(new Date(s.created_at), 'dd/MM/yyyy', { locale: ar }),
     }));
   };
