@@ -47,18 +47,15 @@ LazyImage.displayName = 'LazyImage';
  * Call on hover/focus of navigation links.
  */
 export const prefetchRoute = (path: string) => {
-  // Map common paths to their chunk imports
   const routeChunks: Record<string, () => Promise<unknown>> = {
     '/dashboard': () => import('@/routes/DashboardRoutes'),
-    '/map': () => import('@/pages/InteractiveMap'),
     '/blog': () => import('@/pages/Blog'),
-    '/academy': () => import('@/pages/Academy'),
     '/about': () => import('@/pages/About'),
   };
 
   const loader = routeChunks[path];
   if (loader) {
-    loader().catch(() => {}); // Silent prefetch
+    loader().catch(() => {});
   }
 };
 
