@@ -59,7 +59,7 @@ const SEVERITY_COLORS: Record<string, string> = {
 };
 
 const WasteFlowHeatmap = () => {
-  const { language } = useLanguage();
+  const { t, language } = useLanguage();
   const isRTL = language === 'ar';
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('map');
@@ -68,10 +68,19 @@ const WasteFlowHeatmap = () => {
   const [alerts, setAlerts] = useState<GeoAlert[]>([]);
   const [flowStats, setFlowStats] = useState<any>(null);
 
+  const categoryLabel = (cat: string) => {
+    const map: Record<string, string> = {
+      commodity: t('wasteFlow.commodities'),
+      rdf: t('wasteFlow.rdfType'),
+      hazardous: t('wasteFlow.hazardous'),
+      organic: t('wasteFlow.organicType'),
+    };
+    return map[cat] || cat;
+  };
+
   const fetchFlowData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // Fetch from edge function that aggregates shipment data into flow analytics
       const { data, error } = await supabase.functions.invoke('waste-flow-analysis', {
         body: { waste_category: wasteFilter === 'all' ? undefined : wasteFilter }
       });
@@ -82,20 +91,17 @@ const WasteFlowHeatmap = () => {
       setAlerts(data?.alerts || []);
       setFlowStats(data?.stats || null);
 
-      toast.success(isRTL ? 'تم تحديث خريطة التدفق' : 'Flow map updated');
+      toast.success(t('wasteFlow.flowUpdated'));
     } catch (err) {
       console.error('Flow data error:', err);
-      toast.error(isRTL ? 'خطأ في تحميل البيانات' : 'Error loading data');
+      toast.error(t('wasteFlow.errorLoading'));
     } finally {
       setIsLoading(false);
     }
-  }, [wasteFilter, isRTL]);
+  }, [wasteFilter, t]);
 
   useEffect(() => { fetchFlowData(); }, []);
 
-  // Maps disabled - Leaflet initialization removed
-
-  // Subscribe to realtime alerts
   useEffect(() => {
     const channel = supabase
       .channel('geo-alerts')
@@ -110,7 +116,7 @@ const WasteFlowHeatmap = () => {
   }, [isRTL]);
 
   const regionDistribution = flows.reduce((acc, f) => {
-    const key = f.destination_region || 'غير محدد';
+    const key = f.destination_region || t('wasteFlow.undetermined');
     acc[key] = (acc[key] || 0) + f.quantity_tons;
     return acc;
   }, {} as Record<string, number>);
@@ -130,10 +136,10 @@ const WasteFlowHeatmap = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Map className="w-7 h-7 text-primary" />
-              {isRTL ? 'خريطة تدفق المخلفات' : 'Waste Flow Heatmap'}
+              {t('wasteFlow.title')}
             </h1>
             <p className="text-sm text-muted-foreground mt-1">
-              {isRTL ? 'تتبع حركة المخلفات من المولد للمدور/المدفن مع تنبيهات التركز الجغرافي' : 'Track waste movement from generator to recycler/disposal with geo-concentration alerts'}
+              {t('wasteFlow.subtitle')}
             </p>
           </div>
         </div>
@@ -143,16 +149,16 @@ const WasteFlowHeatmap = () => {
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">{isRTL ? 'جميع الأنواع' : 'All Types'}</SelectItem>
-              <SelectItem value="commodity">{isRTL ? 'سلع (تدوير)' : 'Commodities'}</SelectItem>
-              <SelectItem value="rdf">{isRTL ? 'وقود بديل' : 'RDF'}</SelectItem>
-              <SelectItem value="hazardous">{isRTL ? 'خطرة' : 'Hazardous'}</SelectItem>
-              <SelectItem value="organic">{isRTL ? 'عضوية' : 'Organic'}</SelectItem>
+              <SelectItem value="all">{t('wasteFlow.allTypes')}</SelectItem>
+              <SelectItem value="commodity">{t('wasteFlow.commodities')}</SelectItem>
+              <SelectItem value="rdf">{t('wasteFlow.rdfType')}</SelectItem>
+              <SelectItem value="hazardous">{t('wasteFlow.hazardous')}</SelectItem>
+              <SelectItem value="organic">{t('wasteFlow.organicType')}</SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={fetchFlowData} disabled={isLoading} className="gap-2">
             {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RefreshCw className="w-4 h-4" />}
-            {isRTL ? 'تحديث' : 'Refresh'}
+            {t('wasteFlow.refresh')}
           </Button>
         </div>
       </div>
@@ -160,11 +166,11 @@ const WasteFlowHeatmap = () => {
       {/* Quick Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
         {[
-          { label: isRTL ? 'إجمالي التدفق' : 'Total Flow', value: `${flowStats?.totalTons || 0}T`, icon: Activity, color: 'text-primary' },
-          { label: isRTL ? 'شحنات نشطة' : 'Active Shipments', value: flowStats?.activeShipments || 0, icon: Truck, color: 'text-blue-500' },
-          { label: isRTL ? 'مناطق نشطة' : 'Active Regions', value: flowStats?.activeRegions || 0, icon: MapPin, color: 'text-green-500' },
-          { label: isRTL ? 'نسبة التدوير' : 'Recycling Rate', value: `${flowStats?.recyclingRate || 0}%`, icon: Recycle, color: 'text-emerald-500' },
-          { label: isRTL ? 'تنبيهات نشطة' : 'Active Alerts', value: alerts.filter(a => a.is_active).length, icon: Bell, color: 'text-orange-500' },
+          { label: t('wasteFlow.totalFlow'), value: `${flowStats?.totalTons || 0}T`, icon: Activity, color: 'text-primary' },
+          { label: t('wasteFlow.activeShipments'), value: flowStats?.activeShipments || 0, icon: Truck, color: 'text-blue-500' },
+          { label: t('wasteFlow.activeRegions'), value: flowStats?.activeRegions || 0, icon: MapPin, color: 'text-green-500' },
+          { label: t('wasteFlow.recyclingRate'), value: `${flowStats?.recyclingRate || 0}%`, icon: Recycle, color: 'text-emerald-500' },
+          { label: t('wasteFlow.activeAlerts'), value: alerts.filter(a => a.is_active).length, icon: Bell, color: 'text-orange-500' },
         ].map((stat, i) => (
           <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
             <Card>
@@ -182,31 +188,27 @@ const WasteFlowHeatmap = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-3 w-full max-w-md">
-          <TabsTrigger value="map" className="gap-1"><Map className="w-4 h-4" />{isRTL ? 'الخريطة' : 'Map'}</TabsTrigger>
-          <TabsTrigger value="analytics" className="gap-1"><Activity className="w-4 h-4" />{isRTL ? 'تحليلات' : 'Analytics'}</TabsTrigger>
-          <TabsTrigger value="alerts" className="gap-1"><Bell className="w-4 h-4" />{isRTL ? 'تنبيهات' : 'Alerts'}</TabsTrigger>
+          <TabsTrigger value="map" className="gap-1"><Map className="w-4 h-4" />{t('wasteFlow.map')}</TabsTrigger>
+          <TabsTrigger value="analytics" className="gap-1"><Activity className="w-4 h-4" />{t('wasteFlow.analytics')}</TabsTrigger>
+          <TabsTrigger value="alerts" className="gap-1"><Bell className="w-4 h-4" />{t('wasteFlow.alerts')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="map">
           <Card>
             <CardContent className="p-0">
-              <div className="w-full h-[500px] md:h-[600px] rounded-lg flex items-center justify-center bg-muted/50 text-muted-foreground"><p>الخرائط معطلة حالياً</p></div>
+              <div className="w-full h-[500px] md:h-[600px] rounded-lg flex items-center justify-center bg-muted/50 text-muted-foreground"><p>{t('wasteFlow.mapsDisabled')}</p></div>
             </CardContent>
           </Card>
-          {/* Flow Legend */}
           <div className="flex items-center gap-4 flex-wrap mt-3">
             {Object.entries(FLOW_COLORS).map(([cat, color]) => (
               <div key={cat} className="flex items-center gap-1.5 text-sm">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                {cat === 'commodity' ? (isRTL ? 'سلع (تدوير)' : 'Commodities') :
-                 cat === 'rdf' ? (isRTL ? 'وقود بديل' : 'RDF') :
-                 cat === 'hazardous' ? (isRTL ? 'خطرة' : 'Hazardous') :
-                 (isRTL ? 'عضوية' : 'Organic')}
+                {categoryLabel(cat)}
               </div>
             ))}
             <div className="flex items-center gap-1.5 text-sm">
               <div className="w-3 h-3 rounded-full bg-blue-500" />
-              {isRTL ? 'مصدر (مولد)' : 'Source (Generator)'}
+              {t('wasteFlow.sourceGenerator')}
             </div>
           </div>
         </TabsContent>
@@ -214,7 +216,7 @@ const WasteFlowHeatmap = () => {
         <TabsContent value="analytics" className="space-y-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
             <Card>
-              <CardHeader><CardTitle>{isRTL ? 'توزيع التدفق حسب الفئة' : 'Flow by Category'}</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('wasteFlow.flowByCategory')}</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -232,7 +234,7 @@ const WasteFlowHeatmap = () => {
             </Card>
 
             <Card>
-              <CardHeader><CardTitle>{isRTL ? 'أكبر المناطق استقبالاً' : 'Top Receiving Regions'}</CardTitle></CardHeader>
+              <CardHeader><CardTitle>{t('wasteFlow.topReceivingRegions')}</CardTitle></CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={Object.entries(regionDistribution).sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k, v]) => ({ region: k, tons: v }))}>
@@ -247,19 +249,18 @@ const WasteFlowHeatmap = () => {
             </Card>
           </div>
 
-          {/* Flow Table */}
           <Card>
-            <CardHeader><CardTitle>{isRTL ? 'تفاصيل التدفق' : 'Flow Details'}</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{t('wasteFlow.flowDetails')}</CardTitle></CardHeader>
             <CardContent>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="p-2 text-right">{isRTL ? 'المصدر' : 'Source'}</th>
-                      <th className="p-2 text-right">{isRTL ? 'الوجهة' : 'Destination'}</th>
-                      <th className="p-2 text-right">{isRTL ? 'النوع' : 'Type'}</th>
-                      <th className="p-2 text-right">{isRTL ? 'الكمية (طن)' : 'Qty (Tons)'}</th>
-                      <th className="p-2 text-right">{isRTL ? 'الشحنات' : 'Shipments'}</th>
+                      <th className="p-2 text-right">{t('wasteFlow.source')}</th>
+                      <th className="p-2 text-right">{t('wasteFlow.destination')}</th>
+                      <th className="p-2 text-right">{t('wasteFlow.typeCol')}</th>
+                      <th className="p-2 text-right">{t('wasteFlow.qtyTons')}</th>
+                      <th className="p-2 text-right">{t('wasteFlow.shipments')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -290,7 +291,7 @@ const WasteFlowHeatmap = () => {
           {alerts.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center text-muted-foreground">
-                {isRTL ? 'لا توجد تنبيهات نشطة حالياً' : 'No active alerts at this time'}
+                {t('wasteFlow.noActiveAlerts')}
               </CardContent>
             </Card>
           ) : (

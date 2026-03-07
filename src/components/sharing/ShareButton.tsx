@@ -22,7 +22,7 @@ const ShareButton = ({
   className = '',
 }: ShareButtonProps) => {
   const [open, setOpen] = useState(false);
-  const { language } = useLanguage();
+  const { t } = useLanguage();
 
   return (
     <>
@@ -33,7 +33,7 @@ const ShareButton = ({
         onClick={() => setOpen(true)}
       >
         <Share2 className="w-4 h-4" />
-        {size !== 'icon' && (language === 'ar' ? 'مشاركة ذكية' : 'Smart Share')}
+        {size !== 'icon' && t('share.smartShare')}
       </Button>
       <ShareDialog
         open={open}
