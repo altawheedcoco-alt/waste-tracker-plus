@@ -241,6 +241,17 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check lockout
+    if (lockedUntil && lockedUntil > Date.now()) {
+      toast({
+        title: 'الحساب مقفل مؤقتاً',
+        description: `حاول مرة أخرى بعد ${getRemainingLockoutMinutes()} دقيقة`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setLoading(true);
     setErrors({});
 
@@ -250,10 +261,24 @@ const Auth = () => {
       const { error } = await signIn(loginData.email, loginData.password);
       
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+        // Track failed attempts
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        localStorage.setItem('loginAttempts', String(newAttempts));
+        
+        if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+          const lockTime = Date.now() + LOCKOUT_DURATION_MS;
+          setLockedUntil(lockTime);
+          localStorage.setItem('loginLockout', String(lockTime));
+          toast({
+            title: 'تم قفل الحساب مؤقتاً',
+            description: `عدد محاولات كثيرة. حاول بعد 15 دقيقة.`,
+            variant: 'destructive',
+          });
+        } else if (error.message.includes('Invalid login credentials')) {
           toast({
             title: t('auth.loginError'),
-            description: t('auth.invalidCredentials'),
+            description: `${t('auth.invalidCredentials')} (${MAX_LOGIN_ATTEMPTS - newAttempts} محاولات متبقية)`,
             variant: 'destructive',
           });
         } else {
@@ -264,6 +289,17 @@ const Auth = () => {
           });
         }
       } else {
+        // Success - reset attempts and handle remember me
+        setLoginAttempts(0);
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('loginLockout');
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberEmail', loginData.email);
+        } else {
+          localStorage.removeItem('rememberEmail');
+        }
+        
         toast({
           title: t('auth.loginSuccess'),
           description: t('auth.welcomeBack'),
