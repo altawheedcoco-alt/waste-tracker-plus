@@ -12,7 +12,7 @@ import {
   Boxes, GitCompareArrows, FolderOpen, Inbox, TreePine, Store, GraduationCap,
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
-  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat,
+  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
