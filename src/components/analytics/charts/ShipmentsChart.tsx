@@ -2,59 +2,37 @@ import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  Legend,
-  Cell,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid,
+  Tooltip, ResponsiveContainer, Legend, Cell,
 } from 'recharts';
 import { BarChart3 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { format, eachDayOfInterval, eachWeekOfInterval, eachMonthOfInterval, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ShipmentsChartProps {
   organizationId: string | null;
-  dateRange: {
-    from: Date;
-    to: Date;
-  };
+  dateRange: { from: Date; to: Date };
   wasteTypes?: string[];
   groupBy?: 'date' | 'status';
 }
 
 const statusColors: Record<string, string> = {
-  new: '#94a3b8',
-  approved: '#60a5fa',
-  assigned: '#a78bfa',
-  picked_up: '#fbbf24',
-  in_transit: '#f97316',
-  delivered: '#22c55e',
-  confirmed: '#10b981',
-  cancelled: '#ef4444',
+  new: '#94a3b8', approved: '#60a5fa', assigned: '#a78bfa', picked_up: '#fbbf24',
+  in_transit: '#f97316', delivered: '#22c55e', confirmed: '#10b981', cancelled: '#ef4444',
 };
 
-const statusLabels: Record<string, string> = {
-  new: 'جديد',
-  approved: 'معتمد',
-  assigned: 'مُسند',
-  picked_up: 'تم الاستلام',
-  in_transit: 'في الطريق',
-  delivered: 'تم التسليم',
-  confirmed: 'مؤكد',
-  cancelled: 'ملغي',
-};
+const ShipmentsChart = ({ organizationId, dateRange, wasteTypes = [], groupBy = 'date' }: ShipmentsChartProps) => {
+  const { t } = useLanguage();
 
-const ShipmentsChart = ({ 
-  organizationId, 
-  dateRange, 
-  wasteTypes = [],
-  groupBy = 'date' 
-}: ShipmentsChartProps) => {
+  const statusLabels: Record<string, string> = {
+    new: t('analytics.statusNew'), approved: t('analytics.statusApproved'),
+    assigned: t('analytics.statusAssigned'), picked_up: t('analytics.statusPickedUp'),
+    in_transit: t('analytics.statusInTransit'), delivered: t('analytics.statusDelivered'),
+    confirmed: t('analytics.statusConfirmed'), cancelled: t('analytics.statusCancelled'),
+  };
+
   const { data: chartData, isLoading } = useQuery({
     queryKey: ['shipments-chart', organizationId, dateRange.from, dateRange.to, wasteTypes, groupBy],
     queryFn: async () => {
@@ -68,32 +46,24 @@ const ShipmentsChart = ({
         .lte('created_at', dateRange.to.toISOString());
 
       let shipments = data || [];
-      
-      // Filter by waste types if specified
       if (wasteTypes.length > 0) {
         shipments = shipments.filter(s => wasteTypes.includes(s.waste_type || ''));
       }
+
       if (groupBy === 'status') {
-        // Group by status
         const statusGroups = shipments.reduce((acc, s) => {
           const status = s.status || 'unknown';
-          if (!acc[status]) {
-            acc[status] = { count: 0, quantity: 0 };
-          }
+          if (!acc[status]) acc[status] = { count: 0, quantity: 0 };
           acc[status].count += 1;
           acc[status].quantity += s.quantity || 0;
           return acc;
         }, {} as Record<string, { count: number; quantity: number }>);
 
         return Object.entries(statusGroups).map(([status, data]) => ({
-          name: statusLabels[status] || status,
-          count: data.count,
-          quantity: data.quantity,
-          status,
+          name: statusLabels[status] || status, count: data.count, quantity: data.quantity, status,
         }));
       }
 
-      // Group by date
       const daysDiff = differenceInDays(dateRange.to, dateRange.from);
       let intervals: Date[];
       let formatPattern: string;
@@ -110,15 +80,15 @@ const ShipmentsChart = ({
       }
 
       return intervals.map(date => {
-        const periodEnd = daysDiff <= 14 
-          ? new Date(date.getTime() + 24 * 60 * 60 * 1000 - 1)
+        const periodEnd = daysDiff <= 14
+          ? new Date(date.getTime() + 86400000 - 1)
           : daysDiff <= 90
-            ? new Date(date.getTime() + 7 * 24 * 60 * 60 * 1000 - 1)
+            ? new Date(date.getTime() + 7 * 86400000 - 1)
             : new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
         const periodShipments = shipments.filter(s => {
-          const shipmentDate = new Date(s.created_at);
-          return shipmentDate >= date && shipmentDate <= periodEnd;
+          const d = new Date(s.created_at);
+          return d >= date && d <= periodEnd;
         });
 
         return {
@@ -138,18 +108,16 @@ const ShipmentsChart = ({
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-primary" />
-            الشحنات
+            {t('analytics.totalShipments')}
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <Skeleton className="h-[300px] w-full" />
-        </CardContent>
+        <CardContent><Skeleton className="h-[300px] w-full" /></CardContent>
       </Card>
     );
   }
 
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload?.length) {
       return (
         <div className="bg-background border rounded-lg shadow-lg p-3">
           <p className="font-medium mb-2">{label}</p>
@@ -169,31 +137,18 @@ const ShipmentsChart = ({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <BarChart3 className="h-5 w-5 text-primary" />
-          {groupBy === 'status' ? 'توزيع الشحنات حسب الحالة' : 'الشحنات عبر الزمن'}
+          {groupBy === 'status' ? t('analytics.shipmentsByStatus') : t('analytics.shipmentsOverTime')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
-            <XAxis 
-              dataKey="name" 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-            />
-            <YAxis 
-              tick={{ fontSize: 12 }}
-              tickLine={false}
-              axisLine={false}
-            />
+            <XAxis dataKey="name" tick={{ fontSize: 12 }} tickLine={false} />
+            <YAxis tick={{ fontSize: 12 }} tickLine={false} axisLine={false} />
             <Tooltip content={<CustomTooltip />} />
             <Legend />
-            <Bar 
-              dataKey="count" 
-              name="عدد الشحنات" 
-              fill="hsl(var(--primary))"
-              radius={[4, 4, 0, 0]}
-            >
+            <Bar dataKey="count" name={t('analytics.shipmentCount')} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]}>
               {groupBy === 'status' && chartData?.map((entry: any, index: number) => (
                 <Cell key={`cell-${index}`} fill={statusColors[entry.status] || '#94a3b8'} />
               ))}
