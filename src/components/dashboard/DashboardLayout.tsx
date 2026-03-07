@@ -106,6 +106,8 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
+import ActionChainTree from '@/components/shared/ActionChainTree';
+import { getOrgChains } from '@/config/actionChainsRegistry';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
