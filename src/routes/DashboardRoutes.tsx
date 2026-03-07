@@ -429,6 +429,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/smart-archive" element={<SmartDocumentArchive />} />
     <Route path="/dashboard/cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/visitor-analytics" element={<VisitorAnalytics />} />
+    <Route path="/dashboard/central-registry" element={<CentralDocumentRegistry />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
