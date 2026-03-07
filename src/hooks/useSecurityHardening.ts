@@ -5,6 +5,7 @@
  */
 import { useSessionTimeout } from './useSessionTimeout';
 import { useCSPHeaders } from './useCSPHeaders';
+import { useSecurityMonitor } from './useSecurityMonitor';
 import { useEffect } from 'react';
 
 export function useSecurityHardening() {
@@ -13,6 +14,9 @@ export function useSecurityHardening() {
 
   // CSP headers — block XSS
   useCSPHeaders();
+
+  // Real-time security monitoring
+  useSecurityMonitor();
 
   // Additional browser-level protections
   useEffect(() => {
