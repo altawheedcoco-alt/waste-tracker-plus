@@ -19,7 +19,6 @@ export {
 
 // Performance Components
 export { default as LazyImage } from './LazyImage';
-export { default as PerformanceOptimizer } from './PerformanceOptimizer';
 export { default as FastSuspense, MinimalLoader, SkeletonLoader } from './FastSuspense';
 
 // Hooks

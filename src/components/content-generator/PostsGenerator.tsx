@@ -132,12 +132,6 @@ const PostsGenerator = ({
     try {
       const postContent = `${generatedPost}\n\n${generatedHashtags.map(h => `#${h}`).join(' ')}`;
 
-      console.log('Posting to organization:', {
-        organization_id: targetOrganizationId,
-        author_id: profile.id,
-        content_length: postContent.length
-      });
-
       const { data, error } = await supabase
         .from('organization_posts')
         .insert({
@@ -155,7 +149,6 @@ const PostsGenerator = ({
         throw error;
       }
 
-      console.log('Post created successfully:', data);
       setPosted(true);
       toast.success(`🎉 تم نشر المنشور في صفحة ${selectedOrg?.name || 'الجهة'}!`);
     } catch (error: any) {
