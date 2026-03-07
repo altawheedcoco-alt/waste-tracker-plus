@@ -622,12 +622,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen-safe bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 overflow-y-auto auth-scroll-container">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-eco-emerald/10 rounded-full blur-3xl" />
+    <div className="min-h-screen-safe flex flex-col lg:flex-row overflow-hidden">
+      {/* Side Panel - Desktop only */}
+      <div className="hidden lg:block lg:w-[45%] xl:w-[48%]">
+        <AuthSidePanel />
       </div>
+
+      {/* Form Panel */}
+      <div className="flex-1 bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto auth-scroll-container relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-eco-emerald/10 rounded-full blur-3xl" />
+        </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -635,17 +642,15 @@ const Auth = () => {
         className="w-full max-w-lg relative z-10"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="inline-flex flex-col items-center gap-2 mb-4"
+            className="inline-flex flex-col items-center gap-2"
           >
             <PlatformLogo size="xl" />
-            <div className="flex flex-col items-center">
-              <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground/70">
-                Waste Management System
-              </span>
-            </div>
+            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground/70">
+              Waste Management System v2.0
+            </span>
           </motion.div>
         </div>
 
