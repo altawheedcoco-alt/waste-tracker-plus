@@ -57,7 +57,7 @@ export const useRecordCrossImpact = () => {
 
       const { error } = await (supabase as any).from('cross_impact_log').insert({
         source_organization_id: organization.id,
-        source_org_type: organization.type || 'unknown',
+        source_org_type: (organization as any).type || 'unknown',
         source_command_id: params.commandId,
         source_user_id: user.id,
         target_organization_id: params.targetOrganizationId || null,
