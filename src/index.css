@@ -23,136 +23,112 @@
     --landing-card: 0 0% 100%;
     --landing-card-foreground: 170 25% 12%;
 
-    /* ========================================
-       التسلسل الهرمي البصري - الوضع الفاتح
-       Background (96%) < Muted (94%) < Card (100%) < Popover (100%)
-       Foreground (12%) > MutedFG (45%) — فرق واضح
-       ======================================== */
     --background: 0 0% 100%;
-    --foreground: 150 20% 12%;
-
+    --foreground: 200 15% 10%;
     --card: 0 0% 100%;
-    --card-foreground: 150 20% 12%;
-
+    --card-foreground: 200 15% 10%;
     --popover: 0 0% 100%;
-    --popover-foreground: 150 20% 12%;
-
-    --primary: 160 84% 39%;
+    --popover-foreground: 200 15% 10%;
+    --primary: 162 72% 42%;
     --primary-foreground: 0 0% 100%;
-
-    --secondary: 150 5% 95%;
-    --secondary-foreground: 150 20% 18%;
-
-    --muted: 0 0% 97%;
-    --muted-foreground: 150 8% 45%;
-
-    --accent: 166 30% 97%;
-    --accent-foreground: 173 80% 30%;
-
+    --secondary: 200 8% 95%;
+    --secondary-foreground: 200 15% 16%;
+    --muted: 210 6% 96%;
+    --muted-foreground: 200 6% 44%;
+    --accent: 175 25% 96%;
+    --accent-foreground: 175 70% 28%;
     --destructive: 0 72% 50%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 92%;
-    --input: 0 0% 92%;
-    --ring: 161 93% 30%;
-
+    --border: 210 8% 91%;
+    --input: 210 8% 91%;
+    --ring: 162 72% 38%;
     --radius: 0.75rem;
 
-    /* Custom eco colors */
-    --eco-green: 142 71% 45%;
-    --eco-green-dark: 142 76% 36%;
-    --eco-green-light: 142 76% 55%;
-    --eco-emerald: 160 84% 39%;
-    --eco-teal: 166 72% 40%;
-    --eco-cream: 45 30% 96%;
-    --eco-sand: 40 20% 90%;
+    /* v2.0 Premium eco palette */
+    --eco-green: 162 72% 42%;
+    --eco-green-dark: 162 78% 32%;
+    --eco-green-light: 162 68% 52%;
+    --eco-emerald: 170 75% 38%;
+    --eco-teal: 175 65% 40%;
+    --eco-cream: 48 35% 96%;
+    --eco-sand: 42 22% 90%;
+    --eco-ocean: 200 75% 45%;
+    --eco-gold: 42 92% 55%;
 
-    /* Gradients */
-    --gradient-eco: linear-gradient(135deg, hsl(142, 71%, 45%) 0%, hsl(160, 84%, 39%) 100%);
-    --gradient-hero: linear-gradient(180deg, hsl(140, 20%, 98%) 0%, hsl(140, 30%, 95%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(140, 20%, 98%) 100%);
+    /* v2.0 Gradients */
+    --gradient-eco: linear-gradient(135deg, hsl(162, 72%, 42%) 0%, hsl(175, 65%, 40%) 50%, hsl(200, 75%, 45%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(160, 15%, 97%) 0%, hsl(165, 20%, 94%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 100%) 0%, hsl(165, 12%, 97%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(162, 72%, 42%) 0%, hsl(200, 75%, 45%) 100%);
 
-    /* Shadows — أعمق قليلاً لفصل الطبقات */
-    --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
-    --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.08), 0 2px 4px -2px hsl(0 0% 0% / 0.06);
-    --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.08), 0 4px 6px -4px hsl(0 0% 0% / 0.06);
-    --shadow-glow: 0 0 40px hsl(142, 71%, 45%, 0.4);
-    --shadow-hero: 0 4px 30px hsl(0 0% 0% / 0.15), 0 10px 60px hsl(142, 71%, 45%, 0.1);
+    /* v2.0 Shadows */
+    --shadow-sm: 0 1px 3px 0px hsl(200 15% 10% / 0.06), 0 1px 2px -1px hsl(200 15% 10% / 0.04);
+    --shadow-md: 0 4px 6px -1px hsl(200 15% 10% / 0.07), 0 2px 4px -2px hsl(200 15% 10% / 0.05);
+    --shadow-lg: 0 10px 15px -3px hsl(200 15% 10% / 0.08), 0 4px 6px -4px hsl(200 15% 10% / 0.05);
+    --shadow-glow: 0 0 40px hsl(162, 72%, 42%, 0.35);
+    --shadow-hero: 0 4px 30px hsl(200 15% 10% / 0.12), 0 10px 60px hsl(162, 72%, 42%, 0.08);
+    --shadow-premium: 0 8px 32px hsl(162, 72%, 42%, 0.2), 0 2px 8px hsl(200, 75%, 45%, 0.1);
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 150 20% 15%;
-    --sidebar-primary: 161 93% 30%;
+    --sidebar-foreground: 200 15% 13%;
+    --sidebar-primary: 162 72% 38%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 0 0% 96%;
-    --sidebar-accent-foreground: 150 20% 25%;
-    --sidebar-border: 0 0% 92%;
-    --sidebar-ring: 161 93% 30%;
-    --chart-1: 158 64% 51%;
-    --chart-2: 141 69% 58%;
-    --chart-3: 172 66% 50%;
-    --chart-4: 82 77% 55%;
+    --sidebar-accent: 210 6% 96%;
+    --sidebar-accent-foreground: 200 15% 22%;
+    --sidebar-border: 210 8% 91%;
+    --sidebar-ring: 162 72% 38%;
+    --chart-1: 162 72% 48%;
+    --chart-2: 175 65% 50%;
+    --chart-3: 200 75% 50%;
+    --chart-4: 42 92% 55%;
     --chart-5: 0 0% 55%;
     --sidebar: 0 0% 100%;
     --font-sans: 'Work Sans', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
     --font-serif: 'Lora', ui-serif, Georgia, Cambria, 'Times New Roman', Times, serif;
     --font-mono: 'Inconsolata', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
-    --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.03);
-    --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.05);
-    --shadow: 0 1px 3px 0px hsl(0 0% 0% / 0.08), 0 1px 2px -1px hsl(0 0% 0% / 0.06);
-    --shadow-xl: 0 20px 25px -5px hsl(0 0% 0% / 0.08), 0 8px 10px -6px hsl(0 0% 0% / 0.06);
-    --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.2);
+    --shadow-2xs: 0 1px 2px 0px hsl(200 15% 10% / 0.03);
+    --shadow-xs: 0 1px 2px 0px hsl(200 15% 10% / 0.04);
+    --shadow: 0 1px 3px 0px hsl(200 15% 10% / 0.06), 0 1px 2px -1px hsl(200 15% 10% / 0.04);
+    --shadow-xl: 0 20px 25px -5px hsl(200 15% 10% / 0.08), 0 8px 10px -6px hsl(200 15% 10% / 0.05);
+    --shadow-2xl: 0 25px 50px -12px hsl(200 15% 10% / 0.18);
     --tracking-normal: 0em;
     --spacing: 0.25rem;
   }
 
   .dark {
-    /* ========================================
-       التسلسل الهرمي البصري - الوضع الداكن
-       Background (7%) < Card (11%) < Muted (16%) < Popover (14%)
-       Foreground (92%) > MutedFG (60%) — فرق واضح
-       ======================================== */
-    --background: 0 0% 7%;
-    --foreground: 0 0% 92%;
-
-    --card: 0 0% 11%;
-    --card-foreground: 0 0% 92%;
-
-    --popover: 0 0% 14%;
-    --popover-foreground: 0 0% 92%;
-
-    --primary: 158 64% 51%;
-    --primary-foreground: 165 91% 9%;
-
-    --secondary: 0 0% 16%;
+    --background: 210 12% 7%;
+    --foreground: 0 0% 93%;
+    --card: 210 10% 11%;
+    --card-foreground: 0 0% 93%;
+    --popover: 210 10% 13%;
+    --popover-foreground: 0 0% 93%;
+    --primary: 162 68% 48%;
+    --primary-foreground: 170 90% 8%;
+    --secondary: 210 8% 16%;
     --secondary-foreground: 0 0% 85%;
-
-    --muted: 0 0% 16%;
+    --muted: 210 8% 16%;
     --muted-foreground: 0 0% 60%;
-
-    --accent: 170 40% 12%;
-    --accent-foreground: 172 50% 65%;
-
+    --accent: 175 35% 12%;
+    --accent-foreground: 175 50% 62%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-
-    --border: 0 0% 20%;
-    --input: 0 0% 20%;
-    --ring: 158 64% 51%;
-
-    --sidebar-background: 150 15% 6%;
+    --border: 210 8% 20%;
+    --input: 210 8% 20%;
+    --ring: 162 68% 48%;
+    --sidebar-background: 210 12% 6%;
     --sidebar-foreground: 0 0% 88%;
-    --sidebar-primary: 158 64% 51%;
-    --sidebar-primary-foreground: 165 91% 9%;
-    --sidebar-accent: 170 30% 14%;
-    --sidebar-accent-foreground: 172 40% 68%;
-    --sidebar-border: 0 0% 18%;
-    --sidebar-ring: 158 64% 51%;
-    --chart-1: 156 71% 66%;
-    --chart-2: 141 76% 73%;
-    --chart-3: 170 76% 64%;
-    --chart-4: 81 84% 67%;
+    --sidebar-primary: 162 68% 48%;
+    --sidebar-primary-foreground: 170 90% 8%;
+    --sidebar-accent: 175 25% 14%;
+    --sidebar-accent-foreground: 175 40% 65%;
+    --sidebar-border: 210 8% 18%;
+    --sidebar-ring: 162 68% 48%;
+    --chart-1: 162 68% 60%;
+    --chart-2: 175 65% 65%;
+    --chart-3: 200 75% 60%;
+    --chart-4: 42 92% 62%;
     --chart-5: 0 0% 50%;
-    --sidebar: 0 0% 10%;
+    --sidebar: 210 12% 9%;
     --shadow-2xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
     --shadow-xs: 0 1px 2px 0px hsl(0 0% 0% / 0.15);
     --shadow-sm: 0 1px 3px 0px hsl(0 0% 0% / 0.2), 0 1px 2px -1px hsl(0 0% 0% / 0.2);
