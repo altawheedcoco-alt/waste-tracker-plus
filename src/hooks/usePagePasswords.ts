@@ -32,12 +32,7 @@ async function hashPasswordsServerSide(passwords: string[]): Promise<string[]> {
   return data.hashes;
 }
 
-// verifyPassword is now handled server-side via verify-page-password edge function
-// This export is kept for backward compatibility but should not be used for security
-export async function verifyPassword(_password: string, _hash: string): Promise<boolean> {
-  console.warn('Client-side password verification is deprecated. Use verify-page-password edge function.');
-  return false;
-}
+
 
 // Available pages for protection
 export const availablePages = [

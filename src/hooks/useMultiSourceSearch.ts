@@ -25,8 +25,6 @@ export interface AISearchSuggestion {
   correctedQuery?: string;
 }
 
-// Re-export for backward compatibility
-export { EGYPTIAN_INDUSTRIAL_DATA };
 
 export const useMultiSourceSearch = () => {
   const [isSearching, setIsSearching] = useState(false);
