@@ -1,0 +1,72 @@
+import type { OrgActionChains } from '@/types/actionChainTypes';
+
+export const TRANSPORTER_CHAINS: OrgActionChains = {
+  orgType: 'transporter',
+  labelAr: 'الناقل',
+  labelEn: 'Transporter',
+  chains: [
+    {
+      id: 'shipment-lifecycle',
+      labelAr: 'دورة حياة الشحنة',
+      labelEn: 'Shipment Lifecycle',
+      descriptionAr: 'من إنشاء الشحنة حتى إصدار الشهادة',
+      descriptionEn: 'From shipment creation to certificate issuance',
+      nodes: [
+        { id: 'btn-create-shipment', nodeType: 'trigger', labelAr: 'إنشاء شحنة', labelEn: 'Create Shipment', bindingType: 'hybrid', icon: 'Plus', linkedPath: '/dashboard/shipments/new' },
+        { id: 'fn-assign-driver', nodeType: 'function', labelAr: 'تعيين سائق', labelEn: 'Assign Driver', bindingType: 'internal', icon: 'UserPlus', leadsTo: ['fn-route-optimize'] },
+        { id: 'fn-route-optimize', nodeType: 'function', labelAr: 'تحسين المسار', labelEn: 'Optimize Route', bindingType: 'internal', icon: 'MapPin', leadsTo: ['fn-pickup'] },
+        { id: 'fn-pickup', nodeType: 'function', labelAr: 'جمع من المولد', labelEn: 'Pickup from Generator', bindingType: 'partner', icon: 'Package', leadsTo: ['fn-weigh'] },
+        { id: 'fn-weigh', nodeType: 'function', labelAr: 'وزن الشحنة', labelEn: 'Weigh Shipment', bindingType: 'hybrid', icon: 'Scale', leadsTo: ['fn-deliver'] },
+        { id: 'fn-deliver', nodeType: 'function', labelAr: 'تسليم للمدوّر', labelEn: 'Deliver to Recycler', bindingType: 'partner', icon: 'Truck', leadsTo: ['res-receipt'] },
+        { id: 'res-receipt', nodeType: 'result', labelAr: 'شهادة استلام', labelEn: 'Receipt Certificate', bindingType: 'hybrid', icon: 'FileText', leadsTo: ['eff-ledger', 'eff-custody'] },
+        { id: 'eff-ledger', nodeType: 'effect', labelAr: 'تحديث دفتر الحسابات', labelEn: 'Update Ledger', bindingType: 'internal', icon: 'BookOpen', linkedTab: 'overview' },
+        { id: 'eff-custody', nodeType: 'effect', labelAr: 'تحديث سلسلة الحفظ', labelEn: 'Update Chain of Custody', bindingType: 'hybrid', icon: 'Link', linkedTab: 'custody' },
+        { id: 'eff-carbon', nodeType: 'effect', labelAr: 'احتساب البصمة الكربونية', labelEn: 'Calculate Carbon Footprint', bindingType: 'hybrid', icon: 'Leaf', linkedTab: 'carbon' },
+      ],
+    },
+    {
+      id: 'collection-request-flow',
+      labelAr: 'طلب جمع → شحنة',
+      labelEn: 'Collection Request → Shipment',
+      descriptionAr: 'تحويل طلب جمع من مولد إلى شحنة فعلية',
+      descriptionEn: 'Convert generator collection request to actual shipment',
+      nodes: [
+        { id: 'btn-accept-request', nodeType: 'trigger', labelAr: 'قبول طلب جمع', labelEn: 'Accept Collection Request', bindingType: 'partner', icon: 'CheckSquare', linkedPath: '/dashboard/collection-requests' },
+        { id: 'fn-schedule', nodeType: 'function', labelAr: 'جدولة الموعد', labelEn: 'Schedule Pickup', bindingType: 'hybrid', icon: 'Calendar', leadsTo: ['fn-auto-shipment'] },
+        { id: 'fn-auto-shipment', nodeType: 'function', labelAr: 'إنشاء شحنة تلقائي', labelEn: 'Auto-create Shipment', bindingType: 'hybrid', icon: 'Zap', leadsTo: ['res-shipment-created'] },
+        { id: 'res-shipment-created', nodeType: 'result', labelAr: 'شحنة جديدة', labelEn: 'New Shipment', bindingType: 'hybrid', icon: 'Package', leadsTo: ['eff-notify-generator'] },
+        { id: 'eff-notify-generator', nodeType: 'effect', labelAr: 'إشعار المولد', labelEn: 'Notify Generator', bindingType: 'partner', icon: 'Bell' },
+        { id: 'eff-calendar-update', nodeType: 'effect', labelAr: 'تحديث التقويم', labelEn: 'Update Calendar', bindingType: 'hybrid', icon: 'CalendarDays', linkedTab: 'calendar' },
+      ],
+    },
+    {
+      id: 'driver-management',
+      labelAr: 'إدارة السائقين والأداء',
+      labelEn: 'Driver Management & Performance',
+      descriptionAr: 'من تسجيل السائق حتى المكافآت والتقييم',
+      descriptionEn: 'From driver registration to rewards and evaluation',
+      nodes: [
+        { id: 'btn-add-driver', nodeType: 'trigger', labelAr: 'تسجيل سائق جديد', labelEn: 'Register New Driver', bindingType: 'internal', icon: 'UserPlus', linkedPath: '/dashboard/transporter-drivers' },
+        { id: 'fn-permit-check', nodeType: 'function', labelAr: 'فحص التصاريح', labelEn: 'Check Permits', bindingType: 'admin', icon: 'Shield', leadsTo: ['fn-training'] },
+        { id: 'fn-training', nodeType: 'function', labelAr: 'التدريب والأكاديمية', labelEn: 'Training & Academy', bindingType: 'internal', icon: 'GraduationCap', leadsTo: ['res-certified'], linkedPath: '/dashboard/driver-academy' },
+        { id: 'res-certified', nodeType: 'result', labelAr: 'سائق معتمد', labelEn: 'Certified Driver', bindingType: 'internal', icon: 'BadgeCheck', leadsTo: ['eff-performance', 'eff-rewards'] },
+        { id: 'eff-performance', nodeType: 'effect', labelAr: 'تتبع الأداء', labelEn: 'Track Performance', bindingType: 'internal', icon: 'BarChart3', linkedTab: 'performance' },
+        { id: 'eff-rewards', nodeType: 'effect', labelAr: 'نظام المكافآت', labelEn: 'Rewards System', bindingType: 'internal', icon: 'Trophy', linkedPath: '/dashboard/driver-rewards' },
+      ],
+    },
+    {
+      id: 'compliance-chain',
+      labelAr: 'الامتثال والتقارير الرقابية',
+      labelEn: 'Compliance & Regulatory Reports',
+      descriptionAr: 'التزام تنظيمي يتأثر بكل العمليات',
+      descriptionEn: 'Regulatory compliance affected by all operations',
+      nodes: [
+        { id: 'btn-generate-report', nodeType: 'trigger', labelAr: 'إنشاء تقرير', labelEn: 'Generate Report', bindingType: 'admin', icon: 'FileText', linkedTab: 'compliance' },
+        { id: 'fn-aggregate-data', nodeType: 'function', labelAr: 'تجميع بيانات العمليات', labelEn: 'Aggregate Ops Data', bindingType: 'hybrid', icon: 'Database', affects: ['shipment-lifecycle', 'driver-management'] },
+        { id: 'fn-esg-calc', nodeType: 'function', labelAr: 'حساب مؤشرات ESG', labelEn: 'Calculate ESG Metrics', bindingType: 'admin', icon: 'Leaf', leadsTo: ['res-esg-report'] },
+        { id: 'res-esg-report', nodeType: 'result', labelAr: 'تقرير ESG', labelEn: 'ESG Report', bindingType: 'admin', icon: 'FileSpreadsheet', leadsTo: ['eff-wmis'] },
+        { id: 'eff-wmis', nodeType: 'effect', labelAr: 'تحديث WMIS', labelEn: 'Update WMIS', bindingType: 'admin', icon: 'Globe', linkedTab: 'wmis' },
+      ],
+    },
+  ],
+};
