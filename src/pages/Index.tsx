@@ -155,7 +155,7 @@ const Index = () => {
   return (
     <Suspense fallback={null}>
       <LandingWrapper>
-        <div className="min-h-screen-safe bg-[hsl(140,20%,98%)] smooth-scroll">
+        <div className="min-h-screen-safe bg-[hsl(160,15%,97%)] smooth-scroll">
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
