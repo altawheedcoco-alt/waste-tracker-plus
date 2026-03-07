@@ -239,6 +239,7 @@ const adminTabItems = [
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
   const [stats, setStats] = useState<DashboardStats>({
     totalShipments: 0, activeShipments: 0, registeredCompanies: 0,
