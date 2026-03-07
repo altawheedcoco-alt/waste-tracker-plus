@@ -183,7 +183,7 @@ const TransporterDashboard = () => {
       <DashboardV2Header
         userName={organization?.name || ''}
         orgName={organization?.name || ''}
-        orgLabel="ناقل معتمد"
+        orgLabel={t('dashboard.orgTypes.certifiedTransporter')}
         icon={Truck}
         gradient="from-primary to-primary/70"
       >
@@ -226,7 +226,7 @@ const TransporterDashboard = () => {
         transition={{ delay: 0.2, duration: 0.5 }}
       >
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
-          <V2TabsNav tabs={tabItems} />
+          <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey) }))} />
 
           <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
             <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
@@ -259,8 +259,8 @@ const TransporterDashboard = () => {
 
             <QuickActionsGrid
               actions={quickActions}
-              title="الإجراءات السريعة"
-              subtitle="إدارة الشحنات والسائقين والتقارير"
+              title={t('dashboard.quickActions')}
+              subtitle={t('dashboard.quickActionsTransporter')}
             />
 
             <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
