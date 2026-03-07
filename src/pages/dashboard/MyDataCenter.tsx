@@ -192,9 +192,9 @@ const MyDataCenter = () => {
     queryFn: async () => {
       if (!organization?.id) return 0;
       const { count } = await supabase
-        .from('organization_partnerships')
+        .from('verified_partnerships')
         .select('id', { count: 'exact', head: true })
-        .or(`requester_id.eq.${organization.id},partner_id.eq.${organization.id}`)
+        .or(`requester_org_id.eq.${organization.id},partner_org_id.eq.${organization.id}`)
         .eq('status', 'accepted');
       return count || 0;
     },
@@ -227,22 +227,20 @@ const MyDataCenter = () => {
     enabled: !!organization?.id,
   });
 
-  const { data: licensesData = [] } = useQuery({
-    queryKey: ['mydata-licenses', organization?.id],
-    queryFn: async () => {
-      if (!organization?.id) return [];
-      const { data } = await supabase
-        .from('organization_licenses')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .order('expiry_date', { ascending: true });
-      return data || [];
-    },
-    enabled: !!organization?.id,
-  });
+  // Build license data from organization fields
+  const licensesData = useMemo(() => {
+    if (!orgData) return [];
+    const licenses: { id: string; type: string; number: string | null; expiry: string | null; active: boolean }[] = [];
+    if (orgData.license_number) licenses.push({ id: 'main', type: 'ترخيص رئيسي', number: orgData.license_number, expiry: orgData.license_expiry_date, active: !orgData.license_expiry_date || new Date(orgData.license_expiry_date) > new Date() });
+    if (orgData.env_approval_number) licenses.push({ id: 'env', type: 'الموافقة البيئية', number: orgData.env_approval_number, expiry: orgData.env_approval_expiry, active: !orgData.env_approval_expiry || new Date(orgData.env_approval_expiry) > new Date() });
+    if (orgData.wmra_license) licenses.push({ id: 'wmra', type: 'تصريح WMRA', number: orgData.wmra_license, expiry: orgData.wmra_license_expiry_date, active: !orgData.wmra_license_expiry_date || new Date(orgData.wmra_license_expiry_date) > new Date() });
+    if (orgData.ida_license) licenses.push({ id: 'ida', type: 'ترخيص IDA', number: orgData.ida_license, expiry: orgData.ida_license_expiry_date, active: !orgData.ida_license_expiry_date || new Date(orgData.ida_license_expiry_date) > new Date() });
+    if (orgData.land_transport_license) licenses.push({ id: 'ltra', type: 'رخصة نقل بري', number: orgData.land_transport_license, expiry: orgData.land_transport_license_expiry_date, active: !orgData.land_transport_license_expiry_date || new Date(orgData.land_transport_license_expiry_date) > new Date() });
+    return licenses;
+  }, [orgData]);
 
-  const activeLicenses = licensesData.filter((l: any) => l.status === 'active' || l.status === 'approved');
-  const expiredLicenses = licensesData.filter((l: any) => l.status === 'expired');
+  const activeLicenses = licensesData.filter(l => l.active);
+  const expiredLicenses = licensesData.filter(l => !l.active);
   const complianceScore = licensesData.length > 0
     ? Math.round((activeLicenses.length / licensesData.length) * 100)
     : 0;

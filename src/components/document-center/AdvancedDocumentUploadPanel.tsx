@@ -283,7 +283,7 @@ const AdvancedDocumentUploadPanel = () => {
             file_size: item.size,
             tags: item.tags.length > 0 ? item.tags : null,
             uploaded_by: user.id,
-            uploaded_by_role: profile?.role || 'member',
+            uploaded_by_role: 'member',
           });
 
         if (dbError) throw dbError;
