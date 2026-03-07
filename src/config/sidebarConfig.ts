@@ -12,7 +12,7 @@ import {
   Boxes, GitCompareArrows, FolderOpen, Inbox, TreePine, Store, GraduationCap,
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
-  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat,
+  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -327,7 +327,9 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Document Center',
     visibleFor: [],
     items: [
+      { icon: Database, labelAr: 'بياناتي', labelEn: 'My Data', path: '/dashboard/my-data', key: 'my-data' },
       { icon: FolderOpen, labelAr: 'مركز المستندات', labelEn: 'Document Center', path: '/dashboard/document-center', key: 'document-center' },
+      { icon: Upload, labelAr: 'رفع المستندات', labelEn: 'Upload Documents', path: '/dashboard/document-center?tab=upload', key: 'doc-upload' },
       { icon: Scale, labelAr: 'المستندات التنظيمية', labelEn: 'Regulatory Documents', path: '/dashboard/regulatory-documents', key: 'regulatory-documents',
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'admin'] },
       { icon: FolderOpen, labelAr: 'الأرشيف', labelEn: 'Archive', path: '/dashboard/document-center?tab=archive', key: 'doc-center-archive' },
