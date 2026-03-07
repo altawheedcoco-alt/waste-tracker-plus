@@ -111,21 +111,32 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 4. السائقون والأسطول (ناقل فقط) ═══════════════
+  // ═══════════════ 4A. الأسطول والتتبع (ناقل فقط) ═══════════════
   {
-    id: 'fleet-drivers',
+    id: 'fleet-tracking',
     icon: Truck,
-    labelAr: 'السائقون والأسطول',
-    labelEn: 'Fleet & Drivers',
+    labelAr: 'الأسطول والتتبع',
+    labelEn: 'Fleet & Tracking',
     visibleFor: ['transporter'],
     items: [
-      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers' },
-      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking' },
-      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes' },
-      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits' },
-      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
-      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance' },
-      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards' },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const },
+      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const },
+      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 4B. إدارة القوى العاملة (ناقل فقط) ═══════════════
+  {
+    id: 'workforce-management',
+    icon: Users,
+    labelAr: 'إدارة القوى العاملة',
+    labelEn: 'Workforce Management',
+    visibleFor: ['transporter'],
+    items: [
+      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const },
+      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const },
+      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const },
+      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const },
     ],
   },
 
