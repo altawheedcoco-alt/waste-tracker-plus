@@ -37380,6 +37380,7 @@ export type Database = {
       }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
+      is_regulator_user: { Args: { p_user_id: string }; Returns: boolean }
       is_user_driver: {
         Args: { _driver_id: string; _user_id: string }
         Returns: boolean
