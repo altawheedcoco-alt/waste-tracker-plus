@@ -32292,6 +32292,7 @@ export type Database = {
         Row: {
           attempts: number | null
           created_at: string | null
+          created_by: string | null
           id: string
           is_verified: boolean | null
           max_attempts: number | null
@@ -32306,6 +32307,7 @@ export type Database = {
         Insert: {
           attempts?: number | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_verified?: boolean | null
           max_attempts?: number | null
@@ -32320,6 +32322,7 @@ export type Database = {
         Update: {
           attempts?: number | null
           created_at?: string | null
+          created_by?: string | null
           id?: string
           is_verified?: boolean | null
           max_attempts?: number | null
