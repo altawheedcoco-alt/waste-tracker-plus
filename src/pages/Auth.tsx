@@ -155,7 +155,7 @@ const Auth = () => {
 
   // Login form state
   const [loginData, setLoginData] = useState({
-    email: '',
+    email: localStorage.getItem('rememberEmail') || '',
     password: '',
   });
 
