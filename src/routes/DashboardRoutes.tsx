@@ -395,6 +395,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/regulatory-documents" element={<RegulatoryDocuments />} />
     <Route path="/dashboard/laws-regulations" element={<LawsAndRegulations />} />
     <Route path="/dashboard/my-data" element={<MyDataCenter />} />
+    <Route path="/dashboard/executive" element={<ExecutiveDashboard />} />
+    <Route path="/dashboard/recurring-shipments" element={<RecurringShipments />} />
+    <Route path="/dashboard/task-board" element={<EmployeeTaskBoard />} />
+    <Route path="/dashboard/cv-builder" element={<CVBuilder />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
