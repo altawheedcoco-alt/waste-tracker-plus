@@ -30,34 +30,40 @@ import {
   MessageSquare,
 } from 'lucide-react';
 
+import { useLanguage } from '@/contexts/LanguageContext';
+
 interface CallLogDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
 }
 
-const priorityConfig = {
-  urgent: { label: 'عاجل', color: 'bg-red-500', icon: AlertTriangle },
-  medium: { label: 'متوسط', color: 'bg-yellow-500', icon: Clock },
-  low: { label: 'منخفض', color: 'bg-green-500', icon: CheckCircle2 },
-};
+const getPriorityConfig = (t: (key: string) => string) => ({
+  urgent: { label: t('callLog.urgent'), color: 'bg-red-500', icon: AlertTriangle },
+  medium: { label: t('callLog.medium'), color: 'bg-yellow-500', icon: Clock },
+  low: { label: t('callLog.low'), color: 'bg-green-500', icon: CheckCircle2 },
+});
 
-const categoryConfig = {
-  inquiry: { label: 'استفسار', color: 'bg-blue-500' },
-  complaint: { label: 'شكوى', color: 'bg-red-500' },
-  service_request: { label: 'طلب خدمة', color: 'bg-purple-500' },
-  follow_up: { label: 'متابعة', color: 'bg-orange-500' },
-  other: { label: 'أخرى', color: 'bg-gray-500' },
-};
+const getCategoryConfig = (t: (key: string) => string) => ({
+  inquiry: { label: t('callLog.inquiry'), color: 'bg-blue-500' },
+  complaint: { label: t('callLog.complaint'), color: 'bg-red-500' },
+  service_request: { label: t('callLog.serviceRequest'), color: 'bg-purple-500' },
+  follow_up: { label: t('callLog.followUp'), color: 'bg-orange-500' },
+  other: { label: t('callLog.other'), color: 'bg-gray-500' },
+});
 
-const sentimentConfig = {
-  positive: { label: 'إيجابي', color: 'text-green-500' },
-  neutral: { label: 'محايد', color: 'text-gray-500' },
-  negative: { label: 'سلبي', color: 'text-red-500' },
-};
+const getSentimentConfig = (t: (key: string) => string) => ({
+  positive: { label: t('callLog.positive'), color: 'text-green-500' },
+  neutral: { label: t('callLog.neutral'), color: 'text-gray-500' },
+  negative: { label: t('callLog.negative'), color: 'text-red-500' },
+});
 
 const CallLogDialog = ({ open, onOpenChange, onSaved }: CallLogDialogProps) => {
+  const { t } = useLanguage();
   const { analyzeCall, saveCallLog, isAnalyzing, isSaving } = useCallAnalysis();
+  const priorityConfig = getPriorityConfig(t);
+  const categoryConfig = getCategoryConfig(t);
+  const sentimentConfig = getSentimentConfig(t);
   
   const [phoneNumber, setPhoneNumber] = useState('');
   const [callerName, setCallerName] = useState('');

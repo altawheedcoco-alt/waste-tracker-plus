@@ -5,6 +5,7 @@ import { DollarSign, Clock, TrendingUp, AlertTriangle, ArrowUpRight, ArrowDownRi
 import { TransporterFinancials, TransporterKPIs } from '@/hooks/useTransporterExtended';
 import InteractiveStatCard from '../shared/InteractiveStatCard';
 import { DetailSection } from '../shared/InteractiveDetailDrawer';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface TransporterKPICardsProps {
   financials: TransporterFinancials | undefined;
@@ -14,33 +15,34 @@ interface TransporterKPICardsProps {
 }
 
 const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading }: TransporterKPICardsProps) => {
+  const { t } = useLanguage();
   const isLoading = financialsLoading || kpisLoading;
 
   const revenueDetails: DetailSection[] = [
     {
       id: 'revenue-breakdown',
-      title: 'تفاصيل الإيرادات',
+      title: t('transporterKPI.revenueDetails'),
       icon: DollarSign,
       defaultOpen: true,
       content: (
         <div className="space-y-3 text-right">
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
             <span className="font-bold text-emerald-600">
-              {(financials?.totalRevenue || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
+              {(financials?.totalRevenue || 0).toLocaleString('ar-EG')} {financials?.currency || t('transportOffice.currency')}
             </span>
-            <span className="text-sm">إجمالي الإيرادات</span>
+            <span className="text-sm">{t('transporterKPI.totalRevenue')}</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
             <span className="font-bold text-amber-600">
-              {(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
+              {(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || t('transportOffice.currency')}
             </span>
-            <span className="text-sm">مدفوعات معلقة</span>
+            <span className="text-sm">{t('transporterKPI.pendingPayments')}</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-primary/5">
             <span className="font-bold text-primary">
-              {((financials?.totalRevenue || 0) - (financials?.pendingPayments || 0)).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}
+              {((financials?.totalRevenue || 0) - (financials?.pendingPayments || 0)).toLocaleString('ar-EG')} {financials?.currency || t('transportOffice.currency')}
             </span>
-            <span className="text-sm font-medium">صافي المحصّل</span>
+            <span className="text-sm font-medium">{t('transporterKPI.netCollected')}</span>
           </div>
         </div>
       ),
@@ -51,13 +53,13 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
   const pendingDetails: DetailSection[] = [
     {
       id: 'pending-info',
-      title: 'المدفوعات المعلقة',
+      title: t('transporterKPI.pendingPaymentsTitle'),
       icon: Clock,
       defaultOpen: true,
       content: (
         <div className="space-y-2 text-right text-sm text-muted-foreground">
-          <p>المبلغ المعلق: <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || 'ج.م'}</span></p>
-          <p>هذه المدفوعات تحتاج متابعة وتحصيل من الجهات المرتبطة.</p>
+          <p>{t('transporterKPI.pendingAmount')} <span className="font-bold text-foreground">{(financials?.pendingPayments || 0).toLocaleString('ar-EG')} {financials?.currency || t('transportOffice.currency')}</span></p>
+          <p>{t('transporterKPI.pendingFollowUp')}</p>
         </div>
       ),
       link: '/dashboard/accounting',
@@ -67,7 +69,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
   const onTimeDetails: DetailSection[] = [
     {
       id: 'performance-breakdown',
-      title: 'تفاصيل الأداء',
+      title: t('transporterKPI.performanceDetails'),
       icon: TrendingUp,
       defaultOpen: true,
       content: (
@@ -76,15 +78,15 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
             <Badge variant={((kpis?.onTimeRate || 0) >= 80) ? 'default' : 'destructive'}>
               {kpis?.onTimeRate || 0}%
             </Badge>
-            <span className="text-sm">الالتزام بالمواعيد</span>
+            <span className="text-sm">{t('transporterKPI.onTimeCompliance')}</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
             <Badge variant="secondary">{kpis?.completionRate || 0}%</Badge>
-            <span className="text-sm">معدل الإنجاز</span>
+            <span className="text-sm">{t('transporterKPI.completionRate')}</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} يوم</Badge>
-            <span className="text-sm">متوسط وقت التسليم</span>
+            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} {t('transporterKPI.days')}</Badge>
+            <span className="text-sm">{t('transporterKPI.avgDeliveryTime')}</span>
           </div>
         </div>
       ),
@@ -94,7 +96,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
   const overdueDetails: DetailSection[] = [
     {
       id: 'overdue-info',
-      title: 'الشحنات المتأخرة',
+      title: t('transporterKPI.overdueShipments'),
       icon: AlertTriangle,
       defaultOpen: true,
       content: (
@@ -103,14 +105,14 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
             <Badge variant={(kpis?.overdueShipments || 0) > 0 ? 'destructive' : 'default'}>
               {kpis?.overdueShipments || 0}
             </Badge>
-            <span className="text-sm">شحنات متأخرة</span>
+            <span className="text-sm">{t('transporterKPI.overdueCount')}</span>
           </div>
           <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} يوم</Badge>
-            <span className="text-sm">متوسط التسليم</span>
+            <Badge variant="outline">{kpis?.avgDeliveryDays || 0} {t('transporterKPI.days')}</Badge>
+            <span className="text-sm">{t('transporterKPI.avgDelivery')}</span>
           </div>
           {(kpis?.overdueShipments || 0) > 0 && (
-            <p className="text-sm text-destructive">⚠️ يوجد شحنات تحتاج اهتمام فوري</p>
+            <p className="text-sm text-destructive">{t('transporterKPI.needsImmediateAttention')}</p>
           )}
         </div>
       ),
@@ -120,41 +122,41 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
 
   const cards = [
     {
-      title: 'الإيرادات',
+      title: t('transporterKPI.revenueTitle'),
       value: `${(financials?.totalRevenue || 0).toLocaleString('ar-EG')}`,
-      suffix: financials?.currency || 'ج.م',
+      suffix: financials?.currency || t('transportOffice.currency'),
       icon: DollarSign,
       color: 'text-emerald-600',
       bgColor: 'bg-emerald-500/10',
       detailSections: revenueDetails,
     },
     {
-      title: 'مدفوعات معلقة',
+      title: t('transporterKPI.pendingPaymentsCard'),
       value: `${(financials?.pendingPayments || 0).toLocaleString('ar-EG')}`,
-      suffix: financials?.currency || 'ج.م',
+      suffix: financials?.currency || t('transportOffice.currency'),
       icon: Clock,
       color: 'text-amber-600',
       bgColor: 'bg-amber-500/10',
-      badge: financials?.pendingPayments && financials.pendingPayments > 0 ? 'تحتاج متابعة' : undefined,
+      badge: financials?.pendingPayments && financials.pendingPayments > 0 ? t('shipmentsAccount.needsFollowUp') : undefined,
       detailSections: pendingDetails,
     },
     {
-      title: 'نسبة الالتزام بالمواعيد',
+      title: t('transporterKPI.onTimeRate'),
       value: `${kpis?.onTimeRate || 0}%`,
-      subtitle: `معدل الإنجاز: ${kpis?.completionRate || 0}%`,
+      subtitle: `${t('transporterKPI.completionRateLabel')} ${kpis?.completionRate || 0}%`,
       icon: TrendingUp,
       color: (kpis?.onTimeRate || 0) >= 80 ? 'text-emerald-600' : 'text-red-600',
       bgColor: (kpis?.onTimeRate || 0) >= 80 ? 'bg-emerald-500/10' : 'bg-red-500/10',
       detailSections: onTimeDetails,
     },
     {
-      title: 'شحنات متأخرة',
+      title: t('transporterKPI.overdueShipmentsCard'),
       value: `${kpis?.overdueShipments || 0}`,
-      subtitle: `متوسط التسليم: ${kpis?.avgDeliveryDays || 0} يوم`,
+      subtitle: `${t('transporterKPI.avgDeliveryLabel')} ${kpis?.avgDeliveryDays || 0} ${t('transporterKPI.days')}`,
       icon: AlertTriangle,
       color: (kpis?.overdueShipments || 0) > 0 ? 'text-red-600' : 'text-emerald-600',
       bgColor: (kpis?.overdueShipments || 0) > 0 ? 'bg-red-500/10' : 'bg-emerald-500/10',
-      badge: (kpis?.overdueShipments || 0) > 0 ? 'تحتاج اهتمام' : undefined,
+      badge: (kpis?.overdueShipments || 0) > 0 ? t('transporterKPI.needsAttention') : undefined,
       detailSections: overdueDetails,
     },
   ];
@@ -176,7 +178,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           delay={index * 0.1}
           detailSections={card.detailSections}
           detailTitle={card.title}
-          detailDescription={`تفاصيل ${card.title}`}
+          detailDescription={`${t('transporterKPI.detailsOf')} ${card.title}`}
           isLoading={isLoading}
         />
       ))}

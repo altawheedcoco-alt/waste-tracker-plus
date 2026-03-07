@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
-import { ar } from 'date-fns/locale';
+import { ar, enUS } from 'date-fns/locale';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -18,6 +18,7 @@ import { cn } from '@/lib/utils';
 import CancelShipmentDialog from '@/components/shipments/CancelShipmentDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { WasteTypeInline } from './WasteTypeDetailsBadge';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ShipmentWithPricing {
   id: string;
@@ -41,21 +42,22 @@ interface ShipmentsAccountViewProps {
   onRefresh?: () => void;
 }
 
-const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
-  new: { label: 'جديدة', icon: Clock, color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
-  approved: { label: 'موافق عليها', icon: CheckCircle2, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
-  collecting: { label: 'قيد التجميع', icon: Package, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
-  in_transit: { label: 'قيد النقل', icon: Package, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
-  delivered: { label: 'تم التسليم', icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
-  confirmed: { label: 'مؤكدة', icon: CheckCircle2, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
-  cancelled: { label: 'ملغاة', icon: AlertCircle, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
-};
+const getStatusConfig = (t: (key: string) => string): Record<string, { label: string; icon: any; color: string }> => ({
+  new: { label: t('shipmentStatus.new'), icon: Clock, color: 'bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300' },
+  approved: { label: t('shipmentStatus.approved'), icon: CheckCircle2, color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300' },
+  collecting: { label: t('shipmentStatus.collecting'), icon: Package, color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300' },
+  in_transit: { label: t('shipmentStatus.in_transit'), icon: Package, color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300' },
+  delivered: { label: t('shipmentStatus.delivered'), icon: CheckCircle2, color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' },
+  confirmed: { label: t('shipmentStatus.confirmed'), icon: CheckCircle2, color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300' },
+  cancelled: { label: t('shipmentStatus.cancelled'), icon: AlertCircle, color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300' },
+});
 
 export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }: ShipmentsAccountViewProps) {
   const navigate = useNavigate();
   const { organization, roles } = useAuth();
+  const { t, language } = useLanguage();
   const [activeTab, setActiveTab] = useState('active');
-
+  const statusConfig = getStatusConfig(t);
   // Check if user can cancel shipments (transporter or admin)
   const isAdmin = roles?.includes('admin');
   const canCancel = isAdmin || organization?.organization_type === 'transporter';
@@ -67,7 +69,7 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
   };
 
   const formatDate = (dateStr: string) => {
-    return format(new Date(dateStr), 'dd/MM/yyyy', { locale: ar });
+    return format(new Date(dateStr), 'dd/MM/yyyy', { locale: language === 'ar' ? ar : enUS });
   };
 
   // Split shipments into active and cancelled
@@ -112,8 +114,8 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
     return (
       <div className="text-center py-12 text-muted-foreground">
         <Package className="h-16 w-16 mx-auto mb-4 opacity-30" />
-        <p className="text-lg font-medium">لا توجد شحنات</p>
-        <p className="text-sm">ستظهر الشحنات هنا بعد إنشائها مع هذا الشريك</p>
+        <p className="text-lg font-medium">{t('shipmentsAccount.noShipments')}</p>
+        <p className="text-sm">{t('shipmentsAccount.shipmentsAppearHere')}</p>
       </div>
     );
   }
@@ -124,14 +126,14 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
         <TableHeader>
           <TableRow className="bg-muted/50 hover:bg-muted/50">
             <TableHead className="w-12 text-center font-bold">#</TableHead>
-            <TableHead className="font-bold">رقم الشحنة</TableHead>
-            <TableHead className="font-bold">نوع المخلف</TableHead>
-            <TableHead className="text-center font-bold">الكمية</TableHead>
-            <TableHead className="text-center font-bold">سعر الوحدة</TableHead>
-            <TableHead className="text-center font-bold">الإجمالي</TableHead>
-            <TableHead className="text-center font-bold">الحالة</TableHead>
-            <TableHead className="text-center font-bold">التاريخ</TableHead>
-            {isCancelledSection && <TableHead className="font-bold">سبب الإلغاء</TableHead>}
+            <TableHead className="font-bold">{t('shipmentsAccount.shipmentNumber')}</TableHead>
+            <TableHead className="font-bold">{t('shipmentsAccount.wasteType')}</TableHead>
+            <TableHead className="text-center font-bold">{t('shipmentsAccount.quantity')}</TableHead>
+            <TableHead className="text-center font-bold">{t('shipmentsAccount.unitPrice')}</TableHead>
+            <TableHead className="text-center font-bold">{t('shipmentsAccount.totalAmount')}</TableHead>
+            <TableHead className="text-center font-bold">{t('shipmentsAccount.status')}</TableHead>
+            <TableHead className="text-center font-bold">{t('shipmentsAccount.date')}</TableHead>
+            {isCancelledSection && <TableHead className="font-bold">{t('shipmentsAccount.cancellationReason')}</TableHead>}
             {!isCancelledSection && canCancel && <TableHead className="w-12"></TableHead>}
           </TableRow>
         </TableHeader>
@@ -182,27 +184,27 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
                 <TableCell className="text-center">
                   {isCancelled ? (
                     <span className="text-muted-foreground line-through">
-                      {shipment.hasPrice ? `${formatCurrency(shipment.pricePerUnit)} ج.م` : '-'}
+                    {shipment.hasPrice ? `${formatCurrency(shipment.pricePerUnit)} ${t('transportOffice.currency')}` : '-'}
                     </span>
                   ) : shipment.hasPrice ? (
                     <span className="text-emerald-600 font-medium">
-                      {formatCurrency(shipment.pricePerUnit)} ج.م
+                      {formatCurrency(shipment.pricePerUnit)} {t('transportOffice.currency')}
                     </span>
                   ) : (
                     <Badge variant="outline" className="gap-1 text-amber-600 border-amber-300">
                       <AlertCircle className="h-3 w-3" />
-                      غير محدد
+                      {t('shipmentsAccount.notDetermined')}
                     </Badge>
                   )}
                 </TableCell>
                 <TableCell className="text-center">
                   {isCancelled ? (
                     <span className="text-red-500 font-bold line-through">
-                      {formatCurrency(shipment.pricePerUnit * (Number(shipment.quantity) || 0))} ج.م
+                      {formatCurrency(shipment.pricePerUnit * (Number(shipment.quantity) || 0))} {t('transportOffice.currency')}
                     </span>
                   ) : shipment.hasPrice ? (
                     <span className="font-bold text-lg text-primary">
-                      {formatCurrency(shipment.calculatedTotal)} ج.م
+                      {formatCurrency(shipment.calculatedTotal)} {t('transportOffice.currency')}
                     </span>
                   ) : (
                     <span className="text-muted-foreground">-</span>
@@ -220,7 +222,7 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
                 {isCancelledSection && (
                   <TableCell className="max-w-[200px]">
                     <span className="text-sm text-red-600 dark:text-red-400 line-clamp-2">
-                      {shipment.cancellation_reason || 'لم يتم تحديد السبب'}
+                      {shipment.cancellation_reason || t('shipmentsAccount.noReasonSpecified')}
                     </span>
                   </TableCell>
                 )}
@@ -263,14 +265,14 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
         <TabsList className="grid w-full max-w-md grid-cols-2 mb-4">
           <TabsTrigger value="active" className="gap-2">
             <Package className="h-4 w-4" />
-            الشحنات النشطة
+            {t('shipmentsAccount.activeShipments')}
             <span className="bg-primary/20 text-primary text-xs px-1.5 rounded-full">
               {summary.active}
             </span>
           </TabsTrigger>
           <TabsTrigger value="cancelled" className="gap-2">
             <Ban className="h-4 w-4" />
-            الشحنات الملغاة
+            {t('shipmentsAccount.cancelledShipments')}
             {summary.cancelled > 0 && (
               <span className="bg-red-500/20 text-red-600 dark:text-red-400 text-xs px-1.5 rounded-full">
                 {summary.cancelled}
@@ -285,11 +287,11 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 p-4 bg-muted/30 rounded-xl">
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{summary.active}</p>
-              <p className="text-xs text-muted-foreground">شحنات نشطة</p>
+              <p className="text-xs text-muted-foreground">{t('shipmentsAccount.activeCount')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold">{formatCurrency(summary.totalQuantity)}</p>
-              <p className="text-xs text-muted-foreground">إجمالي الكمية</p>
+              <p className="text-xs text-muted-foreground">{t('shipmentsAccount.totalQuantity')}</p>
             </div>
             <div className="text-center">
               <p className={cn(
@@ -298,18 +300,18 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
               )}>
                 {summary.priced}/{summary.active}
               </p>
-              <p className="text-xs text-muted-foreground">شحنات مسعّرة</p>
+              <p className="text-xs text-muted-foreground">{t('shipmentsAccount.pricedShipments')}</p>
             </div>
             <div className="text-center">
               <p className="text-2xl font-bold text-primary">{formatCurrency(summary.totalValue)}</p>
-              <p className="text-xs text-muted-foreground">إجمالي القيمة (ج.م)</p>
+              <p className="text-xs text-muted-foreground">{t('shipmentsAccount.totalValueEgp')}</p>
             </div>
           </div>
 
           {activeShipments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Package className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p className="font-medium">لا توجد شحنات نشطة</p>
+              <p className="font-medium">{t('shipmentsAccount.noActiveShipments')}</p>
             </div>
           ) : (
             renderShipmentTable(activeShipments, false)
@@ -320,8 +322,8 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
             <div className="flex items-center gap-3 p-3 bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg text-amber-700 dark:text-amber-300">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <div>
-                <p className="font-medium">يوجد {summary.unpriced} شحنات بدون سعر محدد</p>
-                <p className="text-sm opacity-80">أضف أسعار المخلفات في قسم "أنواع المخلفات المشتركة" لحساب قيمتها تلقائياً</p>
+                <p className="font-medium">{t('shipmentsAccount.unpricedWarning').replace('{count}', String(summary.unpriced))}</p>
+                <p className="text-sm opacity-80">{t('shipmentsAccount.unpricedHint')}</p>
               </div>
             </div>
           )}
@@ -334,15 +336,15 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
             <div className="grid grid-cols-2 md:grid-cols-3 gap-3 p-4 bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 rounded-xl">
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">{summary.cancelled}</p>
-                <p className="text-xs text-red-600/80">شحنات ملغاة</p>
+                <p className="text-xs text-red-600/80">{t('shipmentsAccount.cancelledCount')}</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600">{formatCurrency(summary.cancelledQuantity)}</p>
-                <p className="text-xs text-red-600/80">إجمالي الكمية الملغاة</p>
+                <p className="text-xs text-red-600/80">{t('shipmentsAccount.cancelledQuantity')}</p>
               </div>
               <div className="text-center">
                 <p className="text-2xl font-bold text-red-600 line-through">{formatCurrency(summary.cancelledValue)}</p>
-                <p className="text-xs text-red-600/80">قيمة غير محتسبة (ج.م)</p>
+                <p className="text-xs text-red-600/80">{t('shipmentsAccount.uncountedValue')}</p>
               </div>
             </div>
           )}
@@ -350,8 +352,8 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
           {cancelledShipments.length === 0 ? (
             <div className="text-center py-12 text-muted-foreground">
               <Ban className="h-12 w-12 mx-auto mb-4 opacity-30" />
-              <p className="font-medium">لا توجد شحنات ملغاة</p>
-              <p className="text-sm">جميع الشحنات مع هذا الشريك نشطة</p>
+              <p className="font-medium">{t('shipmentsAccount.noCancelledShipments')}</p>
+              <p className="text-sm">{t('shipmentsAccount.allShipmentsActive')}</p>
             </div>
           ) : (
             renderShipmentTable(cancelledShipments, true)
@@ -362,8 +364,8 @@ export default function ShipmentsAccountView({ shipments, isLoading, onRefresh }
             <div className="flex items-center gap-3 p-3 bg-muted/50 border rounded-lg text-muted-foreground">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <div>
-                <p className="font-medium">الشحنات الملغاة لا تُحتسب في كشف الحساب</p>
-                <p className="text-sm">قيمة الشحنات الملغاة ({formatCurrency(summary.cancelledValue)} ج.م) غير مشمولة في الإجماليات</p>
+                <p className="font-medium">{t('shipmentsAccount.cancelledNotCounted')}</p>
+                <p className="text-sm">{t('shipmentsAccount.cancelledValueExcluded').replace('{value}', formatCurrency(summary.cancelledValue))}</p>
               </div>
             </div>
           )}

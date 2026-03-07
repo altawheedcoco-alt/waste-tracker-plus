@@ -21,7 +21,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-
+import { useLanguage } from '@/contexts/LanguageContext';
 interface DocumentAIAnalysisProps {
   fileUrl: string;
   fileName: string;
@@ -57,23 +57,23 @@ interface AnalysisResult {
   tags: string[];
 }
 
-const DOCUMENT_TYPE_LABELS: Record<string, string> = {
-  weight_ticket: 'تذكرة وزن',
-  invoice: 'فاتورة',
-  contract: 'عقد',
-  award_letter: 'خطاب ترسية',
-  license: 'ترخيص',
-  certificate: 'شهادة',
-  receipt: 'إيصال',
-  delivery_declaration: 'إقرار تسليم',
-  vehicle_document: 'مستند مركبة',
-  identity_document: 'إثبات هوية',
-  financial_statement: 'كشف مالي',
-  environmental_report: 'تقرير بيئي',
-  photo_evidence: 'صورة إثبات',
-  correspondence: 'مراسلة',
-  other: 'أخرى',
-};
+const getDocumentTypeLabels = (t: (key: string) => string): Record<string, string> => ({
+  weight_ticket: t('docAI.weightTicket'),
+  invoice: t('docAI.invoice'),
+  contract: t('docAI.contract'),
+  award_letter: t('docAI.awardLetter'),
+  license: t('docAI.license'),
+  certificate: t('docAI.certificate'),
+  receipt: t('docAI.receipt'),
+  delivery_declaration: t('docAI.deliveryDeclaration'),
+  vehicle_document: t('docAI.vehicleDocument'),
+  identity_document: t('docAI.identityDocument'),
+  financial_statement: t('docAI.financialStatement'),
+  environmental_report: t('docAI.environmentalReport'),
+  photo_evidence: t('docAI.photoEvidence'),
+  correspondence: t('docAI.correspondence'),
+  other: t('docAI.other'),
+});
 
 const RISK_COLORS: Record<string, string> = {
   low: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400',
@@ -82,12 +82,12 @@ const RISK_COLORS: Record<string, string> = {
   critical: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400',
 };
 
-const RISK_LABELS: Record<string, string> = {
-  low: 'منخفض',
-  medium: 'متوسط',
-  high: 'مرتفع',
-  critical: 'حرج',
-};
+const getRiskLabels = (t: (key: string) => string): Record<string, string> => ({
+  low: t('docAI.riskLow'),
+  medium: t('docAI.riskMedium'),
+  high: t('docAI.riskHigh'),
+  critical: t('docAI.riskCritical'),
+});
 
 export default function DocumentAIAnalysis({
   fileUrl,
@@ -100,6 +100,9 @@ export default function DocumentAIAnalysis({
   compact = false,
 }: DocumentAIAnalysisProps) {
   const { organization, user } = useAuth();
+  const { t } = useLanguage();
+  const DOCUMENT_TYPE_LABELS = getDocumentTypeLabels(t);
+  const RISK_LABELS = getRiskLabels(t);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<AnalysisResult | null>(null);
   const [duration, setDuration] = useState<number | null>(null);
