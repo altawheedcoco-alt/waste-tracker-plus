@@ -152,16 +152,16 @@ const CarbonFootprintAnalysis = () => {
   const reportRef = useRef<HTMLDivElement>(null);
 
   const wasteTypeLabels: Record<string, string> = {
-    plastic: language === 'ar' ? 'بلاستيك' : 'Plastic',
-    paper: language === 'ar' ? 'ورق' : 'Paper',
-    metal: language === 'ar' ? 'معادن' : 'Metals',
-    glass: language === 'ar' ? 'زجاج' : 'Glass',
-    electronic: language === 'ar' ? 'إلكترونيات' : 'Electronics',
-    organic: language === 'ar' ? 'عضوية' : 'Organic',
-    chemical: language === 'ar' ? 'كيميائية' : 'Chemical',
-    medical: language === 'ar' ? 'طبية' : 'Medical',
-    construction: language === 'ar' ? 'بناء' : 'Construction',
-    other: language === 'ar' ? 'أخرى' : 'Other',
+    plastic: t('wasteTypes.plastic'),
+    paper: t('wasteTypes.paper'),
+    metal: t('wasteTypes.metal'),
+    glass: t('wasteTypes.glass'),
+    electronic: t('wasteTypes.electronic'),
+    organic: t('wasteTypes.organic'),
+    chemical: t('wasteTypes.chemical'),
+    medical: t('wasteTypes.medical'),
+    construction: t('wasteTypes.construction'),
+    other: t('wasteTypes.other'),
   };
 
   useEffect(() => {
@@ -342,7 +342,7 @@ const CarbonFootprintAnalysis = () => {
 
       const emissionsByOrgArr = Object.entries(emissionsByOrg)
         .map(([id, data]) => ({
-          name: orgMap.get(id)?.name || (language === 'ar' ? 'غير معروف' : 'Unknown'),
+          name: orgMap.get(id)?.name || t('carbonUnits.unknown'),
           emissions: Math.round(data.emissions * 100) / 100,
           type: data.type,
         }))
@@ -835,7 +835,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} ${t('car
                     <div>
                       <p className="text-sm text-muted-foreground">{t('carbonExtra.transportEmissions')}</p>
                       <p className="text-2xl font-bold">
-                        {carbonData.transportEmissions.toLocaleString()} {language === 'ar' ? 'كجم' : 'kg'}
+                        {carbonData.transportEmissions.toLocaleString()} {t('carbonUnits.kg')}
                       </p>
                     </div>
                   </div>
@@ -851,7 +851,7 @@ ${carbonData.emissionsByWasteType.map(w => `- ${w.name}: ${w.emissions} ${t('car
                     <div>
                       <p className="text-sm text-muted-foreground">{t('carbonExtra.processingEmissions')}</p>
                       <p className="text-2xl font-bold">
-                        {carbonData.processingEmissions.toLocaleString()} {language === 'ar' ? 'كجم' : 'kg'}
+                        {carbonData.processingEmissions.toLocaleString()} {t('carbonUnits.kg')}
                       </p>
                     </div>
                   </div>
