@@ -313,6 +313,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: [],
     items: [
       { icon: Gauge, labelAr: 'لوحة العمليات', labelEn: 'Operations Dashboard', path: '/dashboard/operations', key: 'operations' },
+      { icon: CheckSquare, labelAr: 'لوحة المهام', labelEn: 'Task Board', path: '/dashboard/task-board', key: 'task-board' },
       { icon: ClipboardList, labelAr: 'سجل الأنشطة', labelEn: 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log' },
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records' },
       { icon: MapPin, labelAr: 'إعدادات GPS', labelEn: 'GPS Settings', path: '/dashboard/gps-settings', key: 'gps-settings' },
