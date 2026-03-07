@@ -1,6 +1,7 @@
-import { lazy } from "react";
+import { lazy, Suspense } from "react";
 import { Route } from "react-router-dom";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import { DashboardErrorBoundary } from "@/components/shared/DashboardErrorBoundary";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
@@ -210,7 +211,7 @@ const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManageme
 
 export const dashboardRoutes = (
   <>
-    <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+    <Route path="/dashboard" element={<ProtectedRoute><DashboardErrorBoundary><Dashboard /></DashboardErrorBoundary></ProtectedRoute>} />
     <Route path="/dashboard/digital-identity-card" element={<DigitalIdentityCardPage />} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
