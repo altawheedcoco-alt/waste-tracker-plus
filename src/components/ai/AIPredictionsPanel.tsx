@@ -102,7 +102,7 @@ const AIPredictionsPanel = () => {
     const avgRevPrev = prevRevThree.reduce((s, m) => s + (monthlyRevenue[m] || 0), 0) / Math.max(prevRevThree.length, 1);
     const revTrend = avgRevPrev > 0 ? ((avgRevRecent - avgRevPrev) / avgRevPrev) * 100 : 0;
 
-    const completedCount = shipments.filter(s => s.status === 'confirmed' || s.status === 'completed').length;
+    const completedCount = shipments.filter(s => s.status === 'confirmed' || s.status === 'delivered').length;
     const completionRate = shipments.length > 0 ? (completedCount / shipments.length) * 100 : 0;
 
     return [
