@@ -29,7 +29,6 @@ export default defineConfig(({ mode }) => ({
           }
           if (id.includes('react-router')) return 'router';
           if (id.includes('@supabase/')) return 'supabase';
-          if (id.includes('@radix-ui/react-dialog') || id.includes('@radix-ui/react-popover') || id.includes('@radix-ui/react-dropdown-menu')) return 'ui-overlays';
           if (id.includes('@radix-ui/')) return 'ui';
           if (id.includes('recharts') || id.includes('d3-')) return 'charts';
           if (id.includes('mapbox-gl') || id.includes('leaflet')) return 'maps';
