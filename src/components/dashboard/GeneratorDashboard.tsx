@@ -15,6 +15,8 @@ import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import InteractiveStatCard from './shared/InteractiveStatCard';
 import { DetailSection } from './shared/InteractiveDetailDrawer';
+import DashboardV2Header from './shared/DashboardV2Header';
+import V2TabsNav, { TabItem } from './shared/V2TabsNav';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -221,32 +223,28 @@ const GeneratorDashboard = () => {
       />
       <StoryCircles />
 
-      {/* Header */}
-      <div className={`flex ${isMobile ? 'flex-col gap-3' : 'items-center justify-between'}`}>
-        <div className={`flex items-center gap-2 flex-wrap ${isMobile ? 'order-2' : ''}`}>
-          <DashboardWidgetCustomizer orgType="generator" />
-          <DashboardPrintReports />
-          <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl shadow-sm">
-            <ClipboardList className="w-4 h-4" />
-            {!isMobile && t('workOrder.createNew')}
-          </Button>
-          
-          <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
-            <FileCheck className="w-4 h-4" />
-            {!isMobile && t('docVerify.sectionBadge')}
-          </Button>
-          <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
-            <Sparkles className="w-4 h-4" />
-          </Button>
-        </div>
-        <div className={`text-right ${isMobile ? 'order-1' : ''}`}>
-          <h1 className="font-bold text-xl sm:text-2xl bg-gradient-to-l from-foreground to-foreground/70 bg-clip-text">مرحباً، {profile?.full_name}</h1>
-          <p className="text-muted-foreground text-sm flex items-center gap-1.5 justify-end">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            {organization?.name} - الجهة المولدة
-          </p>
-        </div>
-      </div>
+      {/* V2.0 Header */}
+      <DashboardV2Header
+        userName={profile?.full_name || ''}
+        orgName={organization?.name || ''}
+        orgLabel="الجهة المولدة"
+        icon={Package}
+        gradient="from-primary to-primary/70"
+      >
+        <DashboardWidgetCustomizer orgType="generator" />
+        <DashboardPrintReports />
+        <Button onClick={() => setShowWorkOrder(true)} variant="default" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl shadow-sm">
+          <ClipboardList className="w-4 h-4" />
+          {!isMobile && t('workOrder.createNew')}
+        </Button>
+        <Button onClick={() => setShowDocumentVerification(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
+          <FileCheck className="w-4 h-4" />
+          {!isMobile && t('docVerify.sectionBadge')}
+        </Button>
+        <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size={isMobile ? 'sm' : 'default'} className="gap-2 rounded-xl">
+          <Sparkles className="w-4 h-4" />
+        </Button>
+      </DashboardV2Header>
 
 
       {/* ★ مركز القيادة */}
@@ -269,17 +267,15 @@ const GeneratorDashboard = () => {
 
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0 scrollbar-hide">
-            <TabsTrigger value="overview" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">نظرة عامة</TabsTrigger>
-            <TabsTrigger value="shipments" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الشحنات</TabsTrigger>
-            <TabsTrigger value="operations" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">العمليات</TabsTrigger>
-            <TabsTrigger value="work-orders" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">أوامر الشغل</TabsTrigger>
-            <TabsTrigger value="partners" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الجهات المرتبطة</TabsTrigger>
-            <TabsTrigger value="compliance" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">الامتثال القانوني</TabsTrigger>
-            <TabsTrigger value="geofence" className="text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:bg-muted/50 transition-all duration-300">تتبع الشحنات</TabsTrigger>
-          </TabsList>
-        </div>
+        <V2TabsNav tabs={[
+          { value: 'overview', label: 'نظرة عامة', icon: Package },
+          { value: 'shipments', label: 'الشحنات', icon: Package },
+          { value: 'operations', label: 'العمليات', icon: Truck },
+          { value: 'work-orders', label: 'أوامر الشغل', icon: ClipboardList },
+          { value: 'partners', label: 'الجهات المرتبطة', icon: Eye },
+          { value: 'compliance', label: 'الامتثال القانوني', icon: FileCheck },
+          { value: 'geofence', label: 'تتبع الشحنات', icon: MapPin },
+        ] as TabItem[]} />
 
         {/* ── نظرة عامة ── */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
