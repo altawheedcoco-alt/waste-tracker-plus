@@ -7173,6 +7173,75 @@ export type Database = {
           },
         ]
       }
+      digital_maturity_scores: {
+        Row: {
+          ai_adoption_score: number | null
+          breakdown: Json | null
+          created_at: string | null
+          data_integration_score: number | null
+          document_digitization_score: number | null
+          e_signature_score: number | null
+          id: string
+          maturity_level: string | null
+          organization_id: string
+          overall_score: number | null
+          recommendations: Json | null
+          score_date: string
+          security_score: number | null
+          updated_at: string | null
+          workflow_automation_score: number | null
+        }
+        Insert: {
+          ai_adoption_score?: number | null
+          breakdown?: Json | null
+          created_at?: string | null
+          data_integration_score?: number | null
+          document_digitization_score?: number | null
+          e_signature_score?: number | null
+          id?: string
+          maturity_level?: string | null
+          organization_id: string
+          overall_score?: number | null
+          recommendations?: Json | null
+          score_date?: string
+          security_score?: number | null
+          updated_at?: string | null
+          workflow_automation_score?: number | null
+        }
+        Update: {
+          ai_adoption_score?: number | null
+          breakdown?: Json | null
+          created_at?: string | null
+          data_integration_score?: number | null
+          document_digitization_score?: number | null
+          e_signature_score?: number | null
+          id?: string
+          maturity_level?: string | null
+          organization_id?: string
+          overall_score?: number | null
+          recommendations?: Json | null
+          score_date?: string
+          security_score?: number | null
+          updated_at?: string | null
+          workflow_automation_score?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "digital_maturity_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "digital_maturity_scores_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       digital_product_passports: {
         Row: {
           basel_code: string | null
@@ -21299,6 +21368,69 @@ export type Database = {
           },
         ]
       }
+      ocr_scan_results: {
+        Row: {
+          classification: string | null
+          confidence_score: number | null
+          created_at: string | null
+          document_name: string | null
+          document_url: string
+          entities: Json | null
+          extracted_data: Json | null
+          id: string
+          linked_record_id: string | null
+          linked_record_type: string | null
+          organization_id: string
+          scan_type: string | null
+          scanned_by: string | null
+        }
+        Insert: {
+          classification?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          document_name?: string | null
+          document_url: string
+          entities?: Json | null
+          extracted_data?: Json | null
+          id?: string
+          linked_record_id?: string | null
+          linked_record_type?: string | null
+          organization_id: string
+          scan_type?: string | null
+          scanned_by?: string | null
+        }
+        Update: {
+          classification?: string | null
+          confidence_score?: number | null
+          created_at?: string | null
+          document_name?: string | null
+          document_url?: string
+          entities?: Json | null
+          extracted_data?: Json | null
+          id?: string
+          linked_record_id?: string | null
+          linked_record_type?: string | null
+          organization_id?: string
+          scan_type?: string | null
+          scanned_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ocr_scan_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ocr_scan_results_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       office_consultant_memberships: {
         Row: {
           assigned_client_ids: string[] | null
@@ -32156,6 +32288,51 @@ export type Database = {
           },
         ]
       }
+      signature_verifications: {
+        Row: {
+          attempts: number | null
+          created_at: string | null
+          id: string
+          is_verified: boolean | null
+          max_attempts: number | null
+          national_id_hash: string | null
+          otp_code: string | null
+          otp_expires_at: string | null
+          signature_id: string | null
+          verification_data: Json | null
+          verification_type: string
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          max_attempts?: number | null
+          national_id_hash?: string | null
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          signature_id?: string | null
+          verification_data?: Json | null
+          verification_type: string
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          is_verified?: boolean | null
+          max_attempts?: number | null
+          national_id_hash?: string | null
+          otp_code?: string | null
+          otp_expires_at?: string | null
+          signature_id?: string | null
+          verification_data?: Json | null
+          verification_type?: string
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       signing_requests: {
         Row: {
           created_at: string
@@ -38464,6 +38641,119 @@ export type Database = {
             columns: ["worker_id"]
             isOneToOne: false
             referencedRelation: "worker_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_executions: {
+        Row: {
+          actions_executed: Json | null
+          created_at: string | null
+          error_message: string | null
+          execution_time_ms: number | null
+          id: string
+          organization_id: string
+          rule_id: string
+          status: string | null
+          trigger_data: Json | null
+        }
+        Insert: {
+          actions_executed?: Json | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          organization_id: string
+          rule_id: string
+          status?: string | null
+          trigger_data?: Json | null
+        }
+        Update: {
+          actions_executed?: Json | null
+          created_at?: string | null
+          error_message?: string | null
+          execution_time_ms?: number | null
+          id?: string
+          organization_id?: string
+          rule_id?: string
+          status?: string | null
+          trigger_data?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_rules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_rules: {
+        Row: {
+          actions: Json | null
+          conditions: Json | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          execution_count: number | null
+          id: string
+          is_enabled: boolean | null
+          last_executed_at: string | null
+          name: string
+          name_ar: string
+          organization_id: string
+          trigger_config: Json | null
+          trigger_type: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions?: Json | null
+          conditions?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          last_executed_at?: string | null
+          name: string
+          name_ar: string
+          organization_id: string
+          trigger_config?: Json | null
+          trigger_type: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions?: Json | null
+          conditions?: Json | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          execution_count?: number | null
+          id?: string
+          is_enabled?: boolean | null
+          last_executed_at?: string | null
+          name?: string
+          name_ar?: string
+          organization_id?: string
+          trigger_config?: Json | null
+          trigger_type?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "workflow_rules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
