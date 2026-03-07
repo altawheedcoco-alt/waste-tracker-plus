@@ -90,7 +90,7 @@ const WasteClassifierCamera = ({ driverId, shipmentId, onClassified }: WasteClas
     } finally {
       setIsAnalyzing(false);
     }
-  }, [shipmentId, onClassified, toast]);
+  }, [shipmentId, onClassified, toast, compressImage]);
 
   const risk = result ? riskConfig[result.risk_level] : null;
   const RiskIcon = risk?.icon || Info;
