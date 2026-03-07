@@ -33,7 +33,7 @@ const ChainOfCustodyPanel = () => {
   const { data: shipments = [], isLoading } = useQuery({
     queryKey: ['regulator-shipments', statusFilter],
     queryFn: async () => {
-      let query = supabase
+      const baseQuery = supabase
         .from('shipments')
         .select(`
           id, manifest_number, status, waste_type, waste_classification, 
@@ -42,9 +42,9 @@ const ChainOfCustodyPanel = () => {
           generator:organizations!shipments_generator_id_fkey(id, name, organization_type),
           transporter:organizations!shipments_transporter_id_fkey(id, name, organization_type),
           receiver:organizations!shipments_receiver_id_fkey(id, name, organization_type)
-        `)
+        ` as any)
         .order('created_at', { ascending: false })
-        .limit(100);
+        .limit(100) as any;
 
       if (statusFilter !== 'all') {
         query = query.eq('status', statusFilter as any);
