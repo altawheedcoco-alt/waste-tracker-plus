@@ -2,6 +2,7 @@ import { useState, lazy, Suspense, useMemo } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuickActions } from '@/hooks/useQuickActions';
 import {
