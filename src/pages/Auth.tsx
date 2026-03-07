@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -7,17 +7,23 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase } from 'lucide-react';
+import { Leaf, Building2, Truck, Recycle, ArrowLeft, ArrowRight, Eye, EyeOff, User, AlertCircle, Shield, Car, Factory, ClipboardCheck, BookOpen, Award, Briefcase, Lock, AlertTriangle } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import PlatformLogo from '@/components/common/PlatformLogo';
 import { z } from 'zod';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import CompanyRegistrationForm, { CompanyFormData } from '@/components/auth/CompanyRegistrationForm';
 import DemoQuickLogin from '@/components/auth/DemoQuickLogin';
+import AuthSidePanel from '@/components/auth/AuthSidePanel';
+import PasswordStrengthMeter from '@/components/auth/PasswordStrengthMeter';
 
 import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useLanguage } from '@/contexts/LanguageContext';
+
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
 
 // Validation schemas
 const loginSchema = z.object({
@@ -78,11 +84,36 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [rememberMe, setRememberMe] = useState(() => localStorage.getItem('rememberEmail') ? true : false);
+  const [loginAttempts, setLoginAttempts] = useState(0);
+  const [lockedUntil, setLockedUntil] = useState<number | null>(null);
   
   const { user, signIn, signUp, signUpDriver } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useLanguage();
+
+  // Check lockout on mount
+  useEffect(() => {
+    const stored = localStorage.getItem('loginLockout');
+    if (stored) {
+      const lockTime = parseInt(stored, 10);
+      if (lockTime > Date.now()) {
+        setLockedUntil(lockTime);
+        setLoginAttempts(MAX_LOGIN_ATTEMPTS);
+      } else {
+        localStorage.removeItem('loginLockout');
+        localStorage.removeItem('loginAttempts');
+      }
+    }
+    const attempts = parseInt(localStorage.getItem('loginAttempts') || '0', 10);
+    setLoginAttempts(attempts);
+  }, []);
+
+  const getRemainingLockoutMinutes = useCallback(() => {
+    if (!lockedUntil) return 0;
+    return Math.max(1, Math.ceil((lockedUntil - Date.now()) / 60000));
+  }, [lockedUntil]);
 
   // Company form state
   const [companyData, setCompanyData] = useState({
@@ -124,7 +155,7 @@ const Auth = () => {
 
   // Login form state
   const [loginData, setLoginData] = useState({
-    email: '',
+    email: localStorage.getItem('rememberEmail') || '',
     password: '',
   });
 
@@ -210,6 +241,17 @@ const Auth = () => {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check lockout
+    if (lockedUntil && lockedUntil > Date.now()) {
+      toast({
+        title: 'الحساب مقفل مؤقتاً',
+        description: `حاول مرة أخرى بعد ${getRemainingLockoutMinutes()} دقيقة`,
+        variant: 'destructive',
+      });
+      return;
+    }
+    
     setLoading(true);
     setErrors({});
 
@@ -219,10 +261,24 @@ const Auth = () => {
       const { error } = await signIn(loginData.email, loginData.password);
       
       if (error) {
-        if (error.message.includes('Invalid login credentials')) {
+        // Track failed attempts
+        const newAttempts = loginAttempts + 1;
+        setLoginAttempts(newAttempts);
+        localStorage.setItem('loginAttempts', String(newAttempts));
+        
+        if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
+          const lockTime = Date.now() + LOCKOUT_DURATION_MS;
+          setLockedUntil(lockTime);
+          localStorage.setItem('loginLockout', String(lockTime));
+          toast({
+            title: 'تم قفل الحساب مؤقتاً',
+            description: `عدد محاولات كثيرة. حاول بعد 15 دقيقة.`,
+            variant: 'destructive',
+          });
+        } else if (error.message.includes('Invalid login credentials')) {
           toast({
             title: t('auth.loginError'),
-            description: t('auth.invalidCredentials'),
+            description: `${t('auth.invalidCredentials')} (${MAX_LOGIN_ATTEMPTS - newAttempts} محاولات متبقية)`,
             variant: 'destructive',
           });
         } else {
@@ -233,6 +289,17 @@ const Auth = () => {
           });
         }
       } else {
+        // Success - reset attempts and handle remember me
+        setLoginAttempts(0);
+        localStorage.removeItem('loginAttempts');
+        localStorage.removeItem('loginLockout');
+        
+        if (rememberMe) {
+          localStorage.setItem('rememberEmail', loginData.email);
+        } else {
+          localStorage.removeItem('rememberEmail');
+        }
+        
         toast({
           title: t('auth.loginSuccess'),
           description: t('auth.welcomeBack'),
@@ -555,12 +622,19 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen-safe bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 overflow-y-auto auth-scroll-container">
-      {/* Background decoration */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 left-20 w-96 h-96 bg-eco-emerald/10 rounded-full blur-3xl" />
+    <div className="min-h-screen-safe flex flex-col lg:flex-row overflow-hidden">
+      {/* Side Panel - Desktop only */}
+      <div className="hidden lg:block lg:w-[45%] xl:w-[48%]">
+        <AuthSidePanel />
       </div>
+
+      {/* Form Panel */}
+      <div className="flex-1 bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4 sm:p-6 overflow-y-auto auth-scroll-container relative">
+        {/* Background decoration */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-20 right-20 w-72 h-72 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-20 w-96 h-96 bg-eco-emerald/10 rounded-full blur-3xl" />
+        </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -568,17 +642,15 @@ const Auth = () => {
         className="w-full max-w-lg relative z-10"
       >
         {/* Logo */}
-        <div className="text-center mb-8">
+        <div className="text-center mb-6">
           <motion.div
             whileHover={{ scale: 1.05 }}
-            className="inline-flex flex-col items-center gap-2 mb-4"
+            className="inline-flex flex-col items-center gap-2"
           >
             <PlatformLogo size="xl" />
-            <div className="flex flex-col items-center">
-              <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground/70">
-                Waste Management System
-              </span>
-            </div>
+            <span className="text-xs font-medium tracking-wider uppercase text-muted-foreground/70">
+              Waste Management System v2.0
+            </span>
           </motion.div>
         </div>
 
@@ -634,6 +706,26 @@ const Auth = () => {
                   onSubmit={handleLogin}
                   className="space-y-4"
                 >
+                  {/* Lockout Warning */}
+                  {lockedUntil && lockedUntil > Date.now() && (
+                    <Alert className="bg-destructive/10 border-destructive/30">
+                      <Lock className="h-4 w-4 text-destructive" />
+                      <AlertDescription className="text-sm text-destructive">
+                        تم قفل الدخول مؤقتاً بسبب محاولات متعددة. حاول بعد {getRemainingLockoutMinutes()} دقيقة.
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
+                  {/* Attempts Warning */}
+                  {loginAttempts >= 3 && loginAttempts < MAX_LOGIN_ATTEMPTS && !lockedUntil && (
+                    <Alert className="bg-accent border-border">
+                      <AlertTriangle className="h-4 w-4 text-accent-foreground" />
+                      <AlertDescription className="text-sm text-accent-foreground">
+                        تنبيه: {MAX_LOGIN_ATTEMPTS - loginAttempts} محاولات متبقية قبل قفل الحساب مؤقتاً
+                      </AlertDescription>
+                    </Alert>
+                  )}
+
                   <div className="space-y-2">
                     <Label htmlFor="email">{t('auth.email')}</Label>
                     <Input
@@ -644,6 +736,7 @@ const Auth = () => {
                       onChange={(e) => handleLoginChange('email', e.target.value)}
                       className={errors.email ? 'border-destructive' : ''}
                       dir="ltr"
+                      disabled={!!lockedUntil && lockedUntil > Date.now()}
                     />
                     {errors.email && (
                       <p className="text-sm text-destructive">{errors.email}</p>
@@ -661,6 +754,7 @@ const Auth = () => {
                         onChange={(e) => handleLoginChange('password', e.target.value)}
                         className={errors.password ? 'border-destructive' : ''}
                         dir="ltr"
+                        disabled={!!lockedUntil && lockedUntil > Date.now()}
                       />
                       <button
                         type="button"
@@ -675,7 +769,17 @@ const Auth = () => {
                     )}
                   </div>
 
-                  <div className="text-left">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Checkbox
+                        id="rememberMe"
+                        checked={rememberMe}
+                        onCheckedChange={(checked) => setRememberMe(checked === true)}
+                      />
+                      <Label htmlFor="rememberMe" className="text-sm text-muted-foreground cursor-pointer">
+                        تذكرني
+                      </Label>
+                    </div>
                     <button
                       type="button"
                       onClick={() => navigate('/reset-password')}
@@ -890,6 +994,7 @@ const Auth = () => {
                       </button>
                     </div>
                     {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
+                    <PasswordStrengthMeter password={jobseekerData.password} />
                   </div>
 
                   {/* Social Login for Job Seekers */}
@@ -1042,6 +1147,7 @@ const Auth = () => {
                         {errors.password && (
                           <p className="text-sm text-destructive">{errors.password}</p>
                         )}
+                        <PasswordStrengthMeter password={driverData.password} />
                       </div>
                     </div>
                   )}
@@ -1180,6 +1286,7 @@ const Auth = () => {
           </CardContent>
         </Card>
       </motion.div>
+      </div>
     </div>
   );
 };
