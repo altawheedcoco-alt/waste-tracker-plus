@@ -105,6 +105,7 @@ import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
+import BindingLegend from '@/components/shared/BindingLegend';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
@@ -556,6 +557,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               </div>
             )}
             
+            {/* Binding Legend */}
+            <BindingLegend isCollapsed={!isSidebarOpen} />
+
             {/* Quick Actions Section */}
             {filteredQuickActions.length > 0 && (
               <div className="pt-4 mt-4 border-t border-border">
@@ -926,6 +930,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       </div>
                     )}
                     
+                    {/* Binding Legend */}
+                    <BindingLegend isCollapsed={false} />
+
                     {/* Quick Actions Section */}
                     {filteredQuickActions.length > 0 && (
                       <div className="pt-4 mt-4 border-t border-border">
