@@ -69,10 +69,13 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
                 exit={{ opacity: 0, width: 0 }}
                 className="overflow-hidden whitespace-nowrap font-medium text-sm flex-1"
               >
-                {item.label}
+               {item.label}
               </motion.span>
             )}
           </AnimatePresence>
+          {!isCollapsed && item.bindingType && (
+            <BindingIndicator type={item.bindingType} dotOnly showTooltip />
+          )}
           {item.badge != null && item.badge > 0 && !isCollapsed && (
             <motion.span
               initial={{ scale: 0 }}
