@@ -67,18 +67,18 @@ interface BulkCertificateDialogProps {
   onSuccess?: () => void;
 }
 
-const wasteTypeLabels: Record<string, string> = {
-  plastic: 'بلاستيك',
-  paper: 'ورق',
-  metal: 'معادن',
-  glass: 'زجاج',
-  electronic: 'إلكترونيات',
-  organic: 'عضوية',
-  chemical: 'كيميائية',
-  medical: 'طبية',
-  construction: 'مخلفات بناء',
-  other: 'أخرى',
-};
+const getWasteTypeLabels = (t: (key: string) => string): Record<string, string> => ({
+  plastic: t('wasteTypes.plastic'),
+  paper: t('wasteTypes.paper'),
+  metal: t('wasteTypes.metal'),
+  glass: t('wasteTypes.glass'),
+  electronic: t('wasteTypes.electronic'),
+  organic: t('wasteTypes.organic'),
+  chemical: t('wasteTypes.chemical'),
+  medical: t('wasteTypes.medical'),
+  construction: t('wasteTypes.construction'),
+  other: t('wasteTypes.other'),
+});
 
 const BulkCertificateDialog = ({
   open,
