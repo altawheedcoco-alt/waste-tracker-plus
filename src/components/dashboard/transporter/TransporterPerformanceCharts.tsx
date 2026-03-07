@@ -4,11 +4,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { BarChart3 } from 'lucide-react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const COLORS = ['hsl(var(--primary))', 'hsl(142, 76%, 36%)', 'hsl(38, 92%, 50%)', 'hsl(0, 84%, 60%)', 'hsl(262, 83%, 58%)'];
 
 const TransporterPerformanceCharts = () => {
   const { organization } = useAuth();
+  const { t } = useLanguage();
 
   const { data, isLoading } = useQuery({
     queryKey: ['transporter-charts', organization?.id],
@@ -25,7 +27,11 @@ const TransporterPerformanceCharts = () => {
 
       // Daily shipment counts
       const dailyMap: Record<string, number> = {};
-      const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+      const days = [
+        t('transporterCharts.sunday'), t('transporterCharts.monday'), t('transporterCharts.tuesday'),
+        t('transporterCharts.wednesday'), t('transporterCharts.thursday'), t('transporterCharts.friday'),
+        t('transporterCharts.saturday')
+      ];
       for (let i = 6; i >= 0; i--) {
         const d = new Date();
         d.setDate(d.getDate() - i);
@@ -37,16 +43,17 @@ const TransporterPerformanceCharts = () => {
         const dayName = days[d.getDay()];
         if (dayName in dailyMap) dailyMap[dayName]++;
       });
-      const dailyData = Object.entries(dailyMap).map(([name, count]) => ({ name, شحنات: count }));
+      const shipmentKey = t('transporterCharts.shipments');
+      const dailyData = Object.entries(dailyMap).map(([name, count]) => ({ name, [shipmentKey]: count }));
 
       // Status distribution
       const statusMap: Record<string, number> = {};
       shipments?.forEach(s => {
-        const label = s.status === 'new' ? 'جديدة'
-          : s.status === 'approved' ? 'مقبولة'
-          : s.status === 'in_transit' ? 'قيد النقل'
-          : s.status === 'delivered' ? 'مسلّمة'
-          : s.status === 'confirmed' ? 'مؤكدة'
+        const label = s.status === 'new' ? t('shipmentStatus.new')
+          : s.status === 'approved' ? t('shipmentStatus.accepted')
+          : s.status === 'in_transit' ? t('shipmentStatus.in_transit')
+          : s.status === 'delivered' ? t('shipmentStatus.delivered')
+          : s.status === 'confirmed' ? t('shipmentStatus.confirmed')
           : s.status;
         statusMap[label] = (statusMap[label] || 0) + 1;
       });
@@ -73,28 +80,28 @@ const TransporterPerformanceCharts = () => {
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <BarChart3 className="w-5 h-5 text-primary" />
-          تحليلات الأداء
+          {t('transporterCharts.performanceAnalytics')}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Daily shipments bar chart */}
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-3 text-right">الشحنات اليومية (آخر 7 أيام)</p>
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-right">{t('transporterCharts.dailyShipmentsLast7')}</p>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={data.dailyData}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
                 <XAxis dataKey="name" fontSize={11} />
                 <YAxis fontSize={11} allowDecimals={false} />
                 <Tooltip />
-                <Bar dataKey="شحنات" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                <Bar dataKey={t('transporterCharts.shipments')} fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
 
           {/* Status pie chart */}
           <div>
-            <p className="text-sm font-medium text-muted-foreground mb-3 text-right">توزيع الحالات</p>
+            <p className="text-sm font-medium text-muted-foreground mb-3 text-right">{t('transporterCharts.statusDistribution')}</p>
             {data.statusData.length > 0 ? (
               <ResponsiveContainer width="100%" height={200}>
                 <PieChart>
@@ -108,7 +115,7 @@ const TransporterPerformanceCharts = () => {
               </ResponsiveContainer>
             ) : (
               <div className="flex items-center justify-center h-[200px] text-muted-foreground text-sm">
-                لا توجد بيانات
+                {t('transporterCharts.noData')}
               </div>
             )}
           </div>

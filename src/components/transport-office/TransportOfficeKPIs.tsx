@@ -2,21 +2,24 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Truck, CheckCircle2, Clock, DollarSign, Users, Wrench, AlertTriangle, Package } from 'lucide-react';
 import type { TransportOfficeStats } from '@/hooks/useTransportOfficeData';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface Props {
   stats: TransportOfficeStats;
 }
 
 const TransportOfficeKPIs = ({ stats }: Props) => {
+  const { t } = useLanguage();
+
   const cards = [
-    { icon: Truck, label: 'إجمالي المركبات', value: stats.totalVehicles, sub: `${stats.availableVehicles} متاحة` },
-    { icon: Users, label: 'السائقين', value: stats.totalDrivers, sub: `${stats.availableDrivers} متاح` },
-    { icon: Clock, label: 'طلبات معلقة', value: stats.pendingBookings, alert: stats.pendingBookings > 0 },
-    { icon: Package, label: 'حجوزات نشطة', value: stats.activeBookings, sub: '' },
-    { icon: CheckCircle2, label: 'مكتملة', value: stats.completedBookings, sub: '' },
-    { icon: DollarSign, label: 'الإيرادات', value: `${stats.totalRevenue.toLocaleString()}`, sub: 'ج.م' },
-    { icon: Wrench, label: 'صيانة', value: stats.maintenanceVehicles, alert: stats.overdueMaintenance > 0, sub: stats.overdueMaintenance > 0 ? `${stats.overdueMaintenance} متأخرة` : '' },
-    { icon: AlertTriangle, label: 'تنتهي قريباً', value: stats.expiringLicenses + stats.expiringInsurance, alert: (stats.expiringLicenses + stats.expiringInsurance) > 0, sub: 'رخصة/تأمين' },
+    { icon: Truck, label: t('transportOffice.totalVehicles'), value: stats.totalVehicles, sub: `${stats.availableVehicles} ${t('transportOffice.available')}` },
+    { icon: Users, label: t('transportOffice.drivers'), value: stats.totalDrivers, sub: `${stats.availableDrivers} ${t('transportOffice.available')}` },
+    { icon: Clock, label: t('transportOffice.pendingBookings'), value: stats.pendingBookings, alert: stats.pendingBookings > 0 },
+    { icon: Package, label: t('transportOffice.activeBookings'), value: stats.activeBookings, sub: '' },
+    { icon: CheckCircle2, label: t('transportOffice.completed'), value: stats.completedBookings, sub: '' },
+    { icon: DollarSign, label: t('transportOffice.revenue'), value: `${stats.totalRevenue.toLocaleString()}`, sub: t('transportOffice.currency') },
+    { icon: Wrench, label: t('transportOffice.maintenance'), value: stats.maintenanceVehicles, alert: stats.overdueMaintenance > 0, sub: stats.overdueMaintenance > 0 ? `${stats.overdueMaintenance} ${t('transportOffice.overdue')}` : '' },
+    { icon: AlertTriangle, label: t('transportOffice.expiringSoon'), value: stats.expiringLicenses + stats.expiringInsurance, alert: (stats.expiringLicenses + stats.expiringInsurance) > 0, sub: t('transportOffice.licenseInsurance') },
   ];
 
   return (
