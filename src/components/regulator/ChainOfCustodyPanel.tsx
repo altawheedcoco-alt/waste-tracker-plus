@@ -46,12 +46,12 @@ const ChainOfCustodyPanel = () => {
         .order('created_at', { ascending: false })
         .limit(100) as any;
 
-      if (statusFilter !== 'all') {
-        query = query.eq('status', statusFilter as any);
-      }
+      const finalQuery = statusFilter !== 'all' 
+        ? baseQuery.eq('status', statusFilter)
+        : baseQuery;
 
-      const { data } = await (query as any);
-      return data || [];
+      const { data } = await finalQuery;
+      return (data as any[]) || [];
     },
   });
 
