@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import DashboardV2Header from './shared/DashboardV2Header';
+import V2TabsNav, { TabItem } from './shared/V2TabsNav';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
