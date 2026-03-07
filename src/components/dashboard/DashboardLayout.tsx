@@ -105,6 +105,7 @@ import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
+import BindingLegend from '@/components/shared/BindingLegend';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
