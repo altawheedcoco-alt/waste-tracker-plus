@@ -1,4 +1,4 @@
-/* Performance & Data Saver Optimizations */
+/* v3.0 Performance & Data Saver Optimizations */
 
 .reduce-motion,
 .reduce-motion * {
@@ -22,9 +22,7 @@
 
 .offline-mode { filter: grayscale(0.3); }
 
-/* ========================================
-   الصفحة الرئيسية العامة
-   ======================================== */
+/* Landing page font */
 .landing-page {
   font-family: 'Cairo', sans-serif;
 }
