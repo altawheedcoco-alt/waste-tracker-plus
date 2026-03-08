@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import RegistrationTermsAcceptance from './RegistrationTermsAcceptance';
 
 interface CompanyRegistrationFormProps {
   onSubmit: (data: CompanyFormData) => Promise<{ error: Error | null }>;
@@ -111,6 +112,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const { toast } = useToast();
 
   const handleChange = (field: keyof CompanyFormData, value: string) => {
@@ -134,6 +136,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
       newErrors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
     }
     if (!formData.address) newErrors.address = 'مطلوب';
+    if (!termsAccepted) newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -370,6 +373,13 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
         />
       </div>
 
+      {/* Terms & Conditions */}
+      <RegistrationTermsAcceptance
+        accountType="company"
+        onAcceptChange={(v) => { setTermsAccepted(v); if (errors.terms) setErrors(prev => ({ ...prev, terms: '' })); }}
+      />
+      {errors.terms && <p className="text-xs text-destructive text-center">{errors.terms}</p>}
+
       {/* Buttons */}
       <div className="flex gap-2 pt-2 border-t">
         <Button
@@ -385,7 +395,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
           type="button"
           variant="eco"
           onClick={handleSubmit}
-          disabled={loading}
+          disabled={loading || !termsAccepted}
           size="sm"
           className="flex-1"
         >
