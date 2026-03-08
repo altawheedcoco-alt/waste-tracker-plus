@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { preprocessForOCR } from '@/utils/imagePreprocess';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -119,7 +120,6 @@ export default function DocumentAIAnalysis({
       let imageBase64 = fileUrl;
       
       if (fileUrl && !fileUrl.startsWith('data:')) {
-        // For images, fetch and convert to base64
         const isImage = fileType?.startsWith('image/') || 
           /\.(jpg|jpeg|png|gif|webp|bmp)$/i.test(fileName);
         
@@ -127,15 +127,24 @@ export default function DocumentAIAnalysis({
           try {
             const response = await fetch(fileUrl);
             const blob = await response.blob();
-            imageBase64 = await new Promise<string>((resolve) => {
+            const rawBase64 = await new Promise<string>((resolve) => {
               const reader = new FileReader();
               reader.onloadend = () => resolve(reader.result as string);
               reader.readAsDataURL(blob);
+            });
+            // Apply CamScanner-quality preprocessing
+            imageBase64 = await preprocessForOCR(rawBase64, {
+              grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
             });
           } catch {
             imageBase64 = fileUrl; // fallback to URL
           }
         }
+      } else if (imageBase64.startsWith('data:image')) {
+        // Preprocess inline base64 images too
+        imageBase64 = await preprocessForOCR(imageBase64, {
+          grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
+        });
       }
 
       const { data, error } = await supabase.functions.invoke('analyze-document', {

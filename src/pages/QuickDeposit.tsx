@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { preprocessForOCR } from '@/utils/imagePreprocess';
 import { useParams, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useForm } from 'react-hook-form';
@@ -300,9 +301,14 @@ const QuickDeposit = () => {
         console.warn('Pre-upload warning:', uploadError);
       }
 
+      // Preprocess image for HD OCR (CamScanner quality)
+      const processedImage = await preprocessForOCR(base64, {
+        grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
+      });
+
       // Then extract data with AI
       const { data, error } = await supabase.functions.invoke('extract-receipt-data', {
-        body: { imageBase64: base64 },
+        body: { imageBase64: processedImage },
       });
 
       if (error) throw error;

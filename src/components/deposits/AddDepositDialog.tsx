@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { preprocessForOCR } from '@/utils/imagePreprocess';
 import BankBranchSelector from './BankBranchSelector';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -301,9 +302,14 @@ export default function AddDepositDialog({
         reader.readAsDataURL(receiptFile);
       });
 
+      // Preprocess image for HD OCR (CamScanner quality)
+      const processedImage = await preprocessForOCR(base64, {
+        grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
+      });
+
       // Call AI extraction edge function
       const { data, error } = await supabase.functions.invoke('extract-receipt-data', {
-        body: { imageBase64: base64 },
+        body: { imageBase64: processedImage },
       });
 
       if (error) throw error;
