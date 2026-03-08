@@ -256,7 +256,7 @@ const TrackingCenter = () => {
     totalDrivers: drivers.length,
   }), [shipments, drivers]);
 
-  const showDrivers = orgType === 'transporter' || orgType === 'transport_office' || isAdmin;
+  const showDrivers = (orgType as string) === 'transporter' || (orgType as string) === 'transport_office' || isAdmin;
 
   const orgLabel = useMemo(() => {
     const labels: Record<string, string> = {
@@ -473,11 +473,10 @@ const TrackingCenter = () => {
                             </Button>
                             <Badge
                               variant="outline"
-                              className="text-[10px] gap-1"
-                              style={{ color: statusCfg.color, borderColor: statusCfg.color }}
+                              className={cn("text-[10px] gap-1", statusCfg?.textClass)}
                             >
-                              <StatusIcon className="w-3 h-3" />
-                              {statusCfg.label}
+                              {statusCfg && <statusCfg.icon className="w-3 h-3" />}
+                              {statusCfg?.labelAr || shipment.status}
                             </Badge>
                           </div>
                           <div className="text-right flex-1">
