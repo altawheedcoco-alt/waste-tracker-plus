@@ -1,4 +1,5 @@
 import { memo, useState, lazy, Suspense } from 'react';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -352,21 +353,27 @@ const ConsultingOfficeDashboard = memo(() => {
         </TabsContent>
 
         <TabsContent value="team" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <OfficeTeamPanel />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في بيانات الفريق">
+            <Suspense fallback={<LazyLoader />}>
+              <OfficeTeamPanel />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="clients" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <OfficeClientsPanel />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في بيانات العملاء">
+            <Suspense fallback={<LazyLoader />}>
+              <OfficeClientsPanel />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="approvals" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ApprovalQueuePanel />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في طلبات الموافقة">
+            <Suspense fallback={<LazyLoader />}>
+              <ApprovalQueuePanel />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         <TabsContent value="documents" className="mt-4 space-y-6">
