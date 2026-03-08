@@ -8,6 +8,7 @@
  * لا يُرسل إشعار من قناة واحدة فقط أبداً.
  */
 import { supabase } from '@/integrations/supabase/client';
+import { fetchBranding } from '@/hooks/useBranding';
 
 export interface DualNotification {
   /** المستخدم المستهدف */
