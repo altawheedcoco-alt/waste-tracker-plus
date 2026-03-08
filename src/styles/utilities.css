@@ -1,4 +1,4 @@
-/* Utility Classes */
+/* v3.0 Utility Classes */
 
 @layer utilities {
   .gradient-eco {
@@ -10,7 +10,7 @@
   }
 
   .text-gradient-eco {
-    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-emerald)) 100%);
+    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-teal)) 50%, hsl(var(--eco-ocean)) 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -21,27 +21,28 @@
   .shadow-eco-lg { box-shadow: var(--shadow-lg); }
   .shadow-eco-glow { box-shadow: var(--shadow-glow); }
 
+  /* v3.0 Glass morphism — refined */
   .glass-eco {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid hsl(var(--border));
+    background: rgba(255, 255, 255, 0.88);
+    backdrop-filter: blur(16px) saturate(1.6);
+    -webkit-backdrop-filter: blur(16px) saturate(1.6);
+    border: 1px solid hsl(var(--border) / 0.6);
   }
 
   .glass-card {
-    background: hsl(var(--card) / 0.8);
-    backdrop-filter: blur(20px) saturate(1.8);
-    -webkit-backdrop-filter: blur(20px) saturate(1.8);
-    border: 1px solid hsl(var(--border) / 0.5);
-    box-shadow: 0 4px 30px hsl(0 0% 0% / 0.06);
+    background: hsl(var(--card) / 0.85);
+    backdrop-filter: blur(24px) saturate(1.8);
+    -webkit-backdrop-filter: blur(24px) saturate(1.8);
+    border: 1px solid hsl(var(--border) / 0.4);
+    box-shadow: 0 4px 30px hsl(0 0% 0% / 0.05);
   }
 
   .glass-card-hover {
     @apply glass-card transition-all duration-300 ease-out;
   }
   .glass-card-hover:hover {
-    box-shadow: 0 8px 40px hsl(0 0% 0% / 0.1), 0 0 0 1px hsl(var(--primary) / 0.1);
-    transform: translateY(-2px);
+    box-shadow: 0 8px 40px hsl(0 0% 0% / 0.08), 0 0 0 1px hsl(var(--primary) / 0.1);
+    transform: translateY(-3px);
   }
   .glass-card-hover:active {
     transform: translateY(0) scale(0.98);
@@ -72,7 +73,7 @@
     @apply transition-transform duration-150;
   }
   .spring-press:active {
-    transform: scale(0.95);
+    transform: scale(0.96);
   }
 
   .gradient-border {
@@ -92,18 +93,20 @@
     pointer-events: none;
   }
 
+  /* v3.0 Hover effects — smoother */
   .hover-lift {
     @apply transition-all duration-300 ease-out;
   }
   .hover-lift:hover {
-    @apply -translate-y-1 shadow-lg;
+    @apply -translate-y-1.5;
+    box-shadow: var(--shadow-lg);
   }
 
   .hover-glow {
     @apply transition-all duration-300;
   }
   .hover-glow:hover {
-    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    box-shadow: 0 0 24px hsl(var(--primary) / 0.25);
   }
 
   .hover-scale {
@@ -117,14 +120,14 @@
     @apply transition-all duration-300 ease-out cursor-pointer;
   }
   .card-interactive:hover {
-    @apply -translate-y-1 shadow-md border-primary/30;
+    @apply -translate-y-1.5 shadow-md border-primary/30;
   }
 
   .scrollbar-thin {
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--border)) transparent;
   }
-  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar { width: 5px; height: 5px; }
   .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
   .scrollbar-thin::-webkit-scrollbar-thumb { background-color: hsl(var(--border)); border-radius: 3px; }
   .scrollbar-thin::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--muted-foreground)); }
@@ -157,6 +160,7 @@
     -webkit-tap-highlight-color: transparent;
   }
 
+  /* v3.0 Responsive text utilities */
   .text-responsive-xs { @apply text-xs sm:text-sm; }
   .text-responsive-sm { @apply text-sm sm:text-base; }
   .text-responsive-base { @apply text-base sm:text-lg; }
@@ -165,7 +169,7 @@
   .gap-responsive { @apply gap-2 sm:gap-3 lg:gap-4; }
   .p-responsive { @apply p-3 sm:p-4 lg:p-6; }
 
-  .card-responsive { @apply rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6; }
+  .card-responsive { @apply rounded-xl sm:rounded-2xl p-3 sm:p-4 lg:p-6; }
 
   .mobile-only { @apply block sm:hidden; }
   .desktop-only { @apply hidden sm:block; }
@@ -210,9 +214,14 @@
     line-height: 1.6;
   }
 
+  /* v3.0 Card adaptive — more refined borders and shadows */
   .card-adaptive {
-    @apply rounded-xl sm:rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow duration-300;
+    @apply rounded-xl sm:rounded-2xl border border-border/40 bg-card shadow-sm hover:shadow-md transition-all duration-300;
   }
 
   .bottom-nav-spacing { @apply pb-20 sm:pb-6; }
+
+  /* v3.0 Section spacing */
+  .section-padding { @apply py-12 sm:py-16 lg:py-20; }
+  .section-padding-sm { @apply py-8 sm:py-12 lg:py-14; }
 }
