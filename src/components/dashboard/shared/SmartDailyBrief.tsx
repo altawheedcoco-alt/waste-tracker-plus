@@ -3,7 +3,8 @@ import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
   Sunrise, Sun, Moon, Zap, TrendingUp, AlertTriangle, 
-  CheckCircle2, Clock, Package, Sparkles, Activity
+  CheckCircle2, Clock, Package, Sparkles, Activity,
+  Truck, Recycle, Factory, Shield
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -17,6 +18,15 @@ interface SmartDailyBriefProps {
   role: 'generator' | 'transporter' | 'recycler' | 'driver' | 'disposal' | 'admin';
 }
 
+const roleConfig: Record<string, { icon: typeof Package; label: string }> = {
+  generator: { icon: Package, label: 'مُولّد' },
+  transporter: { icon: Truck, label: 'ناقل' },
+  recycler: { icon: Recycle, label: 'مُدوِّر' },
+  driver: { icon: Truck, label: 'سائق' },
+  disposal: { icon: Factory, label: 'تخلص' },
+  admin: { icon: Shield, label: 'مسؤول' },
+};
+
 const SmartDailyBrief = ({ stats, role }: SmartDailyBriefProps) => {
   const { profile } = useAuth();
 
@@ -29,17 +39,39 @@ const SmartDailyBrief = ({ stats, role }: SmartDailyBriefProps) => {
 
   const smartMessage = useMemo(() => {
     if (!stats) return null;
-    const { pending = 0, active = 0, completed = 0 } = stats;
+    const { pending = 0, active = 0, completed = 0, total = 0 } = stats;
 
-    if (pending > 5) return { text: `لديك ${pending} شحنة بانتظار الموافقة`, icon: AlertTriangle, color: 'text-amber-500' };
-    if (active > 0) return { text: `${active} رحلة نشطة الآن`, icon: Zap, color: 'text-primary' };
-    if (completed > 0) return { text: `أنجزت ${completed} مهمة اليوم - أحسنت! 🎉`, icon: CheckCircle2, color: 'text-emerald-500' };
-    return { text: 'يوم جديد مليء بالفرص!', icon: Sparkles, color: 'text-primary' };
-  }, [stats]);
+    // Role-specific messages
+    if (role === 'disposal') {
+      if (pending > 3) return { text: `${pending} طلب تخلص بانتظار المعالجة`, icon: AlertTriangle, color: 'text-amber-500' };
+      if (active > 0) return { text: `${active} عملية تخلص جارية الآن`, icon: Zap, color: 'text-primary' };
+      if (completed > 0) return { text: `تم معالجة ${completed} عملية - أداء ممتاز! 🏭`, icon: CheckCircle2, color: 'text-emerald-500' };
+    } else if (role === 'recycler') {
+      if (pending > 3) return { text: `${pending} شحنة واردة بانتظار الفرز`, icon: AlertTriangle, color: 'text-amber-500' };
+      if (active > 0) return { text: `${active} شحنة قيد المعالجة والتدوير`, icon: Zap, color: 'text-primary' };
+      if (completed > 0) return { text: `أنجزت تدوير ${completed} شحنة - استمر! ♻️`, icon: CheckCircle2, color: 'text-emerald-500' };
+    } else if (role === 'transporter') {
+      if (pending > 5) return { text: `لديك ${pending} شحنة بانتظار الاستلام`, icon: AlertTriangle, color: 'text-amber-500' };
+      if (active > 0) return { text: `${active} رحلة نشطة على الطريق`, icon: Zap, color: 'text-primary' };
+      if (completed > 0) return { text: `أتممت ${completed} رحلة بنجاح - أحسنت! 🚛`, icon: CheckCircle2, color: 'text-emerald-500' };
+    } else if (role === 'driver') {
+      if (pending > 0) return { text: `${pending} مهمة بانتظارك`, icon: AlertTriangle, color: 'text-amber-500' };
+      if (active > 0) return { text: `${active} رحلة جارية الآن`, icon: Zap, color: 'text-primary' };
+      if (completed > 0) return { text: `أنجزت ${completed} مهمة اليوم 🌟`, icon: CheckCircle2, color: 'text-emerald-500' };
+    } else {
+      // generator / admin
+      if (pending > 5) return { text: `لديك ${pending} شحنة بانتظار الموافقة`, icon: AlertTriangle, color: 'text-amber-500' };
+      if (active > 0) return { text: `${active} رحلة نشطة الآن`, icon: Zap, color: 'text-primary' };
+      if (completed > 0) return { text: `أنجزت ${completed} مهمة اليوم - أحسنت! 🎉`, icon: CheckCircle2, color: 'text-emerald-500' };
+    }
+
+    if (total === 0) return { text: 'يوم جديد مليء بالفرص!', icon: Sparkles, color: 'text-primary' };
+    return { text: 'استمر في الأداء المتميز!', icon: TrendingUp, color: 'text-primary' };
+  }, [stats, role]);
 
   const firstName = profile?.full_name?.split(' ')[0] || '';
-
   const completionRate = stats?.total ? Math.round(((stats.completed ?? 0) / stats.total) * 100) : 0;
+  const RoleIcon = roleConfig[role]?.icon || Package;
 
   return (
     <motion.div
@@ -76,10 +108,11 @@ const SmartDailyBrief = ({ stats, role }: SmartDailyBriefProps) => {
               </motion.div>
               <div>
                 <h2 className="text-lg sm:text-xl font-bold truncate leading-tight">
-                  {greeting}، {firstName}
+                  {greeting}{firstName ? `، ${firstName}` : ''}
                 </h2>
-                <p className="text-[11px] text-muted-foreground">
-                  {new Date().toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'long' })}
+                <p className="text-[11px] text-muted-foreground flex items-center gap-1.5 justify-end">
+                  <RoleIcon className="w-3 h-3" />
+                  {roleConfig[role]?.label} • {new Date().toLocaleDateString('ar-SA', { weekday: 'long', day: 'numeric', month: 'long' })}
                 </p>
               </div>
             </div>
