@@ -122,20 +122,28 @@ export const useAIAssistant = () => {
     }
   }, []);
 
-  // Classify waste from image
+  // Classify waste from image - HD OCR preprocessing
   const classifyWaste = useCallback(async (imageBase64: string): Promise<WasteClassification | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
+      const processedImage = await preprocessForOCR(imageBase64, {
+        grayscale: false, // keep colors for waste classification
+        contrast: 40,
+        sharpness: 1.5,
+        brightness: 5,
+        maxDimension: 2400,
+        quality: 0.95,
+      });
+
       const { data, error: funcError } = await supabase.functions.invoke('ai-assistant', {
-        body: { type: 'classify_waste', imageBase64 }
+        body: { type: 'classify_waste', imageBase64: processedImage }
       });
 
       if (funcError) throw funcError;
 
       const result = data.result;
-      // Parse JSON from the response
       const jsonMatch = result.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         return JSON.parse(jsonMatch[0]);
