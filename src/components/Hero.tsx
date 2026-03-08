@@ -75,8 +75,8 @@ const Hero = memo(() => {
           >
             <span className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/10 backdrop-blur-xl text-white font-semibold text-[11px] sm:text-sm border border-white/20 shadow-xl relative overflow-hidden">
               
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(42,92%,55%)]" />
-              <span className="text-[hsl(42,92%,55%)] font-bold">v2.0</span>
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
+              <span className="text-amber-400 font-bold">v2.0</span>
               <span className="w-px h-4 bg-white/30" />
               <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />{t('landing.tagline')}
             </span>
@@ -135,7 +135,7 @@ const Hero = memo(() => {
                 transition={{ type: 'spring', stiffness: 400 }}
               >
                 <div className="absolute inset-0 bg-gradient-to-t from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                <stat.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[hsl(162,72%,52%)]" />
+                <stat.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-primary" />
                 <span className="text-lg sm:text-2xl font-black text-white tabular-nums">{stat.value}</span>
                 <span className="text-[9px] sm:text-xs text-white/60 font-medium">{stat.label}</span>
               </motion.div>
@@ -202,13 +202,13 @@ const Hero = memo(() => {
             >
               {t('landing.joinUs')}
             </p>
-            <p className="text-sm sm:text-lg text-[hsl(42,92%,55%)] font-bold tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.5), 0 2px 8px rgba(0,0,0,0.4)' }}>
+            <p className="text-sm sm:text-lg text-amber-400 font-bold tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.5), 0 2px 8px rgba(0,0,0,0.4)' }}>
               𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
             </p>
           </motion.div>
         </div>
       </div>
-      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-[hsl(160,15%,97%)] to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 h-40 bg-gradient-to-t from-background to-transparent" />
     </section>
   );
 });
