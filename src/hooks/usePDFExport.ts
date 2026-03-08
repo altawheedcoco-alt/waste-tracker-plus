@@ -39,8 +39,20 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     const noPrintEls = element.querySelectorAll('.no-print');
     noPrintEls.forEach(el => (el as HTMLElement).style.display = 'none');
 
+    // Wait for images to load and reflow
+    const images = Array.from(element.querySelectorAll('img'));
+    await Promise.allSettled(
+      images.filter(img => !img.complete).map(img => 
+        new Promise<void>((resolve) => {
+          img.onload = () => resolve();
+          img.onerror = () => resolve();
+          setTimeout(resolve, 3000); // 3s timeout per image
+        })
+      )
+    );
+
     // Wait for reflow
-    await new Promise(r => setTimeout(r, 200));
+    await new Promise(r => setTimeout(r, 300));
 
     const pdf = new jsPDF({ orientation, unit: 'mm', format });
     const pageWidth = pdf.internal.pageSize.getWidth();
@@ -55,11 +67,24 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     const captureOpts = {
       scale,
       useCORS: true,
-      allowTaint: true,
+      allowTaint: false,
       backgroundColor: '#ffffff',
       logging: false,
       width: 794,
       windowWidth: 794,
+      onclone: (clonedDoc: Document) => {
+        // Fix all images with crossOrigin for CORS
+        const imgs = clonedDoc.querySelectorAll('img');
+        imgs.forEach(img => {
+          img.crossOrigin = 'anonymous';
+          // Force reload for CORS
+          if (img.src && !img.src.startsWith('data:')) {
+            const url = new URL(img.src);
+            url.searchParams.set('_t', Date.now().toString());
+            img.src = url.toString();
+          }
+        });
+      },
     };
 
     if (hasPageBreaks && children.length > 1) {

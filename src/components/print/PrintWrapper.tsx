@@ -80,9 +80,11 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         margin: '0 auto', 
         padding: '10mm 12mm',
         boxSizing: 'border-box',
-        fontFamily: "'Cairo', sans-serif",
+        fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
         display: 'flex',
         flexDirection: 'column',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
       {/* Watermark */}
@@ -158,11 +160,11 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       )}
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className="print-content flex-1">{children}</main>
+      <main className="print-content flex-1" style={{ pageBreakInside: 'auto' }}>{children}</main>
 
       {/* ===== SECURE FOOTER ===== */}
       {showFooter && (
-        <footer className="print-footer mt-6 pt-3 border-t-2 text-center text-[8pt] text-gray-500" style={{ borderColor: accentColor }}>
+        <footer className="print-footer mt-6 pt-3 border-t-2 text-center text-[8pt] text-gray-500" style={{ borderColor: accentColor, pageBreakInside: 'avoid' }}>
           {/* Legal Disclaimer */}
           <div className="mb-2 px-2">
             <p className="text-[7pt] text-gray-600 leading-relaxed">
@@ -172,9 +174,17 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
               ولا يتطلب المستند توقيعاً خطياً أو ختماً يدوياً للاعتداد به رقمياً.
             </p>
           </div>
-          {/* Footer QR + Verification */}
-          <div className="flex items-center justify-center mb-2">
-            <div className="text-center flex-1">
+          {/* Footer QR + Barcode + Verification */}
+          <div className="flex items-center justify-between mb-2 px-2">
+            {/* QR Code */}
+            {showQR && (
+              <div className="flex-shrink-0">
+                <QRCodeSVG value={qrContent} size={56} level="M" includeMargin={false} />
+                <p className="text-[6pt] text-gray-400 mt-0.5">امسح للتحقق</p>
+              </div>
+            )}
+
+            <div className="text-center flex-1 px-3">
               <p>{footerText || 'هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل'}</p>
               <p className="mt-0.5">
                 رقم المرجع: {documentNumber || '-'} | كود التحقق: <span className="font-mono font-bold">{vCode}</span>
@@ -184,6 +194,13 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
                 <p className="mt-0.5">تاريخ وصول الشحنة: {format(new Date(arrivalDate), 'PPp', { locale: ar })}</p>
               )}
             </div>
+
+            {/* Barcode */}
+            {showBarcode && (
+              <div className="flex-shrink-0">
+                <Barcode value={barcodeContent} width={1} height={28} fontSize={7} displayValue={true} margin={0} />
+              </div>
+            )}
           </div>
           <p className="text-gray-400 text-[7pt]">
             مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي — وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004

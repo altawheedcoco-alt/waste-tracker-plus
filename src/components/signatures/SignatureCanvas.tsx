@@ -13,18 +13,29 @@ const SignatureCanvas = ({ onSignatureChange, width = 400, height = 180, penColo
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasSignature, setHasSignature] = useState(false);
 
+  // Use device pixel ratio for crisp rendering
+  const dpr = typeof window !== 'undefined' ? Math.min(window.devicePixelRatio || 1, 3) : 1;
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    
+    // Set actual canvas size (high-res) 
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    // Scale context to match DPR
+    ctx.scale(dpr, dpr);
     ctx.fillStyle = '#ffffff';
     ctx.fillRect(0, 0, width, height);
     ctx.strokeStyle = penColor;
     ctx.lineWidth = penWidth;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-  }, [width, height, penColor, penWidth]);
+  }, [width, height, penColor, penWidth, dpr]);
 
   const getCoords = useCallback((e: React.MouseEvent | React.TouchEvent) => {
     const canvas = canvasRef.current;
@@ -81,8 +92,7 @@ const SignatureCanvas = ({ onSignatureChange, width = 400, height = 180, penColo
     <div className="flex flex-col items-center gap-2">
       <canvas
         ref={canvasRef}
-        width={width}
-        height={height}
+        style={{ width: `${width}px`, height: `${height}px` }}
         className="border-2 border-dashed border-border rounded-lg cursor-crosshair touch-none bg-white"
         onMouseDown={startDrawing}
         onMouseMove={draw}
