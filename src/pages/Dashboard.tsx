@@ -10,6 +10,7 @@ import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
+import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -51,6 +52,9 @@ const Dashboard = () => {
   
   // Security hardening — session timeout, CSP, anti-XSS
   useSecurityHardening();
+  
+  // Realtime sync — auto-subscribe to all critical tables for this role
+  useDashboardRealtime();
 
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);

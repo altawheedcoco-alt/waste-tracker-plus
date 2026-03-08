@@ -39561,10 +39561,12 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_member_role_level: {
-        Args: { role: Database["public"]["Enums"]["member_role"] }
-        Returns: number
-      }
+      get_member_role_level:
+        | { Args: { _role: string }; Returns: number }
+        | {
+            Args: { role: Database["public"]["Enums"]["member_role"] }
+            Returns: number
+          }
       get_monthly_invoice_stats: {
         Args: { _org_id: string }
         Returns: {
@@ -39721,13 +39723,15 @@ export type Database = {
         }
         Returns: boolean
       }
-      has_role: {
-        Args: {
-          _role: Database["public"]["Enums"]["app_role"]
-          _user_id: string
-        }
-        Returns: boolean
-      }
+      has_role:
+        | {
+            Args: {
+              _role: Database["public"]["Enums"]["app_role"]
+              _user_id: string
+            }
+            Returns: boolean
+          }
+        | { Args: { _role: string; _user_id: string }; Returns: boolean }
       has_two_factor_enabled: { Args: { _user_id: string }; Returns: boolean }
       has_waste_access: {
         Args: { _user_id: string; _waste_type: string }
