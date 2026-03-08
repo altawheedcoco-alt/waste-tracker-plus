@@ -3,7 +3,7 @@
  * Each file exports an array of SidebarGroupConfig.
  */
 import {
-  Building2, FileText, Network, Users, Handshake, Rss, Newspaper, Fingerprint, Shield, Brain, ShieldAlert, GitBranch,
+  Building2, FileText, Network, Users, Handshake, Rss, Newspaper, Fingerprint, Shield, Brain, ShieldAlert, GitBranch, Palette,
 } from 'lucide-react';
 import type { SidebarGroupConfig } from './sidebarTypes';
 
@@ -29,6 +29,7 @@ export const sharedGroups: SidebarGroupConfig[] = [
       { icon: Brain, labelAr: 'الأرشفة الذكية', labelEn: 'Smart Archive', path: '/dashboard/smart-archive', key: 'smart-archive', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'regulator', 'consultant', 'consulting_office', 'admin'] },
       { icon: ShieldAlert, labelAr: 'الأمن السيبراني', labelEn: 'Cyber Security', path: '/dashboard/cyber-security', key: 'cyber-security' },
       { icon: GitBranch, labelAr: 'دليل البنية المعمارية', labelEn: 'Architecture Guide', path: '/dashboard/architecture-guide', key: 'architecture-guide', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'] },
+      { icon: Palette, labelAr: 'الهوية البصرية', labelEn: 'Branding', path: '/dashboard/admin-branding', key: 'admin-branding', visibleFor: ['admin'] },
     ],
   },
 ];
