@@ -1,0 +1,218 @@
+/* Utility Classes */
+
+@layer utilities {
+  .gradient-eco {
+    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-emerald)) 100%);
+  }
+
+  .gradient-eco-light {
+    background: linear-gradient(135deg, hsl(var(--eco-green-light)) 0%, hsl(var(--eco-teal)) 100%);
+  }
+
+  .text-gradient-eco {
+    background: linear-gradient(135deg, hsl(var(--eco-green)) 0%, hsl(var(--eco-emerald)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .shadow-eco-sm { box-shadow: var(--shadow-sm); }
+  .shadow-eco-md { box-shadow: var(--shadow-md); }
+  .shadow-eco-lg { box-shadow: var(--shadow-lg); }
+  .shadow-eco-glow { box-shadow: var(--shadow-glow); }
+
+  .glass-eco {
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid hsl(var(--border));
+  }
+
+  .glass-card {
+    background: hsl(var(--card) / 0.8);
+    backdrop-filter: blur(20px) saturate(1.8);
+    -webkit-backdrop-filter: blur(20px) saturate(1.8);
+    border: 1px solid hsl(var(--border) / 0.5);
+    box-shadow: 0 4px 30px hsl(0 0% 0% / 0.06);
+  }
+
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300 ease-out;
+  }
+  .glass-card-hover:hover {
+    box-shadow: 0 8px 40px hsl(0 0% 0% / 0.1), 0 0 0 1px hsl(var(--primary) / 0.1);
+    transform: translateY(-2px);
+  }
+  .glass-card-hover:active {
+    transform: translateY(0) scale(0.98);
+    transition-duration: 100ms;
+  }
+
+  .card-shine {
+    position: relative;
+    overflow: hidden;
+  }
+  .card-shine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.04), transparent);
+    transition: left 0.6s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  .card-shine:hover::before {
+    left: 100%;
+  }
+
+  .spring-press {
+    @apply transition-transform duration-150;
+  }
+  .spring-press:active {
+    transform: scale(0.95);
+  }
+
+  .gradient-border {
+    position: relative;
+    border: none !important;
+  }
+  .gradient-border::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: inherit;
+    background: linear-gradient(135deg, hsl(var(--primary) / 0.3), hsl(var(--border) / 0.5), hsl(var(--primary) / 0.1));
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+
+  .hover-lift {
+    @apply transition-all duration-300 ease-out;
+  }
+  .hover-lift:hover {
+    @apply -translate-y-1 shadow-lg;
+  }
+
+  .hover-glow {
+    @apply transition-all duration-300;
+  }
+  .hover-glow:hover {
+    box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+  }
+
+  .hover-scale {
+    @apply transition-transform duration-200 ease-out;
+  }
+  .hover-scale:hover {
+    @apply scale-105;
+  }
+
+  .card-interactive {
+    @apply transition-all duration-300 ease-out cursor-pointer;
+  }
+  .card-interactive:hover {
+    @apply -translate-y-1 shadow-md border-primary/30;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background-color: hsl(var(--border)); border-radius: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background-color: hsl(var(--muted-foreground)); }
+
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-primary/50 focus:ring-offset-2 focus:ring-offset-background;
+  }
+
+  .pulse-dot {
+    @apply relative;
+  }
+  .pulse-dot::after {
+    content: '';
+    @apply absolute -top-1 -right-1 w-3 h-3 bg-destructive rounded-full;
+    animation: pulse-ring 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+
+  @keyframes pulse-ring {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(1.2); }
+  }
+
+  .skeleton-loading { @apply bg-muted animate-pulse rounded; }
+
+  .pb-safe { padding-bottom: env(safe-area-inset-bottom, 16px); }
+  .pt-safe { padding-top: env(safe-area-inset-top, 0); }
+
+  .touch-manipulation {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .text-responsive-xs { @apply text-xs sm:text-sm; }
+  .text-responsive-sm { @apply text-sm sm:text-base; }
+  .text-responsive-base { @apply text-base sm:text-lg; }
+  .text-responsive-lg { @apply text-lg sm:text-xl lg:text-2xl; }
+
+  .gap-responsive { @apply gap-2 sm:gap-3 lg:gap-4; }
+  .p-responsive { @apply p-3 sm:p-4 lg:p-6; }
+
+  .card-responsive { @apply rounded-lg sm:rounded-xl p-3 sm:p-4 lg:p-6; }
+
+  .mobile-only { @apply block sm:hidden; }
+  .desktop-only { @apply hidden sm:block; }
+
+  .grid-responsive-2 { @apply grid grid-cols-1 sm:grid-cols-2; }
+  .grid-responsive-3 { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3; }
+  .grid-responsive-4 { @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4; }
+
+  .display-mobile { @apply text-sm; }
+  .display-mobile .card-content { @apply p-3; }
+  .display-tablet { @apply text-base; }
+  .display-tablet .card-content { @apply p-4; }
+  .display-desktop { @apply text-base; }
+  .display-desktop .card-content { @apply p-5; }
+
+  .stat-card { @apply transition-all duration-200; }
+  .stat-card-compact { @apply p-3; }
+  .stat-card-normal { @apply p-4 sm:p-5; }
+
+  .icon-responsive-sm { @apply w-4 h-4 sm:w-5 sm:h-5; }
+  .icon-responsive-md { @apply w-5 h-5 sm:w-6 sm:h-6; }
+  .icon-responsive-lg { @apply w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12; }
+
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px] touch-manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .touch-target-sm {
+    @apply min-h-[36px] min-w-[36px] touch-manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .page-transition { @apply transition-all duration-300 ease-out; }
+
+  .container-responsive {
+    @apply px-3 sm:px-4 lg:px-6 xl:px-8;
+    max-width: 100%;
+  }
+
+  .text-adaptive {
+    @apply text-sm sm:text-base;
+    line-height: 1.6;
+  }
+
+  .card-adaptive {
+    @apply rounded-xl sm:rounded-2xl border border-border/50 bg-card shadow-sm hover:shadow-md transition-shadow duration-300;
+  }
+
+  .bottom-nav-spacing { @apply pb-20 sm:pb-6; }
+}
