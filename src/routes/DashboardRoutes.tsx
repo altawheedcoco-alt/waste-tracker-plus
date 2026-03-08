@@ -12,6 +12,7 @@ const DriverApprovals = lazy(() => import("@/pages/dashboard/DriverApprovals"));
 const ShipmentManagement = lazy(() => import("@/pages/dashboard/ShipmentManagement"));
 const DriverTracking = lazy(() => import("@/pages/dashboard/DriverTracking"));
 const ShipmentRoutesMap = lazy(() => import("@/pages/dashboard/ShipmentRoutesMap"));
+const TrackingCenter = lazy(() => import("@/pages/dashboard/TrackingCenter"));
 const Reports = lazy(() => import("@/pages/dashboard/Reports"));
 const CarbonFootprintAnalysis = lazy(() => import("@/pages/dashboard/CarbonFootprintAnalysis"));
 const EnvironmentalSustainability = lazy(() => import("@/pages/dashboard/EnvironmentalSustainability"));
@@ -237,6 +238,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/transporter-drivers" element={<TransporterDrivers />} />
     <Route path="/dashboard/driver-tracking" element={<DriverTracking />} />
     <Route path="/dashboard/shipment-routes" element={<ShipmentRoutesMap />} />
+    <Route path="/dashboard/tracking-center" element={<TrackingCenter />} />
     <Route path="/dashboard/reports" element={<Reports />} />
     <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
     <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />

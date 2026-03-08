@@ -84,6 +84,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['generator'],
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
       { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
@@ -117,6 +118,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Fleet & Tracking',
     visibleFor: ['transporter'],
     items: [
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const },
       { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const },
       { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const },
       { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const },
@@ -161,6 +163,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['recycler'],
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'recycler-shipments', badgeKey: 'recycler-shipments' },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'recycler-tracking-center' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'recycler-rejected' },
       { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
       { icon: FolderCheck, labelAr: 'إصدار شهادات التدوير', labelEn: 'Issue Certs', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs', badgeKey: 'issue-certs' },
@@ -177,6 +180,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['disposal'],
     items: [
       { icon: Factory, labelAr: 'العمليات', labelEn: 'Operations', path: '/dashboard/disposal/operations', key: 'disposal-operations' },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'disposal-tracking-center' },
       { icon: Package, labelAr: 'الطلبات الواردة', labelEn: 'Incoming Requests', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming' },
       { icon: FolderCheck, labelAr: 'شهادات التخلص', labelEn: 'Disposal Certs', path: '/dashboard/disposal/certificates', key: 'disposal-certs' },
       { icon: BarChart3, labelAr: 'تقارير التخلص', labelEn: 'Disposal Reports', path: '/dashboard/disposal/reports', key: 'disposal-reports' },
