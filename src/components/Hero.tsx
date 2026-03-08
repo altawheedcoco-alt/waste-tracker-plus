@@ -48,7 +48,7 @@ const Hero = memo(() => {
   ];
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-20 pb-8 sm:pt-20 sm:pb-0">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-28 pb-8 sm:pt-32 sm:pb-0">
       {/* Background image with cinematic overlay */}
       <div className="absolute inset-0">
         <img 
