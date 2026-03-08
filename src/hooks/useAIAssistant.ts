@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { preprocessForOCR } from '@/utils/imagePreprocess';
 
 interface Message {
   role: 'user' | 'assistant';
