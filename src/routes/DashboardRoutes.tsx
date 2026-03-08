@@ -218,6 +218,7 @@ const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics")
 const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocumentRegistry"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
+const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 
 export const dashboardRoutes = (
   <>
