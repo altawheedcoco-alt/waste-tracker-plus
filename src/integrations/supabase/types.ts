@@ -22752,9 +22752,13 @@ export type Database = {
       }
       organization_members: {
         Row: {
+          appointed_by: string | null
+          can_grant_permissions: boolean | null
+          can_manage_members: boolean | null
           created_at: string
           department_id: string | null
           employee_number: string | null
+          granted_permissions: Json | null
           id: string
           invitation_accepted_at: string | null
           invitation_email: string | null
@@ -22764,6 +22768,8 @@ export type Database = {
           job_title_ar: string | null
           joined_at: string | null
           left_at: string | null
+          max_grantable_level: number | null
+          member_role: Database["public"]["Enums"]["member_role"]
           notes: string | null
           organization_id: string
           position_id: string | null
@@ -22773,9 +22779,13 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          appointed_by?: string | null
+          can_grant_permissions?: boolean | null
+          can_manage_members?: boolean | null
           created_at?: string
           department_id?: string | null
           employee_number?: string | null
+          granted_permissions?: Json | null
           id?: string
           invitation_accepted_at?: string | null
           invitation_email?: string | null
@@ -22785,6 +22795,8 @@ export type Database = {
           job_title_ar?: string | null
           joined_at?: string | null
           left_at?: string | null
+          max_grantable_level?: number | null
+          member_role?: Database["public"]["Enums"]["member_role"]
           notes?: string | null
           organization_id: string
           position_id?: string | null
@@ -22794,9 +22806,13 @@ export type Database = {
           user_id: string
         }
         Update: {
+          appointed_by?: string | null
+          can_grant_permissions?: boolean | null
+          can_manage_members?: boolean | null
           created_at?: string
           department_id?: string | null
           employee_number?: string | null
+          granted_permissions?: Json | null
           id?: string
           invitation_accepted_at?: string | null
           invitation_email?: string | null
@@ -22806,6 +22822,8 @@ export type Database = {
           job_title_ar?: string | null
           joined_at?: string | null
           left_at?: string | null
+          max_grantable_level?: number | null
+          member_role?: Database["public"]["Enums"]["member_role"]
           notes?: string | null
           organization_id?: string
           position_id?: string | null
@@ -22815,6 +22833,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "organization_members_appointed_by_fkey"
+            columns: ["appointed_by"]
+            isOneToOne: false
+            referencedRelation: "organization_members"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "organization_members_department_id_fkey"
             columns: ["department_id"]
@@ -39045,6 +39070,14 @@ export type Database = {
         Args: { _ticket_id: string; _user_id: string }
         Returns: boolean
       }
+      can_assign_member_role: {
+        Args: {
+          _granting_user_id: string
+          _org_id: string
+          _target_role: Database["public"]["Enums"]["member_role"]
+        }
+        Returns: boolean
+      }
       can_org_access_dashboard: { Args: { org_id: string }; Returns: boolean }
       can_org_operate: { Args: { org_id: string }; Returns: boolean }
       can_view_organization: { Args: { _org_id: string }; Returns: boolean }
@@ -39248,6 +39281,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_member_role_level: {
+        Args: { role: Database["public"]["Enums"]["member_role"] }
+        Returns: number
       }
       get_monthly_invoice_stats: {
         Args: { _org_id: string }
@@ -39454,6 +39491,10 @@ export type Database = {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
       }
+      is_org_member_with_role: {
+        Args: { _max_level?: number; _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_org_subscription_valid: { Args: { org_id: string }; Returns: boolean }
       is_regulator_member: { Args: { _user_id: string }; Returns: boolean }
       is_regulator_user: { Args: { p_user_id: string }; Returns: boolean }
@@ -39605,6 +39646,13 @@ export type Database = {
         | "view_settings"
         | "manage_settings"
         | "full_access"
+      member_role:
+        | "entity_head"
+        | "assistant"
+        | "deputy_assistant"
+        | "agent"
+        | "delegate"
+        | "member"
       organization_type:
         | "generator"
         | "transporter"
@@ -39822,6 +39870,14 @@ export const Constants = {
         "view_settings",
         "manage_settings",
         "full_access",
+      ],
+      member_role: [
+        "entity_head",
+        "assistant",
+        "deputy_assistant",
+        "agent",
+        "delegate",
+        "member",
       ],
       organization_type: [
         "generator",
