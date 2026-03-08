@@ -88,6 +88,7 @@ export const publicRoutes = (
     <Route path="/about" element={<About />} />
     <Route path="/policies" element={<Policies />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/account-pending" element={<AccountPendingPage />} />
     <Route path="/shared/:token" element={<SharedDocumentView />} />
     <Route path="/scoped/:code" element={<ScopedAccessPortal />} />
     <Route path="/recycling-history" element={<RecyclingHistory />} />
