@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { toast } from 'sonner';
+import type { MemberRole, MemberPermission } from '@/types/memberRoles';
 
 export interface OrgMember {
   id: string;
@@ -13,6 +14,12 @@ export interface OrgMember {
   employee_number: string | null;
   job_title: string | null;
   job_title_ar: string | null;
+  member_role: MemberRole;
+  granted_permissions: string[];
+  can_manage_members: boolean;
+  can_grant_permissions: boolean;
+  max_grantable_level: number;
+  appointed_by: string | null;
   status: string;
   joined_at: string | null;
   invitation_email: string | null;
@@ -79,7 +86,6 @@ export function useOrgMembers() {
         .order('created_at', { ascending: false });
       if (error) throw error;
       
-      // Enrich with profile, position, department data
       const members = data as any[];
       const enriched = await Promise.all(members.map(async (m: any) => {
         const [profileRes, posRes, deptRes] = await Promise.all([
@@ -89,6 +95,11 @@ export function useOrgMembers() {
         ]);
         return {
           ...m,
+          granted_permissions: m.granted_permissions || [],
+          member_role: m.member_role || 'member',
+          can_manage_members: m.can_manage_members || false,
+          can_grant_permissions: m.can_grant_permissions || false,
+          max_grantable_level: m.max_grantable_level || 6,
           profile: profileRes.data,
           position: posRes.data,
           department: deptRes.data,
@@ -97,6 +108,41 @@ export function useOrgMembers() {
       return enriched as OrgMember[];
     },
     enabled: !!orgId,
+  });
+
+  /** Get the current user's member record */
+  const currentUserMember = membersQuery.data?.find(m => m.user_id === profile?.user_id && m.status === 'active');
+
+  const registerMember = useMutation({
+    mutationFn: async (payload: {
+      email: string;
+      password: string;
+      fullName: string;
+      phone: string;
+      memberRole: MemberRole;
+      jobTitleAr?: string;
+      departmentId?: string;
+      positionId?: string;
+      grantedPermissions?: MemberPermission[];
+    }) => {
+      if (!orgId) throw new Error('No organization');
+      const { data, error } = await supabase.functions.invoke('register-member', {
+        body: {
+          ...payload,
+          organizationId: orgId,
+        },
+      });
+      if (error) throw new Error(error.message || 'فشل في تسجيل العضو');
+      if (data?.error) throw new Error(data.error);
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['org-members', orgId] });
+      toast.success('تم تسجيل العضو بنجاح');
+    },
+    onError: (err: any) => {
+      toast.error(err.message || 'خطأ في تسجيل العضو');
+    },
   });
 
   const addMember = useMutation({
@@ -110,8 +156,6 @@ export function useOrgMembers() {
       employee_number?: string;
     }) => {
       if (!orgId) throw new Error('No organization');
-
-      // Check if user already exists by email
       const { data: existingProfile } = await supabase
         .from('profiles')
         .select('id, user_id')
@@ -119,7 +163,6 @@ export function useOrgMembers() {
         .single();
 
       if (existingProfile) {
-        // Link existing user
         const { error } = await supabase.from('organization_members' as any).insert({
           organization_id: orgId,
           user_id: existingProfile.user_id,
@@ -128,14 +171,14 @@ export function useOrgMembers() {
           department_id: member.department_id || null,
           job_title_ar: member.job_title_ar || null,
           employee_number: member.employee_number || null,
+          member_role: 'member',
           status: 'active',
         });
         if (error) throw error;
       } else {
-        // Create invitation record (pending)
         const { error } = await supabase.from('organization_members' as any).insert({
           organization_id: orgId,
-          user_id: profile!.user_id, // temporary, will be updated on accept
+          user_id: profile!.user_id,
           profile_id: null,
           position_id: member.position_id || null,
           department_id: member.department_id || null,
@@ -143,6 +186,7 @@ export function useOrgMembers() {
           employee_number: member.employee_number || null,
           invitation_email: member.email,
           invited_by: profile!.id,
+          member_role: 'member',
           status: 'pending_invitation',
         });
         if (error) throw error;
@@ -186,7 +230,9 @@ export function useOrgMembers() {
   return {
     members: membersQuery.data || [],
     isLoading: membersQuery.isLoading,
+    currentUserMember,
     addMember,
+    registerMember,
     updateMember,
     removeMember,
     refetch: membersQuery.refetch,
