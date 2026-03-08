@@ -1,7 +1,7 @@
 import {
   Package, AlertTriangle, CalendarClock, FileText, FolderCheck, FileCheck,
   Fingerprint, Inbox, Plus, Truck, Users, MapPin, Shield, GraduationCap,
-  Recycle, Factory, HardHat, Wrench, Trophy, Gauge,
+  Recycle, Factory, HardHat, Wrench, Trophy, Gauge, Scale,
 } from 'lucide-react';
 import type { SidebarGroupConfig } from './sidebarTypes';
 
@@ -18,6 +18,7 @@ const generatorOps: SidebarGroupConfig = {
     { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments', bindingType: 'hybrid' },
     { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts', bindingType: 'hybrid' },
     { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs', bindingType: 'hybrid' },
+    { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'bulk-weight-entries', bindingType: 'hybrid' },
   ],
 };
 
