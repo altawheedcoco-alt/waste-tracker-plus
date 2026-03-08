@@ -25,6 +25,7 @@ import {
 } from 'lucide-react';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useCustomWasteTypes } from '@/hooks/useCustomWasteTypes';
 
 interface PartnerOption {
   id: string;
@@ -96,6 +97,8 @@ export default function BulkWeightEntries() {
   const queryClient = useQueryClient();
   const { isLoading: aiLoading, extractWeightData } = useAIAssistant();
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const { customWasteTypes, addCustomWasteType } = useCustomWasteTypes();
+  const [newCustomType, setNewCustomType] = useState('');
 
   // Selected partners
   const [selectedTransporter, setSelectedTransporter] = useState<PartnerOption | null>(null);
@@ -593,11 +596,54 @@ export default function BulkWeightEntries() {
                         <div className="space-y-2">
                           <Label>نوع المخلف *</Label>
                           <Select value={activeEntry.waste_type} onValueChange={v => updateEntry(activeEntry.id, { waste_type: v })}>
-                            <SelectTrigger><SelectValue placeholder="اختر أو اكتب" /></SelectTrigger>
+                            <SelectTrigger><SelectValue placeholder="اختر من أصنافك أو العامة" /></SelectTrigger>
                             <SelectContent>
+                              {customWasteTypes.length > 0 && (
+                                <>
+                                  <div className="px-2 py-1 text-xs font-semibold text-primary">أصنافي المخصصة</div>
+                                  {customWasteTypes.map(cwt => (
+                                    <SelectItem key={cwt.id} value={cwt.name}>
+                                      <span className="flex items-center gap-1">⭐ {cwt.name}</span>
+                                    </SelectItem>
+                                  ))}
+                                  <Separator className="my-1" />
+                                </>
+                              )}
+                              <div className="px-2 py-1 text-xs font-semibold text-muted-foreground">الأصناف العامة</div>
                               {wasteTypes.map(wt => <SelectItem key={wt} value={wt}>{wt}</SelectItem>)}
                             </SelectContent>
                           </Select>
+                          {/* Add custom type inline */}
+                          <div className="flex gap-1">
+                            <Input
+                              placeholder="أضف صنف جديد خاص بك..."
+                              value={newCustomType}
+                              onChange={e => setNewCustomType(e.target.value)}
+                              className="text-xs h-8"
+                            />
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="h-8 px-2"
+                              disabled={!newCustomType.trim()}
+                              onClick={async () => {
+                                if (!newCustomType.trim()) return;
+                                try {
+                                  await addCustomWasteType({
+                                    name: newCustomType.trim(),
+                                    code: `CW-${Date.now().toString(36)}`,
+                                    category: 'non-hazardous',
+                                    parent_category: 'أخرى',
+                                  });
+                                  updateEntry(activeEntry.id, { waste_type: newCustomType.trim() });
+                                  setNewCustomType('');
+                                  toast.success('تم إضافة الصنف لقائمتك ⭐');
+                                } catch { toast.error('فشل إضافة الصنف'); }
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </Button>
+                          </div>
                         </div>
                         <div className="space-y-2">
                           <Label>التاريخ</Label>
