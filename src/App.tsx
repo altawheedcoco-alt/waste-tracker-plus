@@ -1,5 +1,6 @@
 import { Suspense, lazy, memo, useEffect, useState } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
+import AccountActivationGuard from "@/components/guards/AccountActivationGuard";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -65,10 +66,12 @@ const AppRoutes = memo(() => {
   }
 
   return (
-    <Routes>
-      {publicRoutes}
-      {dashboardRoutes}
-    </Routes>
+    <AccountActivationGuard>
+      <Routes>
+        {publicRoutes}
+        {dashboardRoutes}
+      </Routes>
+    </AccountActivationGuard>
   );
 });
 AppRoutes.displayName = 'AppRoutes';

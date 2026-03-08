@@ -40,6 +40,7 @@ const SharedDocumentView = lazy(() => import("@/pages/SharedDocumentView"));
 const RecyclingHistory = lazy(() => import("@/pages/RecyclingHistory"));
 const SharedResourcePage = lazy(() => import("@/pages/SharedResourcePage"));
 const SharedShipmentEdit = lazy(() => import("@/pages/SharedShipmentEdit"));
+const AccountPendingPage = lazy(() => import("@/pages/AccountPendingPage"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -88,6 +89,7 @@ export const publicRoutes = (
     <Route path="/about" element={<About />} />
     <Route path="/policies" element={<Policies />} />
     <Route path="/reset-password" element={<ResetPassword />} />
+    <Route path="/account-pending" element={<AccountPendingPage />} />
     <Route path="/shared/:token" element={<SharedDocumentView />} />
     <Route path="/scoped/:code" element={<ScopedAccessPortal />} />
     <Route path="/recycling-history" element={<RecyclingHistory />} />
