@@ -47,6 +47,7 @@ const fleetTracking: SidebarGroupConfig = {
   labelEn: 'Fleet & Tracking',
   visibleFor: ['transporter'],
   items: [
+    { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' },
     { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' },
     { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' },
     { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' },
