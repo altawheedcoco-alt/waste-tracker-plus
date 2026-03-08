@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Shield, Leaf, BarChart3, Truck, Recycle, Globe, CheckCircle2 } from 'lucide-react';
+import { Shield, Leaf, BarChart3, Truck, Recycle, Globe, CheckCircle2, Sparkles } from 'lucide-react';
 import authIllustration from '@/assets/auth-side-illustration.png';
 
 const features = [
@@ -17,38 +17,51 @@ const stats = [
 
 const AuthSidePanel = () => {
   return (
-    <div className="relative flex flex-col justify-between h-full bg-gradient-to-br from-primary via-primary/90 to-eco-teal p-8 xl:p-12 text-white overflow-hidden">
-      {/* Decorative circles */}
+    <div className="relative flex flex-col justify-between h-full overflow-hidden" style={{
+      background: 'linear-gradient(160deg, hsl(160, 68%, 36%) 0%, hsl(178, 60%, 32%) 40%, hsl(205, 78%, 36%) 100%)',
+    }}>
+      {/* v3.0 Geometric decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-80 h-80 border border-white/10 rounded-full" />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 border border-white/5 rounded-full" />
-        <div className="absolute top-1/3 right-1/4 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-        {/* Grid dots */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
+        <div className="absolute -top-24 -right-24 w-96 h-96 border border-white/[0.08] rounded-full" />
+        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] border border-white/[0.04] rounded-full" />
+        <div className="absolute top-1/4 right-1/3 w-52 h-52 bg-white/[0.04] rounded-full blur-3xl" />
+        <div className="absolute bottom-1/3 left-1/4 w-32 h-32 bg-white/[0.06] rounded-full blur-2xl" />
+        {/* Grid pattern */}
+        <div className="absolute inset-0 opacity-[0.025]" style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-          backgroundSize: '24px 24px',
+          backgroundSize: '20px 20px',
+        }} />
+        {/* Diagonal accent line */}
+        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]" style={{
+          background: 'repeating-linear-gradient(45deg, transparent, transparent 60px, white 60px, white 61px)',
         }} />
       </div>
 
       {/* Header */}
-      <div className="relative z-10">
+      <div className="relative z-10 p-8 xl:p-12">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-              <Leaf className="w-5 h-5" />
+          <div className="flex items-center gap-3.5 mb-5">
+            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-black/10">
+              <Leaf className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h2 className="text-xl xl:text-2xl font-bold leading-tight">iRecycle</h2>
-              <p className="text-white/60 text-xs">نظام إدارة المخلفات المتكامل v2.0</p>
+              <h2 className="text-2xl xl:text-3xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
+              <div className="flex items-center gap-2">
+                <p className="text-white/50 text-xs">نظام إدارة المخلفات المتكامل</p>
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[9px] font-bold text-white/80 tracking-wider">
+                  <Sparkles className="w-2.5 h-2.5" />
+                  v3.0
+                </span>
+              </div>
             </div>
           </div>
 
-          <h3 className="text-lg xl:text-xl font-semibold mb-2 leading-relaxed">
+          <h3 className="text-xl xl:text-2xl font-bold mb-3 leading-relaxed text-white">
             منصة رقمية شاملة لإدارة
             <br />
-            <span className="text-eco-gold">سلسلة التوريد البيئية</span>
+            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية</span>
           </h3>
-          <p className="text-white/60 text-sm leading-relaxed max-w-sm">
+          <p className="text-white/50 text-sm leading-relaxed max-w-sm">
             نظام متكامل للتتبع والتوثيق والامتثال القانوني لكافة عمليات إدارة المخلفات في مصر
           </p>
         </motion.div>
@@ -59,14 +72,14 @@ const AuthSidePanel = () => {
         initial={{ opacity: 0, scale: 0.85 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ delay: 0.4, duration: 0.6 }}
-        className="relative z-10 flex justify-center my-4"
+        className="relative z-10 flex justify-center px-8"
       >
         <div className="relative">
-          <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-90" />
+          <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-95" />
           <img
             src={authIllustration}
             alt="منصة إدارة المخلفات"
-            className="relative w-full max-w-[300px] xl:max-w-[350px] drop-shadow-2xl"
+            className="relative w-full max-w-[280px] xl:max-w-[320px] drop-shadow-2xl"
           />
         </div>
       </motion.div>
@@ -76,34 +89,34 @@ const AuthSidePanel = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="relative z-10 grid grid-cols-3 gap-3 mb-4"
+        className="relative z-10 grid grid-cols-3 gap-3 px-8 xl:px-12 my-5"
       >
         {stats.map((stat, i) => (
-          <div key={i} className="text-center p-2.5 rounded-xl bg-white/10 backdrop-blur-sm">
-            <p className="text-lg xl:text-xl font-bold">{stat.value}</p>
-            <p className="text-[10px] text-white/60">{stat.label}</p>
+          <div key={i} className="text-center p-3 rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.12] transition-colors duration-300">
+            <p className="text-xl xl:text-2xl font-bold text-white">{stat.value}</p>
+            <p className="text-[10px] text-white/50 mt-0.5">{stat.label}</p>
           </div>
         ))}
       </motion.div>
 
       {/* Features */}
-      <div className="relative z-10 space-y-2">
+      <div className="relative z-10 space-y-2 px-8 xl:px-12">
         {features.map((f, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.6 + i * 0.08 }}
-            className="flex items-center gap-3 bg-white/[0.07] backdrop-blur-sm rounded-xl p-2.5 hover:bg-white/[0.12] transition-colors group"
+            className="flex items-center gap-3 bg-white/[0.06] backdrop-blur-md rounded-xl p-3 hover:bg-white/[0.1] transition-all duration-300 group border border-white/[0.04]"
           >
-            <div className="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25 transition-colors">
-              <f.icon className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25 group-hover:scale-110 transition-all duration-300">
+              <f.icon className="w-4 h-4 text-white" />
             </div>
-            <div className="min-w-0">
-              <h4 className="text-xs font-semibold leading-tight">{f.label}</h4>
-              <p className="text-[10px] text-white/50 leading-relaxed truncate">{f.desc}</p>
+            <div className="min-w-0 flex-1">
+              <h4 className="text-xs font-semibold leading-tight text-white">{f.label}</h4>
+              <p className="text-[10px] text-white/40 leading-relaxed truncate">{f.desc}</p>
             </div>
-            <CheckCircle2 className="w-3.5 h-3.5 text-eco-gold/60 shrink-0" />
+            <CheckCircle2 className="w-3.5 h-3.5 text-amber-300/60 shrink-0" />
           </motion.div>
         ))}
       </div>
@@ -113,10 +126,14 @@ const AuthSidePanel = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
-        className="relative z-10 flex items-center justify-center gap-2 mt-4 pt-4 border-t border-white/10"
+        className="relative z-10 flex items-center justify-center gap-2 px-8 xl:px-12 py-6 mt-4"
       >
-        <Globe className="w-3.5 h-3.5 text-white/40" />
-        <p className="text-[10px] text-white/40">متوافق مع القانون 202 لسنة 2020 ومعايير WMRA</p>
+        <div className="w-full h-px bg-white/10" />
+        <div className="flex items-center gap-2 shrink-0">
+          <Globe className="w-3.5 h-3.5 text-white/30" />
+          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020</p>
+        </div>
+        <div className="w-full h-px bg-white/10" />
       </motion.div>
     </div>
   );

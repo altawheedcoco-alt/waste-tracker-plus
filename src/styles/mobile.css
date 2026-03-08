@@ -1,5 +1,5 @@
 /* ========================================
-   Enhanced Touch & Scroll Experience
+   v3.0 Enhanced Touch & Scroll Experience
    ======================================== */
 
 [style*="overflow"], .overflow-y-auto, .overflow-x-auto, .overflow-auto,
@@ -74,7 +74,7 @@ nav[class*="overflow"], [role="navigation"][class*="overflow"] {
 }
 
 /* ========================================
-   Mobile Responsive Fixes
+   v3.0 Mobile Responsive — all breakpoints
    ======================================== */
 
 html {
@@ -89,6 +89,23 @@ body {
   max-width: 100vw;
 }
 
+/* ——— Small phones (≤ 360px) ——— */
+@media (max-width: 360px) {
+  :root { font-size: 14px; }
+  
+  .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+  
+  h1 { font-size: 1.25rem !important; }
+  h2 { font-size: 1.125rem !important; }
+  
+  [role="dialog"] > div,
+  [data-radix-dialog-content] {
+    margin: 0.5rem;
+    max-width: calc(100vw - 1rem);
+  }
+}
+
+/* ——— Standard phones (≤ 640px) ——— */
 @media (max-width: 640px) {
   table {
     display: block;
@@ -128,11 +145,12 @@ body {
 
   [role="dialog"] > div,
   [data-radix-dialog-content] {
-    max-height: 85vh;
-    max-height: 85dvh;
+    max-height: 90vh;
+    max-height: 90dvh;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    margin: 0.75rem;
+    margin: 0.5rem;
+    border-radius: 1rem;
   }
 
   [data-radix-select-content],
@@ -176,8 +194,8 @@ body {
   .print-preview-container { transform: scale(0.5); transform-origin: top center; }
 
   [data-radix-dialog-content] {
-    width: calc(100vw - 1.5rem);
-    max-width: calc(100vw - 1.5rem);
+    width: calc(100vw - 1rem);
+    max-width: calc(100vw - 1rem);
   }
 
   [role="tablist"].grid {
@@ -185,8 +203,14 @@ body {
     overflow-x: auto;
     grid-template-columns: none;
   }
+
+  /* v3.0: Better card spacing on mobile */
+  .grid { gap: 0.5rem; }
+  .grid.gap-4 { gap: 0.625rem; }
+  .grid.gap-6 { gap: 0.75rem; }
 }
 
+/* ——— Tablets (641px – 1024px) ——— */
 @media (min-width: 641px) and (max-width: 1024px) {
   .floating-widgets-container { bottom: 1.5rem; left: 1.5rem; gap: 0.75rem; }
 
@@ -196,11 +220,28 @@ body {
     scrollbar-width: none;
   }
   [role="tablist"]::-webkit-scrollbar { display: none; }
+  
+  /* v3.0: tablet grid adjustments */
+  .grid-cols-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
+/* ——— Landscape phones ——— */
+@media (max-height: 500px) and (orientation: landscape) {
+  .auth-scroll-container { min-height: auto; }
+  
+  [role="dialog"] > div,
+  [data-radix-dialog-content] {
+    max-height: 95vh;
+    margin: 0.25rem;
+  }
+}
+
+/* ——— Safe area support ——— */
 @supports (padding: max(0px)) {
   .safe-bottom { padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
   .safe-left { padding-left: max(1rem, env(safe-area-inset-left)); }
+  .safe-right { padding-right: max(1rem, env(safe-area-inset-right)); }
 }
 
 .h-screen-safe { height: 100vh; height: 100dvh; }
@@ -219,4 +260,21 @@ body {
 
 @media (min-width: 1024px) {
   .container-responsive { max-width: 1280px; padding-left: 1.5rem; padding-right: 1.5rem; }
+}
+
+@media (min-width: 1440px) {
+  .container-responsive { max-width: 1400px; padding-left: 2rem; padding-right: 2rem; }
+}
+
+/* v3.0: Smooth scrollbar styling */
+@media (pointer: fine) {
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { 
+    background: hsl(var(--muted-foreground) / 0.2); 
+    border-radius: 3px; 
+  }
+  ::-webkit-scrollbar-thumb:hover { 
+    background: hsl(var(--muted-foreground) / 0.35); 
+  }
 }
