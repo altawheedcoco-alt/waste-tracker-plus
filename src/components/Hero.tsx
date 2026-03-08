@@ -60,8 +60,8 @@ const Hero = memo(() => {
           decoding="async"
         />
         {/* v2.0 — Premium cinematic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-foreground/80 via-foreground/55 to-foreground/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(210,12%,7%)]/80 via-[hsl(210,12%,7%)]/55 to-[hsl(210,12%,7%)]/85" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[hsl(160,15%,97%)]/95 via-transparent to-transparent" />
       </div>
 
       <div className="container relative z-10 px-4">
