@@ -109,13 +109,13 @@ body {
     word-break: break-word;
   }
 
-  .container { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
+  .container { padding-left: 0.75rem; padding-right: 0.75rem; }
 
   [role="tablist"] {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
-    flex-wrap: nowrap !important;
+    flex-wrap: nowrap;
     gap: 0.25rem;
   }
   [role="tablist"]::-webkit-scrollbar { display: none; }
@@ -128,81 +128,25 @@ body {
 
   [role="dialog"] > div,
   [data-radix-dialog-content] {
-    max-height: 85vh !important;
-    max-height: 85dvh !important;
-    overflow-y: auto !important;
+    max-height: 85vh;
+    max-height: 85dvh;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
-    margin: 1rem;
+    margin: 0.75rem;
   }
 
   [data-radix-select-content],
   [data-radix-dropdown-menu-content],
   [data-radix-popover-content] {
-    max-height: 60vh !important;
-    overflow-y: auto !important;
+    max-height: 60vh;
+    overflow-y: auto;
   }
 
-  .grid-cols-2:not(.mobile-keep-cols),
-  .sm\:grid-cols-2:not(.mobile-keep-cols) {
-    grid-template-columns: 1fr !important;
-  }
-
-  .grid-cols-3:not(.mobile-keep-cols),
-  .grid-cols-4:not(.mobile-keep-cols),
-  .grid-cols-5:not(.mobile-keep-cols),
-  .grid-cols-6:not(.mobile-keep-cols) {
-    grid-template-columns: repeat(2, 1fr) !important;
-  }
-
-  .text-3xl { font-size: 1.375rem !important; line-height: 1.75rem !important; }
-  .text-2xl { font-size: 1.125rem !important; line-height: 1.5rem !important; }
-  .text-xl { font-size: 1rem !important; line-height: 1.375rem !important; }
-
-  .p-6:not(.mobile-keep-padding) { padding: 0.75rem !important; }
-  .p-8:not(.mobile-keep-padding) { padding: 1rem !important; }
-  .px-6:not(.mobile-keep-padding) { padding-left: 0.75rem !important; padding-right: 0.75rem !important; }
-  .py-6:not(.mobile-keep-padding) { padding-top: 0.75rem !important; padding-bottom: 0.75rem !important; }
-
-  .space-y-6:not(.mobile-keep-spacing) > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));
-    margin-bottom: calc(0.75rem * var(--tw-space-y-reverse));
-  }
-  .space-y-8:not(.mobile-keep-spacing) > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(1rem * calc(1 - var(--tw-space-y-reverse)));
-    margin-bottom: calc(1rem * var(--tw-space-y-reverse));
-  }
-
-  .gap-6:not(.mobile-keep-gap) { gap: 0.75rem !important; }
-  .gap-8:not(.mobile-keep-gap) { gap: 1rem !important; }
-
-  .max-w-4xl, .max-w-3xl, .max-w-2xl, .max-w-xl { max-width: 100% !important; }
-
-  .flex.items-center.justify-between:not(.mobile-keep-row) { flex-wrap: wrap; gap: 0.5rem; }
-
-  [class*="CardContent"].p-6:not(.mobile-keep-padding),
-  [class*="CardHeader"].p-6:not(.mobile-keep-padding) { padding: 0.75rem !important; }
-
-  [role="tablist"].grid {
-    display: flex !important;
-    overflow-x: auto !important;
-    grid-template-columns: none !important;
-  }
-
-  [data-radix-dialog-content] {
-    width: calc(100vw - 1rem) !important;
-    max-width: calc(100vw - 1rem) !important;
-  }
+  .max-w-4xl, .max-w-3xl, .max-w-2xl, .max-w-xl { max-width: 100%; }
 
   body, #root { overflow-x: hidden; max-width: 100vw; }
 
-  .flex.gap-2, .flex.gap-3, .flex.gap-4 { flex-wrap: wrap; }
-
   .badge, [data-badge] { font-size: 0.6875rem; padding: 0.125rem 0.375rem; }
-
-  .grid.grid-cols-2.sm\:grid-cols-4,
-  .grid.grid-cols-2.md\:grid-cols-4 { gap: 0.5rem !important; }
 
   .floating-widgets-container {
     display: flex;
@@ -217,19 +161,30 @@ body {
   .floating-widget-btn { @apply w-10 h-10; }
 
   .floating-dialog {
-    left: 0.5rem !important;
-    right: 0.5rem !important;
-    width: auto !important;
-    max-height: 60vh !important;
+    left: 0.5rem;
+    right: 0.5rem;
+    width: auto;
+    max-height: 60vh;
   }
 
-  main { padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)); }
+  main { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
 
   .recharts-responsive-container { min-height: 200px; }
 
-  [data-radix-accordion-content] { padding: 0.75rem !important; }
+  [data-radix-accordion-content] { padding: 0.75rem; }
 
   .print-preview-container { transform: scale(0.5); transform-origin: top center; }
+
+  [data-radix-dialog-content] {
+    width: calc(100vw - 1.5rem);
+    max-width: calc(100vw - 1.5rem);
+  }
+
+  [role="tablist"].grid {
+    display: flex;
+    overflow-x: auto;
+    grid-template-columns: none;
+  }
 }
 
 @media (min-width: 641px) and (max-width: 1024px) {
