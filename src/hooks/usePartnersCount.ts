@@ -1,31 +1,25 @@
-import { useState, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useRealtimeTable } from './useRealtimeSync';
 
 export const usePartnersCount = () => {
-  const [count, setCount] = useState(0);
-  const [loading, setLoading] = useState(true);
+  useRealtimeTable('organizations', ['partners-count']);
 
-  useEffect(() => {
-    const fetchCount = async () => {
-      try {
-        const { count: partnersCount, error } = await supabase
-          .from('organizations')
-          .select('*', { count: 'exact', head: true })
-          .in('organization_type', ['generator', 'recycler'])
-          .eq('is_verified', true)
-          .eq('is_active', true);
+  const { data: count = 0, isLoading: loading } = useQuery({
+    queryKey: ['partners-count'],
+    queryFn: async () => {
+      const { count: partnersCount, error } = await supabase
+        .from('organizations')
+        .select('*', { count: 'exact', head: true })
+        .in('organization_type', ['generator', 'recycler'])
+        .eq('is_verified', true)
+        .eq('is_active', true);
 
-        if (error) throw error;
-        setCount(partnersCount || 0);
-      } catch (error) {
-        console.error('Error fetching partners count:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCount();
-  }, []);
+      if (error) throw error;
+      return partnersCount || 0;
+    },
+    staleTime: 1000 * 60 * 5,
+  });
 
   return { count, loading };
 };

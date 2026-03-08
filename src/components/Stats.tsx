@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { withTimeout, logNetworkError } from "@/lib/networkGuard";
 import { motion, useInView } from "framer-motion";
+import { useRealtimeSync } from "@/hooks/useRealtimeSync";
 
 
 const AnimatedCounter = ({ value, suffix }: { value: number; suffix: string }) => {
@@ -42,6 +43,12 @@ const Stats = () => {
   const { t } = useLanguage();
   const sectionRef = useRef(null);
   const isInView = useInView(sectionRef, { once: true, margin: '-100px' });
+
+  useRealtimeSync([
+    { table: 'organizations', queryKeys: ['landing-live-stats'] },
+    { table: 'shipments', queryKeys: ['landing-live-stats'] },
+    { table: 'drivers', queryKeys: ['landing-live-stats'] },
+  ]);
 
   const { data: liveStats } = useQuery({
     queryKey: ['landing-live-stats'],
