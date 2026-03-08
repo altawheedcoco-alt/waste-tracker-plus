@@ -57,7 +57,7 @@ interface DriverLocation {
   speed?: number | null;
 }
 
-const activeStatuses = ['approved', 'collection_started', 'in_transit', 'at_destination'];
+const activeStatuses = ['approved', 'collecting', 'in_transit', 'delivered'] as const;
 
 const TrackingCenter = () => {
   const { organization, roles } = useAuth();
@@ -90,19 +90,18 @@ const TrackingCenter = () => {
         transporter:transporter_id(name),
         recycler:recycler_id(name)
       `)
-      .in('status', activeStatuses)
+      .in('status', [...activeStatuses])
       .order('created_at', { ascending: false })
       .limit(100);
 
     // Filter by org role
     if (!isAdmin && orgId) {
-      if (orgType === 'generator') {
+      const ot = orgType as string;
+      if (ot === 'generator') {
         query = query.eq('generator_id', orgId);
-      } else if (orgType === 'transporter' || orgType === 'transport_office') {
+      } else if (ot === 'transporter' || ot === 'transport_office') {
         query = query.eq('transporter_id', orgId);
-      } else if (orgType === 'recycler') {
-        query = query.eq('recycler_id', orgId);
-      } else if (orgType === 'disposal') {
+      } else if (ot === 'recycler' || ot === 'disposal') {
         query = query.eq('recycler_id', orgId);
       }
     }
@@ -118,7 +117,8 @@ const TrackingCenter = () => {
   // Fetch driver locations (for transporters and admin)
   const fetchDrivers = useCallback(async () => {
     if (!orgId && !isAdmin) return;
-    if (orgType !== 'transporter' && orgType !== 'transport_office' && !isAdmin) return;
+    const ot = orgType as string;
+    if (ot !== 'transporter' && ot !== 'transport_office' && !isAdmin) return;
 
     let query = supabase
       .from('drivers')
