@@ -216,6 +216,7 @@ const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCe
 const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics"));
 const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocumentRegistry"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
+const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 
 export const dashboardRoutes = (
   <>
@@ -434,6 +435,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/visitor-analytics" element={<VisitorAnalytics />} />
     <Route path="/dashboard/central-registry" element={<CentralDocumentRegistry />} />
     <Route path="/dashboard/digital-maturity" element={<DigitalMaturityDashboard />} />
+    <Route path="/dashboard/architecture-guide" element={<SystemArchitectureGuide />} />
     <Route path="/dashboard/*" element={<Dashboard />} />
   </>
 );
