@@ -404,28 +404,43 @@ const TransporterDashboard = () => {
 
           <TabsContent value="intelligence" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
-              <ShiftScheduler />
-              <SmartSchedulerPanel />
-              <RouteOptimizerPanel driverId="" destinations={[]} />
-              <PartnerProfitabilityPanel />
+              <ErrorBoundary fallbackTitle="خطأ في الجدولة الذكية">
+                <ShiftScheduler />
+                <SmartSchedulerPanel />
+              </ErrorBoundary>
+              <ErrorBoundary fallbackTitle="خطأ في تحليل الربحية">
+                <PartnerProfitabilityPanel />
+              </ErrorBoundary>
             </Suspense>
           </TabsContent>
 
           <TabsContent value="partners" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
-              <SustainabilityReportGenerator />
-              <SLADashboard />
-              <ProfitabilityReport />
-              <PartnerRatingsWidget />
-              <PartnersView />
+              <ErrorBoundary fallbackTitle="خطأ في تقارير الاستدامة">
+                <SustainabilityReportGenerator />
+              </ErrorBoundary>
+              <ErrorBoundary fallbackTitle="خطأ في اتفاقيات مستوى الخدمة">
+                <SLADashboard />
+                <ProfitabilityReport />
+              </ErrorBoundary>
+              <ErrorBoundary fallbackTitle="خطأ في تقييمات الشركاء">
+                <PartnerRatingsWidget />
+                <PartnersView />
+              </ErrorBoundary>
             </Suspense>
           </TabsContent>
 
           <TabsContent value="tracking" className="space-y-4 mt-6">
             <Suspense fallback={<TabFallback />}>
-              <SignalMonitorWidget />
-              <DriverLinkingCode />
-              <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+              <ErrorBoundary fallbackTitle="خطأ في مراقبة الإشارات">
+                <SignalMonitorWidget />
+              </ErrorBoundary>
+              <ErrorBoundary fallbackTitle="خطأ في ربط السائقين">
+                <DriverLinkingCode />
+              </ErrorBoundary>
+              <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
+                <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+              </ErrorBoundary>
             </Suspense>
           </TabsContent>
 

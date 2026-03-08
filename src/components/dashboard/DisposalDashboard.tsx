@@ -1,5 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList } from 'lucide-react';
+import StoryCircles from '@/components/stories/StoryCircles';
+import SmartDailyBrief from './shared/SmartDailyBrief';
+import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 
@@ -192,6 +195,17 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
   return (
     <div className="space-y-6" dir="rtl">
+      <SmartDailyBrief
+        role="disposal"
+        stats={{
+          pending: operationsStats?.pending || 0,
+          active: operationsStats?.processing || 0,
+          completed: operationsStats?.completed || 0,
+          total: operationsStats?.total || 0,
+        }}
+      />
+      <StoryCircles />
+
       {/* Mission Control Button */}
       <Button
         className="w-full gap-3 h-14 text-base bg-gradient-to-r from-destructive to-primary hover:opacity-90 shadow-lg"
@@ -215,6 +229,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       {facility && <FacilityCapacityCard facility={facility} />}
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
+      <DashboardWidgetCustomizer orgType="disposal" />
       <AutomationSettingsDialog organizationType="disposal" />
 
       {/* Main Tabs — 6 optimized tabs */}
@@ -308,12 +323,18 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
         {/* 3. Compliance & Safety Tab */}
         <TabsContent value="compliance" className="mt-4 space-y-4">
-          <Suspense fallback={<div className="animate-pulse h-32 bg-muted rounded-lg" />}>
-            {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
-            <WMISEventsFeed />
-          </Suspense>
-          <LegalComplianceWidget />
-          <IncidentReportManager />
+          <ErrorBoundary fallbackTitle="خطأ في بيانات الامتثال">
+            <Suspense fallback={<div className="animate-pulse h-32 bg-muted rounded-lg" />}>
+              {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
+              <WMISEventsFeed />
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في الامتثال القانوني">
+            <LegalComplianceWidget />
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في تقارير الحوادث">
+            <IncidentReportManager />
+          </ErrorBoundary>
           
           {/* Safety & OHS Section */}
           <Card>
@@ -343,9 +364,15 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
         {/* 5. Fleet Tab */}
         <TabsContent value="fleet" className="mt-4 space-y-4">
-          <VehicleComplianceManager />
-          <DriverComplianceManager />
-          <DriverCodeLookup />
+          <ErrorBoundary fallbackTitle="خطأ في امتثال المركبات">
+            <VehicleComplianceManager />
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في امتثال السائقين">
+            <DriverComplianceManager />
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في بحث السائقين">
+            <DriverCodeLookup />
+          </ErrorBoundary>
         </TabsContent>
 
         {/* 6. Reports Tab (ESG + Performance) */}
