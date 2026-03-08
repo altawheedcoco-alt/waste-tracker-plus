@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 // Simple fingerprint based on browser characteristics
@@ -56,7 +56,37 @@ const getDeviceType = (): string => {
   return 'desktop';
 };
 
+const getUTMParams = () => {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    utm_source: params.get('utm_source') || null,
+    utm_medium: params.get('utm_medium') || null,
+    utm_campaign: params.get('utm_campaign') || null,
+    utm_term: params.get('utm_term') || null,
+    utm_content: params.get('utm_content') || null,
+  };
+};
+
+// Track navigation path in session
+const addToNavPath = (url: string) => {
+  try {
+    const existing = JSON.parse(sessionStorage.getItem('_vnav') || '[]');
+    const path = new URL(url).pathname;
+    if (existing[existing.length - 1] !== path) {
+      existing.push(path);
+      sessionStorage.setItem('_vnav', JSON.stringify(existing.slice(-20)));
+    }
+    return existing;
+  } catch {
+    return [window.location.pathname];
+  }
+};
+
 export const useVisitorTracking = () => {
+  const startTimeRef = useRef(Date.now());
+  const maxScrollRef = useRef(0);
+  const sentRef = useRef(false);
+
   useEffect(() => {
     // Don't track if already tracked this session for this page
     const pageKey = '_vt_' + window.location.pathname;
@@ -64,11 +94,23 @@ export const useVisitorTracking = () => {
     sessionStorage.setItem(pageKey, '1');
 
     const ua = navigator.userAgent;
+    const pagesVisited = addToNavPath(window.location.href);
+
+    // Scroll depth tracking
+    const handleScroll = () => {
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const docHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+      if (docHeight > 0) {
+        const depth = Math.round((scrollTop / docHeight) * 100);
+        if (depth > maxScrollRef.current) maxScrollRef.current = depth;
+      }
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     const trackVisit = async () => {
       try {
-        // Check if user is logged in
         const { data: { session } } = await supabase.auth.getSession();
+        const utmParams = getUTMParams();
 
         await supabase.functions.invoke('track-visitor', {
           body: {
@@ -83,6 +125,10 @@ export const useVisitorTracking = () => {
             page_url: window.location.href,
             session_id: getSessionId(),
             user_id: session?.user?.id || null,
+            viewport_width: window.innerWidth,
+            viewport_height: window.innerHeight,
+            pages_visited: pagesVisited.map((p: string) => typeof p === 'string' ? p : String(p)),
+            ...utmParams,
             metadata: {
               timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
               connection: (navigator as any).connection?.effectiveType || null,
@@ -92,12 +138,49 @@ export const useVisitorTracking = () => {
           },
         });
       } catch {
-        // Silent fail - don't affect UX
+        // Silent fail
       }
     };
 
-    // Delay tracking to not affect page load
+    // Send session end data (duration + scroll depth)
+    const sendSessionEnd = async () => {
+      if (sentRef.current) return;
+      sentRef.current = true;
+      const durationSec = Math.round((Date.now() - startTimeRef.current) / 1000);
+      try {
+        await supabase.functions.invoke('track-visitor', {
+          body: {
+            _update_session: true,
+            session_id: getSessionId(),
+            visitor_fingerprint: generateFingerprint(),
+            session_duration_seconds: durationSec,
+            max_scroll_depth: maxScrollRef.current,
+            exit_page: window.location.pathname,
+            pages_visited: JSON.parse(sessionStorage.getItem('_vnav') || '[]'),
+            bounce: (JSON.parse(sessionStorage.getItem('_vnav') || '[]')).length <= 1,
+          },
+        });
+      } catch {
+        // Silent
+      }
+    };
+
+    // Track on page unload
+    const handleBeforeUnload = () => sendSessionEnd();
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') sendSessionEnd();
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
     const timer = setTimeout(trackVisit, 2000);
-    return () => clearTimeout(timer);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
   }, []);
 };
