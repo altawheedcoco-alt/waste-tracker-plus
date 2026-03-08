@@ -38,9 +38,24 @@ export function useAIPlatform(options?: UseAIPlatformOptions) {
         return await streamChat(params.messages || [], options.onStreamDelta, options.onStreamDone);
       }
 
+      // Preprocess images for OCR-related actions (CamScanner quality)
+      let processedParams = { ...params };
+      if (params.imageBase64 && ['classify', 'extract', 'inspect'].includes(action)) {
+        const isColorNeeded = action === 'classify' || action === 'inspect';
+        processedParams.imageBase64 = await preprocessForOCR(params.imageBase64, {
+          grayscale: !isColorNeeded,
+          contrast: isColorNeeded ? 40 : 60,
+          sharpness: 2,
+          brightness: isColorNeeded ? 5 : 10,
+          binarize: isColorNeeded ? undefined : 0,
+          maxDimension: 2400,
+          quality: 0.95,
+        });
+      }
+
       // For non-streaming, use supabase.functions.invoke
       const { data, error: fnError } = await supabase.functions.invoke('ai-unified-gateway', {
-        body: { action, ...params },
+        body: { action, ...processedParams },
       });
 
       if (fnError) {
