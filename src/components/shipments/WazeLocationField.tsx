@@ -464,6 +464,29 @@ const WazeLocationField = ({
       const center = coordinates || mapCenter;
       
       const searchPromises = [
+        // 🤖 AI Location Resolve (PRIMARY - best for Egyptian locations, factories, industrial areas)
+        fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-location-resolve`, {
+          method: 'POST',
+          headers: {
+            'apikey': import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ query: q, context: 'شحنة نفايات - تحديد موقع استلام أو تسليم في مصر' }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (!data?.all_locations) return [];
+            return (data.all_locations as any[]).map((loc: any, i: number) => ({
+              id: `ai-${i}-${loc.latitude}-${loc.longitude}`,
+              name: `${loc.name}${loc.confidence === 'high' ? '' : loc.confidence === 'medium' ? '' : ''}`,
+              address: loc.address || `${loc.governorate || ''} - ${loc.location_type || ''}`,
+              lat: loc.latitude,
+              lng: loc.longitude,
+              type: 'ai' as const,
+            }));
+          })
+          .catch(() => [] as SearchResult[]),
+
         // Google Places search (best for businesses/POIs)
         fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/google-places-search`, {
           method: 'POST',
@@ -484,7 +507,7 @@ const WazeLocationField = ({
           })))
           .catch(() => [] as SearchResult[]),
 
-        // Nominatim search (replaces Mapbox geocoding)
+        // Nominatim search
         fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(q)}&countrycodes=eg&limit=10&accept-language=ar&viewbox=${center.lng-1},${center.lat+1},${center.lng+1},${center.lat-1}&bounded=0`)
           .then(r => r.json())
           .then(data => (data || []).map((f: any, i: number) => ({
@@ -541,10 +564,10 @@ const WazeLocationField = ({
           .catch(() => [] as SearchResult[]),
       ];
 
-      const [googleResults, nominatimResults, wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
+      const [aiResults, googleResults, nominatimResults, wazeResults, multiResults, osmResults] = await Promise.all(searchPromises);
       
-      // Google first, then Nominatim, Waze, multi-geocode, OSM
-      const allMapResults = [...googleResults, ...nominatimResults, ...wazeResults, ...multiResults, ...osmResults];
+      // AI first (primary), then Google, Nominatim, Waze, multi-geocode, OSM
+      const allMapResults = [...aiResults, ...googleResults, ...nominatimResults, ...wazeResults, ...multiResults, ...osmResults];
       const deduped: SearchResult[] = [];
       for (const r of allMapResults) {
         const isDupe = deduped.some(
