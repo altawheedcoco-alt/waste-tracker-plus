@@ -468,7 +468,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               }}
               exit={{ x: 300, opacity: 0 }}
               transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card border-l border-border shadow-sm fixed right-0 top-0 h-screen z-50 overflow-hidden`}
+              className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card/95 backdrop-blur-xl border-l border-border/40 fixed right-0 top-0 h-screen z-50 overflow-hidden`}
+              style={{ boxShadow: '-4px 0 20px hsl(220 16% 12% / 0.04)' }}
             >
               {/* Top Toggle Button + Logo */}
               <div className="p-4 border-b border-border">
@@ -714,7 +715,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           }}
         >
           {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/85 backdrop-blur-xl border-b border-border/40 flex items-center justify-between gap-1 sm:gap-2 px-2 sm:px-4 lg:px-6 shadow-sm`} style={{ WebkitBackdropFilter: 'blur(20px) saturate(1.5)' }}>
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/90 backdrop-blur-2xl border-b border-border/30 flex items-center justify-between gap-1 sm:gap-2 px-2 sm:px-4 lg:px-6`} style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.6)', boxShadow: '0 1px 3px hsl(220 16% 12% / 0.04), 0 4px 12px hsl(160, 68%, 40%, 0.02)' }}>
             <div className="flex items-center gap-2 shrink-0">
               {isMobile && (
                 <button
@@ -882,7 +883,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
                   transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-                  className="fixed top-0 right-0 z-50 h-full w-[85vw] max-w-[320px] bg-card shadow-2xl lg:hidden flex flex-col touch-manipulation"
+                  className="fixed top-0 right-0 z-50 h-full w-[85vw] max-w-[320px] bg-card/98 backdrop-blur-xl shadow-2xl lg:hidden flex flex-col touch-manipulation"
                   style={{ willChange: 'transform' }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
