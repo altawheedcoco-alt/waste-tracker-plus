@@ -84,6 +84,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['generator'],
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
       { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
@@ -162,6 +163,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['recycler'],
     items: [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'recycler-shipments', badgeKey: 'recycler-shipments' },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'recycler-tracking-center' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'recycler-rejected' },
       { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'recycler-declarations' },
       { icon: FolderCheck, labelAr: 'إصدار شهادات التدوير', labelEn: 'Issue Certs', path: '/dashboard/issue-recycling-certificates', key: 'issue-certs', badgeKey: 'issue-certs' },
