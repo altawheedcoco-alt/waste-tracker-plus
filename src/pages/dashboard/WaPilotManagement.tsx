@@ -732,47 +732,108 @@ const WaPilotManagement = () => {
             </div>
           </div>
 
-          {/* Phone + Message */}
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="flex-shrink-0 sm:w-56">
-              <label className="text-[11px] text-muted-foreground mb-1 block">رقم الواتساب (مع كود الدولة)</label>
-              <Input
-                dir="ltr"
-                placeholder="201XXXXXXXXX"
-                value={quickPhone}
-                onChange={(e) => setQuickPhone(e.target.value)}
-                className="font-mono text-sm"
-                disabled={sendingMessage || instanceStatus !== 'connected'}
-              />
-            </div>
-            <div className="flex-1">
-              <label className="text-[11px] text-muted-foreground mb-1 block">نص الرسالة</label>
-              <div className="flex gap-2">
+          {/* Phone + Message + Attachment */}
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="flex-shrink-0 sm:w-64">
+                <label className="text-[11px] text-muted-foreground mb-1 block">أرقام الواتساب (مع كود الدولة) — افصل بين الأرقام بفاصلة أو سطر جديد</label>
                 <Textarea
-                  placeholder="اكتب رسالتك هنا أو اختر من الرسائل الجاهزة أعلاه..."
-                  value={quickMessage}
-                  onChange={(e) => setQuickMessage(e.target.value)}
-                  className="min-h-[60px] max-h-[120px] text-sm resize-none"
+                  dir="ltr"
+                  placeholder={"201XXXXXXXXX\n201YYYYYYYYY\n966XXXXXXXXX"}
+                  value={quickPhone}
+                  onChange={(e) => setQuickPhone(e.target.value)}
+                  className="font-mono text-sm min-h-[60px] max-h-[120px] resize-none"
                   disabled={sendingMessage || instanceStatus !== 'connected'}
                   rows={2}
                 />
-                <div className="flex flex-col gap-1.5 self-end">
-                  <Button
-                    onClick={handleQuickSend}
-                    disabled={sendingMessage || instanceStatus !== 'connected' || !quickPhone.trim() || !quickMessage.trim()}
-                    className="gap-1.5"
-                  >
-                    {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                    إرسال
-                  </Button>
-                  {quickMessage && (
-                    <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => setQuickMessage('')}>
-                      مسح
+                {quickPhone.split(/[,;\n]+/).filter(p => p.replace(/[\s\-\+]/g, '').replace(/^0+/, '').length >= 8).length > 1 && (
+                  <p className="text-[10px] text-primary mt-1 flex items-center gap-1">
+                    <Users className="h-3 w-3" />
+                    سيتم الإرسال لـ {quickPhone.split(/[,;\n]+/).filter(p => p.replace(/[\s\-\+]/g, '').replace(/^0+/, '').length >= 8).length} أرقام
+                  </p>
+                )}
+              </div>
+              <div className="flex-1">
+                <label className="text-[11px] text-muted-foreground mb-1 block">نص الرسالة</label>
+                <div className="flex gap-2">
+                  <div className="flex-1 space-y-2">
+                    <Textarea
+                      placeholder={quickAttachment ? "أضف تعليقاً على المرفق (اختياري)..." : "اكتب رسالتك هنا أو اختر من الرسائل الجاهزة أعلاه..."}
+                      value={quickMessage}
+                      onChange={(e) => setQuickMessage(e.target.value)}
+                      className="min-h-[60px] max-h-[120px] text-sm resize-none"
+                      disabled={sendingMessage || instanceStatus !== 'connected'}
+                      rows={2}
+                    />
+                    {/* Attachment Controls */}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <input
+                        type="file"
+                        id="wapilot-attach"
+                        className="hidden"
+                        accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar"
+                        onChange={handleAttachmentChange}
+                        disabled={sendingMessage || instanceStatus !== 'connected'}
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="h-7 text-[10px] gap-1"
+                        onClick={() => document.getElementById('wapilot-attach')?.click()}
+                        disabled={sendingMessage || instanceStatus !== 'connected'}
+                      >
+                        <Paperclip className="h-3 w-3" />
+                        إرفاق ملف
+                      </Button>
+                      <span className="text-[9px] text-muted-foreground">PDF, صور, فيديو, صوت, مستندات (حد أقصى 16MB)</span>
+                    </div>
+                    {/* Attachment Preview */}
+                    {quickAttachment && (
+                      <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border">
+                        {attachmentPreview ? (
+                          <img src={attachmentPreview} alt="preview" className="h-10 w-10 rounded object-cover" />
+                        ) : quickAttachment.type.startsWith('video/') ? (
+                          <Video className="h-5 w-5 text-primary" />
+                        ) : quickAttachment.type.startsWith('audio/') ? (
+                          <Mic className="h-5 w-5 text-primary" />
+                        ) : (
+                          <File className="h-5 w-5 text-primary" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium truncate">{quickAttachment.name}</p>
+                          <p className="text-[10px] text-muted-foreground">{(quickAttachment.size / 1024).toFixed(0)} KB</p>
+                        </div>
+                        <Button variant="ghost" size="sm" className="h-6 w-6 p-0" onClick={clearAttachment}>
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col gap-1.5 self-end">
+                    <Button
+                      onClick={handleQuickSend}
+                      disabled={sendingMessage || instanceStatus !== 'connected' || !quickPhone.trim() || (!quickMessage.trim() && !quickAttachment)}
+                      className="gap-1.5"
+                    >
+                      {sendingMessage ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+                      إرسال
                     </Button>
-                  )}
+                    {(quickMessage || quickAttachment) && !sendingMessage && (
+                      <Button variant="ghost" size="sm" className="h-6 text-[10px]" onClick={() => { setQuickMessage(''); clearAttachment(); }}>
+                        مسح الكل
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
+            {/* Send Progress */}
+            {sendProgress && (
+              <div className="flex items-center gap-2">
+                <Progress value={(sendProgress.current / sendProgress.total) * 100} className="flex-1 h-2" />
+                <span className="text-[10px] text-muted-foreground whitespace-nowrap">{sendProgress.current}/{sendProgress.total}</span>
+              </div>
+            )}
           </div>
           {instanceStatus !== 'connected' && (
             <p className="text-xs text-destructive mt-2 flex items-center gap-1">
