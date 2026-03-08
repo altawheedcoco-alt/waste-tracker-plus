@@ -294,13 +294,13 @@ const DriverTracking = () => {
               <LeafletMultiDriverMap
                 drivers={filteredDrivers.map(d => ({
                   id: d.id,
-                  name: d.full_name || d.id,
+                  name: d.profile?.full_name || d.id,
                   lat: d.latitude || 30.0,
                   lng: d.longitude || 31.2,
-                  isOnline: d.is_online,
+                  isOnline: d.is_available,
                   vehiclePlate: d.vehicle_plate || undefined,
-                  phone: d.phone || undefined,
-                  currentShipment: d.current_shipment_id || null,
+                  phone: d.profile?.phone || undefined,
+                  currentShipment: null,
                 }))}
                 onDriverClick={(id) => {
                   const driver = filteredDrivers.find(d => d.id === id);
