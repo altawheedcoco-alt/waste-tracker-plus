@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import {
   UserPlus, User, Mail, Phone, Building2, Briefcase, Shield,
-  MoreVertical, UserX, Edit, Eye, Loader2, Search, Hash, Crown, Key,
+  MoreVertical, UserX, Edit, Eye, Loader2, Search, Hash, Crown, Key, Filter,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -31,10 +32,10 @@ import {
 
 const statusConfig: Record<string, { label: string; color: string }> = {
   active: { label: 'نشط', color: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' },
-  suspended: { label: 'موقوف', color: 'bg-red-100 text-red-800' },
+  suspended: { label: 'موقوف', color: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' },
   terminated: { label: 'منتهي', color: 'bg-muted text-muted-foreground' },
-  on_leave: { label: 'إجازة', color: 'bg-yellow-100 text-yellow-800' },
-  pending_invitation: { label: 'دعوة معلقة', color: 'bg-blue-100 text-blue-800' },
+  on_leave: { label: 'إجازة', color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
+  pending_invitation: { label: 'دعوة معلقة', color: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' },
 };
 
 const roleColorMap: Record<MemberRole, string> = {
@@ -55,6 +56,9 @@ export default function OrgMembersPanel() {
   const [selectedMember, setSelectedMember] = useState<OrgMember | null>(null);
   const [editPermsId, setEditPermsId] = useState<string | null>(null);
   const [dialogTab, setDialogTab] = useState<'info' | 'permissions'>('info');
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [deptFilter, setDeptFilter] = useState<string>('all');
+  const [confirmAction, setConfirmAction] = useState<{ type: 'suspend' | 'activate' | 'terminate'; member: OrgMember } | null>(null);
 
   const [form, setForm] = useState({
     email: '', password: '', fullName: '', phone: '',
@@ -68,7 +72,6 @@ export default function OrgMembersPanel() {
   const myPermissions = currentUserMember?.granted_permissions || [];
   const isEntityHead = myRole === 'entity_head';
 
-  // Permissions this user can grant
   const grantablePermissions = isEntityHead
     ? [...ALL_MEMBER_PERMISSIONS]
     : ALL_MEMBER_PERMISSIONS.filter(p => myPermissions.includes(p));
@@ -110,38 +113,88 @@ export default function OrgMembersPanel() {
     }));
   };
 
-  const activeMembers = members.filter(m => m.status !== 'terminated');
-  const filtered = activeMembers.filter(m =>
-    !search ||
-    m.profile?.full_name?.toLowerCase().includes(search.toLowerCase()) ||
-    m.profile?.email?.toLowerCase().includes(search.toLowerCase()) ||
-    m.invitation_email?.toLowerCase().includes(search.toLowerCase()) ||
-    m.job_title_ar?.toLowerCase().includes(search.toLowerCase())
-  );
+  const handleConfirmAction = () => {
+    if (!confirmAction) return;
+    const { type, member } = confirmAction;
+    if (type === 'terminate') {
+      removeMember.mutate(member.id);
+    } else {
+      updateMember.mutate({ id: member.id, status: type === 'suspend' ? 'suspended' : 'active' });
+    }
+    setConfirmAction(null);
+  };
 
-  // Sort by role hierarchy
-  const sorted = [...filtered].sort((a, b) => {
-    const levelA = MEMBER_ROLE_LEVELS[a.member_role as MemberRole] || 6;
-    const levelB = MEMBER_ROLE_LEVELS[b.member_role as MemberRole] || 6;
-    return levelA - levelB;
-  });
+  const activeMembers = members.filter(m => m.status !== 'terminated');
+  
+  const filtered = useMemo(() => {
+    return activeMembers.filter(m => {
+      if (statusFilter !== 'all' && m.status !== statusFilter) return false;
+      if (deptFilter !== 'all' && m.department_id !== deptFilter) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        return (
+          m.profile?.full_name?.toLowerCase().includes(q) ||
+          m.profile?.email?.toLowerCase().includes(q) ||
+          m.invitation_email?.toLowerCase().includes(q) ||
+          m.job_title_ar?.toLowerCase().includes(q) ||
+          m.employee_number?.toLowerCase().includes(q)
+        );
+      }
+      return true;
+    });
+  }, [activeMembers, search, statusFilter, deptFilter]);
+
+  const sorted = useMemo(() => {
+    return [...filtered].sort((a, b) => {
+      const levelA = MEMBER_ROLE_LEVELS[a.member_role as MemberRole] || 6;
+      const levelB = MEMBER_ROLE_LEVELS[b.member_role as MemberRole] || 6;
+      return levelA - levelB;
+    });
+  }, [filtered]);
 
   if (isLoading) {
     return <div className="flex justify-center py-12"><Loader2 className="w-8 h-8 animate-spin text-primary" /></div>;
   }
 
   const canManage = isEntityHead || currentUserMember?.can_manage_members;
+  const usedDepts = [...new Set(activeMembers.map(m => m.department_id).filter(Boolean))];
 
   return (
     <div className="space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <div className="flex items-center gap-2">
-          <div className="relative flex-1 min-w-[200px]">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative min-w-[200px]">
             <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input placeholder="بحث بالاسم أو البريد..." value={search} onChange={e => setSearch(e.target.value)} className="pr-9 text-right" />
+            <Input placeholder="بحث بالاسم أو البريد أو الرقم..." value={search} onChange={e => setSearch(e.target.value)} className="pr-9 text-right" />
           </div>
-          <Badge variant="secondary">{activeMembers.length} عضو</Badge>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-[130px] h-9 text-xs">
+              <Filter className="w-3 h-3 ml-1" />
+              <SelectValue placeholder="الحالة" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">كل الحالات</SelectItem>
+              {Object.entries(statusConfig).filter(([k]) => k !== 'terminated').map(([k, v]) => (
+                <SelectItem key={k} value={k}>{v.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {usedDepts.length > 0 && (
+            <Select value={deptFilter} onValueChange={setDeptFilter}>
+              <SelectTrigger className="w-[130px] h-9 text-xs">
+                <Building2 className="w-3 h-3 ml-1" />
+                <SelectValue placeholder="القسم" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">كل الأقسام</SelectItem>
+                {departments.filter(d => usedDepts.includes(d.id)).map(d => (
+                  <SelectItem key={d.id} value={d.id}>{d.name_ar}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+          <Badge variant="secondary">{filtered.length} / {activeMembers.length} عضو</Badge>
         </div>
         {canManage && (
           <Dialog open={addOpen} onOpenChange={setAddOpen}>
@@ -269,7 +322,7 @@ export default function OrgMembersPanel() {
                   {canManage && (
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
                           <MoreVertical className="w-4 h-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -282,11 +335,14 @@ export default function OrgMembersPanel() {
                             <Shield className="w-4 h-4 ml-2" /> الصلاحيات
                           </DropdownMenuItem>
                         )}
-                        <DropdownMenuItem onClick={() => updateMember.mutate({ id: member.id, status: member.status === 'suspended' ? 'active' : 'suspended' })}>
+                        <DropdownMenuItem onClick={() => setConfirmAction({
+                          type: member.status === 'suspended' ? 'activate' : 'suspend',
+                          member,
+                        })}>
                           <Edit className="w-4 h-4 ml-2" /> {member.status === 'suspended' ? 'إعادة تفعيل' : 'إيقاف مؤقت'}
                         </DropdownMenuItem>
                         {member.member_role !== 'entity_head' && (
-                          <DropdownMenuItem className="text-destructive" onClick={() => removeMember.mutate(member.id)}>
+                          <DropdownMenuItem className="text-destructive" onClick={() => setConfirmAction({ type: 'terminate', member })}>
                             <UserX className="w-4 h-4 ml-2" /> إنهاء العضوية
                           </DropdownMenuItem>
                         )}
@@ -323,7 +379,7 @@ export default function OrgMembersPanel() {
                         )}
                       </div>
                     </div>
-                    <Avatar className="h-10 w-10">
+                    <Avatar className="h-10 w-10 shrink-0">
                       <AvatarImage src={member.profile?.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary/10 text-primary">
                         {member.member_role === 'entity_head' ? <Crown className="w-5 h-5" /> : <User className="w-5 h-5" />}
@@ -345,6 +401,35 @@ export default function OrgMembersPanel() {
           </Card>
         )}
       </div>
+
+      {/* Confirmation Dialog */}
+      <AlertDialog open={!!confirmAction} onOpenChange={() => setConfirmAction(null)}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {confirmAction?.type === 'terminate' ? 'تأكيد إنهاء العضوية' :
+               confirmAction?.type === 'suspend' ? 'تأكيد الإيقاف المؤقت' : 'تأكيد إعادة التفعيل'}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {confirmAction?.type === 'terminate'
+                ? `هل أنت متأكد من إنهاء عضوية "${confirmAction?.member.profile?.full_name || confirmAction?.member.invitation_email}"؟ هذا الإجراء لا يمكن التراجع عنه.`
+                : confirmAction?.type === 'suspend'
+                ? `سيتم إيقاف "${confirmAction?.member.profile?.full_name || confirmAction?.member.invitation_email}" مؤقتاً ولن يتمكن من الوصول للنظام.`
+                : `سيتم إعادة تفعيل "${confirmAction?.member.profile?.full_name || confirmAction?.member.invitation_email}" وسيستعيد صلاحياته.`}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-row-reverse gap-2">
+            <AlertDialogCancel>إلغاء</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmAction}
+              className={confirmAction?.type === 'terminate' ? 'bg-destructive text-destructive-foreground hover:bg-destructive/90' : ''}
+            >
+              {confirmAction?.type === 'terminate' ? 'إنهاء العضوية' :
+               confirmAction?.type === 'suspend' ? 'إيقاف مؤقت' : 'إعادة التفعيل'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Profile Sheet */}
       {selectedMember && (

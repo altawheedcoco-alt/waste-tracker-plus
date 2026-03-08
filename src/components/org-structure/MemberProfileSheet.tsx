@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { User, Mail, Phone, Building2, Briefcase, Calendar, Hash, IdCard, FileText, GraduationCap, ShieldCheck, Upload, Trash2, ExternalLink, AlertTriangle } from 'lucide-react';
+import { User, Mail, Phone, Building2, Briefcase, Calendar, Hash, IdCard, FileText, GraduationCap, ShieldCheck, Upload, Trash2, ExternalLink, AlertTriangle, Key } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useState, useRef } from 'react';
@@ -21,6 +21,8 @@ import {
 } from '@/hooks/useEmployeeArchive';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
+import { toast } from 'sonner';
+import { MEMBER_ROLE_LABELS, PERMISSION_LABELS, type MemberRole, type MemberPermission } from '@/types/memberRoles';
 
 interface Props {
   member: OrgMember;
@@ -34,6 +36,8 @@ const statusLabels: Record<string, string> = {
 };
 
 export default function MemberProfileSheet({ member, open, onClose }: Props) {
+  const roleLabel = MEMBER_ROLE_LABELS[member.member_role as MemberRole] || MEMBER_ROLE_LABELS.member;
+
   return (
     <Sheet open={open} onOpenChange={onClose}>
       <SheetContent side="right" className="w-[95vw] sm:w-[550px] md:w-[600px] overflow-y-auto" dir="rtl">
@@ -44,7 +48,7 @@ export default function MemberProfileSheet({ member, open, onClose }: Props) {
         <div className="mt-4 space-y-4">
           {/* Header */}
           <div className="flex items-center gap-4 p-4 rounded-xl bg-muted/50">
-            <Avatar className="h-16 w-16">
+            <Avatar className="h-16 w-16 shrink-0">
               <AvatarImage src={member.profile?.avatar_url || undefined} />
               <AvatarFallback className="bg-primary/10 text-primary text-xl">
                 <User className="w-8 h-8" />
@@ -53,12 +57,21 @@ export default function MemberProfileSheet({ member, open, onClose }: Props) {
             <div className="flex-1 text-right">
               <h3 className="text-lg font-bold">{member.profile?.full_name || member.invitation_email}</h3>
               {member.job_title_ar && <p className="text-sm text-muted-foreground">{member.job_title_ar}</p>}
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex items-center gap-2 mt-1 flex-wrap">
                 <Badge variant="secondary">{statusLabels[member.status]}</Badge>
+                <Badge variant="outline" className="gap-1">
+                  {roleLabel.icon} {roleLabel.ar}
+                </Badge>
                 {member.employee_number && (
                   <Badge variant="outline" className="gap-1"><Hash className="w-3 h-3" />{member.employee_number}</Badge>
                 )}
               </div>
+              {member.granted_permissions?.length > 0 && (
+                <div className="flex items-center gap-1 mt-1.5 text-xs text-muted-foreground">
+                  <Key className="w-3 h-3" />
+                  <span>{member.granted_permissions.length} صلاحية ممنوحة</span>
+                </div>
+              )}
             </div>
           </div>
 
@@ -103,6 +116,23 @@ function InfoTab({ member }: { member: OrgMember }) {
       {member.position?.title_ar && <InfoRow icon={Briefcase} label="المنصب" value={member.position.title_ar} />}
       {member.profile?.national_id && <InfoRow icon={IdCard} label="رقم الهوية" value={member.profile.national_id} />}
       {member.joined_at && <InfoRow icon={Calendar} label="تاريخ الانضمام" value={format(new Date(member.joined_at), 'PPP', { locale: ar })} />}
+
+      {/* Granted Permissions */}
+      {member.granted_permissions?.length > 0 && (
+        <>
+          <Separator />
+          <div>
+            <p className="text-sm font-medium mb-2 flex items-center gap-1"><Key className="w-4 h-4" /> الصلاحيات الممنوحة</p>
+            <div className="flex flex-wrap gap-1.5">
+              {member.granted_permissions.map(p => (
+                <Badge key={p} variant="outline" className="text-[10px]">
+                  {PERMISSION_LABELS[p as MemberPermission]?.ar || p}
+                </Badge>
+              ))}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -126,7 +156,11 @@ function DocumentsTab({ memberId }: { memberId: string }) {
       setUploading(true);
       try {
         fileUrl = await uploadEmployeeFile(profile.organization_id, memberId, file);
-      } catch { /* ignore */ }
+      } catch (err: any) {
+        toast.error(err?.message || 'فشل في رفع الملف');
+        setUploading(false);
+        return;
+      }
       setUploading(false);
     }
     addDocument.mutate({
@@ -236,7 +270,11 @@ function CoursesTab({ memberId }: { memberId: string }) {
       setUploading(true);
       try {
         certUrl = await uploadEmployeeFile(profile.organization_id, memberId, file);
-      } catch { /* ignore */ }
+      } catch (err: any) {
+        toast.error(err?.message || 'فشل في رفع الشهادة');
+        setUploading(false);
+        return;
+      }
       setUploading(false);
     }
     addCourse.mutate({
@@ -318,7 +356,11 @@ function InsuranceTab({ memberId }: { memberId: string }) {
       setUploading(true);
       try {
         docUrl = await uploadEmployeeFile(profile.organization_id, memberId, file);
-      } catch { /* ignore */ }
+      } catch (err: any) {
+        toast.error(err?.message || 'فشل في رفع المستند');
+        setUploading(false);
+        return;
+      }
       setUploading(false);
     }
     addInsurance.mutate({
