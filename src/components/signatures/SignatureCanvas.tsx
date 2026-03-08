@@ -80,13 +80,15 @@ const SignatureCanvas = ({ onSignatureChange, width = 400, height = 180, penColo
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
     ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, width, height);
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(dpr, dpr);
     ctx.strokeStyle = penColor;
     ctx.lineWidth = penWidth;
     setHasSignature(false);
     onSignatureChange(null);
-  }, [width, height, penColor, penWidth, onSignatureChange]);
+  }, [width, height, penColor, penWidth, dpr, onSignatureChange]);
 
   return (
     <div className="flex flex-col items-center gap-2">
