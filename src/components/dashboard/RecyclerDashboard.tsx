@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import StoryCircles from '@/components/stories/StoryCircles';
@@ -43,6 +43,7 @@ import DriverComplianceManager from '@/components/compliance/DriverComplianceMan
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import RecyclerCommandCenter from './recycler/RecyclerCommandCenter';
+import SmartDailyBrief from './shared/SmartDailyBrief';
 
 
 const QualityInspectorPanel = lazy(() => import('@/components/recycler/QualityInspectorPanel'));
@@ -233,8 +234,22 @@ const RecyclerDashboard = () => {
 
   const [activeTab, setActiveTab] = useState('overview');
 
+  const quickActions = useQuickActions({ type: 'recycler', handlers: {
+    openDepositDialog: () => setShowDepositDialog(true),
+    openSmartWeightUpload: () => setShowSmartWeightUpload(true),
+  }});
+
   return (
     <div className="space-y-6">
+      <SmartDailyBrief
+        role="recycler"
+        stats={{
+          pending: stats.incoming,
+          active: stats.processing,
+          completed: stats.completed,
+          total: stats.total,
+        }}
+      />
       <StoryCircles />
 
       {/* V2.0 Header */}
@@ -295,10 +310,7 @@ const RecyclerDashboard = () => {
           <PendingApprovalsWidget />
 
           <QuickActionsGrid
-            actions={useQuickActions({ type: 'recycler', handlers: {
-              openDepositDialog: () => setShowDepositDialog(true),
-              openSmartWeightUpload: () => setShowSmartWeightUpload(true),
-            }})}
+            actions={quickActions}
             title={t('dashboard.quickActions')}
             subtitle={t('dashboard.quickActionsRecycler')}
           />

@@ -400,23 +400,29 @@ const GeneratorDashboard = () => {
               <ErrorBoundary fallbackTitle="خطأ في ESG">
                 <ESGReportWidget />
               </ErrorBoundary>
-              <DriverCodeLookup />
+              <ErrorBoundary fallbackTitle="خطأ في البحث عن السائق">
+                <DriverCodeLookup />
+              </ErrorBoundary>
             </div>
           </Suspense>
         </TabsContent>
 
         {/* ── أوامر الشغل ── */}
         <TabsContent value="work-orders" className="space-y-4 mt-4 sm:mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <WorkOrderInbox />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في أوامر الشغل">
+            <Suspense fallback={<TabFallback />}>
+              <WorkOrderInbox />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         {/* ── الجهات المرتبطة ── */}
         <TabsContent value="partners" className="space-y-4 mt-4 sm:mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <PartnerRatingsWidget />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في تقييمات الشركاء">
+            <Suspense fallback={<TabFallback />}>
+              <PartnerRatingsWidget />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         {/* ── الامتثال القانوني ── */}
