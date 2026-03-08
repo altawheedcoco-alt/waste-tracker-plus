@@ -178,7 +178,7 @@ export function useOrgMembers() {
       } else {
         const { error } = await supabase.from('organization_members' as any).insert({
           organization_id: orgId,
-          user_id: profile!.user_id,
+          user_id: null,
           profile_id: null,
           position_id: member.position_id || null,
           department_id: member.department_id || null,
