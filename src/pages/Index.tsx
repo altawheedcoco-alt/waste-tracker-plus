@@ -158,7 +158,7 @@ const Index = () => {
   return (
     <Suspense fallback={null}>
       <LandingWrapper>
-        <div className="min-h-screen-safe bg-background smooth-scroll">
+        <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
@@ -215,8 +215,8 @@ const Index = () => {
 
           {/* Visitor Counter - before footer */}
           <LazySection>
-            <div className="container px-4 py-6">
-              <div className="rounded-2xl bg-card border border-border/50 shadow-sm px-6 py-4">
+            <div className="container px-4 py-8 sm:py-10">
+              <div className="rounded-2xl bg-card border border-border/30 shadow-sm px-6 py-5">
                 <VisitorCounter />
               </div>
             </div>
