@@ -66,7 +66,12 @@ export async function sendDualNotification(notification: DualNotification): Prom
     whatsApp: { success: false },
   };
 
-  // 1. إشعار داخلي
+  // Fetch branding for notifications
+  const branding = await fetchBranding();
+  const systemName = branding.system_name || 'iRecycle';
+  const logoUrl = branding.notification_logo_url || branding.logo_url || '';
+
+  // 1. إشعار داخلي مع بيانات الهوية
   try {
     const { error } = await supabase.from('notifications').insert({
       user_id: notification.user_id,
@@ -74,28 +79,35 @@ export async function sendDualNotification(notification: DualNotification): Prom
       message: notification.message,
       type: notification.type || 'general',
       is_read: false,
+      metadata: {
+        ...(notification.metadata || {}),
+        system_name: systemName,
+        logo_url: logoUrl,
+      } as any,
     });
     result.inApp = error ? { success: false, error: error.message } : { success: true };
   } catch (err: any) {
     result.inApp = { success: false, error: err.message };
   }
 
-  // 2. واتساب
+  // 2. واتساب مع اسم النظام واللوجو
   try {
+    const brandedMessage = `${logoUrl ? '🏷️ ' : ''}*${systemName}*\n\n${notification.title}\n\n${notification.message}`;
     const { data, error } = await supabase.functions.invoke('whatsapp-send', {
       body: {
         action: 'send_to_user',
         user_id: notification.user_id,
-        message_text: `${notification.title}\n\n${notification.message}`,
+        message_text: brandedMessage,
         organization_id: notification.organization_id,
         notification_type: notification.type || 'general',
+        logo_url: logoUrl,
+        system_name: systemName,
       },
     });
     result.whatsApp = error
       ? { success: false, error: error.message }
       : { success: true, sent: data?.sent || 1 };
   } catch (err: any) {
-    // WhatsApp failure is non-blocking
     result.whatsApp = { success: false, error: err.message };
     console.warn('[UnifiedNotifier] WhatsApp failed (non-blocking):', err.message);
   }
