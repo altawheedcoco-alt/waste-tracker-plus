@@ -36487,77 +36487,113 @@ export type Database = {
       }
       visitor_tracking: {
         Row: {
+          bounce: boolean | null
           browser: string | null
           city: string | null
           country: string | null
           created_at: string
           device_type: string | null
+          exit_page: string | null
           id: string
           ip_address: string | null
           is_returning: boolean | null
           language: string | null
           latitude: number | null
           longitude: number | null
+          max_scroll_depth: number | null
           metadata: Json | null
           organization_id: string | null
           os: string | null
           page_url: string | null
+          pages_visited: string[] | null
           referrer: string | null
           region: string | null
           screen_resolution: string | null
+          session_duration_seconds: number | null
           session_id: string | null
           user_agent: string | null
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          viewport_height: number | null
+          viewport_width: number | null
           visit_count: number | null
           visitor_fingerprint: string | null
         }
         Insert: {
+          bounce?: boolean | null
           browser?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           device_type?: string | null
+          exit_page?: string | null
           id?: string
           ip_address?: string | null
           is_returning?: boolean | null
           language?: string | null
           latitude?: number | null
           longitude?: number | null
+          max_scroll_depth?: number | null
           metadata?: Json | null
           organization_id?: string | null
           os?: string | null
           page_url?: string | null
+          pages_visited?: string[] | null
           referrer?: string | null
           region?: string | null
           screen_resolution?: string | null
+          session_duration_seconds?: number | null
           session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
           visit_count?: number | null
           visitor_fingerprint?: string | null
         }
         Update: {
+          bounce?: boolean | null
           browser?: string | null
           city?: string | null
           country?: string | null
           created_at?: string
           device_type?: string | null
+          exit_page?: string | null
           id?: string
           ip_address?: string | null
           is_returning?: boolean | null
           language?: string | null
           latitude?: number | null
           longitude?: number | null
+          max_scroll_depth?: number | null
           metadata?: Json | null
           organization_id?: string | null
           os?: string | null
           page_url?: string | null
+          pages_visited?: string[] | null
           referrer?: string | null
           region?: string | null
           screen_resolution?: string | null
+          session_duration_seconds?: number | null
           session_id?: string | null
           user_agent?: string | null
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          viewport_height?: number | null
+          viewport_width?: number | null
           visit_count?: number | null
           visitor_fingerprint?: string | null
         }
