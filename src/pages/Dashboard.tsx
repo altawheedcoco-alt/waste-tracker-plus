@@ -52,6 +52,9 @@ const Dashboard = () => {
   
   // Security hardening — session timeout, CSP, anti-XSS
   useSecurityHardening();
+  
+  // Realtime sync — auto-subscribe to all critical tables for this role
+  useDashboardRealtime();
 
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);

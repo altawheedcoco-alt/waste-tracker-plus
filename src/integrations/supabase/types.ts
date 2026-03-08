@@ -39561,10 +39561,12 @@ export type Database = {
           isSetofReturn: true
         }
       }
-      get_member_role_level: {
-        Args: { role: Database["public"]["Enums"]["member_role"] }
-        Returns: number
-      }
+      get_member_role_level:
+        | { Args: { _role: string }; Returns: number }
+        | {
+            Args: { role: Database["public"]["Enums"]["member_role"] }
+            Returns: number
+          }
       get_monthly_invoice_stats: {
         Args: { _org_id: string }
         Returns: {
