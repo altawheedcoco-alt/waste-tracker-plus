@@ -16,6 +16,7 @@ const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton")
 const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
 const InstallPWA = lazy(() => import("./components/pwa/InstallPWA"));
 const PWAUpdatePrompt = lazy(() => import("./components/pwa/PWAUpdatePrompt"));
+const ProductionReadiness = lazy(() => import("./components/production/ProductionReadiness"));
 
 // Minimal loading component
 const PageLoader = memo(() => (
@@ -97,6 +98,7 @@ const Providers = memo(() => (
                   <CodeProtection />
                   <InstallPWA />
                   <PWAUpdatePrompt />
+                  <ProductionReadiness />
                 </Suspense>
               </AuthProvider>
             </BrowserRouter>
