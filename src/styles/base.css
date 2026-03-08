@@ -1,0 +1,30 @@
+/* Base Layer Styles */
+
+@layer base {
+  * {
+    @apply border-border;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground font-cairo antialiased;
+    direction: rtl;
+  }
+
+  /* Ensure minimum touch target size on mobile */
+  @media (pointer: coarse) {
+    button, [role="button"], [role="tab"], a {
+      min-height: 44px;
+    }
+
+    input, select, textarea {
+      min-height: 44px;
+      font-size: 16px;
+    }
+  }
+}
