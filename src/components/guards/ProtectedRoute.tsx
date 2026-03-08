@@ -28,14 +28,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <>{children}</>;
   }
 
-  // Skip check if we're already on the pending page
-  if (location.pathname === '/account-pending') {
-    return <>{children}</>;
+  // Wait for profile to load before making activation decisions
+  if (!profile && user) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      </div>
+    );
   }
 
   // Check if account is active
-  // For org users: both profile and org must be active
-  // For non-org users (jobseeker): profile must be active
   if (profile) {
     const profileActive = profile.is_active;
     const orgActive = organization ? (organization.is_active && organization.is_verified) : true;
