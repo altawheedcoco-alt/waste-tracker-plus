@@ -8,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, Loader2, MapPin, Navigation, X, ExternalLink,
   Bookmark, Building2, LocateFixed, Star, Map, Link2,
-  Copy, Share2, Hash, Clock, Trash2,
+  Copy, Share2, Hash, Clock, Trash2, Sparkles,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -101,7 +101,7 @@ interface SearchResult {
   address: string;
   lat: number;
   lng: number;
-  type: 'waze' | 'saved' | 'org' | 'google' | 'osm' | 'here' | 'herewego' | 'mapbox' | 'photon' | 'locationiq' | 'opencage' | 'mapsme' | 'tomtom' | 'multi';
+  type: 'ai' | 'waze' | 'saved' | 'org' | 'google' | 'osm' | 'here' | 'herewego' | 'mapbox' | 'photon' | 'locationiq' | 'opencage' | 'mapsme' | 'tomtom' | 'multi';
 }
 
 interface OrgLocation {
