@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { preprocessForOCR } from '@/utils/imagePreprocess';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -149,14 +150,25 @@ export const useAIAssistant = () => {
     }
   }, []);
 
-  // Extract weight data from scale image
+  // Extract weight data from scale image - HD OCR like CamScanner
   const extractWeightData = useCallback(async (imageBase64: string): Promise<WeightData | null> => {
     setIsLoading(true);
     setError(null);
 
     try {
+      // معالجة الصورة بجودة عالية قبل الإرسال (مثل CamScanner)
+      const processedImage = await preprocessForOCR(imageBase64, {
+        grayscale: true,
+        contrast: 60,
+        sharpness: 2,
+        brightness: 10,
+        binarize: 0, // Otsu auto-threshold
+        maxDimension: 2400,
+        quality: 0.95,
+      });
+
       const { data, error: funcError } = await supabase.functions.invoke('ai-assistant', {
-        body: { type: 'extract_weight', imageBase64 }
+        body: { type: 'extract_weight', imageBase64: processedImage }
       });
 
       if (funcError) throw funcError;
