@@ -447,7 +447,6 @@ const TrackingCenter = () => {
               <div className="grid gap-3">
                 {filteredShipments.map(shipment => {
                   const statusCfg = getStatusConfig(mapLegacyStatus(shipment.status));
-                  const StatusIcon = statusCfg.icon;
                   return (
                     <Card
                       key={shipment.id}
