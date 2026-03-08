@@ -16,7 +16,8 @@ import {
   Smartphone, Phone, Copy, Zap, HeartPulse, Shield, Globe,
   BarChart3, Clock, AlertTriangle, ArrowUpRight, ArrowDownRight,
   Radio, Server, Power, QrCode, RotateCcw, Loader2, Megaphone, Brain,
-  Target, PieChart, CalendarDays, Bot, Hash, BookOpen, Code2, ExternalLink
+  Target, PieChart, CalendarDays, Bot, Hash, BookOpen, Code2, ExternalLink,
+  Paperclip, Image, Video, Mic, FileUp, X, File
 } from 'lucide-react';
 import {
   AreaChart, Area, BarChart, Bar, PieChart as RePieChart, Pie, Cell,
@@ -160,6 +161,9 @@ const WaPilotManagement = () => {
   const [quickPhone, setQuickPhone] = useState('');
   const [quickMessage, setQuickMessage] = useState('');
   const [sendingMessage, setSendingMessage] = useState(false);
+  const [quickAttachment, setQuickAttachment] = useState<File | null>(null);
+  const [attachmentPreview, setAttachmentPreview] = useState<string | null>(null);
+  const [sendProgress, setSendProgress] = useState<{ current: number; total: number } | null>(null);
 
   useEffect(() => {
     if (!isAdmin) return;
@@ -404,38 +408,133 @@ const WaPilotManagement = () => {
     if (connectedPhone) { navigator.clipboard.writeText(connectedPhone); toast.success('تم نسخ الرقم'); }
   };
 
-  const handleQuickSend = useCallback(async () => {
-    if (!quickPhone.trim() || !quickMessage.trim()) {
-      toast.error('يرجى إدخال رقم الهاتف ونص الرسالة');
+  const handleAttachmentChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const maxSize = 16 * 1024 * 1024; // 16MB
+    if (file.size > maxSize) {
+      toast.error('حجم الملف يتجاوز 16 ميجا');
       return;
     }
-    const phone = quickPhone.replace(/[\s\-\+]/g, '').replace(/^0+/, '');
-    const chatId = phone.includes('@') ? phone : `${phone}@c.us`;
-    setSendingMessage(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
-        body: { action: 'send-message', chat_id: chatId, text: quickMessage },
-      });
-      if (error) throw error;
-      if (data?.error) throw new Error(data.error);
-      toast.success('تم إرسال الرسالة بنجاح ✓');
-      setQuickMessage('');
-      await supabase.from('whatsapp_messages').insert({
-        to_phone: phone,
-        content: quickMessage,
-        message_type: 'text',
-        status: 'sent',
-        direction: 'outbound',
-        organization_id: orgs[0]?.id || '',
-        metadata: { source: 'wapilot_dashboard_quick_send' },
-      });
-      fetchAllData();
-    } catch (err: any) {
-      toast.error(`فشل الإرسال: ${err.message || 'خطأ غير متوقع'}`);
-    } finally {
-      setSendingMessage(false);
+    setQuickAttachment(file);
+    if (file.type.startsWith('image/')) {
+      const url = URL.createObjectURL(file);
+      setAttachmentPreview(url);
+    } else {
+      setAttachmentPreview(null);
     }
-  }, [quickPhone, quickMessage, orgs, fetchAllData]);
+  }, []);
+
+  const clearAttachment = useCallback(() => {
+    setQuickAttachment(null);
+    if (attachmentPreview) URL.revokeObjectURL(attachmentPreview);
+    setAttachmentPreview(null);
+  }, [attachmentPreview]);
+
+  const handleQuickSend = useCallback(async () => {
+    if (!quickPhone.trim() || (!quickMessage.trim() && !quickAttachment)) {
+      toast.error('يرجى إدخال رقم الهاتف ونص الرسالة أو إرفاق ملف');
+      return;
+    }
+    // Parse multiple phones (comma, newline, or semicolon separated)
+    const phones = quickPhone
+      .split(/[,;\n]+/)
+      .map(p => p.replace(/[\s\-\+]/g, '').replace(/^0+/, ''))
+      .filter(p => p.length >= 8);
+
+    if (phones.length === 0) {
+      toast.error('يرجى إدخال رقم هاتف صحيح');
+      return;
+    }
+
+    setSendingMessage(true);
+    setSendProgress({ current: 0, total: phones.length });
+
+    let mediaUrl: string | null = null;
+    let mediaFilename: string | null = null;
+
+    // Upload attachment to storage if exists
+    if (quickAttachment) {
+      try {
+        const ext = quickAttachment.name.split('.').pop() || 'bin';
+        const path = `wapilot-media/${Date.now()}-${Math.random().toString(36).slice(2, 6)}.${ext}`;
+        const { error: uploadErr } = await supabase.storage
+          .from('documents')
+          .upload(path, quickAttachment, { contentType: quickAttachment.type });
+        if (uploadErr) throw uploadErr;
+        const { data: urlData } = supabase.storage.from('documents').getPublicUrl(path);
+        mediaUrl = urlData.publicUrl;
+        mediaFilename = quickAttachment.name;
+      } catch (err: any) {
+        toast.error(`فشل رفع الملف: ${err.message}`);
+        setSendingMessage(false);
+        setSendProgress(null);
+        return;
+      }
+    }
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < phones.length; i++) {
+      const phone = phones[i];
+      const chatId = phone.includes('@') ? phone : `${phone}@c.us`;
+      setSendProgress({ current: i + 1, total: phones.length });
+      try {
+        if (mediaUrl) {
+          // Send media
+          const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
+            body: {
+              action: 'send-media',
+              chat_id: chatId,
+              media_url: mediaUrl,
+              filename: mediaFilename,
+              caption: quickMessage || undefined,
+            },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+        } else {
+          // Send text only
+          const { data, error } = await supabase.functions.invoke('wapilot-proxy', {
+            body: { action: 'send-message', chat_id: chatId, text: quickMessage },
+          });
+          if (error) throw error;
+          if (data?.error) throw new Error(data.error);
+        }
+        successCount++;
+        // Log to DB
+        await supabase.from('whatsapp_messages').insert({
+          to_phone: phone,
+          content: quickMessage || `[${quickAttachment?.type?.split('/')[0] || 'ملف'}]`,
+          message_type: mediaUrl ? 'media' : 'text',
+          status: 'sent',
+          direction: 'outbound',
+          organization_id: orgs[0]?.id || '',
+          attachment_url: mediaUrl,
+          metadata: { source: 'wapilot_dashboard_quick_send', filename: mediaFilename },
+        });
+      } catch (err: any) {
+        failCount++;
+        console.error(`Failed to send to ${phone}:`, err);
+      }
+      // Small delay between messages to avoid rate limiting
+      if (phones.length > 1 && i < phones.length - 1) {
+        await new Promise(r => setTimeout(r, 500));
+      }
+    }
+
+    if (successCount > 0) {
+      toast.success(`تم إرسال ${successCount} رسالة بنجاح ✓${failCount > 0 ? ` (فشل ${failCount})` : ''}`);
+      setQuickMessage('');
+      clearAttachment();
+    } else {
+      toast.error('فشل إرسال جميع الرسائل');
+    }
+    setSendingMessage(false);
+    setSendProgress(null);
+    fetchAllData();
+  }, [quickPhone, quickMessage, quickAttachment, orgs, fetchAllData, clearAttachment]);
 
   if (!isAdmin) {
     return <div className="flex items-center justify-center py-20 text-muted-foreground">هذه الصفحة متاحة لمدير النظام فقط</div>;
