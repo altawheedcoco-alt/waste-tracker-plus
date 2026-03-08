@@ -10635,11 +10635,14 @@ export type Database = {
           auto_accepted: boolean | null
           counter_price: number | null
           created_at: string
+          distance_km: number | null
           driver_id: string
           driver_notes: string | null
           expires_at: string
           final_price: number | null
           id: string
+          max_radius_km: number | null
+          offer_round: number
           offered_by: string | null
           offered_price: number | null
           organization_id: string | null
@@ -10654,11 +10657,14 @@ export type Database = {
           auto_accepted?: boolean | null
           counter_price?: number | null
           created_at?: string
+          distance_km?: number | null
           driver_id: string
           driver_notes?: string | null
           expires_at?: string
           final_price?: number | null
           id?: string
+          max_radius_km?: number | null
+          offer_round?: number
           offered_by?: string | null
           offered_price?: number | null
           organization_id?: string | null
@@ -10673,11 +10679,14 @@ export type Database = {
           auto_accepted?: boolean | null
           counter_price?: number | null
           created_at?: string
+          distance_km?: number | null
           driver_id?: string
           driver_notes?: string | null
           expires_at?: string
           final_price?: number | null
           id?: string
+          max_radius_km?: number | null
+          offer_round?: number
           offered_by?: string | null
           offered_price?: number | null
           organization_id?: string | null
