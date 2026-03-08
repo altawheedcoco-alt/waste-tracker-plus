@@ -1,4 +1,5 @@
 import { memo, useState, lazy, Suspense, useMemo } from 'react';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -392,22 +393,26 @@ const ConsultantDashboard = memo(() => {
 
         {/* ═══ العمليات الميدانية ═══ */}
         <TabsContent value="field-ops" className="mt-4">
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantFieldOpsPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في العمليات الميدانية">
+            <Suspense fallback={<LazyLoader />}>
+              <ConsultantFieldOpsPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         {/* ═══ الامتثال (يجمع امتثال العملاء + الاعتماد الفني) ═══ */}
         <TabsContent value="compliance" className="mt-4 space-y-6">
-          <Suspense fallback={<LazyLoader />}>
-            <ClientComplianceDashboard assignments={scopedAssignments} />
-          </Suspense>
-          <Suspense fallback={<LazyLoader />}>
-            <ConsultantAutoReviewPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} entityType={(consultantProfile as any)?.entity_type || 'individual'} />
-          </Suspense>
-          <Suspense fallback={<LazyLoader />}>
-            <ApprovalsPanel assignments={scopedAssignments} />
-          </Suspense>
+          <ErrorBoundary fallbackTitle="خطأ في بيانات الامتثال">
+            <Suspense fallback={<LazyLoader />}>
+              <ClientComplianceDashboard assignments={scopedAssignments} />
+            </Suspense>
+            <Suspense fallback={<LazyLoader />}>
+              <ConsultantAutoReviewPanel assignments={scopedAssignments} consultantId={(consultantProfile as any)?.id} entityType={(consultantProfile as any)?.entity_type || 'individual'} />
+            </Suspense>
+            <Suspense fallback={<LazyLoader />}>
+              <ApprovalsPanel assignments={scopedAssignments} />
+            </Suspense>
+          </ErrorBoundary>
         </TabsContent>
 
         {/* ═══ مراجعة الشحنات ═══ */}
