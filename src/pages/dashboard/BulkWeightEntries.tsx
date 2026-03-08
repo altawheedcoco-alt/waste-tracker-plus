@@ -97,7 +97,7 @@ export default function BulkWeightEntries() {
   const queryClient = useQueryClient();
   const { isLoading: aiLoading, extractWeightData } = useAIAssistant();
   const fileInputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const { customWasteTypes, addWasteType } = useCustomWasteTypes();
+  const { customWasteTypes, addCustomWasteType } = useCustomWasteTypes();
   const [newCustomType, setNewCustomType] = useState('');
 
   // Selected partners
@@ -629,7 +629,7 @@ export default function BulkWeightEntries() {
                               onClick={async () => {
                                 if (!newCustomType.trim()) return;
                                 try {
-                                  await addWasteType({
+                                  await addCustomWasteType({
                                     name: newCustomType.trim(),
                                     code: `CW-${Date.now().toString(36)}`,
                                     category: 'non-hazardous',
