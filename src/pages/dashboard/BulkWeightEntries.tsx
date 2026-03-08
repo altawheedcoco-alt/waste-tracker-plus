@@ -211,6 +211,63 @@ export default function BulkWeightEntries() {
     }));
   };
 
+  // Upload image to storage and return public URL
+  const uploadWeighbridgeImage = async (file: File, entryId: string): Promise<string | null> => {
+    if (!organization?.id) return null;
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const path = `${organization.id}/weighbridge/${Date.now()}-${entryId.slice(0, 8)}.${ext}`;
+      const { error } = await supabase.storage
+        .from('shipment-documents')
+        .upload(path, file, { contentType: file.type, upsert: false });
+      if (error) { console.error('Image upload error:', error); return null; }
+      const { data } = supabase.storage.from('shipment-documents').getPublicUrl(path);
+      return data.publicUrl;
+    } catch (err) { console.error('Upload failed:', err); return null; }
+  };
+
+  // Auto-save a single entry to DB
+  const autoSaveEntry = async (entry: WeightEntry, imageUrl: string | null, aiData: any) => {
+    if (!organization?.id || !entry.net_weight) return;
+    try {
+      const row: Record<string, any> = {
+        organization_id: organization.id,
+        batch_number: batchNumber,
+        transporter_id: selectedTransporter?.type === 'organization' ? selectedTransporter.id : null,
+        recycler_id: selectedRecycler?.type === 'organization' ? selectedRecycler.id : null,
+        driver_id: selectedDriver?.id || null,
+        ticket_number: entry.ticket_number || null,
+        waste_type: entry.waste_type || 'غير محدد',
+        waste_description: entry.waste_description || null,
+        first_weight: Number(entry.first_weight) || null,
+        first_weight_date: entry.first_weight_date || null,
+        second_weight: Number(entry.second_weight) || null,
+        second_weight_date: entry.second_weight_date || null,
+        net_weight: Number(entry.net_weight),
+        unit: entry.unit,
+        price_per_unit: Number(entry.price_per_unit) || 0,
+        tax_rate: Number(entry.tax_rate) || 0,
+        paid_amount: Number(entry.paid_amount) || 0,
+        visible_to_transporter: entry.visible_to_transporter,
+        visible_to_recycler: entry.visible_to_recycler,
+        visible_to_driver: entry.visible_to_driver,
+        show_financial_data: entry.show_financial_data,
+        ai_extracted: true,
+        entry_date: entry.entry_date,
+        notes: entry.notes || null,
+        created_by: profile?.id,
+        weighbridge_image_url: imageUrl,
+        ai_extraction_data: aiData ? JSON.parse(JSON.stringify(aiData)) : null,
+        status: 'draft',
+      };
+      const { error } = await supabase.from('bulk_weight_entries').insert([row as any]);
+      if (error) throw error;
+      queryClient.invalidateQueries({ queryKey: ['bulk-weight-entries'] });
+    } catch (err) {
+      console.error('Auto-save failed:', err);
+    }
+  };
+
   // AI extraction
   const handleImageUpload = async (entryId: string, e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -221,7 +278,12 @@ export default function BulkWeightEntries() {
       const base64 = event.target?.result as string;
       updateEntry(entryId, { imagePreview: base64 });
 
-      const data = await extractWeightData(base64);
+      // Upload image to storage in parallel with AI extraction
+      const [imageUrl, data] = await Promise.all([
+        uploadWeighbridgeImage(file, entryId),
+        extractWeightData(base64),
+      ]);
+
       if (data) {
         const updates: Partial<WeightEntry> = { aiExtracted: true };
         if (data.net_weight) updates.net_weight = data.net_weight;
@@ -240,9 +302,29 @@ export default function BulkWeightEntries() {
         }
         if (data.date) updates.entry_date = data.date;
         updateEntry(entryId, updates);
-        toast.success('تم استخراج البيانات من صورة الميزان بنجاح ✨');
+
+        // Auto-save to DB with image URL and AI data
+        const currentEntry = entries.find(en => en.id === entryId);
+        if (currentEntry) {
+          const merged = { ...currentEntry, ...updates };
+          await autoSaveEntry(merged, imageUrl, data);
+          toast.success('تم استخراج البيانات وحفظ الوزنة تلقائياً ✅✨');
+        } else {
+          toast.success('تم استخراج البيانات من صورة الميزان بنجاح ✨');
+        }
       } else {
-        toast.error('لم نتمكن من استخراج البيانات، يرجى الإدخال يدوياً');
+        // Even if AI fails, save the image reference
+        if (imageUrl) {
+          const currentEntry = entries.find(en => en.id === entryId);
+          if (currentEntry && currentEntry.net_weight) {
+            await autoSaveEntry(currentEntry, imageUrl, null);
+            toast.info('تم حفظ الصورة. يرجى إكمال البيانات يدوياً');
+          } else {
+            toast.error('لم نتمكن من استخراج البيانات، يرجى الإدخال يدوياً');
+          }
+        } else {
+          toast.error('لم نتمكن من استخراج البيانات، يرجى الإدخال يدوياً');
+        }
       }
     };
     reader.readAsDataURL(file);
