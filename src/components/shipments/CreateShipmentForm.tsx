@@ -751,10 +751,11 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
           />
         </div>
 
-        {/* Interactive Google Map for location selection */}
+        {/* Interactive Map — pickup + delivery + route + driver */}
         <ShipmentLocationMap
           pickupCoords={pickupCoords}
           deliveryCoords={deliveryCoords}
+          driverCoords={driverCurrentLocation ? { lat: driverCurrentLocation.latitude, lng: driverCurrentLocation.longitude } : undefined}
           onPickupChange={(address, coords) => {
             setFormData(prev => ({ ...prev, pickup_address: address }));
             setPickupCoords(coords);
