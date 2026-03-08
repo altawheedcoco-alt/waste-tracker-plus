@@ -885,6 +885,75 @@ export type Database = {
           },
         ]
       }
+      ai_action_queue: {
+        Row: {
+          action_type: string
+          attempts: number | null
+          created_at: string | null
+          id: string
+          input_data: Json | null
+          last_error: string | null
+          max_attempts: number | null
+          organization_id: string | null
+          output_data: Json | null
+          priority: number | null
+          processed_at: string | null
+          resource_id: string
+          resource_type: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          action_type: string
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          input_data?: Json | null
+          last_error?: string | null
+          max_attempts?: number | null
+          organization_id?: string | null
+          output_data?: Json | null
+          priority?: number | null
+          processed_at?: string | null
+          resource_id: string
+          resource_type: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          action_type?: string
+          attempts?: number | null
+          created_at?: string | null
+          id?: string
+          input_data?: Json | null
+          last_error?: string | null
+          max_attempts?: number | null
+          organization_id?: string | null
+          output_data?: Json | null
+          priority?: number | null
+          processed_at?: string | null
+          resource_id?: string
+          resource_type?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_action_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_action_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_agent_configs: {
         Row: {
           agent_name: string | null
@@ -1298,6 +1367,171 @@ export type Database = {
           },
           {
             foreignKeyName: "ai_agent_orders_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_platform_config: {
+        Row: {
+          anomaly_threshold: number | null
+          auto_analyze_shipments: boolean | null
+          auto_classify_waste: boolean | null
+          auto_document_classify: boolean | null
+          auto_quality_inspect: boolean | null
+          auto_sentiment_analysis: boolean | null
+          created_at: string | null
+          current_daily_usage: number | null
+          custom_system_prompt: string | null
+          fast_model: string | null
+          id: string
+          industry_context: string | null
+          max_requests_per_day: number | null
+          max_requests_per_minute: number | null
+          notify_on_anomaly: boolean | null
+          notify_on_quality_issue: boolean | null
+          organization_id: string
+          preferred_model: string | null
+          response_language: string | null
+          updated_at: string | null
+          usage_reset_at: string | null
+          vision_model: string | null
+        }
+        Insert: {
+          anomaly_threshold?: number | null
+          auto_analyze_shipments?: boolean | null
+          auto_classify_waste?: boolean | null
+          auto_document_classify?: boolean | null
+          auto_quality_inspect?: boolean | null
+          auto_sentiment_analysis?: boolean | null
+          created_at?: string | null
+          current_daily_usage?: number | null
+          custom_system_prompt?: string | null
+          fast_model?: string | null
+          id?: string
+          industry_context?: string | null
+          max_requests_per_day?: number | null
+          max_requests_per_minute?: number | null
+          notify_on_anomaly?: boolean | null
+          notify_on_quality_issue?: boolean | null
+          organization_id: string
+          preferred_model?: string | null
+          response_language?: string | null
+          updated_at?: string | null
+          usage_reset_at?: string | null
+          vision_model?: string | null
+        }
+        Update: {
+          anomaly_threshold?: number | null
+          auto_analyze_shipments?: boolean | null
+          auto_classify_waste?: boolean | null
+          auto_document_classify?: boolean | null
+          auto_quality_inspect?: boolean | null
+          auto_sentiment_analysis?: boolean | null
+          created_at?: string | null
+          current_daily_usage?: number | null
+          custom_system_prompt?: string | null
+          fast_model?: string | null
+          id?: string
+          industry_context?: string | null
+          max_requests_per_day?: number | null
+          max_requests_per_minute?: number | null
+          notify_on_anomaly?: boolean | null
+          notify_on_quality_issue?: boolean | null
+          organization_id?: string
+          preferred_model?: string | null
+          response_language?: string | null
+          updated_at?: string | null
+          usage_reset_at?: string | null
+          vision_model?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_platform_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_platform_config_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_usage_log: {
+        Row: {
+          created_at: string | null
+          error_message: string | null
+          estimated_cost_usd: number | null
+          function_name: string
+          id: string
+          metadata: Json | null
+          model_used: string
+          organization_id: string | null
+          request_type: string
+          resource_id: string | null
+          resource_type: string | null
+          response_time_ms: number | null
+          status: string | null
+          tokens_input: number | null
+          tokens_output: number | null
+          total_tokens: number | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          function_name: string
+          id?: string
+          metadata?: Json | null
+          model_used: string
+          organization_id?: string | null
+          request_type: string
+          resource_id?: string | null
+          resource_type?: string | null
+          response_time_ms?: number | null
+          status?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          error_message?: string | null
+          estimated_cost_usd?: number | null
+          function_name?: string
+          id?: string
+          metadata?: Json | null
+          model_used?: string
+          organization_id?: string | null
+          request_type?: string
+          resource_id?: string | null
+          resource_type?: string | null
+          response_time_ms?: number | null
+          status?: string | null
+          tokens_input?: number | null
+          tokens_output?: number | null
+          total_tokens?: number | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_usage_log_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
