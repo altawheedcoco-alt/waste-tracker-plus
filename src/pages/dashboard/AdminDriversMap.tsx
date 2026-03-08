@@ -29,7 +29,7 @@ import {
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DriverTrackingMap from '@/components/maps/MapboxDriverTracking';
+import LeafletMultiDriverMap from '@/components/maps/LeafletMultiDriverMap';
 import DriverLocationHistory from '@/components/maps/LeafletDriverHistory';
 import BackButton from '@/components/ui/back-button';
 
@@ -378,12 +378,24 @@ const AdminDriversMap = () => {
                   <Loader2 className="w-8 h-8 animate-spin text-primary" />
                 </div>
               ) : (
-                <DriverTrackingMap
-                  drivers={driversWithLocation as MapDriver[]}
-                  selectedDriver={selectedDriver as MapDriver | null}
-                  onSelectDriver={(driver) => setSelectedDriver(driver as unknown as AdminDriver)}
-                  center={{ lat: 30.0444, lng: 31.2357 }}
-                  showHeatmap={showHeatmap}
+                <LeafletMultiDriverMap
+                  drivers={driversWithLocation.map(d => ({
+                    id: d.id,
+                    name: d.profile?.full_name || d.id,
+                    lat: d.latitude || 30.0,
+                    lng: d.longitude || 31.2,
+                    isOnline: d.is_available,
+                    vehiclePlate: d.vehicle_plate || undefined,
+                    phone: d.profile?.phone || undefined,
+                    currentShipment: null,
+                  }))}
+                  onDriverClick={(id) => {
+                    const driver = driversWithLocation.find(d => d.id === id);
+                    if (driver) setSelectedDriver(driver as unknown as AdminDriver);
+                  }}
+                  height="500px"
+                  autoRefresh
+                  refreshInterval={30000}
                 />
               )}
             </CardContent>

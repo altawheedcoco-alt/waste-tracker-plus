@@ -29,7 +29,7 @@ import {
   Eye,
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import DriverTrackingMap from '@/components/maps/MapboxDriverTracking';
+import LeafletMultiDriverMap from '@/components/maps/LeafletMultiDriverMap';
 import DriverLocationHistory from '@/components/maps/LeafletDriverHistory';
 import BackButton from '@/components/ui/back-button';
 import SendDriverNotificationDialog from '@/components/drivers/SendDriverNotificationDialog';
@@ -291,10 +291,24 @@ const DriverTracking = () => {
               </div>
             </CardHeader>
             <CardContent>
-              <DriverTrackingMap
-                drivers={filteredDrivers}
-                selectedDriver={selectedDriver}
-                onSelectDriver={(driver) => setSelectedDriver(driver as any)}
+              <LeafletMultiDriverMap
+                drivers={filteredDrivers.map(d => ({
+                  id: d.id,
+                  name: d.profile?.full_name || d.id,
+                  lat: d.latitude || 30.0,
+                  lng: d.longitude || 31.2,
+                  isOnline: d.is_available,
+                  vehiclePlate: d.vehicle_plate || undefined,
+                  phone: d.profile?.phone || undefined,
+                  currentShipment: null,
+                }))}
+                onDriverClick={(id) => {
+                  const driver = filteredDrivers.find(d => d.id === id);
+                  if (driver) setSelectedDriver(driver as any);
+                }}
+                height="500px"
+                autoRefresh
+                refreshInterval={30000}
               />
             </CardContent>
           </Card>
