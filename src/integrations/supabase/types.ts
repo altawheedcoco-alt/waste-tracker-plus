@@ -3063,6 +3063,193 @@ export type Database = {
           },
         ]
       }
+      bulk_weight_entries: {
+        Row: {
+          ai_extracted: boolean | null
+          ai_extraction_data: Json | null
+          batch_number: string
+          created_at: string | null
+          created_by: string | null
+          currency: string | null
+          driver_id: string | null
+          entry_date: string
+          external_partner_id: string | null
+          first_weight: number | null
+          first_weight_date: string | null
+          id: string
+          net_weight: number
+          notes: string | null
+          organization_id: string
+          paid_amount: number | null
+          price_per_unit: number | null
+          recycler_id: string | null
+          remaining_amount: number | null
+          second_weight: number | null
+          second_weight_date: string | null
+          shipment_number: string | null
+          show_financial_data: boolean | null
+          status: string | null
+          subtotal: number | null
+          tax_amount: number | null
+          tax_rate: number | null
+          ticket_number: string | null
+          total_amount: number | null
+          transporter_id: string | null
+          unit: string
+          updated_at: string | null
+          visible_to_driver: boolean | null
+          visible_to_recycler: boolean | null
+          visible_to_transporter: boolean | null
+          waste_description: string | null
+          waste_type: string
+          weighbridge_image_url: string | null
+        }
+        Insert: {
+          ai_extracted?: boolean | null
+          ai_extraction_data?: Json | null
+          batch_number: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          driver_id?: string | null
+          entry_date?: string
+          external_partner_id?: string | null
+          first_weight?: number | null
+          first_weight_date?: string | null
+          id?: string
+          net_weight: number
+          notes?: string | null
+          organization_id: string
+          paid_amount?: number | null
+          price_per_unit?: number | null
+          recycler_id?: string | null
+          remaining_amount?: number | null
+          second_weight?: number | null
+          second_weight_date?: string | null
+          shipment_number?: string | null
+          show_financial_data?: boolean | null
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          ticket_number?: string | null
+          total_amount?: number | null
+          transporter_id?: string | null
+          unit?: string
+          updated_at?: string | null
+          visible_to_driver?: boolean | null
+          visible_to_recycler?: boolean | null
+          visible_to_transporter?: boolean | null
+          waste_description?: string | null
+          waste_type: string
+          weighbridge_image_url?: string | null
+        }
+        Update: {
+          ai_extracted?: boolean | null
+          ai_extraction_data?: Json | null
+          batch_number?: string
+          created_at?: string | null
+          created_by?: string | null
+          currency?: string | null
+          driver_id?: string | null
+          entry_date?: string
+          external_partner_id?: string | null
+          first_weight?: number | null
+          first_weight_date?: string | null
+          id?: string
+          net_weight?: number
+          notes?: string | null
+          organization_id?: string
+          paid_amount?: number | null
+          price_per_unit?: number | null
+          recycler_id?: string | null
+          remaining_amount?: number | null
+          second_weight?: number | null
+          second_weight_date?: string | null
+          shipment_number?: string | null
+          show_financial_data?: boolean | null
+          status?: string | null
+          subtotal?: number | null
+          tax_amount?: number | null
+          tax_rate?: number | null
+          ticket_number?: string | null
+          total_amount?: number | null
+          transporter_id?: string | null
+          unit?: string
+          updated_at?: string | null
+          visible_to_driver?: boolean | null
+          visible_to_recycler?: boolean | null
+          visible_to_transporter?: boolean | null
+          waste_description?: string | null
+          waste_type?: string
+          weighbridge_image_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bulk_weight_entries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_external_partner_id_fkey"
+            columns: ["external_partner_id"]
+            isOneToOne: false
+            referencedRelation: "external_partners"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_recycler_id_fkey"
+            columns: ["recycler_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "bulk_weight_entries_transporter_id_fkey"
+            columns: ["transporter_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_analysis: {
         Row: {
           action_items: Json | null
