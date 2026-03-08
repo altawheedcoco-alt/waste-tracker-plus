@@ -15,6 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { lovable } from '@/integrations/lovable/index';
 import { useNavigate } from 'react-router-dom';
 import PasswordStrengthMeter from './PasswordStrengthMeter';
+import RegistrationTermsAcceptance from './RegistrationTermsAcceptance';
 
 interface JobSeekerRegistrationFormProps {
   onBack: () => void;
@@ -29,6 +30,7 @@ const JobSeekerRegistrationForm = ({ onBack }: JobSeekerRegistrationFormProps) =
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [data, setData] = useState({ email: '', password: '', fullName: '', phone: '' });
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -40,6 +42,7 @@ const JobSeekerRegistrationForm = ({ onBack }: JobSeekerRegistrationFormProps) =
     if (!data.fullName) errs.fullName = t('auth.nameRequired');
     if (!data.email) errs.email = t('auth.emailRequired');
     if (!data.password || data.password.length < 6) errs.password = t('auth.passwordMinLength');
+    if (!termsAccepted) errs.terms = 'يجب الموافقة على الشروط والأحكام';
     if (Object.keys(errs).length > 0) { setErrors(errs); return; }
 
     setLoading(true);
@@ -104,6 +107,13 @@ const JobSeekerRegistrationForm = ({ onBack }: JobSeekerRegistrationFormProps) =
         </div>
       </div>
 
+      {/* Terms & Conditions */}
+      <RegistrationTermsAcceptance
+        accountType="jobseeker"
+        onAcceptChange={(v) => { setTermsAccepted(v); if (errors.terms) setErrors(prev => ({ ...prev, terms: '' })); }}
+      />
+      {errors.terms && <p className="text-xs text-destructive text-center">{errors.terms}</p>}
+
       {/* Social Login */}
       <div className="relative my-2">
         <div className="absolute inset-0 flex items-center"><Separator className="w-full" /></div>
@@ -144,7 +154,7 @@ const JobSeekerRegistrationForm = ({ onBack }: JobSeekerRegistrationFormProps) =
         <Button type="button" variant="outline" onClick={onBack} className="flex-1 h-11 rounded-xl">
           <ArrowRight className="ml-2" size={18} />{t('common.previous')}
         </Button>
-        <Button type="button" variant="eco" onClick={handleSubmit} disabled={loading} className="flex-1 h-11 rounded-xl">
+        <Button type="button" variant="eco" onClick={handleSubmit} disabled={loading || !termsAccepted} className="flex-1 h-11 rounded-xl">
           {loading ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : null}
           {loading ? t('auth.creatingAccount') : 'إنشاء حساب'}
         </Button>

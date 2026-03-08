@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import PasswordStrengthMeter from './PasswordStrengthMeter';
+import RegistrationTermsAcceptance from './RegistrationTermsAcceptance';
 
 const driverSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
@@ -42,6 +43,7 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
     email: '', password: '', fullName: '', phone: '',
     licenseNumber: '', vehicleType: '', vehiclePlate: '', licenseExpiry: '',
   });
+  const [termsAccepted, setTermsAccepted] = useState(false);
 
   const handleChange = (field: string, value: string) => {
     setData(prev => ({ ...prev, [field]: value }));
@@ -66,6 +68,10 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
 
   const handleSubmit = async () => {
     if (!validateStep(2)) return;
+    if (!termsAccepted) {
+      setErrors(prev => ({ ...prev, terms: 'يجب الموافقة على الشروط والأحكام' }));
+      return;
+    }
     setLoading(true);
     try {
       driverSchema.parse(data);
@@ -173,6 +179,13 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
             <Input placeholder="أ ب ج 1234" value={data.vehiclePlate} onChange={e => handleChange('vehiclePlate', e.target.value)} className={inputClass('vehiclePlate')} dir="ltr" />
             {errors.vehiclePlate && <p className="text-xs text-destructive">{errors.vehiclePlate}</p>}
           </div>
+
+          {/* Terms & Conditions */}
+          <RegistrationTermsAcceptance
+            accountType="driver"
+            onAcceptChange={(v) => { setTermsAccepted(v); if (errors.terms) setErrors(prev => ({ ...prev, terms: '' })); }}
+          />
+          {errors.terms && <p className="text-xs text-destructive text-center">{errors.terms}</p>}
         </div>
       )}
 
@@ -185,7 +198,7 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
             {t('common.next')}<ArrowLeft className="mr-2" size={18} />
           </Button>
         ) : (
-          <Button type="button" variant="eco" onClick={handleSubmit} disabled={loading} className="flex-1 h-11 rounded-xl">
+          <Button type="button" variant="eco" onClick={handleSubmit} disabled={loading || !termsAccepted} className="flex-1 h-11 rounded-xl">
             {loading ? <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" /> : null}
             {loading ? t('auth.creatingAccount') : t('auth.submitRequest')}
           </Button>
