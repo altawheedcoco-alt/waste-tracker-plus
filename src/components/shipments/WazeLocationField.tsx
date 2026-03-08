@@ -709,6 +709,7 @@ const WazeLocationField = ({
 
   const getTypeIcon = (type: SearchResult['type']) => {
     switch (type) {
+      case 'ai': return <Sparkles className="w-3.5 h-3.5 text-primary" />;
       case 'saved': return <Star className="w-3.5 h-3.5 text-amber-500" />;
       case 'org': return <Building2 className="w-3.5 h-3.5 text-primary" />;
       case 'waze': return <Navigation className="w-3.5 h-3.5 text-primary" />;
@@ -726,6 +727,7 @@ const WazeLocationField = ({
 
   const getTypeLabel = (type: SearchResult['type']) => {
     switch (type) {
+      case 'ai': return '✨ AI';
       case 'saved': return 'محفوظ';
       case 'org': return 'منظمة';
       case 'waze': return 'Waze';
