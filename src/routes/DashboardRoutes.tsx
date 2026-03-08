@@ -218,6 +218,7 @@ const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics")
 const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocumentRegistry"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
+const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 
 export const dashboardRoutes = (
   <>
@@ -310,6 +311,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/platform-brochure" element={<PlatformBrochure />} />
     <Route path="/dashboard/platform-terms" element={<PlatformTermsAndPolicies />} />
     <Route path="/dashboard/admin-document-stamping" element={<AdminDocumentStamping />} />
+    <Route path="/dashboard/admin-branding" element={<AdminBrandingSettings />} />
     <Route path="/dashboard/saved-locations" element={<SavedLocationsPage />} />
     <Route path="/dashboard/quick-deposit-links" element={<QuickDepositLinks />} />
     <Route path="/dashboard/quick-shipment-links" element={<QuickShipmentLinks />} />
