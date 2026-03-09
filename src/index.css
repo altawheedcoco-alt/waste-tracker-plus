@@ -1,14 +1,16 @@
 /* Leaflet CSS */
 @import 'leaflet/dist/leaflet.css';
 
+/* آي ريسايكل v3.0 - Design System: tokens MUST load before Tailwind layers */
+@import './styles/tokens.css';
+
 /* Fonts loaded via index.html link tags for better performance */
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* آي ريسايكل v2.0 - Modular Design System */
-@import './styles/tokens.css';
+/* Post-Tailwind styles (utilities, overrides) */
 @import './styles/base.css';
 @import './styles/utilities.css';
 @import './styles/leaflet.css';
