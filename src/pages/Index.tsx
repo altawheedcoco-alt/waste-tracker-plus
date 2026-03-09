@@ -33,6 +33,7 @@ const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcas
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
+const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
 const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
 
 /** Only renders children when the container scrolls into view */
@@ -171,7 +172,12 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Platform Showcase - immediately after hero */}
+          {/* SaaS Tech Section - technical identity */}
+          <LazySection>
+            <SaaSTechSection />
+          </LazySection>
+
+          {/* Platform Showcase - immediately after tech section */}
           <LazySection>
             <PlatformShowcase />
           </LazySection>
