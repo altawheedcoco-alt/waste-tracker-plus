@@ -294,9 +294,9 @@ const OperationalAlertsWidget = () => {
           .lte('end_date', new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()).gte('end_date', now.toISOString()).limit(5),
         supabase.from('invoices').select('id, invoice_number, due_date, total_amount').eq('organization_id', organization!.id).eq('status', 'overdue').limit(5),
         supabase.from('organization_documents').select('id, document_type, created_at').eq('organization_id', organization!.id).eq('verification_status', 'pending').limit(3),
-        // Fleet: vehicles needing maintenance
-        supabase.from('vehicles').select('id, plate_number, next_maintenance_date, insurance_expiry').eq('organization_id', organization!.id).eq('status', 'active')
-          .not('next_maintenance_date', 'is', null).lt('next_maintenance_date', new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString()).limit(5),
+        // Fleet: vehicles with expiring insurance/license
+        supabase.from('fleet_vehicles').select('id, plate_number, insurance_expiry, license_expiry').eq('organization_id', organization!.id).eq('status', 'active')
+          .not('insurance_expiry', 'is', null).lt('insurance_expiry', new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()).gte('insurance_expiry', now.toISOString()).limit(5),
         // Licenses expiring
         supabase.from('organization_documents').select('id, document_type, expiry_date').eq('organization_id', organization!.id).eq('verification_status', 'verified')
           .not('expiry_date', 'is', null).lt('expiry_date', new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()).gte('expiry_date', now.toISOString()).limit(3),
