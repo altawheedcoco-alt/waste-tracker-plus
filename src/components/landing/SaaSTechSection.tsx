@@ -176,7 +176,7 @@ const SaaSTechSection = memo(() => {
         </motion.div>
 
         {/* Tech Pillars Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-6xl mx-auto">
           {techPillars.map((pillar, index) => (
             <motion.div
               key={pillar.titleAr}
