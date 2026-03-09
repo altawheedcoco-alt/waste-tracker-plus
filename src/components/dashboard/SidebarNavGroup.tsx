@@ -27,13 +27,21 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
   const location = useLocation();
   const hasChildren = item.children && item.children.length > 0;
   
+  const { getPref, setPref } = useUserPreferences();
+  
   // Check if any child is active
   const isChildActive = hasChildren && item.children!.some(
     child => location.pathname === child.path || 
     child.children?.some(sub => location.pathname === sub.path)
   );
   const isActive = location.pathname === item.path;
-  const [isOpen, setIsOpen] = useState(isChildActive || isActive);
+  
+  const prefKey = `sidebar_group_open_${item.key}`;
+  const isOpen = getPref(prefKey, isChildActive || isActive);
+  
+  const toggleOpen = useCallback(() => {
+    setPref(prefKey, !isOpen);
+  }, [prefKey, isOpen, setPref]);
 
   const Icon = item.icon;
 
