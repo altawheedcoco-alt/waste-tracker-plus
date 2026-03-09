@@ -661,7 +661,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </Button>
           </div>
             </aside>
-        )
+        )}
+
 
         {/* Floating Show Sidebar Button - Visible when sidebar is hidden */}
         <AnimatePresence>
