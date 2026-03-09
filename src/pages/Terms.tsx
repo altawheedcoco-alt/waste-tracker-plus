@@ -321,8 +321,15 @@ const Terms = () => {
           })}
         </div>
 
+        {/* Usage Agreement Acceptance */}
+        <div className="mt-12">
+          <Suspense fallback={null}>
+            <UsageAgreementSection currentPage="terms" />
+          </Suspense>
+        </div>
+
         {/* Footer legal notice */}
-        <div className="mt-12 p-6 rounded-2xl border-2 border-destructive/20 bg-destructive/5 text-center">
+        <div className="mt-8 p-6 rounded-2xl border-2 border-destructive/20 bg-destructive/5 text-center">
           <AlertTriangle className="w-8 h-8 text-destructive mx-auto mb-3" />
           <h3 className="text-lg font-bold text-destructive mb-2">تنبيه قانوني مهم</h3>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl mx-auto">
