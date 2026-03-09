@@ -94,7 +94,7 @@ const PlatformShowcase = memo(() => {
   const isAr = language === 'ar';
 
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
+    <section className="py-12 sm:py-16 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/[0.03] rounded-full blur-[100px]" />
@@ -107,7 +107,7 @@ const PlatformShowcase = memo(() => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-12 sm:mb-16"
+          className="text-center mb-8 sm:mb-12"
         >
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-4">
             <Zap className="w-4 h-4 text-primary" />
@@ -171,7 +171,7 @@ const PlatformShowcase = memo(() => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-10 sm:mt-14"
+          className="text-center mt-8 sm:mt-10"
         >
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-muted/40 border border-border/50">
             <Globe className="w-5 h-5 text-primary" />

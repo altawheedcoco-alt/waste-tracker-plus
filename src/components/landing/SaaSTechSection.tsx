@@ -68,7 +68,7 @@ const SaaSTechSection = memo(() => {
   const isAr = language === "ar";
 
   return (
-    <section className="relative py-20 sm:py-28 overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
+    <section className="relative py-12 sm:py-16 overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
       {/* Animated tech background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
       
@@ -113,7 +113,7 @@ const SaaSTechSection = memo(() => {
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14 sm:mb-20"
+          className="text-center mb-10 sm:mb-12"
         >
           {/* Code badge */}
           <motion.div
@@ -226,7 +226,7 @@ const SaaSTechSection = memo(() => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-14 sm:mt-20"
+          className="text-center mt-8 sm:mt-12"
         >
           <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-6 px-8 py-5 rounded-2xl bg-card border-2 border-primary/15 shadow-xl">
             <div className="flex items-center gap-3">
