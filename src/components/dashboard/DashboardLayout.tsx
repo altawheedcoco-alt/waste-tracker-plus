@@ -999,7 +999,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               <OnboardingGuard>
-              <motion.div
+                  <motion.div
                     key={location.pathname}
                     initial={{ opacity: 0.6 }}
                     animate={{ opacity: 1 }}
@@ -1007,7 +1007,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   >
                     {children}
                   </motion.div>
-                </AnimatePresence>
               </OnboardingGuard>
             </div>
           </main>
