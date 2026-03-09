@@ -68,7 +68,7 @@ const SaaSTechSection = memo(() => {
   const isAr = language === "ar";
 
   return (
-    <section className="relative py-20 sm:py-28 overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
+    <section className="relative py-12 sm:py-16 overflow-hidden" dir={isAr ? "rtl" : "ltr"}>
       {/* Animated tech background */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-muted/20 to-background" />
       
