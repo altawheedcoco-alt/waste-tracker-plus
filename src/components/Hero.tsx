@@ -140,17 +140,17 @@ const Hero = memo(() => {
 
           {/* CTA Buttons — v3.0 elevated */}
           <motion.div
-            className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 px-6"
-            initial={{ opacity: 0, y: 20 }}
+            className="flex flex-row items-center justify-center gap-2.5 sm:gap-4 px-4 sm:px-6"
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.55 }}
+            transition={{ duration: 0.4, delay: 0.55 }}
           >
-            <Button variant="hero" size="lg" className="group text-sm sm:text-lg px-6 sm:px-10 py-3.5 sm:py-6 w-full sm:w-auto shadow-2xl spring-press font-bold relative overflow-hidden" onClick={() => navigate('/auth?mode=register')}>
+            <Button variant="hero" size="lg" className="group text-[13px] sm:text-lg px-5 sm:px-10 py-3 sm:py-6 flex-1 sm:flex-initial sm:w-auto shadow-2xl spring-press font-bold relative overflow-hidden" onClick={() => navigate('/auth?mode=register')}>
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
               {t('landing.registerCompany')}
               <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5 group-hover:-translate-x-1 transition-transform" />
             </Button>
-            <Button variant="heroOutline" size="lg" className="text-sm sm:text-lg px-6 sm:px-10 py-3.5 sm:py-6 w-full sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 spring-press font-bold backdrop-blur-sm" onClick={() => navigate('/auth?mode=login')}>
+            <Button variant="heroOutline" size="lg" className="text-[13px] sm:text-lg px-5 sm:px-10 py-3 sm:py-6 flex-1 sm:flex-initial sm:w-auto border-2 border-white/30 text-white hover:bg-white/10 hover:border-white/50 spring-press font-bold backdrop-blur-sm" onClick={() => navigate('/auth?mode=login')}>
               {t('nav.login')}
             </Button>
           </motion.div>
