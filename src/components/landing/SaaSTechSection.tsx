@@ -127,7 +127,7 @@ const SaaSTechSection = memo(() => {
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           </motion.div>
 
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-foreground mb-5 leading-tight">
+          <h2 className="text-2xl sm:text-5xl lg:text-6xl font-black text-foreground mb-4 sm:mb-5 leading-tight">
             {isAr ? (
               <>
                 ليست مجرد منصة...
