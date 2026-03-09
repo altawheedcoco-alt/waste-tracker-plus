@@ -72,6 +72,7 @@ import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeli
 import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
 import CompleteShipmentDocButton from './CompleteShipmentDocButton';
 const ShipmentEndorsementButton = lazy(() => import('./ShipmentEndorsementButton'));
+import DocumentChainStrip from './DocumentChainStrip';
 
 // Lazy load the live tracking map dialog and inline map
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
