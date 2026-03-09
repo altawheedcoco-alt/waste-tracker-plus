@@ -144,11 +144,11 @@ const Header = memo(() => {
   }, [navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/20 animate-fade-in" style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)' }}>
+    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/30 animate-fade-in">
       {/* v3.0 Gradient top accent line — bolder */}
       <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-eco-ocean via-primary to-eco-emerald opacity-90" />
       
-      <div className="bg-white/90 dark:bg-card/90 backdrop-blur-2xl shadow-sm">
+      <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
         <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
             {/* Logo */}
@@ -186,7 +186,7 @@ const Header = memo(() => {
                   {/* Mega Dropdown */}
                   {openDropdown === dropdown.label && (
                     <div
-                      className={`absolute top-full mt-2 bg-background border border-border/60 rounded-2xl shadow-2xl shadow-black/8 z-50 overflow-hidden animate-fade-in ${
+                      className={`absolute top-full mt-2 bg-background border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in ${
                         dropdown.megaShowcase ? 'w-[640px]' : dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
                       }`}
                       style={{ [language === 'ar' ? 'right' : 'left']: 0 }}
@@ -287,7 +287,7 @@ const Header = memo(() => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-background border-t border-border/30 animate-fade-in max-h-[75vh] overflow-y-auto shadow-2xl relative z-50">
+        <div className="lg:hidden bg-background border-t border-border animate-fade-in max-h-[75vh] overflow-y-auto shadow-2xl relative z-50">
           <div className="container mx-auto px-3 py-4">
             <nav className="flex flex-col gap-1">
               {dropdowns.map((dropdown) => (
