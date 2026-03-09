@@ -302,7 +302,7 @@ const RecyclerDashboard = () => {
           </ErrorBoundary>
 
           <DailyOperationsSummary />
-          <OperationalAlertsWidget />
+          <DashboardAlertsHub orgType="recycler" />
           <UnifiedDocumentSearch />
           <DocumentVerificationWidget />
           <DriverCodeLookup />
