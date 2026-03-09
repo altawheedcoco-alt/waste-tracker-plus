@@ -100,19 +100,19 @@ const Hero = memo(() => {
           </motion.h1>
 
           <motion.p
-            className="text-[10px] sm:text-sm text-white/65 mt-1 font-semibold tracking-wide px-4"
+            className="text-[9px] sm:text-sm text-white/60 mt-0.5 sm:mt-1 font-semibold tracking-wide px-4"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
             {t('heroExtra.nationalPlatform')}
           </motion.p>
 
           <motion.p
-            className="text-xs sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-5 sm:mb-7 px-4 leading-relaxed font-medium mt-2"
-            initial={{ opacity: 0, y: 15 }}
+            className="text-[11px] sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-4 sm:mb-7 px-3 sm:px-4 leading-relaxed font-medium mt-1.5 sm:mt-2"
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
           >
             {t('landing.heroDesc')}
           </motion.p>
