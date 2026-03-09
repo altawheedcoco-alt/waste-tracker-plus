@@ -94,7 +94,7 @@ const PlatformShowcase = memo(() => {
   const isAr = language === 'ar';
 
   return (
-    <section className="py-16 sm:py-24 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
+    <section className="py-12 sm:py-16 bg-gradient-to-b from-background to-muted/30 relative overflow-hidden">
       {/* Decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-20 left-10 w-72 h-72 bg-primary/[0.03] rounded-full blur-[100px]" />
