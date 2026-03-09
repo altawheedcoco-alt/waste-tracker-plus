@@ -24,7 +24,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
