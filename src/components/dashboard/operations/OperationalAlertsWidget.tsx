@@ -395,27 +395,29 @@ const OperationalAlertsWidget = () => {
         });
       });
 
-      // Fleet maintenance
+      // Fleet - insurance expiry
       vehiclesRes.data?.forEach((v: any) => {
-        const daysLeft = differenceInDays(new Date(v.next_maintenance_date), now);
-        result.push({
-          id: `maint-${v.id}`, type: 'maintenance', severity: daysLeft <= 2 ? 'critical' : 'warning', category: 'fleet',
-          message: `مركبة ${v.plate_number} تحتاج صيانة`,
-          detail: daysLeft <= 0 ? 'تأخرت عن موعد الصيانة!' : `الصيانة القادمة خلال ${daysLeft} يوم`,
-          timestamp: new Date(v.next_maintenance_date), resourceId: v.id, resourceType: 'vehicle',
-          delayReason: daysLeft <= 0 ? 'المركبة تجاوزت موعد الصيانة المحدد — خطر تعطل أثناء الرحلة' : 'اقتراب موعد الصيانة الدورية',
-          solutions: generateSolutions('maintenance'),
-        });
-
-        // Insurance expiry
-        if (v.insurance_expiry && differenceInDays(new Date(v.insurance_expiry), now) <= 14) {
+        if (v.insurance_expiry) {
+          const daysLeft = differenceInDays(new Date(v.insurance_expiry), now);
           result.push({
-            id: `ins-${v.id}`, type: 'license_expiry', severity: 'critical', category: 'compliance',
+            id: `ins-${v.id}`, type: 'license_expiry', severity: daysLeft <= 3 ? 'critical' : 'warning', category: 'fleet',
             message: `تأمين مركبة ${v.plate_number} ينتهي قريباً`,
             detail: `ينتهي ${formatDistanceToNow(new Date(v.insurance_expiry), { locale: ar, addSuffix: true })}`,
             timestamp: new Date(v.insurance_expiry), resourceId: v.id, resourceType: 'vehicle',
             solutions: ['جدد التأمين فوراً', 'أوقف المركبة من الخدمة إذا انتهى التأمين'],
           });
+        }
+        if (v.license_expiry) {
+          const daysLeft = differenceInDays(new Date(v.license_expiry), now);
+          if (daysLeft <= 14) {
+            result.push({
+              id: `vlicense-${v.id}`, type: 'license_expiry', severity: daysLeft <= 3 ? 'critical' : 'warning', category: 'fleet',
+              message: `رخصة مركبة ${v.plate_number} تنتهي قريباً`,
+              detail: `تنتهي ${formatDistanceToNow(new Date(v.license_expiry), { locale: ar, addSuffix: true })}`,
+              timestamp: new Date(v.license_expiry), resourceId: v.id, resourceType: 'vehicle',
+              solutions: ['جدد رخصة المركبة فوراً', 'جهّز مركبة بديلة'],
+            });
+          }
         }
       });
 
