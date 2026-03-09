@@ -9,9 +9,16 @@ export const PWAUpdatePrompt = () => {
     updateServiceWorker,
   } = useRegisterSW({
     onRegisteredSW(swUrl, r) {
-      // Check for updates every hour
       if (r) {
-        setInterval(() => r.update(), 60 * 60 * 1000);
+        // فحص التحديثات كل 10 دقائق (بدلاً من ساعة) لضمان مزامنة أسرع
+        setInterval(() => r.update(), 10 * 60 * 1000);
+
+        // فحص فوري عند العودة من الخلفية
+        document.addEventListener('visibilitychange', () => {
+          if (document.visibilityState === 'visible') {
+            r.update();
+          }
+        });
       }
     },
     onRegisterError(error) {
@@ -26,7 +33,7 @@ export const PWAUpdatePrompt = () => {
           initial={{ y: -60, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: -60, opacity: 0 }}
-          className="fixed top-4 left-4 right-4 z-[100] mx-auto max-w-sm"
+          className="fixed top-4 left-4 right-4 z-[100] mx-auto max-w-sm safe-top-pwa"
         >
           <div className="bg-primary text-primary-foreground rounded-xl shadow-lg p-3 flex items-center gap-3">
             <RefreshCw className="w-5 h-5 flex-shrink-0 animate-spin" />

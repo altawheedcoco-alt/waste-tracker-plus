@@ -11,6 +11,7 @@ import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
+import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -55,6 +56,9 @@ const Dashboard = () => {
   
   // Realtime sync — auto-subscribe to all critical tables for this role
   useDashboardRealtime();
+
+  // PWA: reconnect realtime + invalidate cache when app resumes from background
+  usePWARealtimeSync();
 
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);

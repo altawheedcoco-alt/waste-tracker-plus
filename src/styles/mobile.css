@@ -278,3 +278,65 @@ body {
     background: hsl(var(--muted-foreground) / 0.35); 
   }
 }
+
+/* ========================================
+   PWA Standalone Mode Enhancements
+   ======================================== */
+@media all and (display-mode: standalone) {
+  /* Safe area for status bar in PWA */
+  .safe-top-pwa {
+    top: max(1rem, env(safe-area-inset-top, 1rem));
+  }
+
+  /* Prevent pull-to-refresh in PWA */
+  body {
+    overscroll-behavior-y: contain;
+  }
+
+  /* Extra bottom padding for gesture nav */
+  main {
+    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  }
+
+  /* Hide browser-specific UI hints */
+  .browser-only {
+    display: none !important;
+  }
+}
+
+/* ========================================
+   iOS PWA specific fixes
+   ======================================== */
+@supports (-webkit-touch-callout: none) {
+  /* Fix 100vh issue on iOS */
+  .h-screen-safe {
+    height: -webkit-fill-available;
+  }
+  .min-h-screen-safe {
+    min-height: -webkit-fill-available;
+  }
+
+  /* Prevent text size adjustment */
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Better input handling on iOS */
+  input, textarea, select {
+    font-size: 16px; /* prevents zoom on focus */
+  }
+}
+
+/* ========================================
+   Mobile Bottom Navigation Safe Area
+   ======================================== */
+@media (max-width: 640px) {
+  .bottom-nav-safe {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  /* Prevent content hiding behind bottom nav */
+  .has-bottom-nav {
+    padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+  }
+}
