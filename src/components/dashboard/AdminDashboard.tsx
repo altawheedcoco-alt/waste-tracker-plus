@@ -40,7 +40,7 @@ import DashboardPrintReports from './shared/DashboardPrintReports';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
