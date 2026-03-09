@@ -31,7 +31,7 @@ import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatu
 import RecyclerIncomingPanel from './recycler/RecyclerIncomingPanel';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
