@@ -287,7 +287,7 @@ const Header = memo(() => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white dark:bg-[hsl(222,12%,11%)] border-t border-border animate-fade-in max-h-[75vh] overflow-y-auto shadow-2xl relative z-50">
+        <div className="lg:hidden bg-background border-t border-border animate-fade-in max-h-[75vh] overflow-y-auto shadow-2xl relative z-50">
           <div className="container mx-auto px-3 py-4">
             <nav className="flex flex-col gap-1">
               {dropdowns.map((dropdown) => (
