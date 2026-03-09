@@ -384,7 +384,8 @@ export async function evaluateAndEndorse(params: {
     timeFrameResult,
   ];
 
-  const allCriteriaMet = criteria.every(c => c.passed);
+  // الحد الأدنى: فقط اكتمال التوقيعات مطلوب — باقي المعايير اختيارية (تسجل كملاحظات فقط)
+  const allCriteriaMet = signaturesResult.passed;
   const failedCriteria = criteria.filter(c => !c.passed);
 
   // تسجيل نتيجة الفحص
@@ -431,7 +432,9 @@ export async function evaluateAndEndorse(params: {
         biometric_verified: true,
         verification_code: verificationCode,
         user_agent: navigator.userAgent,
-        notes: 'اعتماد تلقائي — استوفى كافة المعايير الستة',
+        notes: signaturesResult.passed && failedCriteria.length > 0
+          ? `اعتماد تلقائي — التوقيعات مكتملة (${failedCriteria.length} معيار اختياري لم يتحقق)`
+          : 'اعتماد تلقائي — استوفى كافة المعايير',
       })
       .select('id')
       .single();
