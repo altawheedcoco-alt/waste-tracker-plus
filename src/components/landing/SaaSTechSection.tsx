@@ -143,7 +143,7 @@ const SaaSTechSection = memo(() => {
             )}
           </h2>
 
-          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
             {isAr
               ? "نقدم حلولاً برمجية تقنية (SaaS) لإدارة المخلفات بأساليب ذكية ومتطورة — مبنية على أحدث تقنيات الحوسبة السحابية والذكاء الاصطناعي والتشفير المتقدم"
               : "We deliver SaaS solutions for waste management powered by cutting-edge cloud computing, AI, and advanced encryption technologies"}
