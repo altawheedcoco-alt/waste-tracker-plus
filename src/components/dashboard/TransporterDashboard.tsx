@@ -34,7 +34,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
