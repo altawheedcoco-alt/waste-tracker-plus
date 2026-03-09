@@ -94,6 +94,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
+        // Skip waiting — تفعيل التحديث فوراً بدون انتظار إغلاق التبويبات
+        skipWaiting: true,
+        clientsClaim: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -102,11 +105,9 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'google-fonts-cache',
               expiration: {
                 maxEntries: 10,
-                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+                maxAgeSeconds: 60 * 60 * 24 * 365,
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
@@ -118,25 +119,37 @@ export default defineConfig(({ mode }) => ({
                 maxEntries: 10,
                 maxAgeSeconds: 60 * 60 * 24 * 365,
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
           {
+            // API calls — always network first for fresh data
             urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/rest\/v1\/.*/i,
             handler: 'NetworkFirst',
             options: {
               cacheName: 'api-cache',
               expiration: {
                 maxEntries: 50,
-                maxAgeSeconds: 60 * 5, // 5 minutes
+                maxAgeSeconds: 60 * 2, // 2 minutes (shorter for fresher data)
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
-              networkTimeoutSeconds: 10,
+              cacheableResponse: { statuses: [0, 200] },
+              networkTimeoutSeconds: 8,
             },
+          },
+          {
+            // Realtime/WebSocket — NEVER cache
+            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/realtime\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Auth endpoints — NEVER cache
+            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/auth\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            // Edge functions — NEVER cache
+            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/functions\/.*/i,
+            handler: 'NetworkOnly',
           },
           {
             urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/storage\/.*/i,
@@ -145,11 +158,9 @@ export default defineConfig(({ mode }) => ({
               cacheName: 'storage-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+                maxAgeSeconds: 60 * 60 * 24 * 30,
               },
-              cacheableResponse: {
-                statuses: [0, 200],
-              },
+              cacheableResponse: { statuses: [0, 200] },
             },
           },
         ],

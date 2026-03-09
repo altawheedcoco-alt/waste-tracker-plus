@@ -57,6 +57,9 @@ const Dashboard = () => {
   // Realtime sync — auto-subscribe to all critical tables for this role
   useDashboardRealtime();
 
+  // PWA: reconnect realtime + invalidate cache when app resumes from background
+  usePWARealtimeSync();
+
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);
   useEffect(() => {
