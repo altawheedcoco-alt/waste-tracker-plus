@@ -1021,97 +1021,17 @@ const ShipmentCard = ({
               </div>
             )}
 
-            {/* Documents Summary Section */}
-            {totalDocuments > 0 && (
-              <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
-                <div className="flex items-center gap-2 mb-2">
-                  <ScrollText className="w-4 h-4 text-primary" />
-                  <span className="text-xs font-medium">المستندات المرتبطة ({totalDocuments})</span>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {/* Delivery Certificates */}
-                  {linkedReceipts.filter((r: any) => r.receipt_type === 'delivery').map((r: any) => (
-                    <Badge
-                      key={r.id}
-                      variant="outline"
-                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
-                      onClick={() => navigate(`/dashboard/receipts/${r.id}`)}
-                    >
-                      <Send className="w-3 h-3 text-blue-500" />
-                      شهادة تسليم
-                      {r.status === 'confirmed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
-                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
-                    </Badge>
-                  ))}
-                  {/* Receipt Certificates */}
-                  {linkedReceipts.filter((r: any) => r.receipt_type === 'receipt' || !r.receipt_type).map((r: any) => (
-                    <Badge
-                      key={r.id}
-                      variant="outline"
-                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
-                      onClick={() => navigate(`/dashboard/receipts/${r.id}`)}
-                    >
-                      <FileCheck className="w-3 h-3 text-emerald-500" />
-                      شهادة استلام
-                      {r.status === 'confirmed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
-                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
-                    </Badge>
-                  ))}
-                  {/* Recycling Certificates */}
-                  {linkedReports.map((r: any) => (
-                    <Badge
-                      key={r.id}
-                      variant="outline"
-                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
-                      onClick={() => navigate(`/dashboard/recycling-reports/${r.id}`)}
-                    >
-                      <Recycle className="w-3 h-3 text-green-600" />
-                      شهادة تدوير
-                      {r.status === 'approved' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
-                      {r.status === 'pending' && <Clock className="w-2.5 h-2.5 text-yellow-500" />}
-                    </Badge>
-                  ))}
-                  {/* Declarations */}
-                  {allDeclarations.map((d: any, i: number) => (
-                    <Badge
-                      key={d.id}
-                      variant="outline"
-                      className="text-[10px] gap-1 cursor-pointer hover:bg-primary/10 transition-colors"
-                      onClick={() => setIsDeclarationViewOpen(true)}
-                    >
-                      <ClipboardCheck className="w-3 h-3 text-purple-500" />
-                      إقرار {d.declaration_type === 'generator' ? 'المولد' : d.declaration_type === 'recycler' ? 'المدور' : `#${i + 1}`}
-                      {d.status === 'signed' && <CheckCircle2 className="w-2.5 h-2.5 text-green-500" />}
-                      {d.status === 'rejected' && <XCircle className="w-2.5 h-2.5 text-red-500" />}
-                    </Badge>
-                  ))}
-                  {/* Complete Shipment Document Button */}
-                  <CompleteShipmentDocButton
-                    shipmentId={shipment.id}
-                    shipmentNumber={shipment.shipment_number}
-                    shipmentStatus={shipment.status}
-                    variant="outline"
-                    size="sm"
-                    className="text-[10px] h-5 px-2"
-                  />
-                  <Suspense fallback={null}>
-                    <ShipmentEndorsementButton
-                      shipmentId={shipment.id}
-                      shipmentNumber={shipment.shipment_number}
-                      shipmentStatus={mappedStatus}
-                    />
-                  </Suspense>
-                </div>
-              </div>
-            )}
-
-            {/* Complete Shipment Doc - shown even without other documents */}
-            {totalDocuments === 0 && ['confirmed', 'completed', 'delivered'].includes(shipment.status) && (
-              <div className="border-t px-4 py-2.5 bg-muted/30 flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+            {/* Document Chain Strip — سلسلة المستندات المباشرة */}
+            <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
+              <DocumentChainStrip shipmentId={shipment.id} variant="full" />
+              <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                 <CompleteShipmentDocButton
                   shipmentId={shipment.id}
                   shipmentNumber={shipment.shipment_number}
                   shipmentStatus={shipment.status}
+                  variant="outline"
+                  size="sm"
+                  className="text-[10px] h-5 px-2"
                 />
                 <Suspense fallback={null}>
                   <ShipmentEndorsementButton
@@ -1121,32 +1041,33 @@ const ShipmentCard = ({
                   />
                 </Suspense>
               </div>
-            )}
+            </div>
 
-            {/* Progress Steps - Show relevant phase only */}
-            <div className="border-t bg-gradient-to-l from-muted/50 to-transparent px-4 py-3">
+            {/* Simplified Progress Steps — 5 key milestones only */}
+            <div className="border-t bg-gradient-to-l from-muted/50 to-transparent px-4 py-2">
               <div className="flex items-center justify-between gap-1">
-                {allStatuses.slice(0, 10).map((status, index) => {
-                  const isActive = index <= currentStatusIndex;
+                {allStatuses.filter((_, i) => i % 2 === 0).slice(0, 5).map((status, index, arr) => {
+                  const origIndex = allStatuses.findIndex(s => s.key === status.key);
+                  const isActive = origIndex <= currentStatusIndex;
                   const isCurrent = status.key === mappedStatus;
                   const StatusIcon = status.icon;
                   
                   return (
-                    <div key={status.key} className="flex items-center gap-1 flex-1">
+                    <div key={status.key} className="flex items-center gap-0.5 flex-1">
                       <div className={cn(
-                        "w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center transition-all",
+                        "w-6 h-6 rounded-full flex items-center justify-center transition-all",
                         isActive ? status.colorClass : 'bg-muted',
                         isCurrent && 'ring-2 ring-offset-1 ring-primary'
                       )}>
                         <StatusIcon className={cn(
-                          "w-2.5 h-2.5 sm:w-3 sm:h-3",
+                          "w-3 h-3",
                           isActive ? 'text-white' : 'text-muted-foreground'
                         )} />
                       </div>
-                      {index < 9 && (
+                      {index < arr.length - 1 && (
                         <div className={cn(
                           "flex-1 h-0.5 rounded transition-all",
-                          index < currentStatusIndex ? status.colorClass : 'bg-muted'
+                          origIndex < currentStatusIndex ? status.colorClass : 'bg-muted'
                         )} />
                       )}
                     </div>
