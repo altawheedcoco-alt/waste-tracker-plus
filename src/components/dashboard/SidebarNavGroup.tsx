@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useCallback } from 'react';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown } from 'lucide-react';
@@ -26,13 +27,21 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
   const location = useLocation();
   const hasChildren = item.children && item.children.length > 0;
   
+  const { getPref, setPref } = useUserPreferences();
+  
   // Check if any child is active
   const isChildActive = hasChildren && item.children!.some(
     child => location.pathname === child.path || 
     child.children?.some(sub => location.pathname === sub.path)
   );
   const isActive = location.pathname === item.path;
-  const [isOpen, setIsOpen] = useState(isChildActive || isActive);
+  
+  const prefKey = `sidebar_group_open_${item.key}`;
+  const isOpen = getPref(prefKey, isChildActive || isActive);
+  
+  const toggleOpen = useCallback(() => {
+    setPref(prefKey, !isOpen);
+  }, [prefKey, isOpen, setPref]);
 
   const Icon = item.icon;
 
@@ -110,7 +119,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
   const triggerContent = (
     <motion.button
       whileTap={{ scale: 0.98 }}
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={toggleOpen}
       className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 touch-manipulation ${
         isChildActive
           ? 'bg-primary/10 text-primary font-semibold'
