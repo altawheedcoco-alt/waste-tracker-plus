@@ -53,7 +53,7 @@ const NewsTicker = memo(() => {
       </div>
 
       {/* Desktop */}
-      <div className="fixed top-16 sm:top-20 left-0 right-0 w-full overflow-hidden z-40 h-[42px] hidden sm:block" dir="rtl">
+      <div className="fixed top-14 sm:top-[72px] left-0 right-0 w-full overflow-hidden z-40 h-[38px] sm:h-[42px] hidden sm:block" dir="rtl">
         <div className="absolute inset-0 bg-gradient-to-l from-[hsl(160,64%,20%)] via-[hsl(160,56%,25%)] to-[hsl(170,50%,22%)]" />
 
         <div className="relative flex items-center">
