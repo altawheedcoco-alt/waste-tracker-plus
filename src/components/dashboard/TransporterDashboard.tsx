@@ -210,19 +210,13 @@ const TransporterDashboard = () => {
 
       <AutomationSettingsDialog organizationType="transporter" />
 
-      <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
-        <OperationalAlertsWidget />
-        <TransporterSLAAlerts shipments={shipments} />
-        <TransporterIncomingRequests />
-      </ErrorBoundary>
+      <DashboardAlertsHub
+        orgType="transporter"
+        notificationsComponent={<TransporterNotifications notifications={notifications} />}
+        slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+        incomingRequestsComponent={<TransporterIncomingRequests />}
+      />
 
-      <ErrorBoundary fallbackTitle="خطأ في موافقات التسليم">
-        <Suspense fallback={<TabFallback />}>
-          <TransporterDeliveryApproval />
-        </Suspense>
-      </ErrorBoundary>
-
-      <TransporterNotifications notifications={notifications} />
       <UnifiedDocumentSearch />
       <DocumentVerificationWidget />
 
