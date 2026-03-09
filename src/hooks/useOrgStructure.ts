@@ -38,6 +38,11 @@ export interface Position {
   permissions: any;
   max_holders: number;
   sort_order: number;
+  operator_type: 'human' | 'ai';
+  auto_email: string | null;
+  holder_name: string | null;
+  holder_phone: string | null;
+  holder_national_id: string | null;
   created_at: string;
   updated_at: string;
   assigned_user?: { full_name: string; avatar_url: string | null } | null;
