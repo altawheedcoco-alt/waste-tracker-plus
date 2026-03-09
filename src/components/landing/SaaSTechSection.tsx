@@ -199,7 +199,7 @@ const SaaSTechSection = memo(() => {
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-black text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-base sm:text-lg font-black text-foreground mb-1.5 sm:mb-2 group-hover:text-primary transition-colors">
                 {isAr ? pillar.titleAr : pillar.titleEn}
               </h3>
               <p className="text-sm text-muted-foreground leading-relaxed mb-4">
