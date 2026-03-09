@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { formatDistanceToNow, format } from 'date-fns';
+import { formatDistanceToNow, format, isToday, isYesterday, startOfDay } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { enUS } from 'date-fns/locale';
 import { useQuery } from '@tanstack/react-query';
@@ -16,38 +16,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Bell, Search,
-  Package,
-  Truck,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  CheckCheck,
-  FileText,
-  Inbox,
-  Send,
-  PackageCheck,
-  MessageSquare,
-  Download,
-  Printer,
-  Eye,
-  Volume2,
-  Clock,
-  User,
-  Building2,
-  MapPin,
-  Scale,
-  Recycle,
-  Phone,
-  Car,
-  PenTool,
-  Wallet,
-  Handshake,
-  BarChart3,
-  Shield,
-  Stamp,
-  Sparkles,
+  Bell, Search, Package, Truck, CheckCircle, AlertCircle, Info, CheckCheck,
+  FileText, Inbox, Send, PackageCheck, MessageSquare, Download, Printer,
+  Eye, Volume2, Clock, User, Building2, MapPin, Scale, Recycle, Phone,
+  Car, PenTool, Wallet, Handshake, BarChart3, Shield, Stamp, Sparkles,
+  AlertTriangle, Zap, TrendingUp, Flame, Timer, Filter, LayoutGrid,
+  List, CalendarDays, BellRing, BellOff, Wrench, FileCheck, Gavel,
+  Megaphone, Radar, Leaf, ClipboardCheck, UserCheck, Key, Settings,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
@@ -55,168 +32,104 @@ import NotificationDetailDialog from '@/components/notifications/NotificationDet
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { normalizeRelation } from '@/lib/supabaseHelpers';
 
-// Helper: translate metadata keys to Arabic descriptive labels
+// ═══════════════════════════════════════════════════════
+// Metadata labels
+// ═══════════════════════════════════════════════════════
 const getMetadataFieldLabel = (key: string): { label: string } => {
   const labels: Record<string, string> = {
-    // Shipment related
-    shipment_id: 'معرّف الشحنة',
-    shipment_number: 'رقم الشحنة',
-    waste_type: 'نوع المخلفات',
-    quantity: 'الكمية',
-    unit: 'وحدة القياس',
-    weight: 'الوزن',
-    status: 'الحالة',
-    previous_status: 'الحالة السابقة',
-    new_status: 'الحالة الجديدة',
-    // Parties
-    generator_name: 'الجهة المولدة',
-    transporter_name: 'الجهة الناقلة',
-    recycler_name: 'جهة المعالجة',
-    driver_name: 'اسم السائق',
-    partner_name: 'اسم الشريك',
-    organization_name: 'اسم المنظمة',
-    sender_name: 'المرسِل',
-    receiver_name: 'المستلِم',
-    // Location
-    pickup_location: 'موقع الاستلام',
-    delivery_location: 'موقع التسليم',
-    pickup_address: 'عنوان الاستلام',
-    delivery_address: 'عنوان التسليم',
-    location: 'الموقع',
-    // Vehicle & Driver
-    plate_number: 'رقم لوحة المركبة',
-    vehicle_type: 'نوع المركبة',
-    vehicle_plate: 'لوحة المركبة',
-    // Financial
-    amount: 'المبلغ',
-    total_amount: 'المبلغ الإجمالي',
-    invoice_number: 'رقم الفاتورة',
-    invoice_id: 'معرّف الفاتورة',
-    payment_method: 'طريقة الدفع',
-    currency: 'العملة',
+    shipment_id: 'معرّف الشحنة', shipment_number: 'رقم الشحنة', waste_type: 'نوع المخلفات',
+    quantity: 'الكمية', unit: 'وحدة القياس', weight: 'الوزن', status: 'الحالة',
+    previous_status: 'الحالة السابقة', new_status: 'الحالة الجديدة',
+    generator_name: 'الجهة المولدة', transporter_name: 'الجهة الناقلة', recycler_name: 'جهة المعالجة',
+    driver_name: 'اسم السائق', partner_name: 'اسم الشريك', organization_name: 'اسم المنظمة',
+    sender_name: 'المرسِل', receiver_name: 'المستلِم',
+    pickup_location: 'موقع الاستلام', delivery_location: 'موقع التسليم',
+    pickup_address: 'عنوان الاستلام', delivery_address: 'عنوان التسليم', location: 'الموقع',
+    plate_number: 'رقم لوحة المركبة', vehicle_type: 'نوع المركبة', vehicle_plate: 'لوحة المركبة',
+    amount: 'المبلغ', total_amount: 'المبلغ الإجمالي', invoice_number: 'رقم الفاتورة',
+    invoice_id: 'معرّف الفاتورة', payment_method: 'طريقة الدفع', currency: 'العملة',
     price_per_unit: 'السعر لكل وحدة',
-    // Documents
-    document_type: 'نوع المستند',
-    document_name: 'اسم المستند',
-    document_id: 'معرّف المستند',
-    file_name: 'اسم الملف',
-    // Camera
-    camera_event_id: 'معرّف حدث الكاميرا',
-    photo_url: 'رابط الصورة',
-    confidence_score: 'نسبة الثقة',
-    arrival_verified: 'تم تأكيد الوصول',
-    // Reports
-    report_id: 'معرّف التقرير',
-    certificate_id: 'معرّف الشهادة',
-    recycling_rate: 'معدل إعادة التدوير',
-    // Dates
-    pickup_date: 'تاريخ الاستلام',
-    delivery_date: 'تاريخ التسليم',
-    due_date: 'تاريخ الاستحقاق',
-    expires_at: 'تاريخ الانتهاء',
-    scheduled_date: 'التاريخ المجدول',
-    // System
-    action: 'الإجراء',
-    reason: 'السبب',
-    notes: 'ملاحظات',
-    priority: 'الأولوية',
-    type: 'النوع',
-    category: 'التصنيف',
-    source: 'المصدر',
-    event_type: 'نوع الحدث',
-    // Generic
-    count: 'العدد',
-    total: 'الإجمالي',
-    percentage: 'النسبة',
-    description: 'الوصف',
-    reference: 'المرجع',
-    reference_number: 'الرقم المرجعي',
-    approval_status: 'حالة الموافقة',
-    request_type: 'نوع الطلب',
-    matched: 'تطابق',
-    verified: 'تم التحقق',
+    document_type: 'نوع المستند', document_name: 'اسم المستند', document_id: 'معرّف المستند',
+    file_name: 'اسم الملف', camera_event_id: 'معرّف حدث الكاميرا', photo_url: 'رابط الصورة',
+    confidence_score: 'نسبة الثقة', arrival_verified: 'تأكيد الوصول',
+    report_id: 'معرّف التقرير', certificate_id: 'معرّف الشهادة', recycling_rate: 'معدل التدوير',
+    pickup_date: 'تاريخ الاستلام', delivery_date: 'تاريخ التسليم', due_date: 'تاريخ الاستحقاق',
+    expires_at: 'تاريخ الانتهاء', scheduled_date: 'التاريخ المجدول',
+    action: 'الإجراء', reason: 'السبب', notes: 'ملاحظات', priority: 'الأولوية',
+    type: 'النوع', category: 'التصنيف', source: 'المصدر', event_type: 'نوع الحدث',
+    count: 'العدد', total: 'الإجمالي', percentage: 'النسبة', description: 'الوصف',
+    reference: 'المرجع', reference_number: 'الرقم المرجعي',
+    approval_status: 'حالة الموافقة', request_type: 'نوع الطلب',
+    matched: 'تطابق', verified: 'تم التحقق',
   };
   return { label: labels[key] || key };
 };
 
-
+// ═══════════════════════════════════════════════════════
+// Icon & Color Mapping
+// ═══════════════════════════════════════════════════════
 const getNotificationIcon = (type: string | null) => {
   switch (type) {
     case 'shipment_created': return Package;
-    case 'shipment_status':
-    case 'status_update':
-    case 'shipment_assigned': return Truck;
+    case 'shipment_status': case 'status_update': case 'shipment_assigned': return Truck;
     case 'driver_assignment': return Car;
-    case 'shipment_approved':
-    case 'shipment_delivered': return CheckCircle;
-    case 'document_uploaded':
-    case 'signing_request': return FileText;
+    case 'shipment_approved': case 'shipment_delivered': return CheckCircle;
+    case 'document_uploaded': case 'signing_request': return FileText;
     case 'document_issued': return Send;
-    case 'signature_request':
-    case 'document_signed': return PenTool;
+    case 'signature_request': case 'document_signed': return PenTool;
     case 'stamp_applied': return Stamp;
-    case 'recycling_report':
-    case 'report':
-    case 'certificate': return BarChart3;
-    case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
-    case 'partner_linked': return Handshake;
+    case 'recycling_report': case 'report': case 'certificate': return BarChart3;
+    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return Handshake;
     case 'approval_request': return Inbox;
-    case 'invoice':
-    case 'payment':
-    case 'deposit':
-    case 'financial': return Wallet;
-    case 'warning':
-    case 'signal_lost': return AlertCircle;
-    case 'chat_message':
-    case 'message':
-    case 'broadcast': return MessageSquare;
+    case 'invoice': case 'payment': case 'deposit': case 'financial': return Wallet;
+    case 'warning': case 'signal_lost': return AlertCircle;
+    case 'chat_message': case 'message': case 'broadcast': return MessageSquare;
     case 'mention': return User;
     case 'shipment': return Package;
+    case 'license_expiry': case 'license_warning': return Key;
+    case 'compliance_alert': case 'compliance_update': return Shield;
+    case 'fleet_alert': case 'maintenance': return Wrench;
+    case 'work_order': case 'work_order_update': return ClipboardCheck;
+    case 'ai_alert': case 'ai_insight': return Sparkles;
+    case 'environmental': case 'carbon_report': return Leaf;
+    case 'inspection': case 'violation': return Gavel;
+    case 'announcement': return Megaphone;
+    case 'geofence_alert': case 'gps_alert': return Radar;
+    case 'identity_verified': case 'kyc_update': return UserCheck;
     default: return Info;
   }
 };
 
 const getNotificationColor = (type: string | null) => {
   switch (type) {
-    case 'shipment_created':
-    case 'shipment':
-    case 'shipment_assigned': return 'bg-blue-500/10 text-blue-500';
-    case 'shipment_status':
-    case 'status_update': return 'bg-amber-500/10 text-amber-500';
-    case 'shipment_approved':
-    case 'shipment_delivered': return 'bg-green-500/10 text-green-500';
+    case 'shipment_created': case 'shipment': case 'shipment_assigned': return 'bg-blue-500/10 text-blue-500';
+    case 'shipment_status': case 'status_update': return 'bg-amber-500/10 text-amber-500';
+    case 'shipment_approved': case 'shipment_delivered': return 'bg-green-500/10 text-green-500';
     case 'driver_assignment': return 'bg-orange-500/10 text-orange-500';
-    case 'document_uploaded':
-    case 'signing_request':
-    case 'signature_request':
-    case 'document_signed':
-    case 'document_issued':
-    case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
-    case 'recycling_report':
-    case 'report':
-    case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
-    case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
-    case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'document_uploaded': case 'signing_request': case 'signature_request':
+    case 'document_signed': case 'document_issued': case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
+    case 'recycling_report': case 'report': case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
+    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
     case 'approval_request': return 'bg-amber-500/10 text-amber-500';
-    case 'invoice':
-    case 'payment':
-    case 'deposit':
-    case 'financial': return 'bg-emerald-500/10 text-emerald-500';
-    case 'warning':
-    case 'signal_lost': return 'bg-red-500/10 text-red-500';
-    case 'chat_message':
-    case 'message':
-    case 'broadcast': return 'bg-pink-500/10 text-pink-500';
+    case 'invoice': case 'payment': case 'deposit': case 'financial': return 'bg-emerald-500/10 text-emerald-500';
+    case 'warning': case 'signal_lost': case 'violation': return 'bg-red-500/10 text-red-500';
+    case 'chat_message': case 'message': case 'broadcast': return 'bg-pink-500/10 text-pink-500';
     case 'mention': return 'bg-teal-500/10 text-teal-500';
+    case 'license_expiry': case 'license_warning': return 'bg-orange-500/10 text-orange-500';
+    case 'compliance_alert': case 'compliance_update': return 'bg-violet-500/10 text-violet-500';
+    case 'fleet_alert': case 'maintenance': return 'bg-slate-500/10 text-slate-500';
+    case 'work_order': case 'work_order_update': return 'bg-sky-500/10 text-sky-500';
+    case 'ai_alert': case 'ai_insight': return 'bg-fuchsia-500/10 text-fuchsia-500';
+    case 'environmental': case 'carbon_report': return 'bg-lime-500/10 text-lime-600';
+    case 'inspection': return 'bg-amber-500/10 text-amber-600';
+    case 'announcement': return 'bg-blue-500/10 text-blue-600';
+    case 'geofence_alert': case 'gps_alert': return 'bg-rose-500/10 text-rose-500';
+    case 'identity_verified': case 'kyc_update': return 'bg-teal-500/10 text-teal-600';
     default: return 'bg-muted text-muted-foreground';
   }
 };
 
-const getNotificationBadge = (type: string | null, t: (key: string) => string) => {
+const getNotificationBadge = (type: string | null) => {
   const badges: Record<string, { label: string; variant: 'default' | 'secondary' | 'destructive' | 'outline' }> = {
     shipment_created: { label: 'شحنة جديدة', variant: 'default' },
     shipment_status: { label: 'تحديث حالة', variant: 'secondary' },
@@ -250,84 +163,106 @@ const getNotificationBadge = (type: string | null, t: (key: string) => string) =
     message: { label: 'رسالة', variant: 'secondary' },
     broadcast: { label: 'بث جماعي', variant: 'secondary' },
     mention: { label: 'إشارة', variant: 'default' },
+    license_expiry: { label: 'انتهاء ترخيص', variant: 'destructive' },
+    license_warning: { label: 'تنبيه ترخيص', variant: 'secondary' },
+    compliance_alert: { label: 'تنبيه امتثال', variant: 'destructive' },
+    compliance_update: { label: 'تحديث امتثال', variant: 'secondary' },
+    fleet_alert: { label: 'تنبيه أسطول', variant: 'secondary' },
+    maintenance: { label: 'صيانة', variant: 'secondary' },
+    work_order: { label: 'أمر شغل', variant: 'default' },
+    work_order_update: { label: 'تحديث أمر شغل', variant: 'secondary' },
+    ai_alert: { label: 'تنبيه ذكي', variant: 'default' },
+    ai_insight: { label: 'رؤية ذكية', variant: 'secondary' },
+    environmental: { label: 'بيئي', variant: 'default' },
+    carbon_report: { label: 'تقرير كربوني', variant: 'secondary' },
+    inspection: { label: 'تفتيش', variant: 'secondary' },
+    violation: { label: 'مخالفة', variant: 'destructive' },
+    announcement: { label: 'إعلان', variant: 'default' },
+    geofence_alert: { label: 'تنبيه جغرافي', variant: 'destructive' },
+    gps_alert: { label: 'تنبيه GPS', variant: 'destructive' },
+    identity_verified: { label: 'تحقق هوية', variant: 'default' },
+    kyc_update: { label: 'تحديث KYC', variant: 'secondary' },
   };
   return badges[type || ''] || { label: 'إشعار', variant: 'outline' as const };
 };
 
-const getStatusLabel = (status: string | null, t: (key: string) => string) => {
-  const statusMap: Record<string, { label: string; color: string }> = {
-    pending: { label: t('notificationDetails.pending'), color: 'bg-amber-100 text-amber-700' },
-    approved: { label: t('notificationDetails.approved'), color: 'bg-blue-100 text-blue-700' },
-    in_transit: { label: t('notificationDetails.in_transit'), color: 'bg-purple-100 text-purple-700' },
-    picked_up: { label: t('notificationDetails.picked_up'), color: 'bg-indigo-100 text-indigo-700' },
-    delivered: { label: t('notificationDetails.delivered'), color: 'bg-green-100 text-green-700' },
-    confirmed: { label: t('notificationDetails.confirmed'), color: 'bg-emerald-100 text-emerald-700' },
-    cancelled: { label: t('notificationDetails.cancelled'), color: 'bg-red-100 text-red-700' },
-  };
-  return statusMap[status || ''] || { label: status || t('notificationDetails.notAssigned'), color: 'bg-muted text-muted-foreground' };
-};
+// ═══════════════════════════════════════════════════════
+// ENHANCED Category System with Sub-categories
+// ═══════════════════════════════════════════════════════
 
-// Categorize notifications by nature/type
-const categorizeNotification = (type: string | null) => {
+const categorizeNotification = (type: string | null): string => {
   switch (type) {
-    // Shipments category
-    case 'shipment_created':
-    case 'shipment_status':
-    case 'status_update':
-    case 'shipment_assigned':
-    case 'shipment_delivered':
-    case 'shipment_approved':
-    case 'shipment':
-    case 'driver_assignment':
+    case 'shipment_created': case 'shipment_status': case 'status_update':
+    case 'shipment_assigned': case 'shipment_delivered': case 'shipment_approved':
+    case 'shipment': case 'driver_assignment':
       return 'shipments';
-    // Documents & Signatures category
-    case 'document_uploaded':
-    case 'document_issued':
-    case 'signature_request':
-    case 'document_signed':
-    case 'stamp_applied':
-    case 'signing_request':
+    case 'document_uploaded': case 'document_issued': case 'signature_request':
+    case 'document_signed': case 'stamp_applied': case 'signing_request':
       return 'documents';
-    // Finance category
-    case 'invoice':
-    case 'payment':
-    case 'deposit':
-    case 'financial':
+    case 'invoice': case 'payment': case 'deposit': case 'financial':
       return 'finance';
-    // Partners category
-    case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
-    case 'partner_request':
-    case 'partner_linked':
+    case 'partner_post': case 'partner_note': case 'partner_message':
+    case 'partner_request': case 'partner_linked':
       return 'partners';
-    // Approvals category
-    case 'approval_request':
-    case 'approval_granted':
-    case 'approval_rejected':
+    case 'approval_request': case 'approval_granted': case 'approval_rejected':
       return 'approvals';
-    // Reports category
-    case 'recycling_report':
-    case 'report':
-    case 'certificate':
-    case 'compliance':
+    case 'recycling_report': case 'report': case 'certificate': case 'compliance':
       return 'reports';
-    // Messages category
-    case 'chat_message':
-    case 'message':
-    case 'broadcast':
-    case 'mention':
+    case 'chat_message': case 'message': case 'broadcast': case 'mention':
       return 'messages';
-    // System category
-    case 'warning':
-    case 'system':
-    case 'security':
-    case 'info':
-    case 'signal_lost':
+    case 'license_expiry': case 'license_warning': case 'compliance_alert':
+    case 'compliance_update': case 'inspection': case 'violation':
+      return 'compliance';
+    case 'fleet_alert': case 'maintenance': case 'geofence_alert': case 'gps_alert':
+      return 'fleet';
+    case 'work_order': case 'work_order_update':
+      return 'operations';
+    case 'ai_alert': case 'ai_insight':
+      return 'smart';
+    case 'environmental': case 'carbon_report':
+      return 'environmental';
+    case 'identity_verified': case 'kyc_update':
+      return 'identity';
+    case 'announcement':
+      return 'announcements';
+    case 'warning': case 'system': case 'security': case 'info': case 'signal_lost':
       return 'system';
     default:
       return 'other';
   }
+};
+
+// Get sub-category for more granular filtering within a category
+const getSubCategory = (type: string | null): string => {
+  switch (type) {
+    case 'shipment_created': return 'created';
+    case 'shipment_status': case 'status_update': return 'status';
+    case 'shipment_assigned': case 'driver_assignment': return 'assignment';
+    case 'shipment_delivered': case 'shipment_approved': return 'completed';
+    case 'document_uploaded': return 'upload';
+    case 'document_issued': case 'document_signed': case 'stamp_applied': return 'signed';
+    case 'signing_request': case 'signature_request': return 'request';
+    case 'invoice': return 'invoice';
+    case 'payment': case 'deposit': return 'payment';
+    case 'license_expiry': return 'expiry';
+    case 'license_warning': return 'warning';
+    case 'compliance_alert': case 'violation': return 'alert';
+    case 'inspection': case 'compliance_update': return 'update';
+    default: return 'all';
+  }
+};
+
+// Get priority level from notification
+const getPriorityLevel = (notification: Notification): 'urgent' | 'high' | 'normal' | 'low' => {
+  if (notification.priority === 'urgent') return 'urgent';
+  if (notification.priority === 'high') return 'high';
+  if (notification.priority === 'low') return 'low';
+  // Auto-detect priority from type
+  const urgentTypes = ['violation', 'signal_lost', 'geofence_alert', 'gps_alert', 'compliance_alert', 'license_expiry'];
+  if (urgentTypes.includes(notification.type || '')) return 'urgent';
+  const highTypes = ['warning', 'approval_request', 'signing_request', 'signature_request', 'license_warning', 'fleet_alert'];
+  if (highTypes.includes(notification.type || '')) return 'high';
+  return 'normal';
 };
 
 interface Notification {
@@ -358,7 +293,7 @@ interface ShipmentDetails {
   generator?: { name: string } | null;
   recycler?: { name: string } | null;
   transporter?: { name: string } | null;
-  driver?: { 
+  driver?: {
     id: string;
     vehicle_type: string | null;
     vehicle_plate: string | null;
@@ -372,37 +307,129 @@ interface CategoryConfig {
   icon: React.ElementType;
   color: string;
   bgColor: string;
+  subCategories?: { id: string; label: string }[];
 }
 
-const getCategories = (t: (key: string) => string): CategoryConfig[] => [
+const getCategories = (): CategoryConfig[] => [
   { id: 'all', label: 'الكل', icon: Bell, color: 'text-primary', bgColor: 'bg-primary/10' },
-  { id: 'shipments', label: 'الشحنات', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10' },
-  { id: 'documents', label: 'المستندات والتوقيعات', icon: PenTool, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10' },
-  { id: 'approvals', label: 'الموافقات', icon: CheckCircle, color: 'text-amber-500', bgColor: 'bg-amber-500/10' },
-  { id: 'finance', label: 'المالية', icon: Wallet, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10' },
+  {
+    id: 'shipments', label: 'الشحنات', icon: Truck, color: 'text-blue-500', bgColor: 'bg-blue-500/10',
+    subCategories: [
+      { id: 'all', label: 'الكل' },
+      { id: 'created', label: 'جديدة' },
+      { id: 'status', label: 'تحديث حالة' },
+      { id: 'assignment', label: 'تعيينات' },
+      { id: 'completed', label: 'مكتملة' },
+    ],
+  },
+  {
+    id: 'documents', label: 'المستندات', icon: FileText, color: 'text-indigo-500', bgColor: 'bg-indigo-500/10',
+    subCategories: [
+      { id: 'all', label: 'الكل' },
+      { id: 'upload', label: 'مستندات جديدة' },
+      { id: 'request', label: 'طلبات توقيع' },
+      { id: 'signed', label: 'مُوقعة' },
+    ],
+  },
+  {
+    id: 'approvals', label: 'الموافقات', icon: CheckCircle, color: 'text-amber-500', bgColor: 'bg-amber-500/10',
+  },
+  {
+    id: 'finance', label: 'المالية', icon: Wallet, color: 'text-emerald-500', bgColor: 'bg-emerald-500/10',
+    subCategories: [
+      { id: 'all', label: 'الكل' },
+      { id: 'invoice', label: 'فواتير' },
+      { id: 'payment', label: 'مدفوعات' },
+    ],
+  },
+  {
+    id: 'compliance', label: 'الامتثال والتراخيص', icon: Shield, color: 'text-violet-500', bgColor: 'bg-violet-500/10',
+    subCategories: [
+      { id: 'all', label: 'الكل' },
+      { id: 'expiry', label: 'انتهاء صلاحية' },
+      { id: 'warning', label: 'تحذيرات' },
+      { id: 'alert', label: 'مخالفات' },
+      { id: 'update', label: 'تحديثات' },
+    ],
+  },
+  {
+    id: 'fleet', label: 'الأسطول والتتبع', icon: Car, color: 'text-slate-500', bgColor: 'bg-slate-500/10',
+  },
+  {
+    id: 'operations', label: 'أوامر الشغل', icon: ClipboardCheck, color: 'text-sky-500', bgColor: 'bg-sky-500/10',
+  },
   { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
+  { id: 'environmental', label: 'البيئة والكربون', icon: Leaf, color: 'text-lime-600', bgColor: 'bg-lime-500/10' },
+  {
+    id: 'smart', label: 'التنبيهات الذكية', icon: Sparkles, color: 'text-fuchsia-500', bgColor: 'bg-fuchsia-500/10',
+  },
   { id: 'messages', label: 'الرسائل', icon: MessageSquare, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
-  { id: 'system', label: 'النظام', icon: Shield, color: 'text-red-500', bgColor: 'bg-red-500/10' },
+  { id: 'announcements', label: 'الإعلانات', icon: Megaphone, color: 'text-blue-600', bgColor: 'bg-blue-500/10' },
+  { id: 'identity', label: 'التحقق والهوية', icon: UserCheck, color: 'text-teal-600', bgColor: 'bg-teal-500/10' },
+  { id: 'system', label: 'النظام', icon: Settings, color: 'text-red-500', bgColor: 'bg-red-500/10' },
   { id: 'other', label: 'أخرى', icon: Info, color: 'text-muted-foreground', bgColor: 'bg-muted' },
 ];
 
+const getStatusLabel = (status: string | null, t: (key: string) => string) => {
+  const statusMap: Record<string, { label: string; color: string }> = {
+    pending: { label: t('notificationDetails.pending'), color: 'bg-amber-100 text-amber-700' },
+    approved: { label: t('notificationDetails.approved'), color: 'bg-blue-100 text-blue-700' },
+    in_transit: { label: t('notificationDetails.in_transit'), color: 'bg-purple-100 text-purple-700' },
+    picked_up: { label: t('notificationDetails.picked_up'), color: 'bg-indigo-100 text-indigo-700' },
+    delivered: { label: t('notificationDetails.delivered'), color: 'bg-green-100 text-green-700' },
+    confirmed: { label: t('notificationDetails.confirmed'), color: 'bg-emerald-100 text-emerald-700' },
+    cancelled: { label: t('notificationDetails.cancelled'), color: 'bg-red-100 text-red-700' },
+  };
+  return statusMap[status || ''] || { label: status || t('notificationDetails.notAssigned'), color: 'bg-muted text-muted-foreground' };
+};
+
+// ═══════════════════════════════════════════════════════
+// Group notifications by date
+// ═══════════════════════════════════════════════════════
+const groupByDate = (notifications: Notification[]) => {
+  const groups: { label: string; date: Date; items: Notification[] }[] = [];
+  const map = new Map<string, Notification[]>();
+
+  for (const n of notifications) {
+    const d = startOfDay(new Date(n.created_at));
+    const key = d.toISOString();
+    if (!map.has(key)) map.set(key, []);
+    map.get(key)!.push(n);
+  }
+
+  for (const [key, items] of map) {
+    const date = new Date(key);
+    let label: string;
+    if (isToday(date)) label = 'اليوم';
+    else if (isYesterday(date)) label = 'أمس';
+    else label = format(date, 'EEEE d MMMM', { locale: arLocale });
+    groups.push({ label, date, items });
+  }
+
+  return groups.sort((a, b) => b.date.getTime() - a.date.getTime());
+};
+
+// ═══════════════════════════════════════════════════════
+// Main Component
+// ═══════════════════════════════════════════════════════
 const Notifications = () => {
   const { notifications, unreadCount, loading, markAsRead, markAllAsRead } = useNotifications();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
-  const categories = getCategories(t);
+  const categories = getCategories();
   const dateLocale = language === 'ar' ? arLocale : enUS;
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('all');
+  const [activeSubCategory, setActiveSubCategory] = useState('all');
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [readFilter, setReadFilter] = useState<'all' | 'unread' | 'read'>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  // Use display mode for responsive layout - MUST be before any early returns
+  const [viewMode, setViewMode] = useState<'list' | 'timeline'>('list');
   const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
 
-  // Get unique shipment IDs from notifications
+  // Get unique shipment IDs
   const shipmentIds = useMemo(() => {
     return notifications
       .filter(n => n.shipment_id)
@@ -410,45 +437,20 @@ const Notifications = () => {
       .filter((id, index, arr) => arr.indexOf(id) === index);
   }, [notifications]);
 
-  // Fetch shipment details for all shipments in notifications
+  // Fetch shipment details
   const { data: shipmentsData } = useQuery({
     queryKey: ['notification-shipments', shipmentIds],
     queryFn: async () => {
       if (shipmentIds.length === 0) return {};
-      
       const { data } = await supabase
         .from('shipments')
-        .select(`
-          id,
-          shipment_number,
-          status,
-          waste_type,
-          quantity,
-          unit,
-          pickup_address,
-          delivery_address,
-          created_at,
-          generator:generator_id(name),
-          recycler:recycler_id(name),
-          transporter:transporter_id(name),
-          driver:driver_id(
-            id,
-            vehicle_type,
-            vehicle_plate,
-            profiles(full_name, phone)
-          )
-        `)
+        .select(`id, shipment_number, status, waste_type, quantity, unit, pickup_address, delivery_address, created_at,
+          generator:generator_id(name), recycler:recycler_id(name), transporter:transporter_id(name),
+          driver:driver_id(id, vehicle_type, vehicle_plate, profiles(full_name, phone))`)
         .in('id', shipmentIds);
-
       const map: Record<string, ShipmentDetails> = {};
       (data || []).forEach((s: any) => {
-        map[s.id] = {
-          ...s,
-          generator: normalizeRelation(s.generator),
-          recycler: normalizeRelation(s.recycler),
-          transporter: normalizeRelation(s.transporter),
-          driver: normalizeRelation(s.driver),
-        };
+        map[s.id] = { ...s, generator: normalizeRelation(s.generator), recycler: normalizeRelation(s.recycler), transporter: normalizeRelation(s.transporter), driver: normalizeRelation(s.driver) };
       });
       return map;
     },
@@ -458,12 +460,39 @@ const Notifications = () => {
 
   const shipmentDetailsMap = shipmentsData || {};
 
-  useEffect(() => {
-    setSoundEnabled(isNotificationSoundEnabled());
-  }, []);
+  useEffect(() => { setSoundEnabled(isNotificationSoundEnabled()); }, []);
 
-  const handleTestSound = async () => {
-    await previewNotificationSound('default');
+  // Stats
+  const stats = useMemo(() => {
+    const urgent = notifications.filter(n => getPriorityLevel(n) === 'urgent' && !n.is_read).length;
+    const high = notifications.filter(n => getPriorityLevel(n) === 'high' && !n.is_read).length;
+    const todayCount = notifications.filter(n => isToday(new Date(n.created_at))).length;
+    return { urgent, high, todayCount, total: notifications.length, unread: unreadCount };
+  }, [notifications, unreadCount]);
+
+  // Reset sub-category when category changes
+  useEffect(() => { setActiveSubCategory('all'); }, [activeCategory]);
+
+  // Filter
+  const filteredNotifications = useMemo(() => {
+    return notifications.filter((n) => {
+      const matchesCat = activeCategory === 'all' || categorizeNotification(n.type) === activeCategory;
+      const matchesSub = activeSubCategory === 'all' || getSubCategory(n.type) === activeSubCategory;
+      const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !n.is_read : n.is_read);
+      const matchesSearch = !searchQuery ||
+        n.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        n.message?.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesCat && matchesSub && matchesRead && matchesSearch;
+    });
+  }, [notifications, activeCategory, activeSubCategory, readFilter, searchQuery]);
+
+  const getCategoryCount = (id: string) => {
+    if (id === 'all') return notifications.length;
+    return notifications.filter(n => categorizeNotification(n.type) === id).length;
+  };
+  const getUnreadCategoryCount = (id: string) => {
+    if (id === 'all') return unreadCount;
+    return notifications.filter(n => categorizeNotification(n.type) === id && !n.is_read).length;
   };
 
   const handleNotificationClick = (notification: Notification) => {
@@ -472,173 +501,142 @@ const Notifications = () => {
     setDetailDialogOpen(true);
   };
 
-  const handleNavigateToShipment = (shipmentId: string) => {
-    navigate(`/dashboard/shipments?highlight=${shipmentId}`);
-  };
-
-  const handleNavigateToRequest = (requestId?: string) => {
-    if (requestId) {
-      navigate(`/dashboard/my-requests?highlight=${requestId}`);
-    } else {
-      navigate('/dashboard/my-requests');
-    }
-  };
-
-  const handleNavigateToCarbonFootprint = () => {
-    navigate('/dashboard/carbon-footprint');
-  };
-
-  // Filter notifications by category, read status, and search
-  const filteredNotifications = notifications.filter((notification) => {
-    const matchesCategory = activeCategory === 'all' || categorizeNotification(notification.type) === activeCategory;
-    const matchesRead = readFilter === 'all' || (readFilter === 'unread' ? !notification.is_read : notification.is_read);
-    const matchesSearch = !searchQuery || 
-      notification.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      notification.message?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesRead && matchesSearch;
-  });
-
-  // Count notifications per category
-  const getCategoryCount = (categoryId: string) => {
-    if (categoryId === 'all') return notifications.length;
-    return notifications.filter(n => categorizeNotification(n.type) === categoryId).length;
-  };
-
-  const getUnreadCategoryCount = (categoryId: string) => {
-    if (categoryId === 'all') return unreadCount;
-    return notifications.filter(n => 
-      categorizeNotification(n.type) === categoryId && !n.is_read
-    ).length;
-  };
-
-  // Quick action handler based on notification type
   const getQuickAction = (notification: Notification) => {
     const type = notification.type;
-    if (type === 'signing_request' || type === 'signature_request') {
+    if (type === 'signing_request' || type === 'signature_request')
       return { label: 'وقّع الآن', icon: PenTool, action: () => navigate('/dashboard/signing-inbox') };
-    }
-    if (type === 'approval_request') {
+    if (type === 'approval_request')
       return { label: 'راجع الطلب', icon: CheckCircle, action: () => navigate('/dashboard/my-requests') };
-    }
-    if (type === 'shipment_created' || type === 'shipment_assigned' || type === 'shipment_status' || type === 'shipment') {
-      return notification.shipment_id 
-        ? { label: 'عرض الشحنة', icon: Package, action: () => navigate(`/dashboard/shipments/${notification.shipment_id}`) }
-        : null;
-    }
-    if (type === 'partner_linked' || type === 'partner_message') {
+    if (['shipment_created', 'shipment_assigned', 'shipment_status', 'shipment'].includes(type || '') && notification.shipment_id)
+      return { label: 'عرض الشحنة', icon: Package, action: () => navigate(`/dashboard/shipments/${notification.shipment_id}`) };
+    if (type === 'partner_linked' || type === 'partner_message')
       return { label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners') };
-    }
-    if (type === 'invoice' || type === 'payment' || type === 'deposit') {
+    if (['invoice', 'payment', 'deposit'].includes(type || ''))
       return { label: 'المالية', icon: Wallet, action: () => navigate('/dashboard/accounting') };
-    }
+    if (type === 'license_expiry' || type === 'license_warning')
+      return { label: 'التراخيص', icon: Key, action: () => navigate('/dashboard/organization-profile') };
+    if (type === 'work_order' || type === 'work_order_update')
+      return { label: 'أمر الشغل', icon: ClipboardCheck, action: () => navigate('/dashboard/work-orders') };
+    if (type === 'fleet_alert' || type === 'maintenance')
+      return { label: 'الأسطول', icon: Car, action: () => navigate('/dashboard/fleet') };
+    if (type === 'carbon_report' || type === 'environmental')
+      return { label: 'البصمة الكربونية', icon: Leaf, action: () => navigate('/dashboard/carbon-footprint') };
     return null;
   };
+
+  const activeCatConfig = categories.find(c => c.id === activeCategory);
+  const dateGroups = viewMode === 'timeline' ? groupByDate(filteredNotifications) : [];
 
   if (loading) {
     return (
       <DashboardLayout>
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <Skeleton className="h-8 w-48" />
-            <Skeleton className="h-10 w-32" />
-          </div>
-          <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-24 w-full" />
-            ))}
-          </div>
+          <Skeleton className="h-8 w-48" />
+          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-24 w-full" />)}
         </div>
       </DashboardLayout>
     );
   }
-
-  // Get responsive grid columns for categories
-  const iconSize = getResponsiveClass({
-    mobile: 'w-8 h-8',
-    tablet: 'w-10 h-10',
-    desktop: 'w-12 h-12',
-  });
-  const iconInnerSize = getResponsiveClass({
-    mobile: 'w-4 h-4',
-    tablet: 'w-5 h-5',
-    desktop: 'w-6 h-6',
-  });
 
   return (
     <DashboardLayout>
       <div className="w-full max-w-full overflow-x-hidden">
         <ResponsivePageContainer
           title={isMobile ? undefined : t('notifications.title')}
-          subtitle={isMobile ? undefined : t('notifications.subtitle')}
+          subtitle={isMobile ? undefined : 'مركز الإشعارات المتقدم — تصنيف وتتبع شامل'}
           actions={
             <div className="flex flex-wrap gap-1.5 sm:gap-2">
-              <Button
-                onClick={handleTestSound}
-                variant="outline"
-                size="sm"
-                className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                disabled={!soundEnabled}
-              >
-                <Volume2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                {!isMobile && t('notifications.testSound')}
+              <Button onClick={() => previewNotificationSound('default')} variant="outline" size="sm" className="gap-1 text-xs h-8 px-2 sm:px-3" disabled={!soundEnabled}>
+                <Volume2 className="w-3.5 h-3.5" />
+                {!isMobile && 'اختبار الصوت'}
               </Button>
               {unreadCount > 0 && (
-                <Button 
-                  onClick={markAllAsRead} 
-                  variant="outline" 
-                  size="sm"
-                  className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2 sm:px-3"
-                >
-                  <CheckCheck className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                  {isMobile ? `(${unreadCount})` : `${t('notifications.markAllRead')} (${unreadCount})`}
+                <Button onClick={markAllAsRead} variant="outline" size="sm" className="gap-1 text-xs h-8 px-2 sm:px-3">
+                  <CheckCheck className="w-3.5 h-3.5" />
+                  {isMobile ? `(${unreadCount})` : `قراءة الكل (${unreadCount})`}
                 </Button>
               )}
             </div>
           }
         >
-          {/* Back Button - hidden on mobile since we have bottom nav */}
           {!isMobile && <BackButton />}
 
-          {/* Category Cards - Responsive Grid with horizontal scroll on mobile */}
+          {/* ═══ Stats Dashboard ═══ */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+            {[
+              { label: 'الإجمالي', value: stats.total, icon: Bell, color: 'text-primary', bg: 'bg-primary/10' },
+              { label: 'غير مقروء', value: stats.unread, icon: BellRing, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+              { label: 'اليوم', value: stats.todayCount, icon: CalendarDays, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+              { label: 'عاجل', value: stats.urgent, icon: Flame, color: 'text-red-500', bg: 'bg-red-500/10' },
+              { label: 'مهم', value: stats.high, icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10' },
+            ].map(s => (
+              <div key={s.label} className="flex items-center gap-2.5 p-3 rounded-xl bg-card border border-border/50">
+                <div className={`w-9 h-9 rounded-lg ${s.bg} flex items-center justify-center shrink-0`}>
+                  <s.icon className={`w-4 h-4 ${s.color}`} />
+                </div>
+                <div>
+                  <p className="text-lg sm:text-xl font-black">{s.value}</p>
+                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* ═══ Urgent Banner ═══ */}
+          {stats.urgent > 0 && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 p-3 rounded-xl bg-red-500/10 border border-red-500/30"
+            >
+              <Flame className="w-5 h-5 text-red-500 animate-pulse shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-bold text-red-600 dark:text-red-400">
+                  لديك {stats.urgent} إشعار عاجل يتطلب إجراءً فورياً
+                </p>
+                <p className="text-xs text-red-500/70">مخالفات، انقطاع إشارة، أو تنبيهات امتثال حرجة</p>
+              </div>
+              <Button
+                size="sm"
+                variant="destructive"
+                className="shrink-0 h-8 text-xs"
+                onClick={() => { setActiveCategory('all'); setReadFilter('unread'); }}
+              >
+                عرض العاجل
+              </Button>
+            </motion.div>
+          )}
+
+          {/* ═══ Category Cards ═══ */}
           <div className={isMobile ? 'overflow-x-auto pb-2 -mx-1' : ''}>
-            <div className={isMobile 
-              ? 'flex gap-2 px-1 min-w-max' 
-              : 'grid grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-3'
+            <div className={isMobile
+              ? 'flex gap-2 px-1 min-w-max'
+              : 'grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 xl:grid-cols-9 gap-2'
             }>
-              {categories.map((category) => {
+              {categories.filter(c => getCategoryCount(c.id) > 0 || c.id === 'all').map((category) => {
                 const CategoryIcon = category.icon;
                 const count = getCategoryCount(category.id);
-                const unreadCategoryCount = getUnreadCategoryCount(category.id);
+                const unreadCat = getUnreadCategoryCount(category.id);
                 const isActive = activeCategory === category.id;
 
                 return (
-                  <motion.div
-                    key={category.id}
-                    whileTap={{ scale: 0.95 }}
-                    className={isMobile ? 'flex-shrink-0 w-[100px]' : ''}
-                  >
-                    <Card 
-                      className={`cursor-pointer transition-all h-full ${
-                        isActive 
-                          ? 'ring-2 ring-primary border-primary shadow-md' 
-                          : 'hover:shadow-md hover:border-primary/50'
-                      }`}
+                  <motion.div key={category.id} whileTap={{ scale: 0.95 }} className={isMobile ? 'flex-shrink-0 w-[90px]' : ''}>
+                    <Card
+                      className={`cursor-pointer transition-all h-full ${isActive ? 'ring-2 ring-primary border-primary shadow-md' : 'hover:shadow-md hover:border-primary/50'}`}
                       onClick={() => setActiveCategory(category.id)}
                     >
-                      <CardContent className="p-2 sm:p-3">
+                      <CardContent className="p-2 sm:p-2.5">
                         <div className="flex flex-col items-center text-center gap-1">
-                          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${category.bgColor} flex items-center justify-center relative`}>
-                            <CategoryIcon className={`w-4 h-4 sm:w-5 sm:h-5 ${category.color}`} />
-                            {unreadCategoryCount > 0 && (
-                              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 sm:w-4 sm:h-4 rounded-full bg-destructive text-destructive-foreground text-[8px] sm:text-[10px] flex items-center justify-center font-medium">
-                                {unreadCategoryCount > 9 ? '9+' : unreadCategoryCount}
+                          <div className={`w-8 h-8 rounded-full ${category.bgColor} flex items-center justify-center relative`}>
+                            <CategoryIcon className={`w-4 h-4 ${category.color}`} />
+                            {unreadCat > 0 && (
+                              <span className="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-destructive text-destructive-foreground text-[8px] flex items-center justify-center font-medium">
+                                {unreadCat > 9 ? '9+' : unreadCat}
                               </span>
                             )}
                           </div>
-                          <div>
-                            <p className="text-[9px] sm:text-xs font-medium truncate max-w-[80px] sm:max-w-none">{category.label}</p>
-                            <p className="text-sm sm:text-lg font-bold">{count}</p>
-                          </div>
+                          <p className="text-[9px] sm:text-[10px] font-medium truncate max-w-[80px] sm:max-w-none leading-tight">{category.label}</p>
+                          <p className="text-sm font-bold">{count}</p>
                         </div>
                       </CardContent>
                     </Card>
@@ -648,437 +646,360 @@ const Notifications = () => {
             </div>
           </div>
 
-        {/* Search & Filter Bar */}
-        <div className="flex flex-wrap gap-2 items-center">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <Input 
-              placeholder="ابحث في الإشعارات..." 
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              className="pr-9 h-9 text-sm"
-            />
-          </div>
-          <div className="flex gap-1">
-            {(['all', 'unread', 'read'] as const).map(f => (
-              <Button
-                key={f}
-                size="sm"
-                variant={readFilter === f ? 'default' : 'outline'}
-                onClick={() => setReadFilter(f)}
-                className="h-9 text-xs"
-              >
-                {f === 'all' ? 'الكل' : f === 'unread' ? `غير مقروء (${unreadCount})` : 'مقروء'}
-              </Button>
-            ))}
-          </div>
-        </div>
+          {/* ═══ Sub-categories ═══ */}
+          {activeCatConfig?.subCategories && activeCatConfig.subCategories.length > 0 && (
+            <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+              <Filter className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+              {activeCatConfig.subCategories.map(sub => (
+                <Button
+                  key={sub.id}
+                  size="sm"
+                  variant={activeSubCategory === sub.id ? 'default' : 'outline'}
+                  onClick={() => setActiveSubCategory(sub.id)}
+                  className="h-7 text-[10px] px-2.5 shrink-0"
+                >
+                  {sub.label}
+                </Button>
+              ))}
+            </div>
+          )}
 
-        {/* Notifications List */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              {(() => {
-                const activeCat = categories.find(c => c.id === activeCategory);
-                const ActiveIcon = activeCat?.icon || Bell;
-                return (
-                  <>
-                    <ActiveIcon className={`w-5 h-5 ${activeCat?.color || ''}`} />
-                    {activeCat?.label || 'جميع الإشعارات'}
-                    {filteredNotifications.length > 0 && (
-                      <Badge variant="secondary" className="mr-2">
-                        {filteredNotifications.length}
-                      </Badge>
-                    )}
-                  </>
-                );
-              })()}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {filteredNotifications.length === 0 ? (
-              <div className="py-6 sm:py-12 text-center">
+          {/* ═══ Search, Filter & View Toggle ═══ */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="relative flex-1 min-w-[180px]">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Input
+                placeholder="ابحث في الإشعارات..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                className="pr-9 h-9 text-sm"
+              />
+            </div>
+            <div className="flex gap-1">
+              {(['all', 'unread', 'read'] as const).map(f => (
+                <Button key={f} size="sm" variant={readFilter === f ? 'default' : 'outline'} onClick={() => setReadFilter(f)} className="h-9 text-xs">
+                  {f === 'all' ? 'الكل' : f === 'unread' ? `غير مقروء (${unreadCount})` : 'مقروء'}
+                </Button>
+              ))}
+            </div>
+            {!isMobile && (
+              <div className="flex gap-1 border border-border rounded-lg p-0.5">
+                <Button size="sm" variant={viewMode === 'list' ? 'default' : 'ghost'} onClick={() => setViewMode('list')} className="h-7 w-7 p-0">
+                  <List className="w-3.5 h-3.5" />
+                </Button>
+                <Button size="sm" variant={viewMode === 'timeline' ? 'default' : 'ghost'} onClick={() => setViewMode('timeline')} className="h-7 w-7 p-0">
+                  <CalendarDays className="w-3.5 h-3.5" />
+                </Button>
+              </div>
+            )}
+          </div>
+
+          {/* ═══ Notifications List ═══ */}
+          <Card>
+            <CardHeader className="pb-3">
+              <CardTitle className="flex items-center gap-2 text-base">
                 {(() => {
-                  const activeCat = categories.find(c => c.id === activeCategory);
-                  const EmptyIcon = activeCat?.icon || Bell;
+                  const ActiveIcon = activeCatConfig?.icon || Bell;
                   return (
                     <>
-                      <EmptyIcon className={`w-10 h-10 sm:w-16 sm:h-16 mx-auto mb-3 sm:mb-4 ${activeCat?.color || 'text-muted-foreground/30'} opacity-30`} />
-                      <h3 className="text-lg font-medium mb-2">{t('notifications.noNotifications')}</h3>
-                      <p className="text-muted-foreground">
-                        {activeCategory === 'all' 
-                          ? t('notifications.willAppearHere')
-                          : t('notifications.noNotificationsInCategory')
-                        }
-                      </p>
+                      <ActiveIcon className={`w-5 h-5 ${activeCatConfig?.color || ''}`} />
+                      {activeCatConfig?.label || 'جميع الإشعارات'}
+                      {filteredNotifications.length > 0 && (
+                        <Badge variant="secondary" className="mr-2">{filteredNotifications.length}</Badge>
+                      )}
                     </>
                   );
                 })()}
-              </div>
-            ) : (
-              <div className="space-y-3">
-                {filteredNotifications.map((notification, index) => {
-                  const Icon = getNotificationIcon(notification.type);
-                  const iconColorClass = getNotificationColor(notification.type);
-                  const badge = getNotificationBadge(notification.type, t);
-                  const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
-                  const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
-                  const driverProfile = shipmentDetails?.driver?.profiles 
-                    ? (Array.isArray(shipmentDetails.driver.profiles) 
-                        ? shipmentDetails.driver.profiles[0] 
-                        : shipmentDetails.driver.profiles)
-                    : null;
-
-                  const handlePdfView = (e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    if (notification.pdf_url) {
-                      window.open(notification.pdf_url, '_blank');
-                    }
-                  };
-
-                  const handlePdfDownload = (e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    if (notification.pdf_url) {
-                      const link = document.createElement('a');
-                      link.href = notification.pdf_url;
-                      link.download = `شهادة-تدوير-${notification.shipment_id || 'report'}.pdf`;
-                      document.body.appendChild(link);
-                      link.click();
-                      document.body.removeChild(link);
-                    }
-                  };
-
-                  const handlePdfPrint = (e: React.MouseEvent) => {
-                    e.stopPropagation();
-                    if (notification.pdf_url) {
-                      const printWindow = window.open(notification.pdf_url, '_blank');
-                      if (printWindow) {
-                        printWindow.onload = () => {
-                          printWindow.print();
-                        };
-                      }
-                    }
-                  };
-
-                  // Responsive notification card sizing
-                  const cardPadding = isMobile ? 'p-3' : 'p-4';
-                  const iconContainerSize = isMobile ? 'w-10 h-10' : 'w-12 h-12';
-                  const iconSizeInCard = isMobile ? 'w-5 h-5' : 'w-6 h-6';
-
-                  return (
-                    <motion.div
-                      key={notification.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.03 }}
-                      onClick={() => handleNotificationClick(notification)}
-                      className={`${cardPadding} rounded-xl border cursor-pointer transition-all hover:shadow-lg group ${
-                        !notification.is_read
-                          ? 'bg-gradient-to-l from-primary/5 to-transparent border-primary/30 shadow-sm'
-                          : 'bg-card hover:bg-muted/30 border-border/50'
-                      }`}
-                    >
-                      <div className="flex gap-3">
-                        {/* Icon */}
-                        <div className={`${iconContainerSize} rounded-xl flex items-center justify-center shrink-0 ${iconColorClass} transition-transform group-hover:scale-105`}>
-                          <Icon className={iconSizeInCard} />
-                        </div>
-                        
-                        {/* Content */}
-                        <div className="flex-1 min-w-0 space-y-2">
-                          {/* Header Row */}
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <h4 className={`font-semibold leading-tight ${isMobile ? 'text-sm' : 'text-base'}`}>
-                                {notification.title}
-                              </h4>
-                              {!notification.is_read && (
-                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />
-                              )}
-                            </div>
-                            <div className="flex items-center gap-2">
-                              {shipmentDetails?.status && (
-                                <Badge className={`${getStatusLabel(shipmentDetails.status, t).color} text-[10px]`}>
-                                  {getStatusLabel(shipmentDetails.status, t).label}
-                                </Badge>
-                              )}
-                              <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[10px] px-1.5 py-0.5' : 'text-xs'}`}>
-                                {badge.label}
-                              </Badge>
-                            </div>
-                          </div>
-                          
-                          {/* Message - Full details */}
-                          <div className={`text-muted-foreground leading-relaxed ${isMobile ? 'text-xs' : 'text-sm'}`}>
-                            <p className="whitespace-pre-wrap">
-                              {notification.message}
-                            </p>
-                          </div>
-                          
-                          {/* Shipment Details Section */}
-                          {shipmentDetails && (
-                            <div className="bg-muted/30 rounded-lg p-3 space-y-2 mt-2">
-                              {/* Shipment Number & Waste Type */}
-                              <div className="flex flex-wrap items-center gap-2">
-                                {shipmentDetails.shipment_number && (
-                                  <Badge variant="outline" className="gap-1 text-[10px] font-mono bg-primary/5">
-                                    <Package className="w-3 h-3" />
-                                    {shipmentDetails.shipment_number}
-                                  </Badge>
-                                )}
-                                {shipmentDetails.waste_type && (
-                                  <Badge variant="secondary" className="gap-1 text-[10px]">
-                                    <Recycle className="w-3 h-3" />
-                                    {shipmentDetails.waste_type}
-                                  </Badge>
-                                )}
-                                {shipmentDetails.quantity && (
-                                  <Badge variant="outline" className="gap-1 text-[10px]">
-                                    <Scale className="w-3 h-3" />
-                                    {shipmentDetails.quantity} {shipmentDetails.unit || t('notificationDetails.kg')}
-                                  </Badge>
-                                )}
-                              </div>
-
-                              {/* Parties Info */}
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                                {shipmentDetails.generator?.name && (
-                                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                                    <Building2 className="w-3.5 h-3.5 text-blue-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.generator')}:</span>
-                                    <span className="font-medium truncate">{shipmentDetails.generator.name}</span>
-                                  </div>
-                                )}
-                                {shipmentDetails.transporter?.name && (
-                                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                                    <Truck className="w-3.5 h-3.5 text-purple-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.transporter')}:</span>
-                                    <span className="font-medium truncate">{shipmentDetails.transporter.name}</span>
-                                  </div>
-                                )}
-                                {shipmentDetails.recycler?.name && (
-                                  <div className="flex items-center gap-1.5 text-muted-foreground">
-                                    <Recycle className="w-3.5 h-3.5 text-green-500" />
-                                    <span className="text-[10px] text-muted-foreground/70">{t('notificationDetails.recyclerLabel')}:</span>
-                                    <span className="font-medium truncate">{shipmentDetails.recycler.name}</span>
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Driver Info */}
-                              {shipmentDetails.driver && (
-                                <div className="flex flex-wrap items-center gap-3 pt-1 border-t border-border/50 mt-1">
-                                  <div className="flex items-center gap-1.5 text-xs">
-                                    <User className="w-3.5 h-3.5 text-amber-500" />
-                                    <span className="text-muted-foreground/70">{t('notificationDetails.driverLabel')}:</span>
-                                    <span className="font-medium">{driverProfile?.full_name || t('notificationDetails.notAssigned')}</span>
-                                  </div>
-                                  {driverProfile?.phone && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Phone className="w-3 h-3" />
-                                      <span dir="ltr">{driverProfile.phone}</span>
-                                    </div>
-                                  )}
-                                  {shipmentDetails.driver.vehicle_type && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <Car className="w-3 h-3" />
-                                      <span>{shipmentDetails.driver.vehicle_type}</span>
-                                    </div>
-                                  )}
-                                  {shipmentDetails.driver.vehicle_plate && (
-                                    <Badge variant="outline" className="text-[10px] font-mono">
-                                      {shipmentDetails.driver.vehicle_plate}
-                                    </Badge>
-                                  )}
-                                </div>
-                              )}
-
-                              {/* Locations */}
-                              {(shipmentDetails.pickup_address || shipmentDetails.delivery_address) && (
-                                <div className="space-y-1 pt-1 border-t border-border/50 mt-1">
-                                  {shipmentDetails.pickup_address && (
-                                    <div className="flex items-start gap-1.5 text-xs">
-                                      <MapPin className="w-3.5 h-3.5 text-blue-500 mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground/70">{t('notificationDetails.from')}:</span>
-                                      <span className="text-muted-foreground line-clamp-1">{shipmentDetails.pickup_address}</span>
-                                    </div>
-                                  )}
-                                  {shipmentDetails.delivery_address && (
-                                    <div className="flex items-start gap-1.5 text-xs">
-                                      <MapPin className="w-3.5 h-3.5 text-green-500 mt-0.5 shrink-0" />
-                                      <span className="text-muted-foreground/70">{t('notificationDetails.to')}:</span>
-                                      <span className="text-muted-foreground line-clamp-1">{shipmentDetails.delivery_address}</span>
-                                    </div>
-                                  )}
-                                </div>
-                              )}
-                            </div>
-                          )}
-                          
-                          {/* Additional Details (for non-shipment notifications) */}
-                          {!shipmentDetails && (
-                            <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground mt-1">
-                              {notification.shipment_id && (
-                                <Badge variant="outline" className="gap-1 text-[10px] font-mono">
-                                  <Package className="w-3 h-3" />
-                                  {notification.shipment_id.slice(0, 8)}
-                                </Badge>
-                              )}
-                              {notification.request_id && (
-                                <Badge variant="outline" className="gap-1 text-[10px] font-mono">
-                                   <FileText className="w-3 h-3" />
-                                   {t('notificationDetails.request')}: {notification.request_id.slice(0, 6)}
-                                 </Badge>
-                              )}
-                            </div>
-                          )}
-
-                          {/* Priority Badge */}
-                          {notification.priority && notification.priority !== 'normal' && (
-                            <Badge 
-                              variant={notification.priority === 'high' || notification.priority === 'urgent' ? 'destructive' : 'secondary'} 
-                              className="text-[10px] gap-1"
-                            >
-                              <AlertCircle className="w-3 h-3" />
-                              {notification.priority === 'high' ? 'أولوية عالية' : notification.priority === 'urgent' ? 'عاجل' : notification.priority === 'low' ? 'أولوية منخفضة' : notification.priority}
-                            </Badge>
-                          )}
-
-                          {/* Metadata Analysis Section */}
-                          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
-                            <div className="bg-muted/20 rounded-lg p-2.5 space-y-1.5 mt-1 border border-border/30">
-                              <p className="text-[10px] font-semibold text-muted-foreground flex items-center gap-1">
-                                <Sparkles className="w-3 h-3" />
-                                بيانات تفصيلية
-                              </p>
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
-                                {Object.entries(notification.metadata).map(([key, value]) => {
-                                  if (value === null || value === undefined || value === '') return null;
-                                  // Skip nested objects/arrays for now (show simple values)
-                                  if (typeof value === 'object' && !Array.isArray(value)) return null;
-                                  
-                                  const fieldLabel = getMetadataFieldLabel(key);
-                                  const displayValue = Array.isArray(value) ? value.join('، ') : String(value);
-                                  
-                                  return (
-                                    <div key={key} className="flex items-start gap-1.5 text-xs">
-                                      <span className="text-[10px] text-muted-foreground/70 shrink-0 min-w-[60px]">{fieldLabel.label}:</span>
-                                      <span className="font-medium text-foreground/80 truncate" title={displayValue}>{displayValue}</span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                              {/* Nested metadata objects */}
-                              {Object.entries(notification.metadata).map(([key, value]) => {
-                                if (typeof value !== 'object' || value === null || Array.isArray(value)) return null;
-                                const fieldLabel = getMetadataFieldLabel(key);
-                                return (
-                                  <div key={key} className="pt-1 border-t border-border/20">
-                                    <p className="text-[10px] text-muted-foreground/70 mb-1">{fieldLabel.label}:</p>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                                      {Object.entries(value as Record<string, any>).map(([subKey, subVal]) => {
-                                        if (subVal === null || subVal === undefined || subVal === '') return null;
-                                        const subLabel = getMetadataFieldLabel(subKey);
-                                        return (
-                                          <div key={subKey} className="flex items-start gap-1.5 text-xs">
-                                            <span className="text-[10px] text-muted-foreground/70 shrink-0">{subLabel.label}:</span>
-                                            <span className="font-medium text-foreground/80 truncate">{String(subVal)}</span>
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-
-                          {/* Time + Quick Action */}
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                              <Clock className="w-3 h-3" />
-                              {formatDistanceToNow(new Date(notification.created_at), {
-                                addSuffix: true,
-                                locale: dateLocale,
-                              })}
-                            </div>
-                            {(() => {
-                              const qa = getQuickAction(notification);
-                              if (!qa) return null;
-                              const QAIcon = qa.icon;
-                              return (
-                                <Button
-                                  size="sm"
-                                  variant="outline"
-                                  className="h-7 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
-                                  onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); qa.action(); }}
-                                >
-                                  <QAIcon className="w-3 h-3" />
-                                  {qa.label}
-                                </Button>
-                              );
-                            })()}
-                          </div>
-                          
-                          {/* PDF Actions for Recycling Reports */}
-                          {isRecyclingReport && (
-                            <div className="flex flex-wrap gap-2 mt-2 pt-2 border-t border-border/50">
-                              <div className="flex items-center gap-2 text-primary text-xs mb-1 w-full">
-                                <FileText className="w-4 h-4" />
-                                <span className="font-medium">{t('notificationDetails.recyclingCertAttached')}</span>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 text-xs h-8"
-                                onClick={handlePdfView}
-                              >
-                                <Eye className="w-3.5 h-3.5" />
-                                {t('notificationDetails.view')}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 text-xs h-8"
-                                onClick={handlePdfDownload}
-                              >
-                                <Download className="w-3.5 h-3.5" />
-                                {t('notificationDetails.download')}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1.5 text-xs h-8"
-                                onClick={handlePdfPrint}
-                              >
-                                <Printer className="w-3.5 h-3.5" />
-                                {t('notificationDetails.print')}
-                              </Button>
-                            </div>
-                          )}
-                        </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {filteredNotifications.length === 0 ? (
+                <div className="py-8 text-center">
+                  <BellOff className="w-12 h-12 mx-auto mb-3 text-muted-foreground/20" />
+                  <h3 className="text-lg font-medium mb-1">{t('notifications.noNotifications')}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {activeCategory === 'all' ? t('notifications.willAppearHere') : 'لا توجد إشعارات في هذا التصنيف'}
+                  </p>
+                </div>
+              ) : viewMode === 'timeline' ? (
+                /* ═══ Timeline View ═══ */
+                <div className="space-y-6">
+                  {dateGroups.map(group => (
+                    <div key={group.label}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <CalendarDays className="w-4 h-4 text-primary" />
+                        <h3 className="text-sm font-bold text-foreground">{group.label}</h3>
+                        <Badge variant="outline" className="text-[10px]">{group.items.length}</Badge>
+                        <Separator className="flex-1" />
                       </div>
-                    </motion.div>
+                      <div className="space-y-2 relative pr-4 border-r-2 border-border/40 mr-2">
+                        {group.items.map((notification, index) => (
+                          <NotificationCard
+                            key={notification.id}
+                            notification={notification}
+                            index={index}
+                            isMobile={isMobile}
+                            dateLocale={dateLocale}
+                            shipmentDetailsMap={shipmentDetailsMap}
+                            t={t}
+                            onClick={handleNotificationClick}
+                            markAsRead={markAsRead}
+                            getQuickAction={getQuickAction}
+                            isTimeline
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* ═══ List View ═══ */
+                <div className="space-y-2.5">
+                  {filteredNotifications.map((notification, index) => (
+                    <NotificationCard
+                      key={notification.id}
+                      notification={notification}
+                      index={index}
+                      isMobile={isMobile}
+                      dateLocale={dateLocale}
+                      shipmentDetailsMap={shipmentDetailsMap}
+                      t={t}
+                      onClick={handleNotificationClick}
+                      markAsRead={markAsRead}
+                      getQuickAction={getQuickAction}
+                    />
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Notification Detail Dialog */}
+          <NotificationDetailDialog
+            notification={selectedNotification}
+            open={detailDialogOpen}
+            onOpenChange={setDetailDialogOpen}
+            onNavigateToShipment={(id) => navigate(`/dashboard/shipments?highlight=${id}`)}
+            onNavigateToRequest={(id) => navigate(id ? `/dashboard/my-requests?highlight=${id}` : '/dashboard/my-requests')}
+            onNavigateToCarbonFootprint={() => navigate('/dashboard/carbon-footprint')}
+            onNavigateToSigningInbox={() => navigate('/dashboard/signing-inbox')}
+          />
+        </ResponsivePageContainer>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+// ═══════════════════════════════════════════════════════
+// NotificationCard Component
+// ═══════════════════════════════════════════════════════
+interface NotificationCardProps {
+  notification: Notification;
+  index: number;
+  isMobile: boolean;
+  dateLocale: any;
+  shipmentDetailsMap: Record<string, ShipmentDetails>;
+  t: (key: string) => string;
+  onClick: (n: Notification) => void;
+  markAsRead: (id: string) => void;
+  getQuickAction: (n: Notification) => { label: string; icon: React.ElementType; action: () => void } | null;
+  isTimeline?: boolean;
+}
+
+const NotificationCard = ({
+  notification, index, isMobile, dateLocale, shipmentDetailsMap, t,
+  onClick, markAsRead, getQuickAction, isTimeline,
+}: NotificationCardProps) => {
+  const Icon = getNotificationIcon(notification.type);
+  const iconColorClass = getNotificationColor(notification.type);
+  const badge = getNotificationBadge(notification.type);
+  const priority = getPriorityLevel(notification);
+  const isRecyclingReport = notification.type === 'recycling_report' && notification.pdf_url;
+  const shipmentDetails = notification.shipment_id ? shipmentDetailsMap[notification.shipment_id] : null;
+  const driverProfile = shipmentDetails?.driver?.profiles
+    ? (Array.isArray(shipmentDetails.driver.profiles) ? shipmentDetails.driver.profiles[0] : shipmentDetails.driver.profiles)
+    : null;
+
+  const priorityBorder = priority === 'urgent' ? 'border-r-4 border-r-red-500' : priority === 'high' ? 'border-r-4 border-r-orange-400' : '';
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: Math.min(index * 0.02, 0.3) }}
+      onClick={() => onClick(notification)}
+      className={`p-3 sm:p-4 rounded-xl border cursor-pointer transition-all hover:shadow-lg group ${priorityBorder} ${
+        !notification.is_read
+          ? 'bg-gradient-to-l from-primary/5 to-transparent border-primary/30 shadow-sm'
+          : 'bg-card hover:bg-muted/30 border-border/50'
+      } ${isTimeline ? 'relative' : ''}`}
+    >
+      {/* Timeline dot */}
+      {isTimeline && (
+        <div className={`absolute -right-[29px] top-4 w-3 h-3 rounded-full border-2 border-background ${!notification.is_read ? 'bg-primary' : 'bg-muted-foreground/30'}`} />
+      )}
+
+      <div className="flex gap-3">
+        {/* Icon */}
+        <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-xl flex items-center justify-center shrink-0 ${iconColorClass} transition-transform group-hover:scale-105`}>
+          <Icon className="w-5 h-5" />
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 space-y-1.5">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h4 className={`font-semibold leading-tight ${isMobile ? 'text-sm' : 'text-[15px]'}`}>
+                {notification.title}
+              </h4>
+              {!notification.is_read && <span className="w-2 h-2 rounded-full bg-primary animate-pulse shrink-0" />}
+            </div>
+            <div className="flex items-center gap-1.5">
+              {priority === 'urgent' && (
+                <Badge variant="destructive" className="text-[9px] px-1.5 py-0 gap-0.5">
+                  <Flame className="w-2.5 h-2.5" /> عاجل
+                </Badge>
+              )}
+              {priority === 'high' && (
+                <Badge className="bg-orange-100 text-orange-700 text-[9px] px-1.5 py-0 gap-0.5">
+                  <AlertTriangle className="w-2.5 h-2.5" /> مهم
+                </Badge>
+              )}
+              {shipmentDetails?.status && (
+                <Badge className={`${getStatusLabel(shipmentDetails.status, t).color} text-[9px]`}>
+                  {getStatusLabel(shipmentDetails.status, t).label}
+                </Badge>
+              )}
+              <Badge variant={badge.variant} className={`shrink-0 ${isMobile ? 'text-[9px] px-1.5 py-0' : 'text-[10px]'}`}>
+                {badge.label}
+              </Badge>
+            </div>
+          </div>
+
+          {/* Message */}
+          <p className={`text-muted-foreground leading-relaxed whitespace-pre-wrap ${isMobile ? 'text-xs' : 'text-sm'}`}>
+            {notification.message}
+          </p>
+
+          {/* Shipment Details */}
+          {shipmentDetails && (
+            <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 mt-1">
+              <div className="flex flex-wrap items-center gap-1.5">
+                {shipmentDetails.shipment_number && (
+                  <Badge variant="outline" className="gap-1 text-[9px] font-mono bg-primary/5">
+                    <Package className="w-3 h-3" />{shipmentDetails.shipment_number}
+                  </Badge>
+                )}
+                {shipmentDetails.waste_type && (
+                  <Badge variant="secondary" className="gap-1 text-[9px]">
+                    <Recycle className="w-3 h-3" />{shipmentDetails.waste_type}
+                  </Badge>
+                )}
+                {shipmentDetails.quantity && (
+                  <Badge variant="outline" className="gap-1 text-[9px]">
+                    <Scale className="w-3 h-3" />{shipmentDetails.quantity} {shipmentDetails.unit || 'كجم'}
+                  </Badge>
+                )}
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 text-xs">
+                {shipmentDetails.generator?.name && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Building2 className="w-3 h-3 text-blue-500" />
+                    <span className="font-medium truncate">{shipmentDetails.generator.name}</span>
+                  </div>
+                )}
+                {shipmentDetails.transporter?.name && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Truck className="w-3 h-3 text-purple-500" />
+                    <span className="font-medium truncate">{shipmentDetails.transporter.name}</span>
+                  </div>
+                )}
+                {shipmentDetails.recycler?.name && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Recycle className="w-3 h-3 text-green-500" />
+                    <span className="font-medium truncate">{shipmentDetails.recycler.name}</span>
+                  </div>
+                )}
+              </div>
+              {shipmentDetails.driver && (
+                <div className="flex flex-wrap items-center gap-2 pt-1 border-t border-border/50 text-xs">
+                  <div className="flex items-center gap-1">
+                    <User className="w-3 h-3 text-amber-500" />
+                    <span className="font-medium">{driverProfile?.full_name || 'غير معين'}</span>
+                  </div>
+                  {driverProfile?.phone && <span className="text-muted-foreground" dir="ltr">{driverProfile.phone}</span>}
+                  {shipmentDetails.driver.vehicle_plate && (
+                    <Badge variant="outline" className="text-[9px] font-mono">{shipmentDetails.driver.vehicle_plate}</Badge>
+                  )}
+                </div>
+              )}
+              {(shipmentDetails.pickup_address || shipmentDetails.delivery_address) && (
+                <div className="space-y-1 pt-1 border-t border-border/50 text-xs">
+                  {shipmentDetails.pickup_address && (
+                    <div className="flex items-start gap-1.5"><MapPin className="w-3 h-3 text-blue-500 mt-0.5 shrink-0" /><span className="text-muted-foreground line-clamp-1">{shipmentDetails.pickup_address}</span></div>
+                  )}
+                  {shipmentDetails.delivery_address && (
+                    <div className="flex items-start gap-1.5"><MapPin className="w-3 h-3 text-green-500 mt-0.5 shrink-0" /><span className="text-muted-foreground line-clamp-1">{shipmentDetails.delivery_address}</span></div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Metadata */}
+          {notification.metadata && Object.keys(notification.metadata).length > 0 && (
+            <div className="bg-muted/20 rounded-lg p-2 space-y-1 border border-border/30">
+              <p className="text-[9px] font-semibold text-muted-foreground flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> بيانات تفصيلية
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
+                {Object.entries(notification.metadata).map(([key, value]) => {
+                  if (value === null || value === undefined || value === '' || (typeof value === 'object' && !Array.isArray(value))) return null;
+                  return (
+                    <div key={key} className="flex items-start gap-1 text-[10px]">
+                      <span className="text-muted-foreground/70 shrink-0">{getMetadataFieldLabel(key).label}:</span>
+                      <span className="font-medium text-foreground/80 truncate">{Array.isArray(value) ? value.join('، ') : String(value)}</span>
+                    </div>
                   );
                 })}
               </div>
-            )}
-          </CardContent>
-        </Card>
+            </div>
+          )}
 
-        {/* Notification Detail Dialog */}
-        <NotificationDetailDialog
-          notification={selectedNotification}
-          open={detailDialogOpen}
-          onOpenChange={setDetailDialogOpen}
-          onNavigateToShipment={handleNavigateToShipment}
-          onNavigateToRequest={handleNavigateToRequest}
-          onNavigateToCarbonFootprint={handleNavigateToCarbonFootprint}
-          onNavigateToSigningInbox={() => navigate('/dashboard/signing-inbox')}
-        />
-      </ResponsivePageContainer>
+          {/* Time + Quick Action */}
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+              <Clock className="w-3 h-3" />
+              {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true, locale: dateLocale })}
+            </div>
+            {(() => {
+              const qa = getQuickAction(notification);
+              if (!qa) return null;
+              const QAIcon = qa.icon;
+              return (
+                <Button size="sm" variant="outline" className="h-6 text-[10px] gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                  onClick={(e) => { e.stopPropagation(); markAsRead(notification.id); qa.action(); }}>
+                  <QAIcon className="w-3 h-3" />{qa.label}
+                </Button>
+              );
+            })()}
+          </div>
+
+          {/* PDF Actions */}
+          {isRecyclingReport && (
+            <div className="flex flex-wrap gap-2 pt-2 border-t border-border/50">
+              <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={(e) => { e.stopPropagation(); window.open(notification.pdf_url!, '_blank'); }}>
+                <Eye className="w-3 h-3" /> عرض
+              </Button>
+              <Button variant="outline" size="sm" className="gap-1 text-xs h-7" onClick={(e) => { e.stopPropagation(); const a = document.createElement('a'); a.href = notification.pdf_url!; a.download = `تقرير-${notification.shipment_id || ''}.pdf`; a.click(); }}>
+                <Download className="w-3 h-3" /> تحميل
+              </Button>
+            </div>
+          )}
+        </div>
       </div>
-    </DashboardLayout>
+    </motion.div>
   );
 };
 
