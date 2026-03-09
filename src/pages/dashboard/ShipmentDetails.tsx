@@ -7,6 +7,7 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentStatusTimeline from '@/components/shipments/ShipmentStatusTimeline';
 import ShipmentDocumentsTimeline from '@/components/shipments/ShipmentDocumentsTimeline';
+import DocumentChainStrip from '@/components/shipments/DocumentChainStrip';
 import ShipmentDocumentsPanel from '@/components/documents/ShipmentDocumentsPanel';
 import ShipmentProgressLogs from '@/components/shipments/ShipmentProgressLogs';
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';

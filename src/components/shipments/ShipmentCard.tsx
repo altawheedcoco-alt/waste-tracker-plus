@@ -486,6 +486,7 @@ const ShipmentCard = ({
                   <p className="text-sm text-muted-foreground mt-1">
                     {wasteTypeLabels[shipment.waste_type] || shipment.waste_type} - {shipment.quantity} {shipment.unit || 'كجم'}
                   </p>
+                  <DocumentChainStrip shipmentId={shipment.id} variant="minimal" className="mt-1" />
                 </div>
               </div>
             </CardContent>
