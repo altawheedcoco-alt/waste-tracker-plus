@@ -186,7 +186,7 @@ const Header = memo(() => {
                   {/* Mega Dropdown */}
                   {openDropdown === dropdown.label && (
                     <div
-                      className={`absolute top-full mt-2 bg-background border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in ${
+                      className={`absolute top-full mt-2 bg-white dark:bg-[hsl(222,12%,11%)] border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in ${
                         dropdown.megaShowcase ? 'w-[640px]' : dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
                       }`}
                       style={{ [language === 'ar' ? 'right' : 'left']: 0 }}
