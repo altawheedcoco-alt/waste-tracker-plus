@@ -24,7 +24,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
 
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
@@ -258,10 +258,7 @@ const GeneratorDashboard = () => {
 
       <AutomationSettingsDialog organizationType="generator" />
 
-      {/* Alerts & Approvals */}
-      <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
-        <OperationalAlertsWidget />
-      </ErrorBoundary>
+      <DashboardAlertsHub orgType="generator" />
 
       <PendingApprovalsWidget />
       <UnifiedDocumentSearch />

@@ -34,7 +34,7 @@ import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPr
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import OperationalAlertsWidget from './operations/OperationalAlertsWidget';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import FleetUtilizationWidget from './operations/FleetUtilizationWidget';
 import TransporterPerformanceCharts from './transporter/TransporterPerformanceCharts';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
@@ -210,19 +210,13 @@ const TransporterDashboard = () => {
 
       <AutomationSettingsDialog organizationType="transporter" />
 
-      <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
-        <OperationalAlertsWidget />
-        <TransporterSLAAlerts shipments={shipments} />
-        <TransporterIncomingRequests />
-      </ErrorBoundary>
+      <DashboardAlertsHub
+        orgType="transporter"
+        notificationsComponent={<TransporterNotifications notifications={notifications} />}
+        slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+        incomingRequestsComponent={<TransporterIncomingRequests />}
+      />
 
-      <ErrorBoundary fallbackTitle="خطأ في موافقات التسليم">
-        <Suspense fallback={<TabFallback />}>
-          <TransporterDeliveryApproval />
-        </Suspense>
-      </ErrorBoundary>
-
-      <TransporterNotifications notifications={notifications} />
       <UnifiedDocumentSearch />
       <DocumentVerificationWidget />
 

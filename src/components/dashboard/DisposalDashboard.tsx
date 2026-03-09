@@ -31,7 +31,7 @@ import StatsCardsGrid, { StatCardItem } from '@/components/dashboard/shared/Stat
 import DisposalIncomingPanel from '@/components/dashboard/disposal/DisposalIncomingPanel';
 import DisposalDailyOperations from '@/components/dashboard/disposal/DisposalDailyOperations';
 import DisposalRecentOperations from '@/components/dashboard/disposal/DisposalRecentOperations';
-import OperationalAlertsWidget from '@/components/dashboard/operations/OperationalAlertsWidget';
+import DashboardAlertsHub from '@/components/dashboard/shared/DashboardAlertsHub';
 import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
 import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
@@ -247,7 +247,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
           <DisposalDailyOperations />
-          <OperationalAlertsWidget />
+          <DashboardAlertsHub orgType="disposal" />
 
           <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
             <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
