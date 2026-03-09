@@ -267,7 +267,7 @@ const OperationalAlertsWidget = () => {
       .on('postgres_changes', { event: '*', schema: 'public', table: 'contracts' }, () => {
         queryClient.invalidateQueries({ queryKey: ['operational-alerts'] });
       })
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'vehicles' }, () => {
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'fleet_vehicles' }, () => {
         queryClient.invalidateQueries({ queryKey: ['operational-alerts'] });
       })
       .subscribe();
