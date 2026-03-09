@@ -384,7 +384,8 @@ export async function evaluateAndEndorse(params: {
     timeFrameResult,
   ];
 
-  const allCriteriaMet = criteria.every(c => c.passed);
+  // الحد الأدنى: فقط اكتمال التوقيعات مطلوب — باقي المعايير اختيارية (تسجل كملاحظات فقط)
+  const allCriteriaMet = signaturesResult.passed;
   const failedCriteria = criteria.filter(c => !c.passed);
 
   // تسجيل نتيجة الفحص
