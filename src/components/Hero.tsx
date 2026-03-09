@@ -46,7 +46,7 @@ const Hero = memo(() => {
   ];
 
   return (
-    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-24 pb-6 sm:pt-28 sm:pb-0">
+    <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-[4.5rem] pb-4 sm:pt-28 sm:pb-0">
       {/* Background image */}
       <div className="absolute inset-0">
         <img
@@ -58,7 +58,7 @@ const Hero = memo(() => {
           decoding="async"
         />
         {/* v3.0 — Multi-layer cinematic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,7%)]/85 via-[hsl(222,14%,7%)]/50 to-[hsl(222,14%,7%)]/80" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,7%)]/90 via-[hsl(222,14%,7%)]/60 to-[hsl(222,14%,7%)]/85" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
         {/* Subtle color accent overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-eco-ocean/5" />
