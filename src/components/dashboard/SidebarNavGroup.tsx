@@ -119,7 +119,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
   const triggerContent = (
     <motion.button
       whileTap={{ scale: 0.98 }}
-      onClick={() => setIsOpen(!isOpen)}
+      onClick={toggleOpen}
       className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 touch-manipulation ${
         isChildActive
           ? 'bg-primary/10 text-primary font-semibold'
