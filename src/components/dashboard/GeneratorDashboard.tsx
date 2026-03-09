@@ -258,10 +258,7 @@ const GeneratorDashboard = () => {
 
       <AutomationSettingsDialog organizationType="generator" />
 
-      {/* Alerts & Approvals */}
-      <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
-        <OperationalAlertsWidget />
-      </ErrorBoundary>
+      <DashboardAlertsHub orgType="generator" />
 
       <PendingApprovalsWidget />
       <UnifiedDocumentSearch />
