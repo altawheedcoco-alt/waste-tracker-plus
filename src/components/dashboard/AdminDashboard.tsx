@@ -408,9 +408,7 @@ const AdminDashboard = () => {
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
-          <OperationalAlertsWidget />
-        </ErrorBoundary>
+        <DashboardAlertsHub orgType="admin" />
       </motion.div>
 
       <AutomationSettingsDialog organizationType="generator" />
