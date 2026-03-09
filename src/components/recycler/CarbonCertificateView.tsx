@@ -156,6 +156,17 @@ const CarbonCertificateView = ({ data, type, onBack, onIssue }: CarbonCertificat
               </p>
             </div>
           </div>
+
+          {/* إخلاء مسؤولية قانوني */}
+          <div style={{ padding: '12px 32px', background: '#FEF3C7', borderTop: '2px solid #F59E0B', fontSize: 9, color: '#92400E', lineHeight: 1.7, textAlign: 'center' }}>
+            <p style={{ fontWeight: 'bold', marginBottom: 4, fontSize: 10 }}>⚖️ إخلاء مسؤولية</p>
+            <p>
+              تعتبر هذه المنصة وسيطاً تقنياً لنقل وتداول البيانات، وتقع المسئولية القانونية الكاملة عن صحة البيانات المدخلة ومطابقتها للواقع الفعلي على عاتق المستخدم (المولد/ الناقل/ المستلم) دون أدنى مسئولية على إدارة المنصة.
+            </p>
+            <p style={{ marginTop: 4, fontSize: 8, color: '#B45309' }}>
+              هذا المستند صدر آلياً من منصة iRecycle ولا يتطلب توقيعاً خطياً أو ختماً يدوياً للاعتداد به رقمياً (وفقاً للقانون 15/2004). البيانات الواردة تحت مسؤولية الجهة المُصدرة.
+            </p>
+          </div>
         </div>
       </div>
     </div>

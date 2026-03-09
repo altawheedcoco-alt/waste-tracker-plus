@@ -132,11 +132,13 @@ const RegistrationTermsAcceptance = ({
                 <AlertTriangle className="h-3.5 w-3.5 text-destructive" />
                 <span className="text-[11px] font-bold text-destructive">إخلاء مسؤولية</span>
               </div>
-              <p className="text-[10px] leading-relaxed text-destructive/80">
+              <p className="text-[10px] leading-relaxed text-destructive/80 font-bold mb-1">
+                تعتبر هذه المنصة وسيطاً تقنياً لنقل وتداول البيانات، وتقع المسئولية القانونية الكاملة عن صحة البيانات المدخلة ومطابقتها للواقع الفعلي على عاتق المستخدم (المولد/ الناقل/ المستلم) دون أدنى مسئولية على إدارة المنصة.
+              </p>
+              <p className="text-[10px] leading-relaxed text-destructive/70">
                 منصة iRecycle هي جهة وسيطة تقنية (SaaS) تقدم حلولاً برمجية لإدارة المخلفات فقط. لا تتحمل المنصة
                 أي مسؤولية قانونية — مدنية أو جنائية — عن دقة البيانات المدخلة أو طبيعة المواد المنقولة فعلياً
-                أو أي مخالفة لقوانين البيئة أو السلامة من قبل المستخدمين. المسؤولية الكاملة تقع على عاتق
-                المستخدم/الجهة المسجلة وفقاً للقوانين المصرية المعمول بها.
+                أو أي مخالفة لقوانين البيئة أو السلامة من قبل المستخدمين.
               </p>
             </div>
           </ScrollArea>

@@ -931,6 +931,14 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
           إلغاء
         </Button>
       </motion.div>
+
+      {/* إخلاء مسؤولية قانوني */}
+      <div className="border-t border-border/30 pt-3 pb-1">
+        <p className="text-[10px] leading-relaxed text-muted-foreground/70 text-center">
+          <span className="font-semibold text-muted-foreground/80">⚖️ إخلاء مسؤولية:</span>{' '}
+          تعتبر هذه المنصة وسيطاً تقنياً لنقل وتداول البيانات، وتقع المسئولية القانونية الكاملة عن صحة البيانات المدخلة ومطابقتها للواقع الفعلي على عاتق المستخدم (المولد/ الناقل/ المستلم) دون أدنى مسئولية على إدارة المنصة. بالضغط على "إنشاء الشحنة" فإنك تقر بصحة البيانات المُدخلة وتتحمل المسؤولية الكاملة عنها.
+        </p>
+      </div>
     </form>
   );
 };
