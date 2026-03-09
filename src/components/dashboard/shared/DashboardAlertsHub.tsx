@@ -1,4 +1,4 @@
-import { useState, useMemo, lazy, Suspense } from 'react';
+import { useMemo, lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
@@ -7,18 +7,16 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import {
   AlertTriangle, Bell, FileCheck, ChevronDown, ChevronUp, Activity,
-  Shield, Zap, Truck, Clock
+  Zap, Truck, EyeOff, Eye
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 
 const OperationalAlertsWidget = lazy(() => import('@/components/dashboard/operations/OperationalAlertsWidget'));
 const TransporterDeliveryApproval = lazy(() => import('@/components/receipts/TransporterDeliveryApproval'));
 
 interface DashboardAlertsHubProps {
-  /** Which org type: shows delivery approvals only for transporter */
   orgType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
-  /** Optional extra sections to render in additional tabs */
   extraSections?: Array<{
     id: string;
     label: string;
@@ -26,15 +24,16 @@ interface DashboardAlertsHubProps {
     badge?: number;
     content: React.ReactNode;
   }>;
-  /** Notifications component (transporter-specific) */
   notificationsComponent?: React.ReactNode;
-  /** SLA alerts (transporter-specific) */
   slaComponent?: React.ReactNode;
-  /** Incoming requests component */
   incomingRequestsComponent?: React.ReactNode;
 }
 
 const TabFallback = () => <Skeleton className="h-32 w-full rounded-xl" />;
+
+const PREF_KEY_HIDDEN = 'dashboard_alerts_hub_hidden';
+const PREF_KEY_COLLAPSED = 'dashboard_alerts_hub_collapsed';
+const PREF_KEY_ACTIVE_TAB = 'dashboard_alerts_hub_tab';
 
 const DashboardAlertsHub = ({
   orgType,
@@ -43,45 +42,71 @@ const DashboardAlertsHub = ({
   slaComponent,
   incomingRequestsComponent,
 }: DashboardAlertsHubProps) => {
-  const [isOpen, setIsOpen] = useState(true);
-  const [activeTab, setActiveTab] = useState('alerts');
+  const { getPref, setPref, togglePref } = useUserPreferences();
+
+  const isHidden = getPref(PREF_KEY_HIDDEN, false);
+  const isOpen = !getPref(PREF_KEY_COLLAPSED, false);
+  const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'alerts');
 
   const showDeliveryApproval = orgType === 'transporter';
 
-  // Build tabs dynamically
   const tabs = useMemo(() => {
     const t: Array<{ value: string; label: string; icon: typeof Bell }> = [
       { value: 'alerts', label: 'التنبيهات التشغيلية', icon: AlertTriangle },
     ];
-
     if (showDeliveryApproval) {
       t.push({ value: 'certificates', label: 'موافقات الشهادات', icon: FileCheck });
     }
-
     if (notificationsComponent) {
       t.push({ value: 'notifications', label: 'الإشعارات', icon: Bell });
     }
-
     if (slaComponent || incomingRequestsComponent) {
       t.push({ value: 'requests', label: 'الطلبات والأداء', icon: Truck });
     }
-
     extraSections.forEach(section => {
       t.push({ value: section.id, label: section.label, icon: section.icon });
     });
-
     return t;
   }, [showDeliveryApproval, notificationsComponent, slaComponent, incomingRequestsComponent, extraSections]);
 
+  // If hidden, show minimal restore button
+  if (isHidden) {
+    return (
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full gap-2 border-dashed border-primary/30 text-muted-foreground hover:text-primary"
+        onClick={() => setPref(PREF_KEY_HIDDEN, false)}
+      >
+        <Eye className="w-4 h-4" />
+        إظهار مركز التنبيهات
+      </Button>
+    );
+  }
+
   return (
-    <Collapsible open={isOpen} onOpenChange={setIsOpen}>
+    <Collapsible open={isOpen} onOpenChange={(open) => setPref(PREF_KEY_COLLAPSED, !open)}>
       <Card className="border-primary/15 shadow-sm overflow-hidden">
         <CollapsibleTrigger asChild>
           <CardHeader className="pb-2 cursor-pointer hover:bg-muted/30 transition-colors">
             <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" className="h-7 px-2">
-                {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="sm" className="h-7 px-2">
+                  {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-muted-foreground hover:text-destructive"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePref(PREF_KEY_HIDDEN);
+                  }}
+                  title="إخفاء مركز التنبيهات"
+                >
+                  <EyeOff className="w-3.5 h-3.5" />
+                </Button>
+              </div>
               <div className="flex items-center gap-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Activity className="w-5 h-5 text-primary" />
@@ -98,8 +123,8 @@ const DashboardAlertsHub = ({
 
         <CollapsibleContent>
           <CardContent className="pt-0">
-            <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-              <TabsList className={`w-full grid mb-3`} style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
+            <Tabs value={activeTab} onValueChange={(v) => setPref(PREF_KEY_ACTIVE_TAB, v)} dir="rtl">
+              <TabsList className="w-full grid mb-3" style={{ gridTemplateColumns: `repeat(${tabs.length}, 1fr)` }}>
                 {tabs.map(tab => {
                   const Icon = tab.icon;
                   return (
@@ -111,7 +136,6 @@ const DashboardAlertsHub = ({
                 })}
               </TabsList>
 
-              {/* Operational Alerts */}
               <TabsContent value="alerts">
                 <ErrorBoundary fallbackTitle="خطأ في التنبيهات">
                   <Suspense fallback={<TabFallback />}>
@@ -120,7 +144,6 @@ const DashboardAlertsHub = ({
                 </ErrorBoundary>
               </TabsContent>
 
-              {/* Delivery Certificate Approvals */}
               {showDeliveryApproval && (
                 <TabsContent value="certificates">
                   <ErrorBoundary fallbackTitle="خطأ في موافقات الشهادات">
@@ -131,7 +154,6 @@ const DashboardAlertsHub = ({
                 </TabsContent>
               )}
 
-              {/* Notifications */}
               {notificationsComponent && (
                 <TabsContent value="notifications">
                   <ErrorBoundary fallbackTitle="خطأ في الإشعارات">
@@ -140,7 +162,6 @@ const DashboardAlertsHub = ({
                 </TabsContent>
               )}
 
-              {/* Requests & SLA */}
               {(slaComponent || incomingRequestsComponent) && (
                 <TabsContent value="requests">
                   <div className="space-y-4">
@@ -158,7 +179,6 @@ const DashboardAlertsHub = ({
                 </TabsContent>
               )}
 
-              {/* Extra sections */}
               {extraSections.map(section => (
                 <TabsContent key={section.id} value={section.id}>
                   <ErrorBoundary fallbackTitle={`خطأ في ${section.label}`}>
