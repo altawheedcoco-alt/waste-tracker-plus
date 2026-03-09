@@ -27,15 +27,15 @@ export const InstallPWA = () => {
     if (dismissed && Date.now() - parseInt(dismissed) < 7 * 24 * 60 * 60 * 1000) return;
 
     if (ios) {
-      // Show iOS install guide after 30s
-      const timer = setTimeout(() => setShowBanner(true), 30000);
+      // Show iOS install guide immediately on mobile
+      const timer = setTimeout(() => setShowBanner(true), 2000);
       return () => clearTimeout(timer);
     }
 
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShowBanner(true), 15000);
+      setShowBanner(true);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
