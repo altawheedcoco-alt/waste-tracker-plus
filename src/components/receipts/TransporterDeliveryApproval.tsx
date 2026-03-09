@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -7,6 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Dialog,
   DialogContent,
@@ -16,57 +20,300 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import {
-  AlertCircle,
   CheckCircle2,
   XCircle,
   Clock,
-  Package,
-  Send,
-  Loader2,
   Timer,
+  Loader2,
+  Shield,
+  Zap,
+  History,
+  AlertTriangle,
+  Eye,
+  FileCheck,
+  RefreshCcw,
+  CheckCheck,
+  Ban,
+  Sparkles,
 } from 'lucide-react';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getTabChannelName } from '@/lib/tabSession';
 
+type ApprovalStatus = 'pending' | 'approved' | 'auto_approved' | 'rejected';
+
+interface EnrichedReceipt {
+  id: string;
+  receipt_number: string;
+  shipment_id: string;
+  waste_type: string | null;
+  waste_category: string | null;
+  actual_weight: number | null;
+  declared_weight: number | null;
+  unit: string | null;
+  created_at: string;
+  transporter_approval_status: ApprovalStatus;
+  transporter_approval_deadline: string | null;
+  transporter_approved_at: string | null;
+  transporter_rejection_reason: string | null;
+  status: string;
+  shipment?: {
+    shipment_number: string;
+    waste_type: string;
+    quantity: number;
+    unit: string;
+    generator_id: string;
+    pickup_address: string;
+    delivery_address: string;
+  } | null;
+  generator_name: string;
+}
+
+// Auto-hide tracking: stores receipt IDs with the timestamp they were "seen" as approved
+const SEEN_APPROVED_KEY = 'seen_approved_certificates';
+const AUTO_HIDE_MINUTES = 5;
+
+const getSeen = (): Record<string, number> => {
+  try {
+    return JSON.parse(localStorage.getItem(SEEN_APPROVED_KEY) || '{}');
+  } catch { return {}; }
+};
+
+const markSeen = (id: string) => {
+  const seen = getSeen();
+  seen[id] = Date.now();
+  localStorage.setItem(SEEN_APPROVED_KEY, JSON.stringify(seen));
+};
+
+const cleanupSeen = () => {
+  const seen = getSeen();
+  const now = Date.now();
+  const cleaned: Record<string, number> = {};
+  for (const [id, ts] of Object.entries(seen)) {
+    if (now - ts < AUTO_HIDE_MINUTES * 60 * 1000 * 2) cleaned[id] = ts;
+  }
+  localStorage.setItem(SEEN_APPROVED_KEY, JSON.stringify(cleaned));
+};
+
+const isHidden = (id: string): boolean => {
+  const seen = getSeen();
+  if (!seen[id]) return false;
+  return Date.now() - seen[id] > AUTO_HIDE_MINUTES * 60 * 1000;
+};
+
+// ── Countdown Timer ──
+const CountdownTimer = ({ deadline }: { deadline: string }) => {
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const target = new Date(deadline).getTime();
+  const remaining = Math.max(0, target - now);
+  const totalMinutes = Math.floor(remaining / 60000);
+  const seconds = Math.floor((remaining % 60000) / 1000);
+  const progress = Math.max(0, 100 - (remaining / (15 * 60 * 1000)) * 100);
+
+  if (remaining === 0) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400">
+        <Zap className="w-3 h-3" />
+        <span>تمت الموافقة التلقائية</span>
+      </div>
+    );
+  }
+
+  const isUrgent = totalMinutes < 3;
+
+  return (
+    <div className="space-y-1">
+      <div className={`flex items-center gap-1.5 text-xs ${isUrgent ? 'text-destructive animate-pulse' : 'text-amber-600 dark:text-amber-400'}`}>
+        <Clock className="w-3 h-3" />
+        <span>
+          الموافقة التلقائية خلال {totalMinutes}:{seconds.toString().padStart(2, '0')}
+        </span>
+      </div>
+      <Progress value={progress} className="h-1" />
+    </div>
+  );
+};
+
+// ── Certificate Card ──
+const CertificateCard = ({
+  receipt,
+  onApprove,
+  onReject,
+  isSubmitting,
+  showActions = true,
+  variant = 'pending',
+}: {
+  receipt: EnrichedReceipt;
+  onApprove: (r: EnrichedReceipt) => void;
+  onReject: (r: EnrichedReceipt) => void;
+  isSubmitting: boolean;
+  showActions?: boolean;
+  variant?: 'pending' | 'approved' | 'auto_approved' | 'rejected';
+}) => {
+  const borderColors: Record<string, string> = {
+    pending: 'border-amber-300 dark:border-amber-700',
+    approved: 'border-emerald-300 dark:border-emerald-700',
+    auto_approved: 'border-blue-300 dark:border-blue-700',
+    rejected: 'border-destructive/30',
+  };
+
+  const bgColors: Record<string, string> = {
+    pending: 'bg-amber-50/30 dark:bg-amber-950/10',
+    approved: 'bg-emerald-50/30 dark:bg-emerald-950/10',
+    auto_approved: 'bg-blue-50/30 dark:bg-blue-950/10',
+    rejected: 'bg-destructive/5',
+  };
+
+  const statusBadges: Record<string, { label: string; icon: typeof CheckCircle2; className: string }> = {
+    pending: { label: 'بانتظار الموافقة', icon: Clock, className: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200' },
+    approved: { label: 'تمت الموافقة', icon: CheckCircle2, className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200' },
+    auto_approved: { label: 'موافقة تلقائية', icon: Zap, className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' },
+    rejected: { label: 'مرفوض', icon: Ban, className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200' },
+  };
+
+  const StatusIcon = statusBadges[variant].icon;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10, height: 0 }}
+      transition={{ duration: 0.25 }}
+    >
+      <Card className={`${borderColors[variant]} ${bgColors[variant]} transition-all`}>
+        <CardContent className="p-4">
+          <div className="flex items-start justify-between gap-3">
+            {/* Actions */}
+            {showActions && (
+              <div className="flex flex-col items-center gap-2 shrink-0">
+                <Button size="sm" onClick={() => onApprove(receipt)} disabled={isSubmitting} className="gap-1 w-full">
+                  <CheckCircle2 className="w-4 h-4" /> قبول
+                </Button>
+                <Button size="sm" variant="destructive" onClick={() => onReject(receipt)} disabled={isSubmitting} className="gap-1 w-full">
+                  <XCircle className="w-4 h-4" /> رفض
+                </Button>
+              </div>
+            )}
+
+            {/* Details */}
+            <div className="flex-1 text-right space-y-2">
+              <div className="flex items-center gap-2 justify-end flex-wrap">
+                <Badge className={`${statusBadges[variant].className} gap-1 text-[10px]`}>
+                  <StatusIcon className="w-3 h-3" />
+                  {statusBadges[variant].label}
+                </Badge>
+                <Badge variant="outline" className="font-mono text-xs">{receipt.receipt_number}</Badge>
+                {receipt.shipment?.shipment_number && (
+                  <Badge variant="secondary" className="text-xs">{receipt.shipment.shipment_number}</Badge>
+                )}
+                <span className="font-semibold text-sm">{receipt.generator_name || 'مولد غير محدد'}</span>
+              </div>
+
+              <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap justify-end">
+                {receipt.waste_type && (
+                  <span className="flex items-center gap-1">
+                    <span className="font-medium">النوع:</span> {receipt.waste_type}
+                  </span>
+                )}
+                {receipt.waste_category && (
+                  <Badge variant="outline" className="text-[10px] h-5">{receipt.waste_category}</Badge>
+                )}
+                {receipt.actual_weight && (
+                  <span className="flex items-center gap-1">
+                    <span className="font-medium">الوزن:</span> {receipt.actual_weight} {receipt.unit || 'كجم'}
+                  </span>
+                )}
+                <span>{format(new Date(receipt.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}</span>
+              </div>
+
+              {/* Countdown for pending */}
+              {variant === 'pending' && receipt.transporter_approval_deadline && (
+                <CountdownTimer deadline={receipt.transporter_approval_deadline} />
+              )}
+
+              {/* Approval time for approved */}
+              {(variant === 'approved' || variant === 'auto_approved') && receipt.transporter_approved_at && (
+                <div className="flex items-center gap-1.5 text-xs text-emerald-600 dark:text-emerald-400 justify-end">
+                  <CheckCheck className="w-3 h-3" />
+                  <span>تمت الموافقة {formatDistanceToNow(new Date(receipt.transporter_approved_at), { locale: ar, addSuffix: true })}</span>
+                </div>
+              )}
+
+              {/* Rejection reason */}
+              {variant === 'rejected' && receipt.transporter_rejection_reason && (
+                <div className="flex items-center gap-1.5 text-xs text-destructive justify-end mt-1">
+                  <AlertTriangle className="w-3 h-3" />
+                  <span>سبب الرفض: {receipt.transporter_rejection_reason}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
+  );
+};
+
+// ── Main Component ──
 const TransporterDeliveryApproval = () => {
   const { organization, profile } = useAuth();
   const queryClient = useQueryClient();
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
-  const [selectedReceipt, setSelectedReceipt] = useState<any>(null);
+  const [selectedReceipt, setSelectedReceipt] = useState<EnrichedReceipt | null>(null);
   const [rejectionReason, setRejectionReason] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending');
+  const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
 
-  const { data: pendingReceipts = [], isLoading } = useQuery({
-    queryKey: ['pending-delivery-approvals', organization?.id],
+  // Cleanup old seen entries
+  useEffect(() => { cleanupSeen(); }, []);
+
+  // Auto-hide check interval
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const seen = getSeen();
+      const newHidden = new Set<string>();
+      for (const [id, ts] of Object.entries(seen)) {
+        if (Date.now() - ts > AUTO_HIDE_MINUTES * 60 * 1000) newHidden.add(id);
+      }
+      setHiddenIds(newHidden);
+    }, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // ── Fetch ALL receipts (pending + recent approved/rejected) ──
+  const { data: allReceipts = [], isLoading } = useQuery({
+    queryKey: ['delivery-approvals-all', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
 
-      // Get shipments where this org is the transporter
       const { data: shipments } = await supabase
         .from('shipments')
         .select('id')
         .eq('transporter_id', organization.id);
 
       if (!shipments?.length) return [];
-
       const shipmentIds = shipments.map(s => s.id);
 
+      // Fetch all statuses
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select('*')
         .in('shipment_id', shipmentIds)
-        .eq('transporter_approval_status', 'pending')
         .not('generator_id', 'is', null)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
-      if (error) {
-        console.error('Error fetching pending approvals:', error);
-        return [];
-      }
+      if (error) { console.error('Error:', error); return []; }
 
-      // Enrich with shipment details
-      const enrichedData = await Promise.all(
+      const enriched = await Promise.all(
         (data || []).map(async (receipt: any) => {
           const { data: shipment } = await supabase
             .from('shipments')
@@ -84,21 +331,88 @@ const TransporterDeliveryApproval = () => {
             generatorName = gen?.name || '';
           }
 
-          return {
-            ...receipt,
-            shipment,
-            generator_name: generatorName,
-          };
+          return { ...receipt, shipment, generator_name: generatorName } as EnrichedReceipt;
         })
       );
 
-      return enrichedData;
+      return enriched;
     },
     enabled: !!organization?.id,
-    staleTime: 1000 * 60 * 2,
+    staleTime: 1000 * 30,
   });
 
-  const handleApprove = async (receipt: any) => {
+  // ── Realtime subscription ──
+  useEffect(() => {
+    if (!organization?.id) return;
+
+    const channel = supabase
+      .channel(getTabChannelName('delivery-cert-approvals'))
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'shipment_receipts',
+      }, (payload) => {
+        queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
+        
+        if (payload.eventType === 'UPDATE') {
+          const newStatus = (payload.new as any).transporter_approval_status;
+          if (newStatus === 'auto_approved') {
+            toast.info('تمت موافقة تلقائية على شهادة تسليم', { icon: <Zap className="w-4 h-4 text-blue-500" /> });
+          }
+        }
+        if (payload.eventType === 'INSERT') {
+          toast.info('شهادة تسليم جديدة بانتظار موافقتك', { icon: <FileCheck className="w-4 h-4 text-amber-500" /> });
+        }
+      })
+      .subscribe();
+
+    return () => { channel.unsubscribe(); };
+  }, [organization?.id, queryClient]);
+
+  // ── Categorized receipts ──
+  const categorized = useMemo(() => {
+    const pending: EnrichedReceipt[] = [];
+    const approved: EnrichedReceipt[] = [];
+    const autoApproved: EnrichedReceipt[] = [];
+    const rejected: EnrichedReceipt[] = [];
+
+    for (const r of allReceipts) {
+      const status = r.transporter_approval_status;
+      if (status === 'pending') {
+        pending.push(r);
+      } else if (status === 'approved') {
+        if (!isHidden(r.id)) {
+          markSeen(r.id);
+          approved.push(r);
+        }
+      } else if (status === 'auto_approved') {
+        if (!isHidden(r.id)) {
+          markSeen(r.id);
+          autoApproved.push(r);
+        }
+      } else if (status === 'rejected') {
+        rejected.push(r);
+      }
+    }
+
+    return { pending, approved, autoApproved, rejected };
+  }, [allReceipts, hiddenIds]);
+
+  // ── Stats ──
+  const stats = useMemo(() => ({
+    pending: categorized.pending.length,
+    approved: categorized.approved.length,
+    autoApproved: categorized.autoApproved.length,
+    rejected: categorized.rejected.length,
+    total: allReceipts.length,
+    urgentCount: categorized.pending.filter(r => {
+      if (!r.transporter_approval_deadline) return false;
+      return differenceInMinutes(new Date(r.transporter_approval_deadline), new Date()) < 3;
+    }).length,
+  }), [categorized, allReceipts]);
+
+  // ── Handlers ──
+  const handleApprove = async (receipt: EnrichedReceipt) => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase
@@ -112,7 +426,7 @@ const TransporterDeliveryApproval = () => {
 
       if (error) throw error;
       toast.success('تم قبول شهادة التسليم بنجاح');
-      queryClient.invalidateQueries({ queryKey: ['pending-delivery-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
     } catch (error) {
       console.error('Error approving:', error);
       toast.error('حدث خطأ أثناء القبول');
@@ -121,15 +435,39 @@ const TransporterDeliveryApproval = () => {
     }
   };
 
+  const handleBulkApprove = async () => {
+    if (categorized.pending.length === 0) return;
+    setIsSubmitting(true);
+    try {
+      const ids = categorized.pending.map(r => r.id);
+      const { error } = await supabase
+        .from('shipment_receipts')
+        .update({
+          transporter_approval_status: 'approved',
+          transporter_approved_at: new Date().toISOString(),
+          status: 'confirmed',
+        } as any)
+        .in('id', ids);
+
+      if (error) throw error;
+      toast.success(`تم قبول ${ids.length} شهادة تسليم دفعة واحدة`);
+      queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
+    } catch (error) {
+      console.error('Error bulk approving:', error);
+      toast.error('حدث خطأ أثناء الموافقة الجماعية');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   const handleReject = async () => {
-    if (!rejectionReason.trim()) {
+    if (!rejectionReason.trim() || !selectedReceipt) {
       toast.error('يجب ذكر سبب الرفض');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // Update receipt status
       const { error: receiptError } = await supabase
         .from('shipment_receipts')
         .update({
@@ -141,26 +479,21 @@ const TransporterDeliveryApproval = () => {
 
       if (receiptError) throw receiptError;
 
-      // Log in rejection registry
-      const { error: logError } = await supabase
-        .from('shipment_rejection_log')
-        .insert({
-          shipment_id: selectedReceipt.shipment_id,
-          receipt_id: selectedReceipt.id,
-          rejected_by_organization_id: organization?.id,
-          rejected_by_user_id: profile?.id,
-          rejection_reason: rejectionReason,
-          rejection_type: 'transporter_delivery_rejection',
-          shipment_status_before: selectedReceipt.shipment?.status || 'unknown',
-        } as any);
-
-      if (logError) console.error('Error logging rejection:', logError);
+      await supabase.from('shipment_rejection_log').insert({
+        shipment_id: selectedReceipt.shipment_id,
+        receipt_id: selectedReceipt.id,
+        rejected_by_organization_id: organization?.id,
+        rejected_by_user_id: profile?.id,
+        rejection_reason: rejectionReason,
+        rejection_type: 'transporter_delivery_rejection',
+        shipment_status_before: selectedReceipt.status || 'unknown',
+      } as any);
 
       toast.success('تم رفض شهادة التسليم وتسجيلها في سجل المرفوضات');
       setRejectDialogOpen(false);
       setRejectionReason('');
       setSelectedReceipt(null);
-      queryClient.invalidateQueries({ queryKey: ['pending-delivery-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
     } catch (error) {
       console.error('Error rejecting:', error);
       toast.error('حدث خطأ أثناء الرفض');
@@ -169,105 +502,182 @@ const TransporterDeliveryApproval = () => {
     }
   };
 
+  const openReject = (receipt: EnrichedReceipt) => {
+    setSelectedReceipt(receipt);
+    setRejectDialogOpen(true);
+  };
+
   if (isLoading) {
     return (
       <Card>
-        <CardHeader><Skeleton className="h-6 w-48" /></CardHeader>
-        <CardContent><Skeleton className="h-20 w-full" /></CardContent>
+        <CardHeader><Skeleton className="h-6 w-64" /></CardHeader>
+        <CardContent className="space-y-3">
+          <Skeleton className="h-24 w-full" />
+          <Skeleton className="h-24 w-full" />
+        </CardContent>
       </Card>
     );
   }
 
-  if (pendingReceipts.length === 0) return null;
+  if (allReceipts.length === 0) return null;
+
+  const tabItems = [
+    { value: 'pending', label: 'بانتظار الموافقة', count: stats.pending, icon: Clock, color: 'text-amber-600' },
+    { value: 'approved', label: 'تمت الموافقة', count: stats.approved, icon: CheckCircle2, color: 'text-emerald-600' },
+    { value: 'auto_approved', label: 'موافقة تلقائية', count: stats.autoApproved, icon: Zap, color: 'text-blue-600' },
+    { value: 'rejected', label: 'مرفوض', count: stats.rejected, icon: Ban, color: 'text-destructive' },
+  ];
+
+  const currentList =
+    activeTab === 'pending' ? categorized.pending :
+    activeTab === 'approved' ? categorized.approved :
+    activeTab === 'auto_approved' ? categorized.autoApproved :
+    categorized.rejected;
 
   return (
     <>
-      <Card className="border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20">
+      <Card className="border-primary/20">
         <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Timer className="w-5 h-5 text-amber-600" />
-            شهادات تسليم بانتظار موافقتك
-            <Badge variant="destructive">{pendingReceipts.length}</Badge>
-          </CardTitle>
-          <CardDescription>
-            شهادات تسليم صادرة من المولدين تحتاج موافقتك - ستتم الموافقة تلقائياً عند انقضاء المهلة
-          </CardDescription>
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] })}
+                    >
+                      <RefreshCcw className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>تحديث</TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+              {stats.pending > 1 && activeTab === 'pending' && (
+                <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={handleBulkApprove} disabled={isSubmitting}>
+                  <CheckCheck className="w-3 h-3" />
+                  قبول الكل ({stats.pending})
+                </Button>
+              )}
+            </div>
+            <div className="text-right">
+              <CardTitle className="text-base flex items-center gap-2 justify-end">
+                <Shield className="w-5 h-5 text-primary" />
+                مركز موافقات شهادات التسليم
+                {stats.pending > 0 && <Badge variant="destructive">{stats.pending}</Badge>}
+                {stats.urgentCount > 0 && (
+                  <Badge className="bg-red-600 text-white animate-pulse gap-1 text-[10px]">
+                    <AlertTriangle className="w-3 h-3" />
+                    {stats.urgentCount} عاجل
+                  </Badge>
+                )}
+              </CardTitle>
+              <CardDescription className="text-right">
+                إدارة ومتابعة شهادات التسليم الصادرة من المولدين • تحديث لحظي • موافقة تلقائية بعد 15 دقيقة
+              </CardDescription>
+            </div>
+          </div>
+
+          {/* Stats Bar */}
+          <div className="grid grid-cols-4 gap-2 mt-3">
+            {tabItems.map(tab => {
+              const Icon = tab.icon;
+              return (
+                <button
+                  key={tab.value}
+                  onClick={() => setActiveTab(tab.value)}
+                  className={`rounded-lg p-2.5 text-center transition-all border ${
+                    activeTab === tab.value
+                      ? 'bg-primary/10 border-primary/30 shadow-sm'
+                      : 'bg-muted/30 border-transparent hover:bg-muted/50'
+                  }`}
+                >
+                  <Icon className={`w-4 h-4 mx-auto mb-1 ${tab.color}`} />
+                  <div className="text-lg font-bold">{tab.count}</div>
+                  <div className="text-[10px] text-muted-foreground leading-tight">{tab.label}</div>
+                </button>
+              );
+            })}
+          </div>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {pendingReceipts.map((receipt: any) => {
-            const deadline = receipt.transporter_approval_deadline
-              ? new Date(receipt.transporter_approval_deadline)
-              : null;
-            const timeLeft = deadline
-              ? formatDistanceToNow(deadline, { locale: ar, addSuffix: true })
-              : '';
 
-            return (
-              <Card key={receipt.id} className="border-amber-200 dark:border-amber-800">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between gap-3">
-                    {/* Actions */}
-                    <div className="flex items-center gap-2 shrink-0">
-                      <Button
-                        size="sm"
-                        onClick={() => handleApprove(receipt)}
-                        disabled={isSubmitting}
-                        className="gap-1"
-                      >
-                        <CheckCircle2 className="w-4 h-4" />
-                        قبول
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="destructive"
-                        onClick={() => {
-                          setSelectedReceipt(receipt);
-                          setRejectDialogOpen(true);
-                        }}
-                        disabled={isSubmitting}
-                        className="gap-1"
-                      >
-                        <XCircle className="w-4 h-4" />
-                        رفض
-                      </Button>
-                    </div>
+        <CardContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab}>
+            <TabsList className="w-full grid grid-cols-4 mb-3">
+              {tabItems.map(tab => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger key={tab.value} value={tab.value} className="text-xs gap-1">
+                    <Icon className="w-3 h-3" />
+                    {tab.label}
+                    {tab.count > 0 && (
+                      <Badge variant="secondary" className="text-[10px] h-4 px-1 mr-1">{tab.count}</Badge>
+                    )}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
 
-                    {/* Details */}
-                    <div className="flex-1 text-right space-y-1.5">
-                      <div className="flex items-center gap-2 justify-end flex-wrap">
-                        <Badge variant="outline" className="font-mono text-xs">
-                          {receipt.receipt_number}
-                        </Badge>
-                        {receipt.shipment?.shipment_number && (
-                          <Badge variant="secondary" className="text-xs">
-                            {receipt.shipment.shipment_number}
-                          </Badge>
+            {/* Content for each tab */}
+            {['pending', 'approved', 'auto_approved', 'rejected'].map(tabValue => (
+              <TabsContent key={tabValue} value={tabValue}>
+                <ScrollArea className="max-h-[500px]">
+                  <AnimatePresence mode="popLayout">
+                    {currentList.length === 0 ? (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="text-center py-8 text-muted-foreground"
+                      >
+                        {tabValue === 'pending' && (
+                          <div className="space-y-2">
+                            <Sparkles className="w-8 h-8 mx-auto text-emerald-500" />
+                            <p className="text-sm font-medium">لا توجد شهادات بانتظار موافقتك</p>
+                            <p className="text-xs">سيتم إعلامك فوراً عند وصول شهادة جديدة</p>
+                          </div>
                         )}
-                        <span className="font-semibold text-sm">
-                          {receipt.generator_name || 'مولد غير محدد'}
-                        </span>
+                        {tabValue === 'approved' && <p className="text-sm">لا توجد شهادات تمت الموافقة عليها يدوياً حديثاً</p>}
+                        {tabValue === 'auto_approved' && (
+                          <div className="space-y-2">
+                            <Zap className="w-8 h-8 mx-auto text-blue-500" />
+                            <p className="text-sm">لا توجد موافقات تلقائية حديثة</p>
+                            <p className="text-xs">تتم الموافقة التلقائية بعد انقضاء 15 دقيقة من الإصدار</p>
+                          </div>
+                        )}
+                        {tabValue === 'rejected' && <p className="text-sm">لا توجد شهادات مرفوضة</p>}
+                      </motion.div>
+                    ) : (
+                      <div className="space-y-3">
+                        {currentList.map(receipt => (
+                          <CertificateCard
+                            key={receipt.id}
+                            receipt={receipt}
+                            onApprove={handleApprove}
+                            onReject={openReject}
+                            isSubmitting={isSubmitting}
+                            showActions={tabValue === 'pending'}
+                            variant={tabValue as any}
+                          />
+                        ))}
                       </div>
+                    )}
+                  </AnimatePresence>
+                </ScrollArea>
 
-                      <div className="flex items-center gap-3 text-xs text-muted-foreground flex-wrap justify-end">
-                        {receipt.waste_type && <span>النوع: {receipt.waste_type}</span>}
-                        {receipt.actual_weight && <span>الكمية: {receipt.actual_weight} كجم</span>}
-                        <span>
-                          التاريخ: {format(new Date(receipt.created_at), 'dd/MM/yyyy hh:mm a', { locale: ar })}
-                        </span>
-                      </div>
-
-                      {deadline && (
-                        <div className="flex items-center gap-1.5 text-xs text-amber-600 dark:text-amber-400 justify-end">
-                          <Clock className="w-3 h-3" />
-                          <span>الموافقة التلقائية {timeLeft}</span>
-                        </div>
-                      )}
-                    </div>
+                {/* Auto-hide notice for approved tabs */}
+                {(tabValue === 'approved' || tabValue === 'auto_approved') && currentList.length > 0 && (
+                  <div className="mt-3 text-center">
+                    <Badge variant="outline" className="text-[10px] gap-1">
+                      <Eye className="w-3 h-3" />
+                      تختفي الشهادات المعتمدة تلقائياً بعد {AUTO_HIDE_MINUTES} دقائق من المشاهدة
+                    </Badge>
                   </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+                )}
+              </TabsContent>
+            ))}
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -280,7 +690,7 @@ const TransporterDeliveryApproval = () => {
               رفض شهادة التسليم
             </DialogTitle>
             <DialogDescription>
-              سيتم تسجيل الرفض في سجل المرفوضات وتجنيب الشحنة من السجل الفعال
+              سيتم تسجيل الرفض في سجل المرفوضات وإرسال إشعار للمولد
             </DialogDescription>
           </DialogHeader>
 
@@ -293,7 +703,7 @@ const TransporterDeliveryApproval = () => {
                     <span className="font-medium">{selectedReceipt.generator_name}</span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    الكمية: {selectedReceipt.actual_weight} كجم | النوع: {selectedReceipt.waste_type || '-'}
+                    الوزن: {selectedReceipt.actual_weight} {selectedReceipt.unit || 'كجم'} | النوع: {selectedReceipt.waste_type || '-'}
                   </div>
                 </CardContent>
               </Card>
@@ -305,7 +715,7 @@ const TransporterDeliveryApproval = () => {
                 <Textarea
                   value={rejectionReason}
                   onChange={(e) => setRejectionReason(e.target.value)}
-                  placeholder="مثال: تم تحميل الشحنة وإفراغها في نفس الموقع، لم تتم عملية النقل فعلياً..."
+                  placeholder="مثال: لم تتم عملية النقل فعلياً، بيانات غير متطابقة..."
                   dir="rtl"
                   rows={4}
                 />
@@ -314,18 +724,12 @@ const TransporterDeliveryApproval = () => {
           )}
 
           <DialogFooter className="gap-2">
-            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} disabled={isSubmitting}>
-              إلغاء
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleReject}
-              disabled={isSubmitting || !rejectionReason.trim()}
-            >
+            <Button variant="outline" onClick={() => setRejectDialogOpen(false)} disabled={isSubmitting}>إلغاء</Button>
+            <Button variant="destructive" onClick={handleReject} disabled={isSubmitting || !rejectionReason.trim()}>
               {isSubmitting ? (
                 <><Loader2 className="w-4 h-4 ml-2 animate-spin" />جاري الرفض...</>
               ) : (
-                <><XCircle className="w-4 h-4 ml-2" />تأكيد الرفض وتجنيب الشحنة</>
+                <><XCircle className="w-4 h-4 ml-2" />تأكيد الرفض</>
               )}
             </Button>
           </DialogFooter>
