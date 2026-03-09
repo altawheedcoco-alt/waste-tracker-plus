@@ -190,7 +190,7 @@ const SaaSTechSection = memo(() => {
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/0 group-hover:via-primary/60 to-transparent transition-all duration-500" />
 
               {/* Icon with pulse ring */}
-              <div className="relative w-14 h-14 mb-5">
+              <div className="relative w-11 h-11 sm:w-14 sm:h-14 mb-3 sm:mb-5">
                 <div className="absolute inset-0 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors" />
                 <div className="absolute inset-0 rounded-xl ring-2 ring-primary/0 group-hover:ring-primary/20 group-hover:animate-pulse transition-all" />
                 <div className="relative w-full h-full rounded-xl flex items-center justify-center">
