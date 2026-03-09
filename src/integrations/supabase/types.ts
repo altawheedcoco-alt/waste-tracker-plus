@@ -23365,14 +23365,19 @@ export type Database = {
       organization_positions: {
         Row: {
           assigned_user_id: string | null
+          auto_email: string | null
           created_at: string
           department_id: string
           description: string | null
           description_ar: string | null
+          holder_name: string | null
+          holder_national_id: string | null
+          holder_phone: string | null
           id: string
           is_active: boolean | null
           level: number | null
           max_holders: number | null
+          operator_type: string
           organization_id: string
           permissions: Json | null
           reports_to_position_id: string | null
@@ -23383,14 +23388,19 @@ export type Database = {
         }
         Insert: {
           assigned_user_id?: string | null
+          auto_email?: string | null
           created_at?: string
           department_id: string
           description?: string | null
           description_ar?: string | null
+          holder_name?: string | null
+          holder_national_id?: string | null
+          holder_phone?: string | null
           id?: string
           is_active?: boolean | null
           level?: number | null
           max_holders?: number | null
+          operator_type?: string
           organization_id: string
           permissions?: Json | null
           reports_to_position_id?: string | null
@@ -23401,14 +23411,19 @@ export type Database = {
         }
         Update: {
           assigned_user_id?: string | null
+          auto_email?: string | null
           created_at?: string
           department_id?: string
           description?: string | null
           description_ar?: string | null
+          holder_name?: string | null
+          holder_national_id?: string | null
+          holder_phone?: string | null
           id?: string
           is_active?: boolean | null
           level?: number | null
           max_holders?: number | null
+          operator_type?: string
           organization_id?: string
           permissions?: Json | null
           reports_to_position_id?: string | null
