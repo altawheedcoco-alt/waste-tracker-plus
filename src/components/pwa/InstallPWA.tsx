@@ -65,9 +65,9 @@ export const InstallPWA = () => {
           animate={{ y: 0, opacity: 1 }}
           exit={{ y: 100, opacity: 0 }}
           transition={{ type: 'spring', damping: 25 }}
-          className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md"
+          className="fixed bottom-4 left-3 right-3 z-50 mx-auto max-w-md sm:left-4 sm:right-4"
         >
-          <div className="bg-card border border-border rounded-2xl shadow-2xl p-4 backdrop-blur-sm">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl p-3 sm:p-4 backdrop-blur-sm">
             <div className="flex items-start gap-3">
               <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Smartphone className="w-6 h-6 text-primary" />

@@ -127,7 +127,7 @@ const SaaSTechSection = memo(() => {
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
           </motion.div>
 
-          <h2 className="text-3xl sm:text-5xl lg:text-6xl font-black text-foreground mb-5 leading-tight">
+          <h2 className="text-2xl sm:text-5xl lg:text-6xl font-black text-foreground mb-4 sm:mb-5 leading-tight">
             {isAr ? (
               <>
                 ليست مجرد منصة...
@@ -143,7 +143,7 @@ const SaaSTechSection = memo(() => {
             )}
           </h2>
 
-          <p className="text-base sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed">
+          <p className="text-sm sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed px-2">
             {isAr
               ? "نقدم حلولاً برمجية تقنية (SaaS) لإدارة المخلفات بأساليب ذكية ومتطورة — مبنية على أحدث تقنيات الحوسبة السحابية والذكاء الاصطناعي والتشفير المتقدم"
               : "We deliver SaaS solutions for waste management powered by cutting-edge cloud computing, AI, and advanced encryption technologies"}
@@ -176,7 +176,7 @@ const SaaSTechSection = memo(() => {
         </motion.div>
 
         {/* Tech Pillars Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 max-w-6xl mx-auto">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6 max-w-6xl mx-auto">
           {techPillars.map((pillar, index) => (
             <motion.div
               key={pillar.titleAr}
@@ -184,25 +184,25 @@ const SaaSTechSection = memo(() => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.5 }}
-              className="group relative bg-card/80 backdrop-blur-sm border border-border/50 rounded-2xl p-6 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-2"
+              className="group relative bg-card/80 backdrop-blur-sm border border-border/50 rounded-xl sm:rounded-2xl p-4 sm:p-6 hover:border-primary/40 hover:shadow-2xl hover:shadow-primary/5 transition-all duration-500 hover:-translate-y-2"
             >
               {/* Glowing top border on hover */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/2 h-px bg-gradient-to-r from-transparent via-primary/0 group-hover:via-primary/60 to-transparent transition-all duration-500" />
 
               {/* Icon with pulse ring */}
-              <div className="relative w-14 h-14 mb-5">
+              <div className="relative w-11 h-11 sm:w-14 sm:h-14 mb-3 sm:mb-5">
                 <div className="absolute inset-0 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors" />
                 <div className="absolute inset-0 rounded-xl ring-2 ring-primary/0 group-hover:ring-primary/20 group-hover:animate-pulse transition-all" />
                 <div className="relative w-full h-full rounded-xl flex items-center justify-center">
-                  <pillar.icon className="w-7 h-7 text-primary" />
+                  <pillar.icon className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
                 </div>
               </div>
 
               {/* Content */}
-              <h3 className="text-lg font-black text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-base sm:text-lg font-black text-foreground mb-1.5 sm:mb-2 group-hover:text-primary transition-colors">
                 {isAr ? pillar.titleAr : pillar.titleEn}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-3 sm:mb-4">
                 {isAr ? pillar.descAr : pillar.descEn}
               </p>
 
