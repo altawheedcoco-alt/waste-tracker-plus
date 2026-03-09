@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -8,50 +8,36 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
-  Building2, 
-  User, 
-  FileText, 
-  Upload, 
-  Trash2, 
-  Download,
-  Phone,
-  Mail,
-  MapPin,
-  Shield,
-  Users,
-  Loader2,
-  Save,
-  CheckCircle,
-  XCircle,
-  Stamp,
-  PenSquare,
-  Target,
-  Briefcase,
-  Award,
-  Globe,
-  Share2
+  Building2, User, FileText, Upload, Trash2, Download,
+  Phone, Mail, MapPin, Shield, Users, Loader2, Save,
+  Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2
 } from 'lucide-react';
-import OrganizationPosts from '@/components/organization/OrganizationPosts';
-import StampSignatureUpload from '@/components/organization/StampSignatureUpload';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import ProfileHeader from '@/components/organization/ProfileHeader';
 import BackButton from '@/components/ui/back-button';
-import OrganizationPortfolio from '@/components/organization/OrganizationPortfolio';
-import { OrganizationSignatureSettings } from '@/components/signature';
-import BiometricManager from '@/components/biometric/BiometricManager';
-import LocationSettings from '@/components/organization/LocationSettings';
-import OrganizationPhotoGallery from '@/components/organization/OrganizationPhotoGallery';
-import BusinessProfileView from '@/components/organization/BusinessProfileView';
-import BusinessProfileSettings from '@/components/organization/BusinessProfileSettings';
-import LMSProfileCertificates from '@/components/lms/LMSProfileCertificates';
 import LegalDataSection from '@/components/organization/LegalDataSection';
-import AttestationTabContent from '@/components/attestation/AttestationTabContent';
-import BusinessPagePreview from '@/components/organization/BusinessPagePreview';
-import OrgPublicProfileSettings from '@/components/org-structure/OrgPublicProfileSettings';
+
+// Lazy load heavy tab components
+const BusinessPagePreview = lazy(() => import('@/components/organization/BusinessPagePreview'));
+const OrgPublicProfileSettings = lazy(() => import('@/components/org-structure/OrgPublicProfileSettings'));
+const OrganizationPortfolio = lazy(() => import('@/components/organization/OrganizationPortfolio'));
+const BusinessProfileSettings = lazy(() => import('@/components/organization/BusinessProfileSettings'));
+const OrganizationPosts = lazy(() => import('@/components/organization/OrganizationPosts'));
+const LocationSettings = lazy(() => import('@/components/organization/LocationSettings'));
+const OrganizationPhotoGallery = lazy(() => import('@/components/organization/OrganizationPhotoGallery'));
+const BusinessProfileView = lazy(() => import('@/components/organization/BusinessProfileView'));
+const StampSignatureUpload = lazy(() => import('@/components/organization/StampSignatureUpload'));
+const BiometricManager = lazy(() => import('@/components/biometric/BiometricManager'));
+const OrganizationSignatureSettings = lazy(() => import('@/components/signature').then(m => ({ default: m.OrganizationSignatureSettings })));
+const LMSProfileCertificates = lazy(() => import('@/components/lms/LMSProfileCertificates'));
+const AttestationTabContent = lazy(() => import('@/components/attestation/AttestationTabContent'));
 
 interface OrganizationDocument {
   id: string;
@@ -63,10 +49,35 @@ interface OrganizationDocument {
   created_at: string;
 }
 
+const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
+
+const PREF_KEY_ACTIVE_TAB = 'org_profile_active_tab';
+
+// Tab configuration — ordered by logical groups
+const ORG_PROFILE_TABS: TabItem[] = [
+  // الهوية والعرض
+  { value: 'page', label: 'الصفحة التجارية', icon: Globe },
+  { value: 'portfolio', label: 'البورتفوليو', icon: Target },
+  { value: 'business', label: 'الملف التجاري', icon: Briefcase },
+  { value: 'posts', label: 'المنشورات', icon: PenSquare },
+  // البيانات الأساسية
+  { value: 'basic', label: 'البيانات الأساسية', icon: Building2 },
+  { value: 'representatives', label: 'الممثلون', icon: Users },
+  { value: 'contact', label: 'التواصل', icon: Phone },
+  { value: 'location', label: 'الموقع والصور', icon: MapPin },
+  // الوثائق والتوثيق
+  { value: 'documents', label: 'الوثائق', icon: FileText },
+  { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp },
+  { value: 'certificates', label: 'الشهادات', icon: Award },
+  { value: 'attestation', label: 'الإفادة', icon: Shield },
+  { value: 'sharing', label: 'المشاركة', icon: Share2 },
+];
+
 const OrganizationProfile = () => {
   const { user, organization, profile, roles, refreshProfile } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { getPref, setPref } = useUserPreferences();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -74,42 +85,23 @@ const OrganizationProfile = () => {
   const [orgData, setOrgData] = useState<any>(null);
 
   const isCompanyAdmin = roles.includes('company_admin') || roles.includes('admin');
+  const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'page');
 
   useEffect(() => {
-    if (!user) {
-      navigate('/auth');
-      return;
-    }
+    if (!user) { navigate('/auth'); return; }
     fetchOrganizationData();
   }, [user, organization]);
 
   const fetchOrganizationData = async () => {
-    if (!organization?.id) {
-      setLoading(false);
-      return;
-    }
-
+    if (!organization?.id) { setLoading(false); return; }
     try {
-      // Fetch full organization data
-      const { data: orgDetails, error: orgError } = await supabase
-        .from('organizations')
-        .select('*')
-        .eq('id', organization.id)
-        .single();
-
+      const [{ data: orgDetails, error: orgError }, { data: docs, error: docsError }] = await Promise.all([
+        supabase.from('organizations').select('*').eq('id', organization.id).single(),
+        supabase.from('organization_documents').select('*').eq('organization_id', organization.id).order('created_at', { ascending: false }),
+      ]);
       if (orgError) throw orgError;
       setOrgData(orgDetails);
-
-      // Fetch documents
-      const { data: docs, error: docsError } = await supabase
-        .from('organization_documents')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .order('created_at', { ascending: false });
-
-      if (!docsError && docs) {
-        setDocuments(docs as OrganizationDocument[]);
-      }
+      if (!docsError && docs) setDocuments(docs as OrganizationDocument[]);
     } catch (error) {
       console.error('Error fetching organization data:', error);
       toast.error(t('orgProfile.dataLoadError'));
@@ -120,48 +112,30 @@ const OrganizationProfile = () => {
 
   const handleSave = async () => {
     if (!organization?.id || !isCompanyAdmin) return;
-
     setSaving(true);
     try {
       const { error } = await supabase
         .from('organizations')
         .update({
-          name: orgData.name,
-          name_en: orgData.name_en,
-          email: orgData.email,
-          phone: orgData.phone,
-          secondary_phone: orgData.secondary_phone,
-          address: orgData.address,
-          city: orgData.city,
-          region: orgData.region,
-          commercial_register: orgData.commercial_register,
-          environmental_license: orgData.environmental_license,
-          activity_type: orgData.activity_type,
-          production_capacity: orgData.production_capacity,
-          representative_name: orgData.representative_name,
-          representative_national_id: orgData.representative_national_id,
-          representative_phone: orgData.representative_phone,
-          representative_email: orgData.representative_email,
+          name: orgData.name, name_en: orgData.name_en, email: orgData.email,
+          phone: orgData.phone, secondary_phone: orgData.secondary_phone,
+          address: orgData.address, city: orgData.city, region: orgData.region,
+          commercial_register: orgData.commercial_register, environmental_license: orgData.environmental_license,
+          activity_type: orgData.activity_type, production_capacity: orgData.production_capacity,
+          representative_name: orgData.representative_name, representative_national_id: orgData.representative_national_id,
+          representative_phone: orgData.representative_phone, representative_email: orgData.representative_email,
           representative_position: orgData.representative_position,
-          delegate_name: orgData.delegate_name,
-          delegate_national_id: orgData.delegate_national_id,
-          delegate_phone: orgData.delegate_phone,
-          delegate_email: orgData.delegate_email,
-          agent_name: orgData.agent_name,
-          agent_national_id: orgData.agent_national_id,
-          agent_phone: orgData.agent_phone,
-          agent_email: orgData.agent_email,
-          // الحقول الجديدة
-          tax_card: orgData.tax_card,
-          wmra_license: orgData.wmra_license,
+          delegate_name: orgData.delegate_name, delegate_national_id: orgData.delegate_national_id,
+          delegate_phone: orgData.delegate_phone, delegate_email: orgData.delegate_email,
+          agent_name: orgData.agent_name, agent_national_id: orgData.agent_national_id,
+          agent_phone: orgData.agent_phone, agent_email: orgData.agent_email,
+          tax_card: orgData.tax_card, wmra_license: orgData.wmra_license,
           establishment_registration: orgData.establishment_registration,
           registered_activity: orgData.registered_activity,
           environmental_approval_number: orgData.environmental_approval_number,
           land_transport_license: orgData.land_transport_license,
-          ida_license: orgData.ida_license,
-          industrial_registry: orgData.industrial_registry,
+          ida_license: orgData.ida_license, industrial_registry: orgData.industrial_registry,
           license_number: orgData.license_number,
-          // تواريخ التراخيص
           wmra_license_issue_date: orgData.wmra_license_issue_date || null,
           wmra_license_expiry_date: orgData.wmra_license_expiry_date || null,
           eeaa_license_issue_date: orgData.eeaa_license_issue_date || null,
@@ -173,26 +147,17 @@ const OrganizationProfile = () => {
           digital_declaration_number: orgData.digital_declaration_number,
           certifications_approvals: orgData.certifications_approvals || [],
           hazardous_certified: orgData.hazardous_certified,
-          location_url: orgData.location_url,
-          address_details: orgData.address_details,
-          location_description: orgData.location_description,
-          working_hours: orgData.working_hours,
+          location_url: orgData.location_url, address_details: orgData.address_details,
+          location_description: orgData.location_description, working_hours: orgData.working_hours,
           is_location_public: orgData.is_location_public,
-          location_lat: orgData.location_lat,
-          location_lng: orgData.location_lng,
-          bio: orgData.bio,
-          website_url: orgData.website_url,
-          price_range: orgData.price_range,
-          cta_type: orgData.cta_type,
-          services: orgData.services,
-          founded_year: orgData.founded_year,
-          business_email: orgData.business_email,
-          social_links: orgData.social_links,
+          location_lat: orgData.location_lat, location_lng: orgData.location_lng,
+          bio: orgData.bio, website_url: orgData.website_url,
+          price_range: orgData.price_range, cta_type: orgData.cta_type,
+          services: orgData.services, founded_year: orgData.founded_year,
+          business_email: orgData.business_email, social_links: orgData.social_links,
         })
         .eq('id', organization.id);
-
       if (error) throw error;
-      
       toast.success(t('orgProfile.dataSaved'));
       await refreshProfile();
     } catch (error) {
@@ -206,47 +171,21 @@ const OrganizationProfile = () => {
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>, documentType: string) => {
     const file = event.target.files?.[0];
     if (!file || !organization?.id || !user) return;
-
-    // Validate file type
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error(t('orgProfile.unsupportedFileType'));
-      return;
-    }
-
-    // Validate file size (10MB)
-    if (file.size > 10 * 1024 * 1024) {
-      toast.error(t('orgProfile.fileTooLarge'));
-      return;
-    }
-
+    if (!allowedTypes.includes(file.type)) { toast.error(t('orgProfile.unsupportedFileType')); return; }
+    if (file.size > 10 * 1024 * 1024) { toast.error(t('orgProfile.fileTooLarge')); return; }
     setUploading(true);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${documentType}_${Date.now()}.${fileExt}`;
       const filePath = `${organization.id}/${fileName}`;
-
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('organization-documents')
-        .upload(filePath, file);
-
+      const { error: uploadError } = await supabase.storage.from('organization-documents').upload(filePath, file);
       if (uploadError) throw uploadError;
-
-      // Save document record
-      const { error: dbError } = await supabase
-        .from('organization_documents')
-        .insert({
-          organization_id: organization.id,
-          document_type: documentType,
-          file_name: file.name,
-          file_path: filePath,
-          file_size: file.size,
-          uploaded_by: user.id,
-        });
-
+      const { error: dbError } = await supabase.from('organization_documents').insert({
+        organization_id: organization.id, document_type: documentType,
+        file_name: file.name, file_path: filePath, file_size: file.size, uploaded_by: user.id,
+      });
       if (dbError) throw dbError;
-
       toast.success(t('orgProfile.fileUploaded'));
       fetchOrganizationData();
     } catch (error) {
@@ -259,21 +198,10 @@ const OrganizationProfile = () => {
 
   const handleDeleteDocument = async (doc: OrganizationDocument) => {
     if (!isCompanyAdmin) return;
-
     try {
-      // Delete from storage
-      await supabase.storage
-        .from('organization-documents')
-        .remove([doc.file_path]);
-
-      // Delete record
-      const { error } = await supabase
-        .from('organization_documents')
-        .delete()
-        .eq('id', doc.id);
-
+      await supabase.storage.from('organization-documents').remove([doc.file_path]);
+      const { error } = await supabase.from('organization_documents').delete().eq('id', doc.id);
       if (error) throw error;
-
       toast.success(t('orgProfile.fileDeleted'));
       setDocuments(documents.filter(d => d.id !== doc.id));
     } catch (error) {
@@ -284,17 +212,11 @@ const OrganizationProfile = () => {
 
   const handleDownloadDocument = async (doc: OrganizationDocument) => {
     try {
-      const { data, error } = await supabase.storage
-        .from('organization-documents')
-        .download(doc.file_path);
-
+      const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
       if (error) throw error;
-
       const url = URL.createObjectURL(data);
       const a = document.createElement('a');
-      a.href = url;
-      a.download = doc.file_name;
-      a.click();
+      a.href = url; a.download = doc.file_name; a.click();
       URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading document:', error);
@@ -302,24 +224,12 @@ const OrganizationProfile = () => {
     }
   };
 
-  const getOrganizationTypeLabel = (type: string) => {
-    switch (type) {
-      case 'generator': return t('orgProfile.generatorType');
-      case 'transporter': return t('orgProfile.transporterType');
-      case 'recycler': return t('orgProfile.recyclerType');
-      default: return type;
-    }
-  };
-
   const getDocumentTypeLabel = (type: string) => {
-    switch (type) {
-      case 'commercial_register': return 'السجل التجاري';
-      case 'environmental_license': return 'الترخيص البيئي';
-      case 'representative_id': return 'هوية الممثل القانوني';
-      case 'delegate_authorization': return 'تفويض المفوض';
-      case 'other': return 'مستند آخر';
-      default: return type;
-    }
+    const map: Record<string, string> = {
+      commercial_register: 'السجل التجاري', environmental_license: 'الترخيص البيئي',
+      representative_id: 'هوية الممثل القانوني', delegate_authorization: 'تفويض المفوض', other: 'مستند آخر',
+    };
+    return map[type] || type;
   };
 
   if (loading) {
@@ -346,201 +256,113 @@ const OrganizationProfile = () => {
     );
   }
 
+  const SaveButton = () => isCompanyAdmin ? (
+    <div className="flex justify-end pt-2">
+      <Button onClick={handleSave} disabled={saving}>
+        {saving ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
+        حفظ التغييرات
+      </Button>
+    </div>
+  ) : null;
+
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Back Button */}
         <BackButton />
 
-        {/* Profile Header with Cover and Logo */}
+        {/* Profile Header */}
         <Card className="overflow-hidden p-0">
           <ProfileHeader
             organization={{
-              id: organization.id,
-              name: organization.name,
-              name_en: orgData?.name_en,
-              organization_type: organization.organization_type,
-              logo_url: orgData?.logo_url,
-              cover_url: orgData?.cover_url,
-              is_verified: organization.is_verified,
-              city: orgData?.city,
-              region: orgData?.region,
-              client_code: orgData?.client_code,
-              commercial_register: orgData?.commercial_register,
-              environmental_license: orgData?.environmental_license,
-              representative_name: orgData?.representative_name,
-              representative_national_id: orgData?.representative_national_id,
-              representative_phone: orgData?.representative_phone,
-              bio: orgData?.bio,
-              cta_type: orgData?.cta_type,
-              website_url: orgData?.website_url,
-              phone: orgData?.phone,
-              founded_year: orgData?.founded_year,
-              activity_type: orgData?.activity_type,
+              id: organization.id, name: organization.name, name_en: orgData?.name_en,
+              organization_type: organization.organization_type, logo_url: orgData?.logo_url,
+              cover_url: orgData?.cover_url, is_verified: organization.is_verified,
+              city: orgData?.city, region: orgData?.region, client_code: orgData?.client_code,
+              commercial_register: orgData?.commercial_register, environmental_license: orgData?.environmental_license,
+              representative_name: orgData?.representative_name, representative_national_id: orgData?.representative_national_id,
+              representative_phone: orgData?.representative_phone, bio: orgData?.bio,
+              cta_type: orgData?.cta_type, website_url: orgData?.website_url,
+              phone: orgData?.phone, founded_year: orgData?.founded_year, activity_type: orgData?.activity_type,
             }}
             isEditable={isCompanyAdmin}
             onUpdate={fetchOrganizationData}
           />
         </Card>
 
-        <Tabs defaultValue="page" className="space-y-4" dir="rtl">
-          <div className="overflow-x-auto -mx-1 px-1 pb-2">
-            <TabsList className="inline-flex w-max min-w-full gap-1 h-auto p-1">
-              <TabsTrigger value="page" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                الصفحة التجارية
-              </TabsTrigger>
-              <TabsTrigger value="portfolio" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Target className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.portfolio')}
-              </TabsTrigger>
-              <TabsTrigger value="business" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Briefcase className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                الملف التجاري
-              </TabsTrigger>
-              <TabsTrigger value="posts" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <PenSquare className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.posts')}
-              </TabsTrigger>
-              <TabsTrigger value="location" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <MapPin className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                الموقع والصور
-              </TabsTrigger>
-              <TabsTrigger value="basic" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.basicData')}
-              </TabsTrigger>
-              <TabsTrigger value="representatives" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Users className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.representatives')}
-              </TabsTrigger>
-              <TabsTrigger value="stamps" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Stamp className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.stampSignature')}
-              </TabsTrigger>
-              <TabsTrigger value="documents" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.documents')}
-              </TabsTrigger>
-              <TabsTrigger value="contact" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                {t('orgProfile.contactTab')}
-              </TabsTrigger>
-              <TabsTrigger value="certificates" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                الشهادات
-              </TabsTrigger>
-              <TabsTrigger value="attestation" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Shield className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                الإفادة
-              </TabsTrigger>
-              <TabsTrigger value="sharing" className="whitespace-nowrap text-xs sm:text-sm px-2.5 sm:px-3 py-1.5">
-                <Share2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5" />
-                إعدادات المشاركة
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        {/* Tabs with V2TabsNav */}
+        <Tabs
+          value={activeTab}
+          onValueChange={(v) => setPref(PREF_KEY_ACTIVE_TAB, v)}
+          className="space-y-4"
+          dir="rtl"
+        >
+          <V2TabsNav tabs={ORG_PROFILE_TABS} />
 
-          {/* Business Page Preview Tab */}
+          {/* الصفحة التجارية */}
           <TabsContent value="page">
-            <BusinessPagePreview
-              organizationId={organization.id}
-              organizationName={organization.name}
-              orgData={orgData}
-              isOwnPage={true}
-            />
-          </TabsContent>
-
-          {/* Sharing Settings Tab */}
-          <TabsContent value="sharing">
-            <OrgPublicProfileSettings />
-          </TabsContent>
-
-          {/* Portfolio Tab */}
-          <TabsContent value="portfolio">
-            <OrganizationPortfolio
-              organizationId={organization.id}
-              organizationName={organization.name}
-              organizationType={organization.organization_type}
-              currentData={{
-                description: orgData?.description,
-                vision: orgData?.vision,
-                policy: orgData?.policy,
-                headquarters: orgData?.headquarters,
-                branches: orgData?.branches,
-                field_of_work: orgData?.field_of_work,
-                address: orgData?.address,
-                city: orgData?.city,
-                activity_type: orgData?.activity_type,
-              }}
-              isEditable={isCompanyAdmin}
-              onUpdate={fetchOrganizationData}
-            />
-          </TabsContent>
-
-          {/* Business Profile Tab */}
-          <TabsContent value="business">
-            <BusinessProfileSettings
-              organizationId={organization.id}
-              organizationType={organization.organization_type}
-              data={orgData}
-              isEditable={isCompanyAdmin}
-              onUpdate={fetchOrganizationData}
-            />
-          </TabsContent>
-
-          {/* Posts Tab */}
-          <TabsContent value="posts">
-            <OrganizationPosts
-              organizationId={organization.id}
-              organizationName={organization.name}
-              organizationLogo={orgData?.logo_url}
-              isOwnOrganization={true}
-            />
-          </TabsContent>
-
-          {/* Location & Photos Tab */}
-          <TabsContent value="location">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Settings Side (Edit) */}
-              <div className="space-y-6">
-                <LocationSettings
+            <ErrorBoundary fallbackTitle="خطأ في الصفحة التجارية">
+              <Suspense fallback={<TabFallback />}>
+                <BusinessPagePreview
                   organizationId={organization.id}
-                  data={{
-                    location_url: orgData?.location_url,
-                    address_details: orgData?.address_details,
-                    location_description: orgData?.location_description,
-                    working_hours: orgData?.working_hours,
-                    is_location_public: orgData?.is_location_public,
-                    location_lat: orgData?.location_lat,
-                    location_lng: orgData?.location_lng,
-                    address: orgData?.address,
-                    city: orgData?.city,
-                    region: orgData?.region,
+                  organizationName={organization.name}
+                  orgData={orgData}
+                  isOwnPage={true}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* البورتفوليو */}
+          <TabsContent value="portfolio">
+            <ErrorBoundary fallbackTitle="خطأ في البورتفوليو">
+              <Suspense fallback={<TabFallback />}>
+                <OrganizationPortfolio
+                  organizationId={organization.id}
+                  organizationName={organization.name}
+                  organizationType={organization.organization_type}
+                  currentData={{
+                    description: orgData?.description, vision: orgData?.vision,
+                    policy: orgData?.policy, headquarters: orgData?.headquarters,
+                    branches: orgData?.branches, field_of_work: orgData?.field_of_work,
+                    address: orgData?.address, city: orgData?.city, activity_type: orgData?.activity_type,
                   }}
                   isEditable={isCompanyAdmin}
                   onUpdate={fetchOrganizationData}
                 />
-                <OrganizationPhotoGallery
-                  organizationId={organization.id}
-                  isEditable={isCompanyAdmin}
-                />
-              </div>
-
-              {/* Preview Side (How others see it) */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-center">👁️ كيف يراك الآخرون</h3>
-                <BusinessProfileView
-                  organizationId={organization.id}
-                  organizationName={organization.name}
-                  orgData={orgData}
-                  isAuthorized={true}
-                />
-              </div>
-            </div>
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
-          {/* Basic Information Tab */}
+          {/* الملف التجاري */}
+          <TabsContent value="business">
+            <ErrorBoundary fallbackTitle="خطأ في الملف التجاري">
+              <Suspense fallback={<TabFallback />}>
+                <BusinessProfileSettings
+                  organizationId={organization.id}
+                  organizationType={organization.organization_type}
+                  data={orgData}
+                  isEditable={isCompanyAdmin}
+                  onUpdate={fetchOrganizationData}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* المنشورات */}
+          <TabsContent value="posts">
+            <ErrorBoundary fallbackTitle="خطأ في المنشورات">
+              <Suspense fallback={<TabFallback />}>
+                <OrganizationPosts
+                  organizationId={organization.id}
+                  organizationName={organization.name}
+                  organizationLogo={orgData?.logo_url}
+                  isOwnOrganization={true}
+                />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* البيانات الأساسية */}
           <TabsContent value="basic">
             <Card>
               <CardHeader>
@@ -551,24 +373,14 @@ const OrganizationProfile = () => {
                 <CardDescription>{t('orgProfile.basicDataDesc')}</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* البيانات الأساسية */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>{t('orgProfile.orgNameAr')}</Label>
-                    <Input
-                      value={orgData?.name || ''}
-                      onChange={(e) => setOrgData({ ...orgData, name: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
+                    <Input value={orgData?.name || ''} onChange={(e) => setOrgData({ ...orgData, name: e.target.value })} disabled={!isCompanyAdmin} />
                   </div>
                   <div className="space-y-2">
                     <Label>{t('orgProfile.orgNameEn')}</Label>
-                    <Input
-                      value={orgData?.name_en || ''}
-                      onChange={(e) => setOrgData({ ...orgData, name_en: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                      dir="ltr"
-                    />
+                    <Input value={orgData?.name_en || ''} onChange={(e) => setOrgData({ ...orgData, name_en: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" />
                   </div>
                   <div className="space-y-2">
                     <Label>{t('orgProfile.activityType')}</Label>
@@ -579,52 +391,19 @@ const OrganizationProfile = () => {
                       className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       <option value="">اختر نوع النشاط</option>
-                      <option value="تجاري">تجاري</option>
-                      <option value="صناعي">صناعي</option>
-                      <option value="خدمي">خدمي</option>
-                      <option value="زراعي">زراعي</option>
-                      <option value="حرفي">حرفي</option>
-                      <option value="مهني">مهني</option>
-                      <option value="صحي">صحي</option>
-                      <option value="تعليمي">تعليمي</option>
-                      <option value="سياحي">سياحي</option>
-                      <option value="عقاري">عقاري</option>
-                      <option value="لوجستي">لوجستي</option>
-                      <option value="تكنولوجي">تكنولوجي</option>
-                      <option value="بيئي">بيئي</option>
-                      <option value="إنشائي">إنشائي</option>
-                      <option value="تعديني">تعديني</option>
-                      <option value="غذائي">غذائي</option>
-                      <option value="بتروكيماوي">بتروكيماوي</option>
-                      <option value="حكومي">حكومي</option>
-                      <option value="غير ربحي">غير ربحي</option>
-                      <option value="مختلط">مختلط</option>
-                      <option value="أخرى">أخرى</option>
+                      {['تجاري','صناعي','خدمي','زراعي','حرفي','مهني','صحي','تعليمي','سياحي','عقاري','لوجستي','تكنولوجي','بيئي','إنشائي','تعديني','غذائي','بتروكيماوي','حكومي','غير ربحي','مختلط','أخرى'].map(v => (
+                        <option key={v} value={v}>{v}</option>
+                      ))}
                     </select>
                   </div>
                   <div className="space-y-2">
                     <Label>{t('orgProfile.productionCapacity')}</Label>
-                    <Input
-                      value={orgData?.production_capacity || ''}
-                      onChange={(e) => setOrgData({ ...orgData, production_capacity: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                    />
+                    <Input value={orgData?.production_capacity || ''} onChange={(e) => setOrgData({ ...orgData, production_capacity: e.target.value })} disabled={!isCompanyAdmin} />
                   </div>
                 </div>
-
                 <Separator />
-
-                {/* البيانات القانونية والتراخيص - مكون منفصل حسب نوع المنشأة */}
-                <LegalDataSection
-                  orgData={orgData}
-                  organizationType={organization.organization_type as string}
-                  isEditable={isCompanyAdmin}
-                  onUpdate={setOrgData}
-                />
-
+                <LegalDataSection orgData={orgData} organizationType={organization.organization_type as string} isEditable={isCompanyAdmin} onUpdate={setOrgData} />
                 <Separator />
-
-                {/* العنوان */}
                 <div className="space-y-4">
                   <h4 className="font-medium flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
@@ -633,249 +412,140 @@ const OrganizationProfile = () => {
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div className="space-y-2">
                       <Label>{t('orgProfile.city')}</Label>
-                      <Input
-                        value={orgData?.city || ''}
-                        onChange={(e) => setOrgData({ ...orgData, city: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
+                      <Input value={orgData?.city || ''} onChange={(e) => setOrgData({ ...orgData, city: e.target.value })} disabled={!isCompanyAdmin} />
                     </div>
                     <div className="space-y-2">
                       <Label>{t('orgProfile.region')}</Label>
-                      <Input
-                        value={orgData?.region || ''}
-                        onChange={(e) => setOrgData({ ...orgData, region: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
+                      <Input value={orgData?.region || ''} onChange={(e) => setOrgData({ ...orgData, region: e.target.value })} disabled={!isCompanyAdmin} />
                     </div>
                     <div className="space-y-2 md:col-span-3">
                       <Label>{t('orgProfile.detailedAddress')}</Label>
-                      <Input
-                        value={orgData?.address || ''}
-                        onChange={(e) => setOrgData({ ...orgData, address: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
+                      <Input value={orgData?.address || ''} onChange={(e) => setOrgData({ ...orgData, address: e.target.value })} disabled={!isCompanyAdmin} />
                     </div>
                   </div>
                 </div>
-
-                {isCompanyAdmin && (
-                  <div className="flex justify-end">
-                    <Button onClick={handleSave} disabled={saving}>
-                      {saving ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                      {t('orgProfile.saveChanges')}
-                    </Button>
-                  </div>
-                )}
+                <SaveButton />
               </CardContent>
             </Card>
           </TabsContent>
 
-          {/* Representatives Tab */}
+          {/* الممثلون */}
           <TabsContent value="representatives">
             <div className="space-y-4">
-              {/* Legal Representative */}
+              {/* الممثل القانوني */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Shield className="w-5 h-5" />
-                    الممثل القانوني
-                  </CardTitle>
+                  <CardTitle className="flex items-center gap-2"><Shield className="w-5 h-5" />الممثل القانوني</CardTitle>
                   <CardDescription>الشخص المخول قانونياً بتمثيل الجهة</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>الاسم الكامل</Label>
-                      <Input
-                        value={orgData?.representative_name || ''}
-                        onChange={(e) => setOrgData({ ...orgData, representative_name: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهوية الوطنية</Label>
-                      <Input
-                        value={orgData?.representative_national_id || ''}
-                        onChange={(e) => setOrgData({ ...orgData, representative_national_id: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>المنصب</Label>
-                      <Input
-                        value={orgData?.representative_position || ''}
-                        onChange={(e) => setOrgData({ ...orgData, representative_position: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهاتف</Label>
-                      <Input
-                        value={orgData?.representative_phone || ''}
-                        onChange={(e) => setOrgData({ ...orgData, representative_phone: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        dir="ltr"
-                      />
-                    </div>
-                    <div className="space-y-2 md:col-span-2">
-                      <Label>البريد الإلكتروني</Label>
-                      <Input
-                        value={orgData?.representative_email || ''}
-                        onChange={(e) => setOrgData({ ...orgData, representative_email: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        type="email"
-                        dir="ltr"
-                      />
-                    </div>
+                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.representative_name || ''} onChange={(e) => setOrgData({ ...orgData, representative_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.representative_national_id || ''} onChange={(e) => setOrgData({ ...orgData, representative_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>المنصب</Label><Input value={orgData?.representative_position || ''} onChange={(e) => setOrgData({ ...orgData, representative_position: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.representative_phone || ''} onChange={(e) => setOrgData({ ...orgData, representative_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
+                    <div className="space-y-2 md:col-span-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.representative_email || ''} onChange={(e) => setOrgData({ ...orgData, representative_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Delegate */}
+              {/* المفوض */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <User className="w-5 h-5" />
-                    المفوض
-                  </CardTitle>
+                  <CardTitle className="flex items-center gap-2"><User className="w-5 h-5" />المفوض</CardTitle>
                   <CardDescription>الشخص المفوض من قبل الممثل القانوني</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>الاسم الكامل</Label>
-                      <Input
-                        value={orgData?.delegate_name || ''}
-                        onChange={(e) => setOrgData({ ...orgData, delegate_name: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهوية الوطنية</Label>
-                      <Input
-                        value={orgData?.delegate_national_id || ''}
-                        onChange={(e) => setOrgData({ ...orgData, delegate_national_id: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهاتف</Label>
-                      <Input
-                        value={orgData?.delegate_phone || ''}
-                        onChange={(e) => setOrgData({ ...orgData, delegate_phone: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        dir="ltr"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>البريد الإلكتروني</Label>
-                      <Input
-                        value={orgData?.delegate_email || ''}
-                        onChange={(e) => setOrgData({ ...orgData, delegate_email: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        type="email"
-                        dir="ltr"
-                      />
-                    </div>
+                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.delegate_name || ''} onChange={(e) => setOrgData({ ...orgData, delegate_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.delegate_national_id || ''} onChange={(e) => setOrgData({ ...orgData, delegate_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.delegate_phone || ''} onChange={(e) => setOrgData({ ...orgData, delegate_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
+                    <div className="space-y-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.delegate_email || ''} onChange={(e) => setOrgData({ ...orgData, delegate_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* Agent */}
+              {/* الموكل */}
               <Card>
                 <CardHeader>
-                  <CardTitle className="flex items-center gap-2">
-                    <Users className="w-5 h-5" />
-                    الموكل
-                  </CardTitle>
+                  <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />الموكل</CardTitle>
                   <CardDescription>بيانات الموكل (إن وجد)</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label>الاسم الكامل</Label>
-                      <Input
-                        value={orgData?.agent_name || ''}
-                        onChange={(e) => setOrgData({ ...orgData, agent_name: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهوية الوطنية</Label>
-                      <Input
-                        value={orgData?.agent_national_id || ''}
-                        onChange={(e) => setOrgData({ ...orgData, agent_national_id: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>رقم الهاتف</Label>
-                      <Input
-                        value={orgData?.agent_phone || ''}
-                        onChange={(e) => setOrgData({ ...orgData, agent_phone: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        dir="ltr"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label>البريد الإلكتروني</Label>
-                      <Input
-                        value={orgData?.agent_email || ''}
-                        onChange={(e) => setOrgData({ ...orgData, agent_email: e.target.value })}
-                        disabled={!isCompanyAdmin}
-                        type="email"
-                        dir="ltr"
-                      />
-                    </div>
+                    <div className="space-y-2"><Label>الاسم الكامل</Label><Input value={orgData?.agent_name || ''} onChange={(e) => setOrgData({ ...orgData, agent_name: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهوية الوطنية</Label><Input value={orgData?.agent_national_id || ''} onChange={(e) => setOrgData({ ...orgData, agent_national_id: e.target.value })} disabled={!isCompanyAdmin} /></div>
+                    <div className="space-y-2"><Label>رقم الهاتف</Label><Input value={orgData?.agent_phone || ''} onChange={(e) => setOrgData({ ...orgData, agent_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" /></div>
+                    <div className="space-y-2"><Label>البريد الإلكتروني</Label><Input value={orgData?.agent_email || ''} onChange={(e) => setOrgData({ ...orgData, agent_email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" /></div>
                   </div>
                 </CardContent>
               </Card>
+              <SaveButton />
+            </div>
+          </TabsContent>
 
-              {isCompanyAdmin && (
-                <div className="flex justify-end">
-                  <Button onClick={handleSave} disabled={saving}>
-                    {saving ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                    حفظ التغييرات
-                  </Button>
+          {/* التواصل */}
+          <TabsContent value="contact">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Phone className="w-5 h-5" />بيانات التواصل</CardTitle>
+                <CardDescription>معلومات الاتصال بالجهة</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Mail className="w-4 h-4" />البريد الإلكتروني</Label>
+                    <Input value={orgData?.email || ''} onChange={(e) => setOrgData({ ...orgData, email: e.target.value })} disabled={!isCompanyAdmin} type="email" dir="ltr" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4" />رقم الهاتف الأساسي</Label>
+                    <Input value={orgData?.phone || ''} onChange={(e) => setOrgData({ ...orgData, phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" />
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2"><Phone className="w-4 h-4" />رقم الهاتف الثانوي</Label>
+                    <Input value={orgData?.secondary_phone || ''} onChange={(e) => setOrgData({ ...orgData, secondary_phone: e.target.value })} disabled={!isCompanyAdmin} dir="ltr" />
+                  </div>
                 </div>
-              )}
-            </div>
+                <SaveButton />
+              </CardContent>
+            </Card>
           </TabsContent>
 
-          {/* Stamps and Signatures Tab */}
-          <TabsContent value="stamps">
-            <div className="space-y-6">
-              {/* Upload Stamp and Signature Images */}
-              <StampSignatureUpload
-                organizationId={organization.id}
-                stampUrl={orgData?.stamp_url || null}
-                signatureUrl={orgData?.signature_url || null}
-                onUpdate={fetchOrganizationData}
-                disabled={!isCompanyAdmin}
-              />
-
-              {/* Biometric Authentication Manager */}
-              <BiometricManager />
-
-              {/* Signature Settings for Organization */}
-              {isCompanyAdmin && (
-                <OrganizationSignatureSettings />
-              )}
-            </div>
+          {/* الموقع والصور */}
+          <TabsContent value="location">
+            <ErrorBoundary fallbackTitle="خطأ في الموقع">
+              <Suspense fallback={<TabFallback />}>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-6">
+                    <LocationSettings
+                      organizationId={organization.id}
+                      data={{
+                        location_url: orgData?.location_url, address_details: orgData?.address_details,
+                        location_description: orgData?.location_description, working_hours: orgData?.working_hours,
+                        is_location_public: orgData?.is_location_public,
+                        location_lat: orgData?.location_lat, location_lng: orgData?.location_lng,
+                        address: orgData?.address, city: orgData?.city, region: orgData?.region,
+                      }}
+                      isEditable={isCompanyAdmin}
+                      onUpdate={fetchOrganizationData}
+                    />
+                    <OrganizationPhotoGallery organizationId={organization.id} isEditable={isCompanyAdmin} />
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold text-center">👁️ كيف يراك الآخرون</h3>
+                    <BusinessProfileView organizationId={organization.id} organizationName={organization.name} orgData={orgData} isAuthorized={true} />
+                  </div>
+                </div>
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
-          {/* Documents Tab */}
+          {/* الوثائق */}
           <TabsContent value="documents">
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <FileText className="w-5 h-5" />
-                  الوثائق والمستندات
-                </CardTitle>
+                <CardTitle className="flex items-center gap-2"><FileText className="w-5 h-5" />الوثائق والمستندات</CardTitle>
                 <CardDescription>رفع وإدارة الوثائق القانونية للمؤسسة (PDF أو صور)</CardDescription>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Upload Section */}
                 {isCompanyAdmin && (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {[
@@ -886,18 +556,8 @@ const OrganizationProfile = () => {
                       { type: 'other', label: 'مستند آخر' },
                     ].map(({ type, label }) => (
                       <div key={type} className="border-2 border-dashed rounded-lg p-4 text-center hover:border-primary transition-colors">
-                        <input
-                          type="file"
-                          id={`upload-${type}`}
-                          className="hidden"
-                          accept=".pdf,.jpg,.jpeg,.png,.webp"
-                          onChange={(e) => handleFileUpload(e, type)}
-                          disabled={uploading}
-                        />
-                        <label
-                          htmlFor={`upload-${type}`}
-                          className="cursor-pointer flex flex-col items-center gap-2"
-                        >
+                        <input type="file" id={`upload-${type}`} className="hidden" accept=".pdf,.jpg,.jpeg,.png,.webp" onChange={(e) => handleFileUpload(e, type)} disabled={uploading} />
+                        <label htmlFor={`upload-${type}`} className="cursor-pointer flex flex-col items-center gap-2">
                           <Upload className="w-8 h-8 text-muted-foreground" />
                           <span className="font-medium">{label}</span>
                           <span className="text-xs text-muted-foreground">PDF أو صورة (حد 10MB)</span>
@@ -906,17 +566,12 @@ const OrganizationProfile = () => {
                     ))}
                   </div>
                 )}
-
                 {uploading && (
                   <div className="flex items-center justify-center gap-2 py-4">
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    <span>جاري رفع الملف...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" /><span>جاري رفع الملف...</span>
                   </div>
                 )}
-
                 <Separator />
-
-                {/* Documents List */}
                 <div className="space-y-2">
                   <h4 className="font-medium">الملفات المرفوعة</h4>
                   {documents.length === 0 ? (
@@ -930,19 +585,14 @@ const OrganizationProfile = () => {
                             <div>
                               <p className="font-medium">{doc.file_name}</p>
                               <p className="text-sm text-muted-foreground">
-                                {getDocumentTypeLabel(doc.document_type)} • 
-                                {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
+                                {getDocumentTypeLabel(doc.document_type)} • {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
                               </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}>
-                              <Download className="w-4 h-4" />
-                            </Button>
+                            <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
                             {isCompanyAdmin && (
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}>
-                                <Trash2 className="w-4 h-4 text-destructive" />
-                              </Button>
+                              <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                             )}
                           </div>
                         </div>
@@ -954,77 +604,50 @@ const OrganizationProfile = () => {
             </Card>
           </TabsContent>
 
-          {/* Certificates Tab */}
-          <TabsContent value="certificates">
-            <LMSProfileCertificates />
-          </TabsContent>
-
-          {/* Contact Tab */}
-          <TabsContent value="contact">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Phone className="w-5 h-5" />
-                  بيانات التواصل
-                </CardTitle>
-                <CardDescription>معلومات الاتصال بالجهة</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Mail className="w-4 h-4" />
-                      البريد الإلكتروني
-                    </Label>
-                    <Input
-                      value={orgData?.email || ''}
-                      onChange={(e) => setOrgData({ ...orgData, email: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                      type="email"
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
-                      رقم الهاتف الأساسي
-                    </Label>
-                    <Input
-                      value={orgData?.phone || ''}
-                      onChange={(e) => setOrgData({ ...orgData, phone: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                      dir="ltr"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2">
-                      <Phone className="w-4 h-4" />
-                      رقم الهاتف الثانوي
-                    </Label>
-                    <Input
-                      value={orgData?.secondary_phone || ''}
-                      onChange={(e) => setOrgData({ ...orgData, secondary_phone: e.target.value })}
-                      disabled={!isCompanyAdmin}
-                      dir="ltr"
-                    />
-                  </div>
+          {/* الختم والتوقيع */}
+          <TabsContent value="stamps">
+            <ErrorBoundary fallbackTitle="خطأ في الختم والتوقيع">
+              <Suspense fallback={<TabFallback />}>
+                <div className="space-y-6">
+                  <StampSignatureUpload
+                    organizationId={organization.id}
+                    stampUrl={orgData?.stamp_url || null}
+                    signatureUrl={orgData?.signature_url || null}
+                    onUpdate={fetchOrganizationData}
+                    disabled={!isCompanyAdmin}
+                  />
+                  <BiometricManager />
+                  {isCompanyAdmin && <OrganizationSignatureSettings />}
                 </div>
-
-                {isCompanyAdmin && (
-                  <div className="flex justify-end pt-4">
-                    <Button onClick={handleSave} disabled={saving}>
-                      {saving ? <Loader2 className="w-4 h-4 ml-2 animate-spin" /> : <Save className="w-4 h-4 ml-2" />}
-                      حفظ التغييرات
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
-          {/* Attestation Tab */}
+          {/* الشهادات */}
+          <TabsContent value="certificates">
+            <ErrorBoundary fallbackTitle="خطأ في الشهادات">
+              <Suspense fallback={<TabFallback />}>
+                <LMSProfileCertificates />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* الإفادة */}
           <TabsContent value="attestation">
-            <AttestationTabContent organizationId={organization.id} />
+            <ErrorBoundary fallbackTitle="خطأ في الإفادة">
+              <Suspense fallback={<TabFallback />}>
+                <AttestationTabContent organizationId={organization.id} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* المشاركة */}
+          <TabsContent value="sharing">
+            <ErrorBoundary fallbackTitle="خطأ في إعدادات المشاركة">
+              <Suspense fallback={<TabFallback />}>
+                <OrgPublicProfileSettings />
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
         </Tabs>
       </div>
