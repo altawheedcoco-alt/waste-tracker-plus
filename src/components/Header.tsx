@@ -144,11 +144,11 @@ const Header = memo(() => {
   }, [navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/20 animate-fade-in" style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)' }}>
+    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/30 animate-fade-in">
       {/* v3.0 Gradient top accent line — bolder */}
       <div className="absolute top-0 left-0 right-0 h-[2.5px] bg-gradient-to-r from-eco-ocean via-primary to-eco-emerald opacity-90" />
       
-      <div className="bg-white/90 dark:bg-card/90 backdrop-blur-2xl shadow-sm">
+      <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
         <div className="container mx-auto px-3 sm:px-4">
           <div className="flex items-center justify-between h-16 sm:h-[72px]">
             {/* Logo */}
