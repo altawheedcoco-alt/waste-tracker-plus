@@ -457,19 +457,12 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
         {/* Desktop Sidebar - Hidden on mobile when using display mode */}
-        <AnimatePresence>
-          {(isSidebarOpen || !isMobile) && (
-            <motion.aside
-              initial={{ x: 300, opacity: 0 }}
-              animate={{ 
-                x: isSidebarOpen ? 0 : 300, 
-                opacity: isSidebarOpen ? 1 : 0,
-                width: isSidebarOpen ? sidebarWidth : 0
-              }}
-              exit={{ x: 300, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-              className={`${isMobile ? 'hidden' : 'flex'} flex-col bg-card/95 backdrop-blur-xl border-l border-border/40 fixed right-0 top-0 h-screen z-50 overflow-hidden`}
-              style={{ boxShadow: '-4px 0 20px hsl(220 16% 12% / 0.04)' }}
+        {!isMobile && (
+            <aside
+              className={`flex flex-col bg-card/95 backdrop-blur-xl border-l border-border/40 fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
+              }`}
+              style={{ boxShadow: '-4px 0 20px hsl(220 16% 12% / 0.04)', width: sidebarWidth }}
             >
               {/* Top Toggle Button + Logo */}
               <div className="p-4 border-b border-border">
@@ -667,9 +660,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               )}
             </Button>
           </div>
-            </motion.aside>
-          )}
-        </AnimatePresence>
+            </aside>
+        )}
+
 
         {/* Floating Show Sidebar Button - Visible when sidebar is hidden */}
         <AnimatePresence>
@@ -1006,17 +999,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               <OnboardingGuard>
-                <AnimatePresence mode="wait">
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0, y: 12, scale: 0.99 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: -8, scale: 0.99 }}
-                    transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                    initial={{ opacity: 0.6 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ duration: 0.15 }}
                   >
                     {children}
                   </motion.div>
-                </AnimatePresence>
               </OnboardingGuard>
             </div>
           </main>
