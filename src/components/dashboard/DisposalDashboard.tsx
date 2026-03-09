@@ -247,7 +247,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
           <DisposalDailyOperations />
-          <OperationalAlertsWidget />
+          <DashboardAlertsHub orgType="disposal" />
 
           <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
             <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
