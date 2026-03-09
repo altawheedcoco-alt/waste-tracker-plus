@@ -34,6 +34,7 @@ const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPa
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
 const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
+const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
