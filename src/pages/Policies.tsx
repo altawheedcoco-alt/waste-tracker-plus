@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import { lazy, Suspense } from 'react';
 
 const Footer = lazy(() => import('@/components/Footer'));
+const UsageAgreementSection = lazy(() => import('@/components/legal/UsageAgreementAcceptance'));
 
 interface PolicyArticle {
   number: string;

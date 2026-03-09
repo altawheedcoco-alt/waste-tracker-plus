@@ -4,6 +4,7 @@ import { lazy, Suspense } from "react";
 import { Shield, Scale, AlertTriangle, FileText, Users, Globe, Lock, Gavel, Building2, Truck, Recycle, Factory, Eye, Ban, CheckCircle } from "lucide-react";
 
 const Footer = lazy(() => import("@/components/Footer"));
+const UsageAgreementSection = lazy(() => import("@/components/legal/UsageAgreementAcceptance"));
 
 const Terms = () => {
   const { language } = useLanguage();
