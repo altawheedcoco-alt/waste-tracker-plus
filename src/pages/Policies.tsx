@@ -10,6 +10,7 @@ import Header from '@/components/Header';
 import { lazy, Suspense } from 'react';
 
 const Footer = lazy(() => import('@/components/Footer'));
+const UsageAgreementSection = lazy(() => import('@/components/legal/UsageAgreementAcceptance'));
 
 interface PolicyArticle {
   number: string;
@@ -625,8 +626,15 @@ const Policies = () => {
               })}
             </div>
 
+            {/* Usage Agreement Acceptance */}
+            <div className="mt-10">
+              <Suspense fallback={null}>
+                <UsageAgreementSection currentPage="policies" />
+              </Suspense>
+            </div>
+
             {/* Footer Note */}
-            <div className="mt-10 bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center">
+            <div className="mt-8 bg-primary/5 border border-primary/20 rounded-2xl p-6 text-center">
               <Shield className="w-10 h-10 text-primary mx-auto mb-3" />
               <h3 className="font-bold text-foreground mb-2">التزامنا بالشفافية</h3>
               <p className="text-sm text-muted-foreground leading-relaxed max-w-xl mx-auto">
