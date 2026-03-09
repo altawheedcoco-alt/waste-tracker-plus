@@ -194,7 +194,7 @@ const SaaSTechSection = memo(() => {
                 <div className="absolute inset-0 rounded-xl bg-primary/10 group-hover:bg-primary/20 transition-colors" />
                 <div className="absolute inset-0 rounded-xl ring-2 ring-primary/0 group-hover:ring-primary/20 group-hover:animate-pulse transition-all" />
                 <div className="relative w-full h-full rounded-xl flex items-center justify-center">
-                  <pillar.icon className="w-7 h-7 text-primary" />
+                  <pillar.icon className="w-5 h-5 sm:w-7 sm:h-7 text-primary" />
                 </div>
               </div>
 
