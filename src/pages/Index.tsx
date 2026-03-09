@@ -171,7 +171,12 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* Platform Showcase - immediately after hero */}
+          {/* SaaS Tech Section - technical identity */}
+          <LazySection>
+            <SaaSTechSection />
+          </LazySection>
+
+          {/* Platform Showcase - immediately after tech section */}
           <LazySection>
             <PlatformShowcase />
           </LazySection>
