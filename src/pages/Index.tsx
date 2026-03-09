@@ -33,7 +33,7 @@ const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcas
 const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
 const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
-const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
+const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
 
 /** Only renders children when the container scrolls into view */
 const LazySection = memo(({ children }: { children: React.ReactNode }) => {
