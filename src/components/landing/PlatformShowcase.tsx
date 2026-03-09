@@ -171,7 +171,7 @@ const PlatformShowcase = memo(() => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-10 sm:mt-14"
+          className="text-center mt-8 sm:mt-10"
         >
           <div className="inline-flex items-center gap-3 px-6 py-3 rounded-2xl bg-muted/40 border border-border/50">
             <Globe className="w-5 h-5 text-primary" />

@@ -226,7 +226,7 @@ const SaaSTechSection = memo(() => {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-14 sm:mt-20"
+          className="text-center mt-8 sm:mt-12"
         >
           <div className="inline-flex flex-col sm:flex-row items-center gap-4 sm:gap-6 px-8 py-5 rounded-2xl bg-card border-2 border-primary/15 shadow-xl">
             <div className="flex items-center gap-3">
