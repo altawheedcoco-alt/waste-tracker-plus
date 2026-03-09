@@ -188,18 +188,18 @@ const Hero = memo(() => {
 
           {/* Egyptian heritage footer */}
           <motion.div
-            className="mt-4 sm:mt-6 flex flex-col items-center gap-1"
+            className="mt-3 sm:mt-6 flex flex-col items-center gap-0.5 sm:gap-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 1.1 }}
+            transition={{ duration: 0.5, delay: 1.0 }}
           >
             <p
-              className="text-[11px] sm:text-sm font-bold tracking-wide text-gradient-eco"
+              className="text-[10px] sm:text-sm font-bold tracking-wide text-gradient-eco"
               style={{ WebkitTextFillColor: 'transparent' }}
             >
               {t('landing.joinUs')}
             </p>
-            <p className="text-sm sm:text-lg text-amber-400 font-bold tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}>
+            <p className="text-xs sm:text-lg text-amber-400 font-bold tracking-[0.25em] sm:tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}>
               𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
             </p>
           </motion.div>
