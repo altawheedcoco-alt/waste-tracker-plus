@@ -303,8 +303,12 @@ const ShipmentDetailsPage = () => {
           </div>
         </div>
 
-        {/* Status Timeline */}
         <ShipmentStatusTimeline shipment={shipment} />
+
+        {/* Document Chain Strip — مباشر أسفل سجل الحالات */}
+        <Card className="p-3">
+          <DocumentChainStrip shipmentId={shipment.id} variant="full" />
+        </Card>
 
         {/* Job Lifecycle Gates */}
         {organization?.id && (
