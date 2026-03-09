@@ -113,7 +113,7 @@ const SaaSTechSection = memo(() => {
           initial={{ opacity: 0, y: 25 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-14 sm:mb-20"
+          className="text-center mb-10 sm:mb-12"
         >
           {/* Code badge */}
           <motion.div
