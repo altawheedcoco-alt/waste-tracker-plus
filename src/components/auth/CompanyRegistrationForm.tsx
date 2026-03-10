@@ -104,21 +104,98 @@ const organizationTypes = [
 ];
 
 export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: CompanyRegistrationFormProps) => {
-  const [formData, setFormData] = useState<CompanyFormData>({
-    ...initialFormData,
-    organizationType: defaultOrgType || '',
+  // Auto-save support
+  const autoSaveKey = 'company_registration';
+  const [formData, setFormData] = useState<CompanyFormData>(() => {
+    try {
+      const saved = localStorage.getItem(`form_autosave_${autoSaveKey}`);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...initialFormData, ...parsed, organizationType: defaultOrgType || parsed.organizationType || '' };
+      }
+    } catch {}
+    return { ...initialFormData, organizationType: defaultOrgType || '' };
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showRestoredBanner, setShowRestoredBanner] = useState(() => {
+    try { return !!localStorage.getItem(`form_autosave_${autoSaveKey}`); } catch { return false; }
+  });
   const { toast } = useToast();
+
+  // Auto-save to localStorage on changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        const hasContent = Object.values(formData).some(v => typeof v === 'string' && v.trim().length > 0);
+        if (hasContent) {
+          localStorage.setItem(`form_autosave_${autoSaveKey}`, JSON.stringify(formData));
+        }
+      } catch {}
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  // Beforeunload guard
+  const isDirty = useMemo(() => {
+    return Object.values(formData).some(v => typeof v === 'string' && v.trim().length > 0);
+  }, [formData]);
+
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      e.preventDefault();
+      e.returnValue = '';
+    };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [isDirty]);
+
+  const clearAutoSave = () => {
+    try { localStorage.removeItem(`form_autosave_${autoSaveKey}`); } catch {}
+  };
 
   const handleChange = (field: keyof CompanyFormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+    // Inline validation: clear error on change
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: '' }));
     }
+  };
+
+  // Inline validation on blur
+  const handleBlur = (field: keyof CompanyFormData) => {
+    const value = formData[field]?.trim();
+    const newErrors = { ...errors };
+    
+    // Required field checks
+    const requiredFields: Record<string, string> = {
+      organizationName: 'يرجى إدخال اسم الشركة',
+      organizationType: 'يرجى اختيار نوع الشركة',
+      organizationPhone: 'يرجى إدخال رقم الهاتف',
+      organizationEmail: 'يرجى إدخال البريد الإلكتروني',
+      representativeName: 'يرجى إدخال اسم الشخص المسؤول',
+      commercialRegister: 'يرجى إدخال رقم السجل التجاري',
+      email: 'يرجى إدخال البريد الإلكتروني للدخول',
+      password: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+      address: 'يرجى إدخال العنوان',
+    };
+    
+    if (requiredFields[field] && !value) {
+      newErrors[field] = requiredFields[field];
+    } else if (field === 'password' && value && value.length < 6) {
+      newErrors[field] = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+    } else if ((field === 'email' || field === 'organizationEmail') && value && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+      newErrors[field] = 'بريد إلكتروني غير صالح';
+    } else if ((field === 'organizationPhone') && value && !/^[\d\s+\-()]{8,20}$/.test(value)) {
+      newErrors[field] = 'رقم هاتف غير صالح';
+    } else {
+      delete newErrors[field];
+    }
+    
+    setErrors(newErrors);
   };
 
   const validate = (): boolean => {
