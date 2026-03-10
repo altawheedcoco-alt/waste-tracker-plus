@@ -386,7 +386,6 @@ const ShipmentLinksManager = () => {
   };
 
   const deleteLink = async (linkId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الرابط؟')) return;
 
     try {
       const { error } = await supabase
