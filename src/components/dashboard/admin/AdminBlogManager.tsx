@@ -425,7 +425,7 @@ const AdminBlogManager = () => {
                         <Pencil className="w-4 h-4" />
                       </Button>
                       <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive"
-                        onClick={() => { if (confirm('هل أنت متأكد من حذف هذا المقال؟')) deleteMutation.mutate(post.id); }}>
+                        onClick={() => deleteMutation.mutate(post.id)}>
                         <Trash2 className="w-4 h-4" />
                       </Button>
                     </div>

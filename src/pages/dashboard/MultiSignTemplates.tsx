@@ -972,7 +972,7 @@ export default function MultiSignTemplates() {
                         <Link2 className="w-3 h-3" /> ربط بشحنة
                       </Button>
                       <Button size="sm" variant="destructive" className="gap-1" onClick={() => {
-                        if (confirm('هل أنت متأكد من حذف هذا القالب؟')) deleteTemplate.mutate(selectedTemplate.id);
+                        deleteTemplate.mutate(selectedTemplate.id);
                       }}>
                         <Trash2 className="w-3 h-3" /> حذف
                       </Button>

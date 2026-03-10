@@ -173,11 +173,7 @@ const TestimonialsManagement = () => {
                       size="sm"
                       variant="ghost"
                       className="text-destructive hover:text-destructive"
-                      onClick={() => {
-                        if (confirm('هل أنت متأكد من حذف هذا التعليق؟')) {
-                          deleteMutation.mutate(t.id);
-                        }
-                      }}
+                      onClick={() => deleteMutation.mutate(t.id)}
                       disabled={deleteMutation.isPending}
                     >
                       <Trash2 className="w-4 h-4" />

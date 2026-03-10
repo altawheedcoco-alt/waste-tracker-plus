@@ -190,11 +190,8 @@ const DocumentTemplateManager = () => {
                       variant="ghost"
                       size="icon"
                       className="text-destructive h-8 w-8"
-                      onClick={() => {
-                        if (confirm('هل أنت متأكد من حذف هذا القالب؟')) {
-                          deleteTemplate.mutate(template.id);
-                        }
-                      }}
+                      onClick={() => deleteTemplate.mutate(template.id)}
+                    >
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>
