@@ -180,7 +180,7 @@ const PartnerLinkingCard = () => {
         .select('id, status')
         .or(`and(requester_org_id.eq.${organization.id},partner_org_id.eq.${partnerOrg.id}),and(requester_org_id.eq.${partnerOrg.id},partner_org_id.eq.${organization.id})`);
 
-      console.log('🔗 التحقق من الشراكات السابقة:', { existingList, checkError });
+      
 
       if (checkError) {
         console.error('❌ خطأ في التحقق:', checkError);
