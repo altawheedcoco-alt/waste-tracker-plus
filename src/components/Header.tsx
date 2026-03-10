@@ -171,7 +171,7 @@ const Header = memo(() => {
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button
-                    className={`group flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold rounded-xl transition-all duration-200 ${
+                    className={`group flex items-center gap-1 px-2 xl:px-3 py-2 text-[12px] xl:text-[13px] font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
                       openDropdown === dropdown.label
                         ? 'text-primary bg-primary/8'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
