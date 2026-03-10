@@ -261,6 +261,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
           variant: 'destructive',
         });
       } else {
+        clearAutoSave();
         toast({
           title: 'تم التسجيل بنجاح',
           description: 'سيتم مراجعة طلبك والرد عليك قريباً',
