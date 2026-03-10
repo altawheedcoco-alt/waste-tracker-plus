@@ -465,6 +465,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             placeholder="البريد الإلكتروني للدخول"
             value={formData.email}
             onChange={(e) => handleChange('email', e.target.value)}
+            onBlur={() => handleBlur('email')}
             className={`h-8 text-xs ${errors.email ? 'border-destructive' : ''}`}
             dir="ltr"
             maxLength={255}
