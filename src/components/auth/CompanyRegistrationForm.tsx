@@ -410,6 +410,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             placeholder="رقم السجل التجاري"
             value={formData.commercialRegister}
             onChange={(e) => handleChange('commercialRegister', e.target.value)}
+            onBlur={() => handleBlur('commercialRegister')}
             className={`h-8 text-xs ${errors.commercialRegister ? 'border-destructive' : ''}`}
             dir="ltr"
             maxLength={50}
