@@ -51,6 +51,17 @@ const stats = [
 ];
 
 const AuthSidePanel = () => {
+  const [currentIndex, setCurrentIndex] = useState(() => Math.floor(Math.random() * illustrations.length));
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentIndex(prev => (prev + 1) % illustrations.length);
+    }, 5000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const currentIllustration = illustrations[currentIndex];
+
   return (
     <div className="relative flex flex-col justify-between h-full overflow-hidden" style={{
       background: 'linear-gradient(160deg, hsl(160, 68%, 36%) 0%, hsl(178, 60%, 32%) 40%, hsl(205, 78%, 36%) 100%)',
