@@ -77,7 +77,6 @@ const ContractTemplates = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا القالب؟')) return;
     await deleteTemplate(id);
   };
 

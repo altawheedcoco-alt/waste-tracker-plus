@@ -190,7 +190,6 @@ export const useContracts = () => {
   };
 
   const handleDelete = async (contractId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا العقد؟')) return;
 
     try {
       const { error } = await supabase

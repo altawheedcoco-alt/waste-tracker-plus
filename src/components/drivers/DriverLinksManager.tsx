@@ -280,8 +280,7 @@ const DriverLinksManager = () => {
     }
   };
 
-  const deleteLink = async (linkId: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الرابط؟')) return;
+  const deleteLinkAction = async (linkId: string) => {
 
     try {
       const { error } = await supabase
