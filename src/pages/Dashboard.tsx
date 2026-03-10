@@ -10,7 +10,6 @@ import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
-import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
 import { Loader2 } from 'lucide-react';
 
