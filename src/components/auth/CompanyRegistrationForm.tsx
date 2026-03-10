@@ -351,6 +351,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             placeholder="رقم الهاتف"
             value={formData.organizationPhone}
             onChange={(e) => handleChange('organizationPhone', e.target.value)}
+            onBlur={() => handleBlur('organizationPhone')}
             className={`h-8 text-xs ${errors.organizationPhone ? 'border-destructive' : ''}`}
             dir="ltr"
             inputMode="tel"
