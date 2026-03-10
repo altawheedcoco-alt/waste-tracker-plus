@@ -149,8 +149,8 @@ const Header = memo(() => {
       <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[2.5px] bg-gradient-to-r from-eco-ocean via-primary to-eco-emerald opacity-90" />
       
       <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between h-14 sm:h-[72px]">
+        <div className="container mx-auto px-3 sm:px-4 overflow-visible">
+          <div className="flex items-center justify-between h-14 sm:h-[72px] overflow-visible">
             {/* Logo */}
             <div
               className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
