@@ -1,6 +1,41 @@
-import { motion } from 'framer-motion';
+import { useState, useEffect, useCallback } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Leaf, BarChart3, Truck, Recycle, Globe, CheckCircle2, Sparkles } from 'lucide-react';
 import authIllustration from '@/assets/auth-side-illustration.png';
+import authIllustration2 from '@/assets/auth-illustration-2.png';
+import authIllustration3 from '@/assets/auth-illustration-3.png';
+import authIllustration4 from '@/assets/auth-illustration-4.png';
+import authIllustration5 from '@/assets/auth-illustration-5.png';
+import authIllustration6 from '@/assets/auth-illustration-6.png';
+import authIllustration7 from '@/assets/auth-illustration-7.png';
+import authIllustration8 from '@/assets/auth-illustration-8.png';
+import authIllustration9 from '@/assets/auth-illustration-9.png';
+import authIllustration10 from '@/assets/auth-illustration-10.png';
+import authIllustration11 from '@/assets/auth-illustration-11.png';
+import authIllustration12 from '@/assets/auth-illustration-12.png';
+import authIllustration13 from '@/assets/auth-illustration-13.png';
+import authIllustration14 from '@/assets/auth-illustration-14.png';
+import authIllustration15 from '@/assets/auth-illustration-15.png';
+import authIllustration16 from '@/assets/auth-illustration-16.png';
+
+const illustrations = [
+  { src: authIllustration, alt: 'منصة إدارة المخلفات' },
+  { src: authIllustration2, alt: 'مركز التحكم الذكي' },
+  { src: authIllustration3, alt: 'مصنع إعادة التدوير' },
+  { src: authIllustration4, alt: 'أسطول النقل الأخضر' },
+  { src: authIllustration5, alt: 'الاقتصاد الدائري' },
+  { src: authIllustration6, alt: 'التتبع الرقمي' },
+  { src: authIllustration7, alt: 'المدينة الذكية' },
+  { src: authIllustration8, alt: 'المختبر البيئي' },
+  { src: authIllustration9, alt: 'تحويل النفايات لطاقة' },
+  { src: authIllustration10, alt: 'المستودع الآلي' },
+  { src: authIllustration11, alt: 'شبكة الامتثال العالمية' },
+  { src: authIllustration12, alt: 'منشأة التسميد' },
+  { src: authIllustration13, alt: 'مركز اللوجستيات الخضراء' },
+  { src: authIllustration14, alt: 'محطة الرصد البيئي' },
+  { src: authIllustration15, alt: 'مركز إعادة التدوير المجتمعي' },
+  { src: authIllustration16, alt: 'سوق المواد المستدامة' },
+];
 
 const features = [
   { icon: Recycle, label: 'إدارة المخلفات الذكية', desc: 'تتبع وتحليل دورة حياة المخلفات بالكامل' },
