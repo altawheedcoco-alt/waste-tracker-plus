@@ -145,6 +145,8 @@ export const useDashboardRealtime = () => {
   const orgType = organization?.organization_type as string | undefined;
   const userId = profile?.id;
   const isAdmin = roles?.includes('admin');
+  const isEmployee = roles?.includes('employee');
+  const isDriver = roles?.includes('driver');
 
   // Build subscription list based on role
   const subscriptions = useMemo(() => {
@@ -154,18 +156,34 @@ export const useDashboardRealtime = () => {
       subs.push(...(ROLE_TABLES.admin || []));
     }
     
+    if (isDriver) {
+      subs.push(...(ROLE_TABLES.driver || []));
+    }
+    
+    if (isEmployee) {
+      subs.push(...(ROLE_TABLES.employee || []));
+    }
+    
     if (orgType && ROLE_TABLES[orgType]) {
       subs.push(...ROLE_TABLES[orgType]);
     }
     
-    // Deduplicate by table name
-    const seen = new Set<string>();
-    return subs.filter(s => {
-      if (seen.has(s.table)) return false;
-      seen.add(s.table);
-      return true;
+    // Deduplicate by table name, merge queryKeys
+    const map = new Map<string, Set<string>>();
+    subs.forEach(s => {
+      const existing = map.get(s.table);
+      if (existing) {
+        s.queryKeys.forEach(k => existing.add(k));
+      } else {
+        map.set(s.table, new Set(s.queryKeys));
+      }
     });
-  }, [orgType, isAdmin]);
+    
+    return Array.from(map.entries()).map(([table, keys]) => ({
+      table,
+      queryKeys: Array.from(keys),
+    }));
+  }, [orgType, isAdmin, isDriver, isEmployee]);
 
   useEffect(() => {
     if (!orgId && !isAdmin) return;
