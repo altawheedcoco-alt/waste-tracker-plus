@@ -108,7 +108,7 @@ const Auth = () => {
     registrationType === 'consulting_office' || registrationType === 'iso_body';
 
   return (
-    <div className="h-screen flex flex-col lg:flex-row overflow-hidden bg-background">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
       {/* Side Panel - fixed height */}
       <div className="hidden lg:block lg:w-[44%] xl:w-[46%] h-screen">
         <AuthSidePanel />
