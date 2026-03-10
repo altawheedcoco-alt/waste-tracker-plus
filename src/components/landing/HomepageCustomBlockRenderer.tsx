@@ -1,6 +1,27 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
+
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * Strips dangerous tags/attributes while allowing safe formatting
+ */
+function sanitizeHTML(html: string): string {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  // Remove dangerous elements
+  const dangerous = div.querySelectorAll('script,iframe,object,embed,form,input,textarea,select,button,link,meta,style');
+  dangerous.forEach(el => el.remove());
+  // Remove event handler attributes from all elements
+  div.querySelectorAll('*').forEach(el => {
+    for (const attr of Array.from(el.attributes)) {
+      if (attr.name.startsWith('on') || attr.value.includes('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return div.innerHTML;
+}
 
 interface CustomBlock {
   id: string;
