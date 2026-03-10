@@ -138,7 +138,7 @@ const PartnerLinkingCard = () => {
         throw new Error('كود الشراكة يجب أن يكون 8 أحرف على الأقل');
       }
 
-      console.log('🔍 البحث عن المنظمة بالكود:', trimmedCode);
+      
       
       // البحث عن المنظمة بالكود
       const { data: partnerOrg, error: findError } = await supabase
