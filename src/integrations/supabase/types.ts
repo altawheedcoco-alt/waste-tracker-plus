@@ -28091,6 +28091,197 @@ export type Database = {
           },
         ]
       }
+      quotation_items: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          item_order: number
+          notes: string | null
+          quantity: number
+          quotation_id: string
+          total_price: number
+          unit: string | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          item_order?: number
+          notes?: string | null
+          quantity?: number
+          quotation_id: string
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          item_order?: number
+          notes?: string | null
+          quantity?: number
+          quotation_id?: string
+          total_price?: number
+          unit?: string | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotation_items_quotation_id_fkey"
+            columns: ["quotation_id"]
+            isOneToOne: false
+            referencedRelation: "quotations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      quotations: {
+        Row: {
+          client_address: string | null
+          client_email: string | null
+          client_name: string | null
+          client_organization_id: string | null
+          client_phone: string | null
+          client_tax_number: string | null
+          client_type: string
+          created_at: string
+          created_by: string | null
+          currency: string | null
+          delivery_terms: string | null
+          description: string | null
+          discount_amount: number | null
+          entity_type: string
+          id: string
+          notes: string | null
+          organization_id: string
+          payment_terms: string | null
+          quotation_number: string
+          rejection_reason: string | null
+          responded_at: string | null
+          sent_at: string | null
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          template_id: string | null
+          terms_and_conditions: string | null
+          title: string
+          total_amount: number
+          updated_at: string
+          valid_until: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          client_address?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_organization_id?: string | null
+          client_phone?: string | null
+          client_tax_number?: string | null
+          client_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          entity_type: string
+          id?: string
+          notes?: string | null
+          organization_id: string
+          payment_terms?: string | null
+          quotation_number: string
+          rejection_reason?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          template_id?: string | null
+          terms_and_conditions?: string | null
+          title: string
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          client_address?: string | null
+          client_email?: string | null
+          client_name?: string | null
+          client_organization_id?: string | null
+          client_phone?: string | null
+          client_tax_number?: string | null
+          client_type?: string
+          created_at?: string
+          created_by?: string | null
+          currency?: string | null
+          delivery_terms?: string | null
+          description?: string | null
+          discount_amount?: number | null
+          entity_type?: string
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          payment_terms?: string | null
+          quotation_number?: string
+          rejection_reason?: string | null
+          responded_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          template_id?: string | null
+          terms_and_conditions?: string | null
+          title?: string
+          total_amount?: number
+          updated_at?: string
+          valid_until?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quotations_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "quotations_client_organization_id_fkey"
+            columns: ["client_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "quotations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rate_limit_entries: {
         Row: {
           created_at: string | null

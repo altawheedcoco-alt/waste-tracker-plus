@@ -218,6 +218,7 @@ const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocu
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
+const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -455,6 +456,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
     <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/office-performance" element={<AdvancedAnalytics />} />
+    <Route path="/dashboard/quotations" element={<Quotations />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
