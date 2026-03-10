@@ -149,11 +149,11 @@ const Header = memo(() => {
       <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[2.5px] bg-gradient-to-r from-eco-ocean via-primary to-eco-emerald opacity-90" />
       
       <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
-        <div className="container mx-auto px-3 sm:px-4">
-          <div className="flex items-center justify-between h-14 sm:h-[72px]">
+        <div className="w-full mx-auto px-3 sm:px-4 max-w-[1400px]">
+          <div className="flex items-center h-14 sm:h-[72px] gap-2">
             {/* Logo */}
             <div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0"
               onClick={() => navigate('/')}
             >
               <div className="transition-transform duration-300 group-hover:scale-105">
@@ -162,16 +162,16 @@ const Header = memo(() => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0.5">
-              {dropdowns.map((dropdown) => (
+            <nav className="hidden lg:flex items-center gap-0.5 flex-1 min-w-0 justify-center overflow-hidden">
+              {dropdowns.map((dropdown, index) => (
                 <div
                   key={dropdown.label}
-                  className="relative"
+                  className={`relative ${index >= 3 ? 'hidden xl:block' : ''}`}
                   onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button
-                    className={`group flex items-center gap-1.5 px-3 py-2 text-[13px] font-semibold rounded-xl transition-all duration-200 ${
+                    className={`group flex items-center gap-1 px-2 xl:px-3 py-2 text-[12px] xl:text-[13px] font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
                       openDropdown === dropdown.label
                         ? 'text-primary bg-primary/8'
                         : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
@@ -252,24 +252,22 @@ const Header = memo(() => {
             </nav>
 
             {/* Right Actions */}
-            <div className="hidden lg:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
                 aria-label="Switch language"
               >
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
-              <GuideButton />
-              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="gap-1.5 text-xs font-semibold rounded-xl h-9 px-3 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
-                <UserPlus className="w-3.5 h-3.5" />
-                <span className="hidden xl:inline">{t('nav.employeeLogin')}</span>
-                <span className="xl:hidden">{t('nav.employee')}</span>
-              </Button>
-              <Button variant="eco" size="sm" onClick={handleLogin} className="gap-1.5 text-xs font-semibold rounded-xl h-9 px-4 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-shadow">
+              <Button size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md">
                 <LogIn className="w-3.5 h-3.5" />
                 {t('nav.login')}
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
+                <UserPlus className="w-3.5 h-3.5" />
+                {t('nav.employeeLogin')}
               </Button>
             </div>
 
