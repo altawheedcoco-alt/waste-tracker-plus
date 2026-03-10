@@ -630,8 +630,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
  * Filters groups by visibleFor and filters items within groups.
  */
 export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarGroupConfig[] {
-  // Admin sovereign mode: ONLY show admin-specific groups
-  if (isAdmin && !orgType) {
+  // Admin sovereign mode: ALWAYS show only admin-specific groups regardless of orgType
+  if (isAdmin) {
     return sidebarGroups.filter(group => group.visibleFor.includes('admin')).map(group => ({
       ...group,
       items: group.items.filter(item => {
@@ -643,13 +643,11 @@ export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarG
 
   return sidebarGroups.filter(group => {
     if (group.visibleFor.length === 0) return true;
-    if (isAdmin && group.visibleFor.includes('admin')) return true;
     return group.visibleFor.includes(orgType);
   }).map(group => ({
     ...group,
     items: group.items.filter(item => {
       if (!item.visibleFor || item.visibleFor.length === 0) return true;
-      if (isAdmin) return true;
       return item.visibleFor.includes(orgType);
     }),
   }));
