@@ -17,7 +17,7 @@ export function useSidebarPreferences() {
   const [saving, setSaving] = useState(false);
 
   const isAdmin = roles.includes('admin');
-  const orgType = (organization?.organization_type as string) || 'generator';
+  const orgType = (organization?.organization_type as string) || (isAdmin ? '' : 'generator');
 
   const fetchPrefs = useCallback(async () => {
     if (!user) { setLoading(false); return; }
