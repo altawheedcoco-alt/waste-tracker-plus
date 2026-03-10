@@ -208,7 +208,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       </div>
 
       {/* Submit */}
-      <Button type="submit" variant="eco" className="w-full h-11 rounded-xl text-base font-semibold gap-2" disabled={loading || isLocked}>
+      <Button type="submit" variant="default" className="w-full h-11 rounded-xl text-base font-semibold gap-2" disabled={loading || isLocked}>
         {loading ? (
           <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
         ) : (
