@@ -251,7 +251,7 @@ const Verify = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-gray-600">
+              هذا تقرير مجمع يحتوي على بيانات متعددة الشحنات. التقرير صادر رسمياً من نظام iRecycle.
                 هذا تقرير مجمع يحتوي على بيانات متعددة الشحنات. التقرير صادر رسمياً من نظام iRecycle.
               </p>
               <p className="text-sm text-gray-500 mt-4">
