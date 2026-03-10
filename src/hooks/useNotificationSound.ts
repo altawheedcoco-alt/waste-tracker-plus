@@ -226,7 +226,7 @@ export const playNotificationSound = async (type: NotificationSoundType = 'defau
       );
     });
     
-    console.log('🔔 Notification sound played:', type);
+    // sound played
   } catch (error) {
     console.warn('Could not play notification sound:', error);
   }
