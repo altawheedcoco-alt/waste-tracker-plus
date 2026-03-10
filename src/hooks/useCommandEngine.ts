@@ -150,33 +150,14 @@ export function useCommandEngine({ orgType }: CommandEngineOptions) {
             });
             break;
 
-          case 'update_kpi':
-            // تحديث مؤشرات الأداء — يمكن توسيعه لاحقاً
-            console.log(`[Impact] KPI update: ${impact.id}`);
-            break;
-
+           case 'update_kpi':
           case 'update_ledger':
-            console.log(`[Impact] Ledger update: ${impact.id}`);
-            break;
-
           case 'update_compliance':
-            console.log(`[Impact] Compliance update: ${impact.id}`);
-            break;
-
           case 'recalculate_esg':
-            console.log(`[Impact] ESG recalculation: ${impact.id}`);
-            break;
-
           case 'trigger_chain':
-            console.log(`[Impact] Chain trigger: ${impact.id}`);
-            break;
-
           case 'update_inventory':
-            console.log(`[Impact] Inventory update: ${impact.id}`);
-            break;
-
           case 'custom':
-            console.log(`[Impact] Custom: ${impact.id}`);
+            // Placeholder — to be expanded
             break;
         }
       } catch (err) {
@@ -211,8 +192,7 @@ export function useCommandEngine({ orgType }: CommandEngineOptions) {
     const depCheck = await checkDependencies(commandId, resourceId);
     if (!depCheck.canExecute) {
       if (depCheck.bypassable && options?.bypassReason) {
-        // تسجيل التجاوز
-        console.log(`[Bypass] ${commandId} — Reason: ${options.bypassReason}`);
+        // bypass recorded
       } else if (!depCheck.bypassable) {
         const firstBlock = depCheck.blockedBy[0];
         toast.error(firstBlock.condition.blockMessageAr);

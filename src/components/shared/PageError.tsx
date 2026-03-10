@@ -25,7 +25,7 @@ const PageError = ({
     <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
       <Card className="max-w-md w-full">
         <CardContent className="pt-8 text-center">
-          <Icon className={`h-16 w-16 mx-auto mb-4 ${variant === 'error' ? 'text-destructive' : 'text-yellow-500'}`} />
+          <Icon className={`h-16 w-16 mx-auto mb-4 ${variant === 'error' ? 'text-destructive' : 'text-accent-foreground'}`} />
           <h1 className="text-2xl font-bold text-foreground mb-2">{title}</h1>
           <p className="text-muted-foreground mb-6">{message}</p>
           {showHomeButton && (

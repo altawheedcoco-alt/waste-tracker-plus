@@ -138,7 +138,7 @@ const PartnerLinkingCard = () => {
         throw new Error('كود الشراكة يجب أن يكون 8 أحرف على الأقل');
       }
 
-      console.log('🔍 البحث عن المنظمة بالكود:', trimmedCode);
+      
       
       // البحث عن المنظمة بالكود
       const { data: partnerOrg, error: findError } = await supabase
@@ -147,7 +147,7 @@ const PartnerLinkingCard = () => {
         .eq('partner_code', trimmedCode)
         .maybeSingle();
 
-      console.log('📋 نتيجة البحث:', { partnerOrg, findError });
+      
 
       if (findError) {
         console.error('❌ خطأ في البحث:', findError);
@@ -180,7 +180,7 @@ const PartnerLinkingCard = () => {
         .select('id, status')
         .or(`and(requester_org_id.eq.${organization.id},partner_org_id.eq.${partnerOrg.id}),and(requester_org_id.eq.${partnerOrg.id},partner_org_id.eq.${organization.id})`);
 
-      console.log('🔗 التحقق من الشراكات السابقة:', { existingList, checkError });
+      
 
       if (checkError) {
         console.error('❌ خطأ في التحقق:', checkError);
@@ -192,10 +192,6 @@ const PartnerLinkingCard = () => {
       }
 
       // إنشاء الشراكة
-      console.log('✨ إنشاء شراكة جديدة:', {
-        requester_org_id: organization.id,
-        partner_org_id: partnerOrg.id,
-      });
 
       const { data, error } = await supabase
         .from('verified_partnerships')
@@ -216,7 +212,7 @@ const PartnerLinkingCard = () => {
         throw new Error(`فشل في إنشاء الشراكة: ${error.message}`);
       }
 
-      console.log('✅ تم إنشاء الشراكة:', data);
+      
       return { partnership: data, partnerName: partnerOrg.name };
     },
     onSuccess: (result) => {

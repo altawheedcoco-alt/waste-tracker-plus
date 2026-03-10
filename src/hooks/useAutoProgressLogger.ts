@@ -120,7 +120,7 @@ export const useAutoProgressLogger = ({
 
       if (!error) {
         loggedMilestonesRef.current.add(key);
-        console.log(`[AutoProgressLogger] Logged milestone: ${notes}`);
+        // milestone logged successfully
       }
     } catch (err) {
       console.error('[AutoProgressLogger] Error logging milestone:', err);

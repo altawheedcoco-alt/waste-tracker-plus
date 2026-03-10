@@ -104,7 +104,7 @@ export async function autoCreateGeneratorDeclaration(
   if (error) {
     console.error('Auto generator declaration error:', error);
   } else {
-    console.log('Auto generator declaration created for shipment:', shipmentId);
+    // declaration created successfully
     
     // Send notification to transporter about generator declaration
     try {
