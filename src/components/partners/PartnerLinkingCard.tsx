@@ -192,10 +192,6 @@ const PartnerLinkingCard = () => {
       }
 
       // إنشاء الشراكة
-      console.log('✨ إنشاء شراكة جديدة:', {
-        requester_org_id: organization.id,
-        partner_org_id: partnerOrg.id,
-      });
 
       const { data, error } = await supabase
         .from('verified_partnerships')
