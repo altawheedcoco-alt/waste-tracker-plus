@@ -150,10 +150,10 @@ const Header = memo(() => {
       
       <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
         <div className="w-full mx-auto px-3 sm:px-4 max-w-[1400px]">
-          <div className="flex items-center justify-between h-14 sm:h-[72px] overflow-visible">
+          <div className="flex items-center h-14 sm:h-[72px] gap-2">
             {/* Logo */}
             <div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer group"
+              className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0"
               onClick={() => navigate('/')}
             >
               <div className="transition-transform duration-300 group-hover:scale-105">
@@ -162,7 +162,7 @@ const Header = memo(() => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0.5 min-w-0 justify-center">
+            <nav className="hidden lg:flex items-center gap-0.5 flex-1 min-w-0 justify-center overflow-hidden">
               {dropdowns.map((dropdown, index) => (
                 <div
                   key={dropdown.label}
