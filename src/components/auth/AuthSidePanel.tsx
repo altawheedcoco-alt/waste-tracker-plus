@@ -19,34 +19,34 @@ import authIllustration15 from '@/assets/auth-illustration-15.png';
 import authIllustration16 from '@/assets/auth-illustration-16.png';
 
 const illustrations = [
-  { src: authIllustration, alt: 'منصة إدارة المخلفات' },
-  { src: authIllustration2, alt: 'مركز التحكم الذكي' },
-  { src: authIllustration3, alt: 'مصنع إعادة التدوير' },
-  { src: authIllustration4, alt: 'أسطول النقل الأخضر' },
-  { src: authIllustration5, alt: 'الاقتصاد الدائري' },
-  { src: authIllustration6, alt: 'التتبع الرقمي' },
-  { src: authIllustration7, alt: 'المدينة الذكية' },
-  { src: authIllustration8, alt: 'المختبر البيئي' },
-  { src: authIllustration9, alt: 'تحويل النفايات لطاقة' },
-  { src: authIllustration10, alt: 'المستودع الآلي' },
-  { src: authIllustration11, alt: 'شبكة الامتثال العالمية' },
-  { src: authIllustration12, alt: 'منشأة التسميد' },
-  { src: authIllustration13, alt: 'مركز اللوجستيات الخضراء' },
-  { src: authIllustration14, alt: 'محطة الرصد البيئي' },
-  { src: authIllustration15, alt: 'مركز إعادة التدوير المجتمعي' },
-  { src: authIllustration16, alt: 'سوق المواد المستدامة' },
+  { src: authIllustration, alt: 'منصة iRecycle الرقمية', title: 'التحول الرقمي البيئي', desc: 'رقمنة كاملة لعمليات إدارة المخلفات' },
+  { src: authIllustration2, alt: 'لوحة تحكم رقمية ذكية', title: 'لوحة التحكم الذكية', desc: 'تحليلات لحظية وبيانات مباشرة' },
+  { src: authIllustration3, alt: 'فرز ذكي بالروبوتات', title: 'الفرز الآلي بالذكاء الاصطناعي', desc: 'تصنيف المخلفات تلقائياً بدقة عالية' },
+  { src: authIllustration4, alt: 'تتبع أسطول النقل', title: 'تتبع GPS لحظي', desc: 'مراقبة الأسطول والشحنات في الوقت الفعلي' },
+  { src: authIllustration5, alt: 'الاقتصاد الدائري الرقمي', title: 'الاقتصاد الدائري', desc: 'تتبع رقمي من المصدر حتى إعادة التدوير' },
+  { src: authIllustration6, alt: 'الامتثال والتوثيق الرقمي', title: 'الامتثال الرقمي', desc: 'توثيق إلكتروني وشهادات ISO رقمية' },
+  { src: authIllustration7, alt: 'المدن الذكية وإنترنت الأشياء', title: 'المدينة الذكية', desc: 'حاويات ذكية متصلة بمستشعرات IoT' },
+  { src: authIllustration8, alt: 'مختبر التحليل الرقمي', title: 'تحليل بيئي رقمي', desc: 'فحوصات وتصنيفات مدعومة بالذكاء الاصطناعي' },
+  { src: authIllustration9, alt: 'محطة تحويل النفايات لطاقة', title: 'تحويل النفايات لطاقة', desc: 'مراقبة رقمية لمحطات الطاقة المتجددة' },
+  { src: authIllustration10, alt: 'مستودع آلي ذكي', title: 'المستودعات الذكية', desc: 'أتمتة كاملة بالروبوتات وباركود رقمي' },
+  { src: authIllustration11, alt: 'شبكة الامتثال العالمية', title: 'الامتثال الدولي', desc: 'ربط رقمي بمعايير بيئية عالمية' },
+  { src: authIllustration12, alt: 'الفوترة الإلكترونية', title: 'الفوترة الإلكترونية', desc: 'فواتير ومحفظة رقمية وتسويات آلية' },
+  { src: authIllustration13, alt: 'اللوجستيات الذكية', title: 'لوجستيات ذكية', desc: 'بوليصة شحن رقمية وميزان ذكي' },
+  { src: authIllustration14, alt: 'الرصد البيئي الرقمي', title: 'الرصد البيئي', desc: 'محطات رصد متصلة بالسحابة' },
+  { src: authIllustration15, alt: 'سوق المواد المعاد تدويرها', title: 'سوق إلكتروني', desc: 'منصة مزادات رقمية للمواد المعاد تدويرها' },
+  { src: authIllustration16, alt: 'أكاديمية التدريب الرقمية', title: 'الأكاديمية الرقمية', desc: 'تدريب إلكتروني وشهادات معتمدة' },
 ];
 
 const features = [
-  { icon: Recycle, label: 'إدارة المخلفات الذكية', desc: 'تتبع وتحليل دورة حياة المخلفات بالكامل' },
-  { icon: Truck, label: 'تتبع الشحنات لحظياً', desc: 'مراقبة حركة المركبات والشحنات في الوقت الفعلي' },
-  { icon: BarChart3, label: 'تقارير وتحليلات متقدمة', desc: 'لوحات تحكم ذكية مع رؤى بيانية شاملة' },
-  { icon: Shield, label: 'أمان وحماية متكاملة', desc: 'تشفير شامل وحماية متعددة الطبقات' },
+  { icon: Recycle, label: 'رقمنة سلسلة التوريد', desc: 'تتبع رقمي شامل من التوليد حتى التخلص الآمن' },
+  { icon: Truck, label: 'تتبع GPS لحظي', desc: 'مراقبة الأسطول والشحنات بتقنية إنترنت الأشياء' },
+  { icon: BarChart3, label: 'تحليلات ذكية بالـ AI', desc: 'تقارير آلية ولوحات بيانية مدعومة بالذكاء الاصطناعي' },
+  { icon: Shield, label: 'أمان سيبراني متقدم', desc: 'تشفير E2E وتوقيع رقمي وسجل تدقيق كامل' },
 ];
 
 const stats = [
-  { value: '+500', label: 'مؤسسة مسجلة' },
-  { value: '+10K', label: 'شحنة شهرياً' },
+  { value: '+500', label: 'جهة مسجلة رقمياً' },
+  { value: '+10K', label: 'عملية رقمية شهرياً' },
   { value: '99.9%', label: 'وقت التشغيل' },
 ];
 
@@ -93,7 +93,7 @@ const AuthSidePanel = () => {
             <div>
               <h2 className="text-2xl xl:text-3xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
               <div className="flex items-center gap-2">
-                <p className="text-white/50 text-xs">نظام إدارة المخلفات المتكامل</p>
+                <p className="text-white/50 text-xs">المنصة الرقمية الأولى لإدارة المخلفات</p>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[9px] font-bold text-white/80 tracking-wider">
                   <Sparkles className="w-2.5 h-2.5" />
                   v3.0
@@ -103,12 +103,12 @@ const AuthSidePanel = () => {
           </div>
 
           <h3 className="text-xl xl:text-2xl font-bold mb-3 leading-relaxed text-white">
-            منصة رقمية شاملة لإدارة
+            رقمنة شاملة لإدارة
             <br />
-            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية</span>
+            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية في مصر</span>
           </h3>
           <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-            نظام متكامل للتتبع والتوثيق والامتثال القانوني لكافة عمليات إدارة المخلفات في مصر
+            تحول رقمي متكامل: تتبع إلكتروني، فوترة رقمية، امتثال قانوني، وذكاء اصطناعي لكافة عمليات المخلفات
           </p>
         </motion.div>
       </div>
@@ -129,8 +129,22 @@ const AuthSidePanel = () => {
               className="relative w-full h-full object-contain drop-shadow-2xl"
             />
           </AnimatePresence>
+          {/* Title overlay */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`title-${currentIndex}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="absolute -bottom-8 left-0 right-0 text-center"
+            >
+              <p className="text-xs font-bold text-white/90">{currentIllustration.title}</p>
+              <p className="text-[10px] text-white/50">{currentIllustration.desc}</p>
+            </motion.div>
+          </AnimatePresence>
           {/* Dot indicators */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex gap-1">
             {illustrations.map((_, i) => (
               <button
                 key={i}
@@ -191,7 +205,7 @@ const AuthSidePanel = () => {
         <div className="w-full h-px bg-white/10" />
         <div className="flex items-center gap-2 shrink-0">
           <Globe className="w-3.5 h-3.5 text-white/30" />
-          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020</p>
+          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
         </div>
         <div className="w-full h-px bg-white/10" />
       </motion.div>
