@@ -261,7 +261,7 @@ const Header = memo(() => {
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
-              <Button variant="eco" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-shadow">
+              <Button size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md">
                 <LogIn className="w-3.5 h-3.5" />
                 {t('nav.login')}
               </Button>
