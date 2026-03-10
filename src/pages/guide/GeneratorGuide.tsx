@@ -363,7 +363,7 @@ const GeneratorGuide = () => {
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/")}
-                  className="gap-2 border-white/30 text-white hover:bg-white/10"
+                  className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
                   تصفح المزيد
                 </Button>
