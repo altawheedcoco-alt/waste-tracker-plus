@@ -456,6 +456,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
     <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/office-performance" element={<AdvancedAnalytics />} />
+    <Route path="/dashboard/quotations" element={<Quotations />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
