@@ -104,7 +104,8 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   // Admin sees all orgs, regular users see their own
   const displayOrganizations = isAdmin ? allOrganizations : userOrganizations;
 
-  if (!organization) return null;
+  // Only admin can see and use the account switcher
+  if (!organization || !isAdmin) return null;
 
   if (collapsed) {
     if (isOnSystemOverview && isAdmin) {
