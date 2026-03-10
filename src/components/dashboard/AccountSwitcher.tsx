@@ -71,7 +71,38 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   const isOnSystemOverview = location.pathname === '/dashboard/system-overview';
   
   const [open, setOpen] = useState(false);
+  const [allOrganizations, setAllOrganizations] = useState<UserOrganization[]>([]);
   const isAdmin = roles.includes('admin');
+
+  // For admin: fetch ALL organizations so they can view/switch to any org
+  useEffect(() => {
+    if (!isAdmin || !open) return;
+    
+    const fetchAllOrgs = async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, is_active, is_verified, logo_url')
+        .order('name');
+      
+      if (!error && data) {
+        setAllOrganizations(data.map(org => ({
+          organization_id: org.id,
+          organization_name: org.name,
+          organization_type: org.organization_type,
+          role_in_organization: 'admin',
+          is_primary: false,
+          is_active: org.is_active ?? true,
+          is_verified: org.is_verified ?? false,
+          logo_url: org.logo_url,
+        })));
+      }
+    };
+
+    fetchAllOrgs();
+  }, [isAdmin, open]);
+
+  // Admin sees all orgs, regular users see their own
+  const displayOrganizations = isAdmin ? allOrganizations : userOrganizations;
 
   if (!organization) return null;
 
