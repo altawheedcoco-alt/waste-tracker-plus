@@ -192,7 +192,6 @@ const DocumentTemplateManager = () => {
                       className="text-destructive h-8 w-8"
                       onClick={() => deleteTemplate.mutate(template.id)}
                     >
-                    >
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>

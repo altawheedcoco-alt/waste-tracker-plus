@@ -244,7 +244,6 @@ const AdminNewsManager = () => {
                     className="h-8 w-8 text-destructive"
                     onClick={() => deleteMutation.mutate(item.id)}
                   >
-                  >
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>

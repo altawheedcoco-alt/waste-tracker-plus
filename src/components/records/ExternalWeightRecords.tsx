@@ -849,7 +849,6 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
                             className="text-destructive"
                             onClick={() => deleteMutation.mutate(record.id)}
                           >
-                          >
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
