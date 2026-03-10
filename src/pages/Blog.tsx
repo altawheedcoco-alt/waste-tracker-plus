@@ -14,6 +14,7 @@ const formatDate = (dateStr: string) =>
 
 const Blog = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'المدونة' : 'Blog');
   const navigate = useNavigate();
   const isAr = language === 'ar';
 

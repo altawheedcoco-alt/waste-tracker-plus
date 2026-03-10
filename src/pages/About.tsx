@@ -10,6 +10,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 
 const About = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'من نحن' : 'About Us');
   const isAr = language === 'ar';
   const navigate = useNavigate();
 

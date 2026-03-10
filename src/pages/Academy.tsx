@@ -117,6 +117,7 @@ const dangerBadge = (level: string, isAr: boolean) => {
 
 const Academy = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'الأكاديمية البيئية' : 'Environmental Academy');
   const isAr = language === 'ar';
 
   return (

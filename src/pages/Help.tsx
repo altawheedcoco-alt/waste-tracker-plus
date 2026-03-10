@@ -27,6 +27,7 @@ const faqs = {
 
 const Help = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'مركز المساعدة' : 'Help Center');
   const isAr = language === 'ar';
   const faqList = faqs[language] || faqs.ar;
 

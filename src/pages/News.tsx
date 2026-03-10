@@ -25,6 +25,7 @@ const formatDate = (dateStr: string) => {
 
 const News = memo(() => {
   const navigate = useNavigate();
+  usePageTitle('الأخبار والتحديثات');
 
   const { data: newsItems = [], isLoading } = useQuery({
     queryKey: ['platform-news'],
