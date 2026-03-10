@@ -158,7 +158,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
       
       <SheetContent side="right" className="w-80 p-0">
         <SheetHeader className="p-4 pb-2 border-b">
-          <SheetTitle className="text-right text-base">المنظمات المرتبطة بحسابك</SheetTitle>
+          <SheetTitle className="text-right text-base">{isAdmin ? 'لوحة التحكم والمنظمات' : 'المنظمات المرتبطة بحسابك'}</SheetTitle>
         </SheetHeader>
         
         <ScrollArea className="h-[calc(100vh-80px)]">
