@@ -44,6 +44,7 @@ interface Props {
 const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
   const safeHTML = useMemo(() => block.block_type === 'html' && block.content ? sanitizeHTML(block.content) : '', [block.block_type, block.content]);
   const bgStyle = block.background_color ? { backgroundColor: block.background_color } : {};
+  const textStyle = block.text_color ? { color: block.text_color } : {};
 
   switch (block.block_type) {
     case 'banner':

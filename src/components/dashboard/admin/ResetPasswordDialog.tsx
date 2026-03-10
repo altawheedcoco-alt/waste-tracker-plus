@@ -129,7 +129,9 @@ const ResetPasswordDialog = ({
             />
             {newPassword && passwordStrength && (
               <div className="space-y-1 mt-1">
-                <Progress value={strengthPercent} className="h-1.5" indicatorClassName={strengthColor} />
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className={`h-full transition-all ${strengthColor}`} style={{ width: `${strengthPercent}%` }} />
+                </div>
                 <p className="text-xs text-muted-foreground">
                   {strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}
                 </p>

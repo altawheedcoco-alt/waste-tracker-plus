@@ -202,7 +202,9 @@ const ResetPassword = () => {
                   </div>
                   {password && passwordStrength && (
                     <div className="space-y-1.5">
-                      <Progress value={strengthPercent} className="h-1.5" indicatorClassName={strengthColor} />
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                        <div className={`h-full transition-all ${strengthColor}`} style={{ width: `${strengthPercent}%` }} />
+                      </div>
                       <div className="flex justify-between text-xs text-muted-foreground">
                         <span>{strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}</span>
                       </div>
