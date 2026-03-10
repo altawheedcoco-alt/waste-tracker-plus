@@ -437,6 +437,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/smart-job-recommendations" element={<SmartJobRecommendations />} />
     <Route path="/dashboard/driver-rewards" element={<DriverRewards />} />
     <Route path="/dashboard/production" element={<ProductionDashboard />} />
+    <Route path="/dashboard/quotations" element={<Quotations />} />
     <Route path="/dashboard/b2b-marketplace" element={<B2BMarketplace />} />
     <Route path="/dashboard/regulatory-violations" element={<RegulatoryViolations />} />
     <Route path="/dashboard/consultant-portal" element={<ConsultantPortal />} />
@@ -456,7 +457,6 @@ export const dashboardRoutes = (
     <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
     <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/office-performance" element={<AdvancedAnalytics />} />
-    <Route path="/dashboard/quotations" element={<Quotations />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
