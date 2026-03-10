@@ -195,11 +195,24 @@ const ResetPassword = () => {
                 <div className="space-y-2">
                   <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
                   <div className="relative">
-                    <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" required minLength={6} />
+                    <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" required minLength={8} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {password && passwordStrength && (
+                    <div className="space-y-1.5">
+                      <Progress value={strengthPercent} className="h-1.5" indicatorClassName={strengthColor} />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}</span>
+                      </div>
+                      {passwordStrength.feedback.length > 0 && (
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                          {passwordStrength.feedback.map((f, i) => <li key={i}>• {f}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>

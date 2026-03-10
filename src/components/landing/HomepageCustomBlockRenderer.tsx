@@ -179,7 +179,7 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
             <h3 className="text-lg font-bold mb-2">{block.title}</h3>
             {block.content && <p className="text-sm text-muted-foreground mb-3">{block.content}</p>}
             {block.link_url && (
-              <Button variant="outline" className="gap-2" onClick={() => window.open(block.link_url!, '_blank')}>
+              <Button variant="outline" className="gap-2" onClick={() => window.open(block.link_url!, '_blank', 'noopener,noreferrer')}>
                 <ExternalLink className="h-4 w-4" />
                 {block.link_text || 'زيارة الرابط'}
               </Button>

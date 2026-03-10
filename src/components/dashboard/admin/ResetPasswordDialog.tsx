@@ -123,9 +123,18 @@ const ResetPasswordDialog = ({
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="أدخل كلمة المرور الجديدة"
+              placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
               className="text-right"
+              minLength={8}
             />
+            {newPassword && passwordStrength && (
+              <div className="space-y-1 mt-1">
+                <Progress value={strengthPercent} className="h-1.5" indicatorClassName={strengthColor} />
+                <p className="text-xs text-muted-foreground">
+                  {strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}
+                </p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>
