@@ -162,7 +162,7 @@ const Header = memo(() => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0.5">
+            <nav className="hidden lg:flex items-center gap-0.5 min-w-0 flex-1 justify-center overflow-x-hidden">
               {dropdowns.map((dropdown) => (
                 <div
                   key={dropdown.label}
