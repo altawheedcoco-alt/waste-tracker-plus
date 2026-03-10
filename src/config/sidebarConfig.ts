@@ -506,46 +506,101 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18. إدارة النظام (أدمن فقط) ═══════════════
+  // ═══════════════ 18A. مركز القيادة (أدمن فقط) ═══════════════
   {
-    id: 'admin-panel',
-    icon: Shield,
-    labelAr: 'إدارة النظام',
-    labelEn: 'System Admin',
+    id: 'admin-command-center',
+    icon: Zap,
+    labelAr: 'مركز القيادة',
+    labelEn: 'Command Center',
     visibleFor: ['admin'],
     items: [
       { icon: Zap, labelAr: 'اللوحة التنفيذية', labelEn: 'Executive Dashboard', path: '/dashboard/executive', key: 'executive-dashboard' },
       { icon: Brain, labelAr: 'العين الذكية', labelEn: 'Smart Eye', path: '/dashboard/smart-insights', key: 'smart-insights' },
-      { icon: Shield, labelAr: 'مراجعة التسجيل', labelEn: 'Onboarding', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
+      { icon: Activity, labelAr: 'نظرة عامة على النظام', labelEn: 'System Overview', path: '/dashboard/system-overview', key: 'system-overview' },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'system-status' },
-      { icon: Activity, labelAr: 'نظرة عامة', labelEn: 'System Overview', path: '/dashboard/system-overview', key: 'system-overview' },
-      { icon: CreditCard, labelAr: 'الإيرادات والاشتراكات', labelEn: 'Revenue', path: '/dashboard/admin-revenue', key: 'admin-revenue' },
-      { icon: Settings, labelAr: 'أوامر النظام', labelEn: 'Commands', path: '/dashboard/system-commands', key: 'system-commands' },
-      { icon: Newspaper, labelAr: 'إدارة الأخبار', labelEn: 'News', path: '/dashboard/news-manager', key: 'news-manager' },
-      { icon: BookOpen, labelAr: 'إدارة المدونة', labelEn: 'Blog', path: '/dashboard/blog-manager', key: 'blog-manager' },
-      { icon: MessageCircle, labelAr: 'إدارة التعليقات', labelEn: 'Testimonials', path: '/dashboard/testimonials-management', key: 'testimonials-management' },
-      { icon: CheckSquare, labelAr: 'موافقات الشركات', labelEn: 'Approvals', path: '/dashboard/company-approvals', key: 'company-approvals', badgeKey: 'company-approvals' },
-      { icon: Building2, labelAr: 'إدارة الشركات', labelEn: 'Companies', path: '/dashboard/company-management', key: 'company-management' },
+      { icon: BarChart3, labelAr: 'تحليلات متقدمة', labelEn: 'Advanced Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics' },
+      { icon: Scale, labelAr: 'لوحة الرقابة', labelEn: 'Regulator Panel', path: '/dashboard/regulator', key: 'regulator' },
+    ],
+  },
+
+  // ═══════════════ 18B. إدارة الكيانات (أدمن فقط) ═══════════════
+  {
+    id: 'admin-entity-management',
+    icon: Building2,
+    labelAr: 'إدارة الكيانات',
+    labelEn: 'Entity Management',
+    visibleFor: ['admin'],
+    items: [
+      { icon: Shield, labelAr: 'مراجعة التسجيل', labelEn: 'Onboarding Review', path: '/dashboard/onboarding-review', key: 'onboarding-review' },
+      { icon: CheckSquare, labelAr: 'موافقات الشركات', labelEn: 'Company Approvals', path: '/dashboard/company-approvals', key: 'company-approvals', badgeKey: 'company-approvals' },
+      { icon: Building2, labelAr: 'إدارة الشركات', labelEn: 'Company Management', path: '/dashboard/company-management', key: 'company-management' },
+      { icon: Building2, labelAr: 'الشركات المنظمة', labelEn: 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
+      { icon: FileText, labelAr: 'وثائق المنظمات', labelEn: 'Org Documents', path: '/dashboard/organization-documents', key: 'org-docs', badgeKey: 'org-docs' },
+      { icon: FileText, labelAr: 'إدارة الإفادات', labelEn: 'Attestation Management', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
+      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certificates', path: '/dashboard/recycling-certificates', key: 'admin-certs', badgeKey: 'admin-certs' },
+    ],
+  },
+
+  // ═══════════════ 18C. المستخدمون والأسطول (أدمن فقط) ═══════════════
+  {
+    id: 'admin-users-fleet',
+    icon: Truck,
+    labelAr: 'المستخدمون والأسطول',
+    labelEn: 'Users & Fleet',
+    visibleFor: ['admin'],
+    items: [
       { icon: UserPlus, labelAr: 'موافقات السائقين', labelEn: 'Driver Approvals', path: '/dashboard/driver-approvals', key: 'driver-approvals', badgeKey: 'driver-approvals' },
-      { icon: FileText, labelAr: 'وثائق المنظمات', labelEn: 'Org Docs', path: '/dashboard/organization-documents', key: 'org-docs', badgeKey: 'org-docs' },
       { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
       { icon: Truck, labelAr: 'خريطة السائقين', labelEn: 'Drivers Map', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
-      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'admin-certs', badgeKey: 'admin-certs' },
-      { icon: Video, labelAr: 'مولد الفيديو', labelEn: 'Video Gen', path: '/dashboard/video-generator', key: 'video-gen' },
+      { icon: Send, labelAr: 'إدارة WaPilot', labelEn: 'WaPilot Management', path: '/dashboard/wapilot', key: 'wapilot' },
+    ],
+  },
+
+  // ═══════════════ 18D. المالية والإيرادات (أدمن فقط) ═══════════════
+  {
+    id: 'admin-finance',
+    icon: CreditCard,
+    labelAr: 'المالية والإيرادات',
+    labelEn: 'Finance & Revenue',
+    visibleFor: ['admin'],
+    items: [
+      { icon: CreditCard, labelAr: 'الإيرادات والاشتراكات', labelEn: 'Revenue & Subscriptions', path: '/dashboard/admin-revenue', key: 'admin-revenue' },
       { icon: TreePine, labelAr: 'سوق الخشب', labelEn: 'Wood Market', path: '/dashboard/wood-market', key: 'wood-market' },
-      { icon: Scale, labelAr: 'لوحة الرقابة', labelEn: 'Regulator', path: '/dashboard/regulator', key: 'regulator' },
-      { icon: Building2, labelAr: 'الشركات المنظمة', labelEn: 'Regulated', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
+    ],
+  },
+
+  // ═══════════════ 18E. المحتوى والتسويق (أدمن فقط) ═══════════════
+  {
+    id: 'admin-content',
+    icon: Globe,
+    labelAr: 'المحتوى والتسويق',
+    labelEn: 'Content & Marketing',
+    visibleFor: ['admin'],
+    items: [
+      { icon: Globe, labelAr: 'إدارة الصفحة الرئيسية', labelEn: 'Homepage Manager', path: '/dashboard/homepage-manager', key: 'homepage-manager' },
+      { icon: Newspaper, labelAr: 'إدارة الأخبار', labelEn: 'News Manager', path: '/dashboard/news-manager', key: 'news-manager' },
+      { icon: BookOpen, labelAr: 'إدارة المدونة', labelEn: 'Blog Manager', path: '/dashboard/blog-manager', key: 'blog-manager' },
+      { icon: MessageCircle, labelAr: 'إدارة التعليقات', labelEn: 'Testimonials', path: '/dashboard/testimonials-management', key: 'testimonials-management' },
+      { icon: Video, labelAr: 'مولد الفيديو', labelEn: 'Video Generator', path: '/dashboard/video-generator', key: 'video-gen' },
+      { icon: BookOpen, labelAr: 'بروشور المنصة', labelEn: 'Platform Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
+      { icon: Monitor, labelAr: 'سكرين شوت', labelEn: 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
+      { icon: Eye, labelAr: 'تحليلات الزوار', labelEn: 'Visitor Analytics', path: '/dashboard/visitor-analytics', key: 'visitor-analytics' },
+    ],
+  },
+
+  // ═══════════════ 18F. البنية التحتية (أدمن فقط) ═══════════════
+  {
+    id: 'admin-infrastructure',
+    icon: Database,
+    labelAr: 'البنية التحتية',
+    labelEn: 'Infrastructure',
+    visibleFor: ['admin'],
+    items: [
+      { icon: Settings, labelAr: 'أوامر النظام', labelEn: 'System Commands', path: '/dashboard/system-commands', key: 'system-commands' },
       { icon: LinkIcon, labelAr: 'إدارة API', labelEn: 'API Management', path: '/dashboard/api', key: 'api-management' },
       { icon: Shield, labelAr: 'اختبار الأمان', labelEn: 'Security Testing', path: '/dashboard/security-testing', key: 'security-testing' },
       { icon: Database, labelAr: 'تحسين قاعدة البيانات', labelEn: 'DB Optimization', path: '/dashboard/db-optimization', key: 'db-optimization' },
-      { icon: BarChart3, labelAr: 'تحليلات متقدمة', labelEn: 'Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics' },
-      { icon: Lock, labelAr: 'امتثال GDPR', labelEn: 'GDPR', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
-      { icon: BookOpen, labelAr: 'بروشور المنصة', labelEn: 'Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
-      { icon: FileText, labelAr: 'إدارة الإفادات', labelEn: 'Attestations', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
-      { icon: Monitor, labelAr: 'سكرين شوت', labelEn: 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
-      { icon: Globe, labelAr: 'إدارة الصفحة الرئيسية', labelEn: 'Homepage Manager', path: '/dashboard/homepage-manager', key: 'homepage-manager' },
-      { icon: Send, labelAr: 'إدارة WaPilot', labelEn: 'WaPilot', path: '/dashboard/wapilot', key: 'wapilot' },
-      { icon: Eye, labelAr: 'تحليلات الزوار', labelEn: 'Visitor Analytics', path: '/dashboard/visitor-analytics', key: 'visitor-analytics' },
+      { icon: Lock, labelAr: 'امتثال GDPR', labelEn: 'GDPR Compliance', path: '/dashboard/gdpr-compliance', key: 'gdpr-compliance' },
     ],
   },
 
