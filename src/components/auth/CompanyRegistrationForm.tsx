@@ -383,6 +383,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             placeholder="اسم الشخص المسؤول"
             value={formData.representativeName}
             onChange={(e) => handleChange('representativeName', e.target.value)}
+            onBlur={() => handleBlur('representativeName')}
             className={`h-8 text-xs ${errors.representativeName ? 'border-destructive' : ''}`}
             maxLength={100}
           />
