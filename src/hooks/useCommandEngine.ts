@@ -192,8 +192,7 @@ export function useCommandEngine({ orgType }: CommandEngineOptions) {
     const depCheck = await checkDependencies(commandId, resourceId);
     if (!depCheck.canExecute) {
       if (depCheck.bypassable && options?.bypassReason) {
-        // تسجيل التجاوز
-        console.log(`[Bypass] ${commandId} — Reason: ${options.bypassReason}`);
+        // bypass recorded
       } else if (!depCheck.bypassable) {
         const firstBlock = depCheck.blockedBy[0];
         toast.error(firstBlock.condition.blockMessageAr);
