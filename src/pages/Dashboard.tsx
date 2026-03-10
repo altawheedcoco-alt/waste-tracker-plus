@@ -73,14 +73,7 @@ const Dashboard = () => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
-    // Admin should see system-overview by default on first login
-    if (!loading && user && roles.includes('admin') && window.location.pathname === '/dashboard') {
-      const hasVisited = sessionStorage.getItem('__admin_initial_redirect');
-      if (!hasVisited) {
-        sessionStorage.setItem('__admin_initial_redirect', '1');
-        navigate('/dashboard/system-overview', { replace: true });
-      }
-    }
+    // Admin now lands on the Command Center dashboard directly at /dashboard
   }, [user, loading, navigate, roles]);
 
   if (loading) {
