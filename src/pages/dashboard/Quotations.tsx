@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useOrganization } from '@/hooks/useOrganization';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQuotations, type QuotationItem, type Quotation } from '@/hooks/useQuotations';
 import { getTemplatesByEntity, getTemplateById, ENTITY_LABELS, type QuotationTemplate } from '@/lib/quotationTemplates';
 import { Button } from '@/components/ui/button';
