@@ -162,11 +162,11 @@ const Header = memo(() => {
             </div>
 
             {/* Desktop Navigation */}
-            <nav className="hidden lg:flex items-center gap-0.5 min-w-0 flex-1 justify-center overflow-x-hidden">
-              {dropdowns.map((dropdown) => (
+            <nav className="hidden lg:flex items-center gap-0.5 min-w-0 justify-center">
+              {dropdowns.map((dropdown, index) => (
                 <div
                   key={dropdown.label}
-                  className="relative"
+                  className={`relative ${index >= 3 ? 'hidden xl:block' : ''}`}
                   onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                   onMouseLeave={handleDropdownLeave}
                 >
