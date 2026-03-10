@@ -1,4 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense, useState } from "react";
 import { ChevronDown, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
