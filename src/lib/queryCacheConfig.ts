@@ -54,7 +54,10 @@ const QUERY_KEY_PROFILES: Record<string, CacheProfile> = {
   'organizations': 'reference',
   'partners': 'reference',
   'linked-partners': 'reference',
+  'verified-partnerships': 'reference',
   'employees': 'reference',
+  'employee-permissions': 'reference',
+  'my-permissions': 'reference',
   'drivers': 'reference',
   'customers': 'reference',
   'vehicles': 'reference',
@@ -62,6 +65,7 @@ const QUERY_KEY_PROFILES: Record<string, CacheProfile> = {
   'award-letters': 'reference',
   'signatories': 'reference',
   'profile': 'reference',
+  'work-orders': 'operational',
 
   // بيانات تشغيلية
   'shipments': 'operational',
