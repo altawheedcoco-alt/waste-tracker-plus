@@ -93,7 +93,7 @@ const AuthSidePanel = () => {
             <div>
               <h2 className="text-2xl xl:text-3xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
               <div className="flex items-center gap-2">
-                <p className="text-white/50 text-xs">نظام إدارة المخلفات المتكامل</p>
+                <p className="text-white/50 text-xs">المنصة الرقمية الأولى لإدارة المخلفات</p>
                 <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[9px] font-bold text-white/80 tracking-wider">
                   <Sparkles className="w-2.5 h-2.5" />
                   v3.0
@@ -103,12 +103,12 @@ const AuthSidePanel = () => {
           </div>
 
           <h3 className="text-xl xl:text-2xl font-bold mb-3 leading-relaxed text-white">
-            منصة رقمية شاملة لإدارة
+            رقمنة شاملة لإدارة
             <br />
-            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية</span>
+            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية في مصر</span>
           </h3>
           <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-            نظام متكامل للتتبع والتوثيق والامتثال القانوني لكافة عمليات إدارة المخلفات في مصر
+            تحول رقمي متكامل: تتبع إلكتروني، فوترة رقمية، امتثال قانوني، وذكاء اصطناعي لكافة عمليات المخلفات
           </p>
         </motion.div>
       </div>
