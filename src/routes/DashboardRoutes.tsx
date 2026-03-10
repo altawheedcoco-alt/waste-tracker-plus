@@ -218,6 +218,7 @@ const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocu
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
+const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
