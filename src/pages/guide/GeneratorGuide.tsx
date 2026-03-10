@@ -213,12 +213,12 @@ const GeneratorGuide = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-l from-blue-600 to-blue-800 text-white">
+      <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 mb-4 gap-2"
+            className="text-primary-foreground hover:bg-white/20 mb-4 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             العودة للرئيسية
@@ -230,7 +230,7 @@ const GeneratorGuide = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">دليل المولد</h1>
-              <p className="text-blue-100 mt-2">
+              <p className="text-primary-foreground/70 mt-2">
                 دليلك الشامل لاستخدام منصة آي ريسايكل كمنشأة مولدة للنفايات
               </p>
             </div>

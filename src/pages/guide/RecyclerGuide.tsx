@@ -250,12 +250,12 @@ const RecyclerGuide = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-l from-green-600 to-green-800 text-white">
+      <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 mb-4 gap-2"
+            className="text-primary-foreground hover:bg-white/20 mb-4 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             العودة للرئيسية
@@ -267,7 +267,7 @@ const RecyclerGuide = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">دليل المدور</h1>
-              <p className="text-green-100 mt-2">
+              <p className="text-primary-foreground/70 mt-2">
                 دليلك الشامل لاستخدام منصة آي ريسايكل كمصنع إعادة تدوير
               </p>
             </div>
