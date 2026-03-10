@@ -780,7 +780,7 @@ const DriverLinksManager = () => {
                     <Button
                       variant="ghost"
                       size="icon"
-                      onClick={() => deleteLink(link.id)}
+                      onClick={() => deleteLinkAction(link.id)}
                       className="h-8 w-8 text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
