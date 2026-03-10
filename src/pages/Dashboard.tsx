@@ -53,9 +53,6 @@ const Dashboard = () => {
   // Security hardening — session timeout, CSP, anti-XSS
   useSecurityHardening();
   
-  // Realtime sync — auto-subscribe to all critical tables for this role
-  useDashboardRealtime();
-
   // PWA: reconnect realtime + invalidate cache when app resumes from background
   usePWARealtimeSync();
 
