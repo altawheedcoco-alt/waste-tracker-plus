@@ -37,11 +37,11 @@ const wasteTypeLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  new: { label: 'جديدة', color: 'bg-blue-100 text-blue-800' },
-  approved: { label: 'معتمدة', color: 'bg-green-100 text-green-800' },
-  in_transit: { label: 'في الطريق', color: 'bg-orange-100 text-orange-800' },
-  delivered: { label: 'تم التسليم', color: 'bg-purple-100 text-purple-800' },
-  confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-800' },
+  new: { label: 'جديدة', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+  approved: { label: 'معتمدة', color: 'bg-primary/10 text-primary' },
+  in_transit: { label: 'في الطريق', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+  delivered: { label: 'تم التسليم', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
+  confirmed: { label: 'مؤكدة', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
 };
 
 interface ShipmentData {
