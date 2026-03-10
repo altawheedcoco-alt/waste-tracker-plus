@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +23,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { UserOrganization } from '@/contexts/auth/AuthContext';
 
 const getOrganizationIcon = (type: string) => {
   switch (type) {
@@ -69,7 +71,38 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   const isOnSystemOverview = location.pathname === '/dashboard/system-overview';
   
   const [open, setOpen] = useState(false);
+  const [allOrganizations, setAllOrganizations] = useState<UserOrganization[]>([]);
   const isAdmin = roles.includes('admin');
+
+  // For admin: fetch ALL organizations so they can view/switch to any org
+  useEffect(() => {
+    if (!isAdmin || !open) return;
+    
+    const fetchAllOrgs = async () => {
+      const { data, error } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, is_active, is_verified, logo_url')
+        .order('name');
+      
+      if (!error && data) {
+        setAllOrganizations(data.map(org => ({
+          organization_id: org.id,
+          organization_name: org.name,
+          organization_type: org.organization_type,
+          role_in_organization: 'admin',
+          is_primary: false,
+          is_active: org.is_active ?? true,
+          is_verified: org.is_verified ?? false,
+          logo_url: org.logo_url,
+        })));
+      }
+    };
+
+    fetchAllOrgs();
+  }, [isAdmin, open]);
+
+  // Admin sees all orgs, regular users see their own
+  const displayOrganizations = isAdmin ? allOrganizations : userOrganizations;
 
   if (!organization) return null;
 
@@ -198,7 +231,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
             )}
 
             <AnimatePresence>
-              {userOrganizations.map((org, index) => {
+              {displayOrganizations.map((org, index) => {
                 const Icon = getOrganizationIcon(org.organization_type);
                 const isActive = org.organization_id === organization.id;
                 
