@@ -40,13 +40,17 @@ const ResetPasswordDialog = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
+  const passwordStrength = newPassword ? validatePasswordStrength(newPassword) : null;
+  const strengthPercent = passwordStrength ? (passwordStrength.score / 5) * 100 : 0;
+  const strengthColor = strengthPercent <= 40 ? 'bg-destructive' : strengthPercent <= 70 ? 'bg-yellow-500' : 'bg-green-500';
+
   const handleReset = async () => {
     if (!user) return;
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       toast({
         title: 'خطأ',
-        description: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+        description: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
         variant: 'destructive',
       });
       return;
