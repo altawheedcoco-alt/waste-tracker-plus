@@ -243,26 +243,9 @@ const AdminDashboard = () => {
   const { toast } = useToast();
   const { t } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
-  const [stats, setStats] = useState<DashboardStats>({
-    totalShipments: 0, activeShipments: 0, registeredCompanies: 0,
-    activeDrivers: 0, totalDrivers: 0, pendingUsers: 0,
-    generatorCount: 0, transporterCount: 0, recyclerCount: 0,
-  });
-  const [recentShipments, setRecentShipments] = useState<RecentShipment[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [printDialogOpen, setPrintDialogOpen] = useState(false);
-  const [selectedShipmentForPrint, setSelectedShipmentForPrint] = useState<any>(null);
-  const [showDepositDialog, setShowDepositDialog] = useState(false);
-  const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
-  const [showWorkOrder, setShowWorkOrder] = useState(false);
-  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
-
-  useEffect(() => { fetchDashboardData(); }, []);
-
-  const fetchDashboardData = async () => {
-    try {
+  const { data: dashboardData, isLoading: loading } = useQuery({
+    queryKey: ['admin-dashboard-stats'],
+    queryFn: async () => {
       const { data: shipmentsRaw, count: totalShipments } = await supabase
         .from('shipments')
         .select('id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id', { count: 'exact' })
@@ -293,19 +276,26 @@ const AdminDashboard = () => {
 
       const { data: pendingProfiles } = await supabase.from('profiles').select('id').is('organization_id', null);
 
-      setStats({
-        totalShipments: totalShipments || 0, activeShipments,
-        registeredCompanies: organizations?.length || 0, activeDrivers,
-        totalDrivers: drivers?.length || 0, pendingUsers: pendingProfiles?.length || 0,
-        generatorCount, transporterCount, recyclerCount,
-      });
-      setRecentShipments(shipments as unknown as RecentShipment[] || []);
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
+      return {
+        stats: {
+          totalShipments: totalShipments || 0, activeShipments,
+          registeredCompanies: organizations?.length || 0, activeDrivers,
+          totalDrivers: drivers?.length || 0, pendingUsers: pendingProfiles?.length || 0,
+          generatorCount, transporterCount, recyclerCount,
+        },
+        recentShipments: shipments as unknown as RecentShipment[],
+      };
+    },
+    refetchInterval: 30_000, // Auto-refresh every 30s
+    staleTime: 10_000,
+  });
+
+  const stats = dashboardData?.stats || {
+    totalShipments: 0, activeShipments: 0, registeredCompanies: 0,
+    activeDrivers: 0, totalDrivers: 0, pendingUsers: 0,
+    generatorCount: 0, transporterCount: 0, recyclerCount: 0,
   };
+  const recentShipments = dashboardData?.recentShipments || [];
 
   const statCards: StatCard[] = [
     { title: t('dashboard.totalShipments'), value: stats.totalShipments, subtitle: t('dashboard.allShipments'), icon: FileText },
