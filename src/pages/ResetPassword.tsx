@@ -50,9 +50,22 @@ const ResetPassword = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const startCooldown = () => {
+    setCooldown(RESET_COOLDOWN_MS / 1000);
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || cooldown > 0) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -60,6 +73,7 @@ const ResetPassword = () => {
       });
       if (error) throw error;
       setEmailSent(true);
+      startCooldown();
       toast({ title: 'تم الإرسال', description: 'تم إرسال رابط استرجاع كلمة المرور إلى بريدك الإلكتروني' });
     } catch (error: any) {
       toast({ title: 'خطأ', description: error.message || 'حدث خطأ أثناء إرسال رابط الاسترجاع', variant: 'destructive' });
