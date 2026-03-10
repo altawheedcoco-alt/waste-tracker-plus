@@ -73,7 +73,7 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
                   {block.link_url && (
                     <Button
                       className="mt-4 gap-2"
-                      onClick={() => window.open(block.link_url!, '_blank')}
+                     onClick={() => window.open(block.link_url!, '_blank', 'noopener,noreferrer')}
                     >
                       {block.link_text || 'اعرف المزيد'}
                       <ExternalLink className="h-4 w-4" />
