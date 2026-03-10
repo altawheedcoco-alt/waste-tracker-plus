@@ -147,7 +147,7 @@ const PartnerLinkingCard = () => {
         .eq('partner_code', trimmedCode)
         .maybeSingle();
 
-      console.log('📋 نتيجة البحث:', { partnerOrg, findError });
+      
 
       if (findError) {
         console.error('❌ خطأ في البحث:', findError);
