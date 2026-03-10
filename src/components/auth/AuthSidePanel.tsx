@@ -129,8 +129,22 @@ const AuthSidePanel = () => {
               className="relative w-full h-full object-contain drop-shadow-2xl"
             />
           </AnimatePresence>
+          {/* Title overlay */}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={`title-${currentIndex}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.4 }}
+              className="absolute -bottom-8 left-0 right-0 text-center"
+            >
+              <p className="text-xs font-bold text-white/90">{currentIllustration.title}</p>
+              <p className="text-[10px] text-white/50">{currentIllustration.desc}</p>
+            </motion.div>
+          </AnimatePresence>
           {/* Dot indicators */}
-          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex gap-1">
             {illustrations.map((_, i) => (
               <button
                 key={i}
