@@ -250,11 +250,11 @@ const Verify = () => {
                 تقرير مجمع
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              هذا تقرير مجمع يحتوي على بيانات متعددة الشحنات. التقرير صادر رسمياً من نظام iRecycle.
+             <CardContent>
+              <p className="text-muted-foreground">
                 هذا تقرير مجمع يحتوي على بيانات متعددة الشحنات. التقرير صادر رسمياً من نظام iRecycle.
               </p>
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-sm text-muted-foreground mt-4">
                 تاريخ التحقق: {format(new Date(), 'PPpp', { locale: ar })}
               </p>
             </CardContent>
