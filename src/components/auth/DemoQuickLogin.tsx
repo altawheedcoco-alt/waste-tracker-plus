@@ -130,7 +130,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   };
 
   const verifyPin = () => {
-    if (pinInput === ACCESS_PIN) {
+    if (pinInput === ACCESS_PIN_HASH) {
       setPinVerified(true);
     } else {
       setPinError(true);
