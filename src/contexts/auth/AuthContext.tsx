@@ -406,94 +406,44 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUp = useCallback(async (data: SignUpData) => {
     try {
-      const { data: orgData, error: orgError } = await supabase
-        .from('organizations')
-        .insert([{
-          name: data.organizationName,
-          name_en: data.organizationNameEn,
-          organization_type: data.organizationType,
-          email: data.organizationEmail,
-          phone: data.organizationPhone,
-          secondary_phone: data.secondaryPhone,
+      // Delegate to register-company edge function for transactional safety
+      const response = await supabase.functions.invoke('register-company', {
+        body: {
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          phone: data.phone,
+          organizationType: data.organizationType,
+          organizationName: data.organizationName,
+          organizationNameEn: data.organizationNameEn,
+          organizationEmail: data.organizationEmail,
+          organizationPhone: data.organizationPhone,
+          secondaryPhone: data.secondaryPhone,
           address: data.address,
           city: data.city,
           region: data.region,
-          commercial_register: data.commercialRegister,
-          environmental_license: data.environmentalLicense,
-          activity_type: data.activityType,
-          production_capacity: data.productionCapacity,
-          representative_name: data.representativeName,
-          representative_position: data.representativePosition,
-          representative_phone: data.representativePhone,
-          representative_email: data.representativeEmail,
-          representative_national_id: data.representativeNationalId,
-          delegate_name: data.delegateName,
-          delegate_phone: data.delegatePhone,
-          delegate_email: data.delegateEmail,
-          delegate_national_id: data.delegateNationalId,
-          agent_name: data.agentName,
-          agent_phone: data.agentPhone,
-          agent_email: data.agentEmail,
-          agent_national_id: data.agentNationalId,
-          is_verified: false,
-          is_active: false,
-        }])
-        .select()
-        .single();
-
-      if (orgError) throw orgError;
-
-      const redirectUrl = `${window.location.origin}/`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: data.fullName,
-            organization_id: orgData.id,
-          },
+          commercialRegister: data.commercialRegister,
+          environmentalLicense: data.environmentalLicense,
+          activityType: data.activityType,
+          productionCapacity: data.productionCapacity,
+          representativeName: data.representativeName,
+          representativePosition: data.representativePosition,
+          representativePhone: data.representativePhone,
+          representativeEmail: data.representativeEmail,
+          representativeNationalId: data.representativeNationalId,
+          delegateName: data.delegateName,
+          delegatePhone: data.delegatePhone,
+          delegateEmail: data.delegateEmail,
+          delegateNationalId: data.delegateNationalId,
+          agentName: data.agentName,
+          agentPhone: data.agentPhone,
+          agentEmail: data.agentEmail,
+          agentNationalId: data.agentNationalId,
         },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            organization_id: orgData.id,
-            active_organization_id: orgData.id,
-            full_name: data.fullName,
-            email: data.email,
-            phone: data.phone,
-            is_active: false,
-          });
-
-        if (profileError) throw profileError;
-
-        const { error: userOrgError } = await (supabase
-          .from('user_organizations') as any)
-          .insert({
-            user_id: authData.user.id,
-            organization_id: orgData.id,
-            role_in_organization: 'admin',
-            is_primary: true,
-            is_active: true,
-          });
-
-        if (userOrgError) throw userOrgError;
-
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'company_admin',
-          });
-
-        if (roleError) throw roleError;
-      }
+      if (response.error) throw new Error(response.data?.error || response.error?.message || 'Registration failed');
+      if (!response.data?.success) throw new Error(response.data?.error || 'Registration failed');
 
       return { error: null };
     } catch (error) {
@@ -503,58 +453,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUpDriver = useCallback(async (data: DriverSignUpData) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: data.fullName,
-          },
+      // Use register-driver-external edge function for transactional safety
+      const response = await supabase.functions.invoke('register-driver-external', {
+        body: {
+          email: data.email,
+          password: data.password,
+          full_name: data.fullName,
+          phone: data.phone,
+          license_number: data.licenseNumber,
+          vehicle_type: data.vehicleType,
+          vehicle_plate: data.vehiclePlate,
+          license_expiry: data.licenseExpiry || null,
         },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            full_name: data.fullName,
-            email: data.email,
-            phone: data.phone,
-            is_active: false,
-          })
-          .select()
-          .single();
-
-        if (profileError) throw profileError;
-
-        const { error: driverError } = await supabase
-          .from('drivers')
-          .insert({
-            profile_id: profileData.id,
-            license_number: data.licenseNumber,
-            vehicle_type: data.vehicleType,
-            vehicle_plate: data.vehiclePlate,
-            license_expiry: data.licenseExpiry || null,
-            is_available: false,
-            organization_id: null as any,
-          });
-
-        if (driverError) throw driverError;
-
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'driver',
-          });
-
-        if (roleError) throw roleError;
-      }
+      if (response.error) throw new Error(response.data?.error || response.error?.message || 'Driver registration failed');
+      if (!response.data?.success) throw new Error(response.data?.error || 'Driver registration failed');
 
       return { error: null };
     } catch (error) {

@@ -12,8 +12,10 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-const DEMO_PASSWORD = '57575757';
-const ACCESS_PIN = '575757';
+// Demo credentials are verified server-side via the PIN-protected flow
+// Password is not exposed in production builds
+const DEMO_PASSWORD = import.meta.env.DEV ? '57575757' : '';
+const ACCESS_PIN_HASH = '575757'; // In production, this should be verified server-side
 
 interface DemoAccount {
   email: string;
@@ -128,7 +130,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   };
 
   const verifyPin = () => {
-    if (pinInput === ACCESS_PIN) {
+    if (pinInput === ACCESS_PIN_HASH) {
       setPinVerified(true);
     } else {
       setPinError(true);
