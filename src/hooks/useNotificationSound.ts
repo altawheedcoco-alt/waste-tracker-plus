@@ -252,7 +252,7 @@ export const previewNotificationSound = async (type: NotificationSoundType) => {
       );
     });
     
-    console.log('🔊 Preview sound played:', type);
+    // preview played
   } catch (error) {
     console.warn('Could not preview notification sound:', error);
   }

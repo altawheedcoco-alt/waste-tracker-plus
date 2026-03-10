@@ -82,7 +82,6 @@ export const useTrackingSystem = ({
 
   // Switch tracking mode
   const switchMode = useCallback((newMode: TrackingMode) => {
-    console.log(`[TrackingSystem] Switching from ${activeMode} to ${newMode}`);
     setActiveMode(newMode);
   }, [activeMode]);
 

@@ -212,7 +212,7 @@ const PartnerLinkingCard = () => {
         throw new Error(`فشل في إنشاء الشراكة: ${error.message}`);
       }
 
-      console.log('✅ تم إنشاء الشراكة:', data);
+      
       return { partnership: data, partnerName: partnerOrg.name };
     },
     onSuccess: (result) => {
