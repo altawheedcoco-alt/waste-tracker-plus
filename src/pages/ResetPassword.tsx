@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
@@ -9,9 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, KeyRound, ArrowRight, CheckCircle, AlertCircle, Mail, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import PlatformLogo from '@/components/common/PlatformLogo';
+import { validatePasswordStrength } from '@/lib/inputSanitizer';
 
 type ResetView = 'request' | 'update' | 'success';
+
+const RESET_COOLDOWN_MS = 60_000; // 60 seconds between reset emails
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -23,6 +27,17 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const passwordStrength = password ? validatePasswordStrength(password) : null;
+  const strengthPercent = passwordStrength ? (passwordStrength.score / 5) * 100 : 0;
+  const strengthColor = strengthPercent <= 40 ? 'bg-destructive' : strengthPercent <= 70 ? 'bg-yellow-500' : 'bg-green-500';
+
+  // Cleanup cooldown timer
+  useEffect(() => {
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+  }, []);
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
