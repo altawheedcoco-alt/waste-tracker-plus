@@ -315,13 +315,13 @@ const GeneratorGuide = () => {
               transition={{ delay: 0.1 }}
             >
               <Card className="bg-card border-border overflow-hidden">
-                <CardHeader className="bg-gradient-to-l from-blue-500/5 to-blue-500/10 border-b border-border">
+                <CardHeader className="bg-gradient-to-l from-primary/5 to-primary/10 border-b border-border">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg">
-                      <section.icon className="w-6 h-6 text-blue-500" />
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <section.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <span className="text-xs text-blue-500 font-normal">القسم {i + 1}</span>
+                      <span className="text-xs text-primary font-normal">القسم {i + 1}</span>
                       <h2 className="text-xl">{section.title}</h2>
                     </div>
                   </CardTitle>
