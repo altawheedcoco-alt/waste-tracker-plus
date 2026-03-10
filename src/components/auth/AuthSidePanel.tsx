@@ -76,23 +76,20 @@ const AuthSidePanel = () => {
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '20px 20px',
         }} />
-        <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]" style={{
-          background: 'repeating-linear-gradient(45deg, transparent, transparent 60px, white 60px, white 61px)',
-        }} />
       </div>
 
-      {/* Header - compact */}
-      <div className="relative z-10 p-6 xl:p-8 shrink-0">
+      {/* Header */}
+      <div className="relative z-10 px-5 pt-4 pb-2 shrink-0">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-center gap-3 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-black/10">
-              <Leaf className="w-5 h-5 text-white" />
+          <div className="flex items-center gap-2.5 mb-2">
+            <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-black/10">
+              <Leaf className="w-4 h-4 text-white" />
             </div>
             <div>
-              <h2 className="text-xl xl:text-2xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
-              <div className="flex items-center gap-2">
-                <p className="text-white/50 text-[11px]">المنصة الرقمية الأولى لإدارة المخلفات</p>
-                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[8px] font-bold text-white/80 tracking-wider">
+              <h2 className="text-lg font-bold leading-tight text-white tracking-tight">iRecycle</h2>
+              <div className="flex items-center gap-1.5">
+                <p className="text-white/50 text-[10px]">المنصة الرقمية الأولى لإدارة المخلفات</p>
+                <span className="inline-flex items-center gap-0.5 px-1 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[7px] font-bold text-white/80">
                   <Sparkles className="w-2 h-2" />
                   v3.0
                 </span>
@@ -100,19 +97,19 @@ const AuthSidePanel = () => {
             </div>
           </div>
 
-          <h3 className="text-lg xl:text-xl font-bold mb-1.5 leading-snug text-white">
+          <h3 className="text-base font-bold mb-1 leading-snug text-white">
             رقمنة شاملة لإدارة{' '}
             <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية</span>
           </h3>
-          <p className="text-white/45 text-xs leading-relaxed max-w-sm">
+          <p className="text-white/45 text-[11px] leading-relaxed">
             تحول رقمي متكامل: تتبع إلكتروني، فوترة رقمية، امتثال قانوني، وذكاء اصطناعي
           </p>
         </motion.div>
       </div>
 
-      {/* Illustration - flexible center area */}
-      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 min-h-0">
-        <div className="relative w-full max-w-[240px] xl:max-w-[280px] aspect-square">
+      {/* Illustration - flexible center */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-5 min-h-0 py-2">
+        <div className="relative w-full max-w-[180px] xl:max-w-[220px] flex-1 min-h-0 max-h-[200px]">
           <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-90" />
           <AnimatePresence mode="wait">
             <motion.img
@@ -135,19 +132,19 @@ const AuthSidePanel = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.4 }}
-            className="text-center mt-2"
+            className="text-center mt-1.5 shrink-0"
           >
-            <p className="text-xs font-bold text-white/90">{currentIllustration.title}</p>
-            <p className="text-[10px] text-white/50">{currentIllustration.desc}</p>
+            <p className="text-[11px] font-bold text-white/90">{currentIllustration.title}</p>
+            <p className="text-[9px] text-white/50">{currentIllustration.desc}</p>
           </motion.div>
         </AnimatePresence>
-        <div className="flex gap-1 mt-2">
+        <div className="flex gap-1 mt-1.5 shrink-0">
           {illustrations.map((_, i) => (
             <button
               key={i}
               onClick={() => setCurrentIndex(i)}
               className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                i === currentIndex ? 'bg-white w-4' : 'bg-white/30 hover:bg-white/50'
+                i === currentIndex ? 'bg-white w-3.5' : 'bg-white/30 hover:bg-white/50'
               }`}
             />
           ))}
@@ -155,48 +152,48 @@ const AuthSidePanel = () => {
       </div>
 
       {/* Stats */}
-      <div className="relative z-10 shrink-0 px-6 xl:px-8">
+      <div className="relative z-10 shrink-0 px-5">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="grid grid-cols-3 gap-2 mb-3"
+          className="grid grid-cols-3 gap-1.5 mb-2"
         >
           {stats.map((stat, i) => (
-            <div key={i} className="text-center p-2 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.12] transition-colors duration-300">
-              <p className="text-lg xl:text-xl font-bold text-white">{stat.value}</p>
-              <p className="text-[9px] text-white/50">{stat.label}</p>
+            <div key={i} className="text-center py-1.5 px-1 rounded-lg bg-white/[0.08] backdrop-blur-md border border-white/[0.06]">
+              <p className="text-sm font-bold text-white leading-tight">{stat.value}</p>
+              <p className="text-[8px] text-white/50">{stat.label}</p>
             </div>
           ))}
         </motion.div>
 
         {/* Features */}
-        <div className="space-y-1.5 mb-3">
+        <div className="space-y-1 mb-2">
           {features.map((f, i) => (
             <motion.div
               key={i}
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 + i * 0.08 }}
-              className="flex items-center gap-2.5 bg-white/[0.06] backdrop-blur-md rounded-lg p-2 hover:bg-white/[0.1] transition-all duration-300 group border border-white/[0.04]"
+              className="flex items-center gap-2 bg-white/[0.06] backdrop-blur-md rounded-lg py-1.5 px-2 group border border-white/[0.04]"
             >
-              <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25 transition-all duration-300">
-                <f.icon className="w-3.5 h-3.5 text-white" />
+              <div className="w-6 h-6 rounded-md bg-white/15 flex items-center justify-center shrink-0">
+                <f.icon className="w-3 h-3 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <h4 className="text-[11px] font-semibold leading-tight text-white">{f.label}</h4>
-                <p className="text-[9px] text-white/40 leading-relaxed truncate">{f.desc}</p>
+                <h4 className="text-[10px] font-semibold leading-tight text-white">{f.label}</h4>
+                <p className="text-[8px] text-white/40 truncate">{f.desc}</p>
               </div>
-              <CheckCircle2 className="w-3 h-3 text-amber-300/60 shrink-0" />
+              <CheckCircle2 className="w-2.5 h-2.5 text-amber-300/60 shrink-0" />
             </motion.div>
           ))}
         </div>
       </div>
 
       {/* Footer */}
-      <div className="relative z-10 shrink-0 flex items-center justify-center gap-2 px-6 xl:px-8 py-3 border-t border-white/[0.06]">
-        <Globe className="w-3 h-3 text-white/30 shrink-0" />
-        <p className="text-[9px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
+      <div className="relative z-10 shrink-0 flex items-center justify-center gap-1.5 px-5 py-2 border-t border-white/[0.06]">
+        <Globe className="w-2.5 h-2.5 text-white/30 shrink-0" />
+        <p className="text-[8px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
       </div>
     </div>
   );
