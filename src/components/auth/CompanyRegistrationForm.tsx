@@ -289,6 +289,24 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
         </p>
       </div>
 
+      {/* Auto-save restored banner */}
+      {showRestoredBanner && (
+        <div className="flex items-center justify-between bg-muted/50 border border-border/50 rounded-lg px-3 py-2">
+          <p className="text-[11px] text-muted-foreground">✨ تم استعادة البيانات المحفوظة تلقائياً</p>
+          <button
+            type="button"
+            className="text-[10px] text-destructive hover:underline"
+            onClick={() => {
+              clearAutoSave();
+              setFormData({ ...initialFormData, organizationType: defaultOrgType || '' });
+              setShowRestoredBanner(false);
+            }}
+          >
+            مسح وبدء من جديد
+          </button>
+        </div>
+      )}
+
       {/* Form Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* اسم الشركة */}
@@ -298,6 +316,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             placeholder="أدخل اسم الشركة"
             value={formData.organizationName}
             onChange={(e) => handleChange('organizationName', e.target.value)}
+            onBlur={() => handleBlur('organizationName')}
             className={`h-8 text-xs ${errors.organizationName ? 'border-destructive' : ''}`}
             maxLength={200}
           />
