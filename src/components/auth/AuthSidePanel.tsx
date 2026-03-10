@@ -205,7 +205,7 @@ const AuthSidePanel = () => {
         <div className="w-full h-px bg-white/10" />
         <div className="flex items-center gap-2 shrink-0">
           <Globe className="w-3.5 h-3.5 text-white/30" />
-          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020</p>
+          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
         </div>
         <div className="w-full h-px bg-white/10" />
       </motion.div>
