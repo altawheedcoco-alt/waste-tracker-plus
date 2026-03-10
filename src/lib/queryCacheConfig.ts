@@ -91,6 +91,7 @@ const QUERY_KEY_PROFILES: Record<string, CacheProfile> = {
   'trends': 'analytics',
   'performance': 'analytics',
   'backup-logs': 'analytics',
+  'admin-dashboard-stats': 'realtime',
 };
 
 /**
