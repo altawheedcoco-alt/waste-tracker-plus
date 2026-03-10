@@ -221,22 +221,22 @@ const Verify = () => {
         </div>
 
         {/* Verification Status */}
-        <Card className="mb-6 border-2 border-green-200 bg-green-50">
+        <Card className="mb-6 border-2 border-primary/20 bg-primary/5">
           <CardContent className="pt-6 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Shield className="h-8 w-8 text-green-600" />
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
-              <Shield className="h-8 w-8 text-green-600" />
+              <Shield className="h-8 w-8 text-primary" />
+              <CheckCircle2 className="h-12 w-12 text-primary" />
+              <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-green-700 mb-2">تم التحقق بنجاح ✓</h2>
-            <p className="text-green-600">
+            <h2 className="text-2xl font-bold text-primary mb-2">تم التحقق بنجاح ✓</h2>
+            <p className="text-primary/80">
               {documentType === 'shipment' && 'هذه الشحنة مسجلة ومعتمدة في النظام'}
               {documentType === 'certificate' && 'شهادة إعادة التدوير هذه صادرة رسمياً من النظام'}
               {documentType === 'report' && 'هذا التقرير المجمع صادر رسمياً من النظام'}
             </p>
-            <div className="mt-4 inline-block bg-white rounded-lg px-4 py-2 border border-green-200">
-              <span className="text-sm text-gray-500">رقم المرجع: </span>
-              <span className="font-mono font-bold text-green-700">{code}</span>
+            <div className="mt-4 inline-block bg-card rounded-lg px-4 py-2 border border-border">
+              <span className="text-sm text-muted-foreground">رقم المرجع: </span>
+              <span className="font-mono font-bold text-primary">{code}</span>
             </div>
           </CardContent>
         </Card>
