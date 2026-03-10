@@ -293,7 +293,7 @@ const GeneratorGuide = () => {
                   href={`#${section.id}`}
                   className="flex items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <span className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm font-medium">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
                     {i + 1}
                   </span>
                   <span className="text-sm text-foreground">{section.title}</span>
