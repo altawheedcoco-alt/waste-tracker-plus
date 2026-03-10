@@ -261,9 +261,6 @@ const Header = memo(() => {
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
-              <div className="hidden xl:block">
-                <GuideButton />
-              </div>
               <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
                 <UserPlus className="w-3.5 h-3.5" />
                 <span className="hidden xl:inline">{t('nav.employeeLogin')}</span>
