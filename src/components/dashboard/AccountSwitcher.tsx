@@ -231,7 +231,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
             )}
 
             <AnimatePresence>
-              {userOrganizations.map((org, index) => {
+              {displayOrganizations.map((org, index) => {
                 const Icon = getOrganizationIcon(org.organization_type);
                 const isActive = org.organization_id === organization.id;
                 
