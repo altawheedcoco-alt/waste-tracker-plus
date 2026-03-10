@@ -28152,7 +28152,9 @@ export type Database = {
           currency: string | null
           delivery_terms: string | null
           description: string | null
+          direction: string
           discount_amount: number | null
+          document_type: string
           entity_type: string
           id: string
           notes: string | null
@@ -28187,7 +28189,9 @@ export type Database = {
           currency?: string | null
           delivery_terms?: string | null
           description?: string | null
+          direction?: string
           discount_amount?: number | null
+          document_type?: string
           entity_type: string
           id?: string
           notes?: string | null
@@ -28222,7 +28226,9 @@ export type Database = {
           currency?: string | null
           delivery_terms?: string | null
           description?: string | null
+          direction?: string
           discount_amount?: number | null
+          document_type?: string
           entity_type?: string
           id?: string
           notes?: string | null
