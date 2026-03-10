@@ -213,12 +213,12 @@ const GeneratorGuide = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-l from-blue-600 to-blue-800 text-white">
+      <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 mb-4 gap-2"
+            className="text-primary-foreground hover:bg-white/20 mb-4 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             العودة للرئيسية
@@ -230,7 +230,7 @@ const GeneratorGuide = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">دليل المولد</h1>
-              <p className="text-blue-100 mt-2">
+              <p className="text-primary-foreground/70 mt-2">
                 دليلك الشامل لاستخدام منصة آي ريسايكل كمنشأة مولدة للنفايات
               </p>
             </div>
@@ -262,8 +262,8 @@ const GeneratorGuide = () => {
             >
               <Card className="bg-card border-border">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <stat.icon className="w-5 h-5 text-blue-500" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <stat.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
@@ -293,7 +293,7 @@ const GeneratorGuide = () => {
                   href={`#${section.id}`}
                   className="flex items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <span className="w-6 h-6 rounded-full bg-blue-500/10 text-blue-500 flex items-center justify-center text-sm font-medium">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
                     {i + 1}
                   </span>
                   <span className="text-sm text-foreground">{section.title}</span>
@@ -315,13 +315,13 @@ const GeneratorGuide = () => {
               transition={{ delay: 0.1 }}
             >
               <Card className="bg-card border-border overflow-hidden">
-                <CardHeader className="bg-gradient-to-l from-blue-500/5 to-blue-500/10 border-b border-border">
+                <CardHeader className="bg-gradient-to-l from-primary/5 to-primary/10 border-b border-border">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-500/10 rounded-lg">
-                      <section.icon className="w-6 h-6 text-blue-500" />
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <section.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <span className="text-xs text-blue-500 font-normal">القسم {i + 1}</span>
+                      <span className="text-xs text-primary font-normal">القسم {i + 1}</span>
                       <h2 className="text-xl">{section.title}</h2>
                     </div>
                   </CardTitle>
@@ -343,10 +343,10 @@ const GeneratorGuide = () => {
           viewport={{ once: true }}
           className="mt-12"
         >
-          <Card className="bg-gradient-to-l from-blue-600 to-blue-800 border-0 text-white">
+          <Card className="bg-gradient-to-l from-primary to-primary/80 border-0 text-primary-foreground">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-4">جاهز للبدء؟</h3>
-              <p className="text-blue-100 mb-6">
+              <p className="text-primary-foreground/70 mb-6">
                 سجّل الآن كمولد واستفد من جميع مميزات المنصة
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -363,7 +363,7 @@ const GeneratorGuide = () => {
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/")}
-                  className="gap-2 border-white/30 text-white hover:bg-white/10"
+                  className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
                   تصفح المزيد
                 </Button>

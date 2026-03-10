@@ -250,12 +250,12 @@ const RecyclerGuide = () => {
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       {/* Header */}
-      <div className="bg-gradient-to-l from-green-600 to-green-800 text-white">
+      <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-8">
           <Button
             variant="ghost"
             onClick={() => navigate("/")}
-            className="text-white hover:bg-white/20 mb-4 gap-2"
+            className="text-primary-foreground hover:bg-white/20 mb-4 gap-2"
           >
             <ArrowLeft className="w-4 h-4" />
             العودة للرئيسية
@@ -267,7 +267,7 @@ const RecyclerGuide = () => {
             </div>
             <div>
               <h1 className="text-3xl font-bold">دليل المدور</h1>
-              <p className="text-green-100 mt-2">
+              <p className="text-primary-foreground/70 mt-2">
                 دليلك الشامل لاستخدام منصة آي ريسايكل كمصنع إعادة تدوير
               </p>
             </div>
@@ -299,8 +299,8 @@ const RecyclerGuide = () => {
             >
               <Card className="bg-card border-border">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 bg-green-500/10 rounded-lg">
-                    <stat.icon className="w-5 h-5 text-green-500" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <stat.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
@@ -330,7 +330,7 @@ const RecyclerGuide = () => {
                   href={`#${section.id}`}
                   className="flex items-center gap-2 p-3 rounded-lg hover:bg-muted/50 transition-colors"
                 >
-                  <span className="w-6 h-6 rounded-full bg-green-500/10 text-green-500 flex items-center justify-center text-sm font-medium">
+                  <span className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-sm font-medium">
                     {i + 1}
                   </span>
                   <span className="text-sm text-foreground">{section.title}</span>
@@ -352,13 +352,13 @@ const RecyclerGuide = () => {
               transition={{ delay: 0.1 }}
             >
               <Card className="bg-card border-border overflow-hidden">
-                <CardHeader className="bg-gradient-to-l from-green-500/5 to-green-500/10 border-b border-border">
+                <CardHeader className="bg-gradient-to-l from-primary/5 to-primary/10 border-b border-border">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500/10 rounded-lg">
-                      <section.icon className="w-6 h-6 text-green-500" />
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <section.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <span className="text-xs text-green-500 font-normal">القسم {i + 1}</span>
+                      <span className="text-xs text-primary font-normal">القسم {i + 1}</span>
                       <h2 className="text-xl">{section.title}</h2>
                     </div>
                   </CardTitle>
@@ -380,10 +380,10 @@ const RecyclerGuide = () => {
           viewport={{ once: true }}
           className="mt-12"
         >
-          <Card className="bg-gradient-to-l from-green-600 to-green-800 border-0 text-white">
+          <Card className="bg-gradient-to-l from-primary to-primary/80 border-0 text-primary-foreground">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-4">ابدأ رحلة الاستدامة</h3>
-              <p className="text-green-100 mb-6">
+              <p className="text-primary-foreground/70 mb-6">
                 سجّل مصنعك الآن وانضم لشبكة إعادة التدوير المتكاملة
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -400,7 +400,7 @@ const RecyclerGuide = () => {
                   size="lg"
                   variant="outline"
                   onClick={() => navigate("/")}
-                  className="gap-2 border-white/30 text-white hover:bg-white/10"
+                  className="gap-2 border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"
                 >
                   تصفح المزيد
                 </Button>

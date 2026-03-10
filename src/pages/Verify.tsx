@@ -37,11 +37,11 @@ const wasteTypeLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, { label: string; color: string }> = {
-  new: { label: 'جديدة', color: 'bg-blue-100 text-blue-800' },
-  approved: { label: 'معتمدة', color: 'bg-green-100 text-green-800' },
-  in_transit: { label: 'في الطريق', color: 'bg-orange-100 text-orange-800' },
-  delivered: { label: 'تم التسليم', color: 'bg-purple-100 text-purple-800' },
-  confirmed: { label: 'مؤكدة', color: 'bg-emerald-100 text-emerald-800' },
+  new: { label: 'جديدة', color: 'bg-blue-500/10 text-blue-600 dark:text-blue-400' },
+  approved: { label: 'معتمدة', color: 'bg-primary/10 text-primary' },
+  in_transit: { label: 'في الطريق', color: 'bg-orange-500/10 text-orange-600 dark:text-orange-400' },
+  delivered: { label: 'تم التسليم', color: 'bg-purple-500/10 text-purple-600 dark:text-purple-400' },
+  confirmed: { label: 'مؤكدة', color: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' },
 };
 
 interface ShipmentData {
@@ -176,10 +176,10 @@ const Verify = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
         <div className="text-center">
-          <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">جاري التحقق من المستند...</p>
+          <Loader2 className="h-14 w-14 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">جاري التحقق من المستند...</p>
         </div>
       </div>
     );
@@ -187,12 +187,12 @@ const Verify = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
         <Card className="max-w-md w-full">
           <CardContent className="pt-8 text-center">
-            <XCircle className="h-20 w-20 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-red-700 mb-2">فشل التحقق</h1>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <XCircle className="h-20 w-20 text-destructive mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">فشل التحقق</h1>
+            <p className="text-muted-foreground mb-6">{error}</p>
             <Link to="/">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 ml-2" />
@@ -209,34 +209,34 @@ const Verify = () => {
                        documentType === 'certificate' ? (data as RecyclingReport)?.shipment : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-8 px-4" dir="rtl">
+    <div className="min-h-screen bg-background py-8 px-4" dir="rtl">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Leaf className="h-10 w-10 text-green-600" />
-            <h1 className="text-3xl font-bold text-green-700">iRecycle</h1>
+            <Leaf className="h-10 w-10 text-primary" />
+            <h1 className="text-3xl font-bold text-primary">iRecycle</h1>
           </div>
-          <p className="text-gray-600">نظام إدارة المخلفات وإعادة التدوير</p>
+          <p className="text-muted-foreground">نظام إدارة المخلفات وإعادة التدوير</p>
         </div>
 
         {/* Verification Status */}
-        <Card className="mb-6 border-2 border-green-200 bg-green-50">
+        <Card className="mb-6 border-2 border-primary/20 bg-primary/5">
           <CardContent className="pt-6 text-center">
             <div className="flex items-center justify-center gap-3 mb-4">
-              <Shield className="h-8 w-8 text-green-600" />
-              <CheckCircle2 className="h-12 w-12 text-green-600" />
-              <Shield className="h-8 w-8 text-green-600" />
+              <Shield className="h-8 w-8 text-primary" />
+              <CheckCircle2 className="h-12 w-12 text-primary" />
+              <Shield className="h-8 w-8 text-primary" />
             </div>
-            <h2 className="text-2xl font-bold text-green-700 mb-2">تم التحقق بنجاح ✓</h2>
-            <p className="text-green-600">
+            <h2 className="text-2xl font-bold text-primary mb-2">تم التحقق بنجاح ✓</h2>
+            <p className="text-primary/80">
               {documentType === 'shipment' && 'هذه الشحنة مسجلة ومعتمدة في النظام'}
               {documentType === 'certificate' && 'شهادة إعادة التدوير هذه صادرة رسمياً من النظام'}
               {documentType === 'report' && 'هذا التقرير المجمع صادر رسمياً من النظام'}
             </p>
-            <div className="mt-4 inline-block bg-white rounded-lg px-4 py-2 border border-green-200">
-              <span className="text-sm text-gray-500">رقم المرجع: </span>
-              <span className="font-mono font-bold text-green-700">{code}</span>
+            <div className="mt-4 inline-block bg-card rounded-lg px-4 py-2 border border-border">
+              <span className="text-sm text-muted-foreground">رقم المرجع: </span>
+              <span className="font-mono font-bold text-primary">{code}</span>
             </div>
           </CardContent>
         </Card>
@@ -246,15 +246,15 @@ const Verify = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5 text-green-600" />
+                <FileText className="h-5 w-5 text-primary" />
                 تقرير مجمع
               </CardTitle>
             </CardHeader>
-            <CardContent>
-              <p className="text-gray-600">
+             <CardContent>
+              <p className="text-muted-foreground">
                 هذا تقرير مجمع يحتوي على بيانات متعددة الشحنات. التقرير صادر رسمياً من نظام iRecycle.
               </p>
-              <p className="text-sm text-gray-500 mt-4">
+              <p className="text-sm text-muted-foreground mt-4">
                 تاريخ التحقق: {format(new Date(), 'PPpp', { locale: ar })}
               </p>
             </CardContent>
@@ -267,39 +267,39 @@ const Verify = () => {
             <Card className="mb-4">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-green-600" />
+                  <FileText className="h-5 w-5 text-primary" />
                   بيانات الشحنة
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">رقم الشحنة</span>
+                    <span className="text-sm text-muted-foreground">رقم الشحنة</span>
                     <p className="font-mono font-bold">{shipmentData.shipment_number}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">الحالة</span>
+                    <span className="text-sm text-muted-foreground">الحالة</span>
                     <div className="mt-1">
-                      <Badge className={statusLabels[shipmentData.status]?.color || 'bg-gray-100'}>
+                      <Badge className={statusLabels[shipmentData.status]?.color || 'bg-muted'}>
                         {statusLabels[shipmentData.status]?.label || shipmentData.status}
                       </Badge>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500 flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
                       <Scale className="h-3 w-3" /> نوع المخلفات
                     </span>
                     <p className="font-semibold">{wasteTypeLabels[shipmentData.waste_type] || shipmentData.waste_type}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">الكمية</span>
-                    <p className="font-bold text-green-600">{shipmentData.quantity} {shipmentData.unit || 'كجم'}</p>
+                    <span className="text-sm text-muted-foreground">الكمية</span>
+                    <p className="font-bold text-primary">{shipmentData.quantity} {shipmentData.unit || 'كجم'}</p>
                   </div>
                 </div>
 
                 {shipmentData.delivered_at && (
-                  <div className="pt-2 border-t">
-                    <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3 w-3" /> تاريخ التسليم
                     </span>
                     <p className="font-semibold">
@@ -315,13 +315,13 @@ const Verify = () => {
               {/* Generator */}
               <Card>
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-blue-600">
+                  <div className="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
                     <Building2 className="h-4 w-4" />
                     <span className="font-semibold text-sm">الجهة المولدة</span>
                   </div>
                   <p className="font-bold">{shipmentData.generator?.name || '-'}</p>
                   {shipmentData.generator?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.generator.city}
                     </p>
@@ -332,13 +332,13 @@ const Verify = () => {
               {/* Transporter */}
               <Card>
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-orange-600">
+                  <div className="flex items-center gap-2 mb-2 text-orange-600 dark:text-orange-400">
                     <Truck className="h-4 w-4" />
                     <span className="font-semibold text-sm">جهة النقل</span>
                   </div>
                   <p className="font-bold">{shipmentData.transporter?.name || '-'}</p>
                   {shipmentData.transporter?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.transporter.city}
                     </p>
@@ -347,15 +347,15 @@ const Verify = () => {
               </Card>
 
               {/* Recycler */}
-              <Card className="bg-green-50 border-green-200">
+              <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-green-600">
+                  <div className="flex items-center gap-2 mb-2 text-primary">
                     <Recycle className="h-4 w-4" />
                     <span className="font-semibold text-sm">جهة التدوير</span>
                   </div>
                   <p className="font-bold">{shipmentData.recycler?.name || '-'}</p>
                   {shipmentData.recycler?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.recycler.city}
                     </p>
@@ -371,29 +371,29 @@ const Verify = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Recycle className="h-5 w-5 text-green-600" />
+                <Recycle className="h-5 w-5 text-primary" />
                 بيانات شهادة التدوير
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm text-gray-500">رقم الشهادة</span>
+                  <span className="text-sm text-muted-foreground">رقم الشهادة</span>
                   <p className="font-mono font-bold">{data.report_number}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">تصنيف المخلفات</span>
+                  <span className="text-sm text-muted-foreground">تصنيف المخلفات</span>
                   <p className="font-semibold">
                     {data.waste_category === 'hazardous' ? 'خطرة' : 
                      data.waste_category === 'medical' ? 'طبية' : 'غير خطرة'}
                   </p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">جهة التدوير</span>
+                  <span className="text-sm text-muted-foreground">جهة التدوير</span>
                   <p className="font-semibold">{data.recycler_organization?.name || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">تاريخ الإصدار</span>
+                  <span className="text-sm text-muted-foreground">تاريخ الإصدار</span>
                   <p className="font-semibold">
                     {format(new Date(data.created_at), 'PP', { locale: ar })}
                   </p>
@@ -404,10 +404,10 @@ const Verify = () => {
         )}
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500 mt-8">
+        <div className="text-center text-sm text-muted-foreground mt-8">
           <p>تم التحقق بتاريخ: {format(new Date(), 'PPpp', { locale: ar })}</p>
           <p className="mt-2">© {new Date().getFullYear()} iRecycle - نظام إدارة المخلفات وإعادة التدوير</p>
-          <Link to="/" className="text-green-600 hover:underline mt-4 inline-block">
+          <Link to="/" className="text-primary hover:underline mt-4 inline-block">
             زيارة الموقع الرئيسي
           </Link>
         </div>
