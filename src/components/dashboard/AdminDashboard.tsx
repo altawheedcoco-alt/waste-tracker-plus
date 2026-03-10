@@ -488,7 +488,7 @@ const AdminDashboard = () => {
 
           <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsAdmin')} />
 
-          <AdminRecentShipments shipments={recentShipments} onRefresh={fetchDashboardData} />
+          <AdminRecentShipments shipments={recentShipments} onRefresh={() => {}} />
         </TabsContent>
 
         {/* ── المولدين ── */}
