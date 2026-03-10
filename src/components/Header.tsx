@@ -255,19 +255,19 @@ const Header = memo(() => {
             <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
+                className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
                 aria-label="Switch language"
               >
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
               <GuideButton />
-              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="gap-1.5 text-xs font-semibold rounded-xl h-9 px-3 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
+              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
                 <UserPlus className="w-3.5 h-3.5" />
                 <span className="hidden xl:inline">{t('nav.employeeLogin')}</span>
                 <span className="xl:hidden">{t('nav.employee')}</span>
               </Button>
-              <Button variant="eco" size="sm" onClick={handleLogin} className="gap-1.5 text-xs font-semibold rounded-xl h-9 px-4 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-shadow">
+              <Button variant="eco" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-shadow">
                 <LogIn className="w-3.5 h-3.5" />
                 {t('nav.login')}
               </Button>
