@@ -139,7 +139,7 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
           </div>
           <div className="space-y-1.5">
             <Label className="text-sm flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.phone')}</Label>
-            <Input placeholder="01xxxxxxxxx" value={data.phone} onChange={e => handleChange('phone', e.target.value)} className={inputClass('phone')} dir="ltr" />
+            <Input placeholder="01xxxxxxxxx" value={data.phone} onChange={e => handleChange('phone', e.target.value)} className={inputClass('phone')} dir="ltr" inputMode="tel" maxLength={20} />
             {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
           </div>
           <div className="space-y-1.5">

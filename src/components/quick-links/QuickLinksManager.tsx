@@ -45,7 +45,6 @@ export default function QuickLinksManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الرابط؟')) return;
     await deleteLink(id);
   };
 

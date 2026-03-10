@@ -180,15 +180,11 @@ const SignaturesStampsManager = () => {
   };
 
   const handleDeleteSignature = async (id: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا التوقيع؟')) {
-      await deleteSignature(id);
-    }
+    await deleteSignature(id);
   };
 
   const handleDeleteStamp = async (id: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا الختم؟')) {
-      await deleteStamp(id);
-    }
+    await deleteStamp(id);
   };
 
   const handleToggleActive = async (type: 'signature' | 'stamp', id: string, currentState: boolean) => {

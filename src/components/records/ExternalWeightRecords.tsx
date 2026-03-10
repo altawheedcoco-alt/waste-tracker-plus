@@ -847,11 +847,7 @@ export default function ExternalWeightRecords({ organizationType }: Props) {
                             variant="ghost"
                             size="icon"
                             className="text-destructive"
-                            onClick={() => {
-                              if (confirm('هل أنت متأكد من حذف هذا السجل؟')) {
-                                deleteMutation.mutate(record.id);
-                              }
-                            }}
+                            onClick={() => deleteMutation.mutate(record.id)}
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>

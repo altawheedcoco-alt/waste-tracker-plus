@@ -86,9 +86,7 @@ export default function EntityTimeline({
   };
 
   const handleDelete = async (docId: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا المستند؟')) {
-      await deleteDocument.mutateAsync(docId);
-    }
+    await deleteDocument.mutateAsync(docId);
   };
 
   if (isLoading) {

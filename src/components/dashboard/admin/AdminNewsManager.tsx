@@ -242,11 +242,7 @@ const AdminNewsManager = () => {
                     variant="ghost"
                     size="icon"
                     className="h-8 w-8 text-destructive"
-                    onClick={() => {
-                      if (confirm('هل أنت متأكد من حذف هذا الخبر؟')) {
-                        deleteMutation.mutate(item.id);
-                      }
-                    }}
+                    onClick={() => deleteMutation.mutate(item.id)}
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>

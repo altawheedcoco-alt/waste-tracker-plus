@@ -184,7 +184,6 @@ export default function ScopedLinksManager() {
   };
 
   const deleteLink = async (id: string) => {
-    if (!confirm('هل أنت متأكد من حذف هذا الرابط؟')) return;
     await supabase.from('scoped_access_links').delete().eq('id', id);
     toast.success('تم حذف الرابط');
     loadLinks();
