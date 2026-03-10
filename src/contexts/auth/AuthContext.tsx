@@ -453,58 +453,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signUpDriver = useCallback(async (data: DriverSignUpData) => {
     try {
-      const redirectUrl = `${window.location.origin}/`;
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
-        options: {
-          emailRedirectTo: redirectUrl,
-          data: {
-            full_name: data.fullName,
-          },
+      // Use register-driver-external edge function for transactional safety
+      const response = await supabase.functions.invoke('register-driver-external', {
+        body: {
+          email: data.email,
+          password: data.password,
+          fullName: data.fullName,
+          phone: data.phone,
+          licenseNumber: data.licenseNumber,
+          vehicleType: data.vehicleType,
+          vehiclePlate: data.vehiclePlate,
+          licenseExpiry: data.licenseExpiry || null,
         },
       });
 
-      if (authError) throw authError;
-
-      if (authData.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            user_id: authData.user.id,
-            full_name: data.fullName,
-            email: data.email,
-            phone: data.phone,
-            is_active: false,
-          })
-          .select()
-          .single();
-
-        if (profileError) throw profileError;
-
-        const { error: driverError } = await supabase
-          .from('drivers')
-          .insert({
-            profile_id: profileData.id,
-            license_number: data.licenseNumber,
-            vehicle_type: data.vehicleType,
-            vehicle_plate: data.vehiclePlate,
-            license_expiry: data.licenseExpiry || null,
-            is_available: false,
-            organization_id: null as any,
-          });
-
-        if (driverError) throw driverError;
-
-        const { error: roleError } = await supabase
-          .from('user_roles')
-          .insert({
-            user_id: authData.user.id,
-            role: 'driver',
-          });
-
-        if (roleError) throw roleError;
-      }
+      if (response.error) throw new Error(response.data?.error || response.error?.message || 'Driver registration failed');
+      if (!response.data?.success) throw new Error(response.data?.error || 'Driver registration failed');
 
       return { error: null };
     } catch (error) {
