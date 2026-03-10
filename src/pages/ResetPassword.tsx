@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { motion } from 'framer-motion';
@@ -9,9 +9,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, KeyRound, ArrowRight, CheckCircle, AlertCircle, Mail, Sparkles } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
 import PlatformLogo from '@/components/common/PlatformLogo';
+import { validatePasswordStrength } from '@/lib/inputSanitizer';
 
 type ResetView = 'request' | 'update' | 'success';
+
+const RESET_COOLDOWN_MS = 60_000; // 60 seconds between reset emails
 
 const ResetPassword = () => {
   const navigate = useNavigate();
@@ -23,6 +27,17 @@ const ResetPassword = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
+  const cooldownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const passwordStrength = password ? validatePasswordStrength(password) : null;
+  const strengthPercent = passwordStrength ? (passwordStrength.score / 5) * 100 : 0;
+  const strengthColor = strengthPercent <= 40 ? 'bg-destructive' : strengthPercent <= 70 ? 'bg-yellow-500' : 'bg-green-500';
+
+  // Cleanup cooldown timer
+  useEffect(() => {
+    return () => { if (cooldownRef.current) clearInterval(cooldownRef.current); };
+  }, []);
 
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
@@ -35,9 +50,22 @@ const ResetPassword = () => {
     return () => subscription.unsubscribe();
   }, []);
 
+  const startCooldown = () => {
+    setCooldown(RESET_COOLDOWN_MS / 1000);
+    cooldownRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) {
+          if (cooldownRef.current) clearInterval(cooldownRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  };
+
   const handleRequestReset = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim()) return;
+    if (!email.trim() || cooldown > 0) return;
     setLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
@@ -45,6 +73,7 @@ const ResetPassword = () => {
       });
       if (error) throw error;
       setEmailSent(true);
+      startCooldown();
       toast({ title: 'تم الإرسال', description: 'تم إرسال رابط استرجاع كلمة المرور إلى بريدك الإلكتروني' });
     } catch (error: any) {
       toast({ title: 'خطأ', description: error.message || 'حدث خطأ أثناء إرسال رابط الاسترجاع', variant: 'destructive' });
@@ -134,8 +163,8 @@ const ResetPassword = () => {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-11" disabled={loading}>
-                  {loading ? 'جاري الإرسال...' : 'إرسال رابط الاسترجاع'}
+                <Button type="submit" className="w-full h-11" disabled={loading || cooldown > 0}>
+                  {loading ? 'جاري الإرسال...' : cooldown > 0 ? `انتظر ${cooldown} ثانية` : 'إرسال رابط الاسترجاع'}
                 </Button>
                 <Button type="button" variant="ghost" className="w-full gap-2" onClick={() => navigate('/auth')}>
                   <ArrowRight className="w-4 h-4" />العودة لتسجيل الدخول
@@ -152,7 +181,9 @@ const ResetPassword = () => {
                     <br />يرجى التحقق من بريدك الإلكتروني.
                   </AlertDescription>
                 </Alert>
-                <Button variant="outline" className="w-full" onClick={() => { setEmailSent(false); setEmail(''); }}>إعادة الإرسال لبريد آخر</Button>
+                <Button variant="outline" className="w-full" onClick={() => { setEmailSent(false); setEmail(''); }} disabled={cooldown > 0}>
+                  {cooldown > 0 ? `إعادة الإرسال بعد ${cooldown} ثانية` : 'إعادة الإرسال لبريد آخر'}
+                </Button>
                 <Button variant="ghost" className="w-full gap-2" onClick={() => navigate('/auth')}>
                   <ArrowRight className="w-4 h-4" />العودة لتسجيل الدخول
                 </Button>
@@ -164,11 +195,26 @@ const ResetPassword = () => {
                 <div className="space-y-2">
                   <Label htmlFor="new-password">كلمة المرور الجديدة</Label>
                   <div className="relative">
-                    <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" required minLength={6} />
+                    <Input id="new-password" type={showPassword ? 'text' : 'password'} placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} dir="ltr" required minLength={8} />
                     <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                       {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                  {password && passwordStrength && (
+                    <div className="space-y-1.5">
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                        <div className={`h-full transition-all ${strengthColor}`} style={{ width: `${strengthPercent}%` }} />
+                      </div>
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>{strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}</span>
+                      </div>
+                      {passwordStrength.feedback.length > 0 && (
+                        <ul className="text-xs text-muted-foreground space-y-0.5">
+                          {passwordStrength.feedback.map((f, i) => <li key={i}>• {f}</li>)}
+                        </ul>
+                      )}
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">تأكيد كلمة المرور</Label>

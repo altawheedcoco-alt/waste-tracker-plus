@@ -12,6 +12,7 @@ import {
 import { Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { validatePasswordStrength } from '@/lib/inputSanitizer';
 
 interface UserProfile {
   id: string;
@@ -38,13 +39,17 @@ const ResetPasswordDialog = ({
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isResetting, setIsResetting] = useState(false);
 
+  const passwordStrength = newPassword ? validatePasswordStrength(newPassword) : null;
+  const strengthPercent = passwordStrength ? (passwordStrength.score / 5) * 100 : 0;
+  const strengthColor = strengthPercent <= 40 ? 'bg-destructive' : strengthPercent <= 70 ? 'bg-yellow-500' : 'bg-green-500';
+
   const handleReset = async () => {
     if (!user) return;
 
-    if (newPassword.length < 6) {
+    if (newPassword.length < 8) {
       toast({
         title: 'خطأ',
-        description: 'كلمة المرور يجب أن تكون 6 أحرف على الأقل',
+        description: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
         variant: 'destructive',
       });
       return;
@@ -117,9 +122,20 @@ const ResetPasswordDialog = ({
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder="أدخل كلمة المرور الجديدة"
+              placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
               className="text-right"
+              minLength={8}
             />
+            {newPassword && passwordStrength && (
+              <div className="space-y-1 mt-1">
+                <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
+                  <div className={`h-full transition-all ${strengthColor}`} style={{ width: `${strengthPercent}%` }} />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {strengthPercent <= 40 ? 'ضعيفة' : strengthPercent <= 70 ? 'متوسطة' : 'قوية'}
+                </p>
+              </div>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmPassword">تأكيد كلمة المرور</Label>

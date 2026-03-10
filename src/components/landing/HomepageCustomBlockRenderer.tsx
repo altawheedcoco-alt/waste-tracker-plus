@@ -1,6 +1,27 @@
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ExternalLink } from 'lucide-react';
+
+/**
+ * Sanitize HTML content to prevent XSS attacks
+ * Strips dangerous tags/attributes while allowing safe formatting
+ */
+function sanitizeHTML(html: string): string {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  // Remove dangerous elements
+  const dangerous = div.querySelectorAll('script,iframe,object,embed,form,input,textarea,select,button,link,meta,style');
+  dangerous.forEach(el => el.remove());
+  // Remove event handler attributes from all elements
+  div.querySelectorAll('*').forEach(el => {
+    for (const attr of Array.from(el.attributes)) {
+      if (attr.name.startsWith('on') || attr.value.includes('javascript:')) {
+        el.removeAttribute(attr.name);
+      }
+    }
+  });
+  return div.innerHTML;
+}
 
 interface CustomBlock {
   id: string;
@@ -21,6 +42,7 @@ interface Props {
 }
 
 const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
+  const safeHTML = useMemo(() => block.block_type === 'html' && block.content ? sanitizeHTML(block.content) : '', [block.block_type, block.content]);
   const bgStyle = block.background_color ? { backgroundColor: block.background_color } : {};
   const textStyle = block.text_color ? { color: block.text_color } : {};
 
@@ -52,7 +74,7 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
                   {block.link_url && (
                     <Button
                       className="mt-4 gap-2"
-                      onClick={() => window.open(block.link_url!, '_blank')}
+                     onClick={() => window.open(block.link_url!, '_blank', 'noopener,noreferrer')}
                     >
                       {block.link_text || 'اعرف المزيد'}
                       <ExternalLink className="h-4 w-4" />
@@ -124,8 +146,8 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
       return (
         <section className="py-6 px-4" style={bgStyle}>
           <div className="container mx-auto max-w-5xl" style={textStyle}>
-            {block.content && (
-              <div dangerouslySetInnerHTML={{ __html: block.content }} className="prose max-w-none" />
+            {safeHTML && (
+              <div dangerouslySetInnerHTML={{ __html: safeHTML }} className="prose max-w-none" />
             )}
           </div>
         </section>
@@ -156,7 +178,7 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
             <h3 className="text-lg font-bold mb-2">{block.title}</h3>
             {block.content && <p className="text-sm text-muted-foreground mb-3">{block.content}</p>}
             {block.link_url && (
-              <Button variant="outline" className="gap-2" onClick={() => window.open(block.link_url!, '_blank')}>
+              <Button variant="outline" className="gap-2" onClick={() => window.open(block.link_url!, '_blank', 'noopener,noreferrer')}>
                 <ExternalLink className="h-4 w-4" />
                 {block.link_text || 'زيارة الرابط'}
               </Button>
