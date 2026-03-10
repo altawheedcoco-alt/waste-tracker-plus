@@ -296,6 +296,14 @@ const AdminDashboard = () => {
     generatorCount: 0, transporterCount: 0, recyclerCount: 0,
   };
   const recentShipments = dashboardData?.recentShipments || [];
+  const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
+  const [printDialogOpen, setPrintDialogOpen] = useState(false);
+  const [selectedShipmentForPrint, setSelectedShipmentForPrint] = useState<any>(null);
+  const [showDepositDialog, setShowDepositDialog] = useState(false);
+  const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
+  const [showWorkOrder, setShowWorkOrder] = useState(false);
+  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   const statCards: StatCard[] = [
     { title: t('dashboard.totalShipments'), value: stats.totalShipments, subtitle: t('dashboard.allShipments'), icon: FileText },
