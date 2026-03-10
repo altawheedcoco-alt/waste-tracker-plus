@@ -1,18 +1,17 @@
 import { useState, useRef } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQuotations, type QuotationItem, type Quotation } from '@/hooks/useQuotations';
-import { getTemplatesByEntity, getTemplateById, ENTITY_LABELS, type QuotationTemplate } from '@/lib/quotationTemplates';
+import { getTemplatesByEntity, getTemplateById, ENTITY_LABELS, DIRECTION_LABELS, DOCUMENT_TYPE_LABELS, type QuotationTemplate, type QuotationDirection, type DocumentType } from '@/lib/quotationTemplates';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, FileText, Send, Printer, Trash2, Eye, Check, X, Clock, ChevronDown, ChevronUp } from 'lucide-react';
+import { Plus, FileText, Send, Printer, Trash2, Check, X, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useReactToPrint } from 'react-to-print';
@@ -34,18 +33,27 @@ const Quotations = () => {
   const { quotations, receivedQuotations, isLoading, createQuotation, updateStatus, deleteQuotation, getQuotationItems } = useQuotations(organization?.id);
 
   const [showCreate, setShowCreate] = useState(false);
+  const [createDirection, setCreateDirection] = useState<QuotationDirection>('outgoing');
   const [selectedTemplate, setSelectedTemplate] = useState<QuotationTemplate | null>(null);
   const [items, setItems] = useState<QuotationItem[]>([]);
   const [clientType, setClientType] = useState<'registered' | 'unregistered'>('unregistered');
   const [formData, setFormData] = useState<Partial<Quotation>>({});
   const [viewQuotation, setViewQuotation] = useState<Quotation | null>(null);
   const [viewItems, setViewItems] = useState<QuotationItem[]>([]);
-  const [activeTab, setActiveTab] = useState('sent');
+  const [mainTab, setMainTab] = useState('outgoing');
 
   const printRef = useRef<HTMLDivElement>(null);
   const handlePrint = useReactToPrint({ contentRef: printRef });
 
-  const templates = getTemplatesByEntity(orgType);
+  const handleOpenCreate = (direction: QuotationDirection) => {
+    setCreateDirection(direction);
+    setSelectedTemplate(null);
+    setItems([]);
+    setFormData({});
+    setShowCreate(true);
+  };
+
+  const templates = getTemplatesByEntity(orgType, createDirection);
 
   const handleSelectTemplate = (template: QuotationTemplate) => {
     setSelectedTemplate(template);
@@ -113,7 +121,9 @@ const Quotations = () => {
         currency: 'EGP',
         status,
         valid_until: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      },
+        direction: createDirection,
+        document_type: selectedTemplate?.documentType || 'price_quote',
+      } as any,
       items,
     });
 
@@ -131,73 +141,115 @@ const Quotations = () => {
 
   const { subtotal, taxAmount, total } = calculateTotals();
 
+  // Filter quotations by direction
+  const outgoingQuotations = quotations.filter((q: any) => !q.direction || q.direction === 'outgoing');
+  const incomingQuotations = quotations.filter((q: any) => q.direction === 'incoming');
+
+  const renderQuotationList = (list: Quotation[], direction: QuotationDirection) => {
+    if (isLoading) return <div className="text-center py-12 text-muted-foreground">جاري التحميل...</div>;
+    if (list.length === 0) return (
+      <Card>
+        <CardContent className="py-12 text-center">
+          <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+          <p className="text-muted-foreground mb-1">
+            {direction === 'outgoing' ? 'لا توجد عروض صادرة بعد' : 'لا توجد عروض واردة بعد'}
+          </p>
+          <p className="text-xs text-muted-foreground mb-3">
+            {direction === 'outgoing' ? 'أنشئ عرض سعر لعملائك لتحصيل مقابل خدماتك' : 'أنشئ طلب عرض سعر لشراء خدمات أو مواد من الموردين'}
+          </p>
+          <Button variant="outline" onClick={() => handleOpenCreate(direction)}>
+            <Plus className="w-4 h-4 ml-1" />
+            {direction === 'outgoing' ? 'إنشاء عرض صادر' : 'إنشاء طلب وارد'}
+          </Button>
+        </CardContent>
+      </Card>
+    );
+
+    return (
+      <div className="grid gap-3">
+        {list.map(q => (
+          <Card key={q.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleView(q)}>
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <FileText className="w-5 h-5 text-primary" />
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-foreground">{q.title}</p>
+                      {(q as any).document_type && (q as any).document_type !== 'price_quote' && (
+                        <Badge variant="outline" className="text-[10px]">
+                          {DOCUMENT_TYPE_LABELS[(q as any).document_type as DocumentType] || (q as any).document_type}
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {q.quotation_number} • {q.client_name || 'عميل مسجل'} • {format(new Date(q.created_at!), 'dd MMM yyyy', { locale: ar })}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-foreground">{q.total_amount?.toLocaleString()} ج.م</span>
+                  <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'}>
+                    {STATUS_MAP[q.status]?.label || q.status}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  };
+
+  const directionLabel = createDirection === 'outgoing' ? 'عرض صادر (هناخد)' : 'طلب وارد (هندفع)';
+
   return (
     <div className="space-y-6 p-4" dir="rtl">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-foreground">عروض الأسعار</h1>
-          <p className="text-sm text-muted-foreground">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
+          <p className="text-sm text-muted-foreground">إنشاء وإدارة عروض الأسعار والتسعيرات - {ENTITY_LABELS[orgType] || orgType}</p>
         </div>
-        <Button onClick={() => setShowCreate(true)}>
-          <Plus className="w-4 h-4 ml-1" />
-          إنشاء عرض سعر
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1">
+            <ArrowUpRight className="w-4 h-4" />
+            عرض صادر
+          </Button>
+          <Button variant="outline" onClick={() => handleOpenCreate('incoming')} className="gap-1">
+            <ArrowDownLeft className="w-4 h-4" />
+            طلب وارد
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList>
-          <TabsTrigger value="sent">العروض المُرسلة ({quotations.length})</TabsTrigger>
-          <TabsTrigger value="received">العروض الواردة ({receivedQuotations.length})</TabsTrigger>
+      <Tabs value={mainTab} onValueChange={setMainTab}>
+        <TabsList className="w-full justify-start">
+          <TabsTrigger value="outgoing" className="gap-1.5">
+            <ArrowUpRight className="w-3.5 h-3.5" />
+            صادر - هناخد ({outgoingQuotations.length})
+          </TabsTrigger>
+          <TabsTrigger value="incoming" className="gap-1.5">
+            <ArrowDownLeft className="w-3.5 h-3.5" />
+            وارد - هندفع ({incomingQuotations.length})
+          </TabsTrigger>
+          <TabsTrigger value="received" className="gap-1.5">
+            📨 عروض مستلمة ({receivedQuotations.length})
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="sent" className="mt-4">
-          {isLoading ? (
-            <div className="text-center py-12 text-muted-foreground">جاري التحميل...</div>
-          ) : quotations.length === 0 ? (
-            <Card>
-              <CardContent className="py-12 text-center">
-                <FileText className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
-                <p className="text-muted-foreground">لا توجد عروض أسعار بعد</p>
-                <Button variant="outline" className="mt-3" onClick={() => setShowCreate(true)}>
-                  <Plus className="w-4 h-4 ml-1" />
-                  إنشاء أول عرض سعر
-                </Button>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="grid gap-3">
-              {quotations.map(q => (
-                <Card key={q.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleView(q)}>
-                  <CardContent className="py-4">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <FileText className="w-5 h-5 text-primary" />
-                        <div>
-                          <p className="font-semibold text-foreground">{q.title}</p>
-                          <p className="text-xs text-muted-foreground">
-                            {q.quotation_number} • {q.client_name || 'عميل مسجل'} • {format(new Date(q.created_at!), 'dd MMM yyyy', { locale: ar })}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="font-bold text-foreground">{q.total_amount?.toLocaleString()} ج.م</span>
-                        <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'}>
-                          {STATUS_MAP[q.status]?.label || q.status}
-                        </Badge>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
+        <TabsContent value="outgoing" className="mt-4">
+          {renderQuotationList(outgoingQuotations, 'outgoing')}
+        </TabsContent>
+
+        <TabsContent value="incoming" className="mt-4">
+          {renderQuotationList(incomingQuotations, 'incoming')}
         </TabsContent>
 
         <TabsContent value="received" className="mt-4">
           {receivedQuotations.length === 0 ? (
             <Card>
               <CardContent className="py-12 text-center">
-                <p className="text-muted-foreground">لا توجد عروض أسعار واردة</p>
+                <p className="text-muted-foreground">لا توجد عروض مستلمة من جهات أخرى</p>
               </CardContent>
             </Card>
           ) : (
@@ -232,47 +284,76 @@ const Quotations = () => {
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle>إنشاء عرض سعر جديد</DialogTitle>
+            <DialogTitle className="flex items-center gap-2">
+              {createDirection === 'outgoing' ? <ArrowUpRight className="w-5 h-5 text-primary" /> : <ArrowDownLeft className="w-5 h-5 text-orange-500" />}
+              {directionLabel}
+            </DialogTitle>
+            <p className="text-xs text-muted-foreground">
+              {createDirection === 'outgoing' 
+                ? 'عروض تقدمها للعملاء مقابل خدماتك أو منتجاتك' 
+                : 'طلبات عروض أسعار من الموردين لشراء خدمات أو مواد'}
+            </p>
           </DialogHeader>
 
           {!selectedTemplate ? (
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">اختر قالب عرض السعر المناسب لنشاطك:</p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                {templates.map(t => (
-                  <Card key={t.id} className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all" onClick={() => handleSelectTemplate(t)}>
-                    <CardContent className="py-4">
-                      <div className="flex items-center gap-3">
-                        <span className="text-2xl">{t.icon}</span>
-                        <div>
-                          <p className="font-bold text-foreground">{t.nameAr}</p>
-                          <p className="text-xs text-muted-foreground">{t.descriptionAr}</p>
+              <p className="text-sm text-muted-foreground">اختر نوع ومسمى العرض المناسب:</p>
+              {templates.length === 0 ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p>لا توجد قوالب متاحة لهذا النوع من الجهات</p>
+                  <p className="text-xs mt-1">نوع الجهة: {ENTITY_LABELS[orgType] || orgType}</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {templates.map(t => (
+                    <Card key={t.id} className="cursor-pointer hover:border-primary/50 hover:shadow-md transition-all" onClick={() => handleSelectTemplate(t)}>
+                      <CardContent className="py-4">
+                        <div className="flex items-start gap-3">
+                          <span className="text-2xl mt-0.5">{t.icon}</span>
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <p className="font-bold text-foreground text-sm">{t.nameAr}</p>
+                            </div>
+                            <Badge variant="outline" className="text-[10px] mb-1">
+                              {DOCUMENT_TYPE_LABELS[t.documentType]}
+                            </Badge>
+                            <p className="text-xs text-muted-foreground">{t.descriptionAr}</p>
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-6">
-              {/* Client Info */}
+              {/* Document Type Badge */}
+              <div className="flex items-center gap-2 text-sm">
+                <Badge variant="outline">{DOCUMENT_TYPE_LABELS[selectedTemplate.documentType]}</Badge>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-muted-foreground">{selectedTemplate.nameEn}</span>
+              </div>
+
+              {/* Client/Supplier Info */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="text-sm">بيانات العميل</CardTitle>
+                  <CardTitle className="text-sm">
+                    {createDirection === 'outgoing' ? 'بيانات العميل' : 'بيانات المورّد'}
+                  </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex gap-3">
                     <Button variant={clientType === 'unregistered' ? 'default' : 'outline'} size="sm" onClick={() => setClientType('unregistered')}>
-                      عميل خارجي
+                      {createDirection === 'outgoing' ? 'عميل خارجي' : 'مورّد خارجي'}
                     </Button>
                     <Button variant={clientType === 'registered' ? 'default' : 'outline'} size="sm" onClick={() => setClientType('registered')}>
-                      جهة مسجلة
+                      جهة مسجلة بالمنصة
                     </Button>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <Label>اسم العميل / الجهة</Label>
+                      <Label>{createDirection === 'outgoing' ? 'اسم العميل / الجهة' : 'اسم المورّد / الجهة'}</Label>
                       <Input value={formData.client_name || ''} onChange={e => setFormData(p => ({ ...p, client_name: e.target.value }))} />
                     </div>
                     <div>
@@ -403,7 +484,7 @@ const Quotations = () => {
                   <Clock className="w-4 h-4 ml-1" /> حفظ كمسودة
                 </Button>
                 <Button onClick={() => handleCreate('sent')} disabled={createQuotation.isPending}>
-                  <Send className="w-4 h-4 ml-1" /> إرسال العرض
+                  <Send className="w-4 h-4 ml-1" /> إرسال
                 </Button>
               </div>
             </div>
@@ -418,9 +499,17 @@ const Quotations = () => {
             <DialogTitle className="flex items-center gap-2">
               <FileText className="w-5 h-5 text-primary" />
               {viewQuotation?.title}
-              <Badge variant={STATUS_MAP[viewQuotation?.status || '']?.variant || 'secondary'} className="mr-2">
+              <Badge variant={STATUS_MAP[viewQuotation?.status || '']?.variant || 'secondary'}>
                 {STATUS_MAP[viewQuotation?.status || '']?.label}
               </Badge>
+              {(viewQuotation as any)?.direction === 'incoming' && (
+                <Badge variant="outline" className="text-orange-600 border-orange-300">وارد</Badge>
+              )}
+              {(viewQuotation as any)?.document_type && (viewQuotation as any)?.document_type !== 'price_quote' && (
+                <Badge variant="outline" className="text-[10px]">
+                  {DOCUMENT_TYPE_LABELS[(viewQuotation as any)?.document_type as DocumentType]}
+                </Badge>
+              )}
             </DialogTitle>
           </DialogHeader>
 
@@ -429,7 +518,7 @@ const Quotations = () => {
               <div className="grid grid-cols-2 gap-4 text-sm">
                 <div><span className="text-muted-foreground">رقم العرض:</span> <strong>{viewQuotation.quotation_number}</strong></div>
                 <div><span className="text-muted-foreground">التاريخ:</span> <strong>{format(new Date(viewQuotation.created_at!), 'dd/MM/yyyy')}</strong></div>
-                <div><span className="text-muted-foreground">العميل:</span> <strong>{viewQuotation.client_name || 'جهة مسجلة'}</strong></div>
+                <div><span className="text-muted-foreground">{(viewQuotation as any)?.direction === 'incoming' ? 'المورّد:' : 'العميل:'}</span> <strong>{viewQuotation.client_name || 'جهة مسجلة'}</strong></div>
                 <div><span className="text-muted-foreground">الهاتف:</span> <strong>{viewQuotation.client_phone || '-'}</strong></div>
               </div>
 
