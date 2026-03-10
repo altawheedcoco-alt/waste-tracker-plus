@@ -262,8 +262,8 @@ const GeneratorGuide = () => {
             >
               <Card className="bg-card border-border">
                 <CardContent className="p-4 flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg">
-                    <stat.icon className="w-5 h-5 text-blue-500" />
+                  <div className="p-2 bg-primary/10 rounded-lg">
+                    <stat.icon className="w-5 h-5 text-primary" />
                   </div>
                   <div>
                     <div className="text-2xl font-bold text-foreground">{stat.value}</div>
