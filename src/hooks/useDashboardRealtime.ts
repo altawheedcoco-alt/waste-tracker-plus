@@ -17,13 +17,13 @@ interface TableSubscription {
 
 // Core tables every org type needs
 const CORE_TABLES: TableSubscription[] = [
-  { table: 'notifications', queryKeys: ['notifications', 'notification-counts'] },
-  { table: 'shipments', queryKeys: ['shipments', 'shipment-stats', 'system-stats', 'transporter-shipments', 'transporter-stats'] },
+  { table: 'notifications', queryKeys: ['notifications', 'notification-counts', 'unread-count'] },
+  { table: 'shipments', queryKeys: ['shipments', 'shipment-stats', 'system-stats', 'transporter-shipments', 'transporter-stats', 'partner-shipments'] },
   { table: 'invoices', queryKeys: ['invoices', 'invoice-stats'] },
   { table: 'deposits', queryKeys: ['deposits', 'deposit-stats'] },
   { table: 'organizations', queryKeys: ['organization', 'partners-count', 'system-stats'] },
   { table: 'profiles', queryKeys: ['profile', 'profiles'] },
-  { table: 'organization_members', queryKeys: ['org-members', 'organization-members'] },
+  { table: 'organization_members', queryKeys: ['org-members', 'organization-members', 'employees'] },
   { table: 'chat_messages', queryKeys: ['chat-messages'] },
   { table: 'direct_messages', queryKeys: ['direct-messages'] },
   { table: 'notes', queryKeys: ['notes'] },
@@ -33,11 +33,15 @@ const CORE_TABLES: TableSubscription[] = [
   { table: 'entity_documents', queryKeys: ['entity-documents'] },
   { table: 'document_registry', queryKeys: ['document-registry'] },
   { table: 'signing_requests', queryKeys: ['signing-requests', 'signing-inbox'] },
-  { table: 'accounting_ledger', queryKeys: ['accounting-ledger', 'ledger-entries'] },
+  { table: 'accounting_ledger', queryKeys: ['accounting-ledger', 'ledger-entries', 'ledger'] },
   { table: 'account_periods', queryKeys: ['account-periods'] },
   { table: 'contracts', queryKeys: ['contracts'] },
   { table: 'collection_requests', queryKeys: ['collection-requests'] },
   { table: 'compliance_certificates', queryKeys: ['compliance-certificates'] },
+  { table: 'verified_partnerships', queryKeys: ['verified-partnerships', 'partners', 'linked-partners'] },
+  { table: 'work_orders', queryKeys: ['work-orders'] },
+  { table: 'employee_permissions', queryKeys: ['employee-permissions', 'my-permissions'] },
+  { table: 'award_letters', queryKeys: ['award-letters'] },
 ];
 
 // Role-specific additional tables
@@ -52,6 +56,7 @@ const ROLE_TABLES: Record<string, TableSubscription[]> = {
     { table: 'shipment_logs', queryKeys: ['shipment-logs'] },
     { table: 'partner_ratings', queryKeys: ['partner-ratings'] },
     { table: 'delivery_confirmations', queryKeys: ['delivery-confirmations'] },
+    { table: 'digital_wallets', queryKeys: ['digital-wallets'] },
   ],
   generator: [
     { table: 'collection_requests', queryKeys: ['collection-requests', 'generator-requests'] },
@@ -67,12 +72,14 @@ const ROLE_TABLES: Record<string, TableSubscription[]> = {
     { table: 'recycling_reports', queryKeys: ['recycling-reports'] },
     { table: 'carbon_footprint_records', queryKeys: ['carbon-footprint'] },
     { table: 'digital_wallets', queryKeys: ['digital-wallets'] },
+    { table: 'partner_ratings', queryKeys: ['partner-ratings'] },
   ],
   disposal: [
     { table: 'disposal_operations', queryKeys: ['disposal-operations'] },
     { table: 'disposal_incoming_requests', queryKeys: ['disposal-requests'] },
     { table: 'fleet_vehicles', queryKeys: ['fleet-vehicles'] },
     { table: 'carbon_footprint_records', queryKeys: ['carbon-footprint'] },
+    { table: 'delivery_confirmations', queryKeys: ['delivery-confirmations'] },
   ],
   admin: [
     { table: 'organizations', queryKeys: ['organizations', 'admin-orgs', 'system-stats', 'admin-dashboard-stats'] },
@@ -87,24 +94,47 @@ const ROLE_TABLES: Record<string, TableSubscription[]> = {
     { table: 'deposits', queryKeys: ['deposits', 'admin-dashboard-stats'] },
     { table: 'collection_requests', queryKeys: ['collection-requests', 'admin-dashboard-stats'] },
     { table: 'fleet_vehicles', queryKeys: ['fleet-vehicles', 'admin-dashboard-stats'] },
+    { table: 'work_orders', queryKeys: ['work-orders', 'admin-dashboard-stats'] },
+    { table: 'advertisements', queryKeys: ['advertisements'] },
+    { table: 'ai_agent_conversations', queryKeys: ['ai-conversations'] },
+    { table: 'ai_agent_orders', queryKeys: ['ai-orders'] },
+    { table: 'backup_logs', queryKeys: ['backup-logs'] },
+    { table: 'api_keys', queryKeys: ['api-keys'] },
   ],
   driver: [
     { table: 'driver_shipment_assignments', queryKeys: ['driver-assignments', 'my-assignments'] },
     { table: 'driver_shipment_offers', queryKeys: ['driver-offers', 'my-offers'] },
     { table: 'driver_location_logs', queryKeys: ['driver-locations'] },
+    { table: 'shipment_logs', queryKeys: ['shipment-logs'] },
+  ],
+  employee: [
+    { table: 'employee_permissions', queryKeys: ['employee-permissions', 'my-permissions'] },
+    { table: 'work_orders', queryKeys: ['work-orders'] },
   ],
   consultant: [
     { table: 'corrective_actions', queryKeys: ['corrective-actions'] },
     { table: 'compliance_certificates', queryKeys: ['compliance-certificates'] },
+    { table: 'audit_sessions', queryKeys: ['audit-sessions'] },
   ],
   consulting_office: [
     { table: 'corrective_actions', queryKeys: ['corrective-actions'] },
     { table: 'compliance_certificates', queryKeys: ['compliance-certificates'] },
+    { table: 'audit_sessions', queryKeys: ['audit-sessions'] },
   ],
   transport_office: [
     { table: 'drivers', queryKeys: ['drivers'] },
     { table: 'fleet_vehicles', queryKeys: ['fleet-vehicles'] },
     { table: 'driver_shipment_assignments', queryKeys: ['driver-assignments'] },
+    { table: 'vehicle_maintenance', queryKeys: ['vehicle-maintenance'] },
+  ],
+  iso_body: [
+    { table: 'compliance_certificates', queryKeys: ['compliance-certificates'] },
+    { table: 'audit_sessions', queryKeys: ['audit-sessions'] },
+  ],
+  regulator: [
+    { table: 'compliance_certificates', queryKeys: ['compliance-certificates'] },
+    { table: 'corrective_actions', queryKeys: ['corrective-actions'] },
+    { table: 'audit_sessions', queryKeys: ['audit-sessions'] },
   ],
 };
 
