@@ -163,8 +163,8 @@ const ResetPassword = () => {
                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   </div>
                 </div>
-                <Button type="submit" className="w-full h-11" disabled={loading}>
-                  {loading ? 'جاري الإرسال...' : 'إرسال رابط الاسترجاع'}
+                <Button type="submit" className="w-full h-11" disabled={loading || cooldown > 0}>
+                  {loading ? 'جاري الإرسال...' : cooldown > 0 ? `انتظر ${cooldown} ثانية` : 'إرسال رابط الاسترجاع'}
                 </Button>
                 <Button type="button" variant="ghost" className="w-full gap-2" onClick={() => navigate('/auth')}>
                   <ArrowRight className="w-4 h-4" />العودة لتسجيل الدخول
