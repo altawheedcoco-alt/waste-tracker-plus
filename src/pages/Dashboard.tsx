@@ -10,7 +10,6 @@ import SubscriptionGuard from '@/components/guards/SubscriptionGuard';
 import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
-import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
 import { Loader2 } from 'lucide-react';
 
@@ -54,9 +53,6 @@ const Dashboard = () => {
   // Security hardening — session timeout, CSP, anti-XSS
   useSecurityHardening();
   
-  // Realtime sync — auto-subscribe to all critical tables for this role
-  useDashboardRealtime();
-
   // PWA: reconnect realtime + invalidate cache when app resumes from background
   usePWARealtimeSync();
 

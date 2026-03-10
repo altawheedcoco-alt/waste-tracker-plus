@@ -132,6 +132,7 @@ import SidebarCustomizer from '@/components/dashboard/SidebarCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
 import { SidebarGroupConfig, SidebarItemConfig, standaloneItems } from '@/config/sidebarConfig';
+import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 
@@ -143,6 +144,9 @@ interface DashboardLayoutProps {
 const MemoizedSidebarNavItem = memo(SidebarNavItem);
 
 const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
+  // Global realtime sync — active on ALL dashboard pages
+  useDashboardRealtime();
+  
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
