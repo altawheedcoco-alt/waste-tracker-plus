@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Leaf, BarChart3, Truck, Recycle, Globe, CheckCircle2, Sparkles } from 'lucide-react';
 import authIllustration from '@/assets/auth-side-illustration.png';
@@ -63,60 +63,57 @@ const AuthSidePanel = () => {
   const currentIllustration = illustrations[currentIndex];
 
   return (
-    <div className="relative flex flex-col justify-between h-full overflow-hidden" style={{
+    <div className="relative flex flex-col h-full overflow-hidden" style={{
       background: 'linear-gradient(160deg, hsl(160, 68%, 36%) 0%, hsl(178, 60%, 32%) 40%, hsl(205, 78%, 36%) 100%)',
     }}>
-      {/* v3.0 Geometric decorations */}
+      {/* Geometric decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-24 -right-24 w-96 h-96 border border-white/[0.08] rounded-full" />
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] border border-white/[0.04] rounded-full" />
         <div className="absolute top-1/4 right-1/3 w-52 h-52 bg-white/[0.04] rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 left-1/4 w-32 h-32 bg-white/[0.06] rounded-full blur-2xl" />
-        {/* Grid pattern */}
         <div className="absolute inset-0 opacity-[0.025]" style={{
           backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
           backgroundSize: '20px 20px',
         }} />
-        {/* Diagonal accent line */}
         <div className="absolute top-0 left-0 w-full h-full opacity-[0.03]" style={{
           background: 'repeating-linear-gradient(45deg, transparent, transparent 60px, white 60px, white 61px)',
         }} />
       </div>
 
-      {/* Header */}
-      <div className="relative z-10 p-8 xl:p-12">
+      {/* Header - compact */}
+      <div className="relative z-10 p-6 xl:p-8 shrink-0">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
-          <div className="flex items-center gap-3.5 mb-5">
-            <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-black/10">
-              <Leaf className="w-6 h-6 text-white" />
+          <div className="flex items-center gap-3 mb-3">
+            <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center shadow-lg shadow-black/10">
+              <Leaf className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h2 className="text-2xl xl:text-3xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
+              <h2 className="text-xl xl:text-2xl font-bold leading-tight text-white tracking-tight">iRecycle</h2>
               <div className="flex items-center gap-2">
-                <p className="text-white/50 text-xs">المنصة الرقمية الأولى لإدارة المخلفات</p>
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[9px] font-bold text-white/80 tracking-wider">
-                  <Sparkles className="w-2.5 h-2.5" />
+                <p className="text-white/50 text-[11px]">المنصة الرقمية الأولى لإدارة المخلفات</p>
+                <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-white/15 backdrop-blur-sm text-[8px] font-bold text-white/80 tracking-wider">
+                  <Sparkles className="w-2 h-2" />
                   v3.0
                 </span>
               </div>
             </div>
           </div>
 
-          <h3 className="text-xl xl:text-2xl font-bold mb-3 leading-relaxed text-white">
-            رقمنة شاملة لإدارة
-            <br />
-            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية في مصر</span>
+          <h3 className="text-lg xl:text-xl font-bold mb-1.5 leading-snug text-white">
+            رقمنة شاملة لإدارة{' '}
+            <span className="bg-gradient-to-l from-amber-300 to-yellow-200 bg-clip-text text-transparent">سلسلة التوريد البيئية</span>
           </h3>
-          <p className="text-white/50 text-sm leading-relaxed max-w-sm">
-            تحول رقمي متكامل: تتبع إلكتروني، فوترة رقمية، امتثال قانوني، وذكاء اصطناعي لكافة عمليات المخلفات
+          <p className="text-white/45 text-xs leading-relaxed max-w-sm">
+            تحول رقمي متكامل: تتبع إلكتروني، فوترة رقمية، امتثال قانوني، وذكاء اصطناعي
           </p>
         </motion.div>
       </div>
 
-      {/* Illustration - Auto-rotating */}
-      <div className="relative z-10 flex justify-center px-8 h-[280px] xl:h-[320px]">
-        <div className="relative w-full max-w-[280px] xl:max-w-[320px]">
-          <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-95" />
+      {/* Illustration - flexible center area */}
+      <div className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 min-h-0">
+        <div className="relative w-full max-w-[240px] xl:max-w-[280px] aspect-square">
+          <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-90" />
           <AnimatePresence mode="wait">
             <motion.img
               key={currentIndex}
@@ -129,86 +126,78 @@ const AuthSidePanel = () => {
               className="relative w-full h-full object-contain drop-shadow-2xl"
             />
           </AnimatePresence>
-          {/* Title overlay */}
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={`title-${currentIndex}`}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.4 }}
-              className="absolute -bottom-8 left-0 right-0 text-center"
-            >
-              <p className="text-xs font-bold text-white/90">{currentIllustration.title}</p>
-              <p className="text-[10px] text-white/50">{currentIllustration.desc}</p>
-            </motion.div>
-          </AnimatePresence>
-          {/* Dot indicators */}
-          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex gap-1">
-            {illustrations.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentIndex(i)}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
-                  i === currentIndex ? 'bg-white w-4' : 'bg-white/30 hover:bg-white/50'
-                }`}
-              />
-            ))}
-          </div>
+        </div>
+        {/* Title + dots */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={`title-${currentIndex}`}
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.4 }}
+            className="text-center mt-2"
+          >
+            <p className="text-xs font-bold text-white/90">{currentIllustration.title}</p>
+            <p className="text-[10px] text-white/50">{currentIllustration.desc}</p>
+          </motion.div>
+        </AnimatePresence>
+        <div className="flex gap-1 mt-2">
+          {illustrations.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setCurrentIndex(i)}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex ? 'bg-white w-4' : 'bg-white/30 hover:bg-white/50'
+              }`}
+            />
+          ))}
         </div>
       </div>
 
       {/* Stats */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="relative z-10 grid grid-cols-3 gap-3 px-8 xl:px-12 my-5"
-      >
-        {stats.map((stat, i) => (
-          <div key={i} className="text-center p-3 rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.12] transition-colors duration-300">
-            <p className="text-xl xl:text-2xl font-bold text-white">{stat.value}</p>
-            <p className="text-[10px] text-white/50 mt-0.5">{stat.label}</p>
-          </div>
-        ))}
-      </motion.div>
+      <div className="relative z-10 shrink-0 px-6 xl:px-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+          className="grid grid-cols-3 gap-2 mb-3"
+        >
+          {stats.map((stat, i) => (
+            <div key={i} className="text-center p-2 rounded-xl bg-white/[0.08] backdrop-blur-md border border-white/[0.06] hover:bg-white/[0.12] transition-colors duration-300">
+              <p className="text-lg xl:text-xl font-bold text-white">{stat.value}</p>
+              <p className="text-[9px] text-white/50">{stat.label}</p>
+            </div>
+          ))}
+        </motion.div>
 
-      {/* Features */}
-      <div className="relative z-10 space-y-2 px-8 xl:px-12">
-        {features.map((f, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.6 + i * 0.08 }}
-            className="flex items-center gap-3 bg-white/[0.06] backdrop-blur-md rounded-xl p-3 hover:bg-white/[0.1] transition-all duration-300 group border border-white/[0.04]"
-          >
-            <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25 group-hover:scale-110 transition-all duration-300">
-              <f.icon className="w-4 h-4 text-white" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h4 className="text-xs font-semibold leading-tight text-white">{f.label}</h4>
-              <p className="text-[10px] text-white/40 leading-relaxed truncate">{f.desc}</p>
-            </div>
-            <CheckCircle2 className="w-3.5 h-3.5 text-amber-300/60 shrink-0" />
-          </motion.div>
-        ))}
+        {/* Features */}
+        <div className="space-y-1.5 mb-3">
+          {features.map((f, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 + i * 0.08 }}
+              className="flex items-center gap-2.5 bg-white/[0.06] backdrop-blur-md rounded-lg p-2 hover:bg-white/[0.1] transition-all duration-300 group border border-white/[0.04]"
+            >
+              <div className="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center shrink-0 group-hover:bg-white/25 transition-all duration-300">
+                <f.icon className="w-3.5 h-3.5 text-white" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <h4 className="text-[11px] font-semibold leading-tight text-white">{f.label}</h4>
+                <p className="text-[9px] text-white/40 leading-relaxed truncate">{f.desc}</p>
+              </div>
+              <CheckCircle2 className="w-3 h-3 text-amber-300/60 shrink-0" />
+            </motion.div>
+          ))}
+        </div>
       </div>
 
       {/* Footer */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1 }}
-        className="relative z-10 flex items-center justify-center gap-2 px-8 xl:px-12 py-6 mt-4"
-      >
-        <div className="w-full h-px bg-white/10" />
-        <div className="flex items-center gap-2 shrink-0">
-          <Globe className="w-3.5 h-3.5 text-white/30" />
-          <p className="text-[10px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
-        </div>
-        <div className="w-full h-px bg-white/10" />
-      </motion.div>
+      <div className="relative z-10 shrink-0 flex items-center justify-center gap-2 px-6 xl:px-8 py-3 border-t border-white/[0.06]">
+        <Globe className="w-3 h-3 text-white/30 shrink-0" />
+        <p className="text-[9px] text-white/30 whitespace-nowrap">متوافق مع القانون 202 لسنة 2020 · رقمنة بيئية شاملة</p>
+      </div>
     </div>
   );
 };

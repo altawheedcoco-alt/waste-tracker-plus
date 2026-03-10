@@ -108,14 +108,14 @@ const Auth = () => {
     registrationType === 'consulting_office' || registrationType === 'iso_body';
 
   return (
-    <div className="min-h-screen-safe flex flex-col lg:flex-row overflow-hidden bg-background">
-      {/* Side Panel */}
-      <div className="hidden lg:block lg:w-[45%] xl:w-[48%]">
+    <div className="h-screen flex flex-col lg:flex-row overflow-hidden bg-background">
+      {/* Side Panel - fixed height */}
+      <div className="hidden lg:block lg:w-[44%] xl:w-[46%] h-screen">
         <AuthSidePanel />
       </div>
 
-      {/* Form Panel */}
-      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto auth-scroll-container relative">
+      {/* Form Panel - scrollable */}
+      <div className="flex-1 flex items-start lg:items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto auth-scroll-container relative h-screen">
         {/* v3.0 Background decorations */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div className="absolute top-0 right-0 w-full h-full opacity-50" style={{
