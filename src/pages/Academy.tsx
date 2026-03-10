@@ -1,4 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { GraduationCap, Trash2, Cpu, HardHat, HeartPulse, Factory, ArrowLeft, ArrowRight, AlertTriangle, Recycle, BookOpen } from "lucide-react";
@@ -116,6 +117,7 @@ const dangerBadge = (level: string, isAr: boolean) => {
 
 const Academy = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'الأكاديمية البيئية' : 'Environmental Academy');
   const isAr = language === 'ar';
 
   return (

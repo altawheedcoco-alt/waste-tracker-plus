@@ -1,4 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,6 +14,7 @@ const formatDate = (dateStr: string) =>
 
 const Blog = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'المدونة' : 'Blog');
   const navigate = useNavigate();
   const isAr = language === 'ar';
 

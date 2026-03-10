@@ -1,4 +1,5 @@
 import { useLanguage } from "@/contexts/LanguageContext";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Eye, Target, Flag, Heart, Leaf, Brain, Users, MapPin, Scale, ShieldCheck, BarChart3, Globe, Building2, Recycle, ArrowLeft, ArrowRight } from "lucide-react";
@@ -9,6 +10,7 @@ const Footer = lazy(() => import("@/components/Footer"));
 
 const About = () => {
   const { language } = useLanguage();
+  usePageTitle(language === 'ar' ? 'من نحن' : 'About Us');
   const isAr = language === 'ar';
   const navigate = useNavigate();
 

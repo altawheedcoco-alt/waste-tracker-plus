@@ -1,4 +1,5 @@
 import { memo } from 'react';
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,7 @@ const formatDate = (dateStr: string) => {
 
 const News = memo(() => {
   const navigate = useNavigate();
+  usePageTitle('الأخبار والتحديثات');
 
   const { data: newsItems = [], isLoading } = useQuery({
     queryKey: ['platform-news'],
