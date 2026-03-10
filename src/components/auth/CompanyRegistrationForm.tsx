@@ -6,11 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
   Building2,
-  Truck,
-  Recycle,
   Eye,
   EyeOff,
-  X,
 } from 'lucide-react';
 import {
   Select,
@@ -20,6 +17,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import RegistrationTermsAcceptance from './RegistrationTermsAcceptance';
+import { companyRegistrationSchema } from './companyRegistrationSchema';
+import { ZodError } from 'zod';
 
 interface CompanyRegistrationFormProps {
   onSubmit: (data: CompanyFormData) => Promise<{ error: Error | null }>;
@@ -124,18 +123,33 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
-    
-    if (!formData.organizationName) newErrors.organizationName = 'مطلوب';
-    if (!formData.organizationType) newErrors.organizationType = 'مطلوب';
-    if (!formData.organizationPhone) newErrors.organizationPhone = 'مطلوب';
-    if (!formData.organizationEmail) newErrors.organizationEmail = 'مطلوب';
-    if (!formData.representativeName) newErrors.representativeName = 'مطلوب';
-    if (!formData.commercialRegister) newErrors.commercialRegister = 'مطلوب';
-    if (!formData.email) newErrors.email = 'مطلوب';
-    if (!formData.password || formData.password.length < 6) {
-      newErrors.password = 'كلمة المرور يجب أن تكون 6 أحرف على الأقل';
+
+    // Trim all string fields before validation
+    const trimmedData = { ...formData };
+    for (const key of Object.keys(trimmedData) as (keyof CompanyFormData)[]) {
+      if (typeof trimmedData[key] === 'string') {
+        (trimmedData as any)[key] = trimmedData[key].trim();
+      }
     }
-    if (!formData.address) newErrors.address = 'مطلوب';
+
+    try {
+      companyRegistrationSchema.parse({
+        ...trimmedData,
+        fullName: trimmedData.representativeName,
+        phone: trimmedData.organizationPhone,
+        city: trimmedData.address.split(',')[0]?.trim() || 'غير محدد',
+      });
+    } catch (err) {
+      if (err instanceof ZodError) {
+        for (const issue of err.issues) {
+          const field = issue.path[0] as string;
+          if (!newErrors[field]) {
+            newErrors[field] = issue.message;
+          }
+        }
+      }
+    }
+
     if (!termsAccepted) newErrors.terms = 'يجب الموافقة على الشروط والأحكام';
 
     setErrors(newErrors);
@@ -147,11 +161,19 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
 
     setLoading(true);
     try {
+      // Trim all data before submit
+      const trimmedData = { ...formData };
+      for (const key of Object.keys(trimmedData) as (keyof CompanyFormData)[]) {
+        if (typeof trimmedData[key] === 'string') {
+          (trimmedData as any)[key] = trimmedData[key].trim();
+        }
+      }
+
       const submitData = {
-        ...formData,
-        fullName: formData.representativeName,
-        phone: formData.organizationPhone,
-        city: formData.address.split(',')[0] || 'غير محدد',
+        ...trimmedData,
+        fullName: trimmedData.representativeName,
+        phone: trimmedData.organizationPhone,
+        city: trimmedData.address.split(',')[0]?.trim() || 'غير محدد',
       };
       
       const { error } = await onSubmit(submitData);
@@ -172,6 +194,10 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
     }
   };
 
+  const fieldError = (field: string) => errors[field] ? (
+    <p className="text-[10px] text-destructive mt-0.5">{errors[field]}</p>
+  ) : null;
+
   return (
     <div className="space-y-4 max-h-[70vh] overflow-y-auto px-1">
       {/* Header */}
@@ -185,7 +211,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
         </p>
       </div>
 
-      {/* Form Grid - Similar to reference image */}
+      {/* Form Grid */}
       <div className="grid grid-cols-2 gap-3">
         {/* اسم الشركة */}
         <div className="space-y-1">
@@ -195,7 +221,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             value={formData.organizationName}
             onChange={(e) => handleChange('organizationName', e.target.value)}
             className={`h-8 text-xs ${errors.organizationName ? 'border-destructive' : ''}`}
+            maxLength={200}
           />
+          {fieldError('organizationName')}
         </div>
 
         {/* نوع الشركة */}
@@ -216,6 +244,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
               ))}
             </SelectContent>
           </Select>
+          {fieldError('organizationType')}
         </div>
 
         {/* الهاتف */}
@@ -227,7 +256,10 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('organizationPhone', e.target.value)}
             className={`h-8 text-xs ${errors.organizationPhone ? 'border-destructive' : ''}`}
             dir="ltr"
+            inputMode="tel"
+            maxLength={20}
           />
+          {fieldError('organizationPhone')}
         </div>
 
         {/* البريد الإلكتروني */}
@@ -240,7 +272,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('organizationEmail', e.target.value)}
             className={`h-8 text-xs ${errors.organizationEmail ? 'border-destructive' : ''}`}
             dir="ltr"
+            maxLength={255}
           />
+          {fieldError('organizationEmail')}
         </div>
 
         {/* الشخص المسؤول */}
@@ -251,7 +285,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             value={formData.representativeName}
             onChange={(e) => handleChange('representativeName', e.target.value)}
             className={`h-8 text-xs ${errors.representativeName ? 'border-destructive' : ''}`}
+            maxLength={100}
           />
+          {fieldError('representativeName')}
         </div>
 
         {/* البطاقة الضريبية */}
@@ -263,6 +299,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('representativeNationalId', e.target.value)}
             className="h-8 text-xs"
             dir="ltr"
+            maxLength={20}
           />
         </div>
 
@@ -275,7 +312,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('commercialRegister', e.target.value)}
             className={`h-8 text-xs ${errors.commercialRegister ? 'border-destructive' : ''}`}
             dir="ltr"
+            maxLength={50}
           />
+          {fieldError('commercialRegister')}
         </div>
 
         {/* رقم الترخيص */}
@@ -287,6 +326,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('environmentalLicense', e.target.value)}
             className="h-8 text-xs"
             dir="ltr"
+            maxLength={50}
           />
         </div>
 
@@ -299,6 +339,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('region', e.target.value)}
             className="h-8 text-xs"
             dir="ltr"
+            maxLength={100}
           />
         </div>
 
@@ -311,12 +352,13 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('productionCapacity', e.target.value)}
             className="h-8 text-xs"
             dir="ltr"
+            maxLength={100}
           />
         </div>
 
         {/* اسم المستخدم */}
         <div className="space-y-1">
-          <Label className="text-xs">اسم المستخدم *</Label>
+          <Label className="text-xs">اسم المستخدم (البريد الإلكتروني) *</Label>
           <Input
             type="email"
             placeholder="البريد الإلكتروني للدخول"
@@ -324,7 +366,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
             onChange={(e) => handleChange('email', e.target.value)}
             className={`h-8 text-xs ${errors.email ? 'border-destructive' : ''}`}
             dir="ltr"
+            maxLength={255}
           />
+          {fieldError('email')}
         </div>
 
         {/* كلمة المرور */}
@@ -338,6 +382,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
               onChange={(e) => handleChange('password', e.target.value)}
               className={`h-8 text-xs pr-8 ${errors.password ? 'border-destructive' : ''}`}
               dir="ltr"
+              maxLength={128}
             />
             <button
               type="button"
@@ -347,6 +392,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
               {showPassword ? <EyeOff size={14} /> : <Eye size={14} />}
             </button>
           </div>
+          {fieldError('password')}
         </div>
       </div>
 
@@ -358,7 +404,9 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
           value={formData.address}
           onChange={(e) => handleChange('address', e.target.value)}
           className={`h-8 text-xs ${errors.address ? 'border-destructive' : ''}`}
+          maxLength={500}
         />
+        {fieldError('address')}
       </div>
 
       {/* النشاط المسجل - Full width */}
@@ -370,6 +418,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
           onChange={(e) => handleChange('activityType', e.target.value)}
           className="text-xs min-h-[50px] resize-none"
           rows={2}
+          maxLength={500}
         />
       </div>
 
