@@ -6,7 +6,6 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
@@ -39,7 +38,6 @@ import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
 import SmartDailyBrief from './shared/SmartDailyBrief';
-
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
@@ -48,16 +46,16 @@ import DocumentVerificationWidget from './DocumentVerificationWidget';
 
 import {
   Package, Factory, Building2, Truck, Users, FileText, MapPin, Activity,
-  ChartBar, UserPlus, Recycle, Plus, Bot, LayoutDashboard, Link, Leaf,
-  ClipboardList, Shield, FileCheck, Navigation, Brain, BarChart3,
-  CalendarDays, Cpu, Handshake, DollarSign, Store, Wrench, AlertTriangle,
-  ShieldAlert, Link2, Wifi, HardHat, Wallet, Camera, GraduationCap,
-  Scale, Stamp, Settings, Briefcase,
+  UserPlus, Recycle, Plus, Bot, LayoutDashboard, Leaf,
+  ClipboardList, Shield, Navigation, Brain, BarChart3,
+  CalendarDays, Handshake, DollarSign, Store, Wrench, AlertTriangle,
+  ShieldAlert, Link2, Wifi, HardHat, Wallet, Scale, Settings,
+  Briefcase, Zap, CreditCard, Database, Globe,
 } from 'lucide-react';
 
-// ═══ Lazy load ALL entity components ═══
+// ═══ Lazy load widgets ═══
 
-// Generator widgets
+// Command Center widgets
 const GeneratorCommandCenter = lazy(() => import('./generator/GeneratorCommandCenter'));
 const DashboardBrief = lazy(() => import('./generator/DashboardBrief'));
 const WeeklyShipmentChart = lazy(() => import('./generator/WeeklyShipmentChart'));
@@ -73,9 +71,8 @@ const WorkOrderInbox = lazy(() => import('@/components/work-orders/WorkOrderInbo
 const CreateWorkOrderDialog = lazy(() => import('@/components/work-orders/CreateWorkOrderDialog'));
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
-const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
 
-// Compliance widgets
+// Compliance & Safety
 const ComplianceCertificateWidget = lazy(() => import('@/components/compliance/ComplianceCertificateWidget'));
 const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
 const ComplianceAlertsWidget = lazy(() => import('@/components/compliance/ComplianceAlertsWidget'));
@@ -86,7 +83,7 @@ const VehicleComplianceManager = lazy(() => import('@/components/compliance/Vehi
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
 
-// Transporter widgets
+// Operations & Fleet
 const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIInsights'));
 const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
 const RouteOptimizerPanel = lazy(() => import('@/components/ai/RouteOptimizerPanel'));
@@ -98,7 +95,6 @@ const PartnerProfitabilityPanel = lazy(() => import('./transporter/PartnerProfit
 const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
 const PartnersView = lazy(() => import('./PartnersView'));
 const SignalMonitorWidget = lazy(() => import('@/components/tracking/SignalMonitorWidget'));
-const TransporterDriverTracking = lazy(() => import('./transporter/TransporterDriverTracking'));
 const SmartDriverNotifications = lazy(() => import('./transporter/SmartDriverNotifications'));
 const SustainabilityReportGenerator = lazy(() => import('./transporter/SustainabilityReportGenerator'));
 const EnhancedDriverPerformance = lazy(() => import('./transporter/EnhancedDriverPerformance'));
@@ -115,19 +111,17 @@ const IoTMonitoringPanel = lazy(() => import('./transporter/IoTMonitoringPanel')
 const FleetUtilizationWidget = lazy(() => import('./operations/FleetUtilizationWidget'));
 const TransporterPerformanceCharts = lazy(() => import('./transporter/TransporterPerformanceCharts'));
 
-// Disposal widgets
-const FacilityCapacityCard = lazy(() => import('./shared/FacilityCapacityCard'));
+// Disposal
 const DisposalIncomingPanel = lazy(() => import('./disposal/DisposalIncomingPanel'));
 const DisposalDailyOperations = lazy(() => import('./disposal/DisposalDailyOperations'));
 const DisposalRecentOperations = lazy(() => import('./disposal/DisposalRecentOperations'));
 
-// Safety & WMIS
+// Safety & Environment
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const ImpactDashboard = lazy(() => import('@/components/impact/ImpactDashboard'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
-const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 
 // Driver widgets
 const DriverEarningsDashboard = lazy(() => import('@/components/driver/DriverEarningsDashboard'));
@@ -136,7 +130,7 @@ const DriverRewardsPanel = lazy(() => import('@/components/driver/DriverRewardsP
 const DriverLeaderboard = lazy(() => import('@/components/driver/DriverLeaderboard'));
 const DriverAutoReport = lazy(() => import('@/components/driver/DriverAutoReport'));
 
-// Consulting Office widgets
+// Consulting Office
 const OfficeTeamPanel = lazy(() => import('@/components/consulting-office/OfficeTeamPanel'));
 const OfficeClientsPanel = lazy(() => import('@/components/consulting-office/OfficeClientsPanel'));
 const SigningPoliciesPanel = lazy(() => import('@/components/consulting-office/SigningPoliciesPanel'));
@@ -205,43 +199,21 @@ interface UserProfile {
   email: string;
 }
 
-// All admin tabs
-const adminTabKeys = [
-  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
-  { value: 'generators', labelKey: 'dashboard.tabs.generators', icon: Factory },
-  { value: 'transporters', labelKey: 'dashboard.tabs.transporters', icon: Truck },
-  { value: 'recyclers', labelKey: 'dashboard.tabs.recyclers', icon: Recycle },
-  { value: 'operations', labelKey: 'dashboard.tabs.operations', icon: Activity },
-  { value: 'work-orders', labelKey: 'dashboard.tabs.workOrders', icon: ClipboardList },
-  { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
-  { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
-  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
-  { value: 'pricing', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
-  { value: 'marketplace', labelKey: 'dashboard.tabs.marketplace', icon: Store },
-  { value: 'fraud', labelKey: 'dashboard.tabs.fraud', icon: AlertTriangle },
-  { value: 'risk', labelKey: 'dashboard.tabs.risk', icon: ShieldAlert },
-  { value: 'custody', labelKey: 'dashboard.tabs.custody', icon: Link2 },
-  { value: 'disposal', labelKey: 'dashboard.tabs.disposal', icon: Factory },
-  { value: 'drivers', labelKey: 'dashboard.tabs.drivers', icon: Users },
-  { value: 'partners', labelKey: 'dashboard.tabs.partners', icon: Handshake },
-  { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
-  { value: 'geofence', labelKey: 'dashboard.tabs.geofence', icon: Navigation },
-  { value: 'compliance', labelKey: 'dashboard.tabs.compliance', icon: Shield },
-  { value: 'wmis', labelKey: 'dashboard.tabs.wmis', icon: ShieldAlert },
-  { value: 'ohs', labelKey: 'dashboard.tabs.ohs', icon: HardHat },
-  { value: 'consulting', labelKey: 'dashboard.tabs.consulting', icon: Briefcase },
-  { value: 'calendar', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
-  { value: 'government', labelKey: 'dashboard.tabs.government', icon: Building2 },
-  { value: 'carbon', labelKey: 'dashboard.tabs.carbon', icon: Leaf },
-  { value: 'iot', labelKey: 'dashboard.tabs.iot', icon: Wifi },
-  { value: 'esg', labelKey: 'dashboard.tabs.esg', icon: Leaf },
-  { value: 'impact', labelKey: 'dashboard.tabs.impact', icon: Activity },
+// ═══════════════════════════════════════════════════════════════
+// 6 Strategic Pillars — matching sidebar groups
+// ═══════════════════════════════════════════════════════════════
+const pillarTabs = [
+  { value: 'command-center', labelAr: 'مركز القيادة', labelEn: 'Command Center', icon: Zap },
+  { value: 'entities', labelAr: 'إدارة الكيانات', labelEn: 'Entities', icon: Building2 },
+  { value: 'users-fleet', labelAr: 'المستخدمون والأسطول', labelEn: 'Users & Fleet', icon: Truck },
+  { value: 'finance', labelAr: 'المالية والإيرادات', labelEn: 'Finance', icon: CreditCard },
+  { value: 'compliance', labelAr: 'الامتثال والرقابة', labelEn: 'Compliance', icon: Shield },
+  { value: 'analytics-ai', labelAr: 'التحليلات والذكاء', labelEn: 'Analytics & AI', icon: Brain },
 ];
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
@@ -265,15 +237,12 @@ const AdminDashboard = () => {
       }));
 
       const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status || '')).length;
-
       const { data: organizations } = await supabase.from('organizations').select('organization_type');
       const generatorCount = organizations?.filter(o => o.organization_type === 'generator').length || 0;
       const transporterCount = organizations?.filter(o => o.organization_type === 'transporter').length || 0;
       const recyclerCount = organizations?.filter(o => o.organization_type === 'recycler').length || 0;
-
       const { data: drivers } = await supabase.from('drivers').select('is_available');
       const activeDrivers = drivers?.filter(d => d.is_available).length || 0;
-
       const { data: pendingProfiles } = await supabase.from('profiles').select('id').is('organization_id', null);
 
       return {
@@ -286,7 +255,7 @@ const AdminDashboard = () => {
         recentShipments: shipments as unknown as RecentShipment[],
       };
     },
-    refetchInterval: 30_000, // Auto-refresh every 30s
+    refetchInterval: 30_000,
     staleTime: 10_000,
   });
 
@@ -313,21 +282,20 @@ const AdminDashboard = () => {
   ];
 
   const quickActions = useQuickActions({ type: 'admin' });
-
-  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } };
+  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.08 } } };
+  const itemVariants = { hidden: { opacity: 0, y: 16 }, visible: { opacity: 1, y: 0 } };
 
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
       </div>
     );
   }
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      {/* Smart Daily Brief */}
+      {/* ═══ Smart Brief ═══ */}
       <motion.div variants={itemVariants}>
         <SmartDailyBrief
           role="admin"
@@ -340,17 +308,18 @@ const AdminDashboard = () => {
         />
       </motion.div>
 
-      {/* Stories */}
       <motion.div variants={itemVariants}>
         <StoryCircles />
       </motion.div>
 
-
-      {/* Header */}
+      {/* ═══ Header ═══ */}
       <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="text-right">
-          <h1 className="text-2xl font-bold">{t('dashboard.adminPanel')}</h1>
-          <p className="text-primary">{t('dashboard.welcomeAdmin')}</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Zap className="w-6 h-6 text-primary" />
+            {isRTL ? 'مركز القيادة والسيطرة' : 'Command & Control Center'}
+          </h1>
+          <p className="text-muted-foreground text-sm mt-1">{t('dashboard.welcomeAdmin')}</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/50">
@@ -365,14 +334,8 @@ const AdminDashboard = () => {
           <Button variant="outline" size="sm" onClick={() => setShowWorkOrder(true)} className="gap-1.5">
             <ClipboardList className="h-4 w-4" />{t('dashboard.workOrder')}
           </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowSmartWeightUpload(true)} className="gap-1.5">
-            <Scale className="h-4 w-4" />{t('dashboard.smartWeight')}
-          </Button>
           <Button variant="outline" size="sm" onClick={() => setShowDepositDialog(true)} className="gap-1.5">
             <Wallet className="h-4 w-4" />{t('dashboard.deposit')}
-          </Button>
-          <Button variant="outline" onClick={() => navigate('/dashboard/shipments')}>
-            <FileText className="ml-2 h-4 w-4" />{t('dashboard.viewShipments')}
           </Button>
           <Button variant="eco" onClick={() => navigate('/dashboard/shipments/new')}>
             <Plus className="ml-2 h-4 w-4" />{t('dashboard.createShipment')}
@@ -380,392 +343,412 @@ const AdminDashboard = () => {
         </div>
       </motion.div>
 
-      {/* Stats Grid */}
+      {/* ═══ KPIs Grid ═══ */}
       <motion.div variants={itemVariants}>
         <AdminStatsGrid stats={statCards} />
       </motion.div>
 
-      {/* Organization Breakdown */}
       <motion.div variants={itemVariants}>
         <OrganizationBreakdown generatorCount={stats.generatorCount} transporterCount={stats.transporterCount} recyclerCount={stats.recyclerCount} />
       </motion.div>
 
-      {/* Daily Operations Summary */}
-      <motion.div variants={itemVariants}>
-        <AdminDailyOperationsSummary />
-      </motion.div>
-
-      <motion.div variants={itemVariants}>
-        <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-          <DailyOperationsSummary />
-        </ErrorBoundary>
-      </motion.div>
-
-      {/* Operational Alerts */}
+      {/* ═══ Real-time Alerts ═══ */}
       <motion.div variants={itemVariants}>
         <AdminOperationalAlerts />
       </motion.div>
-
       <motion.div variants={itemVariants}>
         <DashboardAlertsHub orgType="admin" />
       </motion.div>
 
       <AutomationSettingsDialog organizationType="generator" />
 
-      {/* Unified Document Search */}
-      <motion.div variants={itemVariants}>
-        <UnifiedDocumentSearch />
-      </motion.div>
-
-      {/* Shipment Search */}
-      <motion.div variants={itemVariants}>
-        <AdminShipmentSearch />
-      </motion.div>
-
-      {/* Active Tracking */}
-      <motion.div variants={itemVariants}>
-        <AdminActiveTracking />
-      </motion.div>
-
-      {/* Pending Approvals */}
-      <motion.div variants={itemVariants}>
-        <AdminPendingApprovals />
-      </motion.div>
-
-      <PendingApprovalsWidget />
-
       {/* ═══════════════════════════════════════════════════════════════ */}
-      {/* COMPREHENSIVE TABS — All entity features in one place */}
+      {/* 6 STRATEGIC PILLARS — Unified Command Tabs                    */}
       {/* ═══════════════════════════════════════════════════════════════ */}
-      <Tabs defaultValue="overview" className="w-full" dir="rtl">
-        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
-            {adminTabKeys.map((tab) => (
+      <Tabs defaultValue="command-center" className="w-full" dir="rtl">
+        <div className="relative overflow-hidden rounded-2xl border border-border/40 bg-gradient-to-r from-card via-card to-muted/10 p-1.5 shadow-sm">
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0 scrollbar-hide">
+            {pillarTabs.map((tab) => (
               <TabsTrigger
                 key={tab.value}
                 value={tab.value}
-                className="text-[9px] sm:text-xs whitespace-nowrap gap-1 sm:gap-1.5 px-2 sm:px-3 py-2 sm:py-2.5 rounded-xl text-muted-foreground data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 hover:text-foreground hover:bg-muted/50 transition-all duration-300"
+                className="text-xs sm:text-sm whitespace-nowrap gap-1.5 sm:gap-2 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl text-muted-foreground font-medium data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:shadow-primary/25 hover:text-foreground hover:bg-muted/50 transition-all duration-300"
               >
-                <tab.icon className="w-3 h-3 sm:w-4 sm:h-4" />
-                <span className="hidden sm:inline font-medium">{t(tab.labelKey)}</span>
+                <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                <span className="font-semibold">{isRTL ? tab.labelAr : tab.labelEn}</span>
               </TabsTrigger>
             ))}
           </TabsList>
         </div>
 
-        {/* ── نظرة عامة ── */}
-        <TabsContent value="overview" className="space-y-6 mt-6">
+        {/* ═══ 1. مركز القيادة — Command Center ═══ */}
+        <TabsContent value="command-center" className="space-y-6 mt-6">
           <Suspense fallback={<TabFallback />}>
             <DashboardBrief />
           </Suspense>
 
+          {/* Daily Operations */}
+          <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+            <AdminDailyOperationsSummary />
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+            <DailyOperationsSummary />
+          </ErrorBoundary>
+
+          {/* Charts */}
           <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
             <Suspense fallback={<TabFallback />}>
-              <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
                 <WeeklyShipmentChart />
                 <ComplianceGauge />
               </div>
             </Suspense>
           </ErrorBoundary>
 
-          <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
-            <Suspense fallback={<TabFallback />}>
-              <FleetUtilizationWidget />
-            </Suspense>
-          </ErrorBoundary>
+          {/* Active Tracking & Approvals */}
+          <AdminActiveTracking />
+          <AdminPendingApprovals />
+          <PendingApprovalsWidget />
 
-          <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
-            <Suspense fallback={<TabFallback />}>
-              <TransporterPerformanceCharts />
-            </Suspense>
-          </ErrorBoundary>
+          {/* Search */}
+          <UnifiedDocumentSearch />
+          <AdminShipmentSearch />
 
-          <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
-            <Suspense fallback={<TabFallback />}>
-              <FinancialSummaryWidget />
-            </Suspense>
-          </ErrorBoundary>
-
+          {/* Quick Actions */}
           <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsAdmin')} />
 
+          {/* Recent */}
           <AdminRecentShipments shipments={recentShipments} onRefresh={() => {}} />
-        </TabsContent>
 
-        {/* ── المولدين ── */}
-        <TabsContent value="generators" className="space-y-6 mt-6">
-          <AdminEntityList orgType="generator" />
-        </TabsContent>
-
-        {/* ── الناقلين ── */}
-        <TabsContent value="transporters" className="space-y-6 mt-6">
-          <AdminEntityList orgType="transporter" />
-        </TabsContent>
-
-        {/* ── المعالجين ── */}
-        <TabsContent value="recyclers" className="space-y-6 mt-6">
-          <AdminEntityList orgType="recycler" />
-        </TabsContent>
-
-        {/* ── العمليات ── */}
-        <TabsContent value="operations" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في مركز القيادة">
+          {/* Operations widgets */}
+          <ErrorBoundary fallbackTitle="خطأ في مركز القيادة">
+            <Suspense fallback={<TabFallback />}>
               <GeneratorCommandCenter />
-            </ErrorBoundary>
-            <ErrorBoundary fallbackTitle="خطأ في التتبع">
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في التتبع">
+            <Suspense fallback={<TabFallback />}>
               <GeneratorTrackingWidget />
-            </ErrorBoundary>
-            <ErrorBoundary fallbackTitle="خطأ في رادار التخلص">
-              <DisposalRadarWidget />
-            </ErrorBoundary>
-            <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+            </Suspense>
+          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+            <Suspense fallback={<TabFallback />}>
               <OrgPerformanceRadar />
-            </ErrorBoundary>
-            <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
-              <ErrorBoundary fallbackTitle="خطأ في ESG">
-                <ESGReportWidget />
+            </Suspense>
+          </ErrorBoundary>
+        </TabsContent>
+
+        {/* ═══ 2. إدارة الكيانات — Entity Management ═══ */}
+        <TabsContent value="entities" className="space-y-6 mt-6">
+          {/* Sub-tabs for entity types */}
+          <Tabs defaultValue="all-entities" className="w-full" dir="rtl">
+            <TabsList className="w-full justify-start bg-muted/30 rounded-xl p-1 gap-1">
+              {[
+                { value: 'all-entities', label: 'جميع الكيانات', labelEn: 'All Entities', icon: Building2 },
+                { value: 'generators-list', label: 'المولّدين', labelEn: 'Generators', icon: Factory },
+                { value: 'transporters-list', label: 'الناقلين', labelEn: 'Transporters', icon: Truck },
+                { value: 'recyclers-list', label: 'المدورين', labelEn: 'Recyclers', icon: Recycle },
+                { value: 'partners-list', label: 'الشركاء', labelEn: 'Partners', icon: Handshake },
+                { value: 'disposal-list', label: 'التخلص', labelEn: 'Disposal', icon: Factory },
+              ].map(sub => (
+                <TabsTrigger key={sub.value} value={sub.value} className="text-xs gap-1 px-3 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <sub.icon className="w-3.5 h-3.5" />
+                  {isRTL ? sub.label : sub.labelEn}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="all-entities" className="mt-4 space-y-4">
+              <OrganizationBreakdown generatorCount={stats.generatorCount} transporterCount={stats.transporterCount} recyclerCount={stats.recyclerCount} />
+            </TabsContent>
+            <TabsContent value="generators-list" className="mt-4">
+              <AdminEntityList orgType="generator" />
+            </TabsContent>
+            <TabsContent value="transporters-list" className="mt-4">
+              <AdminEntityList orgType="transporter" />
+            </TabsContent>
+            <TabsContent value="recyclers-list" className="mt-4">
+              <AdminEntityList orgType="recycler" />
+            </TabsContent>
+            <TabsContent value="partners-list" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <SustainabilityReportGenerator />
+                <PartnerRatingsWidget />
+                <PartnerProfitabilityPanel />
+                <PartnersView />
+              </Suspense>
+              <AdminPartnersTab generatorCount={stats.generatorCount} transporterCount={stats.transporterCount} recyclerCount={stats.recyclerCount} />
+            </TabsContent>
+            <TabsContent value="disposal-list" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في التخلص">
+                  <DisposalDailyOperations />
+                  <DisposalIncomingPanel />
+                  <DisposalRecentOperations />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+
+        {/* ═══ 3. المستخدمون والأسطول — Users & Fleet ═══ */}
+        <TabsContent value="users-fleet" className="space-y-6 mt-6">
+          <Tabs defaultValue="fleet-overview" className="w-full" dir="rtl">
+            <TabsList className="w-full justify-start bg-muted/30 rounded-xl p-1 gap-1">
+              {[
+                { value: 'fleet-overview', label: 'نظرة عامة', labelEn: 'Overview', icon: LayoutDashboard },
+                { value: 'drivers-tab', label: 'السائقون', labelEn: 'Drivers', icon: Users },
+                { value: 'tracking-tab', label: 'التتبع', labelEn: 'Tracking', icon: MapPin },
+                { value: 'fleet-maintenance', label: 'الأسطول والصيانة', labelEn: 'Fleet & Maintenance', icon: Wrench },
+                { value: 'geofence-tab', label: 'الجيوفنس', labelEn: 'Geofence', icon: Navigation },
+                { value: 'performance-tab', label: 'الأداء', labelEn: 'Performance', icon: BarChart3 },
+              ].map(sub => (
+                <TabsTrigger key={sub.value} value={sub.value} className="text-xs gap-1 px-3 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <sub.icon className="w-3.5 h-3.5" />
+                  {isRTL ? sub.label : sub.labelEn}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="fleet-overview" className="mt-4 space-y-4">
+              <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
+                <Suspense fallback={<TabFallback />}><FleetUtilizationWidget /></Suspense>
               </ErrorBoundary>
-              <DriverCodeLookup />
-            </div>
-          </Suspense>
+              <ErrorBoundary fallbackTitle="خطأ في الرسوم">
+                <Suspense fallback={<TabFallback />}><TransporterPerformanceCharts /></Suspense>
+              </ErrorBoundary>
+            </TabsContent>
+
+            <TabsContent value="drivers-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في بيانات السائقين">
+                  <DriverEarningsDashboard />
+                  <DriverWalletPanel />
+                  <DriverRewardsPanel />
+                  <DriverLeaderboard />
+                  <DriverAutoReport />
+                  <DriverCopilot />
+                  <SmartDriverNotifications />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="tracking-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <SignalMonitorWidget />
+              </Suspense>
+              <DriverLinkingCode />
+              <AdminTrackingTab activeDrivers={stats.activeDrivers} totalDrivers={stats.totalDrivers} />
+            </TabsContent>
+
+            <TabsContent value="fleet-maintenance" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
+                  <PredictiveFleetMaintenance />
+                  <MaintenanceScheduler />
+                  <VehicleComplianceManager />
+                  <DriverComplianceManager />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="geofence-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <GeofenceAlertsPanel />
+              </Suspense>
+            </TabsContent>
+
+            <TabsContent value="performance-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
+                  <EnhancedDriverPerformance />
+                  <DriverPerformancePanel />
+                  <TripCostManagement />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* ── أوامر الشغل ── */}
-        <TabsContent value="work-orders" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <WorkOrderInbox />
-          </Suspense>
+        {/* ═══ 4. المالية والإيرادات — Finance & Revenue ═══ */}
+        <TabsContent value="finance" className="space-y-6 mt-6">
+          <Tabs defaultValue="financial-overview" className="w-full" dir="rtl">
+            <TabsList className="w-full justify-start bg-muted/30 rounded-xl p-1 gap-1">
+              {[
+                { value: 'financial-overview', label: 'الملخص المالي', labelEn: 'Financial Summary', icon: DollarSign },
+                { value: 'pricing-tab', label: 'التسعير الذكي', labelEn: 'Smart Pricing', icon: BarChart3 },
+                { value: 'marketplace-tab', label: 'السوق', labelEn: 'Marketplace', icon: Store },
+                { value: 'calendar-tab', label: 'التقويم', labelEn: 'Calendar', icon: CalendarDays },
+              ].map(sub => (
+                <TabsTrigger key={sub.value} value={sub.value} className="text-xs gap-1 px-3 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <sub.icon className="w-3.5 h-3.5" />
+                  {isRTL ? sub.label : sub.labelEn}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="financial-overview" className="mt-4 space-y-4">
+              <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
+                <Suspense fallback={<TabFallback />}><FinancialSummaryWidget /></Suspense>
+              </ErrorBoundary>
+            </TabsContent>
+            <TabsContent value="pricing-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في التسعير"><DynamicPricingEngine /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="marketplace-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في السوق"><WasteMarketplace /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="calendar-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ShipmentCalendarWidget />
+                <SmartSchedulerPanel />
+                <RouteOptimizerPanel driverId="" destinations={[]} />
+              </Suspense>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* ── الذكاء الاصطناعي ── */}
-        <TabsContent value="ai" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
-              <TransporterAIInsights />
-            </ErrorBoundary>
-          </Suspense>
+        {/* ═══ 5. الامتثال والرقابة — Compliance & Oversight ═══ */}
+        <TabsContent value="compliance" className="space-y-6 mt-6">
+          <Tabs defaultValue="compliance-overview" className="w-full" dir="rtl">
+            <TabsList className="w-full justify-start bg-muted/30 rounded-xl p-1 gap-1">
+              {[
+                { value: 'compliance-overview', label: 'الامتثال', labelEn: 'Compliance', icon: Shield },
+                { value: 'safety-tab', label: 'السلامة', labelEn: 'Safety', icon: HardHat },
+                { value: 'custody-tab', label: 'سلسلة الحيازة', labelEn: 'Chain of Custody', icon: Link2 },
+                { value: 'fraud-tab', label: 'كشف الاحتيال', labelEn: 'Fraud Detection', icon: AlertTriangle },
+                { value: 'risk-tab', label: 'المخاطر', labelEn: 'Risk', icon: ShieldAlert },
+                { value: 'government-tab', label: 'البوابة الحكومية', labelEn: 'Government', icon: Building2 },
+                { value: 'consulting-tab', label: 'الاستشارات', labelEn: 'Consulting', icon: Briefcase },
+              ].map(sub => (
+                <TabsTrigger key={sub.value} value={sub.value} className="text-xs gap-1 px-3 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <sub.icon className="w-3.5 h-3.5" />
+                  {isRTL ? sub.label : sub.labelEn}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+
+            <TabsContent value="compliance-overview" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ComplianceAlertsWidget />
+                <ConsultantKPIsWidget />
+                <ComplianceCertificateWidget />
+                <RiskMatrixWidget />
+                <CorrectiveActionsWidget />
+                <AuditPortalWidget />
+                <LegalComplianceWidget />
+                <LegalArchiveWidget />
+                <IncidentReportManager />
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="safety-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في السلامة"><SafetyManagerDashboard /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="custody-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في سلسلة الحيازة"><ChainOfCustodyPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="fraud-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال"><FraudDetectionPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="risk-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في المخاطر"><PartnerRiskPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="government-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية"><GovernmentReportingPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="consulting-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في الاستشارات">
+                  <ConsultantSmartAlerts mode="office" />
+                  <OfficeTeamPanel />
+                  <OfficeClientsPanel />
+                  <SigningPoliciesPanel />
+                  <ApprovalQueuePanel />
+                  <OfficeDocumentsPanel />
+                  <OfficeLicensesPanel />
+                  <OfficeFinancePanel />
+                  <ConsultantAnalyticsPanel mode="office" />
+                </ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        {/* ── الأداء والتكاليف ── */}
-        <TabsContent value="performance" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
-              <EnhancedDriverPerformance />
-              <DriverPerformancePanel />
-              <TripCostManagement />
-              <SmartDriverNotifications />
-              <MaintenanceScheduler />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
+        {/* ═══ 6. التحليلات والذكاء — Analytics & AI ═══ */}
+        <TabsContent value="analytics-ai" className="space-y-6 mt-6">
+          <Tabs defaultValue="ai-insights" className="w-full" dir="rtl">
+            <TabsList className="w-full justify-start bg-muted/30 rounded-xl p-1 gap-1">
+              {[
+                { value: 'ai-insights', label: 'الذكاء الاصطناعي', labelEn: 'AI Insights', icon: Brain },
+                { value: 'carbon-tab', label: 'الكربون', labelEn: 'Carbon', icon: Leaf },
+                { value: 'esg-tab', label: 'ESG', labelEn: 'ESG', icon: Leaf },
+                { value: 'impact-tab', label: 'الأثر', labelEn: 'Impact', icon: Activity },
+                { value: 'wmis-tab', label: 'WMIS', labelEn: 'WMIS', icon: ShieldAlert },
+                { value: 'iot-tab', label: 'IoT', labelEn: 'IoT', icon: Wifi },
+                { value: 'work-orders-tab', label: 'أوامر الشغل', labelEn: 'Work Orders', icon: ClipboardList },
+              ].map(sub => (
+                <TabsTrigger key={sub.value} value={sub.value} className="text-xs gap-1 px-3 py-2 rounded-lg data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                  <sub.icon className="w-3.5 h-3.5" />
+                  {isRTL ? sub.label : sub.labelEn}
+                </TabsTrigger>
+              ))}
+            </TabsList>
 
-        {/* ── الأسطول والصيانة ── */}
-        <TabsContent value="fleet" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
-              <PredictiveFleetMaintenance />
-              <VehicleComplianceManager />
-              <DriverComplianceManager />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── التسعير الذكي ── */}
-        <TabsContent value="pricing" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
-              <DynamicPricingEngine />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── السوق ── */}
-        <TabsContent value="marketplace" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في السوق">
-              <WasteMarketplace />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── كشف الاحتيال ── */}
-        <TabsContent value="fraud" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
-              <FraudDetectionPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── مخاطر الشركاء ── */}
-        <TabsContent value="risk" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في تحليل المخاطر">
-              <PartnerRiskPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── سلسلة الحفظ ── */}
-        <TabsContent value="custody" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في سلسلة الحفظ">
-              <ChainOfCustodyPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── التخلص النهائي ── */}
-        <TabsContent value="disposal" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في عمليات التخلص">
-              <DisposalDailyOperations />
-              <DisposalIncomingPanel />
-              <DisposalRecentOperations />
-              <IncidentReportManager />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── السائقون ── */}
-        <TabsContent value="drivers" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في بيانات السائقين">
-              <DriverEarningsDashboard />
-              <DriverWalletPanel />
-              <DriverRewardsPanel />
-              <DriverLeaderboard />
-              <DriverAutoReport />
-              <DriverCopilot />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── الجهات المرتبطة ── */}
-        <TabsContent value="partners" className="space-y-6 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <SustainabilityReportGenerator />
-            <PartnerRatingsWidget />
-            <PartnerProfitabilityPanel />
-            <PartnersView />
-          </Suspense>
-          <AdminPartnersTab generatorCount={stats.generatorCount} transporterCount={stats.transporterCount} recyclerCount={stats.recyclerCount} />
-        </TabsContent>
-
-        {/* ── تتبع السائقين ── */}
-        <TabsContent value="tracking" className="space-y-6 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <SignalMonitorWidget />
-          </Suspense>
-          <DriverLinkingCode />
-          <AdminTrackingTab activeDrivers={stats.activeDrivers} totalDrivers={stats.totalDrivers} />
-        </TabsContent>
-
-        {/* ── الجيوفنس ── */}
-        <TabsContent value="geofence" className="space-y-6 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <GeofenceAlertsPanel />
-          </Suspense>
-        </TabsContent>
-
-        {/* ── الامتثال الشامل ── */}
-        <TabsContent value="compliance" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ComplianceAlertsWidget />
-            <ConsultantKPIsWidget />
-            <ComplianceCertificateWidget />
-            <RiskMatrixWidget />
-            <CorrectiveActionsWidget />
-            <AuditPortalWidget />
-            <LegalComplianceWidget />
-            <LegalArchiveWidget />
-            <IncidentReportManager />
-          </Suspense>
-        </TabsContent>
-
-        {/* ── WMIS ── */}
-        <TabsContent value="wmis" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
-              <WMISEventsFeed />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── السلامة المهنية ── */}
-        <TabsContent value="ohs" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
-              <SafetyManagerDashboard />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── المكتب الاستشاري ── */}
-        <TabsContent value="consulting" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في أدوات المكتب الاستشاري">
-              <ConsultantSmartAlerts mode="office" />
-              <OfficeTeamPanel />
-              <OfficeClientsPanel />
-              <SigningPoliciesPanel />
-              <ApprovalQueuePanel />
-              <OfficeDocumentsPanel />
-              <OfficeLicensesPanel />
-              <OfficeFinancePanel />
-              <ConsultantAnalyticsPanel mode="office" />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── التقويم ── */}
-        <TabsContent value="calendar" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ShipmentCalendarWidget />
-            <SmartSchedulerPanel />
-            <RouteOptimizerPanel driverId="" destinations={[]} />
-          </Suspense>
-        </TabsContent>
-
-        {/* ── البوابة الحكومية ── */}
-        <TabsContent value="government" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية">
-              <GovernmentReportingPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── أرصدة الكربون ── */}
-        <TabsContent value="carbon" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
-              <CarbonCreditsPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── IoT ── */}
-        <TabsContent value="iot" className="space-y-4 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ErrorBoundary fallbackTitle="خطأ في IoT">
-              <IoTMonitoringPanel />
-            </ErrorBoundary>
-          </Suspense>
-        </TabsContent>
-
-        {/* ── تقارير ESG ── */}
-        <TabsContent value="esg" className="space-y-6 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ESGReportPanel />
-          </Suspense>
-        </TabsContent>
-
-        {/* ── سلسلة الأثر ── */}
-        <TabsContent value="impact" className="space-y-6 mt-6">
-          <Suspense fallback={<TabFallback />}>
-            <ImpactDashboard />
-          </Suspense>
+            <TabsContent value="ai-insights" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في الذكاء الاصطناعي">
+                  <TransporterAIInsights />
+                </ErrorBoundary>
+              </Suspense>
+              <ErrorBoundary fallbackTitle="خطأ في رادار التخلص">
+                <Suspense fallback={<TabFallback />}><DisposalRadarWidget /></Suspense>
+              </ErrorBoundary>
+              <Suspense fallback={<TabFallback />}>
+                <div className="grid gap-3 grid-cols-1 md:grid-cols-2">
+                  <ErrorBoundary fallbackTitle="خطأ في ESG"><ESGReportWidget /></ErrorBoundary>
+                  <DriverCodeLookup />
+                </div>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="carbon-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون"><CarbonCreditsPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="esg-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}><ESGReportPanel /></Suspense>
+            </TabsContent>
+            <TabsContent value="impact-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}><ImpactDashboard /></Suspense>
+            </TabsContent>
+            <TabsContent value="wmis-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في WMIS"><WMISEventsFeed /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="iot-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}>
+                <ErrorBoundary fallbackTitle="خطأ في IoT"><IoTMonitoringPanel /></ErrorBoundary>
+              </Suspense>
+            </TabsContent>
+            <TabsContent value="work-orders-tab" className="mt-4 space-y-4">
+              <Suspense fallback={<TabFallback />}><WorkOrderInbox /></Suspense>
+            </TabsContent>
+          </Tabs>
         </TabsContent>
       </Tabs>
 
