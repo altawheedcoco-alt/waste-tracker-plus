@@ -458,12 +458,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         body: {
           email: data.email,
           password: data.password,
-          fullName: data.fullName,
+          full_name: data.fullName,
           phone: data.phone,
-          licenseNumber: data.licenseNumber,
-          vehicleType: data.vehicleType,
-          vehiclePlate: data.vehiclePlate,
-          licenseExpiry: data.licenseExpiry || null,
+          license_number: data.licenseNumber,
+          vehicle_type: data.vehicleType,
+          vehicle_plate: data.vehiclePlate,
+          license_expiry: data.licenseExpiry || null,
         },
       });
 
