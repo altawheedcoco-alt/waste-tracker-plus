@@ -181,7 +181,9 @@ const ResetPassword = () => {
                     <br />يرجى التحقق من بريدك الإلكتروني.
                   </AlertDescription>
                 </Alert>
-                <Button variant="outline" className="w-full" onClick={() => { setEmailSent(false); setEmail(''); }}>إعادة الإرسال لبريد آخر</Button>
+                <Button variant="outline" className="w-full" onClick={() => { setEmailSent(false); setEmail(''); }} disabled={cooldown > 0}>
+                  {cooldown > 0 ? `إعادة الإرسال بعد ${cooldown} ثانية` : 'إعادة الإرسال لبريد آخر'}
+                </Button>
                 <Button variant="ghost" className="w-full gap-2" onClick={() => navigate('/auth')}>
                   <ArrowRight className="w-4 h-4" />العودة لتسجيل الدخول
                 </Button>
