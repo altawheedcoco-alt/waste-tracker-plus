@@ -176,12 +176,17 @@ export const smartInvalidate = (
  * خريطة الارتباطات: عند تغيير بيانات معينة، ما البيانات الأخرى التي يجب تحديثها؟
  */
 export const INVALIDATION_MAP: Record<string, string[]> = {
-  shipments: ['statistics', 'analytics', 'invoices', 'partner-shipments', 'reports', 'notifications'],
+  shipments: ['statistics', 'analytics', 'invoices', 'partner-shipments', 'reports', 'notifications', 'work-orders'],
   invoices: ['statistics', 'ledger', 'analytics', 'reports'],
   deposits: ['ledger', 'statistics', 'analytics'],
-  drivers: ['driver-locations', 'shipments'],
-  organizations: ['partners', 'linked-partners', 'statistics'],
+  drivers: ['driver-locations', 'shipments', 'transporter-drivers-summary'],
+  organizations: ['partners', 'linked-partners', 'statistics', 'verified-partnerships'],
   'approval-requests': ['notifications', 'shipments', 'organizations'],
+  'verified-partnerships': ['partners', 'linked-partners', 'notifications'],
+  'work-orders': ['notifications', 'shipments'],
+  'employee-permissions': ['my-permissions'],
+  'delivery-confirmations': ['shipments', 'notifications'],
+  contracts: ['award-letters', 'notifications'],
 };
 
 /**
