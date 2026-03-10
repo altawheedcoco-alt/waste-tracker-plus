@@ -1,7 +1,6 @@
-import { lazy, Suspense } from "react";
+import { lazy } from "react";
 import { Route } from "react-router-dom";
-import ProtectedRoute from "@/components/guards/ProtectedRoute";
-import { DashboardErrorBoundary } from "@/components/shared/DashboardErrorBoundary";
+import DashboardRouteGuard from "@/components/guards/DashboardRouteGuard";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
@@ -219,10 +218,16 @@ const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocu
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
 
+/**
+ * All dashboard routes wrapped inside a single DashboardRouteGuard layout route.
+ * This ensures every sub-route is protected (auth + error boundary + suspense)
+ * without needing to wrap each one individually.
+ */
 export const dashboardRoutes = (
-  <>
-    <Route path="/dashboard" element={<ProtectedRoute><DashboardErrorBoundary><Dashboard /></DashboardErrorBoundary></ProtectedRoute>} />
+  <Route element={<DashboardRouteGuard />}>
+    <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/dashboard/digital-identity-card" element={<DigitalIdentityCardPage />} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
@@ -388,6 +393,8 @@ export const dashboardRoutes = (
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
     <Route path="/dashboard/driver-academy" element={<DriverAcademy />} />
     <Route path="/dashboard/ohs-reports" element={<OHSReports />} />
+    {/* Alias: sidebar links to /dashboard/safety → reuse OHSReports */}
+    <Route path="/dashboard/safety" element={<OHSReports />} />
     <Route path="/dashboard/circular-economy" element={<CircularEconomy />} />
     <Route path="/dashboard/my-ads" element={<AdvertiserDashboard />} />
     <Route path="/dashboard/ad-plans" element={<AdPlans />} />
@@ -440,6 +447,15 @@ export const dashboardRoutes = (
     <Route path="/dashboard/central-registry" element={<CentralDocumentRegistry />} />
     <Route path="/dashboard/digital-maturity" element={<DigitalMaturityDashboard />} />
     <Route path="/dashboard/architecture-guide" element={<SystemArchitectureGuide />} />
-    <Route path="/dashboard/*" element={<Dashboard />} />
-  </>
+    {/* Ghost sidebar aliases — consultant/office paths that reuse existing pages */}
+    <Route path="/dashboard/audit-sessions" element={<ConsultantPortal />} />
+    <Route path="/dashboard/consultant-reports" element={<Reports />} />
+    <Route path="/dashboard/compliance-assessment" element={<ConsultantPortal />} />
+    <Route path="/dashboard/consultant-clients" element={<Partners />} />
+    <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
+    <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />
+    <Route path="/dashboard/office-performance" element={<AdvancedAnalytics />} />
+    {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
+    <Route path="/dashboard/*" element={<NotFound />} />
+  </Route>
 );

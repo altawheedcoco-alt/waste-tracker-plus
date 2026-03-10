@@ -21,7 +21,6 @@ const QuickDeposit = lazy(() => import("@/pages/QuickDeposit"));
 const QuickShipment = lazy(() => import("@/pages/QuickShipment"));
 const QuickDriver = lazy(() => import("@/pages/QuickDriver"));
 const QuickShip = lazy(() => import("@/pages/QuickShip"));
-const SavedLocationsPage = lazy(() => import("@/pages/SavedLocationsPage"));
 const ScopedAccessPortal = lazy(() => import("@/pages/ScopedAccessPortal"));
 const Terms = lazy(() => import("@/pages/Terms"));
 const Privacy = lazy(() => import("@/pages/Privacy"));
