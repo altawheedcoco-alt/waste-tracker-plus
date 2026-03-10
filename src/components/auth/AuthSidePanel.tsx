@@ -113,22 +113,36 @@ const AuthSidePanel = () => {
         </motion.div>
       </div>
 
-      {/* Illustration */}
-      <motion.div
-        initial={{ opacity: 0, scale: 0.85 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ delay: 0.4, duration: 0.6 }}
-        className="relative z-10 flex justify-center px-8"
-      >
-        <div className="relative">
+      {/* Illustration - Auto-rotating */}
+      <div className="relative z-10 flex justify-center px-8 h-[280px] xl:h-[320px]">
+        <div className="relative w-full max-w-[280px] xl:max-w-[320px]">
           <div className="absolute inset-0 bg-white/10 rounded-3xl blur-2xl scale-95" />
-          <img
-            src={authIllustration}
-            alt="منصة إدارة المخلفات"
-            className="relative w-full max-w-[280px] xl:max-w-[320px] drop-shadow-2xl"
-          />
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={currentIndex}
+              src={currentIllustration.src}
+              alt={currentIllustration.alt}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              transition={{ duration: 0.6 }}
+              className="relative w-full h-full object-contain drop-shadow-2xl"
+            />
+          </AnimatePresence>
+          {/* Dot indicators */}
+          <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex gap-1">
+            {illustrations.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrentIndex(i)}
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                  i === currentIndex ? 'bg-white w-4' : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* Stats */}
       <motion.div
