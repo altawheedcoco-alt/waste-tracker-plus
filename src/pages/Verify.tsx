@@ -267,39 +267,39 @@ const Verify = () => {
             <Card className="mb-4">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-green-600" />
+                  <FileText className="h-5 w-5 text-primary" />
                   بيانات الشحنة
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-sm text-gray-500">رقم الشحنة</span>
+                    <span className="text-sm text-muted-foreground">رقم الشحنة</span>
                     <p className="font-mono font-bold">{shipmentData.shipment_number}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">الحالة</span>
+                    <span className="text-sm text-muted-foreground">الحالة</span>
                     <div className="mt-1">
-                      <Badge className={statusLabels[shipmentData.status]?.color || 'bg-gray-100'}>
+                      <Badge className={statusLabels[shipmentData.status]?.color || 'bg-muted'}>
                         {statusLabels[shipmentData.status]?.label || shipmentData.status}
                       </Badge>
                     </div>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500 flex items-center gap-1">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
                       <Scale className="h-3 w-3" /> نوع المخلفات
                     </span>
                     <p className="font-semibold">{wasteTypeLabels[shipmentData.waste_type] || shipmentData.waste_type}</p>
                   </div>
                   <div>
-                    <span className="text-sm text-gray-500">الكمية</span>
-                    <p className="font-bold text-green-600">{shipmentData.quantity} {shipmentData.unit || 'كجم'}</p>
+                    <span className="text-sm text-muted-foreground">الكمية</span>
+                    <p className="font-bold text-primary">{shipmentData.quantity} {shipmentData.unit || 'كجم'}</p>
                   </div>
                 </div>
 
                 {shipmentData.delivered_at && (
-                  <div className="pt-2 border-t">
-                    <span className="text-sm text-gray-500 flex items-center gap-1">
+                  <div className="pt-2 border-t border-border">
+                    <span className="text-sm text-muted-foreground flex items-center gap-1">
                       <Calendar className="h-3 w-3" /> تاريخ التسليم
                     </span>
                     <p className="font-semibold">
@@ -315,13 +315,13 @@ const Verify = () => {
               {/* Generator */}
               <Card>
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-blue-600">
+                  <div className="flex items-center gap-2 mb-2 text-blue-600 dark:text-blue-400">
                     <Building2 className="h-4 w-4" />
                     <span className="font-semibold text-sm">الجهة المولدة</span>
                   </div>
                   <p className="font-bold">{shipmentData.generator?.name || '-'}</p>
                   {shipmentData.generator?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.generator.city}
                     </p>
@@ -332,13 +332,13 @@ const Verify = () => {
               {/* Transporter */}
               <Card>
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-orange-600">
+                  <div className="flex items-center gap-2 mb-2 text-orange-600 dark:text-orange-400">
                     <Truck className="h-4 w-4" />
                     <span className="font-semibold text-sm">جهة النقل</span>
                   </div>
                   <p className="font-bold">{shipmentData.transporter?.name || '-'}</p>
                   {shipmentData.transporter?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.transporter.city}
                     </p>
@@ -347,15 +347,15 @@ const Verify = () => {
               </Card>
 
               {/* Recycler */}
-              <Card className="bg-green-50 border-green-200">
+              <Card className="bg-primary/5 border-primary/20">
                 <CardContent className="pt-4">
-                  <div className="flex items-center gap-2 mb-2 text-green-600">
+                  <div className="flex items-center gap-2 mb-2 text-primary">
                     <Recycle className="h-4 w-4" />
                     <span className="font-semibold text-sm">جهة التدوير</span>
                   </div>
                   <p className="font-bold">{shipmentData.recycler?.name || '-'}</p>
                   {shipmentData.recycler?.city && (
-                    <p className="text-sm text-gray-500 flex items-center gap-1 mt-1">
+                    <p className="text-sm text-muted-foreground flex items-center gap-1 mt-1">
                       <MapPin className="h-3 w-3" />
                       {shipmentData.recycler.city}
                     </p>
@@ -371,29 +371,29 @@ const Verify = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <Recycle className="h-5 w-5 text-green-600" />
+                <Recycle className="h-5 w-5 text-primary" />
                 بيانات شهادة التدوير
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <span className="text-sm text-gray-500">رقم الشهادة</span>
+                  <span className="text-sm text-muted-foreground">رقم الشهادة</span>
                   <p className="font-mono font-bold">{data.report_number}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">تصنيف المخلفات</span>
+                  <span className="text-sm text-muted-foreground">تصنيف المخلفات</span>
                   <p className="font-semibold">
                     {data.waste_category === 'hazardous' ? 'خطرة' : 
                      data.waste_category === 'medical' ? 'طبية' : 'غير خطرة'}
                   </p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">جهة التدوير</span>
+                  <span className="text-sm text-muted-foreground">جهة التدوير</span>
                   <p className="font-semibold">{data.recycler_organization?.name || '-'}</p>
                 </div>
                 <div>
-                  <span className="text-sm text-gray-500">تاريخ الإصدار</span>
+                  <span className="text-sm text-muted-foreground">تاريخ الإصدار</span>
                   <p className="font-semibold">
                     {format(new Date(data.created_at), 'PP', { locale: ar })}
                   </p>
@@ -404,10 +404,10 @@ const Verify = () => {
         )}
 
         {/* Footer */}
-        <div className="text-center text-sm text-gray-500 mt-8">
+        <div className="text-center text-sm text-muted-foreground mt-8">
           <p>تم التحقق بتاريخ: {format(new Date(), 'PPpp', { locale: ar })}</p>
           <p className="mt-2">© {new Date().getFullYear()} iRecycle - نظام إدارة المخلفات وإعادة التدوير</p>
-          <Link to="/" className="text-green-600 hover:underline mt-4 inline-block">
+          <Link to="/" className="text-primary hover:underline mt-4 inline-block">
             زيارة الموقع الرئيسي
           </Link>
         </div>
