@@ -352,13 +352,13 @@ const RecyclerGuide = () => {
               transition={{ delay: 0.1 }}
             >
               <Card className="bg-card border-border overflow-hidden">
-                <CardHeader className="bg-gradient-to-l from-green-500/5 to-green-500/10 border-b border-border">
+                <CardHeader className="bg-gradient-to-l from-primary/5 to-primary/10 border-b border-border">
                   <CardTitle className="flex items-center gap-3">
-                    <div className="p-2 bg-green-500/10 rounded-lg">
-                      <section.icon className="w-6 h-6 text-green-500" />
+                    <div className="p-2 bg-primary/10 rounded-lg">
+                      <section.icon className="w-6 h-6 text-primary" />
                     </div>
                     <div>
-                      <span className="text-xs text-green-500 font-normal">القسم {i + 1}</span>
+                      <span className="text-xs text-primary font-normal">القسم {i + 1}</span>
                       <h2 className="text-xl">{section.title}</h2>
                     </div>
                   </CardTitle>
