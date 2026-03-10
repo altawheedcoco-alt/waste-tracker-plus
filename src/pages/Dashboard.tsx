@@ -102,21 +102,8 @@ const Dashboard = () => {
   const renderDashboard = () => {
     if (isDriver) return <DriverDashboard />;
     if (isEmployee) return <EmployeeDashboard />;
-    // Admin sees the target org's dashboard when impersonating, otherwise AdminDashboard
-    if (isAdmin) {
-      switch (orgType) {
-        case 'generator': return <GeneratorDashboard />;
-        case 'transporter': return <TransporterDashboard />;
-        case 'recycler': return <RecyclerDashboard />;
-        case 'disposal': return <DisposalDashboard embedded />;
-        case 'transport_office': return <TransportOfficeDashboard />;
-        case 'consultant': return <ConsultantDashboard />;
-        case 'consulting_office': return <ConsultingOfficeDashboard />;
-        case 'iso_body': return <ISOBodyDashboard />;
-        case 'regulator': return <RegulatorDashboardNew />;
-        default: return <AdminDashboard />;
-      }
-    }
+    // Admin ALWAYS sees AdminDashboard regardless of active organization
+    if (isAdmin) return <AdminDashboard />;
     switch (orgType) {
       case 'generator': return <GeneratorDashboard />;
       case 'transporter': return <TransporterDashboard />;
