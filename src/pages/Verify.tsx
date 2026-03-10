@@ -176,10 +176,10 @@ const Verify = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-green-50 to-white flex items-center justify-center" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-background" dir="rtl">
         <div className="text-center">
-          <Loader2 className="h-16 w-16 animate-spin text-green-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">جاري التحقق من المستند...</p>
+          <Loader2 className="h-14 w-14 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-lg text-muted-foreground">جاري التحقق من المستند...</p>
         </div>
       </div>
     );
@@ -187,12 +187,12 @@ const Verify = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-red-50 to-white flex items-center justify-center p-4" dir="rtl">
+      <div className="min-h-screen flex items-center justify-center bg-background p-4" dir="rtl">
         <Card className="max-w-md w-full">
           <CardContent className="pt-8 text-center">
-            <XCircle className="h-20 w-20 text-red-500 mx-auto mb-4" />
-            <h1 className="text-2xl font-bold text-red-700 mb-2">فشل التحقق</h1>
-            <p className="text-gray-600 mb-6">{error}</p>
+            <XCircle className="h-20 w-20 text-destructive mx-auto mb-4" />
+            <h1 className="text-2xl font-bold text-foreground mb-2">فشل التحقق</h1>
+            <p className="text-muted-foreground mb-6">{error}</p>
             <Link to="/">
               <Button variant="outline">
                 <ArrowLeft className="h-4 w-4 ml-2" />
