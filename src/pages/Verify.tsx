@@ -209,15 +209,15 @@ const Verify = () => {
                        documentType === 'certificate' ? (data as RecyclingReport)?.shipment : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white py-8 px-4" dir="rtl">
+    <div className="min-h-screen bg-background py-8 px-4" dir="rtl">
       <div className="max-w-2xl mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
-            <Leaf className="h-10 w-10 text-green-600" />
-            <h1 className="text-3xl font-bold text-green-700">iRecycle</h1>
+            <Leaf className="h-10 w-10 text-primary" />
+            <h1 className="text-3xl font-bold text-primary">iRecycle</h1>
           </div>
-          <p className="text-gray-600">نظام إدارة المخلفات وإعادة التدوير</p>
+          <p className="text-muted-foreground">نظام إدارة المخلفات وإعادة التدوير</p>
         </div>
 
         {/* Verification Status */}
