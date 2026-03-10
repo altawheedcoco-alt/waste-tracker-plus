@@ -141,8 +141,7 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
         </section>
       );
 
-    case 'html': {
-      const safeHTML = useMemo(() => block.content ? sanitizeHTML(block.content) : '', [block.content]);
+    case 'html':
       return (
         <section className="py-6 px-4" style={bgStyle}>
           <div className="container mx-auto max-w-5xl" style={textStyle}>
@@ -152,7 +151,6 @@ const HomepageCustomBlockRenderer = memo(({ block }: Props) => {
           </div>
         </section>
       );
-    }
 
     case 'partner_logo':
       return (
