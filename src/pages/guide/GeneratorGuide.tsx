@@ -343,10 +343,10 @@ const GeneratorGuide = () => {
           viewport={{ once: true }}
           className="mt-12"
         >
-          <Card className="bg-gradient-to-l from-blue-600 to-blue-800 border-0 text-white">
+          <Card className="bg-gradient-to-l from-primary to-primary/80 border-0 text-primary-foreground">
             <CardContent className="p-8 text-center">
               <h3 className="text-2xl font-bold mb-4">جاهز للبدء؟</h3>
-              <p className="text-blue-100 mb-6">
+              <p className="text-primary-foreground/70 mb-6">
                 سجّل الآن كمولد واستفد من جميع مميزات المنصة
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
