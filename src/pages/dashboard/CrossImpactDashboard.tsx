@@ -77,6 +77,7 @@ export default function CrossImpactDashboard() {
 
   return (
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold flex items-center gap-2">

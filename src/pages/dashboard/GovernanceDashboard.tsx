@@ -23,6 +23,7 @@ const GovernanceDashboard = () => {
 
   return (
     <div dir="rtl" className="space-y-6 p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <Shield className="w-8 h-8 text-primary" />
         <div>

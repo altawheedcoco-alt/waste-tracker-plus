@@ -35,6 +35,7 @@ const SovereignGovernanceDashboard = () => {
 
   return (
     <div className="space-y-4" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center">
