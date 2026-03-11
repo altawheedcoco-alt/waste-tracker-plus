@@ -2511,6 +2511,353 @@ export type Database = {
           },
         ]
       }
+      b2b_deals: {
+        Row: {
+          agreed_price: number | null
+          agreed_quantity: number | null
+          buyer_confirmed: boolean | null
+          buyer_organization_id: string
+          buyer_rating: number | null
+          buyer_review: string | null
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          currency: string | null
+          deal_number: string
+          delivery_date: string | null
+          delivery_method: string | null
+          id: string
+          listing_id: string | null
+          notes: string | null
+          payment_terms: string | null
+          request_id: string | null
+          seller_confirmed: boolean | null
+          seller_organization_id: string
+          seller_rating: number | null
+          seller_review: string | null
+          status: string | null
+          title: string
+          unit: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_price?: number | null
+          agreed_quantity?: number | null
+          buyer_confirmed?: boolean | null
+          buyer_organization_id: string
+          buyer_rating?: number | null
+          buyer_review?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deal_number?: string
+          delivery_date?: string | null
+          delivery_method?: string | null
+          id?: string
+          listing_id?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          request_id?: string | null
+          seller_confirmed?: boolean | null
+          seller_organization_id: string
+          seller_rating?: number | null
+          seller_review?: string | null
+          status?: string | null
+          title: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_price?: number | null
+          agreed_quantity?: number | null
+          buyer_confirmed?: boolean | null
+          buyer_organization_id?: string
+          buyer_rating?: number | null
+          buyer_review?: string | null
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          currency?: string | null
+          deal_number?: string
+          delivery_date?: string | null
+          delivery_method?: string | null
+          id?: string
+          listing_id?: string | null
+          notes?: string | null
+          payment_terms?: string | null
+          request_id?: string | null
+          seller_confirmed?: boolean | null
+          seller_organization_id?: string
+          seller_rating?: number | null
+          seller_review?: string | null
+          status?: string | null
+          title?: string
+          unit?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_deals_buyer_organization_id_fkey"
+            columns: ["buyer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "b2b_deals_buyer_organization_id_fkey"
+            columns: ["buyer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_deals_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_deals_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_deals_seller_organization_id_fkey"
+            columns: ["seller_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "b2b_deals_seller_organization_id_fkey"
+            columns: ["seller_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_favorites: {
+        Row: {
+          created_at: string | null
+          id: string
+          listing_id: string | null
+          organization_id: string
+          request_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          organization_id: string
+          request_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          listing_id?: string | null
+          organization_id?: string
+          request_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_favorites_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_favorites_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "b2b_favorites_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_favorites_request_id_fkey"
+            columns: ["request_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_requests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_messages: {
+        Row: {
+          attachment_url: string | null
+          created_at: string | null
+          deal_id: string | null
+          id: string
+          is_read: boolean | null
+          listing_id: string | null
+          message: string
+          message_type: string | null
+          sender_organization_id: string
+          sender_user_id: string
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          listing_id?: string | null
+          message: string
+          message_type?: string | null
+          sender_organization_id: string
+          sender_user_id: string
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string | null
+          deal_id?: string | null
+          id?: string
+          is_read?: boolean | null
+          listing_id?: string | null
+          message?: string
+          message_type?: string | null
+          sender_organization_id?: string
+          sender_user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_messages_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "b2b_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_messages_listing_id_fkey"
+            columns: ["listing_id"]
+            isOneToOne: false
+            referencedRelation: "marketplace_listings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "b2b_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "b2b_messages_sender_organization_id_fkey"
+            columns: ["sender_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      b2b_requests: {
+        Row: {
+          budget_max: number | null
+          budget_min: number | null
+          created_at: string | null
+          deadline: string | null
+          delivery_preference: string | null
+          description: string | null
+          id: string
+          location_address: string | null
+          location_city: string | null
+          organization_id: string
+          quantity: number
+          request_number: string
+          requester_type: string
+          responses_count: number | null
+          status: string | null
+          target_audience: string[] | null
+          title: string
+          unit: string | null
+          updated_at: string | null
+          urgency: string | null
+          views_count: number | null
+          waste_type: string
+        }
+        Insert: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          delivery_preference?: string | null
+          description?: string | null
+          id?: string
+          location_address?: string | null
+          location_city?: string | null
+          organization_id: string
+          quantity?: number
+          request_number?: string
+          requester_type?: string
+          responses_count?: number | null
+          status?: string | null
+          target_audience?: string[] | null
+          title: string
+          unit?: string | null
+          updated_at?: string | null
+          urgency?: string | null
+          views_count?: number | null
+          waste_type: string
+        }
+        Update: {
+          budget_max?: number | null
+          budget_min?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          delivery_preference?: string | null
+          description?: string | null
+          id?: string
+          location_address?: string | null
+          location_city?: string | null
+          organization_id?: string
+          quantity?: number
+          request_number?: string
+          requester_type?: string
+          responses_count?: number | null
+          status?: string | null
+          target_audience?: string[] | null
+          title?: string
+          unit?: string | null
+          updated_at?: string | null
+          urgency?: string | null
+          views_count?: number | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "b2b_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "b2b_requests_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       backup_logs: {
         Row: {
           backup_type: string
