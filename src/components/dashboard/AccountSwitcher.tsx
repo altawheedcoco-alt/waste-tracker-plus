@@ -1,27 +1,18 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
-  Building2, 
-  ChevronDown, 
-  Check, 
-  Truck, 
-  Factory, 
-  Recycle,
-  Loader2,
-  Shield
+  Building2, ChevronDown, Check, Truck, Factory, Recycle,
+  Loader2, Shield, ArrowRightLeft, LogOut
 } from 'lucide-react';
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
+  Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { UserOrganization } from '@/contexts/auth/AuthContext';
@@ -40,6 +31,7 @@ const getOrganizationLabel = (type: string) => {
     case 'generator': return 'مولد';
     case 'transporter': return 'ناقل';
     case 'recycler': return 'معالج';
+    case 'disposal': return 'تخلص';
     default: return 'منظمة';
   }
 };
@@ -49,6 +41,7 @@ const getOrganizationColor = (type: string) => {
     case 'generator': return 'bg-amber-500/10 text-amber-600 border-amber-200';
     case 'transporter': return 'bg-blue-500/10 text-blue-600 border-blue-200';
     case 'recycler': return 'bg-green-500/10 text-green-600 border-green-200';
+    case 'disposal': return 'bg-red-500/10 text-red-600 border-red-200';
     default: return 'bg-muted text-muted-foreground';
   }
 };
@@ -58,36 +51,112 @@ interface AccountSwitcherProps {
   collapsed?: boolean;
 }
 
+/**
+ * AccountSwitcher for Admin:
+ * - The top always shows admin identity (shield icon + "مدير النظام")
+ * - No switching happens from the top button
+ * - Switching to org view happens from the dedicated sidebar button (AdminOrgSwitcherButton)
+ * 
+ * For non-admin: this component returns null (they don't have account switching)
+ */
 const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps) => {
-  const { 
-    organization, 
-    userOrganizations, 
-    switchOrganization, 
-    switchingOrganization,
-    roles
-  } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const isOnSystemOverview = location.pathname === '/dashboard/system-overview';
-  
-  const [open, setOpen] = useState(false);
-  const [allOrganizations, setAllOrganizations] = useState<UserOrganization[]>([]);
+  const { organization, roles } = useAuth();
   const isAdmin = roles.includes('admin');
 
-  // For admin: fetch ALL organizations so they can view/switch to any org
+  // Only admin sees this — and it's always the admin identity, never changes
+  if (!organization || !isAdmin) return null;
+
+  // Check if admin is currently viewing an org (not in admin mode)
+  const isViewingAsOrg = !!sessionStorage.getItem('admin_viewing_org');
+
+  if (collapsed) {
+    return (
+      <div className={cn("p-2", className)}>
+        <div className={cn(
+          "w-10 h-10 rounded-lg flex items-center justify-center",
+          isViewingAsOrg 
+            ? getOrganizationColor(organization.organization_type)
+            : "bg-destructive/10 text-destructive"
+        )}>
+          {isViewingAsOrg ? (
+            (() => { const Icon = getOrganizationIcon(organization.organization_type); return <Icon className="w-5 h-5" />; })()
+          ) : (
+            <Shield className="w-5 h-5" />
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (isViewingAsOrg) {
+    const OrgIcon = getOrganizationIcon(organization.organization_type);
+    return (
+      <div className={cn("p-3", className)}>
+        <div className="flex items-center gap-3">
+          {organization.logo_url ? (
+            <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+          ) : (
+            <div className={cn(
+              "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+              getOrganizationColor(organization.organization_type)
+            )}>
+              <OrgIcon className="w-5 h-5" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0 text-right">
+            <p className="font-medium text-sm truncate">{organization.name}</p>
+            <p className="text-xs text-muted-foreground">
+              {getOrganizationLabel(organization.organization_type)} — عرض كمدير
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn("p-3", className)}>
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-destructive/10 text-destructive">
+          <Shield className="w-5 h-5" />
+        </div>
+        <div className="flex-1 min-w-0 text-right">
+          <p className="font-medium text-sm truncate">مدير النظام</p>
+          <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة</p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Dedicated sidebar button for admin to switch/view organizations
+ * Shows a sheet with all organizations when clicked
+ */
+export const AdminOrgSwitcherButton = ({ collapsed = false }: { collapsed?: boolean }) => {
+  const { 
+    organization, switchOrganization, switchingOrganization, roles 
+  } = useAuth();
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const [search, setSearch] = useState('');
+  const [allOrganizations, setAllOrganizations] = useState<UserOrganization[]>([]);
+  const isAdmin = roles.includes('admin');
+  const isViewingAsOrg = !!sessionStorage.getItem('admin_viewing_org');
+
+  if (!isAdmin) return null;
+
   useEffect(() => {
-    if (!isAdmin || !open) return;
-    
+    if (!open) return;
     const fetchAllOrgs = async () => {
       const { data, error } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, is_active, is_verified, logo_url')
+        .select('id, name, name_ar, organization_type, is_active, is_verified, logo_url')
         .order('name');
-      
       if (!error && data) {
         setAllOrganizations(data.map(org => ({
           organization_id: org.id,
-          organization_name: org.name,
+          organization_name: org.name_ar || org.name,
           organization_type: org.organization_type,
           role_in_organization: 'admin',
           is_primary: false,
@@ -97,151 +166,95 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
         })));
       }
     };
-
     fetchAllOrgs();
-  }, [isAdmin, open]);
+  }, [open]);
 
-  // Admin sees all orgs, regular users see their own
-  const displayOrganizations = isAdmin ? allOrganizations : userOrganizations;
+  const filtered = allOrganizations.filter(org =>
+    !search || org.organization_name?.toLowerCase().includes(search.toLowerCase())
+  );
 
-  // Only admin can see and use the account switcher
-  if (!organization || !isAdmin) return null;
+  const handleSwitchToOrg = (orgId: string) => {
+    sessionStorage.setItem('admin_viewing_org', orgId);
+    switchOrganization(orgId);
+    navigate('/dashboard');
+    setOpen(false);
+  };
 
-  if (collapsed) {
-    if (isOnSystemOverview && isAdmin) {
-      return (
-        <div className={cn("p-2", className)}>
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-destructive/10 text-destructive">
-            <Shield className="w-5 h-5" />
-          </div>
-        </div>
-      );
-    }
-    const Icon = getOrganizationIcon(organization.organization_type);
-    return (
-      <div className={cn("p-2", className)}>
-        {organization.logo_url ? (
-          <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg object-cover" />
-        ) : (
-          <div className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center",
-            getOrganizationColor(organization.organization_type)
-          )}>
-            <Icon className="w-5 h-5" />
-          </div>
-        )}
-      </div>
-    );
-  }
-
-  const CurrentIcon = getOrganizationIcon(organization.organization_type);
+  const handleReturnToAdmin = () => {
+    sessionStorage.removeItem('admin_viewing_org');
+    navigate('/dashboard/system-overview');
+    setOpen(false);
+  };
 
   return (
     <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
-        <Button
-          variant="ghost"
-          className={cn(
-            "w-full justify-start gap-3 h-auto p-3 hover:bg-muted/80",
-            className
-          )}
-          disabled={switchingOrganization}
-        >
-          {switchingOrganization ? (
-            <Loader2 className="w-5 h-5 animate-spin" />
-          ) : isOnSystemOverview && isAdmin ? (
-            <>
-              <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-destructive/10 text-destructive">
-                <Shield className="w-5 h-5" />
-              </div>
-              <div className="flex-1 min-w-0 text-right">
-                <p className="font-medium text-sm truncate">مدير النظام</p>
-                <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة</p>
-              </div>
-              <ChevronDown className={cn(
-                "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-                open && "rotate-180"
-              )} />
-            </>
-          ) : (
-            <>
-              {organization.logo_url ? (
-                <img src={organization.logo_url} alt={organization.name} className="w-10 h-10 rounded-lg object-cover shrink-0" />
-              ) : (
-                <div className={cn(
-                  "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                  getOrganizationColor(organization.organization_type)
-                )}>
-                  <CurrentIcon className="w-5 h-5" />
-                </div>
-              )}
-              <div className="flex-1 min-w-0 text-right">
-                <p className="font-medium text-sm truncate">{organization.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {getOrganizationLabel(organization.organization_type)}
-                </p>
-              </div>
-              <ChevronDown className={cn(
-                "w-4 h-4 text-muted-foreground transition-transform shrink-0",
-                open && "rotate-180"
-              )} />
-            </>
-          )}
-        </Button>
+        {collapsed ? (
+          <Button variant="ghost" size="icon" className="w-10 h-10 mx-auto" title="تبديل الحسابات">
+            <ArrowRightLeft className="w-5 h-5 text-primary" />
+          </Button>
+        ) : (
+          <Button
+            variant="outline"
+            className="w-full justify-start gap-3 h-11 border-primary/20 hover:bg-primary/5 text-primary"
+            disabled={switchingOrganization}
+          >
+            {switchingOrganization ? (
+              <Loader2 className="w-4 h-4 animate-spin" />
+            ) : (
+              <ArrowRightLeft className="w-4 h-4" />
+            )}
+            <span className="text-sm font-medium">تبديل لحساب جهة</span>
+          </Button>
+        )}
       </SheetTrigger>
       
       <SheetContent side="right" className="w-80 p-0">
         <SheetHeader className="p-4 pb-2 border-b">
-          <SheetTitle className="text-right text-base">{isAdmin ? 'لوحة التحكم والمنظمات' : 'المنظمات المرتبطة بحسابك'}</SheetTitle>
+          <SheetTitle className="text-right text-base">تبديل الحساب — عرض كجهة</SheetTitle>
         </SheetHeader>
         
-        <ScrollArea className="h-[calc(100vh-80px)]">
+        <div className="p-3 border-b">
+          <Input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="بحث بالاسم..."
+            className="h-9 text-sm"
+          />
+        </div>
+
+        <ScrollArea className="h-[calc(100vh-160px)]">
           <div className="p-3 space-y-1">
-            {isAdmin && (
+            {/* Return to Admin button */}
+            {isViewingAsOrg && (
               <>
                 <button
-                  className={cn(
-                    "w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors text-right",
-                    isOnSystemOverview
-                      ? "bg-destructive/10 border border-destructive/20"
-                      : "hover:bg-muted/80 border border-transparent"
-                  )}
-                  onClick={() => {
-                    navigate('/dashboard/system-overview');
-                    setOpen(false);
-                  }}
+                  className="w-full flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-colors text-right hover:bg-destructive/5 border border-destructive/20 bg-destructive/5"
+                  onClick={handleReturnToAdmin}
                 >
                   <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-destructive/10 text-destructive shrink-0">
-                    <Shield className="w-5 h-5" />
+                    <LogOut className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-sm">مدير النظام</p>
-                      <Badge variant="outline" className="text-[10px] h-4 px-1 border-destructive/30 text-destructive">
-                        Admin
-                      </Badge>
-                    </div>
-                    <p className="text-xs text-muted-foreground">لوحة الإدارة والرقابة الشاملة</p>
+                    <p className="font-medium text-sm text-destructive">العودة لحساب المدير</p>
+                    <p className="text-xs text-muted-foreground">الرجوع للوحة الإدارة والرقابة</p>
                   </div>
-                  {isOnSystemOverview && (
-                    <Check className="w-4 h-4 text-destructive shrink-0" />
-                  )}
                 </button>
                 <div className="my-2 border-t" />
               </>
             )}
 
             <AnimatePresence>
-              {displayOrganizations.map((org, index) => {
+              {filtered.map((org, index) => {
                 const Icon = getOrganizationIcon(org.organization_type);
-                const isActive = org.organization_id === organization.id;
+                const isActive = org.organization_id === organization?.id;
                 
                 return (
                   <motion.div
                     key={org.organization_id}
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.04 }}
+                    transition={{ delay: index * 0.03 }}
                   >
                     <button
                       className={cn(
@@ -250,13 +263,7 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
                           ? "bg-primary/10 border border-primary/20" 
                           : "hover:bg-muted/80 border border-transparent"
                       )}
-                      onClick={() => {
-                        if (!isActive) {
-                          switchOrganization(org.organization_id);
-                          navigate('/dashboard');
-                        }
-                        setOpen(false);
-                      }}
+                      onClick={() => handleSwitchToOrg(org.organization_id)}
                       disabled={switchingOrganization}
                     >
                       {org.logo_url ? (
@@ -269,16 +276,8 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
                           <Icon className="w-5 h-5" />
                         </div>
                       )}
-                      
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-sm truncate">{org.organization_name}</p>
-                          {org.is_primary && (
-                            <Badge variant="outline" className="text-[10px] h-4 px-1">
-                              الرئيسية
-                            </Badge>
-                          )}
-                        </div>
+                        <p className="font-medium text-sm truncate">{org.organization_name}</p>
                         <div className="flex items-center gap-2 mt-0.5">
                           <p className="text-xs text-muted-foreground">
                             {getOrganizationLabel(org.organization_type)}
@@ -290,15 +289,16 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
                           )}
                         </div>
                       </div>
-                      
-                      {isActive && (
-                        <Check className="w-4 h-4 text-primary shrink-0" />
-                      )}
+                      {isActive && <Check className="w-4 h-4 text-primary shrink-0" />}
                     </button>
                   </motion.div>
                 );
               })}
             </AnimatePresence>
+
+            {filtered.length === 0 && (
+              <p className="text-center text-sm text-muted-foreground py-4">لا توجد نتائج</p>
+            )}
           </div>
         </ScrollArea>
       </SheetContent>
