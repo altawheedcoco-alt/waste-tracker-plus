@@ -61,24 +61,30 @@ const DocumentArchivePanel = () => {
     enabled: !!organization?.id,
   });
 
-  /** Get a signed URL or open directly if it's already a full URL */
+  /** Get a signed URL or open directly if it's already a full URL — searches ALL buckets */
   const getFileUrl = useCallback(async (fileUrl: string): Promise<string | null> => {
     if (!fileUrl) return null;
-    // If already a full HTTP URL, use directly
-    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
-      return fileUrl;
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) return fileUrl;
+    const buckets = [
+      BUCKET_NAME,
+      'pdf-documents',
+      'shipment-photos',
+      'organization-documents',
+      'weighbridge-photos',
+      'signing-documents',
+      'shared-documents',
+      'deposit-receipts',
+      'identity-documents',
+      'stamps',
+    ];
+    for (const bucket of buckets) {
+      try {
+        const { data } = await supabase.storage.from(bucket).createSignedUrl(fileUrl, 3600);
+        if (data?.signedUrl) return data.signedUrl;
+      } catch { /* try next bucket */ }
     }
-    // Otherwise it's a storage path — generate signed URL
-    try {
-      const { data, error } = await supabase.storage
-        .from(BUCKET_NAME)
-        .createSignedUrl(fileUrl, 3600); // 1 hour
-      if (error) throw error;
-      return data?.signedUrl || null;
-    } catch (err) {
-      console.error('Failed to generate signed URL:', err);
-      return null;
-    }
+    console.error('Failed to resolve file URL from any bucket:', fileUrl);
+    return null;
   }, []);
 
   const handleViewFile = useCallback(async (docId: string, fileUrl: string) => {
