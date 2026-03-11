@@ -1,5 +1,4 @@
 import { useState, lazy, Suspense } from 'react';
-import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -35,7 +34,7 @@ const SovereignGovernanceDashboard = () => {
 
   return (
     <div className="space-y-4" dir="rtl">
-      <BackButton />
+      {/* BackButton removed: rendered inside admin dashboard tab */}
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-red-500 flex items-center justify-center">
