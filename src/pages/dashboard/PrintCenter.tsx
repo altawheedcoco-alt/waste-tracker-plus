@@ -769,6 +769,10 @@ const PrintCenter = () => {
               {selectedIds.size} محدد
             </Badge>
           )}
+          <Button onClick={exportBulkPDF} variant="outline" disabled={isPrinting || !documents?.length} className="gap-2">
+            {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+            تصدير PDF
+          </Button>
           <Button onClick={printBulk} disabled={isPrinting || !documents?.length} className="gap-2">
             {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
             {selectedIds.size > 0 ? `طباعة المحدد (${selectedIds.size})` : 'طباعة الكل'}
