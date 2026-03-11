@@ -52,19 +52,20 @@ const Hero = memo(() => {
         <img
           src={heroBg}
           alt={t('landing.recyclingFacilities')}
-          className="w-full h-full object-cover sm:animate-hero-zoom"
+          className="w-full h-full object-cover sm:animate-hero-zoom brightness-110 contrast-105"
           loading="eager"
           {...{ fetchpriority: "high" } as any}
           decoding="async"
         />
         {/* v3.0 — Multi-layer cinematic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/70 via-[hsl(222,14%,5%)]/45 to-[hsl(222,14%,5%)]/65" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/75 via-transparent to-transparent" />
-        {/* Sunlight reflection effect */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(45,90%,65%)/25,transparent_55%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,hsl(38,95%,70%)/12,transparent_40%)]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/55 via-[hsl(222,14%,5%)]/30 to-[hsl(222,14%,5%)]/60" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
+        {/* Sunlight reflection — strong warm glow */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 80% 60% at 85% 10%, hsla(45, 95%, 72%, 0.40), transparent 60%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse 60% 50% at 80% 5%, hsla(38, 100%, 78%, 0.25), transparent 50%)' }} />
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 82% 8%, hsla(50, 100%, 90%, 0.18), transparent 30%)' }} />
         {/* Subtle color accent overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/6 via-transparent to-eco-ocean/4" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-eco-ocean/3" />
       </div>
 
       <div className="container relative z-10 px-4">
