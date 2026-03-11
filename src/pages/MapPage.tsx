@@ -427,7 +427,7 @@ const MapPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto p-4 pt-24 space-y-4">
-
+        <PageNavBar />
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
