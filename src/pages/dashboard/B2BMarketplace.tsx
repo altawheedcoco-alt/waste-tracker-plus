@@ -5,22 +5,27 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Store, Search, Plus, Package, ShoppingBag, Filter,
-  ArrowLeftRight, Info, AlertTriangle,
+  ArrowLeftRight, Info, AlertTriangle, Handshake, Megaphone, Heart,
 } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
-import { useB2BListings, useMyB2BListings, useUpdateListingStatus } from '@/hooks/useB2BMarketplace';
+import {
+  useB2BListings, useMyB2BListings, useUpdateListingStatus,
+  useB2BRequests, useMyB2BRequests,
+} from '@/hooks/useB2BMarketplace';
 import B2BStatsBar from '@/components/b2b/B2BStatsBar';
 import B2BListingCard from '@/components/b2b/B2BListingCard';
+import B2BRequestCard from '@/components/b2b/B2BRequestCard';
+import B2BDealsPanel from '@/components/b2b/B2BDealsPanel';
 import CreateB2BListingDialog from '@/components/b2b/CreateB2BListingDialog';
+import CreateB2BRequestDialog from '@/components/b2b/CreateB2BRequestDialog';
 import {
   ORG_TYPE_LABELS, ORG_TYPE_COLORS, ALL_WASTE_CATEGORIES,
-  DEFAULT_TARGET_AUDIENCE, ALLOWED_TARGETS,
+  DEFAULT_TARGET_AUDIENCE,
   type OrgType,
 } from '@/components/b2b/B2BVisibilityEngine';
 import { toast } from 'sonner';
@@ -32,20 +37,23 @@ const B2BMarketplace = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sellerTypeFilter, setSellerTypeFilter] = useState('all');
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showCreateListing, setShowCreateListing] = useState(false);
+  const [showCreateRequest, setShowCreateRequest] = useState(false);
 
-  const { data: listings = [], isLoading } = useB2BListings({
-    category: categoryFilter,
-    search,
-    sellerType: sellerTypeFilter,
+  // Listings (supply)
+  const { data: listings = [], isLoading: listingsLoading } = useB2BListings({
+    category: categoryFilter, search, sellerType: sellerTypeFilter,
   });
-
-  const { data: myListings = [], isLoading: myLoading } = useMyB2BListings();
+  const { data: myListings = [], isLoading: myListingsLoading } = useMyB2BListings();
   const updateStatus = useUpdateListingStatus();
 
-  const handleClose = (listing: any) => {
-    updateStatus.mutate({ id: listing.id, status: 'closed' });
-  };
+  // Requests (demand)
+  const { data: requests = [], isLoading: requestsLoading } = useB2BRequests({
+    category: categoryFilter, search,
+  });
+  const { data: myRequests = [] } = useMyB2BRequests();
+
+  const handleCloseListing = (listing: any) => updateStatus.mutate({ id: listing.id, status: 'closed' });
 
   const handleRequestQuote = (listing: any) => {
     toast.info(`سيتم إرسال طلب عرض سعر لـ ${listing.organization_name || 'البائع'}`, {
@@ -53,15 +61,19 @@ const B2BMarketplace = () => {
     });
   };
 
-  // Visibility explanation based on org type
+  const handleRespondToRequest = (request: any) => {
+    toast.info(`سيتم تقديم عرضك لـ ${request.organization_name || 'الطالب'}`, {
+      description: `الطلب: ${request.title}`,
+    });
+  };
+
   const visibilityExplainer = () => {
     const targets = DEFAULT_TARGET_AUDIENCE[myOrgType];
     const targetLabels = targets.map(t => ORG_TYPE_LABELS[t]).join('، ');
-    
     if (myOrgType === 'transporter') {
-      return `كناقل، عروضك تظهر للمدورين وجهات التخلص فقط — لا تظهر للمولدين. وترى أنت عروض المولدين والمدورين وجهات التخلص.`;
+      return 'كناقل، عروضك تظهر للمدورين وجهات التخلص فقط — لا تظهر للمولدين. وترى أنت عروض المولدين والمدورين وجهات التخلص.';
     }
-    return `كـ${ORG_TYPE_LABELS[myOrgType]}، عروضك تظهر لـ: ${targetLabels}`;
+    return `كـ${ORG_TYPE_LABELS[myOrgType]}، عروضك وطلباتك تظهر لـ: ${targetLabels}`;
   };
 
   return (
@@ -74,16 +86,22 @@ const B2BMarketplace = () => {
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
               <Store className="h-7 w-7 text-primary" />
-              سوق B2B — تبادل بين الجهات
+              سوق B2B المتكامل
             </h1>
             <p className="text-muted-foreground text-sm mt-1">
-              منصة تداول المواد والخدمات بين الجهات المسجلة في المنظومة
+              منصة تبادل شاملة — عرض وطلب مواد وخدمات بين كافة الجهات المسجلة
             </p>
           </div>
-          <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
-            <Plus className="h-4 w-4" />
-            نشر عرض جديد
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={() => setShowCreateListing(true)} className="gap-1.5">
+              <Plus className="h-4 w-4" />
+              نشر عرض
+            </Button>
+            <Button onClick={() => setShowCreateRequest(true)} variant="outline" className="gap-1.5">
+              <Megaphone className="h-4 w-4" />
+              نشر طلب
+            </Button>
+          </div>
         </div>
 
         {/* Visibility hint */}
@@ -93,7 +111,7 @@ const B2BMarketplace = () => {
             <div>
               <p className="text-sm text-foreground font-medium flex items-center gap-2">
                 أنت مسجل كـ
-                <Badge variant="outline" className={`${ORG_TYPE_COLORS[myOrgType]}`}>
+                <Badge variant="outline" className={ORG_TYPE_COLORS[myOrgType]}>
                   {ORG_TYPE_LABELS[myOrgType]}
                 </Badge>
               </p>
@@ -105,54 +123,54 @@ const B2BMarketplace = () => {
         {/* Stats */}
         <B2BStatsBar />
 
-        {/* Tabs: Browse / My Listings */}
-        <Tabs defaultValue="browse" dir="rtl">
-          <TabsList className="w-full md:w-auto">
-            <TabsTrigger value="browse" className="gap-1.5">
-              <ShoppingBag className="h-4 w-4" />
-              تصفح السوق
+        {/* Main Tabs */}
+        <Tabs defaultValue="supply" dir="rtl">
+          <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
+            <TabsTrigger value="supply" className="gap-1.5 text-xs">
+              <ShoppingBag className="h-3.5 w-3.5" />
+              العروض (العرض)
+              {listings.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{listings.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="my-listings" className="gap-1.5">
-              <Package className="h-4 w-4" />
-              عروضي
-              {myListings.length > 0 && (
-                <Badge variant="secondary" className="mr-1 text-[10px]">{myListings.length}</Badge>
+            <TabsTrigger value="demand" className="gap-1.5 text-xs">
+              <Megaphone className="h-3.5 w-3.5" />
+              الطلبات (الطلب)
+              {requests.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{requests.length}</Badge>}
+            </TabsTrigger>
+            <TabsTrigger value="my-listings" className="gap-1.5 text-xs">
+              <Package className="h-3.5 w-3.5" />
+              عروضي وطلباتي
+              {(myListings.length + myRequests.length) > 0 && (
+                <Badge variant="secondary" className="text-[9px] px-1">{myListings.length + myRequests.length}</Badge>
               )}
             </TabsTrigger>
-            <TabsTrigger value="rules" className="gap-1.5">
-              <ArrowLeftRight className="h-4 w-4" />
+            <TabsTrigger value="deals" className="gap-1.5 text-xs">
+              <Handshake className="h-3.5 w-3.5" />
+              صفقاتي
+            </TabsTrigger>
+            <TabsTrigger value="rules" className="gap-1.5 text-xs">
+              <ArrowLeftRight className="h-3.5 w-3.5" />
               قواعد الرؤية
             </TabsTrigger>
           </TabsList>
 
-          {/* Browse Tab */}
-          <TabsContent value="browse" className="space-y-4 mt-4">
-            {/* Filters */}
+          {/* ==================== SUPPLY TAB ==================== */}
+          <TabsContent value="supply" className="space-y-4 mt-4">
             <div className="flex flex-col md:flex-row gap-3">
               <div className="relative flex-1">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="ابحث عن منتج، خدمة، أو مدينة..."
-                  value={search}
-                  onChange={e => setSearch(e.target.value)}
-                  className="pr-10"
-                />
+                <Input placeholder="ابحث عن منتج، خدمة، أو مدينة..."
+                  value={search} onChange={e => setSearch(e.target.value)} className="pr-10" />
               </div>
               <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger className="w-full md:w-48">
-                  <Filter className="h-4 w-4 ml-1" />
-                  <SelectValue placeholder="التصنيف" />
+                <SelectTrigger className="w-full md:w-44">
+                  <Filter className="h-4 w-4 ml-1" /><SelectValue placeholder="التصنيف" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ALL_WASTE_CATEGORIES.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>
-                  ))}
+                  {ALL_WASTE_CATEGORIES.map(c => <SelectItem key={c.id} value={c.id}>{c.label}</SelectItem>)}
                 </SelectContent>
               </Select>
               <Select value={sellerTypeFilter} onValueChange={setSellerTypeFilter}>
-                <SelectTrigger className="w-full md:w-44">
-                  <SelectValue placeholder="نوع البائع" />
-                </SelectTrigger>
+                <SelectTrigger className="w-full md:w-40"><SelectValue placeholder="نوع البائع" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">كل الجهات</SelectItem>
                   <SelectItem value="generator">مولّد</SelectItem>
@@ -163,66 +181,115 @@ const B2BMarketplace = () => {
               </Select>
             </div>
 
-            {/* Listings grid */}
-            {isLoading ? (
+            {listingsLoading ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
               </div>
             ) : listings.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <ShoppingBag className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-lg font-medium text-muted-foreground">لا توجد عروض متاحة حالياً</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    العروض المتاحة لنوع جهتك ({ORG_TYPE_LABELS[myOrgType]}) ستظهر هنا
-                  </p>
-                </CardContent>
-              </Card>
+              <Card><CardContent className="py-12 text-center">
+                <ShoppingBag className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-lg font-medium text-muted-foreground">لا توجد عروض متاحة لنوع جهتك حالياً</p>
+                <p className="text-sm text-muted-foreground mt-1">العروض الموجهة لـ ({ORG_TYPE_LABELS[myOrgType]}) ستظهر هنا</p>
+              </CardContent></Card>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {listings.map(listing => (
-                  <B2BListingCard
-                    key={listing.id}
-                    listing={listing}
-                    onRequestQuote={handleRequestQuote}
-                  />
+                {listings.map(l => (
+                  <B2BListingCard key={l.id} listing={l} onRequestQuote={handleRequestQuote} />
                 ))}
               </div>
             )}
           </TabsContent>
 
-          {/* My Listings Tab */}
-          <TabsContent value="my-listings" className="space-y-4 mt-4">
-            {myLoading ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {[1, 2].map(i => <Skeleton key={i} className="h-64 rounded-xl" />)}
+          {/* ==================== DEMAND TAB ==================== */}
+          <TabsContent value="demand" className="space-y-4 mt-4">
+            <div className="flex flex-col md:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="ابحث في طلبات الشراء..."
+                  value={search} onChange={e => setSearch(e.target.value)} className="pr-10" />
               </div>
-            ) : myListings.length === 0 ? (
-              <Card>
-                <CardContent className="py-12 text-center">
-                  <Package className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
-                  <p className="text-lg font-medium text-muted-foreground">لم تنشر أي عروض بعد</p>
-                  <Button className="mt-4 gap-2" onClick={() => setShowCreateDialog(true)}>
-                    <Plus className="h-4 w-4" />
-                    أنشئ أول عرض لك
+              <Button onClick={() => setShowCreateRequest(true)} className="gap-1.5">
+                <Plus className="h-4 w-4" />أنشئ طلب شراء
+              </Button>
+            </div>
+
+            {requestsLoading ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {[1, 2].map(i => <Skeleton key={i} className="h-56 rounded-xl" />)}
+              </div>
+            ) : requests.length === 0 ? (
+              <Card><CardContent className="py-12 text-center">
+                <Megaphone className="h-12 w-12 text-muted-foreground/40 mx-auto mb-3" />
+                <p className="text-lg font-medium text-muted-foreground">لا توجد طلبات شراء متاحة</p>
+                <p className="text-sm text-muted-foreground mt-1">الطلبات الموجهة لنوع جهتك ستظهر هنا</p>
+                <Button className="mt-4 gap-2" onClick={() => setShowCreateRequest(true)}>
+                  <Plus className="h-4 w-4" />أنشئ أول طلب
+                </Button>
+              </CardContent></Card>
+            ) : (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {requests.map(r => (
+                  <B2BRequestCard key={r.id} request={r} onRespond={handleRespondToRequest} />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
+          {/* ==================== MY LISTINGS & REQUESTS TAB ==================== */}
+          <TabsContent value="my-listings" className="space-y-6 mt-4">
+            {/* My Listings */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <Package className="h-5 w-5 text-primary" />عروضي المنشورة
+                <Badge variant="secondary">{myListings.length}</Badge>
+              </h3>
+              {myListingsLoading ? (
+                <Skeleton className="h-48" />
+              ) : myListings.length === 0 ? (
+                <Card><CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">لم تنشر أي عروض بعد</p>
+                  <Button className="mt-3 gap-2" size="sm" onClick={() => setShowCreateListing(true)}>
+                    <Plus className="h-4 w-4" />نشر عرض جديد
                   </Button>
-                </CardContent>
-              </Card>
-            ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {myListings.map(listing => (
-                  <B2BListingCard
-                    key={listing.id}
-                    listing={listing}
-                    isOwn
-                    onClose={handleClose}
-                  />
-                ))}
-              </div>
-            )}
+                </CardContent></Card>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {myListings.map(l => (
+                    <B2BListingCard key={l.id} listing={l} isOwn onClose={handleCloseListing} />
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* My Requests */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3 flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-amber-600" />طلباتي المنشورة
+                <Badge variant="secondary">{myRequests.length}</Badge>
+              </h3>
+              {myRequests.length === 0 ? (
+                <Card><CardContent className="py-8 text-center">
+                  <p className="text-muted-foreground">لم تنشر أي طلبات شراء بعد</p>
+                  <Button className="mt-3 gap-2" size="sm" variant="outline" onClick={() => setShowCreateRequest(true)}>
+                    <Plus className="h-4 w-4" />نشر طلب شراء
+                  </Button>
+                </CardContent></Card>
+              ) : (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  {myRequests.map(r => (
+                    <B2BRequestCard key={r.id} request={r} isOwn />
+                  ))}
+                </div>
+              )}
+            </div>
           </TabsContent>
 
-          {/* Rules Tab */}
+          {/* ==================== DEALS TAB ==================== */}
+          <TabsContent value="deals" className="mt-4">
+            <B2BDealsPanel />
+          </TabsContent>
+
+          {/* ==================== RULES TAB ==================== */}
           <TabsContent value="rules" className="mt-4">
             <Card>
               <CardContent className="p-6 space-y-6">
@@ -230,7 +297,7 @@ const B2BMarketplace = () => {
                   <ArrowLeftRight className="h-10 w-10 text-primary mx-auto mb-2" />
                   <h2 className="text-xl font-bold">قواعد الرؤية في سوق B2B</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    كل جهة ترى فقط العروض الموجهة لنوعها — لضمان سرية العلاقات التجارية
+                    كل جهة ترى فقط العروض والطلبات الموجهة لنوعها — لضمان سرية العلاقات التجارية
                   </p>
                 </div>
 
@@ -240,13 +307,11 @@ const B2BMarketplace = () => {
                       <CardContent className="p-4">
                         <div className="flex items-center gap-2 mb-3">
                           <Badge className={ORG_TYPE_COLORS[seller]}>{ORG_TYPE_LABELS[seller]}</Badge>
-                          {seller === myOrgType && (
-                            <Badge variant="default" className="text-[10px]">أنت</Badge>
-                          )}
-                          <span className="text-sm text-muted-foreground">ينشر عرضاً</span>
+                          {seller === myOrgType && <Badge variant="default" className="text-[10px]">أنت</Badge>}
+                          <span className="text-sm text-muted-foreground">ينشر عرضاً أو طلباً</span>
                         </div>
                         <div className="space-y-1.5">
-                          <p className="text-xs text-muted-foreground font-medium">يظهر العرض لـ:</p>
+                          <p className="text-xs text-muted-foreground font-medium">يظهر لـ:</p>
                           <div className="flex flex-wrap gap-1.5">
                             {targets.map(t => (
                               <Badge key={t} variant="outline" className={`text-xs ${ORG_TYPE_COLORS[t]}`}>
@@ -257,7 +322,7 @@ const B2BMarketplace = () => {
                           {seller === 'transporter' && (
                             <div className="flex items-start gap-1 mt-2 text-xs text-amber-700 bg-amber-50 rounded p-2">
                               <AlertTriangle className="h-3 w-3 mt-0.5 shrink-0" />
-                              <span>عروض الناقل لا تظهر للمولدين — لحماية المصالح التجارية</span>
+                              <span>عروض وطلبات الناقل لا تظهر للمولدين — لحماية المصالح التجارية</span>
                             </div>
                           )}
                         </div>
@@ -265,12 +330,36 @@ const B2BMarketplace = () => {
                     </Card>
                   ))}
                 </div>
+
+                {/* How it works */}
+                <div className="bg-muted/50 rounded-xl p-5 space-y-3">
+                  <h3 className="font-semibold text-foreground">كيف يعمل السوق؟</h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                    <div className="space-y-1">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">1</div>
+                      <p className="font-medium">انشر عرضاً أو طلباً</p>
+                      <p className="text-muted-foreground text-xs">حدد المادة والكمية والسعر والجهات المستهدفة</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">2</div>
+                      <p className="font-medium">تلقّى العروض وتفاوض</p>
+                      <p className="text-muted-foreground text-xs">الجهات المستهدفة تراسلك وتقدم عروض أسعار</p>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">3</div>
+                      <p className="font-medium">أتمم الصفقة</p>
+                      <p className="text-muted-foreground text-xs">وثّق الاتفاق وتابع التنفيذ والتسليم والتقييم</p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
         </Tabs>
 
-        <CreateB2BListingDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} />
+        {/* Dialogs */}
+        <CreateB2BListingDialog open={showCreateListing} onOpenChange={setShowCreateListing} />
+        <CreateB2BRequestDialog open={showCreateRequest} onOpenChange={setShowCreateRequest} />
       </div>
     </DashboardLayout>
   );
