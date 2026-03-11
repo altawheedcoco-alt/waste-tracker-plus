@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Scroll, Pyramid, Cpu, Leaf, Recycle, Globe, Sparkles } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/egypt-history-hero.webp";
