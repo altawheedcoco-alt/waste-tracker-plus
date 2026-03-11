@@ -167,8 +167,7 @@ const BlogPost = () => {
       <main className="pt-32 pb-16 px-4">
         <div className={style.wrapper}>
           {/* Back */}
-          <button onClick={() => navigate('/blog')} className="flex items-center gap-1 text-sm text-primary hover:underline mb-6">
-            <ArrowRight className="w-4 h-4" />
+          <PageNavBar className="mb-6" />
             العودة للمدونة
           </button>
 

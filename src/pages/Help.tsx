@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense, useState } from "react";
 import { ChevronDown, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 

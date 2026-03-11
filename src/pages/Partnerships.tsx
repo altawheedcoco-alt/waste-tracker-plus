@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Factory, Truck, Building2, ArrowLeft, ArrowRight, CheckCircle2, Shield, BarChart3, Recycle, Users, Globe } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

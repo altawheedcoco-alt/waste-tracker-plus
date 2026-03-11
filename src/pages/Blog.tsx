@@ -7,6 +7,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 const formatDate = (dateStr: string) =>

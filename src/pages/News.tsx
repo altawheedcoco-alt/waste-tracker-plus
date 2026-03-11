@@ -12,6 +12,7 @@ import {
   Star, Zap
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageNavBar from '@/components/ui/page-nav-bar';
 
 const ICON_MAP: Record<string, any> = {
   Newspaper, Users, ShieldCheck, Megaphone, Award, Recycle, Truck,

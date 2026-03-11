@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Scale, FileText, Shield, Building2, Leaf, AlertTriangle, CheckCircle2, ExternalLink, BookOpen } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 

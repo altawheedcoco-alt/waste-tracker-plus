@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Eye, Target, Flag, Heart, Leaf, Brain, Users, MapPin, Scale, ShieldCheck, BarChart3, Globe, Building2, Recycle, ArrowLeft, ArrowRight } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 

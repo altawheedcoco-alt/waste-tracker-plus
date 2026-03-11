@@ -15,6 +15,7 @@ import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeoco
 import { toast } from 'sonner';
 import { OpenLocationCode } from 'open-location-code';
 import { useAuth } from '@/contexts/AuthContext';
+import PageNavBar from '@/components/ui/page-nav-bar';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';

@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { GraduationCap, Trash2, Cpu, HardHat, HeartPulse, Factory, ArrowLeft, ArrowRight, AlertTriangle, Recycle, BookOpen } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 
