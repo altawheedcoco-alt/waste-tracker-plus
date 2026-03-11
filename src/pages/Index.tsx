@@ -46,14 +46,14 @@ const LazySection = memo(({ children }: { children: React.ReactNode }) => {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '300px' }
+      { rootMargin: '600px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: visible ? undefined : '80px' }}>
+    <div ref={ref} style={{ minHeight: visible ? undefined : '40px' }}>
       {visible ? (
         <Suspense fallback={null}>
           {children}
@@ -68,7 +68,7 @@ LazySection.displayName = 'LazySection';
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => setShow(true), 3000);
+    const id = setTimeout(() => setShow(true), 800);
     return () => clearTimeout(id);
   }, []);
   if (!show) return <div className="h-[42px] sm:h-[36px]" />;
