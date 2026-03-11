@@ -33,6 +33,7 @@ const Academy = lazy(() => import("@/pages/Academy"));
 const Partnerships = lazy(() => import("@/pages/Partnerships"));
 const Legislation = lazy(() => import("@/pages/Legislation"));
 const About = lazy(() => import("@/pages/About"));
+const Journey = lazy(() => import("@/pages/Journey"));
 const Laws = lazy(() => import("@/pages/Laws"));
 const Policies = lazy(() => import("@/pages/Policies"));
 const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
