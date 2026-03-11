@@ -142,9 +142,21 @@ export const FocusMusicProvider = ({ children }: { children: ReactNode }) => {
     if (!globalAudio) {
       globalAudio = new Audio();
       globalAudio.loop = true;
+      globalAudio.crossOrigin = 'anonymous';
+      globalAudio.preload = 'auto';
     }
     audioRef.current = globalAudio;
     audioRef.current.volume = isMuted ? 0 : volume / 100;
+
+    // Handle playback errors gracefully
+    const handleError = () => {
+      console.warn('Audio playback error — track may be unavailable');
+      setIsPlaying(false);
+    };
+    globalAudio.addEventListener('error', handleError);
+    return () => {
+      globalAudio?.removeEventListener('error', handleError);
+    };
   }, []);
 
   useEffect(() => {
