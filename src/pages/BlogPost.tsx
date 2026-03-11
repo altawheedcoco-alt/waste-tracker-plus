@@ -9,6 +9,7 @@ import { ArrowRight, Calendar, Clock, User, Tag, BookOpen } from 'lucide-react';
 import ShareButton from '@/components/sharing/ShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageNavBar from '@/components/ui/page-nav-bar';
 import { useEffect } from 'react';
 
 const formatDate = (dateStr: string) =>
