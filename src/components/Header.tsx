@@ -271,14 +271,6 @@ const Header = memo(() => {
               </Button>
             </div>
 
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl text-foreground hover:bg-accent/50 transition-colors touch-manipulation"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
           </div>
         </div>
       </div>
