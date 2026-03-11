@@ -34,11 +34,11 @@ const Features = () => {
           <h2 className="text-xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">{t('features.title')} <span className="text-gradient-eco">{t('features.titleHighlight')}</span></h2>
           <p className="text-xs sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">{t('features.desc')}</p>
         </motion.div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-6">
           {features.map((feature, i) => (
             <motion.div 
               key={feature.title} 
-              className="group relative p-4 sm:p-8 rounded-xl sm:rounded-2xl bg-card shadow-eco-sm border border-border/50 card-shine overflow-hidden"
+              className="group relative p-3 sm:p-8 rounded-xl sm:rounded-2xl bg-card shadow-eco-sm border border-border/50 card-shine overflow-hidden"
               initial={{ opacity: 0, y: 30 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.5, delay: i * 0.1 }}
