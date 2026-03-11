@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Users, GitBranch, ScrollText, AlertTriangle, BarChart3 } from 'lucide-react';
@@ -22,6 +23,7 @@ const GovernanceDashboard = () => {
 
   return (
     <div dir="rtl" className="space-y-6 p-6">
+      <BackButton />
       <div className="flex items-center gap-3">
         <Shield className="w-8 h-8 text-primary" />
         <div>

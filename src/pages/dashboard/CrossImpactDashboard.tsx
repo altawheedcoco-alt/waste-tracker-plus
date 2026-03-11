@@ -2,6 +2,7 @@
  * لوحة الأثر المركزية — تعرض كل الآثار المتقاطعة بين الجهات
  */
 import { useState, useMemo } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -76,6 +77,7 @@ export default function CrossImpactDashboard() {
 
   return (
     <div className="space-y-6" dir={isAr ? 'rtl' : 'ltr'}>
+      <BackButton />
       {/* Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold flex items-center gap-2">
