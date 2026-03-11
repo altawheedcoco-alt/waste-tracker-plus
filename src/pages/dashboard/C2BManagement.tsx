@@ -1,5 +1,4 @@
 import { lazy, Suspense } from "react";
-import DashboardLayout from "@/components/layouts/DashboardLayout";
 
 const AdminC2BPanel = lazy(() => import("@/components/c2b/AdminC2BPanel"));
 
