@@ -115,7 +115,7 @@ export const useMyB2BListings = () => {
  */
 export const useB2BStats = () => {
   const { organization } = useAuth();
-  const myOrgType = (organization?.type as OrgType) || 'generator';
+  const myOrgType = (organization?.organization_type as OrgType) || 'generator';
 
   return useQuery({
     queryKey: ['b2b-stats', myOrgType],
