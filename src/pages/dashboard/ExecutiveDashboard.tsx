@@ -1,3 +1,4 @@
+import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
