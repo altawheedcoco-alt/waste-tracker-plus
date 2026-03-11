@@ -57,11 +57,11 @@ const Hero = memo(() => {
           {...{ fetchpriority: "high" } as any}
           decoding="async"
         />
-        {/* v3.0 — Multi-layer cinematic overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,7%)]/90 via-[hsl(222,14%,7%)]/60 to-[hsl(222,14%,7%)]/85" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-transparent to-transparent" />
+        {/* v3.0 — Multi-layer cinematic overlay — enhanced contrast */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/95 via-[hsl(222,14%,5%)]/75 to-[hsl(222,14%,5%)]/92" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent" />
         {/* Subtle color accent overlay */}
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-eco-ocean/5" />
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-eco-ocean/5" />
       </div>
 
       <div className="container relative z-10 px-4">
@@ -88,19 +88,19 @@ const Hero = memo(() => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
-              textShadow: '0 2px 24px rgba(0,0,0,0.5)',
+              textShadow: '0 3px 30px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.5)',
               color: 'white',
             }}
           >
             {t('landing.heroTitle1')}{" "}
-            <span className="text-eco-green-light drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+            <span className="text-eco-green-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
               {t('landing.heroTitle2')}
             </span>
             <br /><span className="text-white">{t('landing.heroTitle3')}</span>
           </motion.h1>
 
           <motion.p
-            className="text-[9px] sm:text-sm text-white/60 mt-0.5 sm:mt-1 font-semibold tracking-wide px-4"
+            className="text-[9px] sm:text-sm text-white/75 mt-0.5 sm:mt-1 font-semibold tracking-wide px-4 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.3 }}
@@ -109,7 +109,7 @@ const Hero = memo(() => {
           </motion.p>
 
           <motion.p
-            className="text-[11px] sm:text-lg md:text-xl text-white/80 max-w-2xl mx-auto mb-4 sm:mb-7 px-3 sm:px-4 leading-relaxed font-medium mt-1.5 sm:mt-2"
+            className="text-[11px] sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-4 sm:mb-7 px-3 sm:px-4 leading-relaxed font-medium mt-1.5 sm:mt-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.4 }}
