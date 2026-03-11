@@ -634,15 +634,45 @@ export const sidebarGroups: SidebarGroupConfig[] = [
  * Filters groups by visibleFor and filters items within groups.
  */
 export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarGroupConfig[] {
-  // Admin sovereign mode: ALWAYS show only admin-specific groups regardless of orgType
+  // Admin sovereign mode: show ALL groups — admin sees everything across all org types
   if (isAdmin) {
-    return sidebarGroups.filter(group => group.visibleFor.includes('admin')).map(group => ({
-      ...group,
-      items: group.items.filter(item => {
-        if (!item.visibleFor || item.visibleFor.length === 0) return true;
-        return item.visibleFor.includes('admin');
-      }),
-    }));
+    // Check if admin is viewing as a specific org type
+    const viewingAsOrg = typeof window !== 'undefined' ? sessionStorage.getItem('admin_viewing_org') : null;
+    
+    if (viewingAsOrg && orgType) {
+      // When viewing as org: show that org's groups + admin-specific groups at the end
+      const orgGroups = sidebarGroups.filter(group => {
+        if (group.visibleFor.length === 0) return true;
+        return group.visibleFor.includes(orgType);
+      }).map(group => ({
+        ...group,
+        items: group.items.filter(item => {
+          if (!item.visibleFor || item.visibleFor.length === 0) return true;
+          return item.visibleFor.includes(orgType);
+        }),
+      }));
+      
+      // Add admin-only groups at the end
+      const adminOnlyGroups = sidebarGroups.filter(group => 
+        group.visibleFor.includes('admin') && !orgGroups.some(og => og.id === group.id)
+      );
+      
+      return [...orgGroups, ...adminOnlyGroups];
+    }
+    
+    // Default admin view: show admin groups first, then all shared groups
+    const adminGroups = sidebarGroups.filter(group => group.visibleFor.includes('admin'));
+    const sharedGroups = sidebarGroups.filter(group => 
+      group.visibleFor.length === 0 && !adminGroups.some(ag => ag.id === group.id)
+    );
+    // All role-specific groups (so admin can see everything)
+    const roleGroups = sidebarGroups.filter(group => 
+      group.visibleFor.length > 0 && 
+      !group.visibleFor.includes('admin') &&
+      !sharedGroups.some(sg => sg.id === group.id)
+    );
+    
+    return [...adminGroups, ...sharedGroups, ...roleGroups];
   }
 
   return sidebarGroups.filter(group => {
