@@ -20894,12 +20894,16 @@ export type Database = {
         Row: {
           awarded_to: string | null
           bids_count: number | null
+          contact_name: string | null
+          contact_phone: string | null
           created_at: string
           deadline: string | null
+          delivery_option: string | null
           expires_at: string | null
           hazardous: boolean | null
           id: string
           images: string[] | null
+          is_negotiable: boolean | null
           listing_number: string
           listing_type: string | null
           max_price: number | null
@@ -20910,9 +20914,12 @@ export type Database = {
           pickup_latitude: number | null
           pickup_longitude: number | null
           preferred_date: string | null
+          price_per_unit: number | null
           quantity: number
+          seller_type: string | null
           special_requirements: string | null
           status: string | null
+          target_audience: string[] | null
           title: string
           unit: string | null
           updated_at: string
@@ -20923,12 +20930,16 @@ export type Database = {
         Insert: {
           awarded_to?: string | null
           bids_count?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           deadline?: string | null
+          delivery_option?: string | null
           expires_at?: string | null
           hazardous?: boolean | null
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           listing_number?: string
           listing_type?: string | null
           max_price?: number | null
@@ -20939,9 +20950,12 @@ export type Database = {
           pickup_latitude?: number | null
           pickup_longitude?: number | null
           preferred_date?: string | null
+          price_per_unit?: number | null
           quantity: number
+          seller_type?: string | null
           special_requirements?: string | null
           status?: string | null
+          target_audience?: string[] | null
           title: string
           unit?: string | null
           updated_at?: string
@@ -20952,12 +20966,16 @@ export type Database = {
         Update: {
           awarded_to?: string | null
           bids_count?: number | null
+          contact_name?: string | null
+          contact_phone?: string | null
           created_at?: string
           deadline?: string | null
+          delivery_option?: string | null
           expires_at?: string | null
           hazardous?: boolean | null
           id?: string
           images?: string[] | null
+          is_negotiable?: boolean | null
           listing_number?: string
           listing_type?: string | null
           max_price?: number | null
@@ -20968,9 +20986,12 @@ export type Database = {
           pickup_latitude?: number | null
           pickup_longitude?: number | null
           preferred_date?: string | null
+          price_per_unit?: number | null
           quantity?: number
+          seller_type?: string | null
           special_requirements?: string | null
           status?: string | null
+          target_audience?: string[] | null
           title?: string
           unit?: string | null
           updated_at?: string
