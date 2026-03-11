@@ -3684,6 +3684,102 @@ export type Database = {
           },
         ]
       }
+      c2b_submissions: {
+        Row: {
+          admin_notes: string | null
+          created_at: string
+          email: string | null
+          estimated_quantity: string | null
+          external_share_code: string | null
+          forwarded_at: string | null
+          forwarded_by: string | null
+          forwarded_to_org_id: string | null
+          forwarded_to_user_id: string | null
+          full_name: string
+          id: string
+          location: string | null
+          message: string
+          phone: string | null
+          photo_urls: string[] | null
+          priority: string | null
+          responded_at: string | null
+          response_message: string | null
+          status: string
+          subject: string
+          submission_type: string
+          updated_at: string
+          waste_type: string | null
+          whatsapp_number: string | null
+        }
+        Insert: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_quantity?: string | null
+          external_share_code?: string | null
+          forwarded_at?: string | null
+          forwarded_by?: string | null
+          forwarded_to_org_id?: string | null
+          forwarded_to_user_id?: string | null
+          full_name: string
+          id?: string
+          location?: string | null
+          message: string
+          phone?: string | null
+          photo_urls?: string[] | null
+          priority?: string | null
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          subject: string
+          submission_type?: string
+          updated_at?: string
+          waste_type?: string | null
+          whatsapp_number?: string | null
+        }
+        Update: {
+          admin_notes?: string | null
+          created_at?: string
+          email?: string | null
+          estimated_quantity?: string | null
+          external_share_code?: string | null
+          forwarded_at?: string | null
+          forwarded_by?: string | null
+          forwarded_to_org_id?: string | null
+          forwarded_to_user_id?: string | null
+          full_name?: string
+          id?: string
+          location?: string | null
+          message?: string
+          phone?: string | null
+          photo_urls?: string[] | null
+          priority?: string | null
+          responded_at?: string | null
+          response_message?: string | null
+          status?: string
+          subject?: string
+          submission_type?: string
+          updated_at?: string
+          waste_type?: string | null
+          whatsapp_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "c2b_submissions_forwarded_to_org_id_fkey"
+            columns: ["forwarded_to_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "c2b_submissions_forwarded_to_org_id_fkey"
+            columns: ["forwarded_to_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_analysis: {
         Row: {
           action_items: Json | null

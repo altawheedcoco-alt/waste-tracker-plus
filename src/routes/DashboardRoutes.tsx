@@ -110,6 +110,7 @@ const IoTSettings = lazy(() => import("@/pages/dashboard/IoTSettings"));
 const EInvoice = lazy(() => import("@/pages/dashboard/EInvoice"));
 const CustomerPortal = lazy(() => import("@/pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("@/pages/dashboard/OnboardingReview"));
+const C2BManagement = lazy(() => import("@/pages/dashboard/C2BManagement"));
 const Stories = lazy(() => import("@/pages/dashboard/Stories"));
 const DeliveryDeclarations = lazy(() => import("@/pages/dashboard/DeliveryDeclarations"));
 const RejectedShipments = lazy(() => import("@/pages/dashboard/RejectedShipments"));
@@ -261,6 +262,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
     <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
     <Route path="/dashboard/admin-revenue" element={<AdminRevenueManagement />} />
+    <Route path="/dashboard/c2b-management" element={<C2BManagement />} />
     <Route path="/dashboard/news-manager" element={<NewsManager />} />
     <Route path="/dashboard/blog-manager" element={<BlogManager />} />
     <Route path="/dashboard/testimonials-management" element={<TestimonialsManagement />} />

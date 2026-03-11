@@ -35,6 +35,7 @@ const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/Home
 const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
 const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
 const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
+const C2BSubmissionForm = lazy(() => import("@/components/c2b/C2BSubmissionForm"));
 
 /** Renders children when the container scrolls into view — with proper placeholder height */
 const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
@@ -218,6 +219,11 @@ const Index = () => {
               <HomepageCustomBlockRenderer block={block} />
             </LazySection>
           ))}
+
+          {/* C2B Contact Form */}
+          <LazySection minH={400}>
+            <C2BSubmissionForm />
+          </LazySection>
 
           {/* Visitor Counter - before footer */}
           <LazySection minH={100}>
