@@ -451,8 +451,8 @@ export async function processForOCR(imageSrc: string): Promise<string> {
     // معالجة مخصصة لـ OCR
     imageData = denoise(imageData);
     imageData = whiteBalance(imageData);
-    imageData = adjustBrightnessContrast(imageData, 20, 1.4);
-    imageData = sharpen(imageData, 0.7);
+    imageData = adjustBrightnessContrast(imageData, 25, 1.7);
+    imageData = sharpen(imageData, 1.0);
 
     ctx.putImageData(imageData, 0, 0);
     return canvas.toDataURL('image/jpeg', 0.95);
