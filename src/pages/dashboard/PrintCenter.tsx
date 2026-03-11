@@ -1,10 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
   Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight,
-  PenTool, Stamp, FileArchive, FolderOpen, FileBadge, ExternalLink
+  PenTool, Stamp, FileArchive, FolderOpen, FileBadge, ExternalLink,
+  FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
