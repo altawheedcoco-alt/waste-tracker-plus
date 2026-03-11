@@ -110,6 +110,7 @@ const IoTSettings = lazy(() => import("@/pages/dashboard/IoTSettings"));
 const EInvoice = lazy(() => import("@/pages/dashboard/EInvoice"));
 const CustomerPortal = lazy(() => import("@/pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("@/pages/dashboard/OnboardingReview"));
+const C2BManagement = lazy(() => import("@/pages/dashboard/C2BManagement"));
 const Stories = lazy(() => import("@/pages/dashboard/Stories"));
 const DeliveryDeclarations = lazy(() => import("@/pages/dashboard/DeliveryDeclarations"));
 const RejectedShipments = lazy(() => import("@/pages/dashboard/RejectedShipments"));
