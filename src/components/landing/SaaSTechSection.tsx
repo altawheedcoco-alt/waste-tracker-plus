@@ -207,11 +207,11 @@ const SaaSTechSection = memo(() => {
               </p>
 
               {/* Tech tags */}
-              <div className="flex flex-wrap gap-1.5">
+              <div className="flex flex-wrap gap-1">
                 {pillar.tags.map((tag) => (
                   <span
                     key={tag}
-                    className="px-2.5 py-1 rounded-md bg-primary/5 border border-primary/10 text-[10px] font-mono font-bold text-primary/80 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors"
+                    className="px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded-md bg-primary/5 border border-primary/10 text-[8px] sm:text-[10px] font-mono font-bold text-primary/80 group-hover:bg-primary/10 group-hover:border-primary/20 transition-colors"
                   >
                     {tag}
                   </span>
