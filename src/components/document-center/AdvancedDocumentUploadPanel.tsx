@@ -265,9 +265,8 @@ const AdvancedDocumentUploadPanel = () => {
 
         updateQueueItem(item.id, { progress: 70 });
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('entity-documents')
-          .getPublicUrl(path);
+        // Store the storage path — signed URLs are generated on demand for private buckets
+        const storagePath = path;
 
         const { error: dbError } = await supabase
           .from('entity_documents')
@@ -277,7 +276,7 @@ const AdvancedDocumentUploadPanel = () => {
             document_category: item.category,
             title: item.name.replace(/\.[^.]+$/, ''),
             description: item.description || null,
-            file_url: publicUrl,
+            file_url: storagePath,
             file_name: item.name,
             file_type: item.type,
             file_size: item.size,
