@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Eye, Target, Flag, Heart, Leaf, Brain, Users, MapPin, Scale, ShieldCheck, BarChart3, Globe, Building2, Recycle, ArrowLeft, ArrowRight } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -76,6 +77,9 @@ const About = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <PageNavBar className="mb-4" />
+        </div>
         {/* Hero Section */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/3" />

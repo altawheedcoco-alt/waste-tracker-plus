@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Scroll, Pyramid, Cpu, Leaf, Recycle, Globe, Sparkles } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/egypt-history-hero.webp";
@@ -130,6 +131,7 @@ const RecyclingHistory = memo(() => {
 
       {/* Introduction */}
       <section className="container mx-auto px-4 py-12 sm:py-16 max-w-4xl">
+        <PageNavBar className="mb-6" />
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 text-amber-700 dark:text-amber-400 text-sm font-bold mb-6">
             <Sparkles className="w-4 h-4" />

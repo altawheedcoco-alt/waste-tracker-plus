@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense, useState } from "react";
 import { ChevronDown, Mail, Phone, MapPin, MessageCircle } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 
@@ -35,6 +36,7 @@ const Help = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-3xl">
+        <PageNavBar className="mb-6" />
         <h1 className="text-3xl font-bold mb-2 text-foreground">{isAr ? 'مركز المساعدة' : 'Help Center'}</h1>
         <p className="text-muted-foreground mb-10">{isAr ? 'ابحث عن إجابات لأسئلتك أو تواصل معنا' : 'Find answers to your questions or contact us'}</p>
 

@@ -12,6 +12,7 @@ import {
   Star, Zap
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageNavBar from '@/components/ui/page-nav-bar';
 
 const ICON_MAP: Record<string, any> = {
   Newspaper, Users, ShieldCheck, Megaphone, Award, Recycle, Truck,
@@ -47,6 +48,7 @@ const News = memo(() => {
       
       <main className="pt-32 sm:pt-36 pb-16 px-4">
         <div className="max-w-5xl mx-auto">
+          <PageNavBar className="mb-6" />
           {/* Header */}
           <div className="text-center mb-12">
             <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-bold mb-4 border border-primary/20">

@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Factory, Truck, Building2, ArrowLeft, ArrowRight, CheckCircle2, Shield, BarChart3, Recycle, Users, Globe } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -80,6 +81,9 @@ const Partnerships = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <PageNavBar className="mb-4" />
+        </div>
         {/* Hero */}
         <section className="container mx-auto px-4 max-w-5xl text-center mb-16">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">

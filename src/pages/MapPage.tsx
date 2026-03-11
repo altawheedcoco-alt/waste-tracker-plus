@@ -15,6 +15,7 @@ import { OSM_TILE_URL, OSM_ATTRIBUTION, EGYPT_CENTER, DEFAULT_ZOOM, forwardGeoco
 import { toast } from 'sonner';
 import { OpenLocationCode } from 'open-location-code';
 import { useAuth } from '@/contexts/AuthContext';
+import PageNavBar from '@/components/ui/page-nav-bar';
 
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
@@ -427,7 +428,7 @@ const MapPage = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <div className="container mx-auto p-4 pt-24 space-y-4">
-
+        <PageNavBar />
         {/* Header */}
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>

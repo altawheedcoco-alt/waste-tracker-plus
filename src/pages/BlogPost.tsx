@@ -9,6 +9,7 @@ import { ArrowRight, Calendar, Clock, User, Tag, BookOpen } from 'lucide-react';
 import ShareButton from '@/components/sharing/ShareButton';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import PageNavBar from '@/components/ui/page-nav-bar';
 import { useEffect } from 'react';
 
 const formatDate = (dateStr: string) =>
@@ -166,10 +167,7 @@ const BlogPost = () => {
       <main className="pt-32 pb-16 px-4">
         <div className={style.wrapper}>
           {/* Back */}
-          <button onClick={() => navigate('/blog')} className="flex items-center gap-1 text-sm text-primary hover:underline mb-6">
-            <ArrowRight className="w-4 h-4" />
-            العودة للمدونة
-          </button>
+          <PageNavBar className="mb-6" />
 
           {/* Cover */}
           <div className={`w-full h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${post.cover_gradient} flex items-center justify-center mb-8 shadow-lg`}

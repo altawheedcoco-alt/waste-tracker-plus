@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Shield, Scale, AlertTriangle, FileText, Users, Globe, Lock, Gavel, Building2, Truck, Recycle, Factory, Eye, Ban, CheckCircle } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 const UsageAgreementSection = lazy(() => import("@/components/legal/UsageAgreementAcceptance"));
@@ -269,6 +270,7 @@ const Terms = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-4xl">
+        <PageNavBar className="mb-6" />
         {/* Hero */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-bold mb-4">
