@@ -435,11 +435,22 @@ const DocumentArchive = () => {
     }
   };
 
-  /** Resolve file URL — handles both direct HTTP URLs and storage paths */
+  /** Resolve file URL — handles both direct HTTP URLs and storage paths across ALL buckets */
   const resolveFileUrl = async (fileUrl: string): Promise<string | null> => {
     if (!fileUrl) return null;
     if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) return fileUrl;
-    const buckets = ['entity-documents', 'pdf-documents', 'shipment-photos', 'organization-documents'];
+    const buckets = [
+      'entity-documents',
+      'pdf-documents',
+      'shipment-photos',
+      'organization-documents',
+      'weighbridge-photos',
+      'signing-documents',
+      'shared-documents',
+      'deposit-receipts',
+      'identity-documents',
+      'stamps',
+    ];
     for (const bucket of buckets) {
       try {
         const { data } = await supabase.storage.from(bucket).createSignedUrl(fileUrl, 3600);
