@@ -55,6 +55,9 @@ import {
 
 // ═══ Lazy load widgets ═══
 
+// Sovereign Governance
+const SovereignGovernanceDashboard = lazy(() => import('@/components/admin/sovereign/SovereignGovernanceDashboard'));
+
 // Command Center widgets
 const GeneratorCommandCenter = lazy(() => import('./generator/GeneratorCommandCenter'));
 const DashboardBrief = lazy(() => import('./generator/DashboardBrief'));
