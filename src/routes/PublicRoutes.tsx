@@ -88,6 +88,7 @@ export const publicRoutes = (
     <Route path="/legislation" element={<Legislation />} />
     <Route path="/laws" element={<Laws />} />
     <Route path="/about" element={<About />} />
+    <Route path="/journey" element={<Journey />} />
     <Route path="/policies" element={<Policies />} />
     <Route path="/reset-password" element={<ResetPassword />} />
     <Route path="/account-pending" element={<AccountPendingPage />} />

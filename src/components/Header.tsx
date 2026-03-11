@@ -98,6 +98,7 @@ const Header = memo(() => {
         { label: t('header.recyclingAcademy'), href: '/academy', icon: GraduationCap, desc: t('header.recyclingAcademyDesc') },
         { label: t('header.legislation'), href: '/legislation', icon: Scale, desc: t('header.legislationDesc') },
         { label: t('header.aboutUs'), href: '/about', icon: Building2, desc: t('header.aboutUsDesc') },
+        { label: 'رحلة المنصة', href: '/journey', icon: Rocket, desc: 'الإصدارات والإنجازات والقائمون على المشروع', badge: 'جديد' },
         { label: t('header.policies'), href: '/policies', icon: ShieldCheck, desc: t('header.policiesDesc') },
         { label: t('header.termsConditions'), href: '/terms', icon: Scale, desc: t('header.termsConditionsDesc') },
       ],
