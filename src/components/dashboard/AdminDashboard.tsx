@@ -55,6 +55,9 @@ import {
 
 // ═══ Lazy load widgets ═══
 
+// Sovereign Governance
+const SovereignGovernanceDashboard = lazy(() => import('@/components/admin/sovereign/SovereignGovernanceDashboard'));
+
 // Command Center widgets
 const GeneratorCommandCenter = lazy(() => import('./generator/GeneratorCommandCenter'));
 const DashboardBrief = lazy(() => import('./generator/DashboardBrief'));
@@ -204,6 +207,7 @@ interface UserProfile {
 // ═══════════════════════════════════════════════════════════════
 const pillarTabs = [
   { value: 'command-center', labelAr: 'مركز القيادة', labelEn: 'Command Center', icon: Zap },
+  { value: 'sovereign', labelAr: 'الحوكمة السيادية', labelEn: 'Sovereign', icon: ShieldAlert },
   { value: 'entities', labelAr: 'إدارة الكيانات', labelEn: 'Entities', icon: Building2 },
   { value: 'users-fleet', labelAr: 'المستخدمون والأسطول', labelEn: 'Users & Fleet', icon: Truck },
   { value: 'finance', labelAr: 'المالية والإيرادات', labelEn: 'Finance', icon: CreditCard },
@@ -380,6 +384,13 @@ const AdminDashboard = () => {
             ))}
           </TabsList>
         </div>
+
+        {/* ═══ 0. الحوكمة السيادية — Sovereign Governance ═══ */}
+        <TabsContent value="sovereign" className="mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <SovereignGovernanceDashboard />
+          </Suspense>
+        </TabsContent>
 
         {/* ═══ 1. مركز القيادة — Command Center ═══ */}
         <TabsContent value="command-center" className="space-y-6 mt-6">

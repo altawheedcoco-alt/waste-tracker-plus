@@ -580,6 +580,48 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_sovereign_roles: {
+        Row: {
+          created_at: string | null
+          granted_at: string | null
+          granted_by: string | null
+          id: string
+          is_active: boolean | null
+          notes: string | null
+          permissions: Json | null
+          revoked_at: string | null
+          role: Database["public"]["Enums"]["sovereign_role"]
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          permissions?: Json | null
+          revoked_at?: string | null
+          role: Database["public"]["Enums"]["sovereign_role"]
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          granted_at?: string | null
+          granted_by?: string | null
+          id?: string
+          is_active?: boolean | null
+          notes?: string | null
+          permissions?: Json | null
+          revoked_at?: string | null
+          role?: Database["public"]["Enums"]["sovereign_role"]
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       advertisements: {
         Row: {
           ad_plan_id: string | null
@@ -1463,6 +1505,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      ai_sovereign_decisions: {
+        Row: {
+          accepted_at: string | null
+          accepted_by: string | null
+          analysis: string | null
+          created_at: string | null
+          data_sources: Json | null
+          decision_type: string
+          id: string
+          outcome_notes: string | null
+          recommendations: Json | null
+          risk_level: string | null
+          status: string | null
+          title: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          analysis?: string | null
+          created_at?: string | null
+          data_sources?: Json | null
+          decision_type: string
+          id?: string
+          outcome_notes?: string | null
+          recommendations?: Json | null
+          risk_level?: string | null
+          status?: string | null
+          title: string
+        }
+        Update: {
+          accepted_at?: string | null
+          accepted_by?: string | null
+          analysis?: string | null
+          created_at?: string | null
+          data_sources?: Json | null
+          decision_type?: string
+          id?: string
+          outcome_notes?: string | null
+          recommendations?: Json | null
+          risk_level?: string | null
+          status?: string | null
+          title?: string
+        }
+        Relationships: []
       }
       ai_usage_log: {
         Row: {
@@ -11694,6 +11781,69 @@ export type Database = {
           key_type?: string
           public_key?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      early_warning_alerts: {
+        Row: {
+          affected_entity_id: string | null
+          affected_entity_type: string | null
+          affected_organization_id: string | null
+          auto_action_taken: Json | null
+          category: Database["public"]["Enums"]["alert_category"]
+          created_at: string | null
+          description: string | null
+          detection_method: string | null
+          id: string
+          is_resolved: boolean | null
+          metadata: Json | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["alert_severity"]
+          suggested_actions: Json | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          affected_entity_id?: string | null
+          affected_entity_type?: string | null
+          affected_organization_id?: string | null
+          auto_action_taken?: Json | null
+          category: Database["public"]["Enums"]["alert_category"]
+          created_at?: string | null
+          description?: string | null
+          detection_method?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity"]
+          suggested_actions?: Json | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          affected_entity_id?: string | null
+          affected_entity_type?: string | null
+          affected_organization_id?: string | null
+          auto_action_taken?: Json | null
+          category?: Database["public"]["Enums"]["alert_category"]
+          created_at?: string | null
+          description?: string | null
+          detection_method?: string | null
+          id?: string
+          is_resolved?: boolean | null
+          metadata?: Json | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["alert_severity"]
+          suggested_actions?: Json | null
+          title?: string
+          updated_at?: string | null
         }
         Relationships: []
       }
@@ -33365,6 +33515,54 @@ export type Database = {
           },
         ]
       }
+      sovereign_delegations: {
+        Row: {
+          audit_trail: Json | null
+          created_at: string | null
+          delegate_id: string
+          delegator_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          reason: string | null
+          revoked_at: string | null
+          revoked_reason: string | null
+          scope: string[]
+          starts_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          audit_trail?: Json | null
+          created_at?: string | null
+          delegate_id: string
+          delegator_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scope?: string[]
+          starts_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          audit_trail?: Json | null
+          created_at?: string | null
+          delegate_id?: string
+          delegator_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          reason?: string | null
+          revoked_at?: string | null
+          revoked_reason?: string | null
+          scope?: string[]
+          starts_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       stationery_plans: {
         Row: {
           created_at: string
@@ -40313,6 +40511,16 @@ export type Database = {
       }
     }
     Enums: {
+      alert_category:
+        | "compliance_breach"
+        | "financial_anomaly"
+        | "security_threat"
+        | "operational_risk"
+        | "license_expiry"
+        | "performance_decline"
+        | "data_integrity"
+        | "system_health"
+      alert_severity: "info" | "warning" | "critical" | "emergency"
       api_scope:
         | "shipments:read"
         | "shipments:write"
@@ -40382,6 +40590,12 @@ export type Database = {
         | "delivered"
         | "confirmed"
         | "cancelled"
+      sovereign_role:
+        | "super_admin"
+        | "financial_auditor"
+        | "compliance_officer"
+        | "technical_supervisor"
+        | "operations_monitor"
       ticket_category:
         | "bug"
         | "feature_request"
@@ -40535,6 +40749,17 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      alert_category: [
+        "compliance_breach",
+        "financial_anomaly",
+        "security_threat",
+        "operational_risk",
+        "license_expiry",
+        "performance_decline",
+        "data_integrity",
+        "system_health",
+      ],
+      alert_severity: ["info", "warning", "critical", "emergency"],
       api_scope: [
         "shipments:read",
         "shipments:write",
@@ -40609,6 +40834,13 @@ export const Constants = {
         "delivered",
         "confirmed",
         "cancelled",
+      ],
+      sovereign_role: [
+        "super_admin",
+        "financial_auditor",
+        "compliance_officer",
+        "technical_supervisor",
+        "operations_monitor",
       ],
       ticket_category: [
         "bug",

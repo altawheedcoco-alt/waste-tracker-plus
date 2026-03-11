@@ -197,3 +197,6 @@ verify_jwt = false
 
 [functions.audit-bindings]
 verify_jwt = false
+
+[functions.sovereign-ai-analyze]
+verify_jwt = false
