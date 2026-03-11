@@ -557,8 +557,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'admin-driver-tracking' },
       { icon: Truck, labelAr: 'خريطة السائقين', labelEn: 'Drivers Map', path: '/dashboard/admin-drivers-map', key: 'admin-drivers-map' },
       { icon: Send, labelAr: 'إدارة WaPilot', labelEn: 'WaPilot Management', path: '/dashboard/wapilot', key: 'wapilot' },
+      { icon: Bot, labelAr: 'الوكيل الذكي', labelEn: 'Smart Agent', path: '/dashboard/smart-agent', key: 'smart-agent' },
       { icon: Inbox, labelAr: 'صندوق طلبات العملاء (C2B)', labelEn: 'C2B Submissions', path: '/dashboard/c2b-management', key: 'c2b-management' },
       { icon: Headphones, labelAr: 'مركز الاتصال', labelEn: 'Call Center', path: '/dashboard/call-center', key: 'call-center' },
+      { icon: Users, labelAr: 'سوق التوظيف', labelEn: 'Recruitment', path: '/dashboard/omaluna', key: 'admin-omaluna' },
     ],
   },
 
