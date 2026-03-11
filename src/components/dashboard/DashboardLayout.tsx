@@ -131,7 +131,7 @@ import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomize
 import SidebarCustomizer from '@/components/dashboard/SidebarCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
-import { SidebarGroupConfig, SidebarItemConfig, standaloneItems } from '@/config/sidebarConfig';
+import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg } from '@/config/sidebarConfig';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
