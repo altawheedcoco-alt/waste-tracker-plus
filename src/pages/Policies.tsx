@@ -6,6 +6,7 @@ import {
   CheckCircle2, BookOpen, Building2, Flame, BadgeCheck, ArrowRight, ChevronDown,
   ChevronUp, Eye, UserCheck, FileText, Camera, MapPin, AlertTriangle, Printer
 } from 'lucide-react';
+import PageNavBar from '@/components/ui/page-nav-bar';
 import Header from '@/components/Header';
 import { lazy, Suspense } from 'react';
 
