@@ -304,7 +304,7 @@ export default function AddDepositDialog({
 
       // Preprocess image for HD OCR (CamScanner quality)
       const processedImage = await preprocessForOCR(base64, {
-        grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
+        grayscale: true, contrast: 85, sharpness: 3, brightness: 15, binarize: 0, maxDimension: 2400, quality: 0.95,
       });
 
       // Call AI extraction edge function

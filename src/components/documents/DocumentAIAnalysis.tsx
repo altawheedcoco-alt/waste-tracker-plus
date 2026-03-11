@@ -143,7 +143,7 @@ export default function DocumentAIAnalysis({
       } else if (imageBase64.startsWith('data:image')) {
         // Preprocess inline base64 images too
         imageBase64 = await preprocessForOCR(imageBase64, {
-          grayscale: true, contrast: 60, sharpness: 2, brightness: 10, binarize: 0, maxDimension: 2400, quality: 0.95,
+          grayscale: true, contrast: 85, sharpness: 3, brightness: 15, binarize: 0, maxDimension: 2400, quality: 0.95,
         });
       }
 
