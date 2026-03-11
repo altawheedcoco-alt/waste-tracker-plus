@@ -46,14 +46,14 @@ const Features = () => {
             >
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/0 to-accent/0 group-hover:from-primary/5 group-hover:to-accent/5 transition-all duration-500" />
               <motion.div 
-                className={`w-11 h-11 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-3 sm:mb-5 shadow-md relative z-10`}
+                className={`w-9 h-9 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl bg-gradient-to-br ${feature.color} flex items-center justify-center mb-2 sm:mb-5 shadow-md relative z-10`}
                 whileHover={{ scale: 1.15, rotate: 5 }}
                 transition={{ type: 'spring', stiffness: 300 }}
               >
-                <feature.icon className="w-5 h-5 sm:w-7 sm:h-7 text-primary-foreground" />
+                <feature.icon className="w-4 h-4 sm:w-7 sm:h-7 text-primary-foreground" />
               </motion.div>
-              <h3 className="text-base sm:text-xl font-bold mb-2 sm:mb-3 group-hover:text-primary transition-colors relative z-10">{feature.title}</h3>
-              <p className="text-xs sm:text-base text-muted-foreground leading-relaxed relative z-10">{feature.description}</p>
+              <h3 className="text-xs sm:text-xl font-bold mb-1 sm:mb-3 group-hover:text-primary transition-colors relative z-10 leading-tight">{feature.title}</h3>
+              <p className="text-[10px] sm:text-base text-muted-foreground leading-relaxed relative z-10 line-clamp-3 sm:line-clamp-none">{feature.description}</p>
             </motion.div>
           ))}
         </div>
