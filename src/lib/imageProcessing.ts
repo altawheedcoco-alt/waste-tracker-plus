@@ -397,7 +397,7 @@ export async function processReceiptImage(
 
     // 3. تحسين التباين
     if (doEnhanceContrast) {
-      imageData = adjustBrightnessContrast(imageData, 15, 1.3);
+      imageData = adjustBrightnessContrast(imageData, 20, 1.6);
       processingSteps.push('تحسين التباين');
     }
 
