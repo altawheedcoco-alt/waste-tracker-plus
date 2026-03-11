@@ -1,3 +1,4 @@
+import BackButton from '@/components/ui/back-button';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -100,6 +101,7 @@ const ExecutiveDashboard = () => {
 
   return (
     <div className="space-y-6 p-4 md:p-6" dir="rtl">
+      <BackButton />
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
