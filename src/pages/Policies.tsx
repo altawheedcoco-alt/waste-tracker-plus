@@ -513,6 +513,9 @@ const Policies = () => {
       <Header />
       
       <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <PageNavBar className="mb-4" />
+        </div>
         {/* Hero */}
         <div className="relative overflow-hidden bg-gradient-to-b from-primary/5 via-background to-background py-16">
           <div className="absolute inset-0 opacity-[0.03]" style={{
