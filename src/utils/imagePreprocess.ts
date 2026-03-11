@@ -22,12 +22,12 @@ interface PreprocessOptions {
 
 const DEFAULT_OCR_OPTIONS: PreprocessOptions = {
   grayscale: true,
-  contrast: 60,
-  sharpness: 2,
-  brightness: 10,
+  contrast: 85,
+  sharpness: 3,
+  brightness: 15,
   binarize: 0, // auto (Otsu-like)
   maxDimension: 2400,
-  quality: 0.92,
+  quality: 0.95,
 };
 
 /**
