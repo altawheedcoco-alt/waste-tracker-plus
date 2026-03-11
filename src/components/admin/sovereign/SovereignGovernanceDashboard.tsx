@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, KeyRound, Zap, Brain, Shield } from 'lucide-react';
+import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSovereignGovernance } from '@/hooks/useSovereignGovernance';
 
@@ -10,18 +10,26 @@ const SovereignRolesPanel = lazy(() => import('./SovereignRolesPanel'));
 const SovereignDelegationPanel = lazy(() => import('./SovereignDelegationPanel'));
 const EarlyWarningPanel = lazy(() => import('./EarlyWarningPanel'));
 const AICommandCenter = lazy(() => import('./AICommandCenter'));
+const SovereignKPIsPanel = lazy(() => import('./SovereignKPIsPanel'));
+const CrisisManagementPanel = lazy(() => import('./CrisisManagementPanel'));
+const SLAMonitoringPanel = lazy(() => import('./SLAMonitoringPanel'));
+const SovereignReportsPanel = lazy(() => import('./SovereignReportsPanel'));
 
 const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
 const SovereignGovernanceDashboard = () => {
-  const [activeTab, setActiveTab] = useState('early-warning');
+  const [activeTab, setActiveTab] = useState('kpis');
   const { criticalAlerts, roles, delegations, decisions, isLoading } = useSovereignGovernance();
 
   const tabs = [
+    { value: 'kpis', label: 'المؤشرات', icon: BarChart3 },
     { value: 'early-warning', label: 'الإنذار المبكر', icon: Zap, badge: criticalAlerts.length || undefined },
-    { value: 'roles', label: 'الأدوار السيادية', icon: Crown, badge: roles.length || undefined },
-    { value: 'delegation', label: 'التفويضات', icon: KeyRound, badge: delegations.length || undefined },
+    { value: 'crisis', label: 'الأزمات', icon: Siren },
+    { value: 'roles', label: 'الأدوار', icon: Crown, badge: roles.length || undefined },
+    { value: 'delegation', label: 'التفويضات', icon: KeyRound },
+    { value: 'sla', label: 'SLA', icon: Target },
     { value: 'ai-command', label: 'القرار الذكي', icon: Brain, badge: decisions.filter(d => d.status === 'pending').length || undefined },
+    { value: 'reports', label: 'التقارير', icon: FileText },
   ];
 
   return (
@@ -33,46 +41,34 @@ const SovereignGovernanceDashboard = () => {
         </div>
         <div>
           <h2 className="text-xl font-bold">الحوكمة السيادية</h2>
-          <p className="text-xs text-muted-foreground">إدارة الأدوار والتفويضات والإنذار المبكر ومركز القرار الذكي</p>
+          <p className="text-xs text-muted-foreground">مؤشرات الأداء · الإنذار المبكر · الأزمات · الأدوار · التفويضات · SLA · القرار الذكي · التقارير</p>
         </div>
-      </div>
-
-      {/* Quick KPIs */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {tabs.map(tab => (
-          <Card key={tab.value} className="cursor-pointer hover:border-primary/30 transition-colors"
-            onClick={() => setActiveTab(tab.value)}>
-            <CardContent className="p-3 flex items-center gap-3">
-              <tab.icon className={`w-5 h-5 ${activeTab === tab.value ? 'text-primary' : 'text-muted-foreground'}`} />
-              <div>
-                <p className="text-sm font-medium">{tab.label}</p>
-                {tab.badge !== undefined && (
-                  <Badge variant={tab.value === 'early-warning' && criticalAlerts.length > 0 ? 'destructive' : 'secondary'} className="text-[10px]">
-                    {tab.badge}
-                  </Badge>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
       </div>
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 w-full">
-          {tabs.map(tab => (
-            <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-1 text-xs">
-              <tab.icon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">{tab.label}</span>
-              {tab.badge !== undefined && tab.badge > 0 && (
-                <Badge variant="secondary" className="text-[9px] h-4 px-1 mr-1">{tab.badge}</Badge>
-              )}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide">
+          <TabsList className="w-max min-w-full justify-start gap-0.5 bg-muted/50 p-1">
+            {tabs.map(tab => (
+              <TabsTrigger key={tab.value} value={tab.value} className="flex items-center gap-1 text-[11px] px-2.5 py-1.5 whitespace-nowrap">
+                <tab.icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
+                {tab.badge !== undefined && tab.badge > 0 && (
+                  <Badge variant={tab.value === 'early-warning' ? 'destructive' : 'secondary'} className="text-[9px] h-4 px-1">{tab.badge}</Badge>
+                )}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </div>
 
+        <TabsContent value="kpis" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SovereignKPIsPanel /></Suspense>
+        </TabsContent>
         <TabsContent value="early-warning" className="mt-4">
           <Suspense fallback={<TabFallback />}><EarlyWarningPanel /></Suspense>
+        </TabsContent>
+        <TabsContent value="crisis" className="mt-4">
+          <Suspense fallback={<TabFallback />}><CrisisManagementPanel /></Suspense>
         </TabsContent>
         <TabsContent value="roles" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignRolesPanel /></Suspense>
@@ -80,8 +76,14 @@ const SovereignGovernanceDashboard = () => {
         <TabsContent value="delegation" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignDelegationPanel /></Suspense>
         </TabsContent>
+        <TabsContent value="sla" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SLAMonitoringPanel /></Suspense>
+        </TabsContent>
         <TabsContent value="ai-command" className="mt-4">
           <Suspense fallback={<TabFallback />}><AICommandCenter /></Suspense>
+        </TabsContent>
+        <TabsContent value="reports" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SovereignReportsPanel /></Suspense>
         </TabsContent>
       </Tabs>
     </div>

@@ -6630,6 +6630,57 @@ export type Database = {
           },
         ]
       }
+      crisis_incidents: {
+        Row: {
+          actions_taken: Json | null
+          affected_organizations: string[] | null
+          created_at: string | null
+          description: string | null
+          emergency_plan: Json | null
+          id: string
+          initiated_by: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          resolved_by: string | null
+          severity: Database["public"]["Enums"]["crisis_severity"]
+          status: string
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          actions_taken?: Json | null
+          affected_organizations?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          emergency_plan?: Json | null
+          id?: string
+          initiated_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["crisis_severity"]
+          status?: string
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          actions_taken?: Json | null
+          affected_organizations?: string[] | null
+          created_at?: string | null
+          description?: string | null
+          emergency_plan?: Json | null
+          id?: string
+          initiated_by?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          resolved_by?: string | null
+          severity?: Database["public"]["Enums"]["crisis_severity"]
+          status?: string
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       cross_impact_log: {
         Row: {
           chain_id: string | null
@@ -33297,6 +33348,98 @@ export type Database = {
           },
         ]
       }
+      sla_definitions: {
+        Row: {
+          applies_to: string[] | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          metric_type: string
+          name: string
+          name_ar: string
+          penalty_type: string | null
+          penalty_value: number | null
+          target_value: number
+          unit: string
+        }
+        Insert: {
+          applies_to?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric_type: string
+          name: string
+          name_ar: string
+          penalty_type?: string | null
+          penalty_value?: number | null
+          target_value: number
+          unit?: string
+        }
+        Update: {
+          applies_to?: string[] | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          metric_type?: string
+          name?: string
+          name_ar?: string
+          penalty_type?: string | null
+          penalty_value?: number | null
+          target_value?: number
+          unit?: string
+        }
+        Relationships: []
+      }
+      sla_violations: {
+        Row: {
+          actual_value: number
+          created_at: string | null
+          deviation_percent: number | null
+          id: string
+          notes: string | null
+          organization_id: string | null
+          penalty_amount: number | null
+          penalty_applied: boolean | null
+          shipment_id: string | null
+          sla_id: string | null
+          target_value: number
+        }
+        Insert: {
+          actual_value: number
+          created_at?: string | null
+          deviation_percent?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string | null
+          penalty_amount?: number | null
+          penalty_applied?: boolean | null
+          shipment_id?: string | null
+          sla_id?: string | null
+          target_value: number
+        }
+        Update: {
+          actual_value?: number
+          created_at?: string | null
+          deviation_percent?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string | null
+          penalty_amount?: number | null
+          penalty_applied?: boolean | null
+          shipment_id?: string | null
+          sla_id?: string | null
+          target_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sla_violations_sla_id_fkey"
+            columns: ["sla_id"]
+            isOneToOne: false
+            referencedRelation: "sla_definitions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       slot_bookings: {
         Row: {
           booked_by_organization_id: string
@@ -33560,6 +33703,54 @@ export type Database = {
           scope?: string[]
           starts_at?: string | null
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      sovereign_reports: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          generated_by: string | null
+          id: string
+          key_metrics: Json | null
+          period: string
+          published_at: string | null
+          recommendations: Json | null
+          report_type: string
+          risk_indicators: Json | null
+          status: string | null
+          summary: string | null
+          title: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json | null
+          period: string
+          published_at?: string | null
+          recommendations?: Json | null
+          report_type: string
+          risk_indicators?: Json | null
+          status?: string | null
+          summary?: string | null
+          title: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          generated_by?: string | null
+          id?: string
+          key_metrics?: Json | null
+          period?: string
+          published_at?: string | null
+          recommendations?: Json | null
+          report_type?: string
+          risk_indicators?: Json | null
+          status?: string | null
+          summary?: string | null
+          title?: string
         }
         Relationships: []
       }
@@ -40541,6 +40732,7 @@ export type Database = {
         | "no-answer"
         | "failed"
         | "canceled"
+      crisis_severity: "level_1" | "level_2" | "level_3" | "level_4"
       employee_permission_type:
         | "create_deposits"
         | "view_deposits"
@@ -40782,6 +40974,7 @@ export const Constants = {
         "failed",
         "canceled",
       ],
+      crisis_severity: ["level_1", "level_2", "level_3", "level_4"],
       employee_permission_type: [
         "create_deposits",
         "view_deposits",
