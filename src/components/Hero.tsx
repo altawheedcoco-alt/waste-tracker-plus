@@ -88,7 +88,7 @@ const Hero = memo(() => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
             style={{
-              textShadow: '0 2px 24px rgba(0,0,0,0.5)',
+              textShadow: '0 3px 30px rgba(0,0,0,0.7), 0 1px 4px rgba(0,0,0,0.5)',
               color: 'white',
             }}
           >
