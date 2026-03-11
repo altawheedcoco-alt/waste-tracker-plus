@@ -1,7 +1,8 @@
 /**
  * لوحة الأرشيف والمستندات — يعرض كل مستندات المنظمة من entity_documents
+ * يستخدم Signed URLs للوصول الآمن للملفات في الباكتات الخاصة
  */
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -13,12 +14,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, FileText, Download, Eye, Clock, FolderOpen, Filter,
-  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink,
+  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   shipment: { label: 'شحنة', icon: FileText },
@@ -32,6 +34,8 @@ const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   other: { label: 'أخرى', icon: FolderOpen },
 };
 
+const BUCKET_NAME = 'entity-documents';
+
 const DocumentArchivePanel = () => {
   const { organization } = useAuth();
   const { language } = useLanguage();
@@ -39,6 +43,7 @@ const DocumentArchivePanel = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
+  const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['document-center-archive', organization?.id],
@@ -55,6 +60,58 @@ const DocumentArchivePanel = () => {
     },
     enabled: !!organization?.id,
   });
+
+  /** Get a signed URL or open directly if it's already a full URL */
+  const getFileUrl = useCallback(async (fileUrl: string): Promise<string | null> => {
+    if (!fileUrl) return null;
+    // If already a full HTTP URL, use directly
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) {
+      return fileUrl;
+    }
+    // Otherwise it's a storage path — generate signed URL
+    try {
+      const { data, error } = await supabase.storage
+        .from(BUCKET_NAME)
+        .createSignedUrl(fileUrl, 3600); // 1 hour
+      if (error) throw error;
+      return data?.signedUrl || null;
+    } catch (err) {
+      console.error('Failed to generate signed URL:', err);
+      return null;
+    }
+  }, []);
+
+  const handleViewFile = useCallback(async (docId: string, fileUrl: string) => {
+    setLoadingFileId(docId);
+    try {
+      const url = await getFileUrl(fileUrl);
+      if (url) {
+        window.open(url, '_blank');
+      } else {
+        toast.error('فشل في الحصول على رابط المستند');
+      }
+    } finally {
+      setLoadingFileId(null);
+    }
+  }, [getFileUrl]);
+
+  const handleDownloadFile = useCallback(async (docId: string, fileUrl: string, fileName: string) => {
+    setLoadingFileId(docId);
+    try {
+      const url = await getFileUrl(fileUrl);
+      if (url) {
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = fileName || 'document';
+        link.target = '_blank';
+        link.click();
+      } else {
+        toast.error('فشل في تحميل المستند');
+      }
+    } finally {
+      setLoadingFileId(null);
+    }
+  }, [getFileUrl]);
 
   const filtered = useMemo(() => {
     let result = documents;
@@ -151,47 +208,63 @@ const DocumentArchivePanel = () => {
       ) : (
         <ScrollArea className="h-[500px]">
           <div className="space-y-2">
-            {filtered.map((doc: any) => (
-              <Card key={doc.id} className="hover:bg-muted/30 transition-colors">
-                <CardContent className="p-3 flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                    {doc.file_type?.startsWith('image') ? (
-                      <Image className="w-5 h-5 text-primary" />
-                    ) : (
-                      <FileText className="w-5 h-5 text-primary" />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm truncate">{doc.title || doc.file_name || 'مستند'}</p>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                      <Badge variant="secondary" className="text-[10px] py-0">
-                        {categoryMap[doc.document_category]?.label || categoryMap[doc.document_type]?.label || doc.document_type || 'عام'}
-                      </Badge>
-                      <span className="flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
-                        {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: arLocale })}
-                      </span>
+            {filtered.map((doc: any) => {
+              const isFileLoading = loadingFileId === doc.id;
+              return (
+                <Card key={doc.id} className="hover:bg-muted/30 transition-colors">
+                  <CardContent className="p-3 flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                      {doc.file_type?.startsWith('image') ? (
+                        <Image className="w-5 h-5 text-primary" />
+                      ) : (
+                        <FileText className="w-5 h-5 text-primary" />
+                      )}
                     </div>
-                  </div>
-                  <div className="flex gap-1 shrink-0">
-                    {doc.file_url && (
-                      <>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                          <a href={doc.file_url} target="_blank" rel="noopener noreferrer">
-                            <Eye className="w-4 h-4" />
-                          </a>
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8" asChild>
-                          <a href={doc.file_url} download>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{doc.title || doc.file_name || 'مستند'}</p>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
+                        <Badge variant="secondary" className="text-[10px] py-0">
+                          {categoryMap[doc.document_category]?.label || categoryMap[doc.document_type]?.label || doc.document_type || 'عام'}
+                        </Badge>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: arLocale })}
+                        </span>
+                        {doc.file_size && (
+                          <span className="text-muted-foreground">
+                            {(doc.file_size / 1024).toFixed(0)} KB
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex gap-1 shrink-0">
+                      {doc.file_url && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={isFileLoading}
+                            onClick={() => handleViewFile(doc.id, doc.file_url)}
+                          >
+                            {isFileLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            disabled={isFileLoading}
+                            onClick={() => handleDownloadFile(doc.id, doc.file_url, doc.file_name)}
+                          >
                             <Download className="w-4 h-4" />
-                          </a>
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </ScrollArea>
       )}
