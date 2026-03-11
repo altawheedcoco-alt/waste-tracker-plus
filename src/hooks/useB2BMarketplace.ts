@@ -148,7 +148,7 @@ export const useB2BStats = () => {
 export const useCreateB2BListing = () => {
   const { organization } = useAuth();
   const queryClient = useQueryClient();
-  const myOrgType = (organization?.type as OrgType) || 'generator';
+  const myOrgType = (organization?.organization_type as OrgType) || 'generator';
 
   return useMutation({
     mutationFn: async (listing: {
