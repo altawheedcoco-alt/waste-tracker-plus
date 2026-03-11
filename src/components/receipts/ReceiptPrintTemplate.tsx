@@ -805,7 +805,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 3px double #10b981;">
           <div>
             <h2 style="color: #10b981;">اشتراطات وسياسات وأحكام المنصة</h2>
-            <p style="font-size: 7.5pt; color: #6b7280;">الإصدار 2.0.0 • منصة iRecycle لإدارة المخلفات والاستدامة البيئية</p>
+            <p style="font-size: 7.5pt; color: #6b7280;">الإصدار 3.0.0 • منصة iRecycle لإدارة المخلفات والاستدامة البيئية</p>
           </div>
           <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
         </div>
