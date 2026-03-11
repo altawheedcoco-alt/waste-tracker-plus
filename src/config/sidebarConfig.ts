@@ -571,7 +571,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['admin'],
     items: [
       { icon: CreditCard, labelAr: 'الإيرادات والاشتراكات', labelEn: 'Revenue & Subscriptions', path: '/dashboard/admin-revenue', key: 'admin-revenue' },
+      { icon: Newspaper, labelAr: 'إدارة الإعلانات', labelEn: 'Ad Management', path: '/dashboard/my-ads', key: 'admin-ads' },
+      { icon: Boxes, labelAr: 'خطط الإعلانات', labelEn: 'Ad Plans', path: '/dashboard/ad-plans', key: 'admin-ad-plans' },
       { icon: TreePine, labelAr: 'سوق الخشب', labelEn: 'Wood Market', path: '/dashboard/wood-market', key: 'wood-market' },
+      { icon: Store, labelAr: 'مزادات المخلفات', labelEn: 'Waste Auctions', path: '/dashboard/waste-auctions', key: 'admin-waste-auctions' },
     ],
   },
 
