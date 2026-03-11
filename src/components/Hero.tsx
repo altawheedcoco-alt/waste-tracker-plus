@@ -93,7 +93,7 @@ const Hero = memo(() => {
             }}
           >
             {t('landing.heroTitle1')}{" "}
-            <span className="text-eco-green-light drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]">
+            <span className="text-eco-green-light drop-shadow-[0_2px_8px_rgba(0,0,0,0.5)]">
               {t('landing.heroTitle2')}
             </span>
             <br /><span className="text-white">{t('landing.heroTitle3')}</span>
