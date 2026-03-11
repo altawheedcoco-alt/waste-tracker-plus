@@ -207,6 +207,7 @@ interface UserProfile {
 // ═══════════════════════════════════════════════════════════════
 const pillarTabs = [
   { value: 'command-center', labelAr: 'مركز القيادة', labelEn: 'Command Center', icon: Zap },
+  { value: 'sovereign', labelAr: 'الحوكمة السيادية', labelEn: 'Sovereign', icon: ShieldAlert },
   { value: 'entities', labelAr: 'إدارة الكيانات', labelEn: 'Entities', icon: Building2 },
   { value: 'users-fleet', labelAr: 'المستخدمون والأسطول', labelEn: 'Users & Fleet', icon: Truck },
   { value: 'finance', labelAr: 'المالية والإيرادات', labelEn: 'Finance', icon: CreditCard },
