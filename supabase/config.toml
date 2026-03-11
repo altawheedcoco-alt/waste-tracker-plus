@@ -200,3 +200,6 @@ verify_jwt = false
 
 [functions.sovereign-ai-analyze]
 verify_jwt = false
+
+[functions.sovereign-ai-report]
+verify_jwt = false
