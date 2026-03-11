@@ -592,8 +592,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: MessageCircle, labelAr: 'إدارة التعليقات', labelEn: 'Testimonials', path: '/dashboard/testimonials-management', key: 'testimonials-management' },
       { icon: Video, labelAr: 'مولد الفيديو', labelEn: 'Video Generator', path: '/dashboard/video-generator', key: 'video-gen' },
       { icon: BookOpen, labelAr: 'بروشور المنصة', labelEn: 'Platform Brochure', path: '/dashboard/platform-brochure', key: 'platform-brochure' },
+      { icon: PenTool, labelAr: 'قوالب القرطاسية', labelEn: 'Stationery Templates', path: '/dashboard/stationery', key: 'stationery' },
       { icon: Monitor, labelAr: 'سكرين شوت', labelEn: 'Screenshots', path: '/dashboard/system-screenshots', key: 'system-screenshots' },
       { icon: Eye, labelAr: 'تحليلات الزوار', labelEn: 'Visitor Analytics', path: '/dashboard/visitor-analytics', key: 'visitor-analytics' },
+      { icon: Sparkles, labelAr: 'العلامة البيضاء', labelEn: 'White Label Portal', path: '/dashboard/white-label-portal', key: 'white-label-portal' },
     ],
   },
 
