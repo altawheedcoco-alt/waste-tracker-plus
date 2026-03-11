@@ -630,18 +630,50 @@ export const sidebarGroups: SidebarGroupConfig[] = [
 ];
 
 /**
+ * Admin-only group IDs for quick lookup
+ */
+const ADMIN_GROUP_IDS = new Set([
+  'admin-command-center',
+  'admin-entity-management', 
+  'admin-users-fleet',
+  'admin-finance',
+  'admin-content',
+  'admin-infrastructure',
+]);
+
+/**
+ * Check if admin is currently viewing as an organization (voluntary switch).
+ * Returns the org ID or null.
+ */
+export function getAdminViewingOrg(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem('admin_viewing_org');
+}
+
+/**
+ * Check if current admin view is their own sovereign account (not mimicking an org).
+ */
+export function isAdminSovereignView(isAdmin: boolean): boolean {
+  return isAdmin && !getAdminViewingOrg();
+}
+
+/**
  * Get visible sidebar groups for a given org type.
- * Filters groups by visibleFor and filters items within groups.
+ * 
+ * Admin logic:
+ * 1. Sovereign mode (own account): Admin-specific groups + shared groups ONLY (no role-specific clutter)
+ * 2. Voluntary org switch: That org's groups + shared groups, then admin tools as a separated section
+ * 
+ * Non-admin: Standard filtering by org type.
  */
 export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarGroupConfig[] {
-  // Admin sovereign mode: show ALL groups — admin sees everything across all org types
   if (isAdmin) {
-    // Check if admin is viewing as a specific org type
-    const viewingAsOrg = typeof window !== 'undefined' ? sessionStorage.getItem('admin_viewing_org') : null;
+    const viewingAsOrg = getAdminViewingOrg();
     
     if (viewingAsOrg && orgType) {
-      // When viewing as org: show that org's groups + admin-specific groups at the end
+      // ── Voluntary org mimicry: show org-relevant groups, then admin tools at end ──
       const orgGroups = sidebarGroups.filter(group => {
+        if (ADMIN_GROUP_IDS.has(group.id)) return false; // exclude admin groups from main list
         if (group.visibleFor.length === 0) return true;
         return group.visibleFor.includes(orgType);
       }).map(group => ({
@@ -652,29 +684,23 @@ export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarG
         }),
       }));
       
-      // Add admin-only groups at the end
-      const adminOnlyGroups = sidebarGroups.filter(group => 
-        group.visibleFor.includes('admin') && !orgGroups.some(og => og.id === group.id)
-      );
+      // Add admin-only groups at the end (sovereign tools always accessible)
+      const adminTools = sidebarGroups.filter(group => ADMIN_GROUP_IDS.has(group.id));
       
-      return [...orgGroups, ...adminOnlyGroups];
+      return [...orgGroups, ...adminTools];
     }
     
-    // Default admin view: show admin groups first, then all shared groups
-    const adminGroups = sidebarGroups.filter(group => group.visibleFor.includes('admin'));
+    // ── Sovereign mode: Admin groups first, then shared groups only ──
+    // NO role-specific groups — admin uses the org switcher to view those
+    const adminGroups = sidebarGroups.filter(group => ADMIN_GROUP_IDS.has(group.id));
     const sharedGroups = sidebarGroups.filter(group => 
-      group.visibleFor.length === 0 && !adminGroups.some(ag => ag.id === group.id)
-    );
-    // All role-specific groups (so admin can see everything)
-    const roleGroups = sidebarGroups.filter(group => 
-      group.visibleFor.length > 0 && 
-      !group.visibleFor.includes('admin') &&
-      !sharedGroups.some(sg => sg.id === group.id)
+      group.visibleFor.length === 0 && !ADMIN_GROUP_IDS.has(group.id)
     );
     
-    return [...adminGroups, ...sharedGroups, ...roleGroups];
+    return [...adminGroups, ...sharedGroups];
   }
 
+  // ── Standard user: filter by org type ──
   return sidebarGroups.filter(group => {
     if (group.visibleFor.length === 0) return true;
     return group.visibleFor.includes(orgType);

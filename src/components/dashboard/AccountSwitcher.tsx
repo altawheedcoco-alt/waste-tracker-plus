@@ -54,8 +54,8 @@ interface AccountSwitcherProps {
 /**
  * AccountSwitcher for Admin:
  * - The top always shows admin identity (shield icon + "مدير النظام")
- * - No switching happens from the top button
- * - Switching to org view happens from the dedicated sidebar button (AdminOrgSwitcherButton)
+ * - No switching happens from the top button — EVER (prevents involuntary switching)
+ * - Switching to org view ONLY happens from the dedicated sidebar button (AdminOrgSwitcherButton)
  * 
  * For non-admin: this component returns null (they don't have account switching)
  */
@@ -63,10 +63,10 @@ const AccountSwitcher = ({ className, collapsed = false }: AccountSwitcherProps)
   const { organization, roles } = useAuth();
   const isAdmin = roles.includes('admin');
 
-  // Only admin sees this — and it's always the admin identity, never changes
+  // Only admin sees this static identity display — never changes, never switches
   if (!organization || !isAdmin) return null;
 
-  // Check if admin is currently viewing an org (not in admin mode)
+  // Check if admin is currently viewing an org (voluntary switch only)
   const isViewingAsOrg = !!sessionStorage.getItem('admin_viewing_org');
 
   if (collapsed) {
