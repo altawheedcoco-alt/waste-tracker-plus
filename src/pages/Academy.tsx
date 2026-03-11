@@ -124,6 +124,7 @@ const Academy = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-5xl">
+        <PageNavBar className="mb-6" />
         {/* Hero */}
         <div className="text-center mb-14">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 text-primary text-sm font-semibold mb-5">
