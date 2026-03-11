@@ -58,8 +58,8 @@ const Hero = memo(() => {
           decoding="async"
         />
         {/* v3.0 — Multi-layer cinematic overlay — enhanced contrast */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/95 via-[hsl(222,14%,5%)]/75 to-[hsl(222,14%,5%)]/92" />
-        <div className="absolute inset-0 bg-gradient-to-t from-background/95 via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/75 via-[hsl(222,14%,5%)]/50 to-[hsl(222,14%,5%)]/70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-transparent to-transparent" />
         {/* Subtle color accent overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/8 via-transparent to-eco-ocean/5" />
       </div>
