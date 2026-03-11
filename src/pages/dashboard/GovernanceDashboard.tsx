@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Shield, Users, GitBranch, ScrollText, AlertTriangle, BarChart3 } from 'lucide-react';
