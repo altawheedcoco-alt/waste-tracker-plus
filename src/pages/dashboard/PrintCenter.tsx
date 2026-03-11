@@ -1,10 +1,11 @@
-import { useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   FileText, Printer, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
   Eye, Download, CheckSquare, Square, CheckCircle, ArrowRight,
-  PenTool, Stamp, FileArchive, FolderOpen, FileBadge, ExternalLink
+  PenTool, Stamp, FileArchive, FolderOpen, FileBadge, ExternalLink,
+  FileDown
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,6 +27,9 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
+import { usePrintTracking } from '@/hooks/usePrintTracking';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'entity_docs' | 'print_log' | 'all';
 
@@ -60,6 +64,7 @@ const PrintCenter = () => {
   const { organization, profile } = useAuth();
   const navigate = useNavigate();
   const orgId = organization?.id;
+  const { logPrint } = usePrintTracking();
 
   const [dateMode, setDateMode] = useState<'today' | 'range'>('range');
   const [dateFrom, setDateFrom] = useState(format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'));
@@ -499,14 +504,22 @@ const PrintCenter = () => {
   };
 
   // Print single document
-  const printSingle = useCallback((doc: DocumentItem) => {
+  const printSingle = useCallback(async (doc: DocumentItem) => {
     const html = generateDocHtml([doc]);
     openPrintWindow(html);
+    // Log print tracking
+    await logPrint({
+      documentType: doc.type,
+      documentId: doc.id.replace(/^[a-z]+-/, ''),
+      documentNumber: doc.title,
+      actionType: 'print',
+      description: `طباعة ${doc.typeLabel}: ${doc.title}`,
+    });
     toast.success(`تم تجهيز "${doc.title}" للطباعة`);
-  }, [organization, profile]);
+  }, [organization, profile, logPrint]);
 
   // Print selected/all
-  const printBulk = useCallback(() => {
+  const printBulk = useCallback(async () => {
     if (!documents || documents.length === 0) return;
     setIsPrinting(true);
     try {
@@ -515,11 +528,86 @@ const PrintCenter = () => {
         : documents;
       const html = generateDocHtml(toPrint);
       openPrintWindow(html);
+      // Log bulk print tracking
+      await logPrint({
+        documentType: 'bulk_print',
+        documentNumber: `${toPrint.length} مستند`,
+        actionType: 'print',
+        description: `طباعة مجمعة: ${toPrint.length} مستند`,
+        metadata: { count: toPrint.length, types: [...new Set(toPrint.map(d => d.type))] },
+      });
       toast.success(`تم تجهيز ${toPrint.length} مستند للطباعة`);
     } finally {
       setIsPrinting(false);
     }
-  }, [documents, selectedIds, organization, profile]);
+  }, [documents, selectedIds, organization, profile, logPrint]);
+
+  // Export to PDF
+  const exportBulkPDF = useCallback(async () => {
+    if (!documents || documents.length === 0) return;
+    setIsPrinting(true);
+    const toastId = toast.loading('جاري إنشاء ملف PDF...');
+    try {
+      const toPrint = selectedIds.size > 0
+        ? documents.filter(d => selectedIds.has(d.id))
+        : documents;
+      const html = generateDocHtml(toPrint);
+
+      // Create offscreen iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.cssText = 'position:fixed;left:-9999px;width:794px;height:1123px;border:none;';
+      document.body.appendChild(iframe);
+      const iDoc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!iDoc) throw new Error('Cannot access iframe');
+      iDoc.open();
+      iDoc.write(html);
+      iDoc.close();
+
+      await new Promise(r => setTimeout(r, 800));
+
+      const canvas = await html2canvas(iDoc.body, { scale: 2, useCORS: true, logging: false, width: 794, windowWidth: 794 });
+      document.body.removeChild(iframe);
+
+      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgWidth = pageWidth;
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+      let heightLeft = imgHeight;
+      let position = 0;
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+      while (heightLeft > 0) {
+        position = -(imgHeight - heightLeft);
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
+
+      const dateStr = format(new Date(), 'yyyy-MM-dd');
+      pdf.save(`مركز-الطباعة-${dateStr}.pdf`);
+
+      // Log PDF export
+      await logPrint({
+        documentType: 'bulk_export',
+        documentNumber: `${toPrint.length} مستند`,
+        actionType: 'pdf_export',
+        description: `تصدير PDF مجمع: ${toPrint.length} مستند`,
+        metadata: { count: toPrint.length },
+      });
+
+      toast.dismiss(toastId);
+      toast.success('تم تحميل ملف PDF بنجاح');
+    } catch (err) {
+      console.error('PDF export error:', err);
+      toast.dismiss(toastId);
+      toast.error('فشل في تصدير PDF');
+    } finally {
+      setIsPrinting(false);
+    }
+  }, [documents, selectedIds, organization, profile, logPrint]);
 
   const openPrintWindow = (html: string) => {
     const w = window.open('', '_blank', 'width=900,height=700');
@@ -681,6 +769,10 @@ const PrintCenter = () => {
               {selectedIds.size} محدد
             </Badge>
           )}
+          <Button onClick={exportBulkPDF} variant="outline" disabled={isPrinting || !documents?.length} className="gap-2">
+            {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
+            تصدير PDF
+          </Button>
           <Button onClick={printBulk} disabled={isPrinting || !documents?.length} className="gap-2">
             {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
             {selectedIds.size > 0 ? `طباعة المحدد (${selectedIds.size})` : 'طباعة الكل'}

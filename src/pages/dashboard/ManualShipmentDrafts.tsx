@@ -325,7 +325,6 @@ const ManualShipmentDrafts = () => {
                         className="gap-1.5 text-xs"
                         onClick={() => {
                           handleExportPDF(draft);
-                          setTimeout(() => window.print(), 500);
                         }}
                       >
                         <Printer className="w-3.5 h-3.5" />
