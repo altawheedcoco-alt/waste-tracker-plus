@@ -174,25 +174,25 @@ const Index = () => {
           )}
 
           {/* SaaS Tech Section - technical identity */}
-          <LazySection>
+          <LazySection minH={500}>
             <SaaSTechSection />
           </LazySection>
 
           {/* Platform Showcase - immediately after tech section */}
-          <LazySection>
+          <LazySection minH={600}>
             <PlatformShowcase />
           </LazySection>
 
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (
-            <LazySection key={block.id}>
+            <LazySection key={block.id} minH={150}>
               <HomepageCustomBlockRenderer block={block} />
             </LazySection>
           ))}
 
           {/* Custom blocks: after_hero position */}
           {blocksAtPosition('after_hero').map(block => (
-            <LazySection key={block.id}>
+            <LazySection key={block.id} minH={150}>
               <HomepageCustomBlockRenderer block={block} />
             </LazySection>
           ))}
@@ -201,10 +201,9 @@ const Index = () => {
             <ErrorBoundary fallbackTitle="خطأ في تحميل المحتوى">
               {sortedSectionIds.map(sectionId => (
                 <div key={sectionId} id={sectionId}>
-                  <LazySection>{SECTION_COMPONENTS[sectionId]}</LazySection>
-                  {/* Custom blocks after this section */}
+                  <LazySection minH={300}>{SECTION_COMPONENTS[sectionId]}</LazySection>
                   {blocksAfterSection(sectionId).map(block => (
-                    <LazySection key={block.id}>
+                    <LazySection key={block.id} minH={150}>
                       <HomepageCustomBlockRenderer block={block} />
                     </LazySection>
                   ))}
@@ -215,21 +214,21 @@ const Index = () => {
 
           {/* Custom blocks: before_footer position */}
           {blocksAtPosition('before_footer').map(block => (
-            <LazySection key={block.id}>
+            <LazySection key={block.id} minH={150}>
               <HomepageCustomBlockRenderer block={block} />
             </LazySection>
           ))}
 
           {/* Visitor Counter - before footer */}
-          <LazySection>
-            <div className="container px-4 py-8 sm:py-10">
-              <div className="rounded-2xl bg-card border border-border/30 shadow-sm px-6 py-5">
+          <LazySection minH={100}>
+            <div className="container px-4 py-6 sm:py-10">
+              <div className="rounded-2xl bg-card border border-border/30 shadow-sm px-4 sm:px-6 py-4 sm:py-5">
                 <VisitorCounter />
               </div>
             </div>
           </LazySection>
 
-          {isVisible('footer') && <LazySection><Footer /></LazySection>}
+          {isVisible('footer') && <LazySection minH={300}><Footer /></LazySection>}
         </div>
       </LandingWrapper>
     </Suspense>
