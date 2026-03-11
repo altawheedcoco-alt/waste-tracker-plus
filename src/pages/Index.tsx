@@ -4,7 +4,7 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
-// Critical above-fold: load eagerly but keep lightweight
+// Critical above-fold: load eagerly
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 
@@ -36,26 +36,27 @@ const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcas
 const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
 const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
 
-/** Only renders children when the container scrolls into view */
-const LazySection = memo(({ children }: { children: React.ReactNode }) => {
+/** Renders children when the container scrolls into view — with proper placeholder height */
+const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    // Use requestIdleCallback to observe after paint
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '600px' }
+      { rootMargin: '800px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
   }, []);
 
   return (
-    <div ref={ref} style={{ minHeight: visible ? undefined : '40px' }}>
+    <div ref={ref} style={{ minHeight: visible ? undefined : `${minH}px` }}>
       {visible ? (
-        <Suspense fallback={null}>
+        <Suspense fallback={<div style={{ minHeight: `${minH}px` }} />}>
           {children}
         </Suspense>
       ) : null}
@@ -64,7 +65,7 @@ const LazySection = memo(({ children }: { children: React.ReactNode }) => {
 });
 LazySection.displayName = 'LazySection';
 
-/** Deferred ticker — renders after a short delay to not block FCP */
+/** Deferred ticker */
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
