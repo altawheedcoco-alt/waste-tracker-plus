@@ -220,6 +220,11 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* C2B Contact Form */}
+          <LazySection minH={400}>
+            <C2BSubmissionForm />
+          </LazySection>
+
           {/* Visitor Counter - before footer */}
           <LazySection minH={100}>
             <div className="container px-4 py-6 sm:py-10">
