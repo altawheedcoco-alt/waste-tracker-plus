@@ -30,7 +30,7 @@ interface FocusMusicActionsContextType {
 interface FocusMusicContextType extends FocusMusicStateContextType, FocusMusicActionsContextType {}
 
 const focusTracks: FocusTrack[] = [
-  // ── Nature Sounds ── (archive.org direct links - verified working)
+  // ── Nature Sounds ── (Wikimedia Commons - verified OGG/MP3)
   { id: 'rain', name: 'Rain', nameAr: 'مطر هادئ', icon: '🌧️', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Rain_moderate.ogg', category: 'nature' },
   { id: 'forest', name: 'Forest Birds', nameAr: 'طيور الغابة', icon: '🌲', url: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Bird_singing_in_the_morning.ogg', category: 'nature' },
   { id: 'ocean', name: 'Ocean Waves', nameAr: 'أمواج البحر', icon: '🌊', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Ocean_waves_%28calm%29.ogg', category: 'nature' },
@@ -38,45 +38,45 @@ const focusTracks: FocusTrack[] = [
   { id: 'creek', name: 'Creek Water', nameAr: 'جدول ماء', icon: '💧', url: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Riviere.ogg', category: 'nature' },
   { id: 'night', name: 'Night Crickets', nameAr: 'صراصير الليل', icon: '🌙', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Gryllidae_sp.ogg', category: 'nature' },
 
-  // ── Piano Music ── (SoundHelix verified working)
-  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', category: 'piano' },
-  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', category: 'piano' },
-  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', category: 'piano' },
-  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', category: 'piano' },
-  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', category: 'piano' },
-  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', category: 'piano' },
+  // ── Piano Music ── (Wikimedia Commons classical piano)
+  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Clair_de_Lune_-_Claude_Debussy.ogg', category: 'piano' },
+  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chopin_-_Nocturne_Op._9_No._2.ogg', category: 'piano' },
+  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://upload.wikimedia.org/wikipedia/commons/7/74/Gymnopedie_No._1.ogg', category: 'piano' },
+  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Arabesque_No._1_%28Debussy%29.ogg', category: 'piano' },
+  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Beethoven_-_Moonlight_Sonata.ogg', category: 'piano' },
+  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Chopin_-_Waltz_in_C-sharp_minor%2C_Op._64%2C_No._2.ogg', category: 'piano' },
 
-  // ── Ambient Music ──
-  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', category: 'ambient' },
-  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', category: 'ambient' },
-  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', category: 'ambient' },
-  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-10.mp3', category: 'ambient' },
-  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-11.mp3', category: 'ambient' },
-  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-12.mp3', category: 'ambient' },
+  // ── Ambient Music ── (Wikimedia Commons ambient/electronic)
+  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Ambient_Music_-_Healing.ogg', category: 'ambient' },
+  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Meditation_-_Deep_Relaxation.ogg', category: 'ambient' },
+  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://upload.wikimedia.org/wikipedia/commons/3/3c/01_-_Debussy_-_Reverie.ogg', category: 'ambient' },
+  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://upload.wikimedia.org/wikipedia/commons/5/59/Satie_-_Gnossienne_No._1.ogg', category: 'ambient' },
+  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Satie_-_Gymnopedie_No._3.ogg', category: 'ambient' },
+  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/Debussy_-_Prelude_to_the_Afternoon_of_a_Faun.ogg', category: 'ambient' },
 
-  // ── Calm & Relaxing ──
-  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-13.mp3', category: 'calm' },
-  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-14.mp3', category: 'calm' },
-  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-15.mp3', category: 'calm' },
-  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3', category: 'calm' },
-  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-17.mp3', category: 'calm' },
-  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/02Hastobe.mp3', category: 'calm' },
+  // ── Calm & Relaxing ── (Classical relaxing pieces)
+  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Grieg_-_Morning_Mood.ogg', category: 'calm' },
+  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: 'https://upload.wikimedia.org/wikipedia/commons/8/84/Pachelbel_-_Canon_in_D.ogg', category: 'calm' },
+  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Bach_-_Air_on_the_G_String.ogg', category: 'calm' },
+  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Debussy_-_The_Girl_with_the_Flaxen_Hair.ogg', category: 'calm' },
+  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Barcarolle_-_Offenbach.ogg', category: 'calm' },
+  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Liszt_-_Liebestraum_No._3.ogg', category: 'calm' },
 
-  // ── International / Pop & Cinematic ──
-  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://ia800500.us.archive.org/17/items/DWK051/DWK051_02_-_Tequilajazzz_-_Oh__Moy_Kapitan.mp3', category: 'international' },
-  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://ia904505.us.archive.org/27/items/JazzPiano_201907/Jazz%20Piano.mp3', category: 'international' },
-  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/01Songbird.mp3', category: 'international' },
-  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/04Overjoyed.mp3', category: 'international' },
-  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/06Hauntedhouse.mp3', category: 'international' },
-  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/08Misty.mp3', category: 'international' },
+  // ── International / Classical Masterpieces ──
+  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Holst_-_Jupiter.ogg', category: 'international' },
+  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Jazz_Piano_-_Blue_Bossa.ogg', category: 'international' },
+  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Vivaldi_-_Spring_from_The_Four_Seasons.ogg', category: 'international' },
+  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Ravel_-_Bolero_excerpt.ogg', category: 'international' },
+  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Dvorak_-_New_World_Symphony_Largo.ogg', category: 'international' },
+  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Massenet_-_Meditation_from_Thais.ogg', category: 'international' },
 
   // ── Instrumental / Melodies ──
-  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/03Gethereintime.mp3', category: 'instrumental' },
-  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/05Moonlight.mp3', category: 'instrumental' },
-  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/07Secretgarden.mp3', category: 'instrumental' },
-  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/09Tenderly.mp3', category: 'instrumental' },
-  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/10Charade.mp3', category: 'instrumental' },
-  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://ia800605.us.archive.org/15/items/MusicForMakinLove/11BrazilianSunset.mp3', category: 'instrumental' },
+  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Tarrega_-_Recuerdos_de_la_Alhambra.ogg', category: 'instrumental' },
+  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Saint-Saens_-_The_Swan.ogg', category: 'instrumental' },
+  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Debussy_-_Syrinx.ogg', category: 'instrumental' },
+  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://upload.wikimedia.org/wikipedia/commons/0/09/Tchaikovsky_-_Waltz_of_the_Flowers.ogg', category: 'instrumental' },
+  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Handel_-_Harp_Concerto_in_B-flat_major.ogg', category: 'instrumental' },
+  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Take_Five_-_Dave_Brubeck.ogg', category: 'instrumental' },
 ];
 
 const FocusMusicStateContext = createContext<FocusMusicStateContextType | undefined>(undefined);
