@@ -39,6 +39,7 @@ const Blog = () => {
     <div className="min-h-screen bg-background" dir="rtl">
       <Header />
       <main className="container mx-auto px-4 pt-32 pb-16 max-w-5xl">
+        <PageNavBar className="mb-6" />
         {/* Header */}
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-5 py-2 rounded-full text-sm font-bold mb-4 border border-primary/20">
