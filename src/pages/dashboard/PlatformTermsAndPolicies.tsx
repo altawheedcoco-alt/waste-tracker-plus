@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useReactToPrint } from 'react-to-print';
 
-const POLICY_VERSION = '2.0.0';
+const POLICY_VERSION = '3.0.0';
 const EFFECTIVE_DATE = '2025-01-01';
 
 interface PolicySection {

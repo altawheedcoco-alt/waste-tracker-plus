@@ -805,9 +805,9 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
         <div style="display: flex; align-items: center; justify-content: space-between; padding-bottom: 8px; margin-bottom: 10px; border-bottom: 3px double #10b981;">
           <div>
             <h2 style="color: #10b981;">اشتراطات وسياسات وأحكام المنصة</h2>
-            <p style="font-size: 7.5pt; color: #6b7280;">الإصدار 2.0.0 • منصة iRecycle لإدارة المخلفات والاستدامة البيئية</p>
+            <p style="font-size: 7.5pt; color: #6b7280;">الإصدار 3.0.0 • منصة iRecycle لإدارة المخلفات والاستدامة البيئية</p>
           </div>
-          <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=3.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
         </div>
 
         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 6px 8px; margin-bottom: 10px; font-size: 7.5pt; line-height: 1.5;">
@@ -917,12 +917,12 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
               </div>
             </div>
             <div style="text-align: center;">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=3.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
               <p style="font-size: 6pt; margin-top: 2px;">امسح للتحقق</p>
             </div>
           </div>
           <div style="text-align: center; margin-top: 6px; font-size: 6pt; color: #6b7280;">
-            جميع الحقوق محفوظة © ${new Date().getFullYear()} iRecycle • الإصدار 2.0.0 • وثيقة محمية بتقنية SHA-256
+            جميع الحقوق محفوظة © ${new Date().getFullYear()} iRecycle • الإصدار 3.0.0 • وثيقة محمية بتقنية SHA-256
           </div>
         </div>
       </div>
