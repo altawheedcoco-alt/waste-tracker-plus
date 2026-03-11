@@ -111,7 +111,7 @@ import { getOrgChains } from '@/config/actionChainsRegistry';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
-import AccountSwitcher from './AccountSwitcher';
+import AccountSwitcher, { AdminOrgSwitcherButton } from './AccountSwitcher';
 import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
@@ -565,6 +565,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             
             {/* Binding Legend */}
             <BindingLegend isCollapsed={!isSidebarOpen} />
+
+            {/* Admin: dedicated org switcher button */}
+            {isAdmin && (
+              <div className="pt-3 mt-3 border-t border-border/30 px-1">
+                <AdminOrgSwitcherButton collapsed={!isSidebarOpen} />
+              </div>
+            )}
 
             {/* Action Chains Tree */}
             {isSidebarOpen && currentOrgChains && (
