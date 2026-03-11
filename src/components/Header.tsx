@@ -151,6 +151,15 @@ const Header = memo(() => {
       <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
         <div className="w-full mx-auto px-3 sm:px-4 max-w-[1400px]">
           <div className="flex items-center h-14 sm:h-[72px] gap-2">
+            {/* Mobile toggle - appears first (right side in RTL) */}
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="lg:hidden p-2.5 rounded-xl text-foreground hover:bg-accent/50 transition-colors touch-manipulation flex-shrink-0"
+              aria-label="Toggle menu"
+            >
+              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            </button>
+
             {/* Logo */}
             <div
               className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0"
@@ -271,14 +280,6 @@ const Header = memo(() => {
               </Button>
             </div>
 
-            {/* Mobile toggle */}
-            <button
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl text-foreground hover:bg-accent/50 transition-colors touch-manipulation"
-              aria-label="Toggle menu"
-            >
-              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
-            </button>
           </div>
         </div>
       </div>
