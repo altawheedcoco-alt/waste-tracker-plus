@@ -2,6 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Shield, Scale, AlertTriangle, FileText, Users, Globe, Lock, Gavel, Building2, Truck, Recycle, Factory, Eye, Ban, CheckCircle } from "lucide-react";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 const UsageAgreementSection = lazy(() => import("@/components/legal/UsageAgreementAcceptance"));
