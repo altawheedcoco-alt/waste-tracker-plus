@@ -276,7 +276,7 @@ const AdvancedDocumentUploadPanel = () => {
             document_category: item.category,
             title: item.name.replace(/\.[^.]+$/, ''),
             description: item.description || null,
-            file_url: publicUrl,
+            file_url: storagePath,
             file_name: item.name,
             file_type: item.type,
             file_size: item.size,
