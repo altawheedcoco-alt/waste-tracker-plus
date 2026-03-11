@@ -156,6 +156,9 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'transporter-declarations', bindingType: 'admin' as const },
       { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'transporter-certs', badgeKey: 'transporter-certs', bindingType: 'admin' as const },
+      { icon: FileCheck, labelAr: 'تجديد التراخيص', labelEn: 'License Renewal', path: '/dashboard?tab=licenses', key: 'transporter-license-renewal', bindingType: 'admin' as const },
+      { icon: FileText, labelAr: 'الإقرارات الدورية', labelEn: 'Periodic Declarations', path: '/dashboard?tab=declarations', key: 'transporter-periodic-declarations', bindingType: 'admin' as const },
+      { icon: ClipboardList, labelAr: 'الخطة السنوية', labelEn: 'Annual Plan', path: '/dashboard?tab=annual_plan', key: 'transporter-annual-plan', bindingType: 'admin' as const },
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'transporter-safety', bindingType: 'hybrid' as const },
     ],
   },
