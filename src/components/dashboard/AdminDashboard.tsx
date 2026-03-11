@@ -385,6 +385,13 @@ const AdminDashboard = () => {
           </TabsList>
         </div>
 
+        {/* ═══ 0. الحوكمة السيادية — Sovereign Governance ═══ */}
+        <TabsContent value="sovereign" className="mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <SovereignGovernanceDashboard />
+          </Suspense>
+        </TabsContent>
+
         {/* ═══ 1. مركز القيادة — Command Center ═══ */}
         <TabsContent value="command-center" className="space-y-6 mt-6">
           <Suspense fallback={<TabFallback />}>
