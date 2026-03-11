@@ -440,7 +440,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     icon: Store,
     labelAr: 'البورصة والتجارة',
     labelEn: 'Exchange & Trade',
-    visibleFor: ['transporter', 'recycler', 'admin'],
+    visibleFor: [],
     items: [
       { icon: Store, labelAr: 'بورصة المخلفات', labelEn: 'Waste Exchange', path: '/dashboard/waste-exchange', key: 'waste-exchange' },
       { icon: Globe, labelAr: 'بورصة السلع العالمية', labelEn: 'Commodity Exchange', path: '/dashboard/commodity-exchange', key: 'commodity-exchange' },
