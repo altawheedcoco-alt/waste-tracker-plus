@@ -103,10 +103,13 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/transporter-shipments', key: 'transporter-shipments', badgeKey: 'transporter-shipments' },
       { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'transporter-rejected' },
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
+      { icon: Scale, labelAr: 'سجل الكميات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'transporter-external-records' },
+      { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'transporter-bulk-weight' },
       { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
       { icon: Inbox, labelAr: 'طلبات الجمع', labelEn: 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests' },
       { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Manual Shipment', path: '/dashboard/manual-shipment', key: 'manual-shipment' },
       { icon: FileText, labelAr: 'أرشيف النماذج اليدوية', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts' },
+      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center' },
     ],
   },
 
