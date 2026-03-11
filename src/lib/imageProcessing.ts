@@ -397,7 +397,7 @@ export async function processReceiptImage(
 
     // 3. تحسين التباين
     if (doEnhanceContrast) {
-      imageData = adjustBrightnessContrast(imageData, 15, 1.3);
+      imageData = adjustBrightnessContrast(imageData, 20, 1.6);
       processingSteps.push('تحسين التباين');
     }
 
@@ -412,7 +412,7 @@ export async function processReceiptImage(
 
     // 5. زيادة الحدة
     if (doSharpen) {
-      imageData = sharpen(imageData, 0.5);
+      imageData = sharpen(imageData, 0.8);
       processingSteps.push('زيادة الحدة');
     }
 
@@ -451,8 +451,8 @@ export async function processForOCR(imageSrc: string): Promise<string> {
     // معالجة مخصصة لـ OCR
     imageData = denoise(imageData);
     imageData = whiteBalance(imageData);
-    imageData = adjustBrightnessContrast(imageData, 20, 1.4);
-    imageData = sharpen(imageData, 0.7);
+    imageData = adjustBrightnessContrast(imageData, 25, 1.7);
+    imageData = sharpen(imageData, 1.0);
 
     ctx.putImageData(imageData, 0, 0);
     return canvas.toDataURL('image/jpeg', 0.95);
