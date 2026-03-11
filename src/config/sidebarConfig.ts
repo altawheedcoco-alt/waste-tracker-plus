@@ -537,9 +537,11 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: CheckSquare, labelAr: 'موافقات الشركات', labelEn: 'Company Approvals', path: '/dashboard/company-approvals', key: 'company-approvals', badgeKey: 'company-approvals' },
       { icon: Building2, labelAr: 'إدارة الشركات', labelEn: 'Company Management', path: '/dashboard/company-management', key: 'company-management' },
       { icon: Building2, labelAr: 'الشركات المنظمة', labelEn: 'Regulated Companies', path: '/dashboard/regulated-companies', key: 'regulated-companies' },
+      { icon: BarChart3, labelAr: 'تعداد الكيانات', labelEn: 'Entity Census', path: '/dashboard/entity-census', key: 'entity-census' },
       { icon: FileText, labelAr: 'وثائق المنظمات', labelEn: 'Org Documents', path: '/dashboard/organization-documents', key: 'org-docs', badgeKey: 'org-docs' },
       { icon: FileText, labelAr: 'إدارة الإفادات', labelEn: 'Attestation Management', path: '/dashboard/admin-attestations', key: 'admin-attestations' },
       { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certificates', path: '/dashboard/recycling-certificates', key: 'admin-certs', badgeKey: 'admin-certs' },
+      { icon: Fingerprint, labelAr: 'ختم المستندات', labelEn: 'Document Stamping', path: '/dashboard/admin-document-stamping', key: 'admin-doc-stamping' },
     ],
   },
 
