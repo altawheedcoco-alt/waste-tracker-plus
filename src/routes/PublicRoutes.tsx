@@ -28,6 +28,7 @@ const Help = lazy(() => import("@/pages/Help"));
 const MapPage = lazy(() => import("@/pages/MapPage"));
 const Blog = lazy(() => import("@/pages/Blog"));
 const BlogPost = lazy(() => import("@/pages/BlogPost"));
+const C2BPublicView = lazy(() => import("@/pages/C2BPublicView"));
 const Academy = lazy(() => import("@/pages/Academy"));
 const Partnerships = lazy(() => import("@/pages/Partnerships"));
 const Legislation = lazy(() => import("@/pages/Legislation"));
