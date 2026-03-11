@@ -1,7 +1,8 @@
 import {
   Package, AlertTriangle, CalendarClock, FileText, FolderCheck, FileCheck,
   Fingerprint, Inbox, Plus, Truck, Users, MapPin, Shield, GraduationCap,
-  Recycle, Factory, HardHat, Wrench, Trophy, Gauge, Scale,
+  Recycle, Factory, HardHat, Wrench, Trophy, Gauge, Scale, Boxes,
+  GitCompareArrows, ClipboardList, Printer,
 } from 'lucide-react';
 import type { SidebarGroupConfig } from './sidebarTypes';
 
@@ -33,10 +34,13 @@ const transporterOps: SidebarGroupConfig = {
     { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/transporter-shipments', key: 'transporter-shipments', badgeKey: 'transporter-shipments', bindingType: 'hybrid' },
     { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'transporter-rejected', bindingType: 'partner' },
     { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/transporter-receipts', key: 'transporter-receipts', bindingType: 'hybrid' },
+    { icon: Scale, labelAr: 'سجل الكميات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'transporter-external-records', bindingType: 'hybrid' },
+    { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'transporter-bulk-weight', bindingType: 'hybrid' },
     { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche', bindingType: 'internal' },
     { icon: Inbox, labelAr: 'طلبات الجمع', labelEn: 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests', bindingType: 'partner' },
     { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Manual Shipment', path: '/dashboard/manual-shipment', key: 'manual-shipment', bindingType: 'hybrid' },
     { icon: FileText, labelAr: 'أرشيف النماذج اليدوية', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts', bindingType: 'internal' },
+    { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center', bindingType: 'internal' },
   ],
 };
 
@@ -51,6 +55,8 @@ const fleetTracking: SidebarGroupConfig = {
     { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' },
     { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' },
     { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' },
+    { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Container Management', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' },
+    { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassignment', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' },
     { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' },
   ],
 };
@@ -65,6 +71,7 @@ const workforceManagement: SidebarGroupConfig = {
   items: [
     { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' },
     { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' },
+    { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' },
     { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' },
     { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' },
   ],
@@ -80,6 +87,9 @@ const transporterRegulatory: SidebarGroupConfig = {
   items: [
     { icon: FileCheck, labelAr: 'إقرارات التسليم', labelEn: 'Delivery Declarations', path: '/dashboard/delivery-declarations', key: 'transporter-declarations', bindingType: 'admin' },
     { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'transporter-certs', badgeKey: 'transporter-certs', bindingType: 'admin' },
+    { icon: FileCheck, labelAr: 'تجديد التراخيص', labelEn: 'License Renewal', path: '/dashboard?tab=licenses', key: 'transporter-license-renewal', bindingType: 'admin' },
+    { icon: FileText, labelAr: 'الإقرارات الدورية', labelEn: 'Periodic Declarations', path: '/dashboard?tab=declarations', key: 'transporter-periodic-declarations', bindingType: 'admin' },
+    { icon: ClipboardList, labelAr: 'الخطة السنوية', labelEn: 'Annual Plan', path: '/dashboard?tab=annual_plan', key: 'transporter-annual-plan', bindingType: 'admin' },
     { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'transporter-safety', bindingType: 'hybrid' },
   ],
 };
