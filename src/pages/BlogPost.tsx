@@ -168,8 +168,6 @@ const BlogPost = () => {
         <div className={style.wrapper}>
           {/* Back */}
           <PageNavBar className="mb-6" />
-            العودة للمدونة
-          </button>
 
           {/* Cover */}
           <div className={`w-full h-48 sm:h-64 rounded-2xl bg-gradient-to-br ${post.cover_gradient} flex items-center justify-center mb-8 shadow-lg`}
