@@ -1,5 +1,4 @@
 import { useState, lazy, Suspense } from 'react';
-import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
