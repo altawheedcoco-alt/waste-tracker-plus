@@ -571,14 +571,50 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Navigation */}
           <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+            {/* Return to Admin Banner (when viewing as org) */}
+            {adminViewingOrg && isSidebarOpen && (
+              <motion.button
+                initial={{ opacity: 0, y: -10 }}
+                animate={{ opacity: 1, y: 0 }}
+                onClick={() => {
+                  sessionStorage.removeItem('admin_viewing_org');
+                  navigate('/dashboard/system-overview');
+                }}
+                className="w-full flex items-center gap-3 p-2.5 mb-2 rounded-lg border border-destructive/30 bg-destructive/5 hover:bg-destructive/10 transition-colors text-right"
+              >
+                <div className="w-8 h-8 rounded-md flex items-center justify-center bg-destructive/10 text-destructive shrink-0">
+                  <LogOut className="w-4 h-4" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-xs text-destructive">العودة لحساب المدير</p>
+                  <p className="text-[10px] text-muted-foreground truncate">أنت تعرض: {organization?.name}</p>
+                </div>
+              </motion.button>
+            )}
+
             {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item: SidebarMenuItem) => (
-                <SidebarNavGroup
-                  key={item.key}
-                  item={item}
-                  isCollapsed={!isSidebarOpen}
-                />
-              ))
+              filteredMenuItems.map((item: SidebarMenuItem) => {
+                // Render admin separator
+                if (item.key === '__admin-separator__') {
+                  return isSidebarOpen ? (
+                    <div key={item.key} className="flex items-center gap-2 pt-4 pb-2 px-2">
+                      <div className="flex-1 h-px bg-primary/20" />
+                      <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
+                        <Shield className="w-3 h-3" />
+                        {language === 'ar' ? 'أدوات المدير' : 'Admin Tools'}
+                      </span>
+                      <div className="flex-1 h-px bg-primary/20" />
+                    </div>
+                  ) : null;
+                }
+                return (
+                  <SidebarNavGroup
+                    key={item.key}
+                    item={item}
+                    isCollapsed={!isSidebarOpen}
+                  />
+                );
+              })
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 {t('commandPalette.noResults')}
