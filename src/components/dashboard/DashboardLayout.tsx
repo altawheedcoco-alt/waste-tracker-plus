@@ -330,6 +330,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Use config-based sidebar groups via preferences hook
   const { orderedGroups: sidebarConfigGroups } = useSidebarPreferences();
 
+  // Admin viewing state
+  const adminViewingOrg = isAdmin ? getAdminViewingOrg() : null;
+  const isSovereignAdmin = isAdminSovereignView(isAdmin);
+
   // Convert config groups to SidebarMenuItem format for rendering
   const configBasedMenuItems: SidebarMenuItem[] = useMemo(() => {
     // Add standalone items first (Dashboard)
@@ -341,11 +345,29 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
     }));
 
+    // Track where admin-only groups start (for visual separator when viewing as org)
+    const ADMIN_GROUP_IDS = new Set([
+      'admin-command-center', 'admin-entity-management', 'admin-users-fleet',
+      'admin-finance', 'admin-content', 'admin-infrastructure',
+    ]);
+    let adminSectionStarted = false;
+
     // Add each group
     for (const group of sidebarConfigGroups) {
       const groupBadge = group.items.reduce((sum, item) => {
         return sum + (item.badgeKey ? (sectionBadges[item.badgeKey] || 0) : 0);
       }, 0);
+
+      // Insert separator before admin groups when viewing as org
+      if (adminViewingOrg && ADMIN_GROUP_IDS.has(group.id) && !adminSectionStarted) {
+        adminSectionStarted = true;
+        items.push({
+          icon: Shield,
+          label: language === 'ar' ? '─── أدوات المدير ───' : '─── Admin Tools ───',
+          path: '#admin-separator',
+          key: '__admin-separator__',
+        });
+      }
 
       items.push({
         icon: group.icon,
@@ -365,7 +387,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
 
     return items;
-  }, [sidebarConfigGroups, language, sectionBadges]);
+  }, [sidebarConfigGroups, language, sectionBadges, adminViewingOrg]);
 
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : configBasedMenuItems;
