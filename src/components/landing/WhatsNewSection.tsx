@@ -5,11 +5,11 @@ import { motion } from 'framer-motion';
 const features = [
   {
     icon: Rocket,
-    title: 'الإصدار 2.0',
+    title: 'الإصدار 3.0',
     desc: 'هوية بصرية جديدة بالكامل مع تحسينات شاملة في الأداء والتجربة وأدوات ذكية متطورة.',
     color: 'from-primary to-[hsl(200,75%,45%)]',
-    link: '/',
-    badge: 'v2.0 🚀',
+    link: '/journey',
+    badge: 'v3.0 🚀',
   },
   {
     icon: Users,

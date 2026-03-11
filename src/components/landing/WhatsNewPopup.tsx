@@ -60,9 +60,9 @@ const WhatsNewPopup = () => {
                 <div className="relative z-10">
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles className="w-5 h-5 text-[hsl(42,92%,55%)] animate-pulse" />
-                    <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">الإصدار 2.0</span>
+                    <span className="text-xs font-bold bg-white/20 px-2 py-0.5 rounded-full">الإصدار 3.0</span>
                   </div>
-                  <h3 className="text-xl font-extrabold">iRecycle 2.0 وصل! 🎉</h3>
+                  <h3 className="text-xl font-extrabold">iRecycle 3.0 وصل! 🎉</h3>
                   <p className="text-sm text-white/80 mt-1">اكتشف التطورات الجديدة اللي أضفناها عشانك</p>
                 </div>
               </div>

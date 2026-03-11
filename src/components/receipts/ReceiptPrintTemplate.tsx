@@ -922,7 +922,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
             </div>
           </div>
           <div style="text-align: center; margin-top: 6px; font-size: 6pt; color: #6b7280;">
-            جميع الحقوق محفوظة © ${new Date().getFullYear()} iRecycle • الإصدار 2.0.0 • وثيقة محمية بتقنية SHA-256
+            جميع الحقوق محفوظة © ${new Date().getFullYear()} iRecycle • الإصدار 3.0.0 • وثيقة محمية بتقنية SHA-256
           </div>
         </div>
       </div>

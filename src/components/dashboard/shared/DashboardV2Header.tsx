@@ -32,7 +32,7 @@ const DashboardV2Header = memo(({ userName, orgName, orgLabel, icon: Icon, gradi
           </h1>
           <div className="flex items-center gap-2 justify-end mt-0.5">
             <Badge variant="outline" className="text-[10px] px-2 py-0 h-5 gap-1 border-primary/20 text-primary">
-              <Sparkles className="w-2.5 h-2.5" /> v2.0
+              <Sparkles className="w-2.5 h-2.5" /> v3.0
             </Badge>
             {orgName && (
               <p className="text-sm text-muted-foreground flex items-center gap-1.5">
