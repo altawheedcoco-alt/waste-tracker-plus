@@ -174,7 +174,7 @@ export default {
   			'float-slow': 'float-slow 4s ease-in-out infinite',
   			'float-delayed': 'float-delayed 5s ease-in-out 1s infinite',
   			'hero-zoom': 'hero-zoom 8s ease-out forwards',
-  			ticker: 'ticker 90s linear infinite',
+  			ticker: 'ticker 120s linear infinite',
   			'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
   		},
   		boxShadow: {
