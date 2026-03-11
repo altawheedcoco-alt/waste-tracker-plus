@@ -127,7 +127,7 @@ const PlatformShowcase = memo(() => {
         </motion.div>
 
         {/* Showcase Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
           {showcaseItems.map((item, index) => (
             <motion.div
               key={item.titleAr}
@@ -135,18 +135,18 @@ const PlatformShowcase = memo(() => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.08, duration: 0.5 }}
-              className="group relative bg-card border border-border/50 rounded-2xl p-5 sm:p-6 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
+              className="group relative bg-card border border-border/50 rounded-xl sm:rounded-2xl p-3.5 sm:p-6 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 hover:-translate-y-1"
             >
               {/* Icon */}
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                <item.icon className="w-6 h-6 text-white" />
+              <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-gradient-to-br ${item.gradient} flex items-center justify-center mb-2.5 sm:mb-4 shadow-lg group-hover:scale-110 transition-transform duration-300`}>
+                <item.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
               </div>
 
               {/* Content */}
-              <h3 className="text-base sm:text-lg font-bold text-foreground mb-2 group-hover:text-primary transition-colors">
+              <h3 className="text-sm sm:text-lg font-bold text-foreground mb-1 sm:mb-2 group-hover:text-primary transition-colors leading-tight">
                 {isAr ? item.titleAr : item.titleEn}
               </h3>
-              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed mb-4">
+              <p className="text-[10px] sm:text-sm text-muted-foreground leading-relaxed mb-2 sm:mb-4 line-clamp-3 sm:line-clamp-none">
                 {isAr ? item.descAr : item.descEn}
               </p>
 
