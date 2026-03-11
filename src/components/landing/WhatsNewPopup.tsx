@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 
-const POPUP_KEY = 'irecycle_whats_new_v2';
+const POPUP_KEY = 'irecycle_whats_new_v3';
 
 const highlights = [
-  { icon: Rocket, title: 'الإصدار 2.0', desc: 'هوية بصرية جديدة بالكامل مع تحسينات شاملة في الأداء والتجربة', color: 'from-primary to-[hsl(200,75%,45%)]' },
+  { icon: Rocket, title: 'الإصدار 3.0', desc: 'هوية بصرية جديدة بالكامل مع تحسينات شاملة في الأداء والتجربة', color: 'from-primary to-[hsl(200,75%,45%)]' },
   { icon: Users, title: 'منصة عُمالنا', desc: 'نظام توظيف متكامل — قدّم على وظائف أو انشر فرص عمل', color: 'from-blue-500 to-cyan-500' },
   { icon: Award, title: 'دليل الاستشاريين', desc: 'اعثر على مستشارين بيئيين ومكاتب أيزو معتمدة', color: 'from-[hsl(42,92%,55%)] to-orange-500' },
   { icon: Megaphone, title: 'إعلانات مستهدفة', desc: 'وصّل خدماتك لجمهور القطاع البيئي', color: 'from-purple-500 to-violet-500' },
