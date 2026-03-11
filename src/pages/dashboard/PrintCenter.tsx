@@ -64,6 +64,7 @@ const PrintCenter = () => {
   const { organization, profile } = useAuth();
   const navigate = useNavigate();
   const orgId = organization?.id;
+  const { logPrint } = usePrintTracking();
 
   const [dateMode, setDateMode] = useState<'today' | 'range'>('range');
   const [dateFrom, setDateFrom] = useState(format(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), 'yyyy-MM-dd'));
