@@ -111,7 +111,7 @@ import { getOrgChains } from '@/config/actionChainsRegistry';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
-import AccountSwitcher from './AccountSwitcher';
+import AccountSwitcher, { AdminOrgSwitcherButton } from './AccountSwitcher';
 import { usePartnersCount } from '@/hooks/usePartnersCount';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useNotificationCounts } from '@/hooks/useNotificationCounts';
