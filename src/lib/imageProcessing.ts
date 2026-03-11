@@ -412,7 +412,7 @@ export async function processReceiptImage(
 
     // 5. زيادة الحدة
     if (doSharpen) {
-      imageData = sharpen(imageData, 0.5);
+      imageData = sharpen(imageData, 0.8);
       processingSteps.push('زيادة الحدة');
     }
 
