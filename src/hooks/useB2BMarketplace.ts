@@ -49,7 +49,7 @@ export const useB2BListings = (filters?: {
   sellerType?: string;
 }) => {
   const { organization } = useAuth();
-  const myOrgType = (organization?.type as OrgType) || 'generator';
+  const myOrgType = (organization?.organization_type as OrgType) || 'generator';
 
   return useQuery({
     queryKey: ['b2b-listings', myOrgType, filters],
