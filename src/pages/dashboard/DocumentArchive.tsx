@@ -435,13 +435,25 @@ const DocumentArchive = () => {
     }
   };
 
-  const handleView = (doc: ArchiveDoc) => {
-    // Open file directly in new tab if available
-    if (doc.fileUrl) {
-      window.open(doc.fileUrl, '_blank');
-      return;
+  /** Resolve file URL — handles both direct HTTP URLs and storage paths */
+  const resolveFileUrl = async (fileUrl: string): Promise<string | null> => {
+    if (!fileUrl) return null;
+    if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) return fileUrl;
+    const buckets = ['entity-documents', 'pdf-documents', 'shipment-photos', 'organization-documents'];
+    for (const bucket of buckets) {
+      try {
+        const { data } = await supabase.storage.from(bucket).createSignedUrl(fileUrl, 3600);
+        if (data?.signedUrl) return data.signedUrl;
+      } catch { /* try next */ }
     }
-    // Otherwise navigate to source page
+    return null;
+  };
+
+  const handleView = async (doc: ArchiveDoc) => {
+    if (doc.fileUrl) {
+      const url = await resolveFileUrl(doc.fileUrl);
+      if (url) { window.open(url, '_blank'); return; }
+    }
     const url = getDocSourceUrl(doc);
     if (url) navigate(url);
     else toast.info(t('archive.noPreviewAvailable'));
@@ -453,23 +465,29 @@ const DocumentArchive = () => {
     else toast.info(t('archive.noPreviewAvailable'));
   };
 
-  const handleDownload = (doc: ArchiveDoc) => {
+  const handleDownload = async (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
-      const a = document.createElement('a'); a.href = doc.fileUrl; a.download = doc.title || 'document'; a.target = '_blank'; a.click();
-    } else {
-      handleView(doc);
+      const url = await resolveFileUrl(doc.fileUrl);
+      if (url) {
+        const a = document.createElement('a'); a.href = url; a.download = doc.title || 'document'; a.target = '_blank'; a.click();
+        return;
+      }
     }
+    handleView(doc);
   };
 
-  const handlePrint = (doc: ArchiveDoc) => {
+  const handlePrint = async (doc: ArchiveDoc) => {
     if (doc.fileUrl) {
-      const printWindow = window.open(doc.fileUrl, '_blank');
-      if (printWindow) {
-        printWindow.addEventListener('load', () => { printWindow.print(); });
+      const url = await resolveFileUrl(doc.fileUrl);
+      if (url) {
+        const printWindow = window.open(url, '_blank');
+        if (printWindow) {
+          printWindow.addEventListener('load', () => { printWindow.print(); });
+        }
+        return;
       }
-    } else {
-      handleView(doc);
     }
+    handleView(doc);
   };
 
   return (
