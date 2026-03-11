@@ -144,19 +144,17 @@ export const AdminOrgSwitcherButton = ({ collapsed = false }: { collapsed?: bool
   const isAdmin = roles.includes('admin');
   const isViewingAsOrg = !!sessionStorage.getItem('admin_viewing_org');
 
-  if (!isAdmin) return null;
-
   useEffect(() => {
-    if (!open) return;
+    if (!isAdmin || !open) return;
     const fetchAllOrgs = async () => {
       const { data, error } = await supabase
         .from('organizations')
-        .select('id, name, name_ar, organization_type, is_active, is_verified, logo_url')
+        .select('id, name, organization_type, is_active, is_verified, logo_url')
         .order('name');
       if (!error && data) {
         setAllOrganizations(data.map(org => ({
           organization_id: org.id,
-          organization_name: org.name_ar || org.name,
+          organization_name: org.name,
           organization_type: org.organization_type,
           role_in_organization: 'admin',
           is_primary: false,
@@ -167,7 +165,9 @@ export const AdminOrgSwitcherButton = ({ collapsed = false }: { collapsed?: bool
       }
     };
     fetchAllOrgs();
-  }, [open]);
+  }, [isAdmin, open]);
+
+  if (!isAdmin) return null;
 
   const filtered = allOrganizations.filter(org =>
     !search || org.organization_name?.toLowerCase().includes(search.toLowerCase())
