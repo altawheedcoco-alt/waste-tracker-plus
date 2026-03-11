@@ -917,7 +917,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
               </div>
             </div>
             <div style="text-align: center;">
-              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=2.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
+              <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=3.0.0`)}" alt="QR" style="width: 45px; height: 45px;" />
               <p style="font-size: 6pt; margin-top: 2px;">امسح للتحقق</p>
             </div>
           </div>
