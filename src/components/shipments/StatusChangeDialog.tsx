@@ -184,8 +184,16 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
+  const rolePhases: Record<string, string[]> = {
+    generator: ['transporter'],
+    transporter: ['transporter'],
+    recycler: ['recycler'],
+    disposal: ['disposal'],
+    admin: ['transporter', 'recycler', 'disposal'],
+  };
+  const allowedPhases = rolePhases[organizationType] || rolePhases.admin;
   const availableStatuses = manualOverride 
-    ? allStatuses.filter(s => s.key !== shipment.status) 
+    ? allStatuses.filter(s => s.key !== shipment.status && allowedPhases.includes(s.phase)) 
     : getAvailableNextStatuses(shipment.status, organizationType);
   const canChange = manualOverride || canChangeStatus(shipment.status, organizationType);
 
