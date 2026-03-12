@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
 import { Scale, Trash2, Factory, Stethoscope, Monitor, Wheat, Building, ChevronDown } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import PageNavBar from "@/components/ui/page-nav-bar";
 
 const Footer = lazy(() => import("@/components/Footer"));
 
