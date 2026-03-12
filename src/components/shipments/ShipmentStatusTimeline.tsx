@@ -634,45 +634,112 @@ const ShipmentStatusTimeline = ({
         ))}
       </div>
 
-      {/* Summary Stats */}
-      <div className="pt-3 border-t space-y-2">
-        {(declarations.length > 0 || receipts.length > 0) && (
-          <div className="flex flex-wrap gap-1.5 justify-end">
-            {declarations.length > 0 && (
-              <Badge variant="secondary" className="gap-1 text-[10px]">
-                <FileText className="w-3 h-3" />
-                {declarations.length} إقرار
-              </Badge>
-            )}
-            {receipts.length > 0 && (
-              <Badge variant="secondary" className="gap-1 text-[10px]">
-                <Receipt className="w-3 h-3" />
-                {receipts.length} شهادة استلام
-              </Badge>
-            )}
-            <Badge variant="secondary" className="gap-1 text-[10px]">
-              <ShieldCheck className="w-3 h-3" />
-              {logEntries.length} سجل
-            </Badge>
-          </div>
-        )}
+      {/* Document Chain Summary */}
+      {(() => {
+        // Deduplicate: keep only the latest declaration per type
+        const declByType = new Map<string, Declaration>();
+        for (const d of declarations) {
+          const existing = declByType.get(d.declaration_type);
+          if (!existing || new Date(d.declared_at) > new Date(existing.declared_at)) {
+            declByType.set(d.declaration_type, d);
+          }
+        }
+        const uniqueDeclarations = Array.from(declByType.values());
 
-        {/* Progress */}
-        <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">
-            {currentStatusIndex + 1} من {timelineSteps.length}
-          </span>
-          <span className="font-medium">تقدم الشحنة</span>
-        </div>
-        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-          <motion.div
-            initial={{ width: 0 }}
-            animate={{ width: `${((currentStatusIndex + 1) / timelineSteps.length) * 100}%` }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="h-full bg-gradient-to-l from-primary to-green-500 rounded-full"
-          />
-        </div>
-      </div>
+        // Deduplicate receipts: keep only latest per status (confirmed vs pending)
+        const confirmedReceipts = receipts.filter(r => r.status === 'confirmed');
+        const pendingReceipts = receipts.filter(r => r.status !== 'confirmed');
+        const latestConfirmed = confirmedReceipts.length > 0 ? confirmedReceipts[confirmedReceipts.length - 1] : null;
+        const latestPending = pendingReceipts.length > 0 ? pendingReceipts[pendingReceipts.length - 1] : null;
+        const uniqueReceiptCount = (latestConfirmed ? 1 : 0) + (latestPending ? 1 : 0);
+
+        // Filter logs to only meaningful status changes (not auto-progress)
+        const meaningfulLogs = logEntries.filter(l => !l.notes?.includes('تقدم تلقائي'));
+
+        const documentChain = [
+          { key: 'generator_handover', label: 'إقرار المولّد', icon: FileText },
+          { key: 'generator_delivery', label: 'إقرار المولّد', icon: FileText },
+          { key: 'transporter_delivery', label: 'إقرار الناقل', icon: FileText },
+          { key: 'recycler_receipt', label: 'إقرار المدوّر', icon: FileText },
+        ];
+        // Only show unique types that exist
+        const shownTypes = new Set<string>();
+        const filteredChain = documentChain.filter(dc => {
+          const decl = declByType.get(dc.key);
+          if (!decl) return false;
+          // Merge generator_handover and generator_delivery
+          const normalizedKey = dc.key === 'generator_handover' ? 'generator' : dc.key === 'generator_delivery' ? 'generator' : dc.key;
+          if (shownTypes.has(normalizedKey)) return false;
+          shownTypes.add(normalizedKey);
+          return true;
+        });
+
+        return (
+          <div className="pt-3 border-t space-y-3">
+            {/* Document Chain Status */}
+            {(filteredChain.length > 0 || uniqueReceiptCount > 0) && (
+              <div className="space-y-1.5">
+                <p className="text-[11px] font-bold text-right text-muted-foreground">سلسلة المستندات</p>
+                <div className="flex flex-wrap gap-1.5 justify-end">
+                  {filteredChain.map(dc => {
+                    const decl = declByType.get(dc.key)!;
+                    const isConfirmed = decl.status === 'confirmed' || decl.status === 'active';
+                    return (
+                      <Badge
+                        key={dc.key}
+                        variant="outline"
+                        className={cn(
+                          "gap-1 text-[10px] px-2",
+                          isConfirmed
+                            ? "border-emerald-500/50 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/50"
+                            : "border-amber-500/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-700/50"
+                        )}
+                      >
+                        {isConfirmed ? <CheckCircle2 className="w-3 h-3" /> : <Clock className="w-3 h-3" />}
+                        {dc.label}
+                      </Badge>
+                    );
+                  })}
+                  {latestConfirmed && (
+                    <Badge variant="outline" className="gap-1 text-[10px] px-2 border-emerald-500/50 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/50">
+                      <CheckCircle2 className="w-3 h-3" />
+                      شهادة استلام
+                    </Badge>
+                  )}
+                  {latestPending && !latestConfirmed && (
+                    <Badge variant="outline" className="gap-1 text-[10px] px-2 border-amber-500/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-700/50">
+                      <Clock className="w-3 h-3" />
+                      شهادة استلام
+                    </Badge>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Minimal stats row */}
+            <div className="flex items-center justify-between">
+              <Badge variant="secondary" className="gap-1 text-[10px]">
+                <ShieldCheck className="w-3 h-3" />
+                {meaningfulLogs.length} تغيير حالة
+              </Badge>
+              <div className="flex items-center gap-2 text-xs">
+                <span className="text-muted-foreground">{currentStatusIndex + 1} من {timelineSteps.length}</span>
+                <span className="font-medium">تقدم الشحنة</span>
+              </div>
+            </div>
+
+            {/* Progress bar */}
+            <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
+              <motion.div
+                initial={{ width: 0 }}
+                animate={{ width: `${((currentStatusIndex + 1) / timelineSteps.length) * 100}%` }}
+                transition={{ duration: 0.5, ease: "easeOut" }}
+                className="h-full bg-gradient-to-l from-primary to-green-500 rounded-full"
+              />
+            </div>
+          </div>
+        );
+      })()}
     </div>
   );
 
