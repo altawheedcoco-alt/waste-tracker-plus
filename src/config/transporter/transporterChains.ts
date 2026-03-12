@@ -113,6 +113,7 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
       descriptionEn: 'From recycler rejection to rescheduling or return to generator',
       nodes: [
         { id: 'btn-rejection-received', nodeType: 'trigger', labelAr: 'استلام رفض', labelEn: 'Rejection Received', bindingType: 'partner', icon: 'AlertTriangle', linkedPath: '/dashboard/rejected-shipments' },
+        { id: 'fn-upload-rejection-photos', nodeType: 'function', labelAr: 'رفع صور الشحنة المرفوضة', labelEn: 'Upload Rejection Photos', bindingType: 'internal', icon: 'Camera', leadsTo: ['fn-assess-rejection'] },
         { id: 'fn-assess-rejection', nodeType: 'function', labelAr: 'تقييم سبب الرفض', labelEn: 'Assess Rejection Reason', bindingType: 'hybrid', icon: 'Search', leadsTo: ['fn-fraud-assessment'] },
         { id: 'fn-fraud-assessment', nodeType: 'function', labelAr: 'فحص التلاعب والاحتيال', labelEn: 'Fraud Assessment Check', bindingType: 'hybrid', icon: 'ShieldAlert', leadsTo: ['fn-decide-action', 'eff-fraud-flag'], linkedTab: 'fraud' },
         { id: 'fn-decide-action', nodeType: 'function', labelAr: 'قرار المعالجة', labelEn: 'Decide Action', bindingType: 'internal', icon: 'GitBranch', leadsTo: ['res-redirect', 'res-return', 'res-marketplace-list'] },
