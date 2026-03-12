@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { autoCreateReceipt } from '@/utils/autoReceiptCreator';
 import { useAuth } from '@/contexts/AuthContext';
