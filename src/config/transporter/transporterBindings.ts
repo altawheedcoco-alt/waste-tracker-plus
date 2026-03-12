@@ -4,8 +4,10 @@
  * 
  * التصحيحات المطبقة:
  * - transporter-certs: hybrid → admin (شهادات حكومية)
- * - OHS: فصل العمليات الداخلية (internal) عن التقارير الرقابية (admin)
- *   النتيجة: hybrid (يجمع كلا البعدين)
+ * - annual_plan: hybrid → admin (التزام تقريري موجه للرقيب)
+ * - ohs: hybrid → admin (خاضع لمعايير امتثال صارمة)
+ * - transporter-guilloche: internal → admin (أمان شهادات مرئي للرقيب)
+ * - smart-weight-upload: internal → hybrid (مرتبط بوزن الشحنة)
  * - risk: partner → hybrid (مرئي للرقيب)
  * - declarations: توحيد كـ admin
  */
