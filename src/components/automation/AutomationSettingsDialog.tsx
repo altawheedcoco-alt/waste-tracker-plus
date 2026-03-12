@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Dialog,
@@ -430,12 +431,19 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
           <Button 
             variant="outline" 
             size="sm"
-            className="bg-gradient-to-r from-primary/10 to-amber-500/10 border-primary/30 hover:border-primary gap-2"
+            className={cn(
+              "gap-2 transition-all",
+              enabledCount > 0 
+                ? "bg-gradient-to-r from-primary/10 to-emerald-500/10 border-primary/30 hover:border-primary" 
+                : "bg-gradient-to-r from-primary/10 to-amber-500/10 border-primary/30 hover:border-primary"
+            )}
           >
-            <Zap className="h-4 w-4 text-primary" />
-            تفعيل الإجراءات التلقائية
+            <Zap className={cn("h-4 w-4", enabledCount > 0 ? "text-emerald-500" : "text-primary")} />
+            {enabledCount > 0 ? 'الإجراءات التلقائية' : 'تفعيل الإجراءات التلقائية'}
             {enabledCount > 0 && (
-              <Badge variant="secondary" className="mr-1">{enabledCount}</Badge>
+              <Badge variant="secondary" className="mr-1 text-[10px] px-1.5 py-0">
+                {enabledCount}/{totalCount}
+              </Badge>
             )}
           </Button>
         )}
