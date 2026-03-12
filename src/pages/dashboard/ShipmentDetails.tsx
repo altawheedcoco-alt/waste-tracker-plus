@@ -586,7 +586,7 @@ const ShipmentDetailsPage = () => {
       {/* Dialogs */}
       <Suspense fallback={null}>
         {showPrintDialog && <ShipmentQuickPrint isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipmentId={shipmentId || ''} />}
-        {showStatusDialog && <ShipmentStatusDialog isOpen={showStatusDialog} onClose={() => setShowStatusDialog(false)} shipment={shipment} onStatusChanged={fetchShipmentDetails} />}
+        
         {showLiveTracking && shipment.driver_id && (
           <LiveTrackingMapDialog isOpen={showLiveTracking} onClose={() => setShowLiveTracking(false)} driverId={shipment.driver_id} shipmentNumber={shipment.shipment_number} pickupAddress={shipment.pickup_address} deliveryAddress={shipment.delivery_address} shipmentStatus={shipment.status} />
         )}
