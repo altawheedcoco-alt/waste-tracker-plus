@@ -219,11 +219,7 @@ const ShipmentDetailsPage = () => {
                 />
               )}
             </Suspense>
-            {canChangeStatus(mapLegacyStatus(shipment.status), (organization?.organization_type || 'generator') as any) && (
-              <Button variant="outline" size="sm" onClick={() => setShowStatusDialog(true)}>
-                <Edit className="ml-1.5 h-4 w-4" />{t('shipmentDetails.changeStatus')}
-              </Button>
-            )}
+            </Suspense>
             <Button variant="eco" size="sm" onClick={() => setShowPrintDialog(true)}>
               <Printer className="ml-1.5 h-4 w-4" />{t('shipmentDetails.printPdf')}
             </Button>
