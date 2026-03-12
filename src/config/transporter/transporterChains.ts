@@ -72,9 +72,11 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
         { id: 'btn-add-driver', nodeType: 'trigger', labelAr: 'تسجيل سائق جديد', labelEn: 'Register New Driver', bindingType: 'internal', icon: 'UserPlus', linkedPath: '/dashboard/transporter-drivers' },
         { id: 'fn-permit-check', nodeType: 'function', labelAr: 'فحص التصاريح', labelEn: 'Check Permits', bindingType: 'admin', icon: 'Shield', leadsTo: ['fn-training'] },
         { id: 'fn-training', nodeType: 'function', labelAr: 'التدريب والأكاديمية', labelEn: 'Training & Academy', bindingType: 'internal', icon: 'GraduationCap', leadsTo: ['res-certified'], linkedPath: '/dashboard/driver-academy' },
-        { id: 'res-certified', nodeType: 'result', labelAr: 'سائق معتمد', labelEn: 'Certified Driver', bindingType: 'internal', icon: 'BadgeCheck', leadsTo: ['eff-performance', 'eff-rewards'] },
+        { id: 'res-certified', nodeType: 'result', labelAr: 'سائق معتمد', labelEn: 'Certified Driver', bindingType: 'internal', icon: 'BadgeCheck', leadsTo: ['eff-performance', 'eff-rewards', 'eff-license-update', 'eff-ai-pattern'] },
         { id: 'eff-performance', nodeType: 'effect', labelAr: 'تتبع الأداء', labelEn: 'Track Performance', bindingType: 'internal', icon: 'BarChart3', linkedTab: 'performance' },
         { id: 'eff-rewards', nodeType: 'effect', labelAr: 'نظام المكافآت', labelEn: 'Rewards System', bindingType: 'internal', icon: 'Trophy', linkedPath: '/dashboard/driver-rewards' },
+        { id: 'eff-license-update', nodeType: 'effect', labelAr: 'تحديث التراخيص والامتثال', labelEn: 'Update Licenses & Compliance', bindingType: 'admin', icon: 'ShieldCheck', linkedTab: 'compliance', affects: ['compliance-chain'] },
+        { id: 'eff-ai-pattern', nodeType: 'effect', labelAr: 'تحليل أنماط القيادة بالذكاء الاصطناعي', labelEn: 'AI Driving Pattern Analysis', bindingType: 'internal', icon: 'Brain', linkedTab: 'ai' },
       ],
     },
 
