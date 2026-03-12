@@ -319,11 +319,19 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
     ? settings 
     : settings.filter(s => s.category !== 'admin_control');
 
+  // Load settings on mount so the button reflects saved state
+  useEffect(() => {
+    if (organization?.id) {
+      loadSettings();
+    }
+  }, [organization?.id]);
+
+  // Reload when dialog opens to get latest
   useEffect(() => {
     if (open && organization?.id) {
       loadSettings();
     }
-  }, [open, organization?.id]);
+  }, [open]);
 
   const loadSettings = async () => {
     if (!organization?.id) return;
