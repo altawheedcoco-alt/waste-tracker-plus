@@ -230,7 +230,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-receipts': 'hybrid',
   'transporter-declarations': 'admin',
   'transporter-certs': 'admin',        // ✅ تصحيح: شهادات حكومية → admin
-  'transporter-guilloche': 'internal',
+  'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
   'manual-shipment-drafts': 'internal',
