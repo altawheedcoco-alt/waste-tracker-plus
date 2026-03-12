@@ -327,11 +327,11 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
   const loadSettings = async () => {
     if (!organization?.id) return;
     try {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from('organization_automation_settings' as any)
         .select('settings')
         .eq('organization_id', organization.id)
-        .maybeSingle();
+        .maybeSingle() as any);
       
       if (data?.settings && typeof data.settings === 'object') {
         const saved = data.settings as Record<string, boolean>;
