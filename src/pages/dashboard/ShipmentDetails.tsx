@@ -219,7 +219,6 @@ const ShipmentDetailsPage = () => {
                 />
               )}
             </Suspense>
-            </Suspense>
             <Button variant="eco" size="sm" onClick={() => setShowPrintDialog(true)}>
               <Printer className="ml-1.5 h-4 w-4" />{t('shipmentDetails.printPdf')}
             </Button>
