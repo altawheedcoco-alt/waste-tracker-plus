@@ -784,61 +784,73 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
       const statusConfig = getStatusConfig(selectedStatus);
       const dbStatus = mapToDbStatus(selectedStatus as ShipmentStatus);
       const statusLabel = statusConfig?.labelAr || selectedStatus;
-      const updateData: any = { status: dbStatus, updated_at: new Date().toISOString() };
-      if (notes) updateData.notes = notes;
-      if (dbStatus === 'in_transit') updateData.in_transit_at = new Date().toISOString();
-      if (dbStatus === 'delivered') updateData.delivered_at = new Date().toISOString();
-      if (dbStatus === 'confirmed') updateData.confirmed_at = new Date().toISOString();
-      if (pickupPhotoUrl) updateData.weighbridge_pickup_url = pickupPhotoUrl;
-      if (deliveryPhotoUrl) updateData.weighbridge_delivery_url = deliveryPhotoUrl;
-      if (receivingPhotoUrl) updateData.weighbridge_receiving_url = receivingPhotoUrl;
-      if (pickupPhotoMeta?.weight) updateData.weighbridge_pickup_weight = pickupPhotoMeta.weight;
-      if (deliveryPhotoMeta?.weight) updateData.weighbridge_delivery_weight = deliveryPhotoMeta.weight;
-      if (receivingPhotoMeta?.weight) updateData.weighbridge_receiving_weight = receivingPhotoMeta.weight;
-      if (recyclerWeight) {
-        updateData.recycler_received_weight = parseFloat(recyclerWeight);
-        const dispute = checkWeightDispute(shipment.quantity || 0, parseFloat(recyclerWeight));
+
+      const updateData: Record<string, any> = { status: dbStatus };
+      const now = new Date().toISOString();
+      const tsFields: Record<string, string> = { approved: 'approved_at', in_transit: 'in_transit_at', delivered: 'delivered_at', confirmed: 'confirmed_at' };
+      if (tsFields[dbStatus]) updateData[tsFields[dbStatus]] = now;
+      if (pickupPhotoUrl) { updateData.pickup_weighbridge_photo_url = pickupPhotoUrl; updateData.pickup_weighbridge_metadata = pickupPhotoMeta; }
+      if (deliveryPhotoUrl) { updateData.delivery_weighbridge_photo_url = deliveryPhotoUrl; updateData.delivery_weighbridge_metadata = deliveryPhotoMeta; }
+      if (receivingPhotoUrl) { updateData.delivery_weighbridge_photo_url = receivingPhotoUrl; updateData.delivery_weighbridge_metadata = receivingPhotoMeta; }
+
+      if (showRecyclerWeightInput && recyclerWeight && shipment.quantity) {
+        const rw = parseFloat(recyclerWeight);
+        const gw = shipment.quantity;
+        const dispute = checkWeightDispute(gw, rw);
         if (dispute.hasDispute) {
-          await createWeightDispute(shipment.id, shipment.quantity || 0, parseFloat(recyclerWeight), dispute);
+          try { await createWeightDispute(shipment.id, organization?.id || '', gw, rw, dispute.differencePercentage); } catch {}
+          toast.warning(`⚠️ فرق الوزن ${dispute.differencePercentage}%`, { duration: 8000 });
+          onStatusChanged?.();
+          setSelectedStatus(null); setExpanded(false); setLoading(false);
+          return;
         }
+        updateData.recycler_received_weight = rw;
+        updateData.generator_declared_weight = gw;
       }
-      if (statusPhotos.length > 0) updateData.status_photos = statusPhotos;
 
-      const { error } = await supabase.from('shipments').update(updateData).eq('id', shipment.id);
-      if (error) throw error;
+      const { error: updateError } = await supabase.from('shipments').update(updateData as any).eq('id', shipment.id);
+      if (updateError) throw updateError;
 
-      await supabase.from('shipment_logs').insert({
-        shipment_id: shipment.id, action: 'status_change',
-        details: { from: shipment.status, to: dbStatus, notes, by: profile?.full_name },
-        performed_by: profile?.id,
-      } as any);
+      const logEntry: any = { shipment_id: shipment.id, status: dbStatus as any, notes: notes || `تم تغيير الحالة إلى ${statusLabel}`, changed_by: profile?.id };
+      if (statusPhotos.length > 0) logEntry.photos = statusPhotos;
+      await supabase.from('shipment_logs').insert([logEntry]);
 
-      try { await autoCreateReceipt(shipment.id, dbStatus); } catch {}
-      try { await recordShipmentStatusChange(shipment.id, shipment.status, dbStatus); } catch {}
-
+      // Auto documents
       try {
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
+        if (['delivered', 'confirmed'].includes(dbStatus)) {
+          const { data: fs } = await supabase.from('shipments').select('recycler_id, transporter_id').eq('id', shipment.id).single();
+          if (fs?.recycler_id) await autoCreateRecyclerDeclaration(shipment.id, fs.recycler_id, profile?.id || '');
+          if (organization?.organization_type === 'transporter') await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        }
+        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+      } catch {}
+
+      // Impact
+      recordShipmentStatusChange(shipment.id, dbStatus, { shipmentNumber: shipment.shipment_number, previousStatus: shipment.status });
+
+      // Notifications
+      try {
+        const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(Boolean) as string[];
         const richData = await fetchRichShipmentData(shipment.id, statusLabel, dbStatus);
         const whatsappText = richData ? buildRichWhatsAppMessage(richData) : `📦 تحديث شحنة ${shipment.shipment_number}: ${statusLabel}`;
         const inAppMessage = richData ? buildRichInAppMessage(richData) : `تم تغيير حالة الشحنة إلى "${statusLabel}"`;
         const notifTitle = `📦 تحديث شحنة ${shipment.shipment_number || ''}`;
-        const buttons = richData ? getStatusButtons(richData) : undefined;
-        const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(Boolean) as string[];
-        for (const orgId of orgIds) {
-          const orgType = resolveOrgType(orgId, shipment as any);
-          await notifyOrganizationMembers(orgId, {
-            title: notifTitle, body: inAppMessage, type: 'shipment_update',
-            resource_id: shipment.id, resource_type: 'shipment',
-            whatsapp_message: whatsappText,
-            action_buttons: buttons,
-            metadata: { shipment_number: shipment.shipment_number, new_status: dbStatus, org_role: orgType },
-          });
-        }
+        await Promise.allSettled(orgIds.map(async (orgId) => {
+          const orgType = resolveOrgType(orgId, shipment.generator_id, shipment.transporter_id, shipment.recycler_id);
+          const buttons = getStatusButtons(dbStatus, shipment.id, orgType);
+          const { data: members } = await supabase.from('profiles').select('id').eq('organization_id', orgId);
+          const memberIds = (members || []).map((m: any) => m.id).filter((id: string) => !profile?.id || id !== profile.id);
+          if (memberIds.length > 0) {
+            await supabase.from('notifications').insert(memberIds.map((uid: string) => ({ user_id: uid, title: notifTitle, message: inAppMessage, type: 'shipment_status', is_read: false, reference_id: shipment.id, reference_type: 'shipment' })));
+            await supabase.functions.invoke('whatsapp-send', { body: { action: 'broadcast_to_users', user_ids: memberIds, message_text: whatsappText, organization_id: orgId, notification_type: 'shipment_status', interactive_buttons: buttons, metadata: { shipment_id: shipment.id, shipment_number: shipment.shipment_number, new_status: dbStatus, direct_link: richData?.direct_link } } });
+          }
+        }));
       } catch {}
 
-      toast.success(`تم تغيير الحالة إلى "${statusConfig?.labelAr}"`);
-      setSelectedStatus(null);
-      setNotes('');
-      setExpanded(false);
+      toast.success(`تم تحديث الحالة إلى "${statusLabel}"`);
+      setSelectedStatus(null); setNotes(''); setExpanded(false);
       onStatusChanged?.();
     } catch (err: any) {
       toast.error(err.message || 'فشل في تحديث الحالة');
