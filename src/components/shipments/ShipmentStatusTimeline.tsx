@@ -88,6 +88,8 @@ interface ShipmentStatusTimelineProps {
     confirmed_at?: string | null;
     destination_type?: string | null;
   };
+  /** نوع الجهة المشاهدة — يتحكم بالمراحل المعروضة */
+  orgType?: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   showCard?: boolean;
   showProgressMilestones?: boolean;
   onRefresh?: () => void;
@@ -145,6 +147,7 @@ const getTimestampForLegacyStatus = (
 
 const ShipmentStatusTimeline = ({ 
   shipment, 
+  orgType,
   showCard = true, 
   showProgressMilestones = true,
   onRefresh,
@@ -163,21 +166,27 @@ const ShipmentStatusTimeline = ({
   const timelineSteps = useMemo(() => {
     const currentConfig = getStatusConfig(currentDetailedStatus);
     
+    // الناقل والسائق والمولد يرون فقط مرحلة النقل
+    // مراحل التدوير/التخلص خاصة بالمدور/جهة التخلص فقط
+    const viewerIsTransporterSide = !orgType || ['generator', 'transporter', 'driver'].includes(orgType);
+    
     // Always show transporter phase
     const steps: StatusConfig[] = [...transporterStatuses];
     
-    // Determine if destination is disposal or recycler
-    const isDisposal = shipment.destination_type === 'disposal' || 
-                       currentConfig?.phase === 'disposal';
-    
-    if (isDisposal) {
-      steps.push(...disposalStatuses);
-    } else {
-      steps.push(...recyclerStatuses);
+    // Only add recycler/disposal phases if the viewer is recycler/disposal/admin
+    if (!viewerIsTransporterSide) {
+      const isDisposal = shipment.destination_type === 'disposal' || 
+                         currentConfig?.phase === 'disposal';
+      
+      if (isDisposal) {
+        steps.push(...disposalStatuses);
+      } else {
+        steps.push(...recyclerStatuses);
+      }
     }
     
     return steps;
-  }, [currentDetailedStatus, shipment.destination_type]);
+  }, [currentDetailedStatus, shipment.destination_type, orgType]);
 
   // Find the current status index in the timeline
   const currentStatusIndex = useMemo(() => {
