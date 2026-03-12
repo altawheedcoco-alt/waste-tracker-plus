@@ -583,21 +583,28 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           {canChange && availableStatuses.length > 0 ? (
             <div className="text-right">
               <Label className="text-sm text-muted-foreground mb-3 block">اختر الحالة الجديدة</Label>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                {availableStatuses.map((status) => renderStatusButton(status, true))}
+              <div className="flex items-start gap-1 overflow-x-auto pb-2">
+                {availableStatuses.map((status, i) => (
+                  <div key={status.key} className="flex items-center">
+                    {renderStatusButton(status, true)}
+                    {i < availableStatuses.length - 1 && (
+                      <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mx-0.5" />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <div className="text-center py-6 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground">
               {currentStatusConfig?.key === 'completed' ? (
                 <>
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-2 text-emerald-500" />
-                  <p>هذه الشحنة مكتملة ولا يمكن تغيير حالتها</p>
+                  <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-emerald-500" />
+                  <p className="text-sm">هذه الشحنة مكتملة</p>
                 </>
               ) : (
                 <>
-                  <Lock className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                  <p>ليس لديك صلاحية لتغيير حالة هذه الشحنة</p>
+                  <Lock className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm">ليس لديك صلاحية لتغيير حالة هذه الشحنة</p>
                 </>
               )}
             </div>
