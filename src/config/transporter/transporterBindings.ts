@@ -271,7 +271,7 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'employees': 'internal',
   'org-structure': 'internal',
   'my-requests': 'hybrid',
-  'activity-log': 'admin',
+  'activity-log': 'internal',                // ✅ تصحيح: سجل نشاط داخلي لمراقبة أداء الموظفين
   'qr-scanner': 'hybrid',
   'pride-certificates': 'hybrid',
 };
