@@ -203,12 +203,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'إقرارات رسمية للجهات الرقابية',
   },
 
-  // ── الخطة السنوية: هجين ──
+  // ── الخطة السنوية: رقابي (التزام تقريري موجه للجهة التنظيمية) ──
   annual_plan: {
-    type: 'hybrid',
+    type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'خطة تشغيلية سنوية مرتبطة بالامتثال',
+    contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
   },
 
   // ── السلامة المهنية: هجين (عمليات داخلية + تقارير حوادث رقابية) ──
