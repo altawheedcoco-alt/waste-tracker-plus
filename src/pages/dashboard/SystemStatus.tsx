@@ -193,6 +193,13 @@ const SystemStatus = () => {
           </TabsTrigger>
         </TabsList>
 
+        {/* AI Health Tab */}
+        <TabsContent value="ai-health" className="mt-6">
+          <Suspense fallback={<div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto" /><p className="mt-2 text-muted-foreground">جارٍ التحميل...</p></div>}>
+            <AIHealthReport />
+          </Suspense>
+        </TabsContent>
+
         {/* Live Monitor Tab */}
         <TabsContent value="live-monitor" className="mt-6">
           <LiveHealthDashboard />
