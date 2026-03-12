@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Factory, Gauge, TrendingUp, Package, Zap, Droplets, Flame, BarChart3 } from "lucide-react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const ProductionDashboard = () => {
   const productionLines = [
