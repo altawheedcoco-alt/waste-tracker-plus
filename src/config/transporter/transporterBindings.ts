@@ -142,11 +142,11 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
 
   // ── الشركاء: شركاء ──
   partners: {
-    type: 'partner',
-    involvedParties: ['self', 'generator', 'recycler', 'disposal'],
+    type: 'hybrid',
+    involvedParties: ['self', 'generator', 'recycler', 'disposal', 'admin'],
     adminVisible: true,
     requiresPartner: true,
-    contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة',
+    contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة بما فيها الجهات الرقابية',
   },
 
   // ── التتبع: داخلي (تتبع السائقين) ──
