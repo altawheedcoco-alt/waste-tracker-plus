@@ -254,7 +254,7 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'driver-tracking': 'internal',
   'register-deposit': 'partner',
   'transporter-receipts': 'hybrid',
-  'smart-weight-upload': 'internal',
+  'smart-weight-upload': 'hybrid',         // ✅ تصحيح: مرتبط بالوزن في سلسلة الشحنة
   'collection-requests': 'partner',
   'transporter-drivers': 'internal',
   'quick-shipment-links': 'partner',
