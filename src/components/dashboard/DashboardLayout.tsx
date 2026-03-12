@@ -812,6 +812,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Theme Customizer - Hidden on mobile */}
               {!isMobile && <ThemeCustomizer />}
 
+              {/* My Shipments */}
+              <MyShipmentsButton />
+
               {/* Notifications Dropdown */}
               <NotificationDropdown />
 
