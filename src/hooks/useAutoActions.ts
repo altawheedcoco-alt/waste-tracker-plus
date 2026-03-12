@@ -102,7 +102,9 @@ export const useAutoActions = (organizationId: string | undefined) => {
       return data as unknown as AutoActionsSettings;
     },
     enabled: !!organizationId,
-    staleTime: 0, // Always refetch to ensure latest state
+    staleTime: 0, // Always refetch to ensure latest state from DB
+    refetchOnWindowFocus: true, // Re-sync when user returns to tab
+    refetchOnMount: 'always', // Always check DB on mount
   });
 
   const updateMutation = useMutation({
