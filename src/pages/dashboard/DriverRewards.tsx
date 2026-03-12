@@ -154,6 +154,7 @@ const DriverRewards = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 

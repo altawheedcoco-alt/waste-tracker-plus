@@ -31,7 +31,9 @@ const ProductionDashboard = () => {
   ];
 
   return (
+    <DashboardLayout>
     <div className="p-4 md:p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Factory className="h-7 w-7 text-primary" />

@@ -96,6 +96,9 @@ const Laws = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="pt-24 pb-16">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <PageNavBar className="mb-4" />
+        </div>
         {/* Hero */}
         <section className="relative overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-background to-primary/3" />

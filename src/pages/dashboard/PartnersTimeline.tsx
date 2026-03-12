@@ -160,6 +160,7 @@ const PartnersTimeline = () => {
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-6">
+        <BackButton />
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>

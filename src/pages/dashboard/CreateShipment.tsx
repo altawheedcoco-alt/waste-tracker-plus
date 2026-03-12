@@ -36,9 +36,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <BackButton />
           <div>
             <h1 className="text-2xl font-bold">{t('shipments.createNewShipment')}</h1>
             <p className="text-muted-foreground">{t('shipments.createNewShipmentDesc')}</p>

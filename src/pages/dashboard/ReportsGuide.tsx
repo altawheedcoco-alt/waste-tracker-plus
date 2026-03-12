@@ -144,6 +144,7 @@ const ReportsGuide = () => {
   return (
     <DashboardLayout>
       <div className={cn("max-w-5xl mx-auto", isMobile ? "p-4" : "p-6")}>
+        <BackButton />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
