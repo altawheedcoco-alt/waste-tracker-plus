@@ -149,12 +149,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة بما فيها الجهات الرقابية',
   },
 
-  // ── التتبع: داخلي (تتبع السائقين) ──
+  // ── التتبع: هجين (تتبع السائقين مع ربط بالتراخيص الجغرافية) ──
   tracking: {
-    type: 'internal',
-    involvedParties: ['self', 'driver'],
-    adminVisible: false,
-    contextHint: 'تتبع مواقع السائقين والمركبات لحظياً',
+    type: 'hybrid',
+    involvedParties: ['self', 'driver', 'regulator'],
+    adminVisible: true,
+    contextHint: 'تتبع مواقع السائقين والمركبات لحظياً مع التحقق من التصاريح الجغرافية',
   },
 
   // ── السياج الجغرافي: هجين (مرتبط بطلبات الجمع والمسارات) ──
