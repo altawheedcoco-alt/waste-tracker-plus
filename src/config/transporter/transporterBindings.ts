@@ -213,12 +213,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
   },
 
-  // ── السلامة المهنية: رقابي (خاضع لمعايير الامتثال الصارمة) ──
+  // ── السلامة المهنية: هجين (عمليات يومية داخلية + رفع للجهات الرقابية) ──
   ohs: {
-    type: 'admin',
+    type: 'hybrid',
     involvedParties: ['self', 'driver', 'regulator'],
     adminVisible: true,
-    contextHint: 'إدارة السلامة والصحة المهنية خاضعة لمعايير امتثال رقابية',
+    contextHint: 'إدارة السلامة والصحة المهنية: عمليات يومية داخلية مع إفصاح رقابي',
   },
 };
 
