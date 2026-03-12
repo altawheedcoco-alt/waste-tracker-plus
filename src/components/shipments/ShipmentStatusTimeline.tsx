@@ -657,22 +657,26 @@ const ShipmentStatusTimeline = ({
         const meaningfulLogs = logEntries.filter(l => !l.notes?.includes('تقدم تلقائي'));
 
         const documentChain = [
-          { key: 'generator_handover', label: 'إقرار المولّد', icon: FileText },
-          { key: 'generator_delivery', label: 'إقرار المولّد', icon: FileText },
-          { key: 'transporter_delivery', label: 'إقرار الناقل', icon: FileText },
-          { key: 'recycler_receipt', label: 'إقرار المدوّر', icon: FileText },
+          { key: 'generator_handover', label: 'إقرار المولّد', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
+          { key: 'generator_delivery', label: 'إقرار المولّد', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
+          { key: 'transporter_delivery', label: 'إقرار الناقل', icon: FileText, roles: ['transporter', 'driver', 'admin'] },
+          { key: 'recycler_receipt', label: 'إقرار المدوّر', icon: FileText, roles: ['recycler', 'disposal', 'admin'] },
         ];
-        // Only show unique types that exist
+        // Only show unique types that exist AND are relevant to the viewer
+        const viewerRole = orgType || 'admin';
         const shownTypes = new Set<string>();
         const filteredChain = documentChain.filter(dc => {
+          if (!dc.roles.includes(viewerRole)) return false;
           const decl = declByType.get(dc.key);
           if (!decl) return false;
-          // Merge generator_handover and generator_delivery
           const normalizedKey = dc.key === 'generator_handover' ? 'generator' : dc.key === 'generator_delivery' ? 'generator' : dc.key;
           if (shownTypes.has(normalizedKey)) return false;
           shownTypes.add(normalizedKey);
           return true;
         });
+
+        // Receipt visibility: transporter side sees receipts, recycler side sees receipts
+        const showReceipt = !orgType || ['transporter', 'driver', 'generator', 'recycler', 'disposal', 'admin'].includes(orgType);
 
         return (
           <div className="pt-3 border-t space-y-3">
