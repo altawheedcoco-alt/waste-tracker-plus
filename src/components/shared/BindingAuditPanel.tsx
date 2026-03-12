@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { Brain, Loader2, RefreshCw, X, Sparkles, AlertTriangle, Save, History, ChevronDown } from 'lucide-react';
+import { Brain, Loader2, RefreshCw, X, Sparkles, AlertTriangle, Save, History, ChevronDown, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
@@ -265,6 +265,20 @@ const BindingAuditPanel = ({ orgType, tabs = [], sidebarItems = [], className }:
                     {isLoading && (
                       <Button variant="ghost" size="icon" onClick={cancel} className="h-7 w-7">
                         <AlertTriangle className="w-3.5 h-3.5 text-destructive" />
+                      </Button>
+                    )}
+                    {report && !isLoading && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          navigator.clipboard.writeText(report);
+                          toast.success(language === 'ar' ? 'تم نسخ التقرير' : 'Report copied');
+                        }}
+                        className="h-7 w-7"
+                        title={language === 'ar' ? 'نسخ التقرير' : 'Copy Report'}
+                      >
+                        <Copy className="w-3.5 h-3.5 text-primary" />
                       </Button>
                     )}
                     {report && !isLoading && (
