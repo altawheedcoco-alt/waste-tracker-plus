@@ -146,7 +146,11 @@ const SystemStatus = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <TabsList className="grid grid-cols-10 w-full">
+        <TabsList className="grid grid-cols-11 w-full">
+          <TabsTrigger value="ai-health" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">صحة AI</span>
+          </TabsTrigger>
           <TabsTrigger value="live-monitor" className="flex items-center gap-2">
             <Radio className="w-4 h-4" />
             <span className="hidden sm:inline">مراقبة مباشرة</span>
