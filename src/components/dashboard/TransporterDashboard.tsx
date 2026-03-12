@@ -1,4 +1,4 @@
-import { useState, Suspense } from 'react';
+import { useState, Suspense, lazy } from 'react';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
