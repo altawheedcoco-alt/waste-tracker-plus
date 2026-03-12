@@ -4,8 +4,10 @@
  * 
  * التصحيحات المطبقة:
  * - transporter-certs: hybrid → admin (شهادات حكومية)
- * - OHS: فصل العمليات الداخلية (internal) عن التقارير الرقابية (admin)
- *   النتيجة: hybrid (يجمع كلا البعدين)
+ * - annual_plan: hybrid → admin (التزام تقريري موجه للرقيب)
+ * - ohs: hybrid → admin (خاضع لمعايير امتثال صارمة)
+ * - transporter-guilloche: internal → admin (أمان شهادات مرئي للرقيب)
+ * - smart-weight-upload: internal → hybrid (مرتبط بوزن الشحنة)
  * - risk: partner → hybrid (مرئي للرقيب)
  * - declarations: توحيد كـ admin
  */
@@ -203,20 +205,20 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'إقرارات رسمية للجهات الرقابية',
   },
 
-  // ── الخطة السنوية: هجين ──
+  // ── الخطة السنوية: رقابي (التزام تقريري موجه للجهة التنظيمية) ──
   annual_plan: {
-    type: 'hybrid',
+    type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'خطة تشغيلية سنوية مرتبطة بالامتثال',
+    contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
   },
 
-  // ── السلامة المهنية: هجين (عمليات داخلية + تقارير حوادث رقابية) ──
+  // ── السلامة المهنية: رقابي (خاضع لمعايير الامتثال الصارمة) ──
   ohs: {
-    type: 'hybrid',
+    type: 'admin',
     involvedParties: ['self', 'driver', 'regulator'],
     adminVisible: true,
-    contextHint: 'إدارة السلامة والصحة المهنية مع إفصاحات رقابية',
+    contextHint: 'إدارة السلامة والصحة المهنية خاضعة لمعايير امتثال رقابية',
   },
 };
 
@@ -230,7 +232,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-receipts': 'hybrid',
   'transporter-declarations': 'admin',
   'transporter-certs': 'admin',        // ✅ تصحيح: شهادات حكومية → admin
-  'transporter-guilloche': 'internal',
+  'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
   'manual-shipment-drafts': 'internal',
@@ -254,7 +256,7 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'driver-tracking': 'internal',
   'register-deposit': 'partner',
   'transporter-receipts': 'hybrid',
-  'smart-weight-upload': 'internal',
+  'smart-weight-upload': 'hybrid',         // ✅ تصحيح: مرتبط بالوزن في سلسلة الشحنة
   'collection-requests': 'partner',
   'transporter-drivers': 'internal',
   'quick-shipment-links': 'partner',
