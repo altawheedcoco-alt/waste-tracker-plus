@@ -126,6 +126,7 @@ import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config
 import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import GlobalRefreshButton from './GlobalRefreshButton';
+import MyShipmentsButton from './header/MyShipmentsButton';
 import LiveEventToast from '@/components/notifications/LiveEventToast';
 import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomizer';
 import SidebarCustomizer from '@/components/dashboard/SidebarCustomizer';
