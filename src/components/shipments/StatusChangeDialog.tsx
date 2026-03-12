@@ -51,22 +51,31 @@ import { calculateHaversineDistance } from '@/lib/mapUtils';
 import WeighbridgePhotoUpload from './WeighbridgePhotoUpload';
 import { checkWeightDispute, createWeightDispute } from '@/lib/weightDisputeLogic';
 
+interface StatusChangeShipment {
+  id: string;
+  shipment_number: string;
+  status: string;
+  delivery_latitude?: number | null;
+  delivery_longitude?: number | null;
+  gps_delivery_lat?: number | null;
+  gps_delivery_lng?: number | null;
+  quantity?: number | null;
+  generator_id?: string | null;
+  transporter_id?: string | null;
+  recycler_id?: string | null;
+}
+
 interface StatusChangeDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  shipment: {
-    id: string;
-    shipment_number: string;
-    status: string;
-    delivery_latitude?: number | null;
-    delivery_longitude?: number | null;
-    gps_delivery_lat?: number | null;
-    gps_delivery_lng?: number | null;
-    quantity?: number | null;
-    generator_id?: string | null;
-    transporter_id?: string | null;
-    recycler_id?: string | null;
-  };
+  shipment: StatusChangeShipment;
+  onStatusChanged?: () => void;
+  geofenceRadius?: number;
+}
+
+// Inline version props
+interface InlineStatusChangeProps {
+  shipment: StatusChangeShipment;
   onStatusChanged?: () => void;
   geofenceRadius?: number;
 }
