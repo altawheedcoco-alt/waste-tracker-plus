@@ -40608,6 +40608,10 @@ export type Database = {
         Args: { _post_id: string; _user_id: string }
         Returns: boolean
       }
+      can_access_organization_auto_actions: {
+        Args: { _organization_id: string }
+        Returns: boolean
+      }
       can_access_partner_note: {
         Args: { _note_id: string; _user_id: string }
         Returns: boolean

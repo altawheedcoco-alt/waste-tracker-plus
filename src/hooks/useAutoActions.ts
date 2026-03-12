@@ -108,13 +108,25 @@ export const useAutoActions = (organizationId: string | undefined) => {
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AutoActionsSettings>) => {
       if (!organizationId) throw new Error('No organization');
-      const userId = (await supabase.auth.getUser()).data.user?.id;
+
+      const { data: authData, error: authError } = await supabase.auth.getUser();
+      if (authError || !authData.user) {
+        throw new Error('انتهت الجلسة، يرجى تسجيل الدخول مرة أخرى');
+      }
+
+      const payload = {
+        organization_id: organizationId,
+        ...updates,
+        last_modified_by: authData.user.id,
+        updated_at: new Date().toISOString(),
+      };
+
       const { data, error } = await supabase
         .from('organization_auto_actions' as any)
-        .update({ ...updates, last_modified_by: userId, updated_at: new Date().toISOString() } as any)
-        .eq('organization_id', organizationId)
+        .upsert(payload as any, { onConflict: 'organization_id' })
         .select()
         .maybeSingle();
+
       if (error) throw error;
       if (!data) throw new Error('لم يتم حفظ التغييرات - تحقق من صلاحياتك');
       return data;
