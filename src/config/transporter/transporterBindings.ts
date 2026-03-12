@@ -213,12 +213,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
   },
 
-  // ── السلامة المهنية: رقابي (خاضع لمعايير الامتثال الصارمة) ──
+  // ── السلامة المهنية: هجين (عمليات يومية داخلية + رفع للجهات الرقابية) ──
   ohs: {
-    type: 'admin',
+    type: 'hybrid',
     involvedParties: ['self', 'driver', 'regulator'],
     adminVisible: true,
-    contextHint: 'إدارة السلامة والصحة المهنية خاضعة لمعايير امتثال رقابية',
+    contextHint: 'إدارة السلامة والصحة المهنية: عمليات يومية داخلية مع إفصاح رقابي',
   },
 };
 
@@ -235,7 +235,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
-  'manual-shipment-drafts': 'internal',
+  'manual-shipment-drafts': 'hybrid',       // ✅ تصحيح: مسودة تتحول لشحنة hybrid لاحقاً
 
   // الأسطول والسائقين
   'transporter-drivers': 'internal',
@@ -271,7 +271,7 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'employees': 'internal',
   'org-structure': 'internal',
   'my-requests': 'hybrid',
-  'activity-log': 'admin',
+  'activity-log': 'internal',                // ✅ تصحيح: سجل نشاط داخلي لمراقبة أداء الموظفين
   'qr-scanner': 'hybrid',
   'pride-certificates': 'hybrid',
 };
