@@ -1,8 +1,9 @@
+// Unified — delegates to UnifiedTrackingMap
 import { memo } from 'react';
-import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
+import UnifiedTrackingMap from '@/components/maps/UnifiedTrackingMap';
 
 const DriverNavigationMap = memo((props: any) => (
-  <LeafletShipmentTracking height="100%" {...props} />
+  <UnifiedTrackingMap preset="fullscreen" {...props} />
 ));
 DriverNavigationMap.displayName = 'DriverNavigationMap';
 export default DriverNavigationMap;
