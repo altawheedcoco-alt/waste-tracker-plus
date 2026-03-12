@@ -219,7 +219,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
                 </Tabs>
 
                 <p className="text-[10px] text-muted-foreground text-center pt-1">
-                  كلمة المرور: <span dir="ltr" className="font-mono">57575757</span>
+                  كلمة المرور: <span dir="ltr" className="font-mono">Demo@575757</span>
                 </p>
               </div>
             )}
