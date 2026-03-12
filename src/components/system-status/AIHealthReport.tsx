@@ -818,6 +818,7 @@ export const AIHealthReport = () => {
           </CardContent>
         </Card>
       )}
+      </div>{/* end reportRef */}
     </div>
   );
 };
