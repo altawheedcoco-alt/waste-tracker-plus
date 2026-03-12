@@ -88,6 +88,8 @@ interface ShipmentStatusTimelineProps {
     confirmed_at?: string | null;
     destination_type?: string | null;
   };
+  /** نوع الجهة المشاهدة — يتحكم بالمراحل المعروضة */
+  orgType?: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   showCard?: boolean;
   showProgressMilestones?: boolean;
   onRefresh?: () => void;
