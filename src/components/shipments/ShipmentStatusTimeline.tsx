@@ -147,6 +147,7 @@ const getTimestampForLegacyStatus = (
 
 const ShipmentStatusTimeline = ({ 
   shipment, 
+  orgType,
   showCard = true, 
   showProgressMilestones = true,
   onRefresh,
