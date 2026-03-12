@@ -15,6 +15,8 @@ interface DocumentChainStripProps {
   shipmentId: string;
   /** minimal = just dots, compact = badges, full = with labels */
   variant?: 'minimal' | 'compact' | 'full';
+  /** نوع الجهة المشاهدة — يتحكم بالمستندات المعروضة */
+  orgType?: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   className?: string;
 }
 
@@ -27,7 +29,7 @@ interface ChainStep {
   linkTo?: string;
 }
 
-const DocumentChainStrip = ({ shipmentId, variant = 'compact', className }: DocumentChainStripProps) => {
+const DocumentChainStrip = ({ shipmentId, variant = 'compact', orgType, className }: DocumentChainStripProps) => {
   const navigate = useNavigate();
 
   const { data } = useQuery({
@@ -66,13 +68,26 @@ const DocumentChainStrip = ({ shipmentId, variant = 'compact', className }: Docu
     return 'pending';
   };
 
-  const steps: ChainStep[] = [
+  const allSteps: ChainStep[] = [
     { key: 'gen_decl', label: 'إقرار المولد', icon: FileSignature, status: getStatus(genDecl), count: genDecl.length },
     { key: 'delivery', label: 'شهادة تسليم', icon: Receipt, status: getStatus(deliveryDocs), count: deliveryDocs.length },
     { key: 'receipt', label: 'شهادة استلام', icon: FileCheck, status: getStatus(receiptDocs), count: receiptDocs.length },
     { key: 'rec_decl', label: 'إقرار المدور', icon: FileSignature, status: getStatus(recDecl), count: recDecl.length },
     { key: 'report', label: 'شهادة تدوير', icon: Recycle, status: getStatus(reports), count: reports.length },
   ];
+
+  // Filter steps based on org type — each role sees only relevant documents
+  const roleStepKeys: Record<string, string[]> = {
+    generator: ['gen_decl', 'delivery', 'receipt'],
+    transporter: ['gen_decl', 'delivery', 'receipt'],
+    driver: ['gen_decl', 'delivery', 'receipt'],
+    recycler: ['receipt', 'rec_decl', 'report'],
+    disposal: ['receipt', 'rec_decl', 'report'],
+    admin: ['gen_decl', 'delivery', 'receipt', 'rec_decl', 'report'],
+  };
+
+  const allowedKeys = orgType ? roleStepKeys[orgType] || roleStepKeys.admin : roleStepKeys.admin;
+  const steps = allSteps.filter(s => allowedKeys.includes(s.key));
 
   const completedCount = steps.filter(s => s.status === 'completed').length;
   const activeSteps = steps.filter(s => s.status !== 'none');

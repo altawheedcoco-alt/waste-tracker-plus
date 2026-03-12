@@ -486,7 +486,7 @@ const ShipmentCard = ({
                   <p className="text-sm text-muted-foreground mt-1">
                     {wasteTypeLabels[shipment.waste_type] || shipment.waste_type} - {shipment.quantity} {shipment.unit || 'كجم'}
                   </p>
-                  <DocumentChainStrip shipmentId={shipment.id} variant="minimal" className="mt-1" />
+                  <DocumentChainStrip shipmentId={shipment.id} variant="minimal" orgType={organization?.organization_type as any} className="mt-1" />
                 </div>
               </div>
             </CardContent>
@@ -1024,7 +1024,7 @@ const ShipmentCard = ({
 
             {/* Document Chain Strip — سلسلة المستندات المباشرة */}
             <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
-              <DocumentChainStrip shipmentId={shipment.id} variant="full" />
+              <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
               <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                 <CompleteShipmentDocButton
                   shipmentId={shipment.id}

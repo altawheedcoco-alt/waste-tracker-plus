@@ -235,7 +235,7 @@ const ShipmentDetailsPage = () => {
         {/* Status Timeline + Document Chain — always visible */}
         <ShipmentStatusTimeline shipment={shipment} orgType={organization?.organization_type as any} />
         <Card className="p-3">
-          <DocumentChainStrip shipmentId={shipment.id} variant="full" />
+          <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
         </Card>
 
         {/* Tabbed Content */}
