@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import ReactMarkdown from 'react-markdown';
-import { Brain, Loader2, RefreshCw, X, Sparkles, AlertTriangle, Save, History, ChevronDown } from 'lucide-react';
+import { Brain, Loader2, RefreshCw, X, Sparkles, AlertTriangle, Save, History, ChevronDown, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
