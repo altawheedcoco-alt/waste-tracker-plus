@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Star, Gift, Target, Flame, Medal, Zap, TrendingUp } from "lucide-react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const DriverRewards = () => {
   const driverStats = {
