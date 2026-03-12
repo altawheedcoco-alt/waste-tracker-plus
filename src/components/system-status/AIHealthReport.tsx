@@ -1,7 +1,8 @@
 /**
  * تقرير صحة ارتباطات الذكاء الاصطناعي - يفحص كل دالة AI فعلياً ويعطي تقرير حقيقي
+ * مع إمكانية التصدير PDF / الطباعة / المشاركة / الإرسال
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,15 +10,21 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
   Brain, CheckCircle2, XCircle, AlertTriangle, Loader2,
   RefreshCw, Zap, Shield, BarChart3, FileText, Eye,
   Route, Wrench, MessageSquare, Sparkles, TrendingUp,
-  Clock, Target, ArrowRight,
+  Clock, Target, ArrowRight, Download, Printer, Share2,
+  Send, Link, Copy, ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 type TestStatus = 'pending' | 'testing' | 'passed' | 'failed' | 'warning';
 
