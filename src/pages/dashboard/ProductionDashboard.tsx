@@ -173,6 +173,7 @@ const ProductionDashboard = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 
