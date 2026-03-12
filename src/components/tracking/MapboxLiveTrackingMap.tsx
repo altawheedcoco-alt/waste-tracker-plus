@@ -1,3 +1,3 @@
-// Re-export Leaflet Live Tracking Map
-import LeafletLiveTrackingMap from './LeafletLiveTrackingMap';
-export default LeafletLiveTrackingMap;
+// Unified — delegates to UnifiedTrackingMap
+import UnifiedTrackingMap from '@/components/maps/UnifiedTrackingMap';
+export default UnifiedTrackingMap;

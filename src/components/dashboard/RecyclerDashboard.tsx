@@ -1,12 +1,10 @@
-import { useState, useEffect, lazy, Suspense, useMemo } from 'react';
+import { useState, useEffect, lazy, Suspense } from 'react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
-import { Skeleton } from '@/components/ui/skeleton';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText } from 'lucide-react';
 import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs } from '@/components/ui/tabs';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,56 +12,22 @@ import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav, { TabItem } from './shared/V2TabsNav';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useNavigate } from 'react-router-dom';
 import FacilityDashboardHeader from './shared/FacilityDashboardHeader';
 import FacilityCapacityCard from './shared/FacilityCapacityCard';
-import StatsCardsGrid, { StatCardItem } from './shared/StatsCardsGrid';
+import { StatCardItem } from './shared/StatsCardsGrid';
 import { DetailSection } from './shared/InteractiveDetailDrawer';
-import QuickActionsGrid from './QuickActionsGrid';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { useQuickActions } from '@/hooks/useQuickActions';
-import CreateShipmentButton from './CreateShipmentButton';
-import ShipmentCard from '@/components/shipments/ShipmentCard';
-import SmartWeightUpload from '@/components/ai/SmartWeightUpload';
+import SmartDailyBrief from './shared/SmartDailyBrief';
+import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
-import RecyclerBulkStatusDropdown from '@/components/shipments/RecyclerBulkStatusDropdown';
-import RecyclerIncomingPanel from './recycler/RecyclerIncomingPanel';
-import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
-import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import DashboardAlertsHub from './shared/DashboardAlertsHub';
-import DriverCodeLookup from '@/components/drivers/DriverCodeLookup';
-import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
-import DocumentVerificationWidget from './DocumentVerificationWidget';
-import PendingApprovalsWidget from '@/components/shipments/PendingApprovalsWidget';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
-import LegalComplianceWidget from '@/components/dashboard/generator/LegalComplianceWidget';
-import VehicleComplianceManager from '@/components/compliance/VehicleComplianceManager';
-import DriverComplianceManager from '@/components/compliance/DriverComplianceManager';
-import IncidentReportManager from '@/components/compliance/IncidentReportManager';
-import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import RecyclerCommandCenter from './recycler/RecyclerCommandCenter';
-import SmartDailyBrief from './shared/SmartDailyBrief';
 
+// Modular tab groups
+import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
+import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
-const QualityInspectorPanel = lazy(() => import('@/components/recycler/QualityInspectorPanel'));
-const ProductionDashboardPanel = lazy(() => import('@/components/recycler/ProductionDashboardPanel'));
-const RecycledProductCertificate = lazy(() => import('@/components/recycler/RecycledProductCertificate'));
-const MaterialMarketPanel = lazy(() => import('@/components/recycler/MaterialMarketPanel'));
-const EquipmentManagerPanel = lazy(() => import('@/components/recycler/EquipmentManagerPanel'));
-const UtilitiesTrackerPanel = lazy(() => import('@/components/recycler/UtilitiesTrackerPanel'));
-const WorkOrdersPanel = lazy(() => import('@/components/recycler/WorkOrdersPanel'));
-const ProductionCostPanel = lazy(() => import('@/components/recycler/ProductionCostPanel'));
-const FactoryDigitalTwinPanel = lazy(() => import('@/components/recycler/FactoryDigitalTwinPanel'));
-const PredictiveMaintenancePanel = lazy(() => import('@/components/recycler/PredictiveMaintenancePanel'));
-const SmartProductionOptimizer = lazy(() => import('@/components/recycler/SmartProductionOptimizer'));
-const BatchTraceabilityPanel = lazy(() => import('@/components/recycler/BatchTraceabilityPanel'));
-const CarbonFootprintDashboard = lazy(() => import('@/components/recycler/CarbonFootprintDashboard'));
-const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
-const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
-const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
-const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
-const RecyclerDeclarations = lazy(() => import('@/components/recycler/RecyclerDeclarations'));
+const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 
 interface RecentShipment {
   id: string;
@@ -103,7 +67,6 @@ const RecyclerDashboard = () => {
   const { t } = useLanguage();
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -112,22 +75,16 @@ const RecyclerDashboard = () => {
   const [reportShipment, setReportShipment] = useState<RecentShipment | null>(null);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
-  // Fetch recycler facility (if registered as facility)
   const { data: facility } = useQuery({
     queryKey: ['recycler-facility', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return null;
-      const { data } = await supabase
-        .from('disposal_facilities')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .maybeSingle();
+      const { data } = await supabase.from('disposal_facilities').select('*').eq('organization_id', organization.id).maybeSingle();
       return data;
     },
-    enabled: !!organization?.id
+    enabled: !!organization?.id,
   });
 
-  // Realtime subscription
   useEffect(() => {
     if (!organization?.id) return;
     const channel = supabase
@@ -147,7 +104,6 @@ const RecyclerDashboard = () => {
     queryKey: ['recycler-dashboard', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return { shipments: [], stats: { total: 0, incoming: 0, processing: 0, completed: 0 } };
-
       const { data: shipments, error } = await supabase
         .from('shipments')
         .select(`
@@ -164,18 +120,11 @@ const RecyclerDashboard = () => {
         .eq('recycler_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
-
       if (error) throw error;
-
       const shipmentIds = shipments?.map(s => s.id) || [];
-      const { data: reportsData } = await supabase
-        .from('recycling_reports')
-        .select('shipment_id')
-        .in('shipment_id', shipmentIds);
-
+      const { data: reportsData } = await supabase.from('recycling_reports').select('shipment_id').in('shipment_id', shipmentIds);
       const reportedIds = new Set(reportsData?.map(r => r.shipment_id) || []);
       const enriched = (shipments || []).map(s => ({ ...s, has_report: reportedIds.has(s.id) }));
-
       return {
         shipments: enriched as unknown as RecentShipment[],
         stats: {
@@ -183,7 +132,7 @@ const RecyclerDashboard = () => {
           incoming: enriched.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length,
           processing: enriched.filter(s => s.status === 'delivered').length,
           completed: enriched.filter(s => s.status === 'confirmed').length,
-        }
+        },
       };
     },
     enabled: !!organization?.id,
@@ -194,24 +143,12 @@ const RecyclerDashboard = () => {
 
   const buildRecyclerDetails = (): DetailSection[] => [
     {
-      id: 'status-breakdown',
-      title: 'توزيع الشحنات حسب الحالة',
-      icon: ListFilter,
-      defaultOpen: true,
+      id: 'status-breakdown', title: 'توزيع الشحنات حسب الحالة', icon: ListFilter, defaultOpen: true,
       content: (
         <div className="space-y-2 text-right">
-          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-            <span className="font-bold">{stats.incoming}</span>
-            <span className="text-sm">واردة</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-            <span className="font-bold">{stats.processing}</span>
-            <span className="text-sm">قيد المعالجة</span>
-          </div>
-          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50">
-            <span className="font-bold">{stats.completed}</span>
-            <span className="text-sm">مؤكدة</span>
-          </div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50"><span className="font-bold">{stats.incoming}</span><span className="text-sm">واردة</span></div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50"><span className="font-bold">{stats.processing}</span><span className="text-sm">قيد المعالجة</span></div>
+          <div className="flex items-center justify-between p-2 rounded-lg bg-muted/50"><span className="font-bold">{stats.completed}</span><span className="text-sm">مؤكدة</span></div>
         </div>
       ),
       link: '/dashboard/shipments',
@@ -241,18 +178,9 @@ const RecyclerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <SmartDailyBrief
-        role="recycler"
-        stats={{
-          pending: stats.incoming,
-          active: stats.processing,
-          completed: stats.completed,
-          total: stats.total,
-        }}
-      />
+      <SmartDailyBrief role="recycler" stats={{ pending: stats.incoming, active: stats.processing, completed: stats.completed, total: stats.total }} />
       <StoryCircles />
 
-      {/* V2.0 Header */}
       <DashboardV2Header
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
@@ -268,7 +196,6 @@ const RecyclerDashboard = () => {
 
       {facility && <FacilityCapacityCard facility={facility} />}
 
-      {/* Tabs Navigation - Reorganized for v2.0 */}
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <V2TabsNav tabs={[
           { value: 'overview', label: 'نظرة عامة', icon: Recycle, bindingType: RECYCLER_TAB_BINDINGS['overview']?.type },
@@ -290,196 +217,23 @@ const RecyclerDashboard = () => {
           { value: 'declarations', label: 'الإقرارات', icon: FileText, bindingType: RECYCLER_TAB_BINDINGS['declarations']?.type },
         ] as TabItem[]} />
 
-        <TabsContent value="overview" className="space-y-6 mt-4">
-          <RecyclerCommandCenter />
-          <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
-          <AutomationSettingsDialog organizationType="recycler" />
+        <RecyclerOverviewTab
+          statCards={statCards}
+          shipmentsLoading={shipmentsLoading}
+          recentShipments={recentShipments}
+          quickActions={quickActions}
+          onRefresh={handleRefresh}
+          facility={facility}
+        />
 
-          <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
-            <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-              <OrgPerformanceRadar />
-            </Suspense>
-          </ErrorBoundary>
-
-          <DailyOperationsSummary />
-          <DashboardAlertsHub orgType="recycler" />
-          <UnifiedDocumentSearch />
-          <DocumentVerificationWidget />
-          <DriverCodeLookup />
-          <RecyclerIncomingPanel />
-          <PendingApprovalsWidget />
-
-          <QuickActionsGrid
-            actions={quickActions}
-            title={t('dashboard.quickActions')}
-            subtitle={t('dashboard.quickActionsRecycler')}
-          />
-
-          <Card>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <BulkCertificateButton
-                    shipments={recentShipments.map(s => ({
-                      id: s.id, shipment_number: s.shipment_number, status: s.status,
-                      created_at: s.created_at, waste_type: s.waste_type, quantity: s.quantity,
-                      unit: s.unit, delivered_at: s.delivered_at, confirmed_at: s.confirmed_at,
-                      has_report: s.has_report,
-                      generator: s.generator ? { name: s.generator.name, city: s.generator.city } : null,
-                      transporter: s.transporter ? { name: s.transporter.name, city: s.transporter.city } : null,
-                      recycler: s.recycler ? { name: s.recycler.name, city: s.recycler.city } : null,
-                    }))}
-                    type="certificate"
-                    onSuccess={handleRefresh}
-                  />
-                  <RecyclerBulkStatusDropdown
-                    shipments={recentShipments.map(s => ({ id: s.id, status: s.status, created_at: s.created_at, waste_type: s.waste_type }))}
-                    onStatusChange={handleRefresh}
-                  />
-                  <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard/shipments')}>
-                    <Eye className="ml-2 h-4 w-4" />
-                    {t('dashboard.viewAll')}
-                  </Button>
-                </div>
-                <div className="text-right">
-                  <CardTitle className="flex items-center gap-2 justify-end">
-                    <Recycle className="w-5 h-5" />
-                    الشحنات الواردة للتدوير
-                  </CardTitle>
-                  <CardDescription>آخر 10 شحنات واردة إلى منشأة التدوير</CardDescription>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              {shipmentsLoading ? (
-                <div className="space-y-3">
-                  {[1, 2, 3].map(i => (
-                    <div key={i} className="animate-pulse h-24 bg-muted rounded-lg" />
-                  ))}
-                </div>
-              ) : recentShipments.length === 0 ? (
-                <div className="text-center py-8">
-                  <AlertCircle className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                  <p className="text-muted-foreground">لا توجد شحنات واردة حتى الآن</p>
-                  <CreateShipmentButton className="mt-4" onSuccess={handleRefresh} />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {recentShipments.map((shipment) => (
-                    <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={handleRefresh} />
-                  ))}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          <LegalComplianceWidget />
-          <VehicleComplianceManager />
-          <DriverComplianceManager />
-          <IncidentReportManager />
-        </TabsContent>
-
-        <TabsContent value="twin" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <FactoryDigitalTwinPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="equipment" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <EquipmentManagerPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="predictive" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <PredictiveMaintenancePanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="quality" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <QualityInspectorPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="workorders" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <WorkOrdersPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="production" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <ProductionDashboardPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="optimizer" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <SmartProductionOptimizer />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="traceability" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <BatchTraceabilityPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="utilities" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <UtilitiesTrackerPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="cost" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <ProductionCostPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="certificates" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <RecycledProductCertificate />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="market" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <MaterialMarketPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="carbon" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <CarbonFootprintDashboard />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="esg" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <ESGReportPanel />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="wmis" className="mt-4 space-y-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            {organization?.id && <LicensedWasteTypesEditor organizationId={organization.id} />}
-            <WMISEventsFeed />
-          </Suspense>
-        </TabsContent>
-
-        <TabsContent value="declarations" className="mt-4">
-          <Suspense fallback={<div className="animate-pulse h-64 bg-muted rounded-lg" />}>
-            <RecyclerDeclarations />
-          </Suspense>
-        </TabsContent>
+        <RecyclerProductionTabs organizationId={organization?.id} />
       </Tabs>
 
       {/* Dialogs */}
       <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
-      <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+      <Suspense fallback={null}>
+        <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
+      </Suspense>
       {reportShipment && (
         <RecyclingCertificateDialog
           isOpen={showReportDialog}
@@ -488,7 +242,6 @@ const RecyclerDashboard = () => {
         />
       )}
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
     </div>
   );
 };
