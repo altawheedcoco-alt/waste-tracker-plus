@@ -108,11 +108,16 @@ export const useAutoActions = (organizationId: string | undefined) => {
   const updateMutation = useMutation({
     mutationFn: async (updates: Partial<AutoActionsSettings>) => {
       if (!organizationId) throw new Error('No organization');
-      const { error } = await supabase
+      const userId = (await supabase.auth.getUser()).data.user?.id;
+      const { data, error } = await supabase
         .from('organization_auto_actions' as any)
-        .update({ ...updates, last_modified_by: (await supabase.auth.getUser()).data.user?.id } as any)
-        .eq('organization_id', organizationId);
+        .update({ ...updates, last_modified_by: userId, updated_at: new Date().toISOString() } as any)
+        .eq('organization_id', organizationId)
+        .select()
+        .maybeSingle();
       if (error) throw error;
+      if (!data) throw new Error('لم يتم حفظ التغييرات - تحقق من صلاحياتك');
+      return data;
     },
     onMutate: async (updates) => {
       // Cancel outgoing refetches
