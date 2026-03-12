@@ -27,10 +27,10 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
 
   // ── ذكاء اصطناعي: تحليلات داخلية ──
   ai: {
-    type: 'internal',
-    involvedParties: ['self'],
+    type: 'hybrid',
+    involvedParties: ['self', 'generator', 'recycler'],
     adminVisible: false,
-    contextHint: 'تحليلات وتوصيات ذكية مبنية على بيانات الناقل',
+    contextHint: 'تحليلات ذكية تعتمد على بيانات الناقل والشركاء لتحسين المسارات والعمليات',
   },
 
   // ── أداء السائقين: داخلي ──
