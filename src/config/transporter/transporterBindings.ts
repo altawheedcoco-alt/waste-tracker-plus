@@ -264,9 +264,9 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'contracts': 'partner',
   'external-records': 'partner',
   'navigation-demo': 'internal',
-  'partners': 'partner',
+  'partners': 'hybrid',                    // ✅ تصحيح: توحيد مع تبويب partners (hybrid) لوجود أطراف رقابية
   'reports': 'hybrid',
-  'transporter-ai-tools': 'internal',
+  'transporter-ai-tools': 'hybrid',         // ✅ تصحيح: توحيد مع تبويب ai (hybrid) لسحب بيانات الشركاء
   'environmental-sustainability': 'admin',
   'employees': 'internal',
   'org-structure': 'internal',
