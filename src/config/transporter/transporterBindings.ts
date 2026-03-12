@@ -149,12 +149,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة بما فيها الجهات الرقابية',
   },
 
-  // ── التتبع: داخلي (تتبع السائقين) ──
+  // ── التتبع: هجين (تتبع السائقين مع ربط بالتراخيص الجغرافية) ──
   tracking: {
-    type: 'internal',
-    involvedParties: ['self', 'driver'],
-    adminVisible: false,
-    contextHint: 'تتبع مواقع السائقين والمركبات لحظياً',
+    type: 'hybrid',
+    involvedParties: ['self', 'driver', 'regulator'],
+    adminVisible: true,
+    contextHint: 'تتبع مواقع السائقين والمركبات لحظياً مع التحقق من التصاريح الجغرافية',
   },
 
   // ── السياج الجغرافي: هجين (مرتبط بطلبات الجمع والمسارات) ──
@@ -231,8 +231,8 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-rejected': 'partner',
   'transporter-receipts': 'hybrid',
   'transporter-declarations': 'admin',
-  'transporter-certs': 'admin',        // ✅ تصحيح: شهادات حكومية → admin
-  'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
+  'transporter-certs': 'admin',        // ✅ شهادات حكومية → admin
+  'transporter-guilloche': 'admin',       // ✅ أمان وثائق رقابية (Guilloche Security Pattern) → مرتبط بسلسلة الامتثال
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
   'manual-shipment-drafts': 'hybrid',       // ✅ تصحيح: مسودة تتحول لشحنة hybrid لاحقاً
@@ -264,9 +264,9 @@ export const TRANSPORTER_ACTION_BINDINGS: Record<string, BindingType> = {
   'contracts': 'partner',
   'external-records': 'partner',
   'navigation-demo': 'internal',
-  'partners': 'partner',
+  'partners': 'hybrid',                    // ✅ تصحيح: توحيد مع تبويب partners (hybrid) لوجود أطراف رقابية
   'reports': 'hybrid',
-  'transporter-ai-tools': 'internal',
+  'transporter-ai-tools': 'hybrid',         // ✅ تصحيح: توحيد مع تبويب ai (hybrid) لسحب بيانات الشركاء
   'environmental-sustainability': 'admin',
   'employees': 'internal',
   'org-structure': 'internal',
