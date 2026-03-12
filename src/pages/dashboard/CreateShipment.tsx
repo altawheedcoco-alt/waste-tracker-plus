@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowRight } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
 import { useLanguage } from '@/contexts/LanguageContext';
