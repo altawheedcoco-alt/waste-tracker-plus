@@ -39,6 +39,7 @@ import {
   Radio,
   Building2,
   Wrench,
+  Loader2,
 } from 'lucide-react';
 import EngineerVisionSection from '@/components/system-status/EngineerVisionSection';
 import BackButton from '@/components/ui/back-button';
@@ -51,6 +52,8 @@ import { LiveStatsGrid, OverallProgressCard } from '@/components/system-status/S
 import { IntegrationCard, IntegrationDetailView, IntegrationStatsGrid } from '@/components/system-status/IntegrationsComponents';
 import { OrganizationsHealthTab } from '@/components/system-status/OrganizationsHealthTab';
 import { SchemaArchiveTab } from '@/components/system-status/SchemaArchiveTab';
+import { lazy, Suspense } from 'react';
+const AIHealthReport = lazy(() => import('@/components/system-status/AIHealthReport'));
 import { triggerAIChat } from '@/lib/aiChatBus';
 import { toast } from 'sonner';
 
@@ -144,7 +147,11 @@ const SystemStatus = () => {
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
-        <TabsList className="grid grid-cols-10 w-full">
+        <TabsList className="grid grid-cols-11 w-full">
+          <TabsTrigger value="ai-health" className="flex items-center gap-2">
+            <Brain className="w-4 h-4" />
+            <span className="hidden sm:inline">صحة AI</span>
+          </TabsTrigger>
           <TabsTrigger value="live-monitor" className="flex items-center gap-2">
             <Radio className="w-4 h-4" />
             <span className="hidden sm:inline">مراقبة مباشرة</span>
@@ -186,6 +193,13 @@ const SystemStatus = () => {
             <span className="hidden sm:inline">اقتراحات</span>
           </TabsTrigger>
         </TabsList>
+
+        {/* AI Health Tab */}
+        <TabsContent value="ai-health" className="mt-6">
+          <Suspense fallback={<div className="text-center py-12"><Loader2 className="w-8 h-8 animate-spin mx-auto" /><p className="mt-2 text-muted-foreground">جارٍ التحميل...</p></div>}>
+            <AIHealthReport />
+          </Suspense>
+        </TabsContent>
 
         {/* Live Monitor Tab */}
         <TabsContent value="live-monitor" className="mt-6">
