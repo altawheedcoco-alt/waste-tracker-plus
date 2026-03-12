@@ -1,7 +1,8 @@
 /**
  * تقرير صحة ارتباطات الذكاء الاصطناعي - يفحص كل دالة AI فعلياً ويعطي تقرير حقيقي
+ * مع إمكانية التصدير PDF / الطباعة / المشاركة / الإرسال
  */
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,15 +10,21 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from '@/components/ui/dropdown-menu';
+import {
   Brain, CheckCircle2, XCircle, AlertTriangle, Loader2,
   RefreshCw, Zap, Shield, BarChart3, FileText, Eye,
   Route, Wrench, MessageSquare, Sparkles, TrendingUp,
-  Clock, Target, ArrowRight,
+  Clock, Target, ArrowRight, Download, Printer, Share2,
+  Send, Link, Copy, ExternalLink,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { usePDFExport } from '@/hooks/usePDFExport';
+import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 
 type TestStatus = 'pending' | 'testing' | 'passed' | 'failed' | 'warning';
 
@@ -399,6 +406,8 @@ export const AIHealthReport = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, printContent, isExporting } = usePDFExport({ filename: 'ai-health-report' });
 
   const runSingleTest = useCallback(async (fn: AIFunctionTest): Promise<AIFunctionTest> => {
     const startTime = Date.now();
@@ -502,8 +511,96 @@ export const AIHealthReport = () => {
     };
   });
 
+  const handleCopyLink = () => {
+    const url = `${window.location.origin}/dashboard/system-status?tab=ai-health`;
+    navigator.clipboard.writeText(url);
+    toast.success('تم نسخ رابط التقرير');
+  };
+
+  const handleWhatsAppShare = () => {
+    const text = `📊 تقرير صحة الذكاء الاصطناعي\n✅ ناجح: ${passed}\n⚠️ تحذير: ${warnings}\n❌ فشل: ${failed}\nالنتيجة: ${healthScore}%\n\n${window.location.origin}/dashboard/system-status?tab=ai-health`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+  };
+
+  const handleEmailShare = () => {
+    const subject = `تقرير صحة ارتباطات الذكاء الاصطناعي - ${healthScore}%`;
+    const body = `تقرير صحة الذكاء الاصطناعي\n\nالنتيجة الإجمالية: ${healthScore}%\nناجح: ${passed} | تحذير: ${warnings} | فشل: ${failed}\nإجمالي الدوال: ${total}\n\nرابط التقرير: ${window.location.origin}/dashboard/system-status?tab=ai-health`;
+    window.open(`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`, '_blank');
+  };
+
+  const reportDate = new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+
   return (
     <div className="space-y-6" dir="rtl">
+      {/* Export Actions Toolbar */}
+      {tested > 0 && (
+        <div className="flex items-center gap-2 flex-wrap no-print">
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => exportToPDF(reportRef.current)}
+            disabled={isExporting}
+          >
+            <Download className="w-4 h-4" />
+            تحميل PDF
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => printContent(reportRef.current)}
+          >
+            <Printer className="w-4 h-4" />
+            طباعة
+          </Button>
+          <ShareDocumentButton
+            referenceId="ai-health-report"
+            referenceType="report"
+            documentTitle={`تقرير صحة AI - ${healthScore}%`}
+            variant="outline"
+            size="sm"
+            label="مشاركة"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-2">
+                <Send className="w-4 h-4" />
+                إرسال
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start">
+              <DropdownMenuItem onClick={handleWhatsAppShare} className="gap-2">
+                <MessageSquare className="w-4 h-4" />
+                واتساب
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={handleEmailShare} className="gap-2">
+                <Send className="w-4 h-4" />
+                بريد إلكتروني
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleCopyLink} className="gap-2">
+                <Copy className="w-4 h-4" />
+                نسخ الرابط
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+      )}
+
+      {/* Printable Report Content */}
+      <div ref={reportRef}>
+        {/* Print-only header */}
+        <div className="hidden print:block mb-6 text-center border-b pb-4">
+          <h1 className="text-xl font-bold">تقرير صحة ارتباطات الذكاء الاصطناعي</h1>
+          <p className="text-sm text-muted-foreground mt-1">{reportDate}</p>
+          <div className="flex justify-center gap-6 mt-3">
+            <span>النتيجة: <strong>{healthScore}%</strong></span>
+            <span>ناجح: <strong>{passed}</strong></span>
+            <span>تحذير: <strong>{warnings}</strong></span>
+            <span>فشل: <strong>{failed}</strong></span>
+          </div>
+        </div>
       {/* Header */}
       <Card className="border-2 border-primary/20">
         <CardHeader>
@@ -721,6 +818,7 @@ export const AIHealthReport = () => {
           </CardContent>
         </Card>
       )}
+      </div>{/* end reportRef */}
     </div>
   );
 };
