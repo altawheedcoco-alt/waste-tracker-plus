@@ -235,7 +235,7 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
-  'manual-shipment-drafts': 'internal',
+  'manual-shipment-drafts': 'hybrid',       // ✅ تصحيح: مسودة تتحول لشحنة hybrid لاحقاً
 
   // الأسطول والسائقين
   'transporter-drivers': 'internal',
