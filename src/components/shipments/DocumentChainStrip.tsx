@@ -15,6 +15,8 @@ interface DocumentChainStripProps {
   shipmentId: string;
   /** minimal = just dots, compact = badges, full = with labels */
   variant?: 'minimal' | 'compact' | 'full';
+  /** نوع الجهة المشاهدة — يتحكم بالمستندات المعروضة */
+  orgType?: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   className?: string;
 }
 
