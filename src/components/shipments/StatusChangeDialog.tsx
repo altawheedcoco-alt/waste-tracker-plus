@@ -472,39 +472,39 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         onClick={() => isAvailable && !isCurrent && setSelectedStatus(status.key)}
         disabled={!isAvailable || isCurrent}
         className={cn(
-          "w-full p-3 rounded-lg border-2 transition-all flex items-center justify-between",
+          "flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all min-w-[72px] flex-1",
           isSelected 
-            ? "border-primary bg-primary/10" 
+            ? "bg-primary/10 ring-2 ring-primary shadow-sm" 
             : isCurrent
-            ? "border-muted bg-muted/50 cursor-not-allowed"
+            ? "bg-muted/60 cursor-not-allowed"
             : isAvailable
-            ? "border-border hover:border-primary/50 hover:bg-muted/50 cursor-pointer"
-            : "border-muted bg-muted/30 cursor-not-allowed opacity-50"
+            ? "hover:bg-muted/50 cursor-pointer"
+            : "opacity-40 cursor-not-allowed"
         )}
       >
-        <div className="flex items-center gap-2">
-          {isSelected && <CheckCircle2 className="w-5 h-5 text-primary" />}
-          {isCurrent && <Badge variant="outline" className="text-xs">الحالية</Badge>}
-          {!isAvailable && !isCurrent && <Lock className="w-4 h-4 text-muted-foreground" />}
+        <div className={cn(
+          "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
+          isSelected
+            ? "border-primary bg-primary text-primary-foreground scale-110 shadow-md"
+            : isCurrent
+            ? cn(status.bgClass, status.textClass, status.borderClass)
+            : isAvailable
+            ? cn("border-border bg-background", status.textClass)
+            : "border-muted bg-muted text-muted-foreground"
+        )}>
+          {isSelected ? <CheckCircle2 className="w-5 h-5" /> : <StatusIcon className="w-4 h-4" />}
         </div>
-        <div className="flex items-center gap-3">
-          <span className={cn(
-            "font-medium",
-            isSelected && "text-primary",
-            isCurrent && "text-muted-foreground"
-          )}>
-            {status.labelAr}
-          </span>
-          <div className={cn(
-            "w-8 h-8 rounded-full flex items-center justify-center",
-            status.bgClass,
-            status.textClass,
-            status.borderClass,
-            "border"
-          )}>
-            <StatusIcon className="w-4 h-4" />
-          </div>
-        </div>
+        <span className={cn(
+          "text-[11px] font-medium text-center leading-tight",
+          isSelected && "text-primary font-bold",
+          isCurrent && "text-muted-foreground",
+          !isAvailable && !isCurrent && "text-muted-foreground"
+        )}>
+          {status.labelAr}
+        </span>
+        {isCurrent && (
+          <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">الحالية</span>
+        )}
       </button>
     );
   };
@@ -583,21 +583,28 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           {canChange && availableStatuses.length > 0 ? (
             <div className="text-right">
               <Label className="text-sm text-muted-foreground mb-3 block">اختر الحالة الجديدة</Label>
-              <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
-                {availableStatuses.map((status) => renderStatusButton(status, true))}
+              <div className="flex items-start gap-1 overflow-x-auto pb-2">
+                {availableStatuses.map((status, i) => (
+                  <div key={status.key} className="flex items-center">
+                    {renderStatusButton(status, true)}
+                    {i < availableStatuses.length - 1 && (
+                      <ArrowRight className="w-4 h-4 text-muted-foreground/40 shrink-0 mx-0.5" />
+                    )}
+                  </div>
+                ))}
               </div>
             </div>
           ) : (
-            <div className="text-center py-6 text-muted-foreground">
+            <div className="text-center py-4 text-muted-foreground">
               {currentStatusConfig?.key === 'completed' ? (
                 <>
-                  <CheckCircle2 className="w-12 h-12 mx-auto mb-2 text-emerald-500" />
-                  <p>هذه الشحنة مكتملة ولا يمكن تغيير حالتها</p>
+                  <CheckCircle2 className="w-10 h-10 mx-auto mb-2 text-emerald-500" />
+                  <p className="text-sm">هذه الشحنة مكتملة</p>
                 </>
               ) : (
                 <>
-                  <Lock className="w-12 h-12 mx-auto mb-2 text-muted-foreground" />
-                  <p>ليس لديك صلاحية لتغيير حالة هذه الشحنة</p>
+                  <Lock className="w-10 h-10 mx-auto mb-2 text-muted-foreground" />
+                  <p className="text-sm">ليس لديك صلاحية لتغيير حالة هذه الشحنة</p>
                 </>
               )}
             </div>
