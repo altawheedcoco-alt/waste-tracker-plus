@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Factory, Gauge, TrendingUp, Package, Zap, Droplets, Flame, BarChart3 } from "lucide-react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const ProductionDashboard = () => {
   const productionLines = [
@@ -29,7 +31,9 @@ const ProductionDashboard = () => {
   ];
 
   return (
+    <DashboardLayout>
     <div className="p-4 md:p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Factory className="h-7 w-7 text-primary" />
@@ -169,6 +173,7 @@ const ProductionDashboard = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 

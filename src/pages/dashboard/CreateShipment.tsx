@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ArrowRight } from 'lucide-react';
+import BackButton from '@/components/ui/back-button';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -35,9 +36,7 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
     <DashboardLayout>
       <div className="space-y-6">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={() => navigate(-1)}>
-            <ArrowRight className="h-4 w-4" />
-          </Button>
+          <BackButton />
           <div>
             <h1 className="text-2xl font-bold">{t('shipments.createNewShipment')}</h1>
             <p className="text-muted-foreground">{t('shipments.createNewShipmentDesc')}</p>

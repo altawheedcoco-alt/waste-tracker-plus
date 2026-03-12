@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
-
+import PageNavBar from "@/components/ui/page-nav-bar";
 const Footer = lazy(() => import("@/components/Footer"));
 
 const Privacy = () => {
@@ -12,6 +12,7 @@ const Privacy = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-3xl">
+        <PageNavBar className="mb-6" />
         <h1 className="text-3xl font-bold mb-8 text-foreground">{isAr ? 'سياسة الخصوصية' : 'Privacy Policy'}</h1>
 
         <div className="prose prose-sm dark:prose-invert max-w-none space-y-6 text-muted-foreground leading-relaxed">

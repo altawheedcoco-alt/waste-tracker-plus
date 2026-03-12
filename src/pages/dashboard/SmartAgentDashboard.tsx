@@ -236,6 +236,7 @@ const SmartAgentDashboard = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

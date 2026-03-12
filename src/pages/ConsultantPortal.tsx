@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import PageNavBar from '@/components/ui/page-nav-bar';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -200,6 +201,7 @@ const ConsultantPortal = () => {
       {/* Header */}
       <div className="bg-gradient-to-l from-emerald-600 to-teal-700 text-white">
         <div className="max-w-5xl mx-auto px-4 py-8">
+          <PageNavBar className="mb-4" />
           <div className="flex items-center gap-4 mb-4">
             <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
               <ShieldCheck className="w-8 h-8" />

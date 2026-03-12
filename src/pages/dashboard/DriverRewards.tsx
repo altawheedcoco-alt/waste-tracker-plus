@@ -3,6 +3,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Trophy, Star, Gift, Target, Flame, Medal, Zap, TrendingUp } from "lucide-react";
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 
 const DriverRewards = () => {
   const driverStats = {
@@ -41,7 +43,9 @@ const DriverRewards = () => {
   ];
 
   return (
+    <DashboardLayout>
     <div className="p-4 md:p-6 space-y-6" dir="rtl">
+      <BackButton />
       <div>
         <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
           <Trophy className="h-7 w-7 text-primary" />
@@ -150,6 +154,7 @@ const DriverRewards = () => {
         </TabsContent>
       </Tabs>
     </div>
+    </DashboardLayout>
   );
 };
 

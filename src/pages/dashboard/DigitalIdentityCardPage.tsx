@@ -9,6 +9,7 @@ const DigitalIdentityCardPage = () => {
   return (
     <DashboardLayout>
       <div className="space-y-6" dir="rtl">
+        <BackButton />
         <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
           <DigitalIdentityCard />
         </Suspense>

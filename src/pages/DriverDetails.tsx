@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -252,9 +253,7 @@ const DriverDetailsPage = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard/drivers')}>
-              <ArrowRight className="h-5 w-5" />
-            </Button>
+            <BackButton fallbackPath="/dashboard/drivers" />
             <div>
               <h1 className="text-2xl font-bold">{driver.profile.full_name}</h1>
               <p className="text-muted-foreground">تفاصيل السائق وتتبع الرحلات</p>

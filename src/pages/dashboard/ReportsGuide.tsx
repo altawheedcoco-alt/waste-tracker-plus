@@ -16,6 +16,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import BackButton from '@/components/ui/back-button';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/utils';
 
@@ -143,6 +144,7 @@ const ReportsGuide = () => {
   return (
     <DashboardLayout>
       <div className={cn("max-w-5xl mx-auto", isMobile ? "p-4" : "p-6")}>
+        <BackButton />
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import BackButton from '@/components/ui/back-button';
 import { supabase } from '@/integrations/supabase/client';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { Card, CardContent } from '@/components/ui/card';
@@ -83,9 +84,7 @@ const VisitorAnalytics = () => {
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')}>
-              <ArrowRight className="w-5 h-5" />
-            </Button>
+            <BackButton />
             <div>
               <h1 className="text-xl font-bold flex items-center gap-2">
                 <Eye className="w-6 h-6 text-primary" />
