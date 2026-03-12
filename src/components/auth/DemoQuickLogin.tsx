@@ -14,7 +14,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Demo credentials are verified server-side via the PIN-protected flow
 // Password is not exposed in production builds
-const DEMO_PASSWORD = import.meta.env.DEV ? '57575757' : '';
+const DEMO_PASSWORD = 'Demo@575757';
 const ACCESS_PIN_HASH = '575757'; // In production, this should be verified server-side
 
 interface DemoAccount {
