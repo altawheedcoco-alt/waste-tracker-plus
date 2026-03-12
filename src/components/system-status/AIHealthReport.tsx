@@ -406,6 +406,8 @@ export const AIHealthReport = () => {
   const [isRunning, setIsRunning] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
   const [filterCategory, setFilterCategory] = useState<string | null>(null);
+  const reportRef = useRef<HTMLDivElement>(null);
+  const { exportToPDF, printContent, isExporting } = usePDFExport({ filename: 'ai-health-report' });
 
   const runSingleTest = useCallback(async (fn: AIFunctionTest): Promise<AIFunctionTest> => {
     const startTime = Date.now();
