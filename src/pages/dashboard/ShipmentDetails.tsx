@@ -35,6 +35,7 @@ const ShipmentDocumentsTimeline = lazy(() => import('@/components/shipments/Ship
 const ShipmentDocumentsPanel = lazy(() => import('@/components/documents/ShipmentDocumentsPanel'));
 const ShipmentProgressLogs = lazy(() => import('@/components/shipments/ShipmentProgressLogs'));
 const ShipmentStatusDialog = lazy(() => import('@/components/shipments/StatusChangeDialog'));
+const InlineStatusChange = lazy(() => import('@/components/shipments/StatusChangeDialog').then(m => ({ default: m.InlineStatusChange })));
 const ShipmentQuickPrint = lazy(() => import('@/components/shipments/ShipmentQuickPrint'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
@@ -218,11 +219,6 @@ const ShipmentDetailsPage = () => {
                 />
               )}
             </Suspense>
-            {canChangeStatus(mapLegacyStatus(shipment.status), (organization?.organization_type || 'generator') as any) && (
-              <Button variant="outline" size="sm" onClick={() => setShowStatusDialog(true)}>
-                <Edit className="ml-1.5 h-4 w-4" />{t('shipmentDetails.changeStatus')}
-              </Button>
-            )}
             <Button variant="eco" size="sm" onClick={() => setShowPrintDialog(true)}>
               <Printer className="ml-1.5 h-4 w-4" />{t('shipmentDetails.printPdf')}
             </Button>
@@ -238,7 +234,11 @@ const ShipmentDetailsPage = () => {
           <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
         </Card>
 
-        {/* Tabbed Content */}
+        {/* Inline Status Change */}
+        <Suspense fallback={null}>
+          <InlineStatusChange shipment={shipment} onStatusChanged={fetchShipmentDetails} />
+        </Suspense>
+
         <Tabs value={activeTab} onValueChange={(v) => setPref(PREF_KEY_ACTIVE_TAB, v)} dir="rtl" className="space-y-4">
           <V2TabsNav tabs={TABS} />
 
@@ -586,7 +586,7 @@ const ShipmentDetailsPage = () => {
       {/* Dialogs */}
       <Suspense fallback={null}>
         {showPrintDialog && <ShipmentQuickPrint isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipmentId={shipmentId || ''} />}
-        {showStatusDialog && <ShipmentStatusDialog isOpen={showStatusDialog} onClose={() => setShowStatusDialog(false)} shipment={shipment} onStatusChanged={fetchShipmentDetails} />}
+        
         {showLiveTracking && shipment.driver_id && (
           <LiveTrackingMapDialog isOpen={showLiveTracking} onClose={() => setShowLiveTracking(false)} driverId={shipment.driver_id} shipmentNumber={shipment.shipment_number} pickupAddress={shipment.pickup_address} deliveryAddress={shipment.delivery_address} shipmentStatus={shipment.status} />
         )}
