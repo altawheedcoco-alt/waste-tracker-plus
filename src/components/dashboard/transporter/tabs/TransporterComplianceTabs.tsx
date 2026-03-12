@@ -1,20 +1,19 @@
 /**
  * تبويبات الامتثال والتقارير الحكومية
- * (compliance, government, carbon, iot, esg, wmis, licenses, declarations, annual_plan, ohs)
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const LegalComplianceWidget = lazy(() => import('../../generator/LegalComplianceWidget'));
-const LegalArchiveWidget = lazy(() => import('../../generator/LegalArchiveWidget'));
+const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
+const LegalArchiveWidget = lazy(() => import('@/components/dashboard/generator/LegalArchiveWidget'));
 const VehicleComplianceManager = lazy(() => import('@/components/compliance/VehicleComplianceManager'));
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
-const GovernmentReportingPanel = lazy(() => import('../GovernmentReportingPanel'));
-const CarbonCreditsPanel = lazy(() => import('../CarbonCreditsPanel'));
-const IoTMonitoringPanel = lazy(() => import('../IoTMonitoringPanel'));
+const GovernmentReportingPanel = lazy(() => import('@/components/dashboard/transporter/GovernmentReportingPanel'));
+const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
+const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));

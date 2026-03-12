@@ -1,37 +1,36 @@
 /**
  * تبويبات العمليات الميدانية للناقل
- * (overview, performance, fleet, tracking, calendar, geofence, copilot)
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
-import TransporterStatsGrid from '../transporter/TransporterStatsGrid';
-import TransporterKPICards from '../transporter/TransporterKPICards';
-import TransporterPartnerSummary from '../transporter/TransporterPartnerSummary';
-import TransporterShipmentsList from '../transporter/TransporterShipmentsList';
-import TransporterAggregateReport from '../transporter/TransporterAggregateReport';
-import TransporterPerformanceCharts from '../transporter/TransporterPerformanceCharts';
-import FleetUtilizationWidget from '../operations/FleetUtilizationWidget';
-import QuickActionsGrid from '../QuickActionsGrid';
+import TransporterStatsGrid from '@/components/dashboard/transporter/TransporterStatsGrid';
+import TransporterKPICards from '@/components/dashboard/transporter/TransporterKPICards';
+import TransporterPartnerSummary from '@/components/dashboard/transporter/TransporterPartnerSummary';
+import TransporterShipmentsList from '@/components/dashboard/transporter/TransporterShipmentsList';
+import TransporterAggregateReport from '@/components/dashboard/transporter/TransporterAggregateReport';
+import TransporterPerformanceCharts from '@/components/dashboard/transporter/TransporterPerformanceCharts';
+import FleetUtilizationWidget from '@/components/dashboard/operations/FleetUtilizationWidget';
+import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import type { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
-const DriverPerformancePanel = lazy(() => import('../transporter/DriverPerformancePanel'));
-const TripCostManagement = lazy(() => import('../transporter/TripCostManagement'));
-const MaintenanceScheduler = lazy(() => import('../transporter/MaintenanceScheduler'));
-const ShipmentCalendarWidget = lazy(() => import('../transporter/ShipmentCalendarWidget'));
-const SmartDriverNotifications = lazy(() => import('../transporter/SmartDriverNotifications'));
-const EnhancedDriverPerformance = lazy(() => import('../transporter/EnhancedDriverPerformance'));
-const DriverCopilot = lazy(() => import('../transporter/DriverCopilot'));
-const PredictiveFleetMaintenance = lazy(() => import('../transporter/PredictiveFleetMaintenance'));
+const DriverPerformancePanel = lazy(() => import('@/components/dashboard/transporter/DriverPerformancePanel'));
+const TripCostManagement = lazy(() => import('@/components/dashboard/transporter/TripCostManagement'));
+const MaintenanceScheduler = lazy(() => import('@/components/dashboard/transporter/MaintenanceScheduler'));
+const ShipmentCalendarWidget = lazy(() => import('@/components/dashboard/transporter/ShipmentCalendarWidget'));
+const SmartDriverNotifications = lazy(() => import('@/components/dashboard/transporter/SmartDriverNotifications'));
+const EnhancedDriverPerformance = lazy(() => import('@/components/dashboard/transporter/EnhancedDriverPerformance'));
+const DriverCopilot = lazy(() => import('@/components/dashboard/transporter/DriverCopilot'));
+const PredictiveFleetMaintenance = lazy(() => import('@/components/dashboard/transporter/PredictiveFleetMaintenance'));
 const ContainerManagement = lazy(() => import('@/components/transporter/ContainerManagement'));
 const VehicleReassignment = lazy(() => import('@/components/transporter/VehicleReassignment'));
 const SignalMonitorWidget = lazy(() => import('@/components/tracking/SignalMonitorWidget'));
 const DriverLinkingCode = lazy(() => import('@/components/drivers/DriverLinkingCode'));
-const TransporterDriverTracking = lazy(() => import('../transporter/TransporterDriverTracking'));
+const TransporterDriverTracking = lazy(() => import('@/components/dashboard/transporter/TransporterDriverTracking'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPriorityQueue'));
-const OrgPerformanceRadar = lazy(() => import('../shared/OrgPerformanceRadar'));
+const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">

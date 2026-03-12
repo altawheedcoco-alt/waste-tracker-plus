@@ -1,6 +1,5 @@
 /**
  * تبويبات الذكاء الاصطناعي والتحليلات والتسعير
- * (ai, pricing, marketplace, intelligence, fraud, risk, custody, partners)
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -8,16 +7,16 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIInsights'));
-const DynamicPricingEngine = lazy(() => import('../DynamicPricingEngine'));
+const DynamicPricingEngine = lazy(() => import('@/components/dashboard/transporter/DynamicPricingEngine'));
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
-const FraudDetectionPanel = lazy(() => import('../FraudDetectionPanel'));
-const PartnerRiskPanel = lazy(() => import('../PartnerRiskPanel'));
-const ChainOfCustodyPanel = lazy(() => import('../ChainOfCustodyPanel'));
+const FraudDetectionPanel = lazy(() => import('@/components/dashboard/transporter/FraudDetectionPanel'));
+const PartnerRiskPanel = lazy(() => import('@/components/dashboard/transporter/PartnerRiskPanel'));
+const ChainOfCustodyPanel = lazy(() => import('@/components/dashboard/transporter/ChainOfCustodyPanel'));
 const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
-const PartnerProfitabilityPanel = lazy(() => import('../PartnerProfitabilityPanel'));
+const PartnerProfitabilityPanel = lazy(() => import('@/components/dashboard/transporter/PartnerProfitabilityPanel'));
 const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
-const PartnersView = lazy(() => import('../../PartnersView'));
-const SustainabilityReportGenerator = lazy(() => import('../SustainabilityReportGenerator'));
+const PartnersView = lazy(() => import('@/components/dashboard/PartnersView'));
+const SustainabilityReportGenerator = lazy(() => import('@/components/dashboard/transporter/SustainabilityReportGenerator'));
 const SLADashboard = lazy(() => import('@/components/transporter/SLADashboard'));
 const ProfitabilityReport = lazy(() => import('@/components/transporter/ProfitabilityReport'));
 const ShiftScheduler = lazy(() => import('@/components/transporter/ShiftScheduler'));
