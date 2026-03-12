@@ -139,7 +139,7 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
       descriptionAr: 'التعامل مع الحوادث والطوارئ المفاجئة أثناء نقل الشحنة',
       descriptionEn: 'Handle emergencies and incidents during shipment transport',
       nodes: [
-        { id: 'btn-report-incident', nodeType: 'trigger', labelAr: 'الإبلاغ عن حادث', labelEn: 'Report Incident', bindingType: 'internal', icon: 'Siren' },
+        { id: 'btn-report-incident', nodeType: 'trigger', labelAr: 'الإبلاغ عن حادث', labelEn: 'Report Incident', bindingType: 'internal', icon: 'Siren', linkedTab: 'ohs', linkedPath: '/dashboard/ohs' },
         { id: 'fn-assess-severity', nodeType: 'function', labelAr: 'تقييم خطورة الحادث', labelEn: 'Assess Incident Severity', bindingType: 'internal', icon: 'AlertTriangle', leadsTo: ['fn-decide-incident-action'] },
         { id: 'fn-decide-incident-action', nodeType: 'function', labelAr: 'قرار المعالجة', labelEn: 'Decide Action', bindingType: 'internal', icon: 'GitBranch', leadsTo: ['res-reassign-driver', 'res-emergency-stop'] },
         { id: 'res-reassign-driver', nodeType: 'result', labelAr: 'إعادة تعيين سائق بديل', labelEn: 'Reassign Backup Driver', bindingType: 'internal', icon: 'UserPlus', leadsTo: ['eff-notify-parties'] },
