@@ -1,7 +1,7 @@
 import { useLanguage } from "@/contexts/LanguageContext";
 import Header from "@/components/Header";
 import { lazy, Suspense } from "react";
-
+import PageNavBar from "@/components/ui/page-nav-bar";
 const Footer = lazy(() => import("@/components/Footer"));
 
 const Privacy = () => {
