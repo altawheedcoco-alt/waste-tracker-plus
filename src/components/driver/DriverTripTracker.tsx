@@ -1,7 +1,8 @@
-import LeafletShipmentTracking from '@/components/maps/LeafletShipmentTracking';
+// Unified — delegates to UnifiedTrackingMap
+import UnifiedTrackingMap from '@/components/maps/UnifiedTrackingMap';
 
 const DriverTripTracker = (props: any) => (
-  <LeafletShipmentTracking height="400px" {...props} />
+  <UnifiedTrackingMap preset="trip" {...props} />
 );
 
 export default DriverTripTracker;
