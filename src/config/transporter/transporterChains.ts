@@ -101,7 +101,8 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
         { id: 'eff-corrective-action', nodeType: 'effect', labelAr: 'إجراء تصحيحي', labelEn: 'Corrective Action', bindingType: 'admin', icon: 'Wrench', affects: ['shipment-lifecycle', 'driver-management'] },
         { id: 'fn-esg-calc', nodeType: 'function', labelAr: 'حساب مؤشرات ESG', labelEn: 'Calculate ESG Metrics', bindingType: 'admin', icon: 'Leaf', leadsTo: ['res-esg-report'] },
         { id: 'res-esg-report', nodeType: 'result', labelAr: 'تقرير ESG', labelEn: 'ESG Report', bindingType: 'admin', icon: 'FileSpreadsheet', leadsTo: ['eff-wmis'] },
-        { id: 'eff-wmis', nodeType: 'effect', labelAr: 'تحديث WMIS', labelEn: 'Update WMIS', bindingType: 'admin', icon: 'Globe', linkedTab: 'wmis' },
+        { id: 'eff-wmis', nodeType: 'effect', labelAr: 'تحديث WMIS', labelEn: 'Update WMIS', bindingType: 'admin', icon: 'Globe', linkedTab: 'wmis', leadsTo: ['fn-wmis-correction'] },
+        { id: 'fn-wmis-correction', nodeType: 'function', labelAr: 'تصحيح بيانات WMIS المرفوضة', labelEn: 'Correct Rejected WMIS Data', bindingType: 'admin', icon: 'RefreshCw', linkedTab: 'wmis' },
       ],
     },
 
