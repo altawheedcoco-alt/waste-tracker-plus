@@ -25,7 +25,7 @@ Deno.serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const NEW_PASSWORD = '575757';
+    const NEW_PASSWORD = 'Demo@575757';
 
     // Get all demo accounts
     const demoEmails = [
