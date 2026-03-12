@@ -29,7 +29,7 @@ interface ChainStep {
   linkTo?: string;
 }
 
-const DocumentChainStrip = ({ shipmentId, variant = 'compact', className }: DocumentChainStripProps) => {
+const DocumentChainStrip = ({ shipmentId, variant = 'compact', orgType, className }: DocumentChainStripProps) => {
   const navigate = useNavigate();
 
   const { data } = useQuery({
