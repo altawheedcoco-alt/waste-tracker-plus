@@ -64,7 +64,8 @@ const calculateOverallProgress = () => {
 };
 
 const SystemStatus = () => {
-  const [activeTab, setActiveTab] = useState('live-monitor');
+  const params = new URLSearchParams(window.location.search);
+  const [activeTab, setActiveTab] = useState(params.get('tab') || 'live-monitor');
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useSystemStats();
   const overallProgress = calculateOverallProgress();
