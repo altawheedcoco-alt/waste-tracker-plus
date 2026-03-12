@@ -231,8 +231,8 @@ export const TRANSPORTER_SIDEBAR_BINDINGS: Record<string, BindingType> = {
   'transporter-rejected': 'partner',
   'transporter-receipts': 'hybrid',
   'transporter-declarations': 'admin',
-  'transporter-certs': 'admin',        // ✅ تصحيح: شهادات حكومية → admin
-  'transporter-guilloche': 'admin',       // ✅ تصحيح: أمان الشهادات مرئي للرقيب → admin
+  'transporter-certs': 'admin',        // ✅ شهادات حكومية → admin
+  'transporter-guilloche': 'admin',       // ✅ أمان وثائق رقابية (Guilloche Security Pattern) → مرتبط بسلسلة الامتثال
   'collection-requests': 'partner',
   'manual-shipment': 'hybrid',
   'manual-shipment-drafts': 'hybrid',       // ✅ تصحيح: مسودة تتحول لشحنة hybrid لاحقاً
