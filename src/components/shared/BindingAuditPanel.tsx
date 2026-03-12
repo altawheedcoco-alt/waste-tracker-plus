@@ -271,6 +271,20 @@ const BindingAuditPanel = ({ orgType, tabs = [], sidebarItems = [], className }:
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => {
+                          navigator.clipboard.writeText(report);
+                          toast.success(language === 'ar' ? 'تم نسخ التقرير' : 'Report copied');
+                        }}
+                        className="h-7 w-7"
+                        title={language === 'ar' ? 'نسخ التقرير' : 'Copy Report'}
+                      >
+                        <Copy className="w-3.5 h-3.5 text-primary" />
+                      </Button>
+                    )}
+                    {report && !isLoading && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
                         onClick={saveReport}
                         disabled={isSaving}
                         className="h-7 w-7"
