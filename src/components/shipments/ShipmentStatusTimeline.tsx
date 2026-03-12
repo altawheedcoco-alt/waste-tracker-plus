@@ -353,44 +353,55 @@ const ShipmentStatusTimeline = ({
     return milestoneTime >= inTransitTime && milestoneTime <= deliveredTime;
   });
 
+  // Track which step is expanded to show details
+  const [expandedStep, setExpandedStep] = useState<string | null>(null);
+
+  // Collect details for the expanded step
+  const getExpandedDetails = (stepKey: string) => {
+    const statusLogs = getLogsForStatus(stepKey);
+    const statusDeclarations = getDeclarationsForStatus(stepKey);
+    const statusReceipts = getReceiptsForStatus(stepKey);
+    const isInTransitStep = ['in_transit', 'on_the_way'].includes(stepKey);
+    const milestones = isInTransitStep && showProgressMilestones ? inTransitMilestones : [];
+    return { statusLogs, statusDeclarations, statusReceipts, milestones };
+  };
+
   const content = (
-    <div className="space-y-6">
-      {/* Current Status Display */}
-      <div className="flex items-center justify-between p-4 rounded-lg bg-muted/50 border">
-        <Badge className={cn("text-sm px-4 py-1.5", currentStepConfig?.colorClass || 'bg-slate-400')}>
+    <div className="space-y-4" dir="rtl">
+      {/* Current Status Badge */}
+      <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
+        <div className="flex items-center gap-2">
+          <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white", currentStepConfig?.colorClass || 'bg-slate-400')}>
+            <CurrentIcon className="w-4 h-4" />
+          </div>
+          <span className="text-sm font-medium">الحالة الحالية</span>
+        </div>
+        <Badge className={cn("text-xs px-3 py-1", currentStepConfig?.colorClass || 'bg-slate-400')}>
           {currentStepConfig?.labelAr || shipment.status}
         </Badge>
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium">الحالة الحالية:</span>
-          <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", currentStepConfig?.colorClass || 'bg-slate-400', "text-white")}>
-            <CurrentIcon className="w-5 h-5" />
-          </div>
-        </div>
       </div>
 
-      {/* Timeline by Phase */}
-      <div className="space-y-6">
+      {/* Horizontal Timeline by Phase */}
+      <div className="space-y-5">
         {phases.map((phase, phaseIdx) => (
           <div key={phase.phase}>
             {/* Phase Header */}
-            <div className="flex items-center gap-2 mb-3">
-              <span className="text-sm font-bold text-muted-foreground">{phase.label}</span>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-xs font-bold text-muted-foreground whitespace-nowrap">{phase.label}</span>
               <div className="flex-1 h-px bg-border" />
             </div>
 
-            {/* Phase Steps */}
-            <div className="relative">
-              <div className="absolute right-5 top-0 bottom-0 w-0.5 bg-border" />
-
-              <div className="space-y-1">
+            {/* Horizontal Steps */}
+            <div className="overflow-x-auto pb-2 -mx-1">
+              <div className="flex items-start min-w-max px-1">
                 {phase.steps.map((step, index) => {
                   const StepIcon = step.icon;
                   const globalIdx = timelineSteps.indexOf(step);
                   const isActive = step.key === currentDetailedStatus;
                   const isCompleted = globalIdx < currentStatusIndex;
                   const isFuture = globalIdx > currentStatusIndex;
+                  const isExpanded = expandedStep === step.key;
 
-                  // Find timestamp from logs or shipment data
                   const logForStatus = logEntries.find(l => {
                     const mapped = mapLegacyStatus(l.status);
                     return mapped === step.key || l.status === step.key;
@@ -402,248 +413,235 @@ const ShipmentStatusTimeline = ({
                   const statusReceipts = getReceiptsForStatus(step.key);
                   const hasDetails = statusLogs.length > 0 || statusDeclarations.length > 0 || statusReceipts.length > 0;
 
-                  const isInTransitStep = ['in_transit', 'on_the_way'].includes(step.key);
-                  const showMilestones = isInTransitStep && inTransitMilestones.length > 0 && showProgressMilestones;
-
                   return (
-                    <div key={step.key}>
+                    <div key={step.key} className="flex items-start">
+                      {/* Step Node */}
                       <motion.div
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: (phaseIdx * 5 + index) * 0.05 }}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: (phaseIdx * 5 + index) * 0.04 }}
                         className={cn(
-                          "relative flex items-center gap-4 p-3 rounded-lg transition-all",
-                          isActive && "bg-primary/5 border border-primary/20",
-                          isCompleted && "opacity-90",
+                          "flex flex-col items-center cursor-pointer group min-w-[56px]",
                           isFuture && "opacity-40"
                         )}
+                        onClick={() => {
+                          if ((isCompleted || isActive) && hasDetails) {
+                            setExpandedStep(isExpanded ? null : step.key);
+                          }
+                        }}
                       >
+                        {/* Circle */}
                         <div
                           className={cn(
-                            "relative z-10 w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all shrink-0",
-                            isActive && "border-primary bg-primary text-primary-foreground scale-110 shadow-lg",
+                            "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all shrink-0",
+                            isActive && "border-primary bg-primary text-primary-foreground scale-110 shadow-lg ring-2 ring-primary/30",
                             isCompleted && cn("border-transparent text-white", step.colorClass),
-                            isFuture && "border-muted-foreground/30 bg-muted text-muted-foreground"
+                            isFuture && "border-muted-foreground/30 bg-muted text-muted-foreground",
+                            (isCompleted || isActive) && hasDetails && "group-hover:ring-2 group-hover:ring-primary/20"
                           )}
                         >
                           {isCompleted ? (
-                            <CheckCircle2 className="w-5 h-5" />
+                            <CheckCircle2 className="w-4 h-4" />
                           ) : (
-                            <StepIcon className="w-5 h-5" />
+                            <StepIcon className="w-4 h-4" />
                           )}
                         </div>
 
-                        <div className="flex-1 text-right">
-                          <div className="flex items-center justify-between">
-                            <div className="text-left">
-                              {(isCompleted || isActive) && timestamp && (
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(timestamp), 'PPp', { locale: ar })}
-                                </span>
-                              )}
-                            </div>
-                            <div>
-                              <p className={cn(
-                                "font-medium text-sm",
-                                isActive && "text-primary",
-                                isCompleted && "text-foreground",
-                                isFuture && "text-muted-foreground"
-                              )}>
-                                {step.labelAr}
-                              </p>
-                              {isActive && (
-                                <Badge variant="outline" className="mt-1 text-xs border-primary text-primary">
-                                  الحالة الحالية
-                                </Badge>
-                              )}
-                              {isCompleted && (
-                                <span className="text-xs text-green-600 dark:text-green-400">مكتمل ✓</span>
-                              )}
-                            </div>
-                          </div>
-                        </div>
+                        {/* Label */}
+                        <p className={cn(
+                          "text-[10px] mt-1.5 text-center leading-tight max-w-[52px]",
+                          isActive && "text-primary font-bold",
+                          isCompleted && "text-foreground font-medium",
+                          isFuture && "text-muted-foreground"
+                        )}>
+                          {step.labelAr}
+                        </p>
+
+                        {/* Timestamp */}
+                        {(isCompleted || isActive) && timestamp && (
+                          <span className="text-[8px] text-muted-foreground mt-0.5 text-center">
+                            {format(new Date(timestamp), 'hh:mm a', { locale: ar })}
+                          </span>
+                        )}
+
+                        {/* Details indicator */}
+                        {(isCompleted || isActive) && hasDetails && (
+                          <div className={cn(
+                            "w-1.5 h-1.5 rounded-full mt-1 transition-colors",
+                            isExpanded ? "bg-primary" : "bg-muted-foreground/40"
+                          )} />
+                        )}
                       </motion.div>
 
-                      {/* Detailed log entries for this status */}
-                      {hasDetails && (isCompleted || isActive) && (
-                        <div className="mr-8 border-r-2 border-dashed border-muted-foreground/20 pr-4 py-2 space-y-2">
-                          {/* Log entries */}
-                          {statusLogs.map((log, lIndex) => (
-                            <motion.div
-                              key={log.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: 0.2 + lIndex * 0.05 }}
-                              className="flex items-start gap-3 p-2.5 rounded-md bg-muted/30 text-sm"
-                            >
-                              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-primary/10 text-primary shrink-0 mt-0.5">
-                                <User className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="flex-1 text-right space-y-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <span className="text-xs text-muted-foreground">
-                                    {format(new Date(log.created_at), 'hh:mm a - yyyy/MM/dd', { locale: ar })}
-                                  </span>
-                                  {log.user_name && (
-                                    <span className="text-xs font-semibold text-foreground">
-                                      {log.user_name}
-                                    </span>
-                                  )}
-                                </div>
-                                {log.notes && (
-                                  <p className="text-xs text-muted-foreground leading-relaxed">{log.notes}</p>
-                                )}
-                                {(log.latitude && log.longitude) && (
-                                  <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-                                    <MapPin className="w-3 h-3" />
-                                    <span>{log.latitude?.toFixed(4)}, {log.longitude?.toFixed(4)}</span>
-                                  </div>
-                                )}
-                              </div>
-                            </motion.div>
-                          ))}
-
-                          {/* Declarations */}
-                          {statusDeclarations.map((decl, dIndex) => (
-                            <motion.div
-                              key={decl.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: 0.3 + dIndex * 0.05 }}
-                              className="flex items-start gap-3 p-2.5 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-sm"
-                            >
-                              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-amber-100 dark:bg-amber-800/50 text-amber-600 shrink-0 mt-0.5">
-                                <FileText className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="flex-1 text-right space-y-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <Badge variant="outline" className={cn(
-                                    "text-[10px] px-1.5 py-0",
-                                    decl.status === 'active' ? 'border-green-500 text-green-600' : 'border-amber-500 text-amber-600'
-                                  )}>
-                                    {decl.status === 'active' ? 'فعال' : 'معلق'}
-                                  </Badge>
-                                  <span className="text-xs font-semibold text-amber-700 dark:text-amber-400">
-                                    📄 {declarationTypeLabels[decl.declaration_type] || decl.declaration_type}
-                                  </span>
-                                </div>
-                                <div className="flex flex-wrap gap-2 text-xs text-muted-foreground">
-                                  {decl.driver_name && <span>🚛 السائق: {decl.driver_name}</span>}
-                                  {decl.generator_name && <span>🏭 المولّد: {decl.generator_name}</span>}
-                                  {decl.transporter_name && <span>🚚 الناقل: {decl.transporter_name}</span>}
-                                  {decl.recycler_name && <span>♻️ المدوّر: {decl.recycler_name}</span>}
-                                </div>
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <CalendarClock className="w-3 h-3" />
-                                  <span>{format(new Date(decl.declared_at), 'PPp', { locale: ar })}</span>
-                                  {decl.auto_generated && (
-                                    <Badge variant="secondary" className="text-[10px] px-1 py-0 mr-1">تلقائي</Badge>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))}
-
-                          {/* Receipts */}
-                          {statusReceipts.map((rcp, rIndex) => (
-                            <motion.div
-                              key={rcp.id}
-                              initial={{ opacity: 0, scale: 0.9 }}
-                              animate={{ opacity: 1, scale: 1 }}
-                              transition={{ delay: 0.35 + rIndex * 0.05 }}
-                              className="flex items-start gap-3 p-2.5 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-sm"
-                            >
-                              <div className="w-6 h-6 rounded-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-800/50 text-emerald-600 shrink-0 mt-0.5">
-                                <Receipt className="w-3.5 h-3.5" />
-                              </div>
-                              <div className="flex-1 text-right space-y-1">
-                                <div className="flex items-center justify-between gap-2">
-                                  <Badge variant="outline" className={cn(
-                                    "text-[10px] px-1.5 py-0",
-                                    rcp.status === 'confirmed' ? 'border-green-500 text-green-600' : 'border-amber-500 text-amber-600'
-                                  )}>
-                                    {rcp.status === 'confirmed' ? 'مؤكد' : 'معلق'}
-                                  </Badge>
-                                  <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                                    🧾 شهادة استلام: {rcp.receipt_number}
-                                  </span>
-                                </div>
-                                {rcp.notes && (
-                                  <p className="text-xs text-muted-foreground">{rcp.notes}</p>
-                                )}
-                                <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                  <CalendarClock className="w-3 h-3" />
-                                  <span>{format(new Date(rcp.created_at), 'PPp', { locale: ar })}</span>
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))}
-                        </div>
-                      )}
-
-                      {/* Inline Milestones for in_transit */}
-                      {showMilestones && (
-                        <div className="mr-8 border-r-2 border-dashed border-primary/30 pr-4 py-2 space-y-2">
-                          {inTransitMilestones.map((milestone, mIndex) => {
-                            const MilestoneIcon = getMilestoneIcon(milestone.notes);
-                            const isHalfway = milestone.notes.includes('منتصف') || milestone.notes.includes('50%');
-                            
-                            return (
-                              <motion.div
-                                key={milestone.id}
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ delay: 0.3 + mIndex * 0.05 }}
-                                className={cn(
-                                  "flex items-center gap-3 p-2 rounded-md text-sm",
-                                  isHalfway ? "bg-amber-50 dark:bg-amber-900/20" : "bg-muted/30"
-                                )}
-                              >
-                                <div className={cn(
-                                  "w-6 h-6 rounded-full flex items-center justify-center",
-                                  isHalfway ? "bg-amber-100 text-amber-600" : "bg-primary/10 text-primary"
-                                )}>
-                                  <MilestoneIcon className="w-3.5 h-3.5" />
-                                </div>
-                                <div className="flex-1 text-right">
-                                  <p className="text-xs font-medium">
-                                    {milestone.notes.replace('تقدم تلقائي: ', '')}
-                                  </p>
-                                </div>
-                                <span className="text-xs text-muted-foreground">
-                                  {format(new Date(milestone.created_at), 'hh:mm a', { locale: ar })}
-                                </span>
-                              </motion.div>
-                            );
-                          })}
-                        </div>
+                      {/* Connector Line */}
+                      {index < phase.steps.length - 1 && (
+                        <div className={cn(
+                          "h-0.5 min-w-[16px] flex-shrink-0 mt-[18px]",
+                          isCompleted ? "bg-emerald-500" : "bg-border"
+                        )} />
                       )}
                     </div>
                   );
                 })}
               </div>
             </div>
+
+            {/* Expanded Details Panel — below the horizontal strip */}
+            {phase.steps.map((step) => {
+              if (expandedStep !== step.key) return null;
+              const globalIdx = timelineSteps.indexOf(step);
+              const isActive = step.key === currentDetailedStatus;
+              const isCompleted = globalIdx < currentStatusIndex;
+              if (!isCompleted && !isActive) return null;
+
+              const { statusLogs, statusDeclarations, statusReceipts, milestones } = getExpandedDetails(step.key);
+              if (statusLogs.length === 0 && statusDeclarations.length === 0 && statusReceipts.length === 0 && milestones.length === 0) return null;
+
+              return (
+                <motion.div
+                  key={`detail-${step.key}`}
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="border rounded-lg p-3 bg-muted/20 space-y-2 mt-1"
+                >
+                  <div className="flex items-center justify-between mb-1">
+                    <button onClick={() => setExpandedStep(null)} className="text-xs text-muted-foreground hover:text-foreground">✕</button>
+                    <span className="text-xs font-bold text-foreground">{step.labelAr}</span>
+                  </div>
+
+                  {/* Log entries */}
+                  {statusLogs.map((log) => (
+                    <div key={log.id} className="flex items-start gap-2 p-2 rounded-md bg-background/80 text-sm">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-primary/10 text-primary shrink-0 mt-0.5">
+                        <User className="w-3 h-3" />
+                      </div>
+                      <div className="flex-1 text-right space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] text-muted-foreground">
+                            {format(new Date(log.created_at), 'hh:mm a - yyyy/MM/dd', { locale: ar })}
+                          </span>
+                          {log.user_name && <span className="text-[10px] font-semibold">{log.user_name}</span>}
+                        </div>
+                        {log.notes && <p className="text-[10px] text-muted-foreground leading-relaxed">{log.notes}</p>}
+                        {(log.latitude && log.longitude) && (
+                          <div className="flex items-center gap-1 text-[10px] text-blue-600 dark:text-blue-400">
+                            <MapPin className="w-2.5 h-2.5" />
+                            <span>{log.latitude?.toFixed(4)}, {log.longitude?.toFixed(4)}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Declarations */}
+                  {statusDeclarations.map((decl) => (
+                    <div key={decl.id} className="flex items-start gap-2 p-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/40 text-sm">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-amber-100 dark:bg-amber-800/50 text-amber-600 shrink-0 mt-0.5">
+                        <FileText className="w-3 h-3" />
+                      </div>
+                      <div className="flex-1 text-right space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge variant="outline" className={cn(
+                            "text-[9px] px-1 py-0",
+                            decl.status === 'active' ? 'border-green-500 text-green-600' : 'border-amber-500 text-amber-600'
+                          )}>
+                            {decl.status === 'active' ? 'فعال' : 'معلق'}
+                          </Badge>
+                          <span className="text-[10px] font-semibold text-amber-700 dark:text-amber-400">
+                            📄 {declarationTypeLabels[decl.declaration_type] || decl.declaration_type}
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-1.5 text-[10px] text-muted-foreground">
+                          {decl.driver_name && <span>🚛 {decl.driver_name}</span>}
+                          {decl.generator_name && <span>🏭 {decl.generator_name}</span>}
+                          {decl.transporter_name && <span>🚚 {decl.transporter_name}</span>}
+                          {decl.recycler_name && <span>♻️ {decl.recycler_name}</span>}
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <CalendarClock className="w-2.5 h-2.5" />
+                          <span>{format(new Date(decl.declared_at), 'PPp', { locale: ar })}</span>
+                          {decl.auto_generated && <Badge variant="secondary" className="text-[8px] px-1 py-0 mr-1">تلقائي</Badge>}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Receipts */}
+                  {statusReceipts.map((rcp) => (
+                    <div key={rcp.id} className="flex items-start gap-2 p-2 rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800/40 text-sm">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center bg-emerald-100 dark:bg-emerald-800/50 text-emerald-600 shrink-0 mt-0.5">
+                        <Receipt className="w-3 h-3" />
+                      </div>
+                      <div className="flex-1 text-right space-y-0.5">
+                        <div className="flex items-center justify-between gap-2">
+                          <Badge variant="outline" className={cn(
+                            "text-[9px] px-1 py-0",
+                            rcp.status === 'confirmed' ? 'border-green-500 text-green-600' : 'border-amber-500 text-amber-600'
+                          )}>
+                            {rcp.status === 'confirmed' ? 'مؤكد' : 'معلق'}
+                          </Badge>
+                          <span className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-400">
+                            🧾 شهادة استلام: {rcp.receipt_number}
+                          </span>
+                        </div>
+                        {rcp.notes && <p className="text-[10px] text-muted-foreground">{rcp.notes}</p>}
+                        <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                          <CalendarClock className="w-2.5 h-2.5" />
+                          <span>{format(new Date(rcp.created_at), 'PPp', { locale: ar })}</span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Milestones */}
+                  {milestones.map((milestone) => {
+                    const MilestoneIcon = getMilestoneIcon(milestone.notes);
+                    const isHalfway = milestone.notes.includes('منتصف') || milestone.notes.includes('50%');
+                    return (
+                      <div key={milestone.id} className={cn(
+                        "flex items-center gap-2 p-2 rounded-md text-sm",
+                        isHalfway ? "bg-amber-50 dark:bg-amber-900/20" : "bg-muted/30"
+                      )}>
+                        <div className={cn(
+                          "w-5 h-5 rounded-full flex items-center justify-center",
+                          isHalfway ? "bg-amber-100 text-amber-600" : "bg-primary/10 text-primary"
+                        )}>
+                          <MilestoneIcon className="w-3 h-3" />
+                        </div>
+                        <p className="text-[10px] font-medium flex-1 text-right">
+                          {milestone.notes.replace('تقدم تلقائي: ', '')}
+                        </p>
+                        <span className="text-[10px] text-muted-foreground">
+                          {format(new Date(milestone.created_at), 'hh:mm a', { locale: ar })}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </motion.div>
+              );
+            })}
           </div>
         ))}
       </div>
 
       {/* Summary Stats */}
-      <div className="pt-4 border-t space-y-3">
+      <div className="pt-3 border-t space-y-2">
         {(declarations.length > 0 || receipts.length > 0) && (
-          <div className="flex flex-wrap gap-2 justify-end">
+          <div className="flex flex-wrap gap-1.5 justify-end">
             {declarations.length > 0 && (
-              <Badge variant="secondary" className="gap-1 text-xs">
+              <Badge variant="secondary" className="gap-1 text-[10px]">
                 <FileText className="w-3 h-3" />
                 {declarations.length} إقرار
               </Badge>
             )}
             {receipts.length > 0 && (
-              <Badge variant="secondary" className="gap-1 text-xs">
+              <Badge variant="secondary" className="gap-1 text-[10px]">
                 <Receipt className="w-3 h-3" />
                 {receipts.length} شهادة استلام
               </Badge>
             )}
-            <Badge variant="secondary" className="gap-1 text-xs">
+            <Badge variant="secondary" className="gap-1 text-[10px]">
               <ShieldCheck className="w-3 h-3" />
               {logEntries.length} سجل
             </Badge>
@@ -651,13 +649,13 @@ const ShipmentStatusTimeline = ({
         )}
 
         {/* Progress */}
-        <div className="flex items-center justify-between text-sm mb-2">
+        <div className="flex items-center justify-between text-xs">
           <span className="text-muted-foreground">
             {currentStatusIndex + 1} من {timelineSteps.length}
           </span>
           <span className="font-medium">تقدم الشحنة</span>
         </div>
-        <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
+        <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${((currentStatusIndex + 1) / timelineSteps.length) * 100}%` }}
