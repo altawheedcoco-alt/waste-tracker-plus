@@ -51,6 +51,8 @@ import { LiveStatsGrid, OverallProgressCard } from '@/components/system-status/S
 import { IntegrationCard, IntegrationDetailView, IntegrationStatsGrid } from '@/components/system-status/IntegrationsComponents';
 import { OrganizationsHealthTab } from '@/components/system-status/OrganizationsHealthTab';
 import { SchemaArchiveTab } from '@/components/system-status/SchemaArchiveTab';
+import { lazy, Suspense } from 'react';
+const AIHealthReport = lazy(() => import('@/components/system-status/AIHealthReport'));
 import { triggerAIChat } from '@/lib/aiChatBus';
 import { toast } from 'sonner';
 
