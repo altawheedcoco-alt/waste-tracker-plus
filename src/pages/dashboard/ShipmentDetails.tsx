@@ -234,7 +234,11 @@ const ShipmentDetailsPage = () => {
           <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
         </Card>
 
-        {/* Tabbed Content */}
+        {/* Inline Status Change */}
+        <Suspense fallback={null}>
+          <InlineStatusChange shipment={shipment} onStatusChanged={fetchShipmentDetails} />
+        </Suspense>
+
         <Tabs value={activeTab} onValueChange={(v) => setPref(PREF_KEY_ACTIVE_TAB, v)} dir="rtl" className="space-y-4">
           <V2TabsNav tabs={TABS} />
 
