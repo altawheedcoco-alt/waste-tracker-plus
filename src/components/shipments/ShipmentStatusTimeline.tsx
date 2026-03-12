@@ -704,13 +704,13 @@ const ShipmentStatusTimeline = ({
                       </Badge>
                     );
                   })}
-                  {latestConfirmed && (
+                  {showReceipt && latestConfirmed && (
                     <Badge variant="outline" className="gap-1 text-[10px] px-2 border-emerald-500/50 bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-700/50">
                       <CheckCircle2 className="w-3 h-3" />
                       شهادة استلام
                     </Badge>
                   )}
-                  {latestPending && !latestConfirmed && (
+                  {showReceipt && latestPending && !latestConfirmed && (
                     <Badge variant="outline" className="gap-1 text-[10px] px-2 border-amber-500/50 bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-700/50">
                       <Clock className="w-3 h-3" />
                       شهادة استلام
