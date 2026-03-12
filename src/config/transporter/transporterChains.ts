@@ -122,5 +122,26 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
         { id: 'eff-risk-update', nodeType: 'effect', labelAr: 'تحديث تقييم المخاطر', labelEn: 'Update Risk Assessment', bindingType: 'hybrid', icon: 'AlertCircle', linkedTab: 'risk' },
       ],
     },
+
+    // ═══════════════════════════════════════════
+    // 6. إدارة الحوادث أثناء الرحلة (جديد - لسد الفجوة الوظيفية)
+    // ═══════════════════════════════════════════
+    {
+      id: 'incident-flow',
+      labelAr: 'إدارة الحوادث أثناء الرحلة',
+      labelEn: 'Trip Incident Management',
+      descriptionAr: 'التعامل مع الحوادث والطوارئ المفاجئة أثناء نقل الشحنة',
+      descriptionEn: 'Handle emergencies and incidents during shipment transport',
+      nodes: [
+        { id: 'btn-report-incident', nodeType: 'trigger', labelAr: 'الإبلاغ عن حادث', labelEn: 'Report Incident', bindingType: 'internal', icon: 'Siren' },
+        { id: 'fn-assess-severity', nodeType: 'function', labelAr: 'تقييم خطورة الحادث', labelEn: 'Assess Incident Severity', bindingType: 'internal', icon: 'AlertTriangle', leadsTo: ['fn-decide-incident-action'] },
+        { id: 'fn-decide-incident-action', nodeType: 'function', labelAr: 'قرار المعالجة', labelEn: 'Decide Action', bindingType: 'internal', icon: 'GitBranch', leadsTo: ['res-reassign-driver', 'res-emergency-stop'] },
+        { id: 'res-reassign-driver', nodeType: 'result', labelAr: 'إعادة تعيين سائق بديل', labelEn: 'Reassign Backup Driver', bindingType: 'internal', icon: 'UserPlus', leadsTo: ['eff-notify-parties'] },
+        { id: 'res-emergency-stop', nodeType: 'result', labelAr: 'إيقاف طوارئ', labelEn: 'Emergency Stop', bindingType: 'hybrid', icon: 'OctagonX', leadsTo: ['eff-notify-parties', 'eff-ohs-report'] },
+        { id: 'eff-notify-parties', nodeType: 'effect', labelAr: 'إشعار الأطراف المعنية', labelEn: 'Notify Involved Parties', bindingType: 'hybrid', icon: 'Bell' },
+        { id: 'eff-ohs-report', nodeType: 'effect', labelAr: 'تقرير السلامة المهنية', labelEn: 'OHS Incident Report', bindingType: 'admin', icon: 'FileWarning', linkedTab: 'ohs', affects: ['compliance-chain'] },
+        { id: 'eff-fleet-damage', nodeType: 'effect', labelAr: 'تسجيل ضرر المركبة', labelEn: 'Record Vehicle Damage', bindingType: 'internal', icon: 'CarFront', linkedTab: 'fleet' },
+      ],
+    },
   ],
 };
