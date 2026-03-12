@@ -78,10 +78,11 @@ export const TRANSPORTER_CHAINS: OrgActionChains = {
         { id: 'fn-permit-check', nodeType: 'function', labelAr: 'فحص التصاريح', labelEn: 'Check Permits', bindingType: 'admin', icon: 'Shield', leadsTo: ['fn-training'] },
         { id: 'fn-training', nodeType: 'function', labelAr: 'التدريب والأكاديمية', labelEn: 'Training & Academy', bindingType: 'internal', icon: 'GraduationCap', leadsTo: ['res-certified'], linkedPath: '/dashboard/driver-academy' },
         { id: 'res-certified', nodeType: 'result', labelAr: 'سائق معتمد', labelEn: 'Certified Driver', bindingType: 'internal', icon: 'BadgeCheck', leadsTo: ['eff-performance', 'eff-rewards', 'eff-license-update', 'eff-ai-pattern'] },
-        { id: 'eff-performance', nodeType: 'effect', labelAr: 'تتبع الأداء', labelEn: 'Track Performance', bindingType: 'internal', icon: 'BarChart3', linkedTab: 'performance' },
+        { id: 'eff-performance', nodeType: 'effect', labelAr: 'تتبع الأداء', labelEn: 'Track Performance', bindingType: 'internal', icon: 'BarChart3', linkedTab: 'performance', leadsTo: ['eff-driving-wear'] },
+        { id: 'eff-driving-wear', nodeType: 'effect', labelAr: 'تأثير أسلوب القيادة على الصيانة', labelEn: 'Driving Style Impact on Maintenance', bindingType: 'internal', icon: 'Wrench', linkedTab: 'fleet' },
         { id: 'eff-rewards', nodeType: 'effect', labelAr: 'نظام المكافآت', labelEn: 'Rewards System', bindingType: 'internal', icon: 'Trophy', linkedPath: '/dashboard/driver-rewards' },
         { id: 'eff-license-update', nodeType: 'effect', labelAr: 'تحديث التراخيص والامتثال', labelEn: 'Update Licenses & Compliance', bindingType: 'admin', icon: 'ShieldCheck', linkedTab: 'compliance', affects: ['compliance-chain'] },
-        { id: 'eff-ai-pattern', nodeType: 'effect', labelAr: 'تحليل أنماط القيادة بالذكاء الاصطناعي', labelEn: 'AI Driving Pattern Analysis', bindingType: 'internal', icon: 'Brain', linkedTab: 'ai' },
+        { id: 'eff-ai-pattern', nodeType: 'effect', labelAr: 'تحليل أنماط القيادة بالذكاء الاصطناعي', labelEn: 'AI Driving Pattern Analysis', bindingType: 'hybrid', icon: 'Brain', linkedTab: 'ai' },
       ],
     },
 
