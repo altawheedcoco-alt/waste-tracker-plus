@@ -102,7 +102,9 @@ export const useAutoActions = (organizationId: string | undefined) => {
       return data as unknown as AutoActionsSettings;
     },
     enabled: !!organizationId,
-    staleTime: 0, // Always refetch to ensure latest state
+    staleTime: 0, // Always refetch to ensure latest state from DB
+    refetchOnWindowFocus: true, // Re-sync when user returns to tab
+    refetchOnMount: 'always', // Always check DB on mount
   });
 
   const updateMutation = useMutation({
@@ -147,9 +149,15 @@ export const useAutoActions = (organizationId: string | undefined) => {
       if (context?.previous) {
         queryClient.setQueryData(['auto-actions', organizationId], context.previous);
       }
-      toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
+      console.error('Auto-actions save failed:', err);
+      toast({ title: 'خطأ في حفظ الإجراءات التلقائية', description: err.message, variant: 'destructive' });
+    },
+    onSuccess: (data) => {
+      // Force cache to use server response (source of truth)
+      queryClient.setQueryData(['auto-actions', organizationId], data);
     },
     onSettled: () => {
+      // Refetch to ensure sync with DB
       queryClient.invalidateQueries({ queryKey: ['auto-actions', organizationId] });
     },
   });
