@@ -39,6 +39,7 @@ import {
   Radio,
   Building2,
   Wrench,
+  Loader2,
 } from 'lucide-react';
 import EngineerVisionSection from '@/components/system-status/EngineerVisionSection';
 import BackButton from '@/components/ui/back-button';
