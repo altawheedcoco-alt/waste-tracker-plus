@@ -325,8 +325,24 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
   }, [open, organization?.id]);
 
   const loadSettings = async () => {
-    // In a real implementation, load saved settings from database
-    // For now, use default settings
+    if (!organization?.id) return;
+    try {
+      const { data } = await supabase
+        .from('organization_automation_settings' as any)
+        .select('settings')
+        .eq('organization_id', organization.id)
+        .maybeSingle();
+      
+      if (data?.settings && typeof data.settings === 'object') {
+        const saved = data.settings as Record<string, boolean>;
+        setSettings(prev => prev.map(s => ({
+          ...s,
+          enabled: saved[s.key] !== undefined ? saved[s.key] : s.enabled,
+        })));
+      }
+    } catch (err) {
+      console.error('Error loading automation settings:', err);
+    }
   };
 
   const handleToggle = (settingId: string) => {
@@ -366,12 +382,27 @@ const AutomationSettingsDialog = ({ organizationType = 'transporter', children }
   };
 
   const handleSave = async () => {
+    if (!organization?.id) return;
     setSaving(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const settingsMap: Record<string, boolean> = {};
+      settings.forEach(s => { settingsMap[s.key] = s.enabled; });
+
+      const { data: user } = await supabase.auth.getUser();
+      const { error } = await supabase
+        .from('organization_automation_settings' as any)
+        .upsert({
+          organization_id: organization.id,
+          settings: settingsMap,
+          updated_at: new Date().toISOString(),
+          updated_by: user.user?.id || null,
+        } as any, { onConflict: 'organization_id' });
+      
+      if (error) throw error;
       toast.success('تم حفظ إعدادات الأتمتة بنجاح');
       setOpen(false);
     } catch (error) {
+      console.error('Error saving automation settings:', error);
       toast.error('فشل في حفظ الإعدادات');
     } finally {
       setSaving(false);
