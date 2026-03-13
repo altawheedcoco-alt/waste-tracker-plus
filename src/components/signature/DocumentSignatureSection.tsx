@@ -71,6 +71,9 @@ const DocumentSignatureSection = ({
   compact = false,
   className,
 }: DocumentSignatureSectionProps) => {
+  // Digital verification identity is MANDATORY - stamp & signature always shown
+  const showStamp = true;
+  const showSignature = true;
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const handleSignComplete = (data: BiometricSignatureData) => {
