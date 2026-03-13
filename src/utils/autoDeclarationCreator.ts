@@ -160,6 +160,20 @@ function applyVisibilityMasking(
   };
 }
 
+// ─── Transporter Docs Visibility Helper ───
+
+/**
+ * Checks if transporter documents (declarations/receipts) should be visible to generator.
+ */
+export async function isTransporterDocsVisibleToGenerator(transporterOrgId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('organization_auto_actions')
+    .select('transporter_docs_visible_to_generator')
+    .eq('organization_id', transporterOrgId)
+    .maybeSingle();
+  return data?.transporter_docs_visible_to_generator ?? true;
+}
+
 // ─── Shared Helpers ───
 
 async function fetchShipmentWithParties(shipmentId: string) {
