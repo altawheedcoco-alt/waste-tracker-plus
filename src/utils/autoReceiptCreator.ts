@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
+import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
@@ -41,6 +42,11 @@ export async function autoCreateReceipt(
   // Generate receipt number
   const receiptNumber = `RCP-${Date.now().toString(36).toUpperCase()}`;
 
+  // Generate mandatory verification identity
+  const identity = generateDocumentIdentity('shipment_receipt', receiptNumber, {
+    shipmentNumber: shipment.shipment_number,
+  });
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     receipt_number: receiptNumber,
@@ -54,6 +60,7 @@ export async function autoCreateReceipt(
     status: 'pending',
     notes: 'تم الإنشاء تلقائياً عند استلام الشحنة',
     created_by: userId || null,
+    ...identity,
   };
 
   const { data: receiptData, error } = await supabase

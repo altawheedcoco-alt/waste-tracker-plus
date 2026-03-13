@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
+import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
 
 const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — صادر تلقائياً من المولّد
 
@@ -87,6 +88,13 @@ export async function autoCreateGeneratorDeclaration(
 
   const getOrgName = (id?: string | null) => orgs?.find(o => o.id === id)?.name || '';
 
+  // Generate mandatory verification identity
+  const declarationNumber = `DCL-GEN-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('generator_handover', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.generator_id),
+  });
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -102,6 +110,7 @@ export async function autoCreateGeneratorDeclaration(
     generator_name: getOrgName(shipment.generator_id),
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
+    ...identity,
   };
 
   const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
@@ -175,6 +184,13 @@ export async function autoCreateRecyclerDeclaration(
 
   const getOrgName = (id?: string | null) => orgs?.find(o => o.id === id)?.name || '';
 
+  // Generate mandatory verification identity
+  const declarationNumber = `DCL-RCY-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('recycler_receipt', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.recycler_id),
+  });
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -190,6 +206,7 @@ export async function autoCreateRecyclerDeclaration(
     generator_name: getOrgName(shipment.generator_id),
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
+    ...identity,
   };
 
   const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);

@@ -7901,6 +7901,7 @@ export type Database = {
       delivery_declarations: {
         Row: {
           auto_generated: boolean
+          barcode_data: string | null
           created_at: string
           declaration_text: string | null
           declaration_type: string
@@ -7913,6 +7914,7 @@ export type Database = {
           generator_name: string | null
           id: string
           ip_address: string | null
+          qr_data: string | null
           quantity: number | null
           recycler_name: string | null
           rejected_at: string | null
@@ -7924,10 +7926,12 @@ export type Database = {
           transporter_name: string | null
           unit: string | null
           user_agent: string | null
+          verification_code: string | null
           waste_type: string | null
         }
         Insert: {
           auto_generated?: boolean
+          barcode_data?: string | null
           created_at?: string
           declaration_text?: string | null
           declaration_type?: string
@@ -7940,6 +7944,7 @@ export type Database = {
           generator_name?: string | null
           id?: string
           ip_address?: string | null
+          qr_data?: string | null
           quantity?: number | null
           recycler_name?: string | null
           rejected_at?: string | null
@@ -7951,10 +7956,12 @@ export type Database = {
           transporter_name?: string | null
           unit?: string | null
           user_agent?: string | null
+          verification_code?: string | null
           waste_type?: string | null
         }
         Update: {
           auto_generated?: boolean
+          barcode_data?: string | null
           created_at?: string
           declaration_text?: string | null
           declaration_type?: string
@@ -7967,6 +7974,7 @@ export type Database = {
           generator_name?: string | null
           id?: string
           ip_address?: string | null
+          qr_data?: string | null
           quantity?: number | null
           recycler_name?: string | null
           rejected_at?: string | null
@@ -7978,6 +7986,7 @@ export type Database = {
           transporter_name?: string | null
           unit?: string | null
           user_agent?: string | null
+          verification_code?: string | null
           waste_type?: string | null
         }
         Relationships: [
@@ -32646,6 +32655,7 @@ export type Database = {
       shipment_receipts: {
         Row: {
           actual_weight: number | null
+          barcode_data: string | null
           confirmed_at: string | null
           confirmed_by: string | null
           created_at: string
@@ -32661,6 +32671,7 @@ export type Database = {
           pickup_date: string
           pickup_location: string | null
           pickup_photos: string[] | null
+          qr_data: string | null
           receipt_number: string
           receipt_type: string | null
           shipment_id: string
@@ -32674,11 +32685,13 @@ export type Database = {
           transporter_stamp_url: string | null
           unit: string | null
           updated_at: string
+          verification_code: string | null
           waste_category: string | null
           waste_type: string | null
         }
         Insert: {
           actual_weight?: number | null
+          barcode_data?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -32694,6 +32707,7 @@ export type Database = {
           pickup_date?: string
           pickup_location?: string | null
           pickup_photos?: string[] | null
+          qr_data?: string | null
           receipt_number?: string
           receipt_type?: string | null
           shipment_id: string
@@ -32707,11 +32721,13 @@ export type Database = {
           transporter_stamp_url?: string | null
           unit?: string | null
           updated_at?: string
+          verification_code?: string | null
           waste_category?: string | null
           waste_type?: string | null
         }
         Update: {
           actual_weight?: number | null
+          barcode_data?: string | null
           confirmed_at?: string | null
           confirmed_by?: string | null
           created_at?: string
@@ -32727,6 +32743,7 @@ export type Database = {
           pickup_date?: string
           pickup_location?: string | null
           pickup_photos?: string[] | null
+          qr_data?: string | null
           receipt_number?: string
           receipt_type?: string | null
           shipment_id?: string
@@ -32740,6 +32757,7 @@ export type Database = {
           transporter_stamp_url?: string | null
           unit?: string | null
           updated_at?: string
+          verification_code?: string | null
           waste_category?: string | null
           waste_type?: string | null
         }
