@@ -61,7 +61,7 @@ export default function OrgMembersPanel() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [confirmAction, setConfirmAction] = useState<{ type: 'suspend' | 'activate' | 'terminate'; member: OrgMember } | null>(null);
-
+  const [credentialsMember, setCredentialsMember] = useState<OrgMember | null>(null);
   const [form, setForm] = useState({
     email: '', password: '', fullName: '', phone: '',
     memberRole: 'member' as MemberRole,
