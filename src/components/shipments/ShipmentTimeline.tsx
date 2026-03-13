@@ -76,7 +76,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
             <div
               className={cn(
                 'w-3 h-3 rounded-full shrink-0 transition-colors',
-                step.status === 'completed' && 'bg-emerald-500',
+                step.status === 'completed' && 'bg-primary',
                 step.status === 'current' && 'bg-primary animate-pulse',
                 step.status === 'pending' && 'bg-muted-foreground/20'
               )}
@@ -85,7 +85,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
               <div
                 className={cn(
                   'h-0.5 flex-1 mx-0.5',
-                  step.status === 'completed' ? 'bg-emerald-500' : 'bg-muted-foreground/20'
+                  step.status === 'completed' ? 'bg-primary' : 'bg-muted-foreground/20'
                 )}
               />
             )}
