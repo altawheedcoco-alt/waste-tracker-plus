@@ -11991,6 +11991,7 @@ export type Database = {
       drivers: {
         Row: {
           created_at: string | null
+          declaration_visible_to_generator: boolean | null
           id: string
           is_available: boolean | null
           license_expiry: string | null
@@ -12003,6 +12004,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string | null
+          declaration_visible_to_generator?: boolean | null
           id?: string
           is_available?: boolean | null
           license_expiry?: string | null
@@ -12015,6 +12017,7 @@ export type Database = {
         }
         Update: {
           created_at?: string | null
+          declaration_visible_to_generator?: boolean | null
           id?: string
           is_available?: boolean | null
           license_expiry?: string | null
@@ -23292,6 +23295,7 @@ export type Database = {
           auto_weight_reconciliation: boolean
           auto_whatsapp_notifications: boolean
           created_at: string
+          driver_declaration_visible_to_generator: boolean
           id: string
           last_modified_by: string | null
           organization_id: string
@@ -23319,6 +23323,7 @@ export type Database = {
           auto_weight_reconciliation?: boolean
           auto_whatsapp_notifications?: boolean
           created_at?: string
+          driver_declaration_visible_to_generator?: boolean
           id?: string
           last_modified_by?: string | null
           organization_id: string
@@ -23346,6 +23351,7 @@ export type Database = {
           auto_weight_reconciliation?: boolean
           auto_whatsapp_notifications?: boolean
           created_at?: string
+          driver_declaration_visible_to_generator?: boolean
           id?: string
           last_modified_by?: string | null
           organization_id?: string
