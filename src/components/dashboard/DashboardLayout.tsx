@@ -107,7 +107,7 @@ import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
-import { getOrgChains } from '@/config/actionChainsRegistry';
+
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
