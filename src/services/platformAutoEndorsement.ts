@@ -437,8 +437,8 @@ export async function evaluateAndEndorse(params: {
         biometric_verified: true,
         verification_code: verificationCode,
         user_agent: navigator.userAgent,
-        notes: signaturesResult.passed && failedCriteria.length > 0
-          ? `اعتماد تلقائي — التوقيعات مكتملة (${failedCriteria.length} معيار اختياري لم يتحقق)`
+        notes: failedCriteria.length > 0
+          ? `اعتماد تلقائي — مع ملاحظات: ${failedCriteria.map(c => c.criterionNameAr).join(', ')}`
           : 'اعتماد تلقائي — استوفى كافة المعايير',
       })
       .select('id')
