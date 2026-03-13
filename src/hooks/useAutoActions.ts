@@ -45,26 +45,26 @@ export const AUTO_ACTION_KEYS = [
 
 export type AutoActionKey = typeof AUTO_ACTION_KEYS[number];
 
-export const AUTO_ACTION_LABELS: Record<AutoActionKey, { ar: string; en: string; group: string }> = {
-  auto_delivery_certificate: { ar: 'إصدار شهادات التسليم تلقائياً', en: 'Auto delivery certificates', group: 'documents' },
-  auto_receipt_generation: { ar: 'إصدار الإيصالات تلقائياً', en: 'Auto receipt generation', group: 'documents' },
-  auto_manifest_generation: { ar: 'إصدار المانيفست تلقائياً', en: 'Auto manifest generation', group: 'documents' },
-  auto_invoice_generation: { ar: 'إصدار الفواتير تلقائياً', en: 'Auto invoice generation', group: 'documents' },
-  auto_tracking_form: { ar: 'إصدار نماذج التتبع تلقائياً', en: 'Auto tracking forms', group: 'documents' },
-  auto_shipment_notifications: { ar: 'إشعارات الشحنات', en: 'Shipment notifications', group: 'notifications' },
-  auto_status_change_alerts: { ar: 'تنبيهات تغيير الحالة', en: 'Status change alerts', group: 'notifications' },
-  auto_partner_notifications: { ar: 'إشعارات الشركاء', en: 'Partner notifications', group: 'notifications' },
-  auto_whatsapp_notifications: { ar: 'إشعارات واتساب', en: 'WhatsApp notifications', group: 'notifications' },
-  auto_email_notifications: { ar: 'إشعارات البريد الإلكتروني', en: 'Email notifications', group: 'notifications' },
-  auto_shipment_status_update: { ar: 'تحديث حالات الشحنات', en: 'Shipment status updates', group: 'operations' },
-  auto_weight_reconciliation: { ar: 'مطابقة الأوزان', en: 'Weight reconciliation', group: 'operations' },
-  auto_compliance_check: { ar: 'فحص الامتثال', en: 'Compliance checks', group: 'operations' },
-  auto_archive_documents: { ar: 'أرشفة المستندات', en: 'Document archiving', group: 'operations' },
-  auto_signature_request: { ar: 'طلب التوقيعات', en: 'Signature requests', group: 'operations' },
-  auto_waste_classification: { ar: 'تصنيف المخلفات بالذكاء الاصطناعي', en: 'AI waste classification', group: 'ai' },
-  auto_route_optimization: { ar: 'تحسين المسارات', en: 'Route optimization', group: 'ai' },
-  auto_fraud_detection: { ar: 'كشف الاحتيال', en: 'Fraud detection', group: 'ai' },
-  auto_price_calculation: { ar: 'حساب الأسعار تلقائياً', en: 'Auto price calculation', group: 'ai' },
+export const AUTO_ACTION_LABELS: Record<AutoActionKey, { ar: string; en: string; group: string; trigger?: string }> = {
+  auto_delivery_certificate: { ar: 'إصدار إقرارات التسليم/الاستلام تلقائياً', en: 'Auto delivery declarations', group: 'documents', trigger: 'عند تسجيل/اعتماد أو تسليم الشحنة' },
+  auto_receipt_generation: { ar: 'إصدار شهادات الاستلام تلقائياً', en: 'Auto receipt generation', group: 'documents', trigger: 'عند استلام الناقل للشحنة أو تسليمها' },
+  auto_manifest_generation: { ar: 'إصدار المانيفست تلقائياً', en: 'Auto manifest generation', group: 'documents', trigger: 'عند بدء نقل الشحنة (in_transit)' },
+  auto_invoice_generation: { ar: 'إصدار الفواتير تلقائياً', en: 'Auto invoice generation', group: 'documents', trigger: 'عند اكتمال الشحنة (completed/confirmed)' },
+  auto_tracking_form: { ar: 'إصدار نماذج التتبع تلقائياً', en: 'Auto tracking forms', group: 'documents', trigger: 'عند تحميل الشحنة (loading)' },
+  auto_shipment_notifications: { ar: 'إشعارات الشحنات', en: 'Shipment notifications', group: 'notifications', trigger: 'عند أي تغيير في حالة الشحنة' },
+  auto_status_change_alerts: { ar: 'تنبيهات تغيير الحالة', en: 'Status change alerts', group: 'notifications', trigger: 'عند انتقال الشحنة لمرحلة جديدة' },
+  auto_partner_notifications: { ar: 'إشعارات الشركاء', en: 'Partner notifications', group: 'notifications', trigger: 'عند إصدار مستند يخص شريكاً' },
+  auto_whatsapp_notifications: { ar: 'إشعارات واتساب', en: 'WhatsApp notifications', group: 'notifications', trigger: 'مع كل إشعار داخلي' },
+  auto_email_notifications: { ar: 'إشعارات البريد الإلكتروني', en: 'Email notifications', group: 'notifications', trigger: 'مع كل إشعار داخلي' },
+  auto_shipment_status_update: { ar: 'تحديث حالات الشحنات', en: 'Shipment status updates', group: 'operations', trigger: 'عند وصول السائق للموقع (Geofence)' },
+  auto_weight_reconciliation: { ar: 'مطابقة الأوزان', en: 'Weight reconciliation', group: 'operations', trigger: 'عند تسجيل الوزن في مرحلة الوزن' },
+  auto_compliance_check: { ar: 'فحص الامتثال', en: 'Compliance checks', group: 'operations', trigger: 'قبل اعتماد الشحنة' },
+  auto_archive_documents: { ar: 'أرشفة المستندات', en: 'Document archiving', group: 'operations', trigger: 'عند اكتمال الشحنة' },
+  auto_signature_request: { ar: 'طلب التوقيعات', en: 'Signature requests', group: 'operations', trigger: 'عند إصدار إقرار أو شهادة' },
+  auto_waste_classification: { ar: 'تصنيف المخلفات بالذكاء الاصطناعي', en: 'AI waste classification', group: 'ai', trigger: 'عند إنشاء شحنة جديدة' },
+  auto_route_optimization: { ar: 'تحسين المسارات', en: 'Route optimization', group: 'ai', trigger: 'عند تعيين سائق للشحنة' },
+  auto_fraud_detection: { ar: 'كشف الاحتيال', en: 'Fraud detection', group: 'ai', trigger: 'عند تغييرات الأوزان أو المسار' },
+  auto_price_calculation: { ar: 'حساب الأسعار تلقائياً', en: 'Auto price calculation', group: 'ai', trigger: 'عند ربط الشحنة بخطاب ترسية' },
 };
 
 export const AUTO_ACTION_GROUPS = {
