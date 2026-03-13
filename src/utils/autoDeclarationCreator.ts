@@ -604,6 +604,11 @@ export async function autoCreateDisposalCertificate(
     shipment, disposalOrgId,
   );
 
+  // Check if transporter allows forwarding docs to generator
+  const visibleToGenerator = shipment.transporter_id
+    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
+    : true;
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -618,6 +623,7 @@ export async function autoCreateDisposalCertificate(
     unit: shipment.unit,
     ...maskedNames,
     disposal_name: getOrgName(disposalOrgId),
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -627,8 +633,14 @@ export async function autoCreateDisposalCertificate(
     return;
   }
 
+  // Always notify transporter; only notify generator if transporter allows
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
+  if (visibleToGenerator) {
+    notifyIds.push(shipment.generator_id);
+  }
+
   await notifyOrgUsers(
-    [shipment.transporter_id],
+    notifyIds,
     '🏭 شهادة تخلص نهائي',
     `أصدرت جهة التخلص شهادة تخلص نهائي للشحنة ${shipment.shipment_number}.`,
     shipmentId,
