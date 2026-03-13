@@ -64,7 +64,7 @@ export async function autoCreateReceipt(
     status: 'pending',
     notes: 'تم الإنشاء تلقائياً عند استلام الشحنة',
     created_by: userId || null,
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
