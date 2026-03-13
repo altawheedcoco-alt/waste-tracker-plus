@@ -331,7 +331,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
 
       // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         
         // Generator declaration when shipment is approved/registered
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) {
