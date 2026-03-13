@@ -357,12 +357,24 @@ export default function GuillocheA4BorderDesigner() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [a4PreviewOpen, setA4PreviewOpen] = useState(false);
   const [activeBorder, setActiveBorder] = useState<BorderConfig | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
 
   // Customization
   const [customThickness, setCustomThickness] = useState(2);
   const [customColor, setCustomColor] = useState<string | null>(null);
 
   const allBorders = useMemo(() => generateBorders(), []);
+
+  const savedBorderIds: string[] = getPref('guilloche_saved_borders', []);
+  const savedBorders = useMemo(() => {
+    return savedBorderIds.map(id => allBorders.find(b => b.id === id)).filter(Boolean) as BorderConfig[];
+  }, [savedBorderIds, allBorders]);
+
+  const removeSavedBorder = (borderId: string) => {
+    const updated = savedBorderIds.filter(id => id !== borderId);
+    setPref('guilloche_saved_borders', updated);
+    toast.info('تم إزالة البرواز من المحفوظات');
+  };
 
   const filteredBorders = useMemo(() => {
     return allBorders.filter(b => {
