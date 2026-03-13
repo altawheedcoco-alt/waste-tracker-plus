@@ -1,6 +1,6 @@
 /**
  * لوحة الأرشيف والمستندات — يعرض كل مستندات المنظمة من entity_documents
- * يستخدم Signed URLs للوصول الآمن للملفات في الباكتات الخاصة
+ * يدعم فتح مركز إجراءات المستند الموحد (DocumentActionHub) لأي مستند
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -21,6 +21,8 @@ import { ar as arLocale } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import DocumentActionHub from '@/components/documents/DocumentActionHub';
+import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   shipment: { label: 'شحنة', icon: FileText },
