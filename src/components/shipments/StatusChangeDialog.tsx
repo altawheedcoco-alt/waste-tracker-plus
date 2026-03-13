@@ -842,7 +842,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
 
       // Auto documents (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
         if (['picked_up', 'loading'].includes(dbStatus) && organization?.organization_type === 'transporter') await autoCreateDriverConfirmation(shipment.id, organization.id, profile?.id || '', profile?.full_name);
         if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
@@ -853,9 +853,14 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
           const { data: fs } = await supabase.from('shipments').select('recycler_id, transporter_id').eq('id', shipment.id).single();
           if (fs?.recycler_id) await autoCreateRecyclerDeclaration(shipment.id, fs.recycler_id, profile?.id || '');
           if (organization?.organization_type === 'transporter') await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+          if ((organization?.organization_type as string) === 'disposal') await autoCreateDisposalReceptionDeclaration(shipment.id, organization.id, profile?.id || '');
         }
         if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(dbStatus) && (organization?.organization_type as string) === 'disposal') {
-          await autoCreateDisposalDeclaration(shipment.id, organization.id, profile?.id || '');
+          await autoCreateDisposalCertificate(shipment.id, organization.id, profile?.id || '');
+        }
+        if (['recycling_complete', 'processing_complete', 'completed'].includes(dbStatus)) {
+          const { data: fs2 } = await supabase.from('shipments').select('recycler_id').eq('id', shipment.id).single();
+          if (fs2?.recycler_id) await autoCreateRecyclingCertificate(shipment.id, fs2.recycler_id, profile?.id || '');
         }
       } catch {}
 
