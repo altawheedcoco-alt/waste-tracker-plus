@@ -410,6 +410,13 @@ export default function GuillochePatterns() {
     setVisibleCount(prev => Math.min(prev + 50, filteredPatterns.length));
   };
 
+  // Persist active patterns to document background
+  const { setDocumentBackground } = useGuillocheBackground();
+
+  const persistActivePatterns = useCallback((patterns: PatternConfig[]) => {
+    setDocumentBackground(patterns.map(patternToRef));
+  }, [setDocumentBackground]);
+
   const handleApplyPattern = async (pattern: PatternConfig) => {
     setIsApplying(true);
     try {
@@ -423,14 +430,18 @@ export default function GuillochePatterns() {
           const newPatterns = [...activePatterns, pattern];
           setActivePatterns(newPatterns);
           savePatternToHistory(newPatterns.map(p => p.id));
+          persistActivePatterns(newPatterns);
           toast.success(`تمت إضافة "${pattern.name}" كطبقة (${activePatterns.length + 1}/${MAX_LAYERS})`);
         } else {
-          setActivePatterns(prev => prev.filter(p => p.id !== pattern.id));
+          const newPatterns = activePatterns.filter(p => p.id !== pattern.id);
+          setActivePatterns(newPatterns);
+          persistActivePatterns(newPatterns);
           toast.info(`تمت إزالة "${pattern.name}" من الطبقات`);
         }
       } else {
         setActivePatterns([pattern]);
         savePatternToHistory([pattern.id]);
+        persistActivePatterns([pattern]);
         toast.success(`تم تحديد "${pattern.name}" كخلفية للمستندات`);
       }
     } finally {
