@@ -1,6 +1,6 @@
 /**
  * لوحة الأرشيف والمستندات — يعرض كل مستندات المنظمة من entity_documents
- * يستخدم Signed URLs للوصول الآمن للملفات في الباكتات الخاصة
+ * يدعم فتح مركز إجراءات المستند الموحد (DocumentActionHub) لأي مستند
  */
 import { useState, useMemo, useCallback } from 'react';
 import { useQuery } from '@tanstack/react-query';
@@ -21,6 +21,8 @@ import { ar as arLocale } from 'date-fns/locale';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import DocumentActionHub from '@/components/documents/DocumentActionHub';
+import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   shipment: { label: 'شحنة', icon: FileText },
@@ -44,6 +46,25 @@ const DocumentArchivePanel = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+  const [hubDoc, setHubDoc] = useState<any | null>(null);
+
+  const openDocHub = (doc: any) => setHubDoc(doc);
+
+  const docToSource = (doc: any): DocumentSource => ({
+    url: doc.file_url,
+    fileName: doc.file_name,
+    fileType: doc.file_type,
+    fileSize: doc.file_size,
+    title: doc.title || doc.file_name,
+    description: doc.description,
+    documentType: doc.document_type,
+    documentCategory: doc.document_category,
+    referenceNumber: doc.reference_number,
+    documentDate: doc.document_date,
+    uploadedAt: doc.created_at,
+    tags: doc.tags,
+    entityDocumentId: doc.id,
+  });
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['document-center-archive', organization?.id],
@@ -217,7 +238,7 @@ const DocumentArchivePanel = () => {
             {filtered.map((doc: any) => {
               const isFileLoading = loadingFileId === doc.id;
               return (
-                <Card key={doc.id} className="hover:bg-muted/30 transition-colors">
+                <Card key={doc.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => openDocHub(doc)}>
                   <CardContent className="p-3 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       {doc.file_type?.startsWith('image') ? (
@@ -244,28 +265,14 @@ const DocumentArchivePanel = () => {
                       </div>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      {doc.file_url && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            disabled={isFileLoading}
-                            onClick={() => handleViewFile(doc.id, doc.file_url)}
-                          >
-                            {isFileLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            disabled={isFileLoading}
-                            onClick={() => handleDownloadFile(doc.id, doc.file_url, doc.file_name)}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -273,6 +280,17 @@ const DocumentArchivePanel = () => {
             })}
           </div>
         </ScrollArea>
+      )}
+
+      {/* Document Action Hub */}
+      {hubDoc && (
+        <DocumentActionHub
+          source={docToSource(hubDoc)}
+          open={!!hubDoc}
+          onOpenChange={(v) => { if (!v) setHubDoc(null); }}
+          referenceId={hubDoc.id}
+          referenceType={hubDoc.document_type}
+        />
       )}
     </div>
   );
