@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import PositionPermissionsEditor from './PositionPermissionsEditor';
 import MemberProfileSheet from './MemberProfileSheet';
+import MemberCredentialsDialog from './MemberCredentialsDialog';
+import MyCredentialsCard from './MyCredentialsCard';
 import {
   MEMBER_ROLE_LABELS, MEMBER_ROLE_LEVELS,
   ALL_MEMBER_PERMISSIONS, PERMISSION_LABELS, PERMISSION_CATEGORIES,
@@ -59,7 +61,7 @@ export default function OrgMembersPanel() {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [deptFilter, setDeptFilter] = useState<string>('all');
   const [confirmAction, setConfirmAction] = useState<{ type: 'suspend' | 'activate' | 'terminate'; member: OrgMember } | null>(null);
-
+  const [credentialsMember, setCredentialsMember] = useState<OrgMember | null>(null);
   const [form, setForm] = useState({
     email: '', password: '', fullName: '', phone: '',
     memberRole: 'member' as MemberRole,
@@ -308,6 +310,9 @@ export default function OrgMembersPanel() {
         )}
       </div>
 
+      {/* Self Credentials Card */}
+      <MyCredentialsCard />
+
       {/* Members List */}
       <div className="space-y-2">
         {sorted.map(member => {
@@ -333,6 +338,11 @@ export default function OrgMembersPanel() {
                         {member.position_id && (
                           <DropdownMenuItem onClick={() => setEditPermsId(member.position_id!)}>
                             <Shield className="w-4 h-4 ml-2" /> الصلاحيات
+                          </DropdownMenuItem>
+                        )}
+                        {member.user_id && (
+                          <DropdownMenuItem onClick={() => setCredentialsMember(member)}>
+                            <Key className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
                           </DropdownMenuItem>
                         )}
                         <DropdownMenuItem onClick={() => setConfirmAction({
@@ -446,6 +456,17 @@ export default function OrgMembersPanel() {
           positionId={editPermsId}
           open={!!editPermsId}
           onClose={() => setEditPermsId(null)}
+        />
+      )}
+
+      {/* Member Credentials Dialog */}
+      {credentialsMember && (
+        <MemberCredentialsDialog
+          open={!!credentialsMember}
+          onClose={() => setCredentialsMember(null)}
+          targetUserId={credentialsMember.user_id}
+          memberName={credentialsMember.profile?.full_name || credentialsMember.invitation_email || 'عضو'}
+          currentEmail={credentialsMember.profile?.email}
         />
       )}
     </div>
