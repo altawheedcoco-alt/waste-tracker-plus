@@ -41173,20 +41173,35 @@ export type Database = {
         }
         Returns: string
       }
-      notify_related_parties: {
-        Args: {
-          _exclude_user_id?: string
-          _message?: string
-          _org_id: string
-          _partner_org_id?: string
-          _reference_id?: string
-          _reference_type?: string
-          _shipment_id?: string
-          _title?: string
-          _type?: string
-        }
-        Returns: undefined
-      }
+      notify_related_parties:
+        | {
+            Args: {
+              _exclude_user_id?: string
+              _message?: string
+              _org_id: string
+              _partner_org_id?: string
+              _reference_id?: string
+              _reference_type?: string
+              _shipment_id?: string
+              _title?: string
+              _type?: string
+            }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              p_message: string
+              p_org_id: string
+              p_partner_org_id: string
+              p_ref_id: string
+              p_ref_type: string
+              p_shipment_id: string
+              p_title: string
+              p_type: string
+              p_user_id: string
+            }
+            Returns: undefined
+          }
       record_action_execution: {
         Args: {
           p_action_type: string
