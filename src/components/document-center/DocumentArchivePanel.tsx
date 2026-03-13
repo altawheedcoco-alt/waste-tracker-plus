@@ -60,8 +60,12 @@ const DocumentArchivePanel = () => {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [hubDoc, setHubDoc] = useState<any | null>(null);
+  const [hubInitialTab, setHubInitialTab] = useState<string>('preview');
 
-  const openDocHub = (doc: any) => setHubDoc(doc);
+  const openDocHub = (doc: any, tab = 'preview') => {
+    setHubInitialTab(tab);
+    setHubDoc(doc);
+  };
 
   const docToSource = (doc: any): DocumentSource => ({
     url: doc.file_url,
