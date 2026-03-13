@@ -487,10 +487,28 @@ export async function evaluateAndEndorse(params: {
       await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
       if (!silent) {
-        toast.success('✅ تم اعتماد المستند رقمياً من المنصة', {
+        const successMsg = failedCriteria.length > 0
+          ? `✅ تم اعتماد المستند رقمياً (مع ${failedCriteria.length} ملاحظة)`
+          : '✅ تم اعتماد المستند رقمياً من المنصة';
+        toast.success(successMsg, {
           description: `رقم الختم: ${sealNumber}`,
           duration: 6000,
         });
+
+        // إرسال تنبيه بالملاحظات إن وُجدت (بدون حجب)
+        if (failedCriteria.length > 0) {
+          const warningDetails = failedCriteria
+            .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
+            .join('\n');
+
+          await sendDualNotification({
+            user_id: userId,
+            title: 'ℹ️ ملاحظات على اعتماد المستند',
+            message: `تم اعتماد المستند رقمياً مع الملاحظات التالية:\n${warningDetails}`,
+            type: 'document',
+            priority: 'medium',
+          });
+        }
       }
 
       return {
