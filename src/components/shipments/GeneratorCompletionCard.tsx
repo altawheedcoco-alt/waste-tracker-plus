@@ -46,14 +46,14 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
   const completionDate = shipment.confirmed_at || shipment.delivered_at;
 
   return (
-    <Card className="border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/80 to-green-50/40 dark:from-emerald-950/30 dark:to-green-950/20">
+    <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <Badge className="bg-emerald-500 text-white gap-1 text-sm px-3 py-1">
+          <Badge className="bg-primary text-primary-foreground gap-1 text-sm px-3 py-1">
             <CheckCircle2 className="w-4 h-4" />
             {isConfirmed ? 'تم التأكيد والاستلام' : 'تم التسليم للمدوّر'}
           </Badge>
-          <CardTitle className="text-lg flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+          <CardTitle className="text-lg flex items-center gap-2 text-primary dark:text-primary">
             <Shield className="w-5 h-5" />
             اكتمال دورة الشحنة
           </CardTitle>
@@ -66,8 +66,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
         {/* Timeline Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-            <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-              <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 rounded-full bg-secondary">
+              <Calendar className="w-4 h-4 text-secondary-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">تاريخ الإنشاء</p>
@@ -78,8 +78,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
           </div>
           {completionDate && (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-              <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 rounded-full bg-primary/10">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">تاريخ الاكتمال</p>
@@ -90,8 +90,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
             </div>
           )}
           <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-            <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
-              <Scale className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 rounded-full bg-accent">
+              <Scale className="w-4 h-4 text-accent-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">الكمية المسلّمة</p>
@@ -107,8 +107,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
         {/* Parties Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3" dir="rtl">
           {shipment.generator && (
-            <div className="flex items-center gap-2 p-3 rounded-lg border border-orange-200 dark:border-orange-800 bg-orange-50/50 dark:bg-orange-950/20">
-              <Package className="w-5 h-5 text-orange-600 dark:text-orange-400" />
+            <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+              <Package className="w-5 h-5 text-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">المولّد</p>
                 <p className="text-sm font-semibold">{shipment.generator.name}</p>
@@ -117,8 +117,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
             </div>
           )}
           {shipment.transporter && (
-            <div className="flex items-center gap-2 p-3 rounded-lg border border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-950/20">
-              <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+            <div className="flex items-center gap-2 p-3 rounded-lg border bg-muted/30">
+              <Truck className="w-5 h-5 text-foreground" />
               <div>
                 <p className="text-xs text-muted-foreground">الناقل</p>
                 <p className="text-sm font-semibold">{shipment.transporter.name}</p>
@@ -127,8 +127,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
             </div>
           )}
           {shipment.recycler && (
-            <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-950/20">
-              <Recycle className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+            <div className="flex items-center gap-2 p-3 rounded-lg border bg-primary/5">
+              <Recycle className="w-5 h-5 text-primary" />
               <div>
                 <p className="text-xs text-muted-foreground">المدوّر/المستلم</p>
                 <p className="text-sm font-semibold">{shipment.recycler.name}</p>
@@ -142,7 +142,7 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" dir="rtl">
           {shipment.pickup_address && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-background/80 border">
-              <MapPin className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+              <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">موقع الاستلام</p>
                 <p className="text-sm">{shipment.pickup_address}</p>
@@ -151,7 +151,7 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
           )}
           {shipment.delivery_address && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-background/80 border">
-              <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">موقع التسليم</p>
                 <p className="text-sm">{shipment.delivery_address}</p>

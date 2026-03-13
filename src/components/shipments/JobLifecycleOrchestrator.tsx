@@ -33,10 +33,10 @@ const gateIcons: Record<string, any> = {
 };
 
 const gateColors: Record<string, string> = {
-  passed: 'bg-emerald-500 text-white border-emerald-500',
-  failed: 'bg-destructive text-white border-destructive',
+  passed: 'bg-primary text-primary-foreground border-primary',
+  failed: 'bg-destructive text-destructive-foreground border-destructive',
   pending: 'bg-muted text-muted-foreground border-border',
-  bypassed: 'bg-amber-500 text-white border-amber-500',
+  bypassed: 'bg-secondary text-secondary-foreground border-secondary',
 };
 
 const JobLifecycleOrchestrator = memo(({ 

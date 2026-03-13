@@ -1025,7 +1025,7 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
             <AlertDialogAction
               onClick={handleReject}
               disabled={!rejectionReason.trim() || rejecting}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground"
             >
               {rejecting ? 'جارٍ الإلغاء...' : 'تأكيد الإلغاء'}
             </AlertDialogAction>

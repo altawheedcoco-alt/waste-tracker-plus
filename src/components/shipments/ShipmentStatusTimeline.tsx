@@ -380,7 +380,7 @@ const ShipmentStatusTimeline = ({
       {/* Current Status Badge */}
       <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
         <div className="flex items-center gap-2">
-          <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white", currentStepConfig?.colorClass || 'bg-slate-400')}>
+          <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", currentStepConfig?.colorClass || 'bg-muted', currentStepConfig ? 'text-primary-foreground' : 'text-muted-foreground')}>
             <CurrentIcon className="w-4 h-4" />
           </div>
           <span className="text-sm font-medium">الحالة الحالية</span>
@@ -444,7 +444,7 @@ const ShipmentStatusTimeline = ({
                           className={cn(
                             "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all shrink-0",
                             isActive && "border-primary bg-primary text-primary-foreground scale-110 shadow-lg ring-2 ring-primary/30",
-                            isCompleted && cn("border-transparent text-white", step.colorClass),
+                            isCompleted && cn("border-transparent text-primary-foreground", step.colorClass),
                             isFuture && "border-muted-foreground/30 bg-muted text-muted-foreground",
                             (isCompleted || isActive) && hasDetails && "group-hover:ring-2 group-hover:ring-primary/20"
                           )}
