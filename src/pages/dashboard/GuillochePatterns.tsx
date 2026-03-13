@@ -1,8 +1,11 @@
-import { useState, useMemo, useCallback, useRef } from 'react';
+import { useState, useMemo, useCallback, useRef, lazy, Suspense } from 'react';
 import BackButton from '@/components/ui/back-button';
 import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
+const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -461,10 +464,24 @@ export default function GuillochePatterns() {
               قوالب الرسم الغيوشي للمستندات
             </h1>
             <p className="text-muted-foreground mt-1">
-              اختر نمطاً من 1000 قالب مميز لخلفية المستندات الرسمية
+              اختر نمطاً من 1000 قالب خلفية أو 1000 برواز صفحة A4
             </p>
           </div>
+        </div>
 
+        <Tabs defaultValue="patterns" dir="rtl">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="patterns" className="gap-2">
+              <Fingerprint className="h-4 w-4" />
+              أنماط الخلفية (1000)
+            </TabsTrigger>
+            <TabsTrigger value="borders" className="gap-2">
+              <FileText className="h-4 w-4" />
+              براويز الصفحة (1000)
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="patterns" className="space-y-6 mt-4">
           <div className="flex flex-wrap items-center gap-3">
             {/* Layer Mode Toggle */}
             <Button
@@ -487,7 +504,6 @@ export default function GuillochePatterns() {
               {activePatterns.length === 0 && <Check className="h-4 w-4 mr-1" />}
             </Button>
           </div>
-        </div>
 
         {/* Active Patterns / Layers Display */}
         {activePatterns.length > 0 && (
@@ -1052,6 +1068,14 @@ export default function GuillochePatterns() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+          </TabsContent>
+
+          <TabsContent value="borders" className="mt-4">
+            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <GuillocheA4BorderDesigner />
+            </Suspense>
+          </TabsContent>
+        </Tabs>
       </div>
     </DashboardLayout>
   );
