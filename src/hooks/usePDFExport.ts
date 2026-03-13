@@ -5,11 +5,69 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { generateThemeCSS, getThemeById, type PrintThemeId } from '@/lib/printThemes';
 
+/**
+ * A4 dimensions in mm (with 20mm margins)
+ */
+const A4 = {
+  width: 210,
+  height: 297,
+  margin: 20,
+  contentWidth: 170,  // 210 - 2×20
+  contentHeight: 257, // 297 - 2×20
+} as const;
+
+/** A4 content area in pixels at 96 DPI (screen) */
+const A4_PX = {
+  width: Math.round(A4.contentWidth * 96 / 25.4),  // ~643px
+  height: Math.round(A4.contentHeight * 96 / 25.4), // ~972px
+  fullWidth: Math.round(A4.width * 96 / 25.4),      // ~794px
+} as const;
+
 interface UsePDFExportOptions {
   filename?: string;
   orientation?: 'portrait' | 'landscape';
   format?: 'a4' | 'letter';
   scale?: number;
+  /** Force content to fit in a single A4 page via dynamic scaling */
+  fitSinglePage?: boolean;
+}
+
+/**
+ * Calculate a scale factor to fit content into a single A4 page.
+ * Returns 1 if content already fits; < 1 if it needs shrinking.
+ */
+function calcFitScale(element: HTMLElement): number {
+  const contentH = element.scrollHeight;
+  const contentW = element.scrollWidth;
+  const scaleX = contentW > A4_PX.width ? A4_PX.width / contentW : 1;
+  const scaleY = contentH > A4_PX.height ? A4_PX.height / contentH : 1;
+  return Math.min(scaleX, scaleY, 1);
+}
+
+/**
+ * Apply single-page scaling to an element temporarily.
+ * Returns a cleanup function.
+ */
+function applySinglePageScaling(element: HTMLElement): { scale: number; cleanup: () => void } {
+  const scale = calcFitScale(element);
+  const origTransform = element.style.transform;
+  const origTransformOrigin = element.style.transformOrigin;
+  const origOverflow = element.style.overflow;
+
+  if (scale < 1) {
+    element.style.transform = `scale(${scale})`;
+    element.style.transformOrigin = 'top right'; // RTL
+    element.style.overflow = 'hidden';
+  }
+
+  return {
+    scale,
+    cleanup: () => {
+      element.style.transform = origTransform;
+      element.style.transformOrigin = origTransformOrigin;
+      element.style.overflow = origOverflow;
+    },
+  };
 }
 
 export const usePDFExport = (options: UsePDFExportOptions = {}) => {
@@ -22,15 +80,14 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       orientation = 'portrait',
       format = 'a4',
       scale = 2,
+      fitSinglePage = true,
     } = options;
-
-    const marginMM = 8;
 
     // Temporarily apply A4-like width constraint for accurate capture
     const originalStyle = element.style.cssText;
-    element.style.width = '794px';
-    element.style.maxWidth = '794px';
-    element.style.padding = '24px';
+    element.style.width = `${A4_PX.fullWidth}px`;
+    element.style.maxWidth = `${A4_PX.fullWidth}px`;
+    element.style.padding = `${A4.margin}mm`;
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
@@ -46,7 +103,7 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
         new Promise<void>((resolve) => {
           img.onload = () => resolve();
           img.onerror = () => resolve();
-          setTimeout(resolve, 3000); // 3s timeout per image
+          setTimeout(resolve, 3000);
         })
       )
     );
@@ -54,15 +111,18 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     // Wait for reflow
     await new Promise(r => setTimeout(r, 300));
 
+    // Apply single-page scaling if requested
+    let scalingCleanup: (() => void) | null = null;
+    if (fitSinglePage) {
+      const { cleanup } = applySinglePageScaling(element);
+      scalingCleanup = cleanup;
+      // Wait for reflow after scaling
+      await new Promise(r => setTimeout(r, 100));
+    }
+
     const pdf = new jsPDF({ orientation, unit: 'mm', format });
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const contentWidth = pageWidth - marginMM * 2;
-    const contentHeight = pageHeight - marginMM * 2;
-
-    // Check for page-break sections (children with pageBreakAfter)
-    const children = Array.from(element.children) as HTMLElement[];
-    const hasPageBreaks = children.length > 1;
 
     const captureOpts = {
       scale,
@@ -70,14 +130,12 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       allowTaint: false,
       backgroundColor: '#ffffff',
       logging: false,
-      width: 794,
-      windowWidth: 794,
+      width: A4_PX.fullWidth,
+      windowWidth: A4_PX.fullWidth,
       onclone: (clonedDoc: Document) => {
-        // Fix all images with crossOrigin for CORS
         const imgs = clonedDoc.querySelectorAll('img');
         imgs.forEach(img => {
           img.crossOrigin = 'anonymous';
-          // Force reload for CORS
           if (img.src && !img.src.startsWith('data:')) {
             const url = new URL(img.src);
             url.searchParams.set('_t', Date.now().toString());
@@ -87,39 +145,39 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       },
     };
 
-    if (hasPageBreaks && children.length > 1) {
-      // Filter out empty/page-break-only children
+    // Check for page-break sections
+    const children = Array.from(element.children) as HTMLElement[];
+    const hasPageBreaks = !fitSinglePage && children.length > 1;
+
+    if (hasPageBreaks) {
       const validChildren = children.filter(child => {
         const isPageBreak = child.style.pageBreakBefore === 'always' || child.style.pageBreakAfter === 'always';
         const isEmpty = child.offsetHeight < 5 && child.children.length === 0;
         return !isPageBreak && !isEmpty;
       });
 
-      // Capture each valid top-level child as a separate page
       for (let i = 0; i < validChildren.length; i++) {
         const child = validChildren[i];
         try {
           const canvas = await html2canvas(child, captureOpts);
           const imgData = canvas.toDataURL('image/jpeg', 0.92);
-          const imgWidth = contentWidth;
-          const imgHeight = (canvas.height * contentWidth) / canvas.width;
+          const imgWidth = A4.contentWidth;
+          const imgHeight = (canvas.height * A4.contentWidth) / canvas.width;
 
           if (i > 0) pdf.addPage();
 
-          // If content fits in one page, center it
-          if (imgHeight <= contentHeight) {
-            pdf.addImage(imgData, 'JPEG', marginMM, marginMM, imgWidth, imgHeight);
+          if (imgHeight <= A4.contentHeight) {
+            pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgWidth, imgHeight);
           } else {
-            // Multi-page for this section
             let heightLeft = imgHeight;
             let position = 0;
-            pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
-            heightLeft -= contentHeight;
+            pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin + position, imgWidth, imgHeight);
+            heightLeft -= A4.contentHeight;
             while (heightLeft > 0) {
               position = -(imgHeight - heightLeft);
               pdf.addPage();
-              pdf.addImage(imgData, 'JPEG', marginMM, marginMM + position, imgWidth, imgHeight);
-              heightLeft -= contentHeight;
+              pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin + position, imgWidth, imgHeight);
+              heightLeft -= A4.contentHeight;
             }
           }
         } catch (childError) {
@@ -127,26 +185,36 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
         }
       }
     } else {
-      // Single capture fallback
+      // Single capture (with scaling if fitSinglePage)
       const canvas = await html2canvas(element, captureOpts);
       const imgData = canvas.toDataURL('image/png');
-      const imgWidth = contentWidth;
-      const imgHeight = (canvas.height * contentWidth) / canvas.width;
+      const imgWidth = A4.contentWidth;
+      const imgHeight = (canvas.height * A4.contentWidth) / canvas.width;
 
-      let heightLeft = imgHeight;
-      let position = 0;
-      pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
-      heightLeft -= contentHeight;
+      if (fitSinglePage || imgHeight <= A4.contentHeight) {
+        // Fit in one page — scale image to fit if needed
+        const fitScale = Math.min(1, A4.contentHeight / imgHeight);
+        const finalWidth = imgWidth * fitScale;
+        const finalHeight = imgHeight * fitScale;
+        pdf.addImage(imgData, 'PNG', A4.margin, A4.margin, finalWidth, finalHeight);
+      } else {
+        // Multi-page fallback
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, 'PNG', A4.margin, A4.margin + position, imgWidth, imgHeight);
+        heightLeft -= A4.contentHeight;
 
-      while (heightLeft > 0) {
-        position = -(imgHeight - heightLeft);
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', marginMM, marginMM + position, imgWidth, imgHeight);
-        heightLeft -= contentHeight;
+        while (heightLeft > 0) {
+          position = -(imgHeight - heightLeft);
+          pdf.addPage();
+          pdf.addImage(imgData, 'PNG', A4.margin, A4.margin + position, imgWidth, imgHeight);
+          heightLeft -= A4.contentHeight;
+        }
       }
     }
 
-    // Restore original styles
+    // Cleanup
+    if (scalingCleanup) scalingCleanup();
     element.style.cssText = originalStyle;
     noPrintEls.forEach(el => (el as HTMLElement).style.display = '');
 
@@ -211,6 +279,11 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     }
   }, [generatePDF]);
 
+  /**
+   * Print via browser window — produces vector-based text (not rasterized).
+   * This is the HIGHEST quality method and should be preferred over PDF export
+   * when actual printing is needed.
+   */
   const printContent = useCallback((element: HTMLElement | null, styles: string = '') => {
     if (!element) {
       toast.error('لا يوجد محتوى للطباعة');
@@ -244,25 +317,58 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
     const defaultPrintStyles = `
       @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
-      @page { size: A4; margin: 8mm 10mm; }
-      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; box-sizing: border-box; }
-      body { margin: 0; padding: 0; background: white !important; font-family: 'Cairo', sans-serif !important; direction: rtl; }
-      .print-container { width: 190mm; max-width: 190mm; margin: 0 auto; padding: 2mm; box-sizing: border-box; overflow: visible !important; }
+      
+      @page { 
+        size: A4 portrait; 
+        margin: 20mm; 
+      }
+      
+      * { 
+        -webkit-print-color-adjust: exact !important; 
+        print-color-adjust: exact !important; 
+        color-adjust: exact !important; 
+        box-sizing: border-box; 
+      }
+      
+      html, body { 
+        margin: 0; 
+        padding: 0; 
+        background: white !important; 
+        font-family: 'Cairo', sans-serif !important; 
+        direction: rtl; 
+        /* Vector text rendering */
+        -webkit-font-smoothing: antialiased !important;
+        text-rendering: optimizeLegibility !important;
+      }
+      
+      .print-container { 
+        width: 170mm; 
+        max-width: 170mm; 
+        max-height: 257mm;
+        margin: 0 auto; 
+        padding: 0; 
+        box-sizing: border-box; 
+        overflow: hidden !important; 
+      }
+      
       .no-print { display: none !important; }
+      
       img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
+      
       table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
       tr { page-break-inside: avoid; page-break-after: auto; }
-      th, td { padding: 2px 6px; border: 1px solid #ddd; text-align: right; font-size: 10px; line-height: 1.3; }
-      h1 { font-size: 18px; margin: 4px 0; }
-      h2 { font-size: 15px; margin: 3px 0; }
-      h3 { font-size: 13px; margin: 2px 0; }
-      h4, h5, h6 { font-size: 11px; margin: 2px 0; }
+      th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; }
+      
+      h1 { font-size: 16pt; margin: 4px 0; }
+      h2 { font-size: 13pt; margin: 3px 0; }
+      h3 { font-size: 11pt; margin: 2px 0; }
+      h4, h5, h6 { font-size: 10pt; margin: 2px 0; }
       h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }
-      p { font-size: 10px; margin: 2px 0; line-height: 1.4; }
-      /* Ensure header and footer are always visible */
+      p { font-size: 10pt; margin: 2px 0; line-height: 1.4; }
+      
       header, footer { display: block !important; visibility: visible !important; overflow: visible !important; page-break-inside: avoid; }
       footer { page-break-before: avoid; }
-      /* Grid and flex support for print */
+      
       .grid { display: grid !important; }
       .flex { display: flex !important; }
       .grid-cols-2 { grid-template-columns: repeat(2, 1fr) !important; }
@@ -310,18 +416,23 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       .col-span-2 { grid-column: span 2 !important; }
       .col-span-3 { grid-column: span 3 !important; }
       .w-full { width: 100% !important; }
-      .text-3xl { font-size: 16px !important; }
-      .text-4xl { font-size: 18px !important; }
-      .text-6xl { font-size: 22px !important; }
-      .text-2xl { font-size: 14px !important; }
-      .text-xl { font-size: 12px !important; }
-      .text-lg { font-size: 11px !important; }
-      /* SVG icons in print */
+      .text-3xl { font-size: 14pt !important; }
+      .text-4xl { font-size: 16pt !important; }
+      .text-6xl { font-size: 20pt !important; }
+      .text-2xl { font-size: 13pt !important; }
+      .text-xl { font-size: 11pt !important; }
+      .text-lg { font-size: 10pt !important; }
       svg { display: inline-block !important; vertical-align: middle !important; }
-      @media print { body { margin: 0; padding: 0; } .print-container { overflow: visible !important; } }
+      
+      @media print { 
+        body { margin: 0; padding: 0; } 
+        .print-container { overflow: hidden !important; }
+      }
     `;
 
+    // Measure content and apply scaling if needed
     const content = element.outerHTML;
+
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -330,6 +441,22 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
           <title>طباعة الوثيقة</title>
           <style>${collectedStyles}\n${styles || defaultPrintStyles}</style>
+          <script>
+            // Dynamic scaling to fit content in single A4 page
+            window.addEventListener('load', function() {
+              var container = document.querySelector('.print-container');
+              if (!container) return;
+              // A4 content area at 96 DPI: 170mm × 257mm ≈ 643px × 972px
+              var maxH = 972;
+              var contentH = container.scrollHeight;
+              if (contentH > maxH) {
+                var scale = maxH / contentH;
+                container.style.transform = 'scale(' + scale + ')';
+                container.style.transformOrigin = 'top right';
+                container.style.overflow = 'hidden';
+              }
+            });
+          </script>
         </head>
         <body>
           <div class="print-container">${content}</div>
@@ -344,8 +471,8 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
       printed = true;
       printWindow.print();
     };
-    printWindow.onload = () => { setTimeout(doPrint, 300); };
-    setTimeout(doPrint, 1500);
+    printWindow.onload = () => { setTimeout(doPrint, 500); };
+    setTimeout(doPrint, 2000);
   }, []);
 
   /** Print with a specific theme applied */
@@ -390,7 +517,6 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
       const publicUrl = urlData?.publicUrl || null;
 
-      // Update print log with file URL if docId exists
       if (publicUrl && docId) {
         await supabase
           .from('document_print_log')
@@ -413,6 +539,17 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     printContent,
     printWithTheme,
     generatePDF,
-    isExporting 
+    isExporting,
+    /** Utility: apply single-page scaling to any element */
+    applySinglePageScaling,
+    /** Utility: calculate fit scale for any element */
+    calcFitScale,
+    /** A4 dimensions constants */
+    A4_DIMENSIONS: A4,
   };
 };
+
+/**
+ * Exported utilities for use outside the hook
+ */
+export { calcFitScale, applySinglePageScaling, A4, A4_PX };

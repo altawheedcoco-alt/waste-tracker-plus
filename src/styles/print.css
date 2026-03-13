@@ -1,29 +1,19 @@
 /* ========================================
    Print Styles - نظام الطباعة الموحد A4
+   معايير الطباعة الاحترافية:
+   - تنسيق A4 ثابت مع هوامش 20mm
+   - احتواء المحتوى في صفحة واحدة (Single Page)
+   - نصوص متجهية عالية الجودة (Vector Text)
+   - تحجيم ديناميكي تلقائي (Auto Scaling)
    ======================================== */
 
 @media print {
   @page {
     size: A4 portrait;
-    margin: 6mm 8mm;
+    margin: 20mm;
   }
 
-  .print-a4-page {
-    width: 210mm !important;
-    min-height: 297mm !important;
-    margin: 0 auto !important;
-    padding: 8mm 10mm !important;
-    box-sizing: border-box !important;
-    display: flex !important;
-    flex-direction: column !important;
-    background: #fff !important;
-    page-break-after: always !important;
-  }
-
-  .print-a4-page:last-child {
-    page-break-after: auto !important;
-  }
-
+  /* ====== Global Reset for Print ====== */
   *,
   *::before,
   *::after {
@@ -38,19 +28,25 @@
     width: 210mm !important;
     margin: 0 !important;
     padding: 0 !important;
-    font-family: 'Cairo', sans-serif !important;
+    font-family: 'Cairo', 'Noto Sans Arabic', sans-serif !important;
     font-size: 10pt !important;
     line-height: 1.5 !important;
     color: #000 !important;
     background: #fff !important;
     direction: rtl !important;
+    /* Vector text rendering */
+    -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
+    text-rendering: optimizeLegibility !important;
   }
 
+  /* ====== Typography ====== */
   h1 { font-size: 16pt !important; }
   h2 { font-size: 13pt !important; }
   h3 { font-size: 11pt !important; }
   h4 { font-size: 10pt !important; }
 
+  /* ====== Hide Non-Print Elements ====== */
   .no-print,
   .print\:hidden,
   nav, aside, .sidebar,
@@ -83,6 +79,37 @@
     padding: 0 !important;
   }
 
+  /* ====== A4 Page Container ====== */
+  .print-a4-page {
+    width: 170mm !important;       /* 210mm - 2×20mm margins */
+    max-height: 257mm !important;   /* 297mm - 2×20mm margins */
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    background: #fff !important;
+    overflow: hidden !important;
+    page-break-after: always !important;
+  }
+
+  .print-a4-page:last-child {
+    page-break-after: auto !important;
+  }
+
+  /* ====== Single Page Fit — Dynamic Scaling ====== */
+  .print-fit-page {
+    width: 170mm !important;
+    max-height: 257mm !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    page-break-inside: avoid !important;
+    /* The JS scaling will set transform: scale() dynamically */
+  }
+
+  /* ====== Print Area ====== */
   .print-area, [data-print-area] {
     display: block !important;
     visibility: visible !important;
@@ -98,13 +125,14 @@
 
   .print-container, [data-print-content] {
     width: 100% !important;
-    max-width: 190mm !important;
+    max-width: 170mm !important;
     margin: 0 auto !important;
     padding: 0 !important;
     background: #fff !important;
     box-sizing: border-box !important;
   }
 
+  /* ====== Document Header ====== */
   .print-header {
     display: flex !important;
     justify-content: space-between !important;
@@ -124,6 +152,7 @@
     margin-bottom: 10px !important;
   }
 
+  /* ====== Tables ====== */
   table {
     width: 100% !important;
     border-collapse: collapse !important;
@@ -136,7 +165,7 @@
 
   th, td {
     border: 1px solid #d1d5db !important;
-    padding: 5px 7px !important;
+    padding: 4px 6px !important;
     text-align: right !important;
     vertical-align: middle !important;
   }
@@ -149,11 +178,12 @@
 
   tbody tr:nth-child(even) { background-color: #f9fafb !important; }
 
+  /* ====== Cards & Badges ====== */
   .card, [data-card] {
     border: 1px solid #e5e7eb !important;
     border-radius: 0 !important;
     page-break-inside: avoid !important;
-    margin-bottom: 8px !important;
+    margin-bottom: 6px !important;
   }
 
   .badge, [data-badge] {
@@ -163,9 +193,11 @@
     font-size: 8pt !important;
   }
 
+  /* ====== QR / Barcode ====== */
   .print-qr, .print-barcode { display: block !important; text-align: center !important; }
   .print-qr svg, .print-barcode svg { max-width: 70px !important; height: auto !important; }
 
+  /* ====== Signatures ====== */
   .print-signatures {
     display: grid !important;
     gap: 15px !important;
@@ -197,6 +229,7 @@
     margin: 0 auto 4px !important;
   }
 
+  /* ====== Footer ====== */
   .print-footer {
     display: block !important;
     text-align: center !important;
@@ -205,9 +238,10 @@
     padding: 5px 0 !important;
     border-top: 1px solid #e5e7eb !important;
     background: #fff !important;
-    margin-top: 15px !important;
+    margin-top: auto !important;
   }
 
+  /* ====== Declaration Block ====== */
   .print-declaration {
     background-color: #f0fdf4 !important;
     border: 1px solid #86efac !important;
@@ -232,6 +266,7 @@
     color: #14532d !important;
   }
 
+  /* ====== Info Boxes ====== */
   .print-info-box {
     border: 1px solid #e5e7eb !important;
     border-radius: 4px !important;
@@ -249,37 +284,42 @@
     border-bottom: 1px solid #e5e7eb !important;
   }
 
-  .print-grid-2 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
-  .print-grid-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 10px !important; }
-  .print-grid-4 { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 8px !important; }
+  /* ====== Grid Utilities ====== */
+  .print-grid-2 { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; gap: 8px !important; }
+  .print-grid-3 { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; gap: 8px !important; }
+  .print-grid-4 { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; gap: 6px !important; }
 
   .print-stat-card {
     text-align: center !important;
-    padding: 8px !important;
+    padding: 6px !important;
     border: 1px solid #e5e7eb !important;
     border-radius: 4px !important;
   }
 
-  .print-stat-value { font-size: 16pt !important; font-weight: bold !important; color: #16a34a !important; }
+  .print-stat-value { font-size: 14pt !important; font-weight: bold !important; color: #16a34a !important; }
   .print-stat-label { font-size: 8pt !important; color: #6b7280 !important; }
 
+  /* ====== Links ====== */
   a[href]:after { content: none !important; }
 
+  /* ====== Images ====== */
   img { max-width: 100% !important; height: auto !important; page-break-inside: avoid !important; }
 
+  /* ====== Page Break Controls ====== */
   .print-avoid-break { page-break-inside: avoid !important; }
   .print-break-before { page-break-before: always !important; }
   .print-break-after { page-break-after: always !important; }
 
+  /* ====== Color Utilities ====== */
   .print-color-green { color: #16a34a !important; }
   .print-color-blue { color: #2563eb !important; }
   .print-color-amber { color: #d97706 !important; }
   .print-color-red { color: #dc2626 !important; }
-
   .print-bg-green { background-color: #f0fdf4 !important; }
   .print-bg-blue { background-color: #eff6ff !important; }
   .print-bg-amber { background-color: #fffbeb !important; }
 
+  /* ====== Watermark ====== */
   .print-watermark {
     position: fixed !important;
     top: 50% !important;
@@ -295,6 +335,7 @@
     print-color-adjust: exact !important;
   }
 
+  /* ====== Official Document Border ====== */
   .print-official {
     border: 2px solid #16a34a !important;
     padding: 15px !important;
@@ -312,6 +353,7 @@
     pointer-events: none !important;
   }
 
+  /* ====== Certificate ====== */
   .print-certificate-header { text-align: center !important; margin-bottom: 15px !important; }
 
   .print-certificate-number {
@@ -323,41 +365,70 @@
     display: inline-block !important;
   }
 
+  /* ====== Landscape Mode ====== */
   .print-landscape { page: landscape !important; }
 
   @page landscape {
     size: A4 landscape;
-    margin: 10mm;
+    margin: 20mm;
   }
 }
 
-/* Print Utility Classes (hidden on screen) */
+/* ========================================
+   Screen-Only Print Utilities
+   ======================================== */
 .print-only { display: none; }
 
 @media print {
   .print-only { display: block !important; }
 
-  .print-brochure { width: 210mm !important; margin: 0 auto !important; }
+  .print-brochure { width: 170mm !important; margin: 0 auto !important; }
 
   .print-brochure .card,
   .print-brochure [class*="Card"] {
     border: 1px solid #d1d5db !important;
     border-radius: 6px !important;
     page-break-inside: avoid !important;
-    margin-bottom: 10px !important;
+    margin-bottom: 8px !important;
     overflow: hidden !important;
   }
 
   .print-brochure .grid { display: grid !important; }
 
   .print-document-a4 {
-    width: 210mm !important;
-    min-height: 297mm !important;
+    width: 170mm !important;
+    max-height: 257mm !important;
     margin: 0 !important;
-    padding: 8mm 10mm !important;
+    padding: 0 !important;
     box-sizing: border-box !important;
     background: #fff !important;
     font-family: 'Cairo', sans-serif !important;
     direction: rtl !important;
+    overflow: hidden !important;
   }
+}
+
+/* ========================================
+   A4 Preview on Screen (for WYSIWYG)
+   ======================================== */
+.a4-preview-frame {
+  width: 210mm;
+  min-height: 297mm;
+  max-height: 297mm;
+  margin: 0 auto;
+  padding: 20mm;
+  box-sizing: border-box;
+  background: white;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+  overflow: hidden;
+  position: relative;
+  font-family: 'Cairo', sans-serif;
+  direction: rtl;
+}
+
+.a4-preview-frame > .a4-content {
+  width: 100%;
+  height: 100%;
+  transform-origin: top right;
+  /* JS will set transform: scale() here */
 }
