@@ -4,6 +4,8 @@ import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
 
+// ─── Declaration Texts ───
+
 const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — صادر تلقائياً من المولّد
 
 أولاً — إثبات التسليم:
@@ -26,74 +28,183 @@ const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — 
 
 ⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومحمي ببصمة رقمية SHA-256 ولا يجوز تعديله أو التلاعب به. يحق لأي طرف إلغاء هذا الإقرار مع ذكر الأسباب، ويظل محفوظاً في سجل الشحنة حتى بعد الإلغاء.`;
 
+const TRANSPORTER_AUTO_DECLARATION_TEXT = `إقرار نقل مخلفات — صادر تلقائياً من الناقل
+
+أولاً — إثبات الاستلام والنقل:
+يُقر الناقل بأنه قد استلم المخلفات المذكورة أعلاه من المولّد وبدأ عملية النقل وفقاً للمسار المعتمد والتراخيص السارية.
+
+ثانياً — المسؤولية عن النقل الآمن:
+يتحمل الناقل المسؤولية الكاملة عن سلامة المخلفات أثناء النقل، والالتزام بمعايير السلامة والأمان والاشتراطات البيئية طوال مسار الرحلة.
+
+ثالثاً — الالتزام بالتراخيص والمركبات:
+يُقر الناقل بأن المركبة المستخدمة مرخصة ومجهزة لنقل هذا النوع من المخلفات، وأن السائق يحمل التراخيص والشهادات المطلوبة.
+
+رابعاً — سلسلة الحيازة:
+يُعد هذا الإقرار جزءاً من سلسلة الحيازة القانونية (Chain of Custody). الناقل مسؤول عن الشحنة منذ لحظة الاستلام حتى التسليم الرسمي للجهة المستقبلة.
+
+⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومحمي ببصمة رقمية ولا يجوز تعديله أو التلاعب به.`;
+
 const RECYCLER_AUTO_DECLARATION_TEXT = `إقرار استلام مخلفات — صادر تلقائياً من المدوّر/جهة التخلص
 
 أولاً — إثبات الاستلام:
 يُقر المدوّر/جهة التخلص بأنه قد استلم المخلفات المذكورة أعلاه بكامل محتوياتها ومواصفاتها من ممثل جهة النقل المعتمدة، وأن البيانات المسجلة في النظام مطابقة للواقع الفعلي عند الاستلام.
 
 ثانياً — المسؤولية عن المعالجة:
-يتحمل المدوّر/جهة التخلص المسؤولية المدنية والجنائية الكاملة عن المعالجة الآمنة والسليمة بيئياً للمخلفات المستلمة وفقاً للتراخيص الممنوحة والمعايير البيئية المعتمدة. وأي إخلال بمعايير المعالجة أو التخلص يستوجب المساءلة القانونية والجزائية.
+يتحمل المدوّر/جهة التخلص المسؤولية المدنية والجنائية الكاملة عن المعالجة الآمنة والسليمة بيئياً للمخلفات المستلمة وفقاً للتراخيص الممنوحة والمعايير البيئية المعتمدة.
 
 ثالثاً — الالتزام البيئي:
-يلتزم المدوّر بمعالجة المخلفات وفقاً لاشتراطات جهاز تنظيم إدارة المخلفات (WMRA) وقانون حماية البيئة رقم 4 لسنة 1994 المعدّل، والمعايير الدولية المعتمدة (ISO 14001).
+يلتزم المدوّر بمعالجة المخلفات وفقاً لاشتراطات جهاز تنظيم إدارة المخلفات (WMRA) وقانون حماية البيئة رقم 4 لسنة 1994 المعدّل.
 
 رابعاً — سلسلة الحيازة:
 يمثل هذا الاستلام نقل المسؤولية القانونية عن الشحنة بالكامل إلى المدوّر/جهة التخلص ضمن سلسلة الحيازة (Chain of Custody).
 
-خامساً — الالتزام بشروط وسياسات المنصة:
-يخضع هذا الإقرار لشروط وأحكام وسياسات منصة iRecycle المنشورة والمعتمدة، والمخالف يتحمل كافة التبعات القانونية المدنية والجنائية المترتبة على ذلك.
+⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومحمي ببصمة رقمية ولا يجوز تعديله أو التلاعب به.`;
 
-سادساً — المرجعية القانونية:
-يخضع هذا الإقرار لأحكام قانون تنظيم إدارة المخلفات رقم 202 لسنة 2020، وقانون حماية البيئة رقم 4 لسنة 1994 المعدّل، واتفاقية بازل بشأن التحكم في نقل النفايات الخطرة والتخلص منها عبر الحدود.
+const DISPOSAL_AUTO_DECLARATION_TEXT = `إقرار تخلص نهائي من مخلفات — صادر تلقائياً من جهة التخلص
 
-⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومحمي ببصمة رقمية SHA-256 ولا يجوز تعديله أو التلاعب به. يحق لأي طرف إلغاء هذا الإقرار مع ذكر الأسباب، ويظل محفوظاً في سجل الشحنة حتى بعد الإلغاء.`;
+أولاً — إثبات التخلص:
+تُقر جهة التخلص بأنها قد باشرت عمليات التخلص النهائي من المخلفات المذكورة أعلاه وفقاً للطريقة المعتمدة (دفن صحي / حرق آمن / معالجة كيميائية) والتراخيص السارية.
+
+ثانياً — المسؤولية البيئية:
+تتحمل جهة التخلص المسؤولية الكاملة عن ضمان عدم تسرب أو تلوث أي مكونات من المخلفات إلى البيئة المحيطة أثناء وبعد عملية التخلص.
+
+ثالثاً — التوثيق والرقابة:
+تم توثيق عملية التخلص بالكامل وفقاً لمتطلبات WMRA والجهات الرقابية المختصة.
+
+رابعاً — سلسلة الحيازة:
+يُعد هذا الإقرار نهاية سلسلة الحيازة القانونية (Chain of Custody) للشحنة.
+
+⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومحمي ببصمة رقمية ولا يجوز تعديله أو التلاعب به.`;
+
+const DRIVER_AUTO_CONFIRMATION_TEXT = `إقرار سائق — صادر تلقائياً
+
+أولاً — إثبات الاستلام الميداني:
+يُقر السائق بأنه قد استلم الشحنة ميدانياً وتحقق من مطابقتها للبيانات المسجلة في النظام.
+
+ثانياً — حالة المركبة:
+يُقر السائق بأن المركبة المستخدمة في حالة سليمة ومطابقة لاشتراطات النقل.
+
+ثالثاً — الالتزام بالمسار:
+يلتزم السائق بالمسار المحدد في النظام وعدم الانحراف عنه دون إذن مسبق.
+
+⚠️ تنبيه: هذا الإقرار مسجل إلكترونياً ومرتبط بموقع GPS السائق لحظة التأكيد.`;
+
+// ─── Visibility Masking Helper ───
+
+interface ShipmentParties {
+  generator_id?: string | null;
+  transporter_id?: string | null;
+  recycler_id?: string | null;
+  hide_recycler_from_generator?: boolean;
+  hide_generator_from_recycler?: boolean;
+}
 
 /**
- * Auto-creates a generator handover declaration when shipment goes to transporter (in_transit).
+ * Apply visibility masking to org names based on shipment settings.
+ * - If hide_recycler_from_generator: generator's copy shows "جهة مخفية" for recycler
+ * - If hide_generator_from_recycler: recycler's copy shows "جهة مخفية" for generator
+ */
+function applyVisibilityMasking(
+  orgNames: { generator: string; transporter: string; recycler: string },
+  shipment: ShipmentParties,
+  declaringOrgId: string,
+): { generator_name: string; transporter_name: string; recycler_name: string } {
+  const masked = { ...orgNames };
+  const HIDDEN = 'جهة مخفية';
+
+  // If the declaring org is the generator and recycler should be hidden from them
+  if (declaringOrgId === shipment.generator_id && shipment.hide_recycler_from_generator) {
+    masked.recycler = HIDDEN;
+  }
+  // If the declaring org is the recycler and generator should be hidden from them
+  if (declaringOrgId === shipment.recycler_id && shipment.hide_generator_from_recycler) {
+    masked.generator = HIDDEN;
+  }
+
+  return {
+    generator_name: masked.generator,
+    transporter_name: masked.transporter,
+    recycler_name: masked.recycler,
+  };
+}
+
+// ─── Shared Helpers ───
+
+async function fetchShipmentWithParties(shipmentId: string) {
+  const { data: shipment } = await supabase
+    .from('shipments')
+    .select('shipment_number, waste_type, quantity, unit, generator_id, transporter_id, recycler_id, hide_recycler_from_generator, hide_generator_from_recycler')
+    .eq('id', shipmentId)
+    .single();
+  return shipment;
+}
+
+async function fetchOrgNames(ids: (string | null | undefined)[]) {
+  const validIds = ids.filter(Boolean) as string[];
+  if (validIds.length === 0) return () => '';
+  const { data: orgs } = await supabase
+    .from('organizations')
+    .select('id, name')
+    .in('id', validIds);
+  return (id?: string | null) => orgs?.find(o => o.id === id)?.name || '';
+}
+
+async function notifyOrgUsers(orgIds: (string | null | undefined)[], title: string, message: string, shipmentId: string) {
+  const validIds = orgIds.filter(Boolean) as string[];
+  if (validIds.length === 0) return;
+  try {
+    const { data: users } = await supabase
+      .from('profiles')
+      .select('user_id')
+      .in('organization_id', validIds)
+      .limit(20);
+    if (users && users.length > 0) {
+      await sendBulkDualNotification({
+        user_ids: users.map((u: any) => u.user_id),
+        title,
+        message: withTagline(message),
+        type: 'document_issued',
+        reference_id: shipmentId,
+        reference_type: 'shipment',
+      });
+    }
+  } catch (e) {
+    console.error('Document notification failed:', e);
+  }
+}
+
+// ─── Auto-Create Functions ───
+
+/**
+ * Generator handover declaration — triggered at: approved/registered
  */
 export async function autoCreateGeneratorDeclaration(
   shipmentId: string,
   generatorOrgId: string,
   userId: string
 ): Promise<void> {
-  // Check if auto-action is enabled
   if (!(await isAutoActionEnabled(generatorOrgId, 'auto_delivery_certificate'))) return;
 
-  // Check if already exists
-  const { data: existing } = await (supabase
-    .from('delivery_declarations') as any)
-    .select('id')
-    .eq('shipment_id', shipmentId)
-    .eq('declaration_type', 'generator_handover')
-    .eq('status', 'active')
-    .maybeSingle();
-
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'generator_handover').eq('status', 'active').maybeSingle();
   if (existing) return;
 
-  // Fetch shipment details
-  const { data: shipment } = await supabase
-    .from('shipments')
-    .select('shipment_number, waste_type, quantity, unit, generator_id, transporter_id, recycler_id')
-    .eq('id', shipmentId)
-    .single();
-
+  const shipment = await fetchShipmentWithParties(shipmentId);
   if (!shipment) return;
 
-  // Fetch org names
-  const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(Boolean);
-  const { data: orgs } = await supabase
-    .from('organizations')
-    .select('id, name')
-    .in('id', orgIds);
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
-  const getOrgName = (id?: string | null) => orgs?.find(o => o.id === id)?.name || '';
-
-  // Generate mandatory verification identity
   const declarationNumber = `DCL-GEN-${Date.now().toString(36).toUpperCase()}`;
   const identity = generateDocumentIdentity('generator_handover', declarationNumber, {
     shipmentNumber: shipment.shipment_number,
     organizationName: getOrgName(shipment.generator_id),
   });
+
+  const maskedNames = applyVisibilityMasking(
+    { generator: getOrgName(shipment.generator_id), transporter: getOrgName(shipment.transporter_id), recycler: getOrgName(shipment.recycler_id) },
+    shipment, generatorOrgId,
+  );
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
@@ -107,96 +218,56 @@ export async function autoCreateGeneratorDeclaration(
     waste_type: shipment.waste_type,
     quantity: shipment.quantity,
     unit: shipment.unit,
-    generator_name: getOrgName(shipment.generator_id),
-    transporter_name: getOrgName(shipment.transporter_id),
-    recycler_name: getOrgName(shipment.recycler_id),
+    ...maskedNames,
     ...identity,
   };
 
   const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
   if (error) {
     console.error('Auto generator declaration error:', error);
-  } else {
-    // declaration created successfully
-    
-    // Send notification to transporter about generator declaration
-    try {
-      const transporterId = shipment.transporter_id;
-      if (transporterId) {
-        const { data: transporterUsers } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .eq('organization_id', transporterId)
-          .limit(10);
-
-        if (transporterUsers && transporterUsers.length > 0) {
-          await sendBulkDualNotification({
-            user_ids: transporterUsers.map((u: any) => u.user_id),
-            title: '📝 إقرار تسليم جديد من المولّد',
-            message: withTagline(`أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`),
-            type: 'document_issued',
-            reference_id: shipmentId,
-            reference_type: 'shipment',
-          });
-        }
-      }
-    } catch (notifErr) {
-      console.error('Generator declaration notification failed:', notifErr);
-    }
+    return;
   }
+
+  await notifyOrgUsers(
+    [shipment.transporter_id],
+    '📝 إقرار تسليم جديد من المولّد',
+    `أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`,
+    shipmentId,
+  );
 }
 
 /**
- * Auto-creates a recycler receipt declaration when shipment is delivered.
+ * Transporter transport declaration — triggered at: in_transit
  */
-export async function autoCreateRecyclerDeclaration(
+export async function autoCreateTransporterDeclaration(
   shipmentId: string,
-  recyclerOrgId: string,
+  transporterOrgId: string,
   userId: string
 ): Promise<void> {
-  // Check if auto-action is enabled
-  if (!(await isAutoActionEnabled(recyclerOrgId, 'auto_delivery_certificate'))) return;
+  if (!(await isAutoActionEnabled(transporterOrgId, 'auto_manifest_generation'))) return;
 
-  // Check if already exists
-  const { data: existing } = await (supabase
-    .from('delivery_declarations') as any)
-    .select('id')
-    .eq('shipment_id', shipmentId)
-    .eq('declaration_type', 'recycler_receipt')
-    .eq('status', 'active')
-    .maybeSingle();
-
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'transporter_transport').eq('status', 'active').maybeSingle();
   if (existing) return;
 
-  const { data: shipment } = await supabase
-    .from('shipments')
-    .select('shipment_number, waste_type, quantity, unit, generator_id, transporter_id, recycler_id')
-    .eq('id', shipmentId)
-    .single();
-
+  const shipment = await fetchShipmentWithParties(shipmentId);
   if (!shipment) return;
 
-  const orgIds = [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(Boolean);
-  const { data: orgs } = await supabase
-    .from('organizations')
-    .select('id, name')
-    .in('id', orgIds);
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
-  const getOrgName = (id?: string | null) => orgs?.find(o => o.id === id)?.name || '';
-
-  // Generate mandatory verification identity
-  const declarationNumber = `DCL-RCY-${Date.now().toString(36).toUpperCase()}`;
-  const identity = generateDocumentIdentity('recycler_receipt', declarationNumber, {
+  const declarationNumber = `DCL-TRN-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('transporter_transport', declarationNumber, {
     shipmentNumber: shipment.shipment_number,
-    organizationName: getOrgName(shipment.recycler_id),
+    organizationName: getOrgName(shipment.transporter_id),
   });
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
-    declared_by_organization_id: recyclerOrgId,
-    declaration_type: 'recycler_receipt',
-    declaration_text: RECYCLER_AUTO_DECLARATION_TEXT,
+    declared_by_organization_id: transporterOrgId,
+    declaration_type: 'transporter_transport',
+    declaration_text: TRANSPORTER_AUTO_DECLARATION_TEXT,
     auto_generated: true,
     status: 'active',
     shipment_number: shipment.shipment_number,
@@ -211,35 +282,207 @@ export async function autoCreateRecyclerDeclaration(
 
   const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
   if (error) {
-    console.error('Auto recycler declaration error:', error);
-  } else {
-    console.log('Auto recycler declaration created for shipment:', shipmentId);
-    
-    // Send notification to generator & transporter about recycler receipt
-    try {
-      const notifyOrgIds = [shipment.generator_id, shipment.transporter_id].filter(Boolean);
-      if (notifyOrgIds.length > 0) {
-        const { data: usersToNotify } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .in('organization_id', notifyOrgIds)
-          .limit(20);
-
-        if (usersToNotify && usersToNotify.length > 0) {
-          await sendBulkDualNotification({
-            user_ids: usersToNotify.map((u: any) => u.user_id),
-            title: '📥 إقرار استلام من المدوّر/جهة التخلص',
-            message: withTagline(`أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`),
-            type: 'document_issued',
-            reference_id: shipmentId,
-            reference_type: 'shipment',
-          });
-        }
-      }
-    } catch (notifErr) {
-      console.error('Recycler declaration notification failed:', notifErr);
-    }
+    console.error('Auto transporter declaration error:', error);
+    return;
   }
+
+  // Notify generator (with visibility masking check)
+  const notifyIds: (string | null | undefined)[] = [shipment.generator_id];
+  if (!shipment.hide_recycler_from_generator) notifyIds.push(shipment.recycler_id);
+
+  await notifyOrgUsers(
+    notifyIds,
+    '🚛 إقرار نقل — الناقل بدأ الرحلة',
+    `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار نقل للشحنة ${shipment.shipment_number}.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Recycler receipt declaration — triggered at: delivered/confirmed
+ */
+export async function autoCreateRecyclerDeclaration(
+  shipmentId: string,
+  recyclerOrgId: string,
+  userId: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(recyclerOrgId, 'auto_delivery_certificate'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'recycler_receipt').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `DCL-RCY-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('recycler_receipt', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.recycler_id),
+  });
+
+  const maskedNames = applyVisibilityMasking(
+    { generator: getOrgName(shipment.generator_id), transporter: getOrgName(shipment.transporter_id), recycler: getOrgName(shipment.recycler_id) },
+    shipment, recyclerOrgId,
+  );
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: recyclerOrgId,
+    declaration_type: 'recycler_receipt',
+    declaration_text: RECYCLER_AUTO_DECLARATION_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    ...maskedNames,
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto recycler declaration error:', error);
+    return;
+  }
+
+  // Notify transporter + generator (respecting visibility)
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
+  if (!shipment.hide_generator_from_recycler) notifyIds.push(shipment.generator_id);
+
+  await notifyOrgUsers(
+    notifyIds,
+    '📥 إقرار استلام من المدوّر/جهة التخلص',
+    `أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Disposal final declaration — triggered at: disposal_treatment/disposal_final/disposal_completed
+ */
+export async function autoCreateDisposalDeclaration(
+  shipmentId: string,
+  disposalOrgId: string,
+  userId: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(disposalOrgId, 'auto_delivery_certificate'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'disposal_final').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `DCL-DSP-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('disposal_final', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(disposalOrgId),
+  });
+
+  const maskedNames = applyVisibilityMasking(
+    { generator: getOrgName(shipment.generator_id), transporter: getOrgName(shipment.transporter_id), recycler: getOrgName(shipment.recycler_id) },
+    shipment, disposalOrgId,
+  );
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: disposalOrgId,
+    declaration_type: 'disposal_final',
+    declaration_text: DISPOSAL_AUTO_DECLARATION_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    ...maskedNames,
+    disposal_name: getOrgName(disposalOrgId),
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto disposal declaration error:', error);
+    return;
+  }
+
+  await notifyOrgUsers(
+    [shipment.transporter_id],
+    '♻️ إقرار تخلص نهائي',
+    `أصدرت جهة التخلص إقرار تخلص نهائي للشحنة ${shipment.shipment_number}.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Driver pickup confirmation — triggered at: picked_up/loading
+ */
+export async function autoCreateDriverConfirmation(
+  shipmentId: string,
+  transporterOrgId: string,
+  userId: string,
+  driverName?: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(transporterOrgId, 'auto_tracking_form'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'driver_confirmation').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `DCL-DRV-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('driver_confirmation', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.transporter_id),
+  });
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: transporterOrgId,
+    declaration_type: 'driver_confirmation',
+    declaration_text: DRIVER_AUTO_CONFIRMATION_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    generator_name: getOrgName(shipment.generator_id),
+    transporter_name: getOrgName(shipment.transporter_id),
+    recycler_name: getOrgName(shipment.recycler_id),
+    driver_name: driverName || null,
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto driver confirmation error:', error);
+    return;
+  }
+
+  await notifyOrgUsers(
+    [shipment.generator_id],
+    '🚗 تأكيد السائق — تم استلام الشحنة ميدانياً',
+    `أكد السائق ${driverName || ''} استلام الشحنة ${shipment.shipment_number} ميدانياً.`,
+    shipmentId,
+  );
 }
 
 /**
