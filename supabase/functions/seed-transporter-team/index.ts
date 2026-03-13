@@ -339,22 +339,67 @@ Deno.serve(async (req) => {
             const { data: users } = await supabase.auth.admin.listUsers();
             const existing = users?.users?.find((u) => u.email === member.email);
             if (existing) {
-              // Update profile & position
-              await supabase
+              // Check if profile exists
+              const { data: existingProfile } = await supabase
                 .from("profiles")
-                .update({
+                .select("id")
+                .eq("user_id", existing.id)
+                .maybeSingle();
+
+              if (existingProfile) {
+                // Update existing profile
+                await supabase
+                  .from("profiles")
+                  .update({
+                    full_name: member.full_name,
+                    organization_id: ORG_ID,
+                    department: member.department,
+                    employee_type: member.employee_type,
+                    is_active: true,
+                    email: member.email,
+                  })
+                  .eq("user_id", existing.id);
+              } else {
+                // Create profile if it doesn't exist
+                await supabase.from("profiles").insert({
+                  id: existing.id,
+                  user_id: existing.id,
                   full_name: member.full_name,
                   organization_id: ORG_ID,
                   department: member.department,
                   employee_type: member.employee_type,
                   is_active: true,
-                })
-                .eq("user_id", existing.id);
+                  email: member.email,
+                });
+              }
+
+              // Upsert user_organizations
+              await supabase.from("user_organizations").upsert(
+                {
+                  user_id: existing.id,
+                  organization_id: ORG_ID,
+                  role_in_organization: member.role_in_org,
+                  is_primary: true,
+                  is_active: true,
+                },
+                { onConflict: "user_id,organization_id" }
+              );
 
               await supabase
                 .from("organization_positions")
                 .update({ assigned_user_id: existing.id })
                 .eq("id", member.position_id);
+
+              // Upsert employee_permissions
+              for (const perm of member.permissions) {
+                await supabase.from("employee_permissions").upsert(
+                  {
+                    profile_id: existing.id,
+                    permission_type: perm,
+                  },
+                  { onConflict: "profile_id,permission_type" }
+                );
+              }
 
               results.push({
                 email: member.email,
