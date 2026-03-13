@@ -15,6 +15,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, FileText, Download, Eye, Clock, FolderOpen, Filter,
   Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2, Upload,
+  PenTool, Stamp, FileSignature, Package, Truck, Shield,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
@@ -23,11 +24,12 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import DocumentActionHub from '@/components/documents/DocumentActionHub';
 import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   documents: { label: 'مستندات', icon: FileText },
   financials: { label: 'مالية', icon: FileText },
-  operations: { label: 'تشغيل', icon: FileText },
+  operations: { label: 'تشغيل', icon: Truck },
   legal: { label: 'قانونية', icon: FileCheck },
   other: { label: 'أخرى', icon: FolderOpen },
 };
@@ -37,13 +39,13 @@ const typeMap: Record<string, string> = {
   contract: 'عقد',
   correspondence: 'مراسلات',
   invoice: 'فاتورة',
-  receipt: 'إيصال',
+  receipt: 'إقرار / إيصال',
   deposit_proof: 'إثبات إيداع',
   weight_slip: 'تذكرة ميزان',
   certificate: 'شهادة',
-  license: 'رخصة',
+  license: 'رخصة / تصريح',
   registration: 'تسجيل',
-  other: 'أخرى',
+  other: 'مستند عام',
 };
 
 const BUCKET_NAME = 'entity-documents';
