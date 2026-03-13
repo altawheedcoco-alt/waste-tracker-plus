@@ -23302,6 +23302,7 @@ export type Database = {
           id: string
           last_modified_by: string | null
           organization_id: string
+          transporter_docs_visible_to_generator: boolean
           updated_at: string
         }
         Insert: {
@@ -23330,6 +23331,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           organization_id: string
+          transporter_docs_visible_to_generator?: boolean
           updated_at?: string
         }
         Update: {
@@ -23358,6 +23360,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           organization_id?: string
+          transporter_docs_visible_to_generator?: boolean
           updated_at?: string
         }
         Relationships: [
