@@ -1,3 +1,4 @@
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -78,6 +79,13 @@ const ComplianceCertificateView = ({ certificate, open, onClose }: ComplianceCer
           <div class="axis"><span>${certificate.documentation_score}%</span><span>التوثيق الرقمي</span></div>
           <div class="axis"><span>${certificate.safety_environment_score}%</span><span>السلامة والبيئة</span></div>
         </div>
+        ${generateDigitalVerificationStamp({
+          referenceNumber: `COMP-${certificate.id?.slice(0,8) || Date.now()}`,
+          documentType: 'certificate',
+          entityName: certificate.organization_name || 'iRecycle',
+          accentColor: '#059669',
+          compact: true,
+        })}
         <div class="footer">
           <p>هذه الشهادة صادرة آلياً من منصة iRecycle وتعكس مستوى الامتثال بناءً على البيانات التشغيلية الفعلية</p>
           <p>للتحقق: ${verifyUrl}</p>

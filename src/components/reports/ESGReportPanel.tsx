@@ -1,4 +1,5 @@
 import { memo, useState, useMemo, useRef } from 'react';
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -238,7 +239,14 @@ const ESGReportPanel = memo(({ organizationId, showPrint = true, embedded = fals
             <div class="metric card"><p>⚡ ${metrics.energySaved.toLocaleString()}</p><p>كيلوواط ساعة</p></div>
             <div class="metric card"><p>🚗 ${Math.round(metrics.carbonSaved * 4000).toLocaleString()}</p><p>كم قيادة مُوفرة</p></div>
           </div>
-          <p style="margin-top:32px;text-align:center;color:#6b7280;font-size:12px">تم إنشاء هذا التقرير آلياً بواسطة منصة iRecycle | ${format(new Date(), 'PPP', { locale: ar })}</p>
+          ${generateDigitalVerificationStamp({
+            referenceNumber: `ESG-${format(new Date(), 'yyyyMMdd')}`,
+            documentType: 'report',
+            entityName: 'iRecycle',
+            accentColor: '#059669',
+            compact: true,
+          })}
+          <p style="margin-top:12px;text-align:center;color:#6b7280;font-size:12px">تم إنشاء هذا التقرير آلياً بواسطة منصة iRecycle | ${format(new Date(), 'PPP', { locale: ar })}</p>
           </body></html>
         `);
         printWindow.document.close();

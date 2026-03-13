@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 interface A4Data {
   orgName: string;
   dateStr: string;
@@ -122,6 +122,13 @@ ${notifications.map((n: any, i: number) => `<tr>
 </tr>`).join('')}
 </tbody>
 </table>` : ''}
+
+${generateDigitalVerificationStamp({
+  referenceNumber: `RPT-${dateStr.replace(/\//g, '')}`,
+  documentType: 'report',
+  entityName: orgName,
+  accentColor: '#059669',
+})}
 
 <div class="footer">
   <p>تقرير صادر من منصة iRecycle لإدارة المخلفات | ${dateStr} - ${timeStr}</p>

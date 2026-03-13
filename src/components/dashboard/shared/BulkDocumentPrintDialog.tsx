@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 import { 
   FileText, Printer, Download, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
@@ -446,6 +447,13 @@ ${docSignatures.map((s: any, i: number) => `<tr>
 
 ${(signingOut.length === 0 && signingIn.length === 0 && docSignatures.length === 0) ? '<p class="empty">لا توجد طلبات توقيع أو أختام في هذه الفترة</p>' : ''}
 ` : ''}
+
+${generateDigitalVerificationStamp({
+  referenceNumber: `RPT-${dateStr.replace(/\//g, '')}`,
+  documentType: 'report',
+  entityName: selectedPartnerName,
+  accentColor: '#059669',
+})}
 
 <div class="footer">
   <p>تقرير صادر من منصة iRecycle لإدارة المخلفات | ${dateStr} - ${timeStr}</p>
