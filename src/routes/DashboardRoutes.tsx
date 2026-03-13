@@ -212,10 +212,9 @@ const RegulatoryViolations = lazy(() => import("@/pages/dashboard/RegulatoryViol
 const ConsultantPortal = lazy(() => import("@/pages/dashboard/ConsultantPortal"));
 const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManagement"));
 const GovernanceDashboard = lazy(() => import("@/pages/dashboard/GovernanceDashboard"));
-const SmartDocumentArchive = lazy(() => import("@/pages/dashboard/SmartDocumentArchive"));
+// SmartDocumentArchive and CentralDocumentRegistry now redirect to DocumentCenter
 const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCenter"));
 const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics"));
-const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocumentRegistry"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
@@ -445,10 +444,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/consultant-portal" element={<ConsultantPortal />} />
     <Route path="/dashboard/capacity-management" element={<CapacityManagement />} />
     <Route path="/dashboard/governance" element={<GovernanceDashboard />} />
-    <Route path="/dashboard/smart-archive" element={<SmartDocumentArchive />} />
+    <Route path="/dashboard/smart-archive" element={<Navigate to="/dashboard/document-center?tab=smart-archive" replace />} />
     <Route path="/dashboard/cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/visitor-analytics" element={<VisitorAnalytics />} />
-    <Route path="/dashboard/central-registry" element={<CentralDocumentRegistry />} />
+    <Route path="/dashboard/central-registry" element={<Navigate to="/dashboard/document-center?tab=registry" replace />} />
     <Route path="/dashboard/digital-maturity" element={<DigitalMaturityDashboard />} />
     <Route path="/dashboard/architecture-guide" element={<SystemArchitectureGuide />} />
     {/* Ghost sidebar aliases — consultant/office paths that reuse existing pages */}

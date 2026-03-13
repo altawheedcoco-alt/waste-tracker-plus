@@ -2,27 +2,27 @@
  * مركز المستندات الموحد — Unified Document Center
  * قاعدة مركزية واحدة لجميع المستندات والتوقيعات والأختام والتحقق والأرشيف
  */
-import { lazy, Suspense, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
 import {
-  FolderOpen, FileText, PenTool, QrCode, Shield, Archive,
-  Printer, FileSignature, BadgeCheck, Receipt, FileCheck,
-  Inbox, Send, Award, Layers, ScanLine, Building2,
-  Download, Eye, Search, Filter, Plus, ArrowRight,
-  Brain, Workflow,
+  FolderOpen, PenTool, QrCode, Shield, Printer, FileSignature,
+  Award, Receipt, Layers, Brain, Workflow, Archive, Inbox, Upload,
 } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Lazy-load heavy sub-panels
+// Lazy-load panels
+const RegistryPanel = lazy(() => import('@/components/document-center/RegistryPanel'));
+const SmartArchivePanel = lazy(() => import('@/components/document-center/SmartArchivePanel'));
+const AdvancedDocumentUploadPanel = lazy(() => import('@/components/document-center/AdvancedDocumentUploadPanel'));
 const DocumentArchivePanel = lazy(() => import('@/components/document-center/DocumentArchivePanel'));
 const SignaturesStampsPanel = lazy(() => import('@/components/document-center/SignaturesStampsPanel'));
+const OCRScannerPanel = lazy(() => import('@/components/digitization/OCRScannerPanel'));
+const WorkflowAutomationPanel = lazy(() => import('@/components/digitization/WorkflowAutomationPanel'));
+const AdvancedSignatureVerification = lazy(() => import('@/components/digitization/AdvancedSignatureVerification'));
 const QRBarcodePanel = lazy(() => import('@/components/document-center/QRBarcodePanel'));
 const VerificationPanel = lazy(() => import('@/components/document-center/VerificationPanel'));
 const PrintCenterPanel = lazy(() => import('@/components/document-center/PrintCenterPanel'));
@@ -30,10 +30,6 @@ const ContractsPanel = lazy(() => import('@/components/document-center/Contracts
 const CertificatesPanel = lazy(() => import('@/components/document-center/CertificatesPanel'));
 const InvoicesPanel = lazy(() => import('@/components/document-center/InvoicesPanel'));
 const TemplatesPanel = lazy(() => import('@/components/document-center/TemplatesPanel'));
-const AdvancedDocumentUploadPanel = lazy(() => import('@/components/document-center/AdvancedDocumentUploadPanel'));
-const OCRScannerPanel = lazy(() => import('@/components/digitization/OCRScannerPanel'));
-const WorkflowAutomationPanel = lazy(() => import('@/components/digitization/WorkflowAutomationPanel'));
-const AdvancedSignatureVerification = lazy(() => import('@/components/digitization/AdvancedSignatureVerification'));
 
 const PanelLoader = () => (
   <div className="flex items-center justify-center py-12">
@@ -42,7 +38,9 @@ const PanelLoader = () => (
 );
 
 const getDocCenterTabs = (t: (key: string) => string) => [
-  { id: 'upload', icon: FolderOpen, label: t('docCenter.uploadDocuments') },
+  { id: 'registry', icon: Shield, label: 'السجل المركزي' },
+  { id: 'smart-archive', icon: Brain, label: 'الأرشفة الذكية' },
+  { id: 'upload', icon: Upload, label: t('docCenter.uploadDocuments') },
   { id: 'archive', icon: FolderOpen, label: t('docCenter.archiveDocs') },
   { id: 'signatures', icon: PenTool, label: t('docCenter.signaturesStamps') },
   { id: 'ocr-scanner', icon: Brain, label: 'الماسح الذكي OCR' },
@@ -61,8 +59,7 @@ const DocumentCenter = () => {
   const { t, language } = useLanguage();
   const tabs = getDocCenterTabs(t);
   const [searchParams, setSearchParams] = useSearchParams();
-  const activeTab = searchParams.get('tab') || 'archive';
-  const navigate = useNavigate();
+  const activeTab = searchParams.get('tab') || 'registry';
 
   const handleTabChange = (value: string) => {
     setSearchParams({ tab: value });
@@ -110,6 +107,8 @@ const DocumentCenter = () => {
 
           <div className="mt-4">
             <Suspense fallback={<PanelLoader />}>
+              <TabsContent value="registry" className="mt-0"><RegistryPanel /></TabsContent>
+              <TabsContent value="smart-archive" className="mt-0"><SmartArchivePanel /></TabsContent>
               <TabsContent value="upload" className="mt-0"><AdvancedDocumentUploadPanel /></TabsContent>
               <TabsContent value="archive" className="mt-0"><DocumentArchivePanel /></TabsContent>
               <TabsContent value="signatures" className="mt-0"><SignaturesStampsPanel /></TabsContent>
