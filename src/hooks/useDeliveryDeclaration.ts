@@ -66,10 +66,10 @@ export function useShipmentDeclarations(shipmentId: string | undefined, userOrgI
       const isGenerator = userOrgId === shipment.generator_id;
       const isTransporter = userOrgId === shipment.transporter_id;
 
-      // Filter: if user is generator, hide driver declarations where visible_to_generator = false
-      // If user is transporter, always show all (it's their driver)
+      // Filter: if user is generator, hide documents where visible_to_generator = false
+      // This covers driver confirmations AND transporter declarations/receipts
       return declarations.filter((dec: any) => {
-        if (dec.declaration_type === 'driver_confirmation' && isGenerator && dec.visible_to_generator === false) {
+        if (isGenerator && dec.visible_to_generator === false) {
           return false;
         }
         return true;

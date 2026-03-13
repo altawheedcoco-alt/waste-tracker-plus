@@ -32698,6 +32698,7 @@ export type Database = {
           unit: string | null
           updated_at: string
           verification_code: string | null
+          visible_to_generator: boolean | null
           waste_category: string | null
           waste_type: string | null
         }
@@ -32734,6 +32735,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
         }
@@ -32770,6 +32772,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
         }
