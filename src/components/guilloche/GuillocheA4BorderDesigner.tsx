@@ -111,7 +111,7 @@ const generateBorders = (): BorderConfig[] => {
       color,
       thickness: 1 + (i % 5),
       cornerStyle: corner,
-      innerMargin: 15 + (i % 6) * 5,
+      innerMargin: 0,
       doubleBorder: i % 3 === 0,
       cornerDecoration: i % 2 === 0,
       density: 4 + (i % 8),
