@@ -482,7 +482,6 @@ export default function GuillochePatterns() {
           </TabsList>
 
           <TabsContent value="patterns" className="space-y-6 mt-4">
-          {/* Patterns mode controls */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Layer Mode Toggle */}
             <Button
@@ -505,7 +504,6 @@ export default function GuillochePatterns() {
               {activePatterns.length === 0 && <Check className="h-4 w-4 mr-1" />}
             </Button>
           </div>
-        </div>
 
         {/* Active Patterns / Layers Display */}
         {activePatterns.length > 0 && (
