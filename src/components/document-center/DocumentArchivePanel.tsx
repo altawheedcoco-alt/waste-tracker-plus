@@ -2,8 +2,8 @@
  * لوحة الأرشيف والمستندات — يعرض كل مستندات المنظمة من entity_documents
  * يدعم فتح مركز إجراءات المستند الموحد (DocumentActionHub) لأي مستند
  */
-import { useState, useMemo, useCallback } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -50,6 +50,7 @@ const BUCKET_NAME = 'entity-documents';
 
 const DocumentArchivePanel = () => {
   const { organization } = useAuth();
+  const queryClient = useQueryClient();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
@@ -91,6 +92,23 @@ const DocumentArchivePanel = () => {
     },
     enabled: !!organization?.id,
   });
+
+  // Realtime subscription — تحديث فوري عند أي تغيير
+  useEffect(() => {
+    if (!organization?.id) return;
+    const channel = supabase
+      .channel('archive-panel-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'entity_documents',
+        filter: `organization_id=eq.${organization.id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['document-center-archive'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [organization?.id, queryClient]);
 
   /** Get a signed URL or open directly if it's already a full URL — searches ALL buckets */
   const getFileUrl = useCallback(async (fileUrl: string): Promise<string | null> => {
