@@ -444,7 +444,7 @@ const ShipmentStatusTimeline = ({
                           className={cn(
                             "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all shrink-0",
                             isActive && "border-primary bg-primary text-primary-foreground scale-110 shadow-lg ring-2 ring-primary/30",
-                            isCompleted && cn("border-transparent text-white", step.colorClass),
+                            isCompleted && cn("border-transparent text-primary-foreground", step.colorClass),
                             isFuture && "border-muted-foreground/30 bg-muted text-muted-foreground",
                             (isCompleted || isActive) && hasDetails && "group-hover:ring-2 group-hover:ring-primary/20"
                           )}
