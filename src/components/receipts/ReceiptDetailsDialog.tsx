@@ -62,7 +62,7 @@ const ReceiptDetailsDialog = ({
   onConfirm,
   isGenerator = false 
 }: ReceiptDetailsDialogProps) => {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const navigate = useNavigate();
   const [confirming, setConfirming] = useState(false);
   const [themeOpen, setThemeOpen] = useState(false);
