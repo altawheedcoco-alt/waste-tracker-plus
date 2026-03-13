@@ -491,9 +491,9 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         onClick={() => isAvailable && !isCurrent && setSelectedStatus(status.key)}
         disabled={!isAvailable || isCurrent}
         className={cn(
-          "flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all min-w-[72px] flex-1",
+          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all min-w-[72px] flex-1",
           isSelected 
-            ? "bg-primary/10 ring-2 ring-primary shadow-sm" 
+            ? "bg-primary/15 ring-2 ring-primary shadow-sm" 
             : isCurrent
             ? "bg-muted/60 cursor-not-allowed"
             : isAvailable
@@ -514,15 +514,16 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           {isSelected ? <CheckCircle2 className="w-5 h-5" /> : <StatusIcon className="w-4 h-4" />}
         </div>
         <span className={cn(
-          "text-[11px] font-medium text-center leading-tight",
-          isSelected && "text-primary font-bold",
+          "text-xs font-semibold text-center leading-tight",
+          isSelected ? "text-primary" : "",
           isCurrent && "text-muted-foreground",
+          !isSelected && !isCurrent && isAvailable && "text-foreground",
           !isAvailable && !isCurrent && "text-muted-foreground"
         )}>
           {status.labelAr}
         </span>
         {isCurrent && (
-          <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">الحالية</span>
+          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">الحالية</span>
         )}
       </button>
     );
@@ -869,18 +870,18 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
     return (
       <button key={status.key} onClick={() => { setSelectedStatus(status.key); setExpanded(true); }}
         className={cn(
-          "flex flex-col items-center gap-1 p-2 rounded-xl transition-all min-w-[64px] flex-1",
-          isSelected ? "bg-primary/10 ring-2 ring-primary shadow-sm" : "hover:bg-muted/50 cursor-pointer"
+          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all min-w-[72px] flex-1",
+          isSelected ? "bg-primary/15 ring-2 ring-primary shadow-sm" : "hover:bg-muted/50 cursor-pointer"
         )}>
         <div className={cn(
-          "w-9 h-9 rounded-full flex items-center justify-center border-2 transition-all",
+          "w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all",
           isSelected ? "border-primary bg-primary text-primary-foreground scale-110 shadow-md"
             : cn("border-border bg-background", status.textClass)
         )}>
-          {isSelected ? <CheckCircle2 className="w-4 h-4" /> : <StatusIcon className="w-4 h-4" />}
+          {isSelected ? <CheckCircle2 className="w-5 h-5" /> : <StatusIcon className="w-4 h-4" />}
         </div>
-        <span className={cn("text-[10px] font-medium text-center leading-tight",
-          isSelected && "text-primary font-bold"
+        <span className={cn("text-xs font-semibold text-center leading-tight",
+          isSelected ? "text-primary" : "text-foreground"
         )}>{status.labelAr}</span>
       </button>
     );
