@@ -74,7 +74,7 @@ const ReceiptDetailsDialog = ({
 
   // Fetch linked delivery declarations (both generator handover + transporter delivery)
   const shipmentId = receipt?.shipment?.id;
-  const { data: declarations = [] } = useShipmentDeclarations(shipmentId);
+  const { data: declarations = [] } = useShipmentDeclarations(shipmentId, organization?.id);
   const generatorDeclaration = declarations.find((d: any) => d.declaration_type === 'generator_handover');
   const transporterDeclaration = declarations.find((d: any) => d.declaration_type === 'transporter_delivery' || !d.declaration_type);
   const declarationData = transporterDeclaration || generatorDeclaration;
