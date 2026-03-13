@@ -65,16 +65,16 @@ const wasteTypeLabels: Record<string, string> = {
   medical: 'طبية', construction: 'مخلفات بناء', other: 'أخرى',
 };
 const hazardLevelLabels: Record<string, { label: string; className: string }> = {
-  low: { label: 'منخفض', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  medium: { label: 'متوسط', className: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' },
-  high: { label: 'عالي', className: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300' },
+  low: { label: 'منخفض', className: 'bg-primary/10 text-primary border border-primary/20' },
+  medium: { label: 'متوسط', className: 'bg-accent text-accent-foreground border border-accent/20' },
+  high: { label: 'عالي', className: 'bg-destructive/10 text-destructive border border-destructive/20' },
 };
 const statusLabels: Record<string, { label: string; className: string }> = {
-  new: { label: 'جديدة', className: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' },
-  approved: { label: 'معتمدة', className: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' },
-  in_transit: { label: 'في الطريق', className: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300' },
-  delivered: { label: 'تم التسليم', className: 'bg-teal-100 text-teal-800 dark:bg-teal-900 dark:text-teal-300' },
-  confirmed: { label: 'مؤكدة', className: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-300' },
+  new: { label: 'جديدة', className: 'bg-primary/10 text-primary border border-primary/20' },
+  approved: { label: 'معتمدة', className: 'bg-primary/15 text-primary border border-primary/30' },
+  in_transit: { label: 'في الطريق', className: 'bg-accent text-accent-foreground border border-accent/30' },
+  delivered: { label: 'تم التسليم', className: 'bg-secondary text-secondary-foreground border border-secondary/30' },
+  confirmed: { label: 'مؤكدة', className: 'bg-primary/20 text-primary border border-primary/30' },
 };
 
 const TABS: TabItem[] = [

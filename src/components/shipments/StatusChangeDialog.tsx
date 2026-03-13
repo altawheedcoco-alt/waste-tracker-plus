@@ -491,9 +491,9 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         onClick={() => isAvailable && !isCurrent && setSelectedStatus(status.key)}
         disabled={!isAvailable || isCurrent}
         className={cn(
-          "flex flex-col items-center gap-1.5 p-2 rounded-xl transition-all min-w-[72px] flex-1",
+          "flex flex-col items-center gap-1.5 p-2.5 rounded-xl transition-all min-w-[72px] flex-1",
           isSelected 
-            ? "bg-primary/10 ring-2 ring-primary shadow-sm" 
+            ? "bg-primary/15 ring-2 ring-primary shadow-sm" 
             : isCurrent
             ? "bg-muted/60 cursor-not-allowed"
             : isAvailable
@@ -514,15 +514,16 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           {isSelected ? <CheckCircle2 className="w-5 h-5" /> : <StatusIcon className="w-4 h-4" />}
         </div>
         <span className={cn(
-          "text-[11px] font-medium text-center leading-tight",
-          isSelected && "text-primary font-bold",
+          "text-xs font-semibold text-center leading-tight",
+          isSelected ? "text-primary" : "",
           isCurrent && "text-muted-foreground",
+          !isSelected && !isCurrent && isAvailable && "text-foreground",
           !isAvailable && !isCurrent && "text-muted-foreground"
         )}>
           {status.labelAr}
         </span>
         {isCurrent && (
-          <span className="text-[9px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">الحالية</span>
+          <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-full">الحالية</span>
         )}
       </button>
     );
