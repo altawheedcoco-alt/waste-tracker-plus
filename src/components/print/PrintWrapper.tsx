@@ -42,6 +42,46 @@ interface PrintWrapperProps {
   className?: string;
 }
 
+/** Renders guilloche pattern layers as SVG background */
+const GuillocheBackgroundLayer = ({ patterns }: { patterns: SavedPatternRef[] }) => {
+  if (!patterns.length) return null;
+  const tileSize = 200;
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+      {patterns.map((ref, idx) => {
+        const palette = GUILLOCHE_COLOR_PALETTES.find(c => c.id === ref.colorPaletteId);
+        if (!palette) return null;
+        const paths = generatePatternPaths(ref.patternType, tileSize, ref.scale, ref.seed);
+        const opacity = 0.08 - idx * 0.015;
+        const gradId = `pw-grad-${ref.id}-${idx}`;
+        const patId = `pw-pat-${ref.id}-${idx}`;
+        return (
+          <div key={ref.id} style={{ position: 'absolute', inset: 0, opacity }}>
+            <svg width="100%" height="100%" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={palette.primary} />
+                  <stop offset="100%" stopColor={palette.secondary} />
+                </linearGradient>
+                <pattern id={patId} patternUnits="userSpaceOnUse" width={tileSize} height={tileSize}>
+                  <g transform={`rotate(${ref.rotation} ${tileSize / 2} ${tileSize / 2})`}>
+                    <g opacity={ref.opacity * 10}>
+                      {paths.map((d, i) => (
+                        <path key={i} d={d} fill="none" stroke={`url(#${gradId})`} strokeWidth={ref.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+                      ))}
+                    </g>
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill={`url(#${patId})`} />
+            </svg>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   children,
   title,
@@ -71,10 +111,13 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   const barcodeContent = barcodeValue || documentNumber || `DOC${Date.now()}`;
   const vCode = verificationCode || `VRF-${Date.now().toString(36).toUpperCase()}`;
 
+  // Guilloche background from user preferences
+  const { savedPatterns, bgColor } = useGuillocheBackground();
+
   return (
     <div
       ref={ref}
-      className={`print-container bg-white text-black ${isOfficial ? 'print-official' : ''} ${className}`}
+      className={`print-container text-black ${isOfficial ? 'print-official' : ''} ${className}`}
       dir="rtl"
       style={{ 
         width: '210mm', 
@@ -87,8 +130,12 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden',
+        backgroundColor: bgColor || '#ffffff',
       }}
     >
+      {/* Guilloche Pattern Background */}
+      <GuillocheBackgroundLayer patterns={savedPatterns} />
+
       {/* Watermark */}
       {showWatermark && (
         <div className="print-watermark">{watermarkText}</div>
