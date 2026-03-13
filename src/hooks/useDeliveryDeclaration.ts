@@ -72,7 +72,7 @@ export function useShipmentDeclarations(shipmentId: string | undefined, userOrgI
         
         // Determine the user's role relative to this shipment
         if (isGenerator && dec.visible_to.generator === false) return false;
-        if (userOrgId === shipment.recycler_id && dec.visible_to.recycler === false) return false;
+        if (isRecycler && dec.visible_to.recycler === false) return false;
         // Transporter always sees everything
         return true;
       });
