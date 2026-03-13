@@ -90,8 +90,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
             </div>
           )}
           <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-            <div className="p-2 rounded-full bg-purple-100 dark:bg-purple-900">
-              <Scale className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+            <div className="p-2 rounded-full bg-accent">
+              <Scale className="w-4 h-4 text-accent-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">الكمية المسلّمة</p>
