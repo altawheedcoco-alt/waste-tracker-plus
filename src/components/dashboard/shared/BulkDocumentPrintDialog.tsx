@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 import { 
   FileText, Printer, Download, Calendar, Building2, Filter, 
   Loader2, FileStack, ClipboardList, Award, Receipt, Package,
