@@ -121,7 +121,7 @@ export const useRealtimeTracking = ({
 
       // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         const { withTagline, SHIPMENT_STATUS_LABELS } = await import('@/utils/platformTaglines');
 
@@ -191,9 +191,19 @@ export const useRealtimeTracking = ({
             await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
           }
 
-          // Disposal declaration on disposal stages
+          // Disposal reception on delivered
+          if (['delivered', 'confirmed'].includes(newStatus) && shipmentData.recycler_id) {
+            await autoCreateDisposalReceptionDeclaration(shipmentId, shipmentData.recycler_id, user.id);
+          }
+
+          // Disposal certificate on disposal stages
           if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(newStatus) && shipmentData.recycler_id) {
-            await autoCreateDisposalDeclaration(shipmentId, shipmentData.recycler_id, user.id);
+            await autoCreateDisposalCertificate(shipmentId, shipmentData.recycler_id, user.id);
+          }
+
+          // Recycling certificate on recycling complete
+          if (['recycling_complete', 'processing_complete', 'completed'].includes(newStatus) && shipmentData.recycler_id) {
+            await autoCreateRecyclingCertificate(shipmentId, shipmentData.recycler_id, user.id);
           }
         }
       } catch (autoErr) {

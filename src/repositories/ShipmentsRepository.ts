@@ -128,7 +128,7 @@ export const ShipmentsRepository = {
 
       // Auto-create declarations based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         
         if (['approved', 'registered'].includes(status) && shipment.generator_id) {
@@ -143,12 +143,16 @@ export const ShipmentsRepository = {
         }
         if (['delivered', 'confirmed'].includes(status) && shipment.recycler_id) {
           await autoCreateRecyclerDeclaration(id, shipment.recycler_id, userId);
+          await autoCreateDisposalReceptionDeclaration(id, shipment.recycler_id, userId);
         }
         if (['delivered'].includes(status) && shipment.transporter_id) {
           await autoCreateReceipt(id, shipment.transporter_id, userId);
         }
         if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(status) && shipment.recycler_id) {
-          await autoCreateDisposalDeclaration(id, shipment.recycler_id, userId);
+          await autoCreateDisposalCertificate(id, shipment.recycler_id, userId);
+        }
+        if (['recycling_complete', 'processing_complete', 'completed'].includes(status) && shipment.recycler_id) {
+          await autoCreateRecyclingCertificate(id, shipment.recycler_id, userId);
         }
       } catch (e) {
         console.error('Auto declaration error (non-blocking):', e);
