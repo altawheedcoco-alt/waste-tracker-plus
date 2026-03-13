@@ -7,7 +7,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Zap, ZapOff, FileText, Bell, Settings, Sparkles,
-  Shield, AlertTriangle, CheckCircle2
+  Shield, AlertTriangle, CheckCircle2, GitBranch
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -97,6 +97,16 @@ const AutoActionsPanel = () => {
         </CardContent>
       </Card>
 
+      {/* Lifecycle Info */}
+      <Card className="border-primary/20 bg-primary/5">
+        <CardContent className="py-3 px-4">
+          <div className="flex items-center gap-2 text-xs text-primary">
+            <GitBranch className="w-4 h-4 shrink-0" />
+            <span className="font-medium">مرتبطة بدورة حياة الشحنة — كل إجراء يتم تنفيذه تلقائياً عند الوصول للمرحلة المحددة</span>
+          </div>
+        </CardContent>
+      </Card>
+
       {/* Security Note */}
       <Card className="border-muted">
         <CardContent className="py-3 px-4">
@@ -147,14 +157,22 @@ const AutoActionsPanel = () => {
                     const label = AUTO_ACTION_LABELS[actionKey];
                     const enabled = (settings as any)[actionKey];
                     return (
-                      <div key={actionKey} className="flex items-center justify-between py-1.5">
-                        <div className="flex items-center gap-2">
-                          {enabled ? (
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-                          ) : (
-                            <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground/30" />
+                      <div key={actionKey} className="flex items-center justify-between py-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            {enabled ? (
+                              <CheckCircle2 className="w-3.5 h-3.5 text-primary shrink-0" />
+                            ) : (
+                              <div className="w-3.5 h-3.5 rounded-full border-2 border-muted-foreground/30 shrink-0" />
+                            )}
+                            <span className="text-sm">{label.ar}</span>
+                          </div>
+                          {label.trigger && (
+                            <div className="mr-5.5 mt-1 flex items-center gap-1.5">
+                              <GitBranch className="w-3 h-3 text-muted-foreground/60 shrink-0" />
+                              <span className="text-[11px] text-muted-foreground/70">{label.trigger}</span>
+                            </div>
                           )}
-                          <span className="text-sm">{label.ar}</span>
                         </div>
                         <Switch
                           checked={enabled}

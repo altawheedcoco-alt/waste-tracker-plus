@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
+import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 
 const GENERATOR_AUTO_DECLARATION_TEXT = `إقرار تسليم مخلفات — صادر تلقائياً من المولّد
 
@@ -54,6 +55,9 @@ export async function autoCreateGeneratorDeclaration(
   generatorOrgId: string,
   userId: string
 ): Promise<void> {
+  // Check if auto-action is enabled
+  if (!(await isAutoActionEnabled(generatorOrgId, 'auto_delivery_certificate'))) return;
+
   // Check if already exists
   const { data: existing } = await (supabase
     .from('delivery_declarations') as any)
@@ -141,6 +145,9 @@ export async function autoCreateRecyclerDeclaration(
   recyclerOrgId: string,
   userId: string
 ): Promise<void> {
+  // Check if auto-action is enabled
+  if (!(await isAutoActionEnabled(recyclerOrgId, 'auto_delivery_certificate'))) return;
+
   // Check if already exists
   const { data: existing } = await (supabase
     .from('delivery_declarations') as any)
