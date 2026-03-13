@@ -1098,6 +1098,89 @@ export default function GuillochePatterns() {
         </Dialog>
           </TabsContent>
 
+          {/* Saved/Previously Used Tab */}
+          <TabsContent value="saved" className="space-y-6 mt-4">
+            {savedPatternIds.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Star className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">لا توجد قوالب محفوظة</h3>
+                  <p className="text-muted-foreground text-sm">عند تحديد أي نمط أو تداخل سيتم حفظه تلقائياً هنا</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Star className="h-5 w-5 text-primary" />
+                    القوالب المحفوظة والمستخدمة سابقاً ({savedPatternIds.length})
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive gap-1"
+                    onClick={() => {
+                      setPref('guilloche_saved_patterns', []);
+                      toast.success('تم مسح جميع القوالب المحفوظة');
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                    مسح الكل
+                  </Button>
+                </div>
+
+                <div className={cn('grid gap-4', gridCols[gridSize])}>
+                  {allPatterns
+                    .filter(p => savedPatternIds.includes(p.id))
+                    .map((pattern, index) => (
+                      <motion.div
+                        key={pattern.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: Math.min(index * 0.03, 0.5) }}
+                      >
+                        <Card
+                          className={cn(
+                            'cursor-pointer transition-all hover:shadow-lg hover:scale-105 group overflow-hidden',
+                            isPatternActive(pattern.id) && 'ring-2 ring-primary'
+                          )}
+                          onClick={() => handlePreview(pattern)}
+                        >
+                          <CardContent className="p-2 relative">
+                            <GuillochePatternSVG pattern={pattern} size={patternSize[gridSize]} />
+
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); handlePreview(pattern); }}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={isPatternActive(pattern.id) ? "destructive" : "default"}
+                                onClick={(e) => { e.stopPropagation(); handleApplyPattern(pattern); }}
+                              >
+                                {isPatternActive(pattern.id) ? <Minus className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                              </Button>
+                            </div>
+
+                            {isPatternActive(pattern.id) && (
+                              <div className="absolute top-1 left-1">
+                                <Badge className="gap-1 bg-primary"><Star className="h-3 w-3" />مُفعَّل</Badge>
+                              </div>
+                            )}
+
+                            <div className="mt-2 text-center">
+                              <p className="text-xs font-medium truncate">{pattern.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{pattern.categoryName}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                </div>
+              </>
+            )}
+          </TabsContent>
+
           <TabsContent value="borders" className="mt-4">
             <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
               <GuillocheA4BorderDesigner />
