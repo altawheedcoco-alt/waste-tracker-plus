@@ -25,15 +25,25 @@ import DocumentActionHub from '@/components/documents/DocumentActionHub';
 import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
-  shipment: { label: 'شحنة', icon: FileText },
-  invoice: { label: 'فاتورة', icon: FileText },
-  contract: { label: 'عقد', icon: FileCheck },
-  certificate: { label: 'شهادة', icon: FileCheck },
-  receipt: { label: 'إيصال', icon: FileText },
-  report: { label: 'تقرير', icon: FileText },
-  weighbridge: { label: 'تذكرة ميزان', icon: FileText },
-  identity: { label: 'وثيقة هوية', icon: FileText },
+  documents: { label: 'مستندات', icon: FileText },
+  financials: { label: 'مالية', icon: FileText },
+  operations: { label: 'تشغيل', icon: FileText },
+  legal: { label: 'قانونية', icon: FileCheck },
   other: { label: 'أخرى', icon: FolderOpen },
+};
+
+const typeMap: Record<string, string> = {
+  award_letter: 'خطاب ترسية',
+  contract: 'عقد',
+  correspondence: 'مراسلات',
+  invoice: 'فاتورة',
+  receipt: 'إيصال',
+  deposit_proof: 'إثبات إيداع',
+  weight_slip: 'تذكرة ميزان',
+  certificate: 'شهادة',
+  license: 'رخصة',
+  registration: 'تسجيل',
+  other: 'أخرى',
 };
 
 const BUCKET_NAME = 'entity-documents';
