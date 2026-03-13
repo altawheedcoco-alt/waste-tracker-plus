@@ -3,6 +3,7 @@ import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
+import { resolveDocVisibilityForAllParties, getDocCategory, type DocumentVisibleTo } from '@/utils/documentVisibilityResolver';
 
 // ─── Declaration Texts ───
 
