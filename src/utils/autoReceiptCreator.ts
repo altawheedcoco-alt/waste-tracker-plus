@@ -80,7 +80,7 @@ export async function autoCreateReceipt(
   }
 
   // Only notify generator if transporter docs are visible to them
-  if (generatorId && visibleToGenerator) {
+  if (generatorId && visibleTo.generator !== false) {
     try {
       const { data: generatorUsers } = await supabase
         .from('profiles')
