@@ -16,8 +16,8 @@ const MyTasksTab = () => {
     queryKey: ['my-pending-shipments', user?.id, organization?.id],
     queryFn: async () => {
       if (!user?.id || !organization?.id) return [];
-      const { data } = await supabase
-        .from('shipments')
+      const { data } = await (supabase
+        .from('shipments') as any)
         .select('id, shipment_number, status, created_at, shipment_type')
         .eq('organization_id', organization.id)
         .in('status', ['confirmed', 'in_transit'] as any[])
