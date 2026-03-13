@@ -392,10 +392,12 @@ export default function GuillocheA4BorderDesigner() {
 
   const handleSelect = (border: BorderConfig) => {
     setActiveBorder(border);
-    // Save to preferences
+    // Save to preferences (saved list + active document border)
     const existing: string[] = getPref('guilloche_saved_borders', []);
     const merged = [...new Set([border.id, ...existing])].slice(0, 50);
     setPref('guilloche_saved_borders', merged);
+    // Persist as document border
+    setPref('guilloche_document_border', border);
     toast.success(`تم اختيار "${border.name}" كبرواز للصفحة`);
   };
 
