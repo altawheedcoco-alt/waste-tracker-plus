@@ -7927,6 +7927,7 @@ export type Database = {
           unit: string | null
           user_agent: string | null
           verification_code: string | null
+          visible_to: Json | null
           visible_to_generator: boolean | null
           waste_type: string | null
         }
@@ -7958,6 +7959,7 @@ export type Database = {
           unit?: string | null
           user_agent?: string | null
           verification_code?: string | null
+          visible_to?: Json | null
           visible_to_generator?: boolean | null
           waste_type?: string | null
         }
@@ -7989,6 +7991,7 @@ export type Database = {
           unit?: string | null
           user_agent?: string | null
           verification_code?: string | null
+          visible_to?: Json | null
           visible_to_generator?: boolean | null
           waste_type?: string | null
         }
@@ -23298,6 +23301,7 @@ export type Database = {
           auto_weight_reconciliation: boolean
           auto_whatsapp_notifications: boolean
           created_at: string
+          document_visibility_settings: Json
           driver_declaration_visible_to_generator: boolean
           id: string
           last_modified_by: string | null
@@ -23327,6 +23331,7 @@ export type Database = {
           auto_weight_reconciliation?: boolean
           auto_whatsapp_notifications?: boolean
           created_at?: string
+          document_visibility_settings?: Json
           driver_declaration_visible_to_generator?: boolean
           id?: string
           last_modified_by?: string | null
@@ -23356,6 +23361,7 @@ export type Database = {
           auto_weight_reconciliation?: boolean
           auto_whatsapp_notifications?: boolean
           created_at?: string
+          document_visibility_settings?: Json
           driver_declaration_visible_to_generator?: boolean
           id?: string
           last_modified_by?: string | null
@@ -32698,6 +32704,7 @@ export type Database = {
           unit: string | null
           updated_at: string
           verification_code: string | null
+          visible_to: Json | null
           visible_to_generator: boolean | null
           waste_category: string | null
           waste_type: string | null
@@ -32735,6 +32742,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to?: Json | null
           visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
@@ -32772,6 +32780,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to?: Json | null
           visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
