@@ -530,6 +530,11 @@ export async function autoCreateDisposalReceptionDeclaration(
     shipment, disposalOrgId,
   );
 
+  // Check if transporter allows forwarding docs to generator
+  const visibleToGenerator = shipment.transporter_id
+    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
+    : true;
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -544,6 +549,7 @@ export async function autoCreateDisposalReceptionDeclaration(
     unit: shipment.unit,
     ...maskedNames,
     disposal_name: getOrgName(disposalOrgId),
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -553,8 +559,14 @@ export async function autoCreateDisposalReceptionDeclaration(
     return;
   }
 
+  // Always notify transporter; only notify generator if transporter allows
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
+  if (visibleToGenerator) {
+    notifyIds.push(shipment.generator_id);
+  }
+
   await notifyOrgUsers(
-    [shipment.transporter_id],
+    notifyIds,
     '📥 إقرار استلام من جهة التخلص',
     `أصدرت جهة التخلص إقرار استلام للشحنة ${shipment.shipment_number}.`,
     shipmentId,
