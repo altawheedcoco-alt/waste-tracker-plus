@@ -123,6 +123,13 @@ ${notifications.map((n: any, i: number) => `<tr>
 </tbody>
 </table>` : ''}
 
+${generateDigitalVerificationStamp({
+  referenceNumber: `RPT-${dateStr.replace(/\//g, '')}`,
+  documentType: 'report',
+  entityName: orgName,
+  accentColor: '#059669',
+})}
+
 <div class="footer">
   <p>تقرير صادر من منصة iRecycle لإدارة المخلفات | ${dateStr} - ${timeStr}</p>
   <p>هذا التقرير آلي ولا يحتاج إلى توقيع</p>
