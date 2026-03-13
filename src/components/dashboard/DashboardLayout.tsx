@@ -1015,10 +1015,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     {/* Binding Legend */}
                     <BindingLegend isCollapsed={false} />
 
-                    {/* Action Chains Tree */}
+                    {/* Action Chains Button */}
                     {currentOrgChains && (
                       <div className="pt-3 mt-3 border-t border-border/30">
-                        <ActionChainTree orgChains={currentOrgChains} />
+                        <ActionChainsButton orgChains={currentOrgChains} isCollapsed={false} />
                       </div>
                     )}
 
