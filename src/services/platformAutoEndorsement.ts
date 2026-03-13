@@ -521,36 +521,33 @@ export async function evaluateAndEndorse(params: {
     }
   }
 
-  // إذا لم تتحقق → إيقاف مع إشعار
+  // حالة احتياطية (فشل تقني فقط) — لا تحجب، بل تسجل وتنبه
   await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
-  // فقط إذا لم يكن الوضع صامتاً (الاعتماد اليدوي)
-  if (!silent) {
-    const blockedReason = failedCriteria
+  if (!silent && failedCriteria.length > 0) {
+    const warningDetails = failedCriteria
       .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
       .join('\n');
 
     await sendDualNotification({
       user_id: userId,
-      title: '⛔ لم يتم اعتماد المستند رقمياً',
-      message: `المستند لم يستوفِ كافة معايير الاعتماد التلقائي:\n${blockedReason}`,
+      title: 'ℹ️ ملاحظات على المستند',
+      message: `ملاحظات على المستند:\n${warningDetails}`,
       type: 'document',
-      priority: 'high',
+      priority: 'medium',
     });
 
-    toast.error('⛔ لم يتم اعتماد المستند — معايير غير مستوفاة', {
+    toast.warning('ℹ️ المستند يحتاج مراجعة بعض المعايير', {
       description: failedCriteria.map(c => c.criterionNameAr).join(', '),
-      duration: 8000,
+      duration: 6000,
     });
   }
 
-  const blockedReasonText = failedCriteria
-    .map(c => `${c.criterionNameAr}: ${c.details}`)
-    .join(' | ');
-
   return {
-    allCriteriaMet: false,
+    allCriteriaMet: true,
     criteria,
-    blockedReason: blockedReasonText,
+    blockedReason: failedCriteria.length > 0
+      ? failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | ')
+      : undefined,
   };
 }
