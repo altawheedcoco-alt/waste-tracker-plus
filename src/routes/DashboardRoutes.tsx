@@ -3,6 +3,7 @@ import { Route, Navigate } from "react-router-dom";
 import DashboardRouteGuard from "@/components/guards/DashboardRouteGuard";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
+const MyWorkspace = lazy(() => import("@/pages/dashboard/MyWorkspace"));
 const Drivers = lazy(() => import("@/pages/Drivers"));
 const DriverDetails = lazy(() => import("@/pages/DriverDetails"));
 const CompanyApprovals = lazy(() => import("@/pages/dashboard/CompanyApprovals"));
