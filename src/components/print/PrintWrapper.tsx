@@ -89,8 +89,8 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   documentNumber,
   verificationCode,
   serialNumber,
-  showQR = true,
-  showBarcode = true,
+  showQR = true, // kept for API compat but always rendered
+  showBarcode = true, // kept for API compat but always rendered
   qrValue,
   barcodeValue,
   organizationName,
@@ -105,6 +105,9 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   arrivalDate,
   className = '',
 }, ref) => {
+  // QR and Barcode are ALWAYS shown (mandatory digital verification identity)
+  const forceQR = true;
+  const forceBarcode = true;
   const currentDate = format(new Date(), 'PP', { locale: ar });
   const currentTime = format(new Date(), 'p', { locale: ar });
   const qrContent = qrValue || `${window.location.origin}/verify?type=document&code=${verificationCode || documentNumber || Date.now()}`;
