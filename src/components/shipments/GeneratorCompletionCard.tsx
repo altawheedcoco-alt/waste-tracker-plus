@@ -66,8 +66,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
         {/* Timeline Summary */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-            <div className="p-2 rounded-full bg-blue-100 dark:bg-blue-900">
-              <Calendar className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+            <div className="p-2 rounded-full bg-secondary">
+              <Calendar className="w-4 h-4 text-secondary-foreground" />
             </div>
             <div>
               <p className="text-xs text-muted-foreground">تاريخ الإنشاء</p>
