@@ -212,10 +212,9 @@ const RegulatoryViolations = lazy(() => import("@/pages/dashboard/RegulatoryViol
 const ConsultantPortal = lazy(() => import("@/pages/dashboard/ConsultantPortal"));
 const CapacityManagement = lazy(() => import("@/pages/dashboard/CapacityManagement"));
 const GovernanceDashboard = lazy(() => import("@/pages/dashboard/GovernanceDashboard"));
-const SmartDocumentArchive = lazy(() => import("@/pages/dashboard/SmartDocumentArchive"));
+// SmartDocumentArchive and CentralDocumentRegistry now redirect to DocumentCenter
 const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCenter"));
 const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics"));
-const CentralDocumentRegistry = lazy(() => import("@/pages/dashboard/CentralDocumentRegistry"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));

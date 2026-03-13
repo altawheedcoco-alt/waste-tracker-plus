@@ -24,7 +24,7 @@ export const sharedGroups: SidebarGroupConfig[] = [
       { icon: Newspaper, labelAr: 'منشورات المنظمة', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
       { icon: Fingerprint, labelAr: 'بطاقة الهوية الرقمية', labelEn: 'Digital Identity', path: '/dashboard/digital-identity-card', key: 'digital-identity-card' },
       { icon: Shield, labelAr: 'الحوكمة والرقابة', labelEn: 'Governance', path: '/dashboard/governance', key: 'governance' },
-      { icon: Brain, labelAr: 'الأرشفة الذكية', labelEn: 'Smart Archive', path: '/dashboard/smart-archive', key: 'smart-archive', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'regulator', 'consultant', 'consulting_office', 'admin'] },
+      { icon: Brain, labelAr: 'مركز المستندات', labelEn: 'Document Center', path: '/dashboard/document-center', key: 'document-center', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'regulator', 'consultant', 'consulting_office', 'admin'] },
       { icon: ShieldAlert, labelAr: 'الأمن السيبراني', labelEn: 'Cyber Security', path: '/dashboard/cyber-security', key: 'cyber-security' },
       { icon: GitBranch, labelAr: 'دليل البنية المعمارية', labelEn: 'Architecture Guide', path: '/dashboard/architecture-guide', key: 'architecture-guide', visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'] },
       { icon: Palette, labelAr: 'الهوية البصرية', labelEn: 'Branding', path: '/dashboard/admin-branding', key: 'admin-branding', visibleFor: ['admin'] },
