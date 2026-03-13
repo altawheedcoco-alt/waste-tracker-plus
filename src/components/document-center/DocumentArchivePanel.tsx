@@ -92,6 +92,23 @@ const DocumentArchivePanel = () => {
     enabled: !!organization?.id,
   });
 
+  // Realtime subscription — تحديث فوري عند أي تغيير
+  useEffect(() => {
+    if (!organization?.id) return;
+    const channel = supabase
+      .channel('archive-panel-realtime')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'entity_documents',
+        filter: `organization_id=eq.${organization.id}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['document-center-archive'] });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [organization?.id, queryClient]);
+
   /** Get a signed URL or open directly if it's already a full URL — searches ALL buckets */
   const getFileUrl = useCallback(async (fileUrl: string): Promise<string | null> => {
     if (!fileUrl) return null;
