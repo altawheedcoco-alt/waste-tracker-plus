@@ -6,12 +6,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import {
   User, ListTodo, ShieldCheck, Trophy, Bell, Loader2,
-  Building2, Clock, Package, Zap, CalendarDays,
+  Building2, Clock, Package, Zap, CalendarDays, LayoutDashboard, Settings, LogOut,
 } from 'lucide-react';
 
 const MyProfileTab = lazy(() => import('@/components/workspace/MyProfileTab'));
