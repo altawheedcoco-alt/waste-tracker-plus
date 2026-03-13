@@ -23,6 +23,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import PositionPermissionsEditor from './PositionPermissionsEditor';
 import MemberProfileSheet from './MemberProfileSheet';
+import MemberCredentialsDialog from './MemberCredentialsDialog';
+import MyCredentialsCard from './MyCredentialsCard';
 import {
   MEMBER_ROLE_LABELS, MEMBER_ROLE_LEVELS,
   ALL_MEMBER_PERMISSIONS, PERMISSION_LABELS, PERMISSION_CATEGORIES,
