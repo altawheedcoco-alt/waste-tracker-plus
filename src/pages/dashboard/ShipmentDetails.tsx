@@ -201,7 +201,7 @@ const ShipmentDetailsPage = () => {
           </div>
           <div className="flex gap-2 flex-wrap">
             {shipment.driver_id && visibility.canViewTracking && (
-              <Button onClick={() => setShowLiveTracking(true)} className="bg-green-600 hover:bg-green-700 text-white" size="sm">
+              <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm">
                 <Navigation className="ml-1.5 h-4 w-4" />{t('shipmentDetails.liveTracking')}
               </Button>
             )}
