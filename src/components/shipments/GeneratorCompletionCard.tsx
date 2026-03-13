@@ -142,7 +142,7 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3" dir="rtl">
           {shipment.pickup_address && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-background/80 border">
-              <MapPin className="w-4 h-4 text-orange-500 mt-0.5 shrink-0" />
+              <MapPin className="w-4 h-4 text-muted-foreground mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">موقع الاستلام</p>
                 <p className="text-sm">{shipment.pickup_address}</p>
