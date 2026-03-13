@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, FileText, Download, Eye, Clock, FolderOpen, Filter,
-  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2,
+  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2, Upload,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
@@ -25,15 +25,25 @@ import DocumentActionHub from '@/components/documents/DocumentActionHub';
 import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
-  shipment: { label: 'شحنة', icon: FileText },
-  invoice: { label: 'فاتورة', icon: FileText },
-  contract: { label: 'عقد', icon: FileCheck },
-  certificate: { label: 'شهادة', icon: FileCheck },
-  receipt: { label: 'إيصال', icon: FileText },
-  report: { label: 'تقرير', icon: FileText },
-  weighbridge: { label: 'تذكرة ميزان', icon: FileText },
-  identity: { label: 'وثيقة هوية', icon: FileText },
+  documents: { label: 'مستندات', icon: FileText },
+  financials: { label: 'مالية', icon: FileText },
+  operations: { label: 'تشغيل', icon: FileText },
+  legal: { label: 'قانونية', icon: FileCheck },
   other: { label: 'أخرى', icon: FolderOpen },
+};
+
+const typeMap: Record<string, string> = {
+  award_letter: 'خطاب ترسية',
+  contract: 'عقد',
+  correspondence: 'مراسلات',
+  invoice: 'فاتورة',
+  receipt: 'إيصال',
+  deposit_proof: 'إثبات إيداع',
+  weight_slip: 'تذكرة ميزان',
+  certificate: 'شهادة',
+  license: 'رخصة',
+  registration: 'تسجيل',
+  other: 'أخرى',
 };
 
 const BUCKET_NAME = 'entity-documents';
@@ -214,6 +224,10 @@ const DocumentArchivePanel = () => {
         <Button variant="outline" size="icon" onClick={() => setSortOrder(s => s === 'desc' ? 'asc' : 'desc')}>
           <ArrowUpDown className="w-4 h-4" />
         </Button>
+        <Button variant="default" size="sm" onClick={() => navigate('/dashboard/document-center?tab=upload')}>
+          <Upload className="w-4 h-4 ml-1" />
+          رفع مستند
+        </Button>
         <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/document-archive')}>
           <FolderOpen className="w-4 h-4 ml-1" />
           الأرشيف الكامل
@@ -251,7 +265,7 @@ const DocumentArchivePanel = () => {
                       <p className="font-medium text-sm truncate">{doc.title || doc.file_name || 'مستند'}</p>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
                         <Badge variant="secondary" className="text-[10px] py-0">
-                          {categoryMap[doc.document_category]?.label || categoryMap[doc.document_type]?.label || doc.document_type || 'عام'}
+                          {typeMap[doc.document_type] || categoryMap[doc.document_category]?.label || doc.document_type || 'عام'}
                         </Badge>
                         <span className="flex items-center gap-1">
                           <Clock className="w-3 h-3" />
