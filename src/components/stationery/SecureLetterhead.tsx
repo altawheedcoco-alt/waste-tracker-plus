@@ -112,6 +112,11 @@ const SecureLetterhead = forwardRef<HTMLDivElement, SecureLetterheadProps>(
       documentTitle, documentDate,
     } = config;
 
+    // Digital verification identity is MANDATORY - only admin can disable
+    const showQR = true;
+    const showBarcode = true;
+    const showSerialNumber = true;
+
     const qrValue = `${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=stationery&code=${encodeURIComponent(serialNumber)}`;
 
     return (
