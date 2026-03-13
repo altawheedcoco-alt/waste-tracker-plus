@@ -310,9 +310,9 @@ const StationeryTemplates = () => {
                     watermarkOpacity: selectedTemplate.watermark_opacity || 0.06,
                     showGuilloche: selectedTemplate.show_guilloche || false,
                     guillocheColor: selectedTemplate.guilloche_color || '#16a34a',
-                    showQR: selectedTemplate.show_qr !== false,
-                    showBarcode: selectedTemplate.show_barcode !== false,
-                    showSerialNumber: selectedTemplate.show_serial_number !== false,
+                    showQR: true, // mandatory digital verification
+                    showBarcode: true, // mandatory digital verification
+                    showSerialNumber: true, // mandatory digital verification
                     showSHA256: selectedTemplate.show_sha256 || false,
                     serialNumber: serial,
                     verificationCode: vCode,
