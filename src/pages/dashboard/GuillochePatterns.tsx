@@ -350,7 +350,8 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles } = useAuth();
+  const { roles, organization } = useAuth();
+  const { getPref, setPref } = useUserPreferences();
   const isAdmin = roles.includes('admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -363,6 +364,18 @@ export default function GuillochePatterns() {
   const [isApplying, setIsApplying] = useState(false);
   const [visibleCount, setVisibleCount] = useState(50);
   const [layerMode, setLayerMode] = useState(false);
+
+  // Org name for watermark
+  const orgName = organization?.name || 'اسم الجهة';
+
+  // Saved/used patterns from preferences
+  const savedPatternIds: string[] = getPref('guilloche_saved_patterns', []);
+
+  const savePatternToHistory = useCallback((patternIds: string[]) => {
+    const existing: string[] = getPref('guilloche_saved_patterns', []);
+    const merged = [...new Set([...patternIds, ...existing])].slice(0, 50); // keep last 50
+    setPref('guilloche_saved_patterns', merged);
+  }, [getPref, setPref]);
 
   // Max layers allowed
   const MAX_LAYERS = 5;
