@@ -217,6 +217,7 @@ const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCe
 const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
+const ActionChainsPage = lazy(() => import("@/pages/dashboard/ActionChainsPage"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
