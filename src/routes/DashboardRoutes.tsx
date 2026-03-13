@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Route } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import DashboardRouteGuard from "@/components/guards/DashboardRouteGuard";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
@@ -267,7 +267,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/blog-manager" element={<BlogManager />} />
     <Route path="/dashboard/testimonials-management" element={<TestimonialsManagement />} />
     <Route path="/dashboard/partners" element={<Partners />} />
-    <Route path="/dashboard/employees" element={<EmployeeManagement />} />
+    <Route path="/dashboard/employees" element={<Navigate to="/dashboard/org-structure" replace />} />
     <Route path="/dashboard/organization/:organizationId" element={<OrganizationView />} />
     <Route path="/dashboard/aggregate-report" element={<AggregateShipmentReport />} />
     <Route path="/dashboard/non-hazardous-register" element={<NonHazardousWasteRegister />} />
@@ -278,7 +278,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/regulatory-updates" element={<RegulatoryUpdates />} />
     <Route path="/dashboard/operational-plans" element={<OperationalPlans />} />
     <Route path="/dashboard/chat" element={<Chat />} />
-    <Route path="/dashboard/team-credentials" element={<TeamCredentials />} />
+    <Route path="/dashboard/team-credentials" element={<Navigate to="/dashboard/org-structure" replace />} />
     <Route path="/dashboard/partners-timeline" element={<PartnersTimeline />} />
     <Route path="/dashboard/add-organization" element={<AddOrganization />} />
     <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
