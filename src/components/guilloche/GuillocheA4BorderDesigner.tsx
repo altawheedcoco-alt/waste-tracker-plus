@@ -28,7 +28,7 @@ import {
 import {
   Search, Check, Eye, Printer, Filter, X, Grid3X3, LayoutGrid,
   Sparkles, Frame, Square, Hexagon, Circle, Star, Triangle,
-  Loader2, Download, Settings2, RotateCw, Palette, Maximize,
+  Loader2, Download, Settings2, RotateCw, Palette, Maximize, Bookmark, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
@@ -357,12 +357,24 @@ export default function GuillocheA4BorderDesigner() {
   const [previewOpen, setPreviewOpen] = useState(false);
   const [a4PreviewOpen, setA4PreviewOpen] = useState(false);
   const [activeBorder, setActiveBorder] = useState<BorderConfig | null>(null);
+  const [showSaved, setShowSaved] = useState(false);
 
   // Customization
   const [customThickness, setCustomThickness] = useState(2);
   const [customColor, setCustomColor] = useState<string | null>(null);
 
   const allBorders = useMemo(() => generateBorders(), []);
+
+  const savedBorderIds: string[] = getPref('guilloche_saved_borders', []);
+  const savedBorders = useMemo(() => {
+    return savedBorderIds.map(id => allBorders.find(b => b.id === id)).filter(Boolean) as BorderConfig[];
+  }, [savedBorderIds, allBorders]);
+
+  const removeSavedBorder = (borderId: string) => {
+    const updated = savedBorderIds.filter(id => id !== borderId);
+    setPref('guilloche_saved_borders', updated);
+    toast.info('تم إزالة البرواز من المحفوظات');
+  };
 
   const filteredBorders = useMemo(() => {
     return allBorders.filter(b => {
@@ -473,7 +485,76 @@ export default function GuillocheA4BorderDesigner() {
         </Card>
       )}
 
+      {/* Saved/All Toggle */}
+      <div className="flex items-center gap-2">
+        <Button
+          variant={!showSaved ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowSaved(false)}
+          className="gap-1"
+        >
+          <Grid3X3 className="h-4 w-4" />
+          كل البراويز
+        </Button>
+        <Button
+          variant={showSaved ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setShowSaved(true)}
+          className="gap-1"
+        >
+          <Bookmark className="h-4 w-4" />
+          المحفوظة ({savedBorders.length})
+        </Button>
+      </div>
+
+      {/* Saved Borders Section */}
+      {showSaved && (
+        <Card>
+          <CardContent className="p-4">
+            {savedBorders.length === 0 ? (
+              <div className="text-center py-10 text-muted-foreground">
+                <Bookmark className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="font-medium">لا توجد براويز محفوظة</p>
+                <p className="text-sm">اختر أي برواز من المكتبة لحفظه هنا</p>
+              </div>
+            ) : (
+              <div className={cn('grid gap-3', gridCols[gridSize])}>
+                {savedBorders.map((border) => (
+                  <Card
+                    key={border.id}
+                    className={cn(
+                      'cursor-pointer transition-all hover:shadow-lg hover:scale-105 group overflow-hidden',
+                      activeBorder?.id === border.id && 'ring-2 ring-primary'
+                    )}
+                    onClick={() => handlePreview(border)}
+                  >
+                    <CardContent className="p-2 relative flex flex-col items-center">
+                      <GuillocheA4Border border={border} width={thumbSize[gridSize].w} height={thumbSize[gridSize].h} />
+                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-1">
+                        <Button size="sm" variant="secondary" onClick={e => { e.stopPropagation(); handleSelect(border); }}>
+                          <Check className="h-4 w-4" />
+                        </Button>
+                        <Button size="sm" variant="destructive" onClick={e => { e.stopPropagation(); removeSavedBorder(border.id); }}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      {activeBorder?.id === border.id && (
+                        <div className="absolute top-1 left-1">
+                          <Badge className="gap-1 bg-primary"><Star className="h-3 w-3" />مُفعَّل</Badge>
+                        </div>
+                      )}
+                      <p className="text-xs font-medium mt-1.5 truncate w-full text-center">{border.name}</p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {/* Filters */}
+      {!showSaved && <>
       <Card>
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
@@ -580,6 +661,7 @@ export default function GuillocheA4BorderDesigner() {
           </Button>
         </div>
       )}
+      </>}
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
