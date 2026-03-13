@@ -380,7 +380,7 @@ const ShipmentStatusTimeline = ({
       {/* Current Status Badge */}
       <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50 border">
         <div className="flex items-center gap-2">
-          <div className={cn("w-8 h-8 rounded-full flex items-center justify-center text-white", currentStepConfig?.colorClass || 'bg-slate-400')}>
+          <div className={cn("w-8 h-8 rounded-full flex items-center justify-center", currentStepConfig?.colorClass || 'bg-muted', currentStepConfig ? 'text-primary-foreground' : 'text-muted-foreground')}>
             <CurrentIcon className="w-4 h-4" />
           </div>
           <span className="text-sm font-medium">الحالة الحالية</span>

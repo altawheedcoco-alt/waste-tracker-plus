@@ -46,14 +46,14 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
   const completionDate = shipment.confirmed_at || shipment.delivered_at;
 
   return (
-    <Card className="border-2 border-emerald-200 dark:border-emerald-800 bg-gradient-to-br from-emerald-50/80 to-green-50/40 dark:from-emerald-950/30 dark:to-green-950/20">
+    <Card className="border-2 border-primary/30 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between flex-wrap gap-3">
-          <Badge className="bg-emerald-500 text-white gap-1 text-sm px-3 py-1">
+          <Badge className="bg-primary text-primary-foreground gap-1 text-sm px-3 py-1">
             <CheckCircle2 className="w-4 h-4" />
             {isConfirmed ? 'تم التأكيد والاستلام' : 'تم التسليم للمدوّر'}
           </Badge>
-          <CardTitle className="text-lg flex items-center gap-2 text-emerald-800 dark:text-emerald-300">
+          <CardTitle className="text-lg flex items-center gap-2 text-primary dark:text-primary">
             <Shield className="w-5 h-5" />
             اكتمال دورة الشحنة
           </CardTitle>
