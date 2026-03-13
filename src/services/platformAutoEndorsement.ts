@@ -301,7 +301,8 @@ async function checkWithinTimeFrame(
     .limit(1);
 
   if (!signatures || signatures.length === 0) {
-    result.details = 'لا توجد توقيعات لحساب الإطار الزمني';
+    result.passed = true;
+    result.details = 'مستند تلقائي — الإطار الزمني غير مطلوب';
     return result;
   }
 
