@@ -384,6 +384,11 @@ export async function autoCreateRecyclerDeclaration(
     shipment, recyclerOrgId,
   );
 
+  // Check if transporter allows forwarding docs to generator
+  const visibleToGenerator = shipment.transporter_id
+    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
+    : true;
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -397,6 +402,7 @@ export async function autoCreateRecyclerDeclaration(
     quantity: shipment.quantity,
     unit: shipment.unit,
     ...maskedNames,
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -406,13 +412,15 @@ export async function autoCreateRecyclerDeclaration(
     return;
   }
 
-  // Notify transporter + generator (respecting visibility)
+  // Always notify transporter; only notify generator if transporter allows + visibility masking
   const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
-  if (!shipment.hide_generator_from_recycler) notifyIds.push(shipment.generator_id);
+  if (visibleToGenerator && !shipment.hide_generator_from_recycler) {
+    notifyIds.push(shipment.generator_id);
+  }
 
   await notifyOrgUsers(
     notifyIds,
-    '📥 إقرار استلام من المدوّر/جهة التخلص',
+    '📥 إقرار استلام من المدوّر',
     `أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`,
     shipmentId,
   );
