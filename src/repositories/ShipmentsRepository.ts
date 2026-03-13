@@ -126,15 +126,29 @@ export const ShipmentsRepository = {
         notes: `تم تغيير الحالة إلى ${status}`,
       });
 
-      // Auto-create declarations based on status
+      // Auto-create declarations based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         
-        if ((status === 'approved' || status === 'registered') && shipment.generator_id) {
+        if (['approved', 'registered'].includes(status) && shipment.generator_id) {
           await autoCreateGeneratorDeclaration(id, shipment.generator_id, userId);
         }
-        if ((status === 'delivered' || status === 'confirmed') && shipment.recycler_id) {
+        if (['picked_up', 'loading'].includes(status) && shipment.transporter_id) {
+          await autoCreateDriverConfirmation(id, shipment.transporter_id, userId);
+        }
+        if (status === 'in_transit' && shipment.transporter_id) {
+          await autoCreateTransporterDeclaration(id, shipment.transporter_id, userId);
+          await autoCreateReceipt(id, shipment.transporter_id, userId);
+        }
+        if (['delivered', 'confirmed'].includes(status) && shipment.recycler_id) {
           await autoCreateRecyclerDeclaration(id, shipment.recycler_id, userId);
+        }
+        if (['delivered'].includes(status) && shipment.transporter_id) {
+          await autoCreateReceipt(id, shipment.transporter_id, userId);
+        }
+        if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(status) && shipment.recycler_id) {
+          await autoCreateDisposalDeclaration(id, shipment.recycler_id, userId);
         }
       } catch (e) {
         console.error('Auto declaration error (non-blocking):', e);
