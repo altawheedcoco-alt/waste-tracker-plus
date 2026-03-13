@@ -145,6 +145,9 @@ export async function autoCreateRecyclerDeclaration(
   recyclerOrgId: string,
   userId: string
 ): Promise<void> {
+  // Check if auto-action is enabled
+  if (!(await isAutoActionEnabled(recyclerOrgId, 'auto_delivery_certificate'))) return;
+
   // Check if already exists
   const { data: existing } = await (supabase
     .from('delivery_declarations') as any)

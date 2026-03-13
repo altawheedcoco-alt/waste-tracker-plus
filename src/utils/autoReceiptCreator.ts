@@ -1,16 +1,20 @@
 import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
+import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
- * Skips if a receipt already exists for this shipment.
+ * Skips if a receipt already exists for this shipment or if auto-action is disabled.
  */
 export async function autoCreateReceipt(
   shipmentId: string,
   transporterId: string,
   userId?: string
 ): Promise<void> {
+  // Check if auto-action is enabled for this organization
+  if (!(await isAutoActionEnabled(transporterId, 'auto_receipt_generation'))) return;
+
   // Check if receipt already exists
   const { data: existing } = await supabase
     .from('shipment_receipts')
