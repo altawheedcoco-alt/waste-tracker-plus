@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
+import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
