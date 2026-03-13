@@ -28,7 +28,7 @@ import {
 import {
   Search, Check, Eye, Printer, Filter, X, Grid3X3, LayoutGrid,
   Sparkles, Frame, Square, Hexagon, Circle, Star, Triangle,
-  Loader2, Download, Settings2, RotateCw, Palette, Maximize,
+  Loader2, Download, Settings2, RotateCw, Palette, Maximize, Bookmark, Trash2,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
