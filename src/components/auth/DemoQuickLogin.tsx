@@ -54,6 +54,36 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     ],
   },
   {
+    id: 'transporter-team',
+    label: 'فريق الناقل',
+    icon: Truck,
+    accounts: [
+      // الإدارة العليا
+      { email: 'ceo@transporter.demo', label: 'أحمد محمد السيد', desc: 'الرئيس التنفيذي 👑', icon: Shield, color: 'from-amber-500 to-yellow-700' },
+      { email: 'deputy@transporter.demo', label: 'محمود عبدالرحمن', desc: 'نائب المدير العام ⭐', icon: Shield, color: 'from-amber-400 to-orange-600' },
+      { email: 'strategy@transporter.demo', label: 'خالد إبراهيم', desc: 'التخطيط الاستراتيجي', icon: Briefcase, color: 'from-indigo-500 to-purple-700' },
+      { email: 'assistant@transporter.demo', label: 'سارة أحمد', desc: 'مساعد تنفيذي', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
+      // رؤساء الأقسام
+      { email: 'operations@transporter.demo', label: 'عمرو حسين', desc: 'مدير العمليات 🔧', icon: UserCog, color: 'from-blue-600 to-indigo-800' },
+      { email: 'fleet@transporter.demo', label: 'مصطفى عادل', desc: 'مدير الأسطول 🚛', icon: Truck, color: 'from-sky-500 to-blue-700' },
+      { email: 'finance@transporter.demo', label: 'ماجد فؤاد', desc: 'مدير المالية 💰', icon: Landmark, color: 'from-emerald-500 to-green-700' },
+      { email: 'sales@transporter.demo', label: 'سامح وليد', desc: 'مدير المبيعات 📈', icon: Building2, color: 'from-orange-500 to-red-600' },
+      { email: 'hr@transporter.demo', label: 'شريف كمال', desc: 'مدير الموارد البشرية 👥', icon: Users, color: 'from-violet-500 to-purple-700' },
+      { email: 'it@transporter.demo', label: 'أحمد هشام', desc: 'مدير IT 💻', icon: UserCog, color: 'from-cyan-500 to-teal-700' },
+      { email: 'compliance@transporter.demo', label: 'هاني وجيه', desc: 'مدير الامتثال 🛡️', icon: ShieldCheck, color: 'from-red-500 to-rose-700' },
+      { email: 'cs@transporter.demo', label: 'منى إبراهيم', desc: 'مدير خدمة العملاء 📞', icon: Users, color: 'from-teal-400 to-cyan-600' },
+      // المشرفون والتنفيذيون
+      { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', desc: 'مشرف الحركة', icon: Truck, color: 'from-blue-400 to-sky-600' },
+      { email: 'dispatch@transporter.demo', label: 'ياسر محمد', desc: 'مسؤول الجدولة', icon: ClipboardCheck, color: 'from-blue-400 to-indigo-600' },
+      { email: 'accountant@transporter.demo', label: 'رشا عبدالناصر', desc: 'المحاسب الرئيسي', icon: Landmark, color: 'from-green-400 to-emerald-600' },
+      { email: 'driver.head@transporter.demo', label: 'عبدالله سامي', desc: 'رئيس السائقين 🚗', icon: Car, color: 'from-rose-400 to-pink-600' },
+      { email: 'safety@transporter.demo', label: 'كريم طاهر', desc: 'أخصائي السلامة ⚠️', icon: ShieldCheck, color: 'from-red-400 to-orange-600' },
+      { email: 'callcenter@transporter.demo', label: 'هبة سعيد', desc: 'قائد مركز الاتصال 🎧', icon: Users, color: 'from-teal-400 to-green-600' },
+      { email: 'analyst@transporter.demo', label: 'نورهان محمد', desc: 'محلل البيانات 📊', icon: ClipboardCheck, color: 'from-purple-400 to-indigo-600' },
+      { email: 'maintenance@transporter.demo', label: 'محمد جمال', desc: 'مشرف الصيانة 🔩', icon: HardHat, color: 'from-amber-400 to-yellow-600' },
+    ],
+  },
+  {
     id: 'consultants',
     label: 'استشاريون',
     icon: Briefcase,
