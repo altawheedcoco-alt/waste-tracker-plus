@@ -617,7 +617,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             <p className="text-[11px] text-muted-foreground">
               فرق: <span className={cn(
                 Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100) > 5
-                  ? 'text-destructive font-bold' : 'text-emerald-600'
+                  ? 'text-destructive font-bold' : 'text-primary'
               )}>{Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100).toFixed(1)}%</span>
             </p>
           )}
