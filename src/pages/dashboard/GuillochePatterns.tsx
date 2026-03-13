@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import GuillocheSecurityOverlay, { generateSecurityOverlayHTML } from '@/components/guilloche/GuillocheSecurityOverlay';
 
 // Pattern categories
 const PATTERN_CATEGORIES = [
