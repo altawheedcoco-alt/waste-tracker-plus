@@ -50,6 +50,7 @@ const BUCKET_NAME = 'entity-documents';
 
 const DocumentArchivePanel = () => {
   const { organization } = useAuth();
+  const queryClient = useQueryClient();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const [search, setSearch] = useState('');
