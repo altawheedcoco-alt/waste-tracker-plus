@@ -138,6 +138,36 @@ const MyWorkspace = () => {
                 <Badge className="bg-accent text-accent-foreground text-xs">🤖 AI</Badge>
               )}
             </div>
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 mt-3">
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs h-8 hover:bg-primary/5 hover:border-primary/30"
+                onClick={() => navigate('/dashboard')}
+              >
+                <LayoutDashboard className="w-3.5 h-3.5" />
+                لوحة التحكم
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs h-8 hover:bg-primary/5 hover:border-primary/30"
+                onClick={() => navigate('/dashboard/settings')}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                الإعدادات
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs h-8 text-destructive hover:bg-destructive/10 hover:border-destructive/30"
+                onClick={handleLogout}
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                تسجيل الخروج
+              </Button>
+            </div>
           </div>
 
           {/* Quick Stats */}
