@@ -224,6 +224,10 @@ const DocumentArchivePanel = () => {
         <Button variant="outline" size="icon" onClick={() => setSortOrder(s => s === 'desc' ? 'asc' : 'desc')}>
           <ArrowUpDown className="w-4 h-4" />
         </Button>
+        <Button variant="default" size="sm" onClick={() => navigate('/dashboard/document-center?tab=upload')}>
+          <Upload className="w-4 h-4 ml-1" />
+          رفع مستند
+        </Button>
         <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/document-archive')}>
           <FolderOpen className="w-4 h-4 ml-1" />
           الأرشيف الكامل
