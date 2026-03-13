@@ -1,9 +1,11 @@
-import React, { forwardRef, ReactNode } from 'react';
+import React, { forwardRef, ReactNode, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { Leaf, FileCheck, Building2, CheckCircle2, Shield, Hash } from 'lucide-react';
+import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
+import { generatePatternPaths, GUILLOCHE_COLOR_PALETTES, type SavedPatternRef } from '@/lib/guillochePatternUtils';
 
 // ===== Partner Identity (Logo + Barcode) =====
 export interface PrintPartner {
