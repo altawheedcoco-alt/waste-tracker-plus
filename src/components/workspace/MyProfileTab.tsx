@@ -2,7 +2,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { User, Mail, Phone, Building2, Briefcase, Calendar, MapPin, IdCard } from 'lucide-react';
+import { User, Mail, Phone, Building2, Briefcase, MapPin } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -16,8 +16,8 @@ const MyProfileTab = () => {
       if (!profile?.id) return null;
       const { data } = await supabase
         .from('organization_positions')
-        .select('title, level, department, is_ai_operator')
-        .eq('holder_profile_id', profile.id)
+        .select('title, title_ar, level, department_id, operator_type')
+        .eq('assigned_user_id', profile.user_id)
         .maybeSingle();
       return data;
     },
@@ -31,10 +31,7 @@ const MyProfileTab = () => {
     { icon: Mail, label: 'البريد الإلكتروني', value: user?.email },
     { icon: Phone, label: 'الهاتف', value: profile?.phone },
     { icon: Building2, label: 'المنظمة', value: organization?.name },
-    { icon: Briefcase, label: 'المنصب', value: position?.title },
-    { icon: MapPin, label: 'القسم', value: position?.department },
-    { icon: Calendar, label: 'تاريخ الانضمام', value: profile?.created_at ? new Date(profile.created_at).toLocaleDateString('ar-EG') : undefined },
-    { icon: IdCard, label: 'الرقم القومي', value: profile?.national_id },
+    { icon: Briefcase, label: 'المنصب', value: position?.title_ar || position?.title },
   ].filter(item => item.value);
 
   return (
@@ -44,18 +41,18 @@ const MyProfileTab = () => {
         <CardContent className="pt-6 flex flex-col items-center text-center gap-4">
           <Avatar className="w-24 h-24 border-4 border-primary/20">
             <AvatarImage src={profile?.avatar_url || undefined} />
-            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-primary/60 text-white">
+            <AvatarFallback className="text-2xl bg-gradient-to-br from-primary to-primary/60 text-primary-foreground">
               {initials}
             </AvatarFallback>
           </Avatar>
           <div>
             <h2 className="text-xl font-bold">{profile?.full_name || 'عضو'}</h2>
-            {position?.title && (
-              <p className="text-sm text-muted-foreground mt-1">{position.title}</p>
+            {position?.title_ar && (
+              <p className="text-sm text-muted-foreground mt-1">{position.title_ar}</p>
             )}
             <div className="flex items-center justify-center gap-2 mt-2">
-              {position?.is_ai_operator && (
-                <Badge className="bg-purple-500/10 text-purple-600 border-purple-500/20">🤖 AI</Badge>
+              {position?.operator_type === 'ai' && (
+                <Badge className="bg-accent text-accent-foreground">🤖 AI</Badge>
               )}
               <Badge variant="secondary">{organization?.name}</Badge>
             </div>
