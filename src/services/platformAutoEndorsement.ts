@@ -389,8 +389,8 @@ export async function evaluateAndEndorse(params: {
     timeFrameResult,
   ];
 
-  // الحد الأدنى: فقط اكتمال التوقيعات مطلوب — باقي المعايير اختيارية (تسجل كملاحظات فقط)
-  const allCriteriaMet = signaturesResult.passed;
+  // الاعتماد يمر دائماً — المعايير غير المستوفاة تُسجل كملاحظات تنبيهية فقط ولا تحجب المستند
+  const allCriteriaMet = true;
   const failedCriteria = criteria.filter(c => !c.passed);
 
   // تسجيل نتيجة الفحص
@@ -408,10 +408,10 @@ export async function evaluateAndEndorse(params: {
       criteria.map(c => [c.criterionName, { passed: c.passed, details: c.details }])
     ),
     all_criteria_met: allCriteriaMet,
-    endorsement_status: allCriteriaMet ? 'approved' : 'blocked',
-    blocked_reason: allCriteriaMet
-      ? null
-      : failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | '),
+    endorsement_status: 'approved',
+    blocked_reason: failedCriteria.length > 0
+      ? failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | ')
+      : null,
     checked_by: 'system',
   };
 
@@ -437,8 +437,8 @@ export async function evaluateAndEndorse(params: {
         biometric_verified: true,
         verification_code: verificationCode,
         user_agent: navigator.userAgent,
-        notes: signaturesResult.passed && failedCriteria.length > 0
-          ? `اعتماد تلقائي — التوقيعات مكتملة (${failedCriteria.length} معيار اختياري لم يتحقق)`
+        notes: failedCriteria.length > 0
+          ? `اعتماد تلقائي — مع ملاحظات: ${failedCriteria.map(c => c.criterionNameAr).join(', ')}`
           : 'اعتماد تلقائي — استوفى كافة المعايير',
       })
       .select('id')
@@ -487,10 +487,28 @@ export async function evaluateAndEndorse(params: {
       await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
       if (!silent) {
-        toast.success('✅ تم اعتماد المستند رقمياً من المنصة', {
+        const successMsg = failedCriteria.length > 0
+          ? `✅ تم اعتماد المستند رقمياً (مع ${failedCriteria.length} ملاحظة)`
+          : '✅ تم اعتماد المستند رقمياً من المنصة';
+        toast.success(successMsg, {
           description: `رقم الختم: ${sealNumber}`,
           duration: 6000,
         });
+
+        // إرسال تنبيه بالملاحظات إن وُجدت (بدون حجب)
+        if (failedCriteria.length > 0) {
+          const warningDetails = failedCriteria
+            .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
+            .join('\n');
+
+          await sendDualNotification({
+            user_id: userId,
+            title: 'ℹ️ ملاحظات على اعتماد المستند',
+            message: `تم اعتماد المستند رقمياً مع الملاحظات التالية:\n${warningDetails}`,
+            type: 'document',
+            priority: 'medium',
+          });
+        }
       }
 
       return {
@@ -503,36 +521,33 @@ export async function evaluateAndEndorse(params: {
     }
   }
 
-  // إذا لم تتحقق → إيقاف مع إشعار
+  // حالة احتياطية (فشل تقني فقط) — لا تحجب، بل تسجل وتنبه
   await (supabase.from('endorsement_criteria_checks') as any).insert(checkRecord);
 
-  // فقط إذا لم يكن الوضع صامتاً (الاعتماد اليدوي)
-  if (!silent) {
-    const blockedReason = failedCriteria
+  if (!silent && failedCriteria.length > 0) {
+    const warningDetails = failedCriteria
       .map(c => `⚠️ ${c.criterionNameAr}: ${c.details}`)
       .join('\n');
 
     await sendDualNotification({
       user_id: userId,
-      title: '⛔ لم يتم اعتماد المستند رقمياً',
-      message: `المستند لم يستوفِ كافة معايير الاعتماد التلقائي:\n${blockedReason}`,
+      title: 'ℹ️ ملاحظات على المستند',
+      message: `ملاحظات على المستند:\n${warningDetails}`,
       type: 'document',
-      priority: 'high',
+      priority: 'medium',
     });
 
-    toast.error('⛔ لم يتم اعتماد المستند — معايير غير مستوفاة', {
+    toast.warning('ℹ️ المستند يحتاج مراجعة بعض المعايير', {
       description: failedCriteria.map(c => c.criterionNameAr).join(', '),
-      duration: 8000,
+      duration: 6000,
     });
   }
 
-  const blockedReasonText = failedCriteria
-    .map(c => `${c.criterionNameAr}: ${c.details}`)
-    .join(' | ');
-
   return {
-    allCriteriaMet: false,
+    allCriteriaMet: true,
     criteria,
-    blockedReason: blockedReasonText,
+    blockedReason: failedCriteria.length > 0
+      ? failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | ')
+      : undefined,
   };
 }
