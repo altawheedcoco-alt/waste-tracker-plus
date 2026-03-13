@@ -52,6 +52,13 @@ const MyWorkspace = () => {
   const { profile, organization, user } = useAuth();
   const { permissions, isLoading: permsLoading } = useMyPermissions();
   const [activeTab, setActiveTab] = useState('overview');
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('تم تسجيل الخروج بنجاح');
+    navigate('/auth', { replace: true });
+  };
 
   const orgType = (organization?.organization_type as string) || '';
   const initials = (profile?.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2);
