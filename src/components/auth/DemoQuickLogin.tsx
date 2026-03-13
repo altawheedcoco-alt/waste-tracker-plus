@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield,
   Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award,
-  ClipboardCheck, Users, Landmark, Leaf, HardHat,
+  ClipboardCheck, Users, Landmark, Leaf, HardHat, User,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -12,10 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
-// Demo credentials are verified server-side via the PIN-protected flow
-// Password is not exposed in production builds
 const DEMO_PASSWORD = 'Demo@575757';
-const ACCESS_PIN_HASH = '575757'; // In production, this should be verified server-side
+const ACCESS_PIN_HASH = '575757';
 
 interface DemoAccount {
   email: string;
@@ -54,16 +52,13 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     ],
   },
   {
-    id: 'transporter-team',
-    label: 'فريق الناقل',
-    icon: Truck,
+    id: 'transporter-leadership',
+    label: 'إدارة الناقل',
+    icon: Shield,
     accounts: [
-      // الإدارة العليا
       { email: 'ceo@transporter.demo', label: 'أحمد محمد السيد', desc: 'الرئيس التنفيذي 👑', icon: Shield, color: 'from-amber-500 to-yellow-700' },
       { email: 'deputy@transporter.demo', label: 'محمود عبدالرحمن', desc: 'نائب المدير العام ⭐', icon: Shield, color: 'from-amber-400 to-orange-600' },
       { email: 'strategy@transporter.demo', label: 'خالد إبراهيم', desc: 'التخطيط الاستراتيجي', icon: Briefcase, color: 'from-indigo-500 to-purple-700' },
-      { email: 'assistant@transporter.demo', label: 'سارة أحمد', desc: 'مساعد تنفيذي', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
-      // رؤساء الأقسام
       { email: 'operations@transporter.demo', label: 'عمرو حسين', desc: 'مدير العمليات 🔧', icon: UserCog, color: 'from-blue-600 to-indigo-800' },
       { email: 'fleet@transporter.demo', label: 'مصطفى عادل', desc: 'مدير الأسطول 🚛', icon: Truck, color: 'from-sky-500 to-blue-700' },
       { email: 'finance@transporter.demo', label: 'ماجد فؤاد', desc: 'مدير المالية 💰', icon: Landmark, color: 'from-emerald-500 to-green-700' },
@@ -72,15 +67,22 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
       { email: 'it@transporter.demo', label: 'أحمد هشام', desc: 'مدير IT 💻', icon: UserCog, color: 'from-cyan-500 to-teal-700' },
       { email: 'compliance@transporter.demo', label: 'هاني وجيه', desc: 'مدير الامتثال 🛡️', icon: ShieldCheck, color: 'from-red-500 to-rose-700' },
       { email: 'cs@transporter.demo', label: 'منى إبراهيم', desc: 'مدير خدمة العملاء 📞', icon: Users, color: 'from-teal-400 to-cyan-600' },
-      // المشرفون والتنفيذيون
-      { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', desc: 'مشرف الحركة', icon: Truck, color: 'from-blue-400 to-sky-600' },
-      { email: 'dispatch@transporter.demo', label: 'ياسر محمد', desc: 'مسؤول الجدولة', icon: ClipboardCheck, color: 'from-blue-400 to-indigo-600' },
-      { email: 'accountant@transporter.demo', label: 'رشا عبدالناصر', desc: 'المحاسب الرئيسي', icon: Landmark, color: 'from-green-400 to-emerald-600' },
-      { email: 'driver.head@transporter.demo', label: 'عبدالله سامي', desc: 'رئيس السائقين 🚗', icon: Car, color: 'from-rose-400 to-pink-600' },
-      { email: 'safety@transporter.demo', label: 'كريم طاهر', desc: 'أخصائي السلامة ⚠️', icon: ShieldCheck, color: 'from-red-400 to-orange-600' },
-      { email: 'callcenter@transporter.demo', label: 'هبة سعيد', desc: 'قائد مركز الاتصال 🎧', icon: Users, color: 'from-teal-400 to-green-600' },
-      { email: 'analyst@transporter.demo', label: 'نورهان محمد', desc: 'محلل البيانات 📊', icon: ClipboardCheck, color: 'from-purple-400 to-indigo-600' },
-      { email: 'maintenance@transporter.demo', label: 'محمد جمال', desc: 'مشرف الصيانة 🔩', icon: HardHat, color: 'from-amber-400 to-yellow-600' },
+    ],
+  },
+  {
+    id: 'transporter-members',
+    label: 'أعضاء الناقل',
+    icon: User,
+    accounts: [
+      { email: 'assistant@transporter.demo', label: 'سارة أحمد', desc: 'مساعد تنفيذي → مساحة العمل', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
+      { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', desc: 'مشرف الحركة → مساحة العمل', icon: Truck, color: 'from-blue-400 to-sky-600' },
+      { email: 'dispatch@transporter.demo', label: 'ياسر محمد', desc: 'مسؤول الجدولة → مساحة العمل', icon: ClipboardCheck, color: 'from-blue-400 to-indigo-600' },
+      { email: 'accountant@transporter.demo', label: 'رشا عبدالناصر', desc: 'المحاسب → مساحة العمل', icon: Landmark, color: 'from-green-400 to-emerald-600' },
+      { email: 'driver.head@transporter.demo', label: 'عبدالله سامي', desc: 'رئيس السائقين → مساحة العمل', icon: Car, color: 'from-rose-400 to-pink-600' },
+      { email: 'safety@transporter.demo', label: 'كريم طاهر', desc: 'أخصائي السلامة → مساحة العمل', icon: ShieldCheck, color: 'from-red-400 to-orange-600' },
+      { email: 'callcenter@transporter.demo', label: 'هبة سعيد', desc: 'قائد مركز الاتصال → مساحة العمل', icon: Users, color: 'from-teal-400 to-green-600' },
+      { email: 'analyst@transporter.demo', label: 'نورهان محمد', desc: 'محلل البيانات → مساحة العمل', icon: ClipboardCheck, color: 'from-purple-400 to-indigo-600' },
+      { email: 'maintenance@transporter.demo', label: 'محمد جمال', desc: 'مشرف الصيانة → مساحة العمل', icon: HardHat, color: 'from-amber-400 to-yellow-600' },
     ],
   },
   {
@@ -112,7 +114,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
       { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin', icon: Shield, color: 'from-yellow-500 to-amber-700' },
       { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'driver@demo.com', label: 'سائق - النقل السريع', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
-      { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف', icon: UserCog, color: 'from-slate-500 to-slate-700' },
+      { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
 ];
@@ -135,7 +137,6 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     setLoading(email);
     onLoginStart?.();
     try {
-      // Sign out first to clear any stale session/cache
       await supabase.auth.signOut();
       
       const { error } = await signIn(email, DEMO_PASSWORD);
@@ -147,7 +148,6 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         }
       } else {
         toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
-        // Force full page reload to clear all cached data
         window.location.href = '/dashboard';
         return;
       }
@@ -216,6 +216,15 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
 
                   {accountGroups.map(group => (
                     <TabsContent key={group.id} value={group.id} className="mt-2">
+                      {/* Show badge for member tabs */}
+                      {group.id === 'transporter-members' && (
+                        <div className="flex items-center gap-2 mb-2 px-1">
+                          <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
+                            <User className="w-2.5 h-2.5" />
+                            يُوجَّهون لمساحة العمل الشخصية
+                          </Badge>
+                        </div>
+                      )}
                       <div className="grid grid-cols-2 gap-2 max-h-[320px] overflow-y-auto pr-1">
                         {group.accounts.map((account, i) => (
                           <motion.button
