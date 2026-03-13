@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Search, FileText, Download, Eye, Clock, FolderOpen, Filter,
   Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2, Upload,
@@ -24,7 +25,6 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import DocumentActionHub from '@/components/documents/DocumentActionHub';
 import type { DocumentSource } from '@/components/documents/UnifiedDocumentViewer';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const categoryMap: Record<string, { label: string; icon: typeof FileText }> = {
   documents: { label: 'مستندات', icon: FileText },
@@ -60,12 +60,8 @@ const DocumentArchivePanel = () => {
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
   const [hubDoc, setHubDoc] = useState<any | null>(null);
-  const [hubInitialTab, setHubInitialTab] = useState<string>('preview');
 
-  const openDocHub = (doc: any, tab = 'preview') => {
-    setHubInitialTab(tab);
-    setHubDoc(doc);
-  };
+  const openDocHub = (doc: any) => setHubDoc(doc);
 
   const docToSource = (doc: any): DocumentSource => ({
     url: doc.file_url,
@@ -99,7 +95,7 @@ const DocumentArchivePanel = () => {
     enabled: !!organization?.id,
   });
 
-  // Realtime subscription — تحديث فوري عند أي تغيير
+  // Realtime subscription
   useEffect(() => {
     if (!organization?.id) return;
     const channel = supabase
@@ -116,21 +112,13 @@ const DocumentArchivePanel = () => {
     return () => { supabase.removeChannel(channel); };
   }, [organization?.id, queryClient]);
 
-  /** Get a signed URL or open directly if it's already a full URL — searches ALL buckets */
   const getFileUrl = useCallback(async (fileUrl: string): Promise<string | null> => {
     if (!fileUrl) return null;
     if (fileUrl.startsWith('http://') || fileUrl.startsWith('https://')) return fileUrl;
     const buckets = [
-      BUCKET_NAME,
-      'pdf-documents',
-      'shipment-photos',
-      'organization-documents',
-      'weighbridge-photos',
-      'signing-documents',
-      'shared-documents',
-      'deposit-receipts',
-      'identity-documents',
-      'stamps',
+      BUCKET_NAME, 'pdf-documents', 'shipment-photos', 'organization-documents',
+      'weighbridge-photos', 'signing-documents', 'shared-documents',
+      'deposit-receipts', 'identity-documents', 'stamps',
     ];
     for (const bucket of buckets) {
       try {
@@ -138,23 +126,8 @@ const DocumentArchivePanel = () => {
         if (data?.signedUrl) return data.signedUrl;
       } catch { /* try next bucket */ }
     }
-    console.error('Failed to resolve file URL from any bucket:', fileUrl);
     return null;
   }, []);
-
-  const handleViewFile = useCallback(async (docId: string, fileUrl: string) => {
-    setLoadingFileId(docId);
-    try {
-      const url = await getFileUrl(fileUrl);
-      if (url) {
-        window.open(url, '_blank');
-      } else {
-        toast.error('فشل في الحصول على رابط المستند');
-      }
-    } finally {
-      setLoadingFileId(null);
-    }
-  }, [getFileUrl]);
 
   const handleDownloadFile = useCallback(async (docId: string, fileUrl: string, fileName: string) => {
     setLoadingFileId(docId);
@@ -192,7 +165,6 @@ const DocumentArchivePanel = () => {
     return result;
   }, [documents, search, categoryFilter, sortOrder]);
 
-  // Stats
   const stats = useMemo(() => {
     const cats: Record<string, number> = {};
     documents.forEach((d: any) => {
@@ -201,6 +173,17 @@ const DocumentArchivePanel = () => {
     });
     return cats;
   }, [documents]);
+
+  const getDocBadge = (doc: any) => {
+    const t = doc.title || '';
+    if (t.includes('مانيفست')) return { label: '📋 مانيفست', cls: 'border-orange-400/40 text-orange-600' };
+    if (t.includes('تتبع')) return { label: '📍 تتبع', cls: 'border-blue-400/40 text-blue-600' };
+    if (t.includes('إقرار')) return { label: '✅ إقرار', cls: 'border-emerald-400/40 text-emerald-600' };
+    if (t.includes('بوليصة')) return { label: '🚢 بوليصة', cls: 'border-indigo-400/40 text-indigo-600' };
+    if (t.includes('حادث')) return { label: '⚠️ حادث', cls: 'border-red-400/40 text-red-600' };
+    if (t.includes('ميزان')) return { label: '⚖️ ميزان', cls: 'border-amber-400/40 text-amber-600' };
+    return null;
+  };
 
   return (
     <div className="space-y-4">
@@ -216,7 +199,7 @@ const DocumentArchivePanel = () => {
           <Card key={cat} className="bg-muted/30">
             <CardContent className="p-3 text-center">
               <p className="text-lg font-bold">{count}</p>
-              <p className="text-xs text-muted-foreground">{categoryMap[cat]?.label || cat}</p>
+              <p className="text-xs text-muted-foreground">{categoryMap[cat]?.label || typeMap[cat] || cat}</p>
             </CardContent>
           </Card>
         ))}
@@ -226,12 +209,7 @@ const DocumentArchivePanel = () => {
       <div className="flex flex-wrap gap-2 items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="بحث في المستندات..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pr-9"
-          />
+          <Input placeholder="بحث في المستندات..." value={search} onChange={(e) => setSearch(e.target.value)} className="pr-9" />
         </div>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-40">
@@ -252,10 +230,6 @@ const DocumentArchivePanel = () => {
           <Upload className="w-4 h-4 ml-1" />
           رفع مستند
         </Button>
-        <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/document-archive')}>
-          <FolderOpen className="w-4 h-4 ml-1" />
-          الأرشيف الكامل
-        </Button>
       </div>
 
       {/* Documents List */}
@@ -271,53 +245,97 @@ const DocumentArchivePanel = () => {
           </CardContent>
         </Card>
       ) : (
-        <ScrollArea className="h-[500px]">
-          <div className="space-y-2">
-            {filtered.map((doc: any) => {
-              const isFileLoading = loadingFileId === doc.id;
-              return (
-                <Card key={doc.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => openDocHub(doc)}>
-                  <CardContent className="p-3 flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                      {doc.file_type?.startsWith('image') ? (
-                        <Image className="w-5 h-5 text-primary" />
-                      ) : (
-                        <FileText className="w-5 h-5 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{doc.title || doc.file_name || 'مستند'}</p>
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground mt-0.5">
-                        <Badge variant="secondary" className="text-[10px] py-0">
-                          {typeMap[doc.document_type] || categoryMap[doc.document_category]?.label || doc.document_type || 'عام'}
-                        </Badge>
-                        <span className="flex items-center gap-1">
-                          <Clock className="w-3 h-3" />
-                          {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: arLocale })}
-                        </span>
-                        {doc.file_size && (
-                          <span className="text-muted-foreground">
-                            {(doc.file_size / 1024).toFixed(0)} KB
-                          </span>
+        <TooltipProvider>
+          <ScrollArea className="h-[600px]">
+            <div className="space-y-2">
+              {filtered.map((doc: any) => {
+                const isFileLoading = loadingFileId === doc.id;
+                const extraBadge = getDocBadge(doc);
+                return (
+                  <Card key={doc.id} className="hover:bg-muted/30 hover:border-primary/30 transition-all cursor-pointer group" onClick={() => openDocHub(doc)}>
+                    <CardContent className="p-3 flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${
+                        doc.document_category === 'legal' ? 'bg-amber-500/10' :
+                        doc.document_category === 'financials' ? 'bg-emerald-500/10' :
+                        'bg-primary/10'
+                      }`}>
+                        {doc.file_type?.startsWith('image') ? (
+                          <Image className={`w-5 h-5 ${doc.document_category === 'legal' ? 'text-amber-600' : 'text-primary'}`} />
+                        ) : doc.document_type === 'certificate' ? (
+                          <Shield className="w-5 h-5 text-amber-600" />
+                        ) : doc.document_type === 'contract' ? (
+                          <FileSignature className="w-5 h-5 text-indigo-600" />
+                        ) : doc.document_type === 'invoice' ? (
+                          <FileCheck className="w-5 h-5 text-emerald-600" />
+                        ) : (
+                          <FileText className={`w-5 h-5 ${doc.document_category === 'financials' ? 'text-emerald-600' : 'text-primary'}`} />
                         )}
                       </div>
-                    </div>
-                    <div className="flex gap-1 shrink-0">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </ScrollArea>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">{doc.title || doc.file_name || 'مستند'}</p>
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+                          <Badge variant="secondary" className="text-[10px] py-0">
+                            {typeMap[doc.document_type] || categoryMap[doc.document_category]?.label || 'عام'}
+                          </Badge>
+                          {extraBadge && (
+                            <Badge variant="outline" className={`text-[10px] py-0 ${extraBadge.cls}`}>
+                              {extraBadge.label}
+                            </Badge>
+                          )}
+                          {doc.shipment_id && (
+                            <Badge variant="outline" className="text-[10px] py-0 border-blue-400/40 text-blue-600">
+                              <Package className="w-2.5 h-2.5 ml-0.5" />
+                              شحنة
+                            </Badge>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Clock className="w-3 h-3" />
+                            {formatDistanceToNow(new Date(doc.created_at), { addSuffix: true, locale: arLocale })}
+                          </span>
+                          {doc.file_size && <span>{(doc.file_size / 1024).toFixed(0)} KB</span>}
+                        </div>
+                      </div>
+                      <div className="flex gap-0.5 shrink-0 opacity-60 group-hover:opacity-100 transition-opacity">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}>
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top"><p>معاينة وفتح</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-primary hover:text-primary" onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}>
+                              <PenTool className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top"><p>توقيع إلكتروني</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 text-amber-600 hover:text-amber-700" onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}>
+                              <Stamp className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top"><p>ختم إلكتروني</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => { e.stopPropagation(); handleDownloadFile(doc.id, doc.file_url, doc.file_name); }}>
+                              {isFileLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent side="top"><p>تحميل</p></TooltipContent>
+                        </Tooltip>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          </ScrollArea>
+        </TooltipProvider>
       )}
 
       {/* Document Action Hub */}
