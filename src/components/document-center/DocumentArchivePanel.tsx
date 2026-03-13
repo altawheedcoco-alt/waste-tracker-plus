@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Search, FileText, Download, Eye, Clock, FolderOpen, Filter,
-  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2,
+  Image, FileCheck, Inbox, Send, ArrowUpDown, ExternalLink, Loader2, Upload,
 } from 'lucide-react';
 import { format, formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
