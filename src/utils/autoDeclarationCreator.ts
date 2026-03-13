@@ -350,8 +350,9 @@ export async function autoCreateTransporterDeclaration(
 
   const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
-  // Check if transporter docs should be visible to generator
-  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterOrgId);
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    transporterOrgId, 'transporter_transport', shipment, transporterOrgId,
+  );
 
   const declarationNumber = `DCL-TRN-${Date.now().toString(36).toUpperCase()}`;
   const identity = generateDocumentIdentity('transporter_transport', declarationNumber, {
@@ -374,7 +375,7 @@ export async function autoCreateTransporterDeclaration(
     generator_name: getOrgName(shipment.generator_id),
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -384,16 +385,9 @@ export async function autoCreateTransporterDeclaration(
     return;
   }
 
-  // Only notify generator if docs are visible to them
-  const notifyIds: (string | null | undefined)[] = [];
-  if (visibleToGenerator) {
-    notifyIds.push(shipment.generator_id);
-    if (!shipment.hide_recycler_from_generator) notifyIds.push(shipment.recycler_id);
-  }
-
-  if (notifyIds.length > 0) {
+  if (notifyOrgIds.length > 0) {
     await notifyOrgUsers(
-      notifyIds,
+      notifyOrgIds,
       '🚛 إقرار نقل — الناقل بدأ الرحلة',
       `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار نقل للشحنة ${shipment.shipment_number}.`,
       shipmentId,
