@@ -238,7 +238,7 @@ const DocumentArchivePanel = () => {
             {filtered.map((doc: any) => {
               const isFileLoading = loadingFileId === doc.id;
               return (
-                <Card key={doc.id} className="hover:bg-muted/30 transition-colors">
+                <Card key={doc.id} className="hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => openDocHub(doc)}>
                   <CardContent className="p-3 flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
                       {doc.file_type?.startsWith('image') ? (
@@ -265,28 +265,14 @@ const DocumentArchivePanel = () => {
                       </div>
                     </div>
                     <div className="flex gap-1 shrink-0">
-                      {doc.file_url && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            disabled={isFileLoading}
-                            onClick={() => handleViewFile(doc.id, doc.file_url)}
-                          >
-                            {isFileLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Eye className="w-4 h-4" />}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8"
-                            disabled={isFileLoading}
-                            onClick={() => handleDownloadFile(doc.id, doc.file_url, doc.file_name)}
-                          >
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </>
-                      )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={(e) => { e.stopPropagation(); openDocHub(doc); }}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
                     </div>
                   </CardContent>
                 </Card>
@@ -294,6 +280,17 @@ const DocumentArchivePanel = () => {
             })}
           </div>
         </ScrollArea>
+      )}
+
+      {/* Document Action Hub */}
+      {hubDoc && (
+        <DocumentActionHub
+          source={docToSource(hubDoc)}
+          open={!!hubDoc}
+          onOpenChange={(v) => { if (!v) setHubDoc(null); }}
+          referenceId={hubDoc.id}
+          referenceType={hubDoc.document_type}
+        />
       )}
     </div>
   );
