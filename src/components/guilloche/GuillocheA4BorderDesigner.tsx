@@ -442,15 +442,30 @@ export default function GuillocheA4BorderDesigner() {
     printWindow.document.write(`
       <html dir="rtl">
       <head>
-        <title>طباعة البرواز الغيلوشي A4</title>
+        <title>طباعة البرواز الغيلوشي A4 - ${orgName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A4; margin: 0; }
-          body { display: flex; justify-content: center; }
-          svg { width: 210mm; height: 297mm; }
+          body { display: flex; justify-content: center; font-family: 'Cairo', sans-serif; }
+          .print-wrapper { width: 210mm; height: 297mm; position: relative; }
+          .print-wrapper svg { width: 210mm; height: 297mm; }
+          .org-wm { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
         </style>
       </head>
-      <body>${svgEl.outerHTML}</body>
+      <body>
+        <div class="print-wrapper">
+          ${svgEl.outerHTML}
+          <svg class="org-wm" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <pattern id="border-org-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
+                <text x="5" y="55" font-size="12" font-weight="300" fill="${activeBorder.color.primary}" opacity="0.05" font-family="Cairo, sans-serif">${orgName}</text>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#border-org-wm)" />
+          </svg>
+        </div>
+      </body>
       </html>
     `);
     printWindow.document.close();
