@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -349,7 +350,8 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles } = useAuth();
+  const { roles, organization } = useAuth();
+  const { getPref, setPref } = useUserPreferences();
   const isAdmin = roles.includes('admin');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -362,6 +364,18 @@ export default function GuillochePatterns() {
   const [isApplying, setIsApplying] = useState(false);
   const [visibleCount, setVisibleCount] = useState(50);
   const [layerMode, setLayerMode] = useState(false);
+
+  // Org name for watermark
+  const orgName = organization?.name || 'اسم الجهة';
+
+  // Saved/used patterns from preferences
+  const savedPatternIds: string[] = getPref('guilloche_saved_patterns', []);
+
+  const savePatternToHistory = useCallback((patternIds: string[]) => {
+    const existing: string[] = getPref('guilloche_saved_patterns', []);
+    const merged = [...new Set([...patternIds, ...existing])].slice(0, 50); // keep last 50
+    setPref('guilloche_saved_patterns', merged);
+  }, [getPref, setPref]);
 
   // Max layers allowed
   const MAX_LAYERS = 5;
@@ -398,22 +412,22 @@ export default function GuillochePatterns() {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       if (layerMode) {
-        // In layer mode, add to activePatterns if not already there
         if (!activePatterns.find(p => p.id === pattern.id)) {
           if (activePatterns.length >= MAX_LAYERS) {
             toast.error(`الحد الأقصى للطبقات هو ${MAX_LAYERS}`);
             return;
           }
-          setActivePatterns(prev => [...prev, pattern]);
+          const newPatterns = [...activePatterns, pattern];
+          setActivePatterns(newPatterns);
+          savePatternToHistory(newPatterns.map(p => p.id));
           toast.success(`تمت إضافة "${pattern.name}" كطبقة (${activePatterns.length + 1}/${MAX_LAYERS})`);
         } else {
-          // Remove if already selected
           setActivePatterns(prev => prev.filter(p => p.id !== pattern.id));
           toast.info(`تمت إزالة "${pattern.name}" من الطبقات`);
         }
       } else {
-        // Single pattern mode
         setActivePatterns([pattern]);
+        savePatternToHistory([pattern.id]);
         toast.success(`تم تحديد "${pattern.name}" كخلفية للمستندات`);
       }
     } finally {
@@ -470,14 +484,18 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="patterns" dir="rtl">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="patterns" className="gap-2">
-              <Fingerprint className="h-4 w-4" />
-              أنماط الخلفية (1000)
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsTrigger value="patterns" className="gap-1 text-xs">
+              <Fingerprint className="h-3.5 w-3.5" />
+              أنماط الخلفية
             </TabsTrigger>
-            <TabsTrigger value="borders" className="gap-2">
-              <FileText className="h-4 w-4" />
-              براويز الصفحة (1000)
+            <TabsTrigger value="saved" className="gap-1 text-xs">
+              <Star className="h-3.5 w-3.5" />
+              المحفوظة ({savedPatternIds.length})
+            </TabsTrigger>
+            <TabsTrigger value="borders" className="gap-1 text-xs">
+              <FileText className="h-3.5 w-3.5" />
+              براويز الصفحة
             </TabsTrigger>
           </TabsList>
 
@@ -961,6 +979,16 @@ export default function GuillochePatterns() {
                   </div>
                 ))}
 
+                {/* Organization Name Watermark - repeated diagonal */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <pattern id="org-watermark-pattern" patternUnits="userSpaceOnUse" width="220" height="120" patternTransform="rotate(-35)">
+                      <text x="10" y="60" fontSize="14" fontWeight="300" fill={activePatterns[0]?.colorPalette.primary || '#059669'} opacity="0.06" fontFamily="Cairo, sans-serif">{orgName}</text>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#org-watermark-pattern)" />
+                </svg>
+
                 {/* Document Content */}
                 <div className="absolute inset-0 p-8 flex flex-col">
                   {/* Header */}
@@ -1044,16 +1072,28 @@ export default function GuillochePatterns() {
                     printWindow.document.write(`
                       <html dir="rtl">
                       <head>
-                        <title>طباعة الرسم الغيوشي</title>
+                        <title>طباعة الرسم الغيوشي - ${orgName}</title>
+                        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
                         <style>
                           * { margin: 0; padding: 0; box-sizing: border-box; }
                           @page { size: A4; margin: 0; }
-                          body { display: flex; justify-content: center; align-items: flex-start; }
+                          body { display: flex; justify-content: center; align-items: flex-start; font-family: 'Cairo', sans-serif; }
                           .print-container { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
+                          .org-watermark { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
                         </style>
                       </head>
                       <body>
-                        <div class="print-container">${printContent.innerHTML}</div>
+                        <div class="print-container">
+                          ${printContent.innerHTML}
+                          <svg class="org-watermark" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+                            <defs>
+                              <pattern id="print-org-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
+                                <text x="5" y="55" font-size="12" font-weight="300" fill="${activePatterns[0]?.colorPalette.primary || '#059669'}" opacity="0.05" font-family="Cairo, sans-serif">${orgName}</text>
+                              </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#print-org-wm)" />
+                          </svg>
+                        </div>
                       </body>
                       </html>
                     `);
@@ -1068,6 +1108,89 @@ export default function GuillochePatterns() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+          </TabsContent>
+
+          {/* Saved/Previously Used Tab */}
+          <TabsContent value="saved" className="space-y-6 mt-4">
+            {savedPatternIds.length === 0 ? (
+              <Card>
+                <CardContent className="p-12 text-center">
+                  <Star className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                  <h3 className="font-semibold text-lg mb-2">لا توجد قوالب محفوظة</h3>
+                  <p className="text-muted-foreground text-sm">عند تحديد أي نمط أو تداخل سيتم حفظه تلقائياً هنا</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-semibold flex items-center gap-2">
+                    <Star className="h-5 w-5 text-primary" />
+                    القوالب المحفوظة والمستخدمة سابقاً ({savedPatternIds.length})
+                  </h3>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-destructive gap-1"
+                    onClick={() => {
+                      setPref('guilloche_saved_patterns', []);
+                      toast.success('تم مسح جميع القوالب المحفوظة');
+                    }}
+                  >
+                    <X className="h-4 w-4" />
+                    مسح الكل
+                  </Button>
+                </div>
+
+                <div className={cn('grid gap-4', gridCols[gridSize])}>
+                  {allPatterns
+                    .filter(p => savedPatternIds.includes(p.id))
+                    .map((pattern, index) => (
+                      <motion.div
+                        key={pattern.id}
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ delay: Math.min(index * 0.03, 0.5) }}
+                      >
+                        <Card
+                          className={cn(
+                            'cursor-pointer transition-all hover:shadow-lg hover:scale-105 group overflow-hidden',
+                            isPatternActive(pattern.id) && 'ring-2 ring-primary'
+                          )}
+                          onClick={() => handlePreview(pattern)}
+                        >
+                          <CardContent className="p-2 relative">
+                            <GuillochePatternSVG pattern={pattern} size={patternSize[gridSize]} />
+
+                            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                              <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); handlePreview(pattern); }}>
+                                <Eye className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="sm"
+                                variant={isPatternActive(pattern.id) ? "destructive" : "default"}
+                                onClick={(e) => { e.stopPropagation(); handleApplyPattern(pattern); }}
+                              >
+                                {isPatternActive(pattern.id) ? <Minus className="h-4 w-4" /> : <Check className="h-4 w-4" />}
+                              </Button>
+                            </div>
+
+                            {isPatternActive(pattern.id) && (
+                              <div className="absolute top-1 left-1">
+                                <Badge className="gap-1 bg-primary"><Star className="h-3 w-3" />مُفعَّل</Badge>
+                              </div>
+                            )}
+
+                            <div className="mt-2 text-center">
+                              <p className="text-xs font-medium truncate">{pattern.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{pattern.categoryName}</p>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      </motion.div>
+                    ))}
+                </div>
+              </>
+            )}
           </TabsContent>
 
           <TabsContent value="borders" className="mt-4">

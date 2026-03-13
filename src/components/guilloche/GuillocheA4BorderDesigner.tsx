@@ -1,4 +1,6 @@
 import { useState, useMemo, useCallback } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -381,6 +383,10 @@ const GuillocheA4Border = ({ border, width = 200, height = 283, showContent = fa
 
 // ─── Main Component ───
 export default function GuillocheA4BorderDesigner() {
+  const { organization } = useAuth();
+  const { getPref, setPref } = useUserPreferences();
+  const orgName = organization?.name || 'اسم الجهة';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedColor, setSelectedColor] = useState('all');
@@ -413,6 +419,10 @@ export default function GuillocheA4BorderDesigner() {
 
   const handleSelect = (border: BorderConfig) => {
     setActiveBorder(border);
+    // Save to preferences
+    const existing: string[] = getPref('guilloche_saved_borders', []);
+    const merged = [...new Set([border.id, ...existing])].slice(0, 50);
+    setPref('guilloche_saved_borders', merged);
     toast.success(`تم اختيار "${border.name}" كبرواز للصفحة`);
   };
 
@@ -432,15 +442,30 @@ export default function GuillocheA4BorderDesigner() {
     printWindow.document.write(`
       <html dir="rtl">
       <head>
-        <title>طباعة البرواز الغيلوشي A4</title>
+        <title>طباعة البرواز الغيلوشي A4 - ${orgName}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A4; margin: 0; }
-          body { display: flex; justify-content: center; }
-          svg { width: 210mm; height: 297mm; }
+          body { display: flex; justify-content: center; font-family: 'Cairo', sans-serif; }
+          .print-wrapper { width: 210mm; height: 297mm; position: relative; }
+          .print-wrapper svg { width: 210mm; height: 297mm; }
+          .org-wm { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
         </style>
       </head>
-      <body>${svgEl.outerHTML}</body>
+      <body>
+        <div class="print-wrapper">
+          ${svgEl.outerHTML}
+          <svg class="org-wm" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+            <defs>
+              <pattern id="border-org-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
+                <text x="5" y="55" font-size="12" font-weight="300" fill="${activeBorder.color.primary}" opacity="0.05" font-family="Cairo, sans-serif">${orgName}</text>
+              </pattern>
+            </defs>
+            <rect width="100%" height="100%" fill="url(#border-org-wm)" />
+          </svg>
+        </div>
+      </body>
       </html>
     `);
     printWindow.document.close();
@@ -667,10 +692,19 @@ export default function GuillocheA4BorderDesigner() {
 
           {activeBorder && (
             <div className="flex justify-center">
-              <div className="shadow-2xl rounded-lg overflow-hidden border">
+              <div className="shadow-2xl rounded-lg overflow-hidden border relative">
                 <div id="a4-border-full-preview">
                   <GuillocheA4Border border={activeBorder} width={595} height={842} showContent />
                 </div>
+                {/* Org name watermark overlay */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <pattern id="border-preview-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
+                      <text x="5" y="55" fontSize="12" fontWeight="300" fill={activeBorder.color.primary} opacity="0.05" fontFamily="Cairo, sans-serif">{orgName}</text>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#border-preview-wm)" />
+                </svg>
               </div>
             </div>
           )}
