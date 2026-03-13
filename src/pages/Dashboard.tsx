@@ -56,6 +56,12 @@ const Dashboard = () => {
   // PWA: reconnect realtime + invalidate cache when app resumes from background
   usePWARealtimeSync();
 
+  const isAdmin = roles.includes('admin');
+  const isDriver = roles.includes('driver');
+  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
+  const orgType = organization?.organization_type as string | undefined;
+  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
+
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);
   useEffect(() => {
@@ -73,8 +79,11 @@ const Dashboard = () => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
-    // Admin now lands on the Command Center dashboard directly at /dashboard
-  }, [user, loading, navigate, roles]);
+    // Redirect regular employees/members to their personal workspace
+    if (!loading && user && isEmployee && !isAdmin) {
+      navigate('/dashboard/my-workspace', { replace: true });
+    }
+  }, [user, loading, navigate, roles, isEmployee, isAdmin]);
 
   if (loading) {
     return (
@@ -92,12 +101,6 @@ const Dashboard = () => {
   if (!user) {
     return null;
   }
-
-  const isAdmin = roles.includes('admin');
-  const isDriver = roles.includes('driver');
-  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
-  const orgType = organization?.organization_type as string | undefined;
-  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
   const renderDashboard = () => {
     if (isDriver) return <DriverDashboard />;
