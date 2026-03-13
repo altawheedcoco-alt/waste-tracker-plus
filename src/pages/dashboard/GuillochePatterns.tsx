@@ -412,22 +412,22 @@ export default function GuillochePatterns() {
     try {
       await new Promise(resolve => setTimeout(resolve, 300));
       if (layerMode) {
-        // In layer mode, add to activePatterns if not already there
         if (!activePatterns.find(p => p.id === pattern.id)) {
           if (activePatterns.length >= MAX_LAYERS) {
             toast.error(`الحد الأقصى للطبقات هو ${MAX_LAYERS}`);
             return;
           }
-          setActivePatterns(prev => [...prev, pattern]);
+          const newPatterns = [...activePatterns, pattern];
+          setActivePatterns(newPatterns);
+          savePatternToHistory(newPatterns.map(p => p.id));
           toast.success(`تمت إضافة "${pattern.name}" كطبقة (${activePatterns.length + 1}/${MAX_LAYERS})`);
         } else {
-          // Remove if already selected
           setActivePatterns(prev => prev.filter(p => p.id !== pattern.id));
           toast.info(`تمت إزالة "${pattern.name}" من الطبقات`);
         }
       } else {
-        // Single pattern mode
         setActivePatterns([pattern]);
+        savePatternToHistory([pattern.id]);
         toast.success(`تم تحديد "${pattern.name}" كخلفية للمستندات`);
       }
     } finally {
