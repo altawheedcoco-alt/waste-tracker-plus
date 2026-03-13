@@ -3,7 +3,7 @@ import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
-import { isTransporterDocsVisibleToGenerator } from '@/utils/autoDeclarationCreator';
+import { resolveDocVisibilityForAllParties } from '@/utils/documentVisibilityResolver';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
