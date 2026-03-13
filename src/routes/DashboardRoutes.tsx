@@ -217,6 +217,7 @@ const CyberSecurityCenter = lazy(() => import("@/pages/dashboard/CyberSecurityCe
 const VisitorAnalytics = lazy(() => import("@/pages/dashboard/VisitorAnalytics"));
 const DigitalMaturityDashboard = lazy(() => import("@/pages/dashboard/DigitalMaturityDashboard"));
 const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchitectureGuide"));
+const ActionChainsPage = lazy(() => import("@/pages/dashboard/ActionChainsPage"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
@@ -450,6 +451,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/central-registry" element={<Navigate to="/dashboard/document-center?tab=registry" replace />} />
     <Route path="/dashboard/digital-maturity" element={<DigitalMaturityDashboard />} />
     <Route path="/dashboard/architecture-guide" element={<SystemArchitectureGuide />} />
+    <Route path="/dashboard/action-chains" element={<ActionChainsPage />} />
     {/* Ghost sidebar aliases — consultant/office paths that reuse existing pages */}
     <Route path="/dashboard/audit-sessions" element={<ConsultantPortal />} />
     <Route path="/dashboard/consultant-reports" element={<Reports />} />

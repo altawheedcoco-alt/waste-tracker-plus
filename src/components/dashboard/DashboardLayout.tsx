@@ -107,7 +107,7 @@ import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
-import { getOrgChains } from '@/config/actionChainsRegistry';
+
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
 import CreateRequestButton from './CreateRequestButton';
@@ -405,11 +405,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [isAdmin, isDriver, organization]);
 
-  // Action chains for current org type
-  const currentOrgChains = useMemo(() => {
-    const orgType = organization?.organization_type as string;
-    return orgType ? getOrgChains(orgType) : undefined;
-  }, [organization?.organization_type]);
+
 
   // Use quick action preferences hook
   const { applyOrder, preferences: quickActionPrefs } = useQuickActionPreferences();
@@ -633,11 +629,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
 
             {/* Action Chains Button */}
-            {currentOrgChains && (
-              <div className="pt-3 mt-3 border-t border-border/30">
-                <ActionChainsButton orgChains={currentOrgChains} isCollapsed={!isSidebarOpen} />
-              </div>
-            )}
+            <div className="pt-3 mt-3 border-t border-border/30">
+              <ActionChainsButton isCollapsed={!isSidebarOpen} />
+            </div>
 
             {/* Quick Actions Section */}
             {filteredQuickActions.length > 0 && (
@@ -1016,11 +1010,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     <BindingLegend isCollapsed={false} />
 
                     {/* Action Chains Button */}
-                    {currentOrgChains && (
-                      <div className="pt-3 mt-3 border-t border-border/30">
-                        <ActionChainsButton orgChains={currentOrgChains} isCollapsed={false} />
-                      </div>
-                    )}
+                    <div className="pt-3 mt-3 border-t border-border/30">
+                      <ActionChainsButton isCollapsed={false} />
+                    </div>
 
                     {/* Quick Actions Section */}
                     {filteredQuickActions.length > 0 && (
