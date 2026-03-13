@@ -106,7 +106,7 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
-import ActionChainTree from '@/components/shared/ActionChainTree';
+import ActionChainsButton from './ActionChainsButton';
 import { getOrgChains } from '@/config/actionChainsRegistry';
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
@@ -632,10 +632,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               </div>
             )}
 
-            {/* Action Chains Tree */}
-            {isSidebarOpen && currentOrgChains && (
+            {/* Action Chains Button */}
+            {currentOrgChains && (
               <div className="pt-3 mt-3 border-t border-border/30">
-                <ActionChainTree orgChains={currentOrgChains} />
+                <ActionChainsButton orgChains={currentOrgChains} isCollapsed={!isSidebarOpen} />
               </div>
             )}
 
@@ -1015,10 +1015,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     {/* Binding Legend */}
                     <BindingLegend isCollapsed={false} />
 
-                    {/* Action Chains Tree */}
+                    {/* Action Chains Button */}
                     {currentOrgChains && (
                       <div className="pt-3 mt-3 border-t border-border/30">
-                        <ActionChainTree orgChains={currentOrgChains} />
+                        <ActionChainsButton orgChains={currentOrgChains} isCollapsed={false} />
                       </div>
                     )}
 
