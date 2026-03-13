@@ -294,6 +294,11 @@ export async function autoCreateGeneratorDeclaration(
     shipment, generatorOrgId,
   );
 
+  // Resolve visibility via transporter's settings
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'generator_handover', shipment, generatorOrgId,
+  );
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -307,6 +312,7 @@ export async function autoCreateGeneratorDeclaration(
     quantity: shipment.quantity,
     unit: shipment.unit,
     ...maskedNames,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -317,7 +323,7 @@ export async function autoCreateGeneratorDeclaration(
   }
 
   await notifyOrgUsers(
-    [shipment.transporter_id],
+    notifyOrgIds,
     '📝 إقرار تسليم جديد من المولّد',
     `أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`,
     shipmentId,
