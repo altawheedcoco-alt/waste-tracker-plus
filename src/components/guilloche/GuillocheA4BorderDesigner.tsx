@@ -554,7 +554,7 @@ export default function GuillocheA4BorderDesigner() {
       )}
 
       {/* Filters */}
-      {!showSaved && <Card>
+      {!showSaved && <>
         <CardContent className="p-4">
           <div className="flex flex-wrap items-center gap-4">
             <div className="relative flex-1 min-w-[200px]">
