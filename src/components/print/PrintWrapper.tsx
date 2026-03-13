@@ -226,20 +226,23 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
               ولا يتطلب المستند توقيعاً خطياً أو ختماً يدوياً للاعتداد به رقمياً.
             </p>
           </div>
-          {/* Footer QR + Barcode + Verification */}
+          {/* Footer QR + Barcode + Verification — MANDATORY */}
           <div className="flex items-center justify-between mb-2 px-2">
-            {/* QR Code */}
-            {showQR && (
-              <div className="flex-shrink-0">
-                <QRCodeSVG value={qrContent} size={56} level="M" includeMargin={false} />
-                <p className="text-[6pt] text-gray-400 mt-0.5">امسح للتحقق</p>
-              </div>
-            )}
+            {/* QR Code — Always shown */}
+            <div className="flex-shrink-0">
+              <QRCodeSVG value={qrContent} size={56} level="M" includeMargin={false} />
+              <p className="text-[6pt] text-gray-400 mt-0.5">امسح للتحقق</p>
+            </div>
 
             <div className="text-center flex-1 px-3">
+              <div className="flex items-center justify-center gap-1 mb-1">
+                <Shield className="w-3 h-3" style={{ color: accentColor }} />
+                <span className="text-[8pt] font-bold" style={{ color: accentColor }}>هوية التحقق الرقمي</span>
+                <Shield className="w-3 h-3" style={{ color: accentColor }} />
+              </div>
               <p>{footerText || 'هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل'}</p>
               <p className="mt-0.5">
-                رقم المرجع: {documentNumber || '-'} | كود التحقق: <span className="font-mono font-bold">{vCode}</span>
+                رقم المرجع: {documentNumber || '-'} | كود التحقق: <span className="font-mono font-bold" style={{ color: accentColor }}>{vCode}</span>
                 {serialNumber && <> | رقم الشحنة: <span className="font-mono">{serialNumber}</span></>}
               </p>
               {arrivalDate && (
@@ -247,12 +250,10 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
               )}
             </div>
 
-            {/* Barcode */}
-            {showBarcode && (
-              <div className="flex-shrink-0">
-                <Barcode value={barcodeContent} width={1} height={28} fontSize={7} displayValue={true} margin={0} />
-              </div>
-            )}
+            {/* Barcode — Always shown */}
+            <div className="flex-shrink-0">
+              <Barcode value={barcodeContent} width={1} height={28} fontSize={7} displayValue={true} margin={0} />
+            </div>
           </div>
           <p className="text-gray-400 text-[7pt]">
             مستند صادر آلياً من نظام iRecycle ولا يُعتد به بدون رمز التحقق الرقمي — وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004
