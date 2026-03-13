@@ -445,10 +445,10 @@ export const dashboardRoutes = (
     <Route path="/dashboard/consultant-portal" element={<ConsultantPortal />} />
     <Route path="/dashboard/capacity-management" element={<CapacityManagement />} />
     <Route path="/dashboard/governance" element={<GovernanceDashboard />} />
-    <Route path="/dashboard/smart-archive" element={<SmartDocumentArchive />} />
+    <Route path="/dashboard/smart-archive" element={<Navigate to="/dashboard/document-center?tab=smart-archive" replace />} />
     <Route path="/dashboard/cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/visitor-analytics" element={<VisitorAnalytics />} />
-    <Route path="/dashboard/central-registry" element={<CentralDocumentRegistry />} />
+    <Route path="/dashboard/central-registry" element={<Navigate to="/dashboard/document-center?tab=registry" replace />} />
     <Route path="/dashboard/digital-maturity" element={<DigitalMaturityDashboard />} />
     <Route path="/dashboard/architecture-guide" element={<SystemArchitectureGuide />} />
     {/* Ghost sidebar aliases — consultant/office paths that reuse existing pages */}
