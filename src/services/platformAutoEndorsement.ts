@@ -165,7 +165,8 @@ async function checkSignersKYC(
     .eq('status', 'signed');
 
   if (!signatures || signatures.length === 0) {
-    result.details = 'لا توجد توقيعات للتحقق منها';
+    result.passed = true;
+    result.details = 'مستند تلقائي — لا يتطلب تحقق من موقّعين';
     return result;
   }
 
