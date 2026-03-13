@@ -107,7 +107,7 @@ const SecureLetterhead = forwardRef<HTMLDivElement, SecureLetterheadProps>(
       accentColor, borderStyle, headerLayout,
       showWatermark, watermarkText, watermarkOpacity,
       showGuilloche, guillocheColor,
-      showQR, showBarcode, showSerialNumber, showSHA256,
+      showQR: _showQR, showBarcode: _showBarcode, showSerialNumber: _showSerialNumber, showSHA256,
       serialNumber, verificationCode, sha256Hash,
       documentTitle, documentDate,
     } = config;
