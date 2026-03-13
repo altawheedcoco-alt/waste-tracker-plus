@@ -979,6 +979,16 @@ export default function GuillochePatterns() {
                   </div>
                 ))}
 
+                {/* Organization Name Watermark - repeated diagonal */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <pattern id="org-watermark-pattern" patternUnits="userSpaceOnUse" width="220" height="120" patternTransform="rotate(-35)">
+                      <text x="10" y="60" fontSize="14" fontWeight="300" fill={activePatterns[0]?.colorPalette.primary || '#059669'} opacity="0.06" fontFamily="Cairo, sans-serif">{orgName}</text>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#org-watermark-pattern)" />
+                </svg>
+
                 {/* Document Content */}
                 <div className="absolute inset-0 p-8 flex flex-col">
                   {/* Header */}
