@@ -57,21 +57,23 @@ export function useShipmentDeclarations(shipmentId: string | undefined, userOrgI
       // Check if user is from generator org
       const { data: shipment } = await supabase
         .from('shipments')
-        .select('generator_id, transporter_id')
+        .select('generator_id, transporter_id, recycler_id')
         .eq('id', shipmentId)
         .maybeSingle();
 
       if (!shipment) return declarations;
 
       const isGenerator = userOrgId === shipment.generator_id;
-      const isTransporter = userOrgId === shipment.transporter_id;
+      const isRecycler = userOrgId === shipment.recycler_id;
 
-      // Filter: if user is generator, hide documents where visible_to_generator = false
-      // This covers driver confirmations AND transporter declarations/receipts
+      // Filter: if user's org is specified, hide documents where visible_to marks them as hidden
       return declarations.filter((dec: any) => {
-        if (isGenerator && dec.visible_to_generator === false) {
-          return false;
-        }
+        if (!dec.visible_to || typeof dec.visible_to !== 'object') return true;
+        
+        // Determine the user's role relative to this shipment
+        if (isGenerator && dec.visible_to.generator === false) return false;
+        if (isRecycler && dec.visible_to.recycler === false) return false;
+        // Transporter always sees everything
         return true;
       });
     },

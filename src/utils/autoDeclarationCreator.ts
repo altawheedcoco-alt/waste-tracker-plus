@@ -3,6 +3,7 @@ import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
+import { resolveDocVisibilityForAllParties, getDocCategory, type DocumentVisibleTo } from '@/utils/documentVisibilityResolver';
 
 // ─── Declaration Texts ───
 
@@ -160,19 +161,60 @@ function applyVisibilityMasking(
   };
 }
 
-// ─── Transporter Docs Visibility Helper ───
+// ─── Visibility Resolver (uses granular JSONB settings) ───
 
 /**
- * Checks if transporter documents (declarations/receipts) should be visible to generator.
+ * @deprecated Use resolveDocVisibilityForAllParties from documentVisibilityResolver instead.
  */
 export async function isTransporterDocsVisibleToGenerator(transporterOrgId: string): Promise<boolean> {
-  const { data } = await supabase
-    .from('organization_auto_actions')
-    .select('transporter_docs_visible_to_generator')
-    .eq('organization_id', transporterOrgId)
-    .maybeSingle();
-  return data?.transporter_docs_visible_to_generator ?? true;
+  const vis = await resolveDocVisibilityForAllParties(transporterOrgId, 'declarations');
+  return vis.generator !== false;
 }
+
+/**
+ * Resolves visibility for a document and builds the visible_to JSONB + notification targets.
+ */
+async function resolveAndNotify(
+  transporterOrgId: string | null | undefined,
+  declarationType: string,
+  shipment: { generator_id?: string | null; transporter_id?: string | null; recycler_id?: string | null; hide_recycler_from_generator?: boolean; hide_generator_from_recycler?: boolean },
+  creatorOrgId: string,
+): Promise<{ visibleTo: DocumentVisibleTo; notifyOrgIds: (string | null | undefined)[] }> {
+  const category = getDocCategory(declarationType);
+
+  if (!transporterOrgId) {
+    return {
+      visibleTo: { generator: true, recycler: true, disposal: true },
+      notifyOrgIds: [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(id => id && id !== creatorOrgId),
+    };
+  }
+
+  const visibleTo = await resolveDocVisibilityForAllParties(transporterOrgId, category);
+
+  const notifyOrgIds: (string | null | undefined)[] = [];
+
+  // Transporter always gets notified (unless they're the creator)
+  if (shipment.transporter_id && shipment.transporter_id !== creatorOrgId) {
+    notifyOrgIds.push(shipment.transporter_id);
+  }
+
+  // Generator — check visibility + bidirectional masking
+  if (shipment.generator_id && shipment.generator_id !== creatorOrgId && visibleTo.generator !== false) {
+    if (!shipment.hide_generator_from_recycler || creatorOrgId !== shipment.recycler_id) {
+      notifyOrgIds.push(shipment.generator_id);
+    }
+  }
+
+  // Recycler — check visibility + bidirectional masking
+  if (shipment.recycler_id && shipment.recycler_id !== creatorOrgId && visibleTo.recycler !== false) {
+    if (!shipment.hide_recycler_from_generator || creatorOrgId !== shipment.generator_id) {
+      notifyOrgIds.push(shipment.recycler_id);
+    }
+  }
+
+  return { visibleTo, notifyOrgIds };
+}
+
 
 // ─── Shared Helpers ───
 
@@ -252,6 +294,11 @@ export async function autoCreateGeneratorDeclaration(
     shipment, generatorOrgId,
   );
 
+  // Resolve visibility via transporter's settings
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'generator_handover', shipment, generatorOrgId,
+  );
+
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
     declared_by_user_id: userId,
@@ -265,6 +312,7 @@ export async function autoCreateGeneratorDeclaration(
     quantity: shipment.quantity,
     unit: shipment.unit,
     ...maskedNames,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -275,7 +323,7 @@ export async function autoCreateGeneratorDeclaration(
   }
 
   await notifyOrgUsers(
-    [shipment.transporter_id],
+    notifyOrgIds,
     '📝 إقرار تسليم جديد من المولّد',
     `أصدر المولّد "${getOrgName(shipment.generator_id)}" إقرار تسليم للشحنة ${shipment.shipment_number}. يرجى مراجعة المستند والتأكيد.`,
     shipmentId,
@@ -302,8 +350,9 @@ export async function autoCreateTransporterDeclaration(
 
   const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
-  // Check if transporter docs should be visible to generator
-  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterOrgId);
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    transporterOrgId, 'transporter_transport', shipment, transporterOrgId,
+  );
 
   const declarationNumber = `DCL-TRN-${Date.now().toString(36).toUpperCase()}`;
   const identity = generateDocumentIdentity('transporter_transport', declarationNumber, {
@@ -326,7 +375,7 @@ export async function autoCreateTransporterDeclaration(
     generator_name: getOrgName(shipment.generator_id),
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -336,16 +385,9 @@ export async function autoCreateTransporterDeclaration(
     return;
   }
 
-  // Only notify generator if docs are visible to them
-  const notifyIds: (string | null | undefined)[] = [];
-  if (visibleToGenerator) {
-    notifyIds.push(shipment.generator_id);
-    if (!shipment.hide_recycler_from_generator) notifyIds.push(shipment.recycler_id);
-  }
-
-  if (notifyIds.length > 0) {
+  if (notifyOrgIds.length > 0) {
     await notifyOrgUsers(
-      notifyIds,
+      notifyOrgIds,
       '🚛 إقرار نقل — الناقل بدأ الرحلة',
       `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار نقل للشحنة ${shipment.shipment_number}.`,
       shipmentId,
@@ -384,10 +426,9 @@ export async function autoCreateRecyclerDeclaration(
     shipment, recyclerOrgId,
   );
 
-  // Check if transporter allows forwarding docs to generator
-  const visibleToGenerator = shipment.transporter_id
-    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
-    : true;
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'recycler_receipt', shipment, recyclerOrgId,
+  );
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
@@ -402,7 +443,7 @@ export async function autoCreateRecyclerDeclaration(
     quantity: shipment.quantity,
     unit: shipment.unit,
     ...maskedNames,
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -412,14 +453,8 @@ export async function autoCreateRecyclerDeclaration(
     return;
   }
 
-  // Always notify transporter; only notify generator if transporter allows + visibility masking
-  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
-  if (visibleToGenerator && !shipment.hide_generator_from_recycler) {
-    notifyIds.push(shipment.generator_id);
-  }
-
   await notifyOrgUsers(
-    notifyIds,
+    notifyOrgIds,
     '📥 إقرار استلام من المدوّر',
     `أصدر المدوّر "${getOrgName(shipment.recycler_id)}" إقرار استلام للشحنة ${shipment.shipment_number}. تم توثيق سلسلة الحيازة بنجاح.`,
     shipmentId,
@@ -457,10 +492,9 @@ export async function autoCreateRecyclingCertificate(
     shipment, recyclerOrgId,
   );
 
-  // Check if transporter allows forwarding docs to generator
-  const visibleToGenerator = shipment.transporter_id
-    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
-    : true;
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'recycling_certificate', shipment, recyclerOrgId,
+  );
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
@@ -475,7 +509,7 @@ export async function autoCreateRecyclingCertificate(
     quantity: shipment.quantity,
     unit: shipment.unit,
     ...maskedNames,
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -485,14 +519,8 @@ export async function autoCreateRecyclingCertificate(
     return;
   }
 
-  // Always notify transporter; only notify generator if transporter allows
-  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
-  if (visibleToGenerator && !shipment.hide_generator_from_recycler) {
-    notifyIds.push(shipment.generator_id);
-  }
-
   await notifyOrgUsers(
-    notifyIds,
+    notifyOrgIds,
     '♻️ شهادة تدوير — تم إتمام التدوير',
     `أصدر المدوّر "${getOrgName(shipment.recycler_id)}" شهادة تدوير للشحنة ${shipment.shipment_number}.`,
     shipmentId,
@@ -530,10 +558,9 @@ export async function autoCreateDisposalReceptionDeclaration(
     shipment, disposalOrgId,
   );
 
-  // Check if transporter allows forwarding docs to generator
-  const visibleToGenerator = shipment.transporter_id
-    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
-    : true;
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'disposal_receipt', shipment, disposalOrgId,
+  );
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
@@ -549,7 +576,7 @@ export async function autoCreateDisposalReceptionDeclaration(
     unit: shipment.unit,
     ...maskedNames,
     disposal_name: getOrgName(disposalOrgId),
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -559,14 +586,8 @@ export async function autoCreateDisposalReceptionDeclaration(
     return;
   }
 
-  // Always notify transporter; only notify generator if transporter allows
-  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
-  if (visibleToGenerator) {
-    notifyIds.push(shipment.generator_id);
-  }
-
   await notifyOrgUsers(
-    notifyIds,
+    notifyOrgIds,
     '📥 إقرار استلام من جهة التخلص',
     `أصدرت جهة التخلص إقرار استلام للشحنة ${shipment.shipment_number}.`,
     shipmentId,
@@ -604,10 +625,9 @@ export async function autoCreateDisposalCertificate(
     shipment, disposalOrgId,
   );
 
-  // Check if transporter allows forwarding docs to generator
-  const visibleToGenerator = shipment.transporter_id
-    ? await isTransporterDocsVisibleToGenerator(shipment.transporter_id)
-    : true;
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    shipment.transporter_id, 'disposal_certificate', shipment, disposalOrgId,
+  );
 
   const insertData: Record<string, any> = {
     shipment_id: shipmentId,
@@ -623,7 +643,7 @@ export async function autoCreateDisposalCertificate(
     unit: shipment.unit,
     ...maskedNames,
     disposal_name: getOrgName(disposalOrgId),
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -633,14 +653,8 @@ export async function autoCreateDisposalCertificate(
     return;
   }
 
-  // Always notify transporter; only notify generator if transporter allows
-  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
-  if (visibleToGenerator) {
-    notifyIds.push(shipment.generator_id);
-  }
-
   await notifyOrgUsers(
-    notifyIds,
+    notifyOrgIds,
     '🏭 شهادة تخلص نهائي',
     `أصدرت جهة التخلص شهادة تخلص نهائي للشحنة ${shipment.shipment_number}.`,
     shipmentId,

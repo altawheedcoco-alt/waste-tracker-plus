@@ -3,7 +3,7 @@ import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
-import { isTransporterDocsVisibleToGenerator } from '@/utils/autoDeclarationCreator';
+import { resolveDocVisibilityForAllParties } from '@/utils/documentVisibilityResolver';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
@@ -40,8 +40,8 @@ export async function autoCreateReceipt(
 
   const generatorId = shipment.generator_id;
 
-  // Check if transporter docs should be visible to generator
-  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterId);
+  // Resolve visibility for all parties
+  const visibleTo = await resolveDocVisibilityForAllParties(transporterId, 'receipts');
 
   // Generate receipt number
   const receiptNumber = `RCP-${Date.now().toString(36).toUpperCase()}`;
@@ -64,7 +64,7 @@ export async function autoCreateReceipt(
     status: 'pending',
     notes: 'تم الإنشاء تلقائياً عند استلام الشحنة',
     created_by: userId || null,
-    visible_to_generator: visibleToGenerator,
+    visible_to: visibleTo,
     ...identity,
   };
 
@@ -80,7 +80,7 @@ export async function autoCreateReceipt(
   }
 
   // Only notify generator if transporter docs are visible to them
-  if (generatorId && visibleToGenerator) {
+  if (generatorId && visibleTo.generator !== false) {
     try {
       const { data: generatorUsers } = await supabase
         .from('profiles')
