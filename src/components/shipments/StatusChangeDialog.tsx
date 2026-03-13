@@ -366,10 +366,25 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           }
         }
 
-        // Disposal declaration when disposal stages
+        // Disposal: reception declaration when delivered to disposal
+        if (['delivered', 'confirmed'].includes(dbStatus)) {
+          if ((organization?.organization_type as string) === 'disposal') {
+            await autoCreateDisposalReceptionDeclaration(shipment.id, organization.id, profile?.id || '');
+          }
+        }
+
+        // Disposal certificate when disposal stages
         if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(dbStatus)) {
           if ((organization?.organization_type as string) === 'disposal') {
-            await autoCreateDisposalDeclaration(shipment.id, organization.id, profile?.id || '');
+            await autoCreateDisposalCertificate(shipment.id, organization.id, profile?.id || '');
+          }
+        }
+
+        // Recycling certificate when recycling complete
+        if (['recycling_complete', 'processing_complete', 'completed'].includes(dbStatus)) {
+          const { data: fs2 } = await supabase.from('shipments').select('recycler_id').eq('id', shipment.id).single();
+          if (fs2?.recycler_id) {
+            await autoCreateRecyclingCertificate(shipment.id, fs2.recycler_id, profile?.id || '');
           }
         }
       } catch (autoError) {
