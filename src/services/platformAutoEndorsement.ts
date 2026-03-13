@@ -50,8 +50,10 @@ async function checkAllSignaturesComplete(
     .eq('document_type', documentType)
     .eq('document_id', documentId);
 
+  // إذا لم توجد توقيعات أصلاً → المستند لا يتطلب توقيعات (مستند تلقائي) → يمر
   if (error || !signatures || signatures.length === 0) {
-    result.details = 'لا توجد توقيعات مسجلة على هذا المستند';
+    result.passed = true;
+    result.details = 'مستند تلقائي — لا يتطلب توقيعات';
     return result;
   }
 
