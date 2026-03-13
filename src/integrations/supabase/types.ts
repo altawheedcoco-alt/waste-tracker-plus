@@ -23302,6 +23302,7 @@ export type Database = {
           id: string
           last_modified_by: string | null
           organization_id: string
+          transporter_docs_visible_to_generator: boolean
           updated_at: string
         }
         Insert: {
@@ -23330,6 +23331,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           organization_id: string
+          transporter_docs_visible_to_generator?: boolean
           updated_at?: string
         }
         Update: {
@@ -23358,6 +23360,7 @@ export type Database = {
           id?: string
           last_modified_by?: string | null
           organization_id?: string
+          transporter_docs_visible_to_generator?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -32695,6 +32698,7 @@ export type Database = {
           unit: string | null
           updated_at: string
           verification_code: string | null
+          visible_to_generator: boolean | null
           waste_category: string | null
           waste_type: string | null
         }
@@ -32731,6 +32735,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
         }
@@ -32767,6 +32772,7 @@ export type Database = {
           unit?: string | null
           updated_at?: string
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_category?: string | null
           waste_type?: string | null
         }

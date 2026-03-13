@@ -3,6 +3,7 @@ import { withTagline } from '@/utils/platformTaglines';
 import { sendBulkDualNotification } from '@/services/unifiedNotifier';
 import { isAutoActionEnabled } from '@/utils/autoActionChecker';
 import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
+import { isTransporterDocsVisibleToGenerator } from '@/utils/autoDeclarationCreator';
 
 /**
  * Auto-creates a shipment receipt when a transporter delivers/receives a shipment.
@@ -39,6 +40,9 @@ export async function autoCreateReceipt(
 
   const generatorId = shipment.generator_id;
 
+  // Check if transporter docs should be visible to generator
+  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterId);
+
   // Generate receipt number
   const receiptNumber = `RCP-${Date.now().toString(36).toUpperCase()}`;
 
@@ -60,6 +64,7 @@ export async function autoCreateReceipt(
     status: 'pending',
     notes: 'تم الإنشاء تلقائياً عند استلام الشحنة',
     created_by: userId || null,
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -74,10 +79,9 @@ export async function autoCreateReceipt(
     throw error;
   }
 
-  // Send notification to generator
-  if (generatorId) {
+  // Only notify generator if transporter docs are visible to them
+  if (generatorId && visibleToGenerator) {
     try {
-      // Find users belonging to the generator organization
       const { data: generatorUsers } = await supabase
         .from('profiles')
         .select('user_id')
@@ -96,7 +100,6 @@ export async function autoCreateReceipt(
       }
     } catch (notifError) {
       console.error('Failed to send receipt notification:', notifError);
-      // Don't throw - notification failure shouldn't block receipt creation
     }
   }
 

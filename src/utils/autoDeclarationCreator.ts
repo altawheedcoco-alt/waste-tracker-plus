@@ -160,6 +160,20 @@ function applyVisibilityMasking(
   };
 }
 
+// ─── Transporter Docs Visibility Helper ───
+
+/**
+ * Checks if transporter documents (declarations/receipts) should be visible to generator.
+ */
+export async function isTransporterDocsVisibleToGenerator(transporterOrgId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('organization_auto_actions')
+    .select('transporter_docs_visible_to_generator')
+    .eq('organization_id', transporterOrgId)
+    .maybeSingle();
+  return data?.transporter_docs_visible_to_generator ?? true;
+}
+
 // ─── Shared Helpers ───
 
 async function fetchShipmentWithParties(shipmentId: string) {
@@ -288,6 +302,9 @@ export async function autoCreateTransporterDeclaration(
 
   const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
+  // Check if transporter docs should be visible to generator
+  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterOrgId);
+
   const declarationNumber = `DCL-TRN-${Date.now().toString(36).toUpperCase()}`;
   const identity = generateDocumentIdentity('transporter_transport', declarationNumber, {
     shipmentNumber: shipment.shipment_number,
@@ -309,6 +326,7 @@ export async function autoCreateTransporterDeclaration(
     generator_name: getOrgName(shipment.generator_id),
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -318,16 +336,21 @@ export async function autoCreateTransporterDeclaration(
     return;
   }
 
-  // Notify generator (with visibility masking check)
-  const notifyIds: (string | null | undefined)[] = [shipment.generator_id];
-  if (!shipment.hide_recycler_from_generator) notifyIds.push(shipment.recycler_id);
+  // Only notify generator if docs are visible to them
+  const notifyIds: (string | null | undefined)[] = [];
+  if (visibleToGenerator) {
+    notifyIds.push(shipment.generator_id);
+    if (!shipment.hide_recycler_from_generator) notifyIds.push(shipment.recycler_id);
+  }
 
-  await notifyOrgUsers(
-    notifyIds,
-    '🚛 إقرار نقل — الناقل بدأ الرحلة',
-    `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار نقل للشحنة ${shipment.shipment_number}.`,
-    shipmentId,
-  );
+  if (notifyIds.length > 0) {
+    await notifyOrgUsers(
+      notifyIds,
+      '🚛 إقرار نقل — الناقل بدأ الرحلة',
+      `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار نقل للشحنة ${shipment.shipment_number}.`,
+      shipmentId,
+    );
+  }
 }
 
 /**
