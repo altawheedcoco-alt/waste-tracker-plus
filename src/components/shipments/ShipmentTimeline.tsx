@@ -76,7 +76,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
             <div
               className={cn(
                 'w-3 h-3 rounded-full shrink-0 transition-colors',
-                step.status === 'completed' && 'bg-emerald-500',
+                step.status === 'completed' && 'bg-primary',
                 step.status === 'current' && 'bg-primary animate-pulse',
                 step.status === 'pending' && 'bg-muted-foreground/20'
               )}
@@ -85,7 +85,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
               <div
                 className={cn(
                   'h-0.5 flex-1 mx-0.5',
-                  step.status === 'completed' ? 'bg-emerald-500' : 'bg-muted-foreground/20'
+                  step.status === 'completed' ? 'bg-primary' : 'bg-muted-foreground/20'
                 )}
               />
             )}
@@ -103,10 +103,10 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
           <div key={step.key} className="flex gap-3">
             {/* Line + Circle */}
             <div className="flex flex-col items-center">
-              <div
+                <div
                 className={cn(
                   'w-8 h-8 rounded-full flex items-center justify-center shrink-0 border-2 transition-all',
-                  step.status === 'completed' && 'bg-emerald-500 border-emerald-500 text-white',
+                  step.status === 'completed' && 'bg-primary border-primary text-primary-foreground',
                   step.status === 'current' && 'bg-primary/10 border-primary text-primary animate-pulse',
                   step.status === 'pending' && 'bg-muted border-muted-foreground/20 text-muted-foreground/40'
                 )}
@@ -117,7 +117,7 @@ const ShipmentTimeline = ({ shipment, compact = false }: ShipmentTimelineProps) 
                 <div
                   className={cn(
                     'w-0.5 h-8',
-                    step.status === 'completed' ? 'bg-emerald-500' : 'bg-muted-foreground/20'
+                    step.status === 'completed' ? 'bg-primary' : 'bg-muted-foreground/20'
                   )}
                 />
               )}

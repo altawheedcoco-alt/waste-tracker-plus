@@ -588,7 +588,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         </div>
       )}
       {geofenceCheck.isInside === true && geofenceCheck.distance != null && (
-        <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
+        <p className="text-xs text-primary text-center">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
       )}
 
       {/* Weighbridge Photos */}
@@ -617,7 +617,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
             <p className="text-[11px] text-muted-foreground">
               فرق: <span className={cn(
                 Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100) > 5
-                  ? 'text-destructive font-bold' : 'text-emerald-600'
+                  ? 'text-destructive font-bold' : 'text-primary'
               )}>{Math.abs(((parseFloat(recyclerWeight) - shipment.quantity) / shipment.quantity) * 100).toFixed(1)}%</span>
             </p>
           )}
@@ -922,7 +922,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
               )}
               {geofenceCheck.checking && <p className="text-xs text-muted-foreground text-center"><Loader2 className="w-3 h-3 animate-spin inline ml-1" />تحقق...</p>}
               {geofenceCheck.isInside === true && geofenceCheck.distance != null && (
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
+                <p className="text-xs text-primary">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
               )}
 
               {/* Photos */}
