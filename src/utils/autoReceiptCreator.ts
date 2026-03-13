@@ -40,8 +40,8 @@ export async function autoCreateReceipt(
 
   const generatorId = shipment.generator_id;
 
-  // Check if transporter docs should be visible to generator
-  const visibleToGenerator = await isTransporterDocsVisibleToGenerator(transporterId);
+  // Resolve visibility for all parties
+  const visibleTo = await resolveDocVisibilityForAllParties(transporterId, 'receipts');
 
   // Generate receipt number
   const receiptNumber = `RCP-${Date.now().toString(36).toUpperCase()}`;
