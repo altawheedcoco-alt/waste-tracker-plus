@@ -1209,6 +1209,12 @@ export default function GuillochePatterns() {
               <GuillocheA4BorderDesigner />
             </Suspense>
           </TabsContent>
+
+          <TabsContent value="combined" className="mt-4">
+            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <GuillocheA4CombinedPreview />
+            </Suspense>
+          </TabsContent>
         </Tabs>
       </div>
     </DashboardLayout>
