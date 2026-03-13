@@ -692,10 +692,19 @@ export default function GuillocheA4BorderDesigner() {
 
           {activeBorder && (
             <div className="flex justify-center">
-              <div className="shadow-2xl rounded-lg overflow-hidden border">
+              <div className="shadow-2xl rounded-lg overflow-hidden border relative">
                 <div id="a4-border-full-preview">
                   <GuillocheA4Border border={activeBorder} width={595} height={842} showContent />
                 </div>
+                {/* Org name watermark overlay */}
+                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+                  <defs>
+                    <pattern id="border-preview-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
+                      <text x="5" y="55" fontSize="12" fontWeight="300" fill={activeBorder.color.primary} opacity="0.05" fontFamily="Cairo, sans-serif">{orgName}</text>
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#border-preview-wm)" />
+                </svg>
               </div>
             </div>
           )}
