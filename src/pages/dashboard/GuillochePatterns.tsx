@@ -450,12 +450,15 @@ export default function GuillochePatterns() {
   };
 
   const handleRemoveLayer = (patternId: string) => {
-    setActivePatterns(prev => prev.filter(p => p.id !== patternId));
+    const newPatterns = activePatterns.filter(p => p.id !== patternId);
+    setActivePatterns(newPatterns);
+    persistActivePatterns(newPatterns);
     toast.info('تمت إزالة الطبقة');
   };
 
   const handleClearAllLayers = () => {
     setActivePatterns([]);
+    persistActivePatterns([]);
     toast.success('تم إلغاء جميع الطبقات - ستتم طباعة المستندات بدون خلفية');
   };
 
