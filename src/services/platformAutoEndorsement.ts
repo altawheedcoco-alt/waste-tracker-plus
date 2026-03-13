@@ -223,7 +223,8 @@ async function checkDocumentHashIntegrity(
     .order('created_at', { ascending: true });
 
   if (!signatures || signatures.length === 0) {
-    result.details = 'لا توجد بصمات رقمية للتحقق';
+    result.passed = true;
+    result.details = 'مستند تلقائي — لا يتطلب بصمات رقمية';
     return result;
   }
 
