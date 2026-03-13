@@ -142,7 +142,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       )}
 
       {/* ===== HEADER: Title ===== */}
-      <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}` }}>
+      <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}`, position: 'relative', zIndex: 1 }}>
 
         {/* Title Section */}
         <div className="text-center flex-1 px-3">
