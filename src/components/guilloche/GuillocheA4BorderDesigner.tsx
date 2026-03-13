@@ -450,21 +450,13 @@ export default function GuillocheA4BorderDesigner() {
           @page { size: A4; margin: 0; }
           body { display: flex; justify-content: center; font-family: 'Cairo', sans-serif; }
           .print-wrapper { width: 210mm; height: 297mm; position: relative; }
-          .print-wrapper svg { width: 210mm; height: 297mm; }
-          .org-wm { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+          .print-wrapper > svg { width: 210mm; height: 297mm; }
         </style>
       </head>
       <body>
         <div class="print-wrapper">
           ${svgEl.outerHTML}
-          <svg class="org-wm" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
-            <defs>
-              <pattern id="border-org-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
-                <text x="5" y="55" font-size="12" font-weight="300" fill="${activeBorder.color.primary}" opacity="0.05" font-family="Cairo, sans-serif">${orgName}</text>
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#border-org-wm)" />
-          </svg>
+          ${generateSecurityOverlayHTML(orgName, activeBorder.color.primary)}
         </div>
       </body>
       </html>
