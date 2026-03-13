@@ -26,13 +26,19 @@ export function useDeliveryDeclaration(shipmentId: string | undefined) {
   });
 }
 
-export function useShipmentDeclarations(shipmentId: string | undefined) {
+/**
+ * Fetches all declarations for a shipment, filtering out driver declarations
+ * that are not visible to the generator (based on visible_to_generator flag).
+ */
+export function useShipmentDeclarations(shipmentId: string | undefined, userOrgId?: string) {
   return useQuery({
-    queryKey: ['shipment-declarations', shipmentId],
+    queryKey: ['shipment-declarations', shipmentId, userOrgId],
     queryFn: async () => {
       if (!shipmentId) return [];
-      const { data, error } = await supabase
-        .from('delivery_declarations')
+
+      // Fetch declarations
+      const { data, error } = await (supabase
+        .from('delivery_declarations') as any)
         .select('*')
         .eq('shipment_id', shipmentId)
         .order('created_at', { ascending: true });
@@ -42,7 +48,32 @@ export function useShipmentDeclarations(shipmentId: string | undefined) {
         console.error('Error fetching shipment declarations:', error);
         return [];
       }
-      return data || [];
+
+      const declarations = data || [];
+
+      // If no user org, return all
+      if (!userOrgId) return declarations;
+
+      // Check if user is from generator org
+      const { data: shipment } = await supabase
+        .from('shipments')
+        .select('generator_id, transporter_id')
+        .eq('id', shipmentId)
+        .maybeSingle();
+
+      if (!shipment) return declarations;
+
+      const isGenerator = userOrgId === shipment.generator_id;
+      const isTransporter = userOrgId === shipment.transporter_id;
+
+      // Filter: if user is generator, hide driver declarations where visible_to_generator = false
+      // If user is transporter, always show all (it's their driver)
+      return declarations.filter((dec: any) => {
+        if (dec.declaration_type === 'driver_confirmation' && isGenerator && dec.visible_to_generator === false) {
+          return false;
+        }
+        return true;
+      });
     },
     enabled: !!shipmentId,
     staleTime: 1000 * 60 * 5,

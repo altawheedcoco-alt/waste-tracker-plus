@@ -584,7 +584,40 @@ export async function autoCreateDisposalCertificate(
 }
 
 /**
+ * Checks if driver declaration should be visible to generator.
+ * Priority: per-driver setting > org-level setting > default (true)
+ */
+async function isDriverDeclarationVisibleToGenerator(
+  transporterOrgId: string,
+  driverProfileId?: string
+): Promise<boolean> {
+  // 1. Check per-driver override first
+  if (driverProfileId) {
+    const { data: driver } = await supabase
+      .from('drivers')
+      .select('declaration_visible_to_generator')
+      .eq('profile_id', driverProfileId)
+      .eq('organization_id', transporterOrgId)
+      .maybeSingle();
+    
+    if (driver?.declaration_visible_to_generator !== null && driver?.declaration_visible_to_generator !== undefined) {
+      return driver.declaration_visible_to_generator;
+    }
+  }
+
+  // 2. Fall back to org-level setting
+  const { data: orgSettings } = await supabase
+    .from('organization_auto_actions')
+    .select('driver_declaration_visible_to_generator')
+    .eq('organization_id', transporterOrgId)
+    .maybeSingle();
+
+  return orgSettings?.driver_declaration_visible_to_generator ?? true;
+}
+
+/**
  * Driver pickup confirmation — triggered at: picked_up/loading
+ * Visibility to generator depends on org/driver settings.
  */
 export async function autoCreateDriverConfirmation(
   shipmentId: string,
@@ -603,6 +636,9 @@ export async function autoCreateDriverConfirmation(
   if (!shipment) return;
 
   const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  // Check visibility setting for this driver
+  const visibleToGenerator = await isDriverDeclarationVisibleToGenerator(transporterOrgId, userId);
 
   const declarationNumber = `DCL-DRV-${Date.now().toString(36).toUpperCase()}`;
   const identity = generateDocumentIdentity('driver_confirmation', declarationNumber, {
@@ -626,6 +662,7 @@ export async function autoCreateDriverConfirmation(
     transporter_name: getOrgName(shipment.transporter_id),
     recycler_name: getOrgName(shipment.recycler_id),
     driver_name: driverName || null,
+    visible_to_generator: visibleToGenerator,
     ...identity,
   };
 
@@ -635,8 +672,14 @@ export async function autoCreateDriverConfirmation(
     return;
   }
 
+  // Only notify generator if declaration is visible to them
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
+  if (visibleToGenerator) {
+    notifyIds.push(shipment.generator_id);
+  }
+
   await notifyOrgUsers(
-    [shipment.generator_id],
+    notifyIds,
     '🚗 تأكيد السائق — تم استلام الشحنة ميدانياً',
     `أكد السائق ${driverName || ''} استلام الشحنة ${shipment.shipment_number} ميدانياً.`,
     shipmentId,

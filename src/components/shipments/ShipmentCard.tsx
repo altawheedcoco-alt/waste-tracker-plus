@@ -140,7 +140,7 @@ const ShipmentCard = ({
   // استخدام hook صلاحيات الرؤية
   const visibility = useShipmentVisibility(shipment.id);
   const { data: declarationData } = useDeliveryDeclaration(shipment.id);
-  const { data: allDeclarations = [] } = useShipmentDeclarations(shipment.id);
+  const { data: allDeclarations = [] } = useShipmentDeclarations(shipment.id, organization?.id);
 
   // Fetch linked receipts/certificates for this shipment
   const { data: linkedReceipts = [] } = useQuery({
