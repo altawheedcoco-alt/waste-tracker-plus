@@ -383,6 +383,10 @@ const GuillocheA4Border = ({ border, width = 200, height = 283, showContent = fa
 
 // ─── Main Component ───
 export default function GuillocheA4BorderDesigner() {
+  const { organization } = useAuth();
+  const { getPref, setPref } = useUserPreferences();
+  const orgName = organization?.name || 'اسم الجهة';
+
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedColor, setSelectedColor] = useState('all');
@@ -415,6 +419,10 @@ export default function GuillocheA4BorderDesigner() {
 
   const handleSelect = (border: BorderConfig) => {
     setActiveBorder(border);
+    // Save to preferences
+    const existing: string[] = getPref('guilloche_saved_borders', []);
+    const merged = [...new Set([border.id, ...existing])].slice(0, 50);
+    setPref('guilloche_saved_borders', merged);
     toast.success(`تم اختيار "${border.name}" كبرواز للصفحة`);
   };
 
