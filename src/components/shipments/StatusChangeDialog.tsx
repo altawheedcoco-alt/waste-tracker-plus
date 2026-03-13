@@ -368,7 +368,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
 
         // Disposal declaration when disposal stages
         if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(dbStatus)) {
-          if (organization?.organization_type === 'disposal') {
+          if ((organization?.organization_type as string) === 'disposal') {
             await autoCreateDisposalDeclaration(shipment.id, organization.id, profile?.id || '');
           }
         }
