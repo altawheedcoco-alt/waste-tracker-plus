@@ -57,14 +57,14 @@ export function useShipmentDeclarations(shipmentId: string | undefined, userOrgI
       // Check if user is from generator org
       const { data: shipment } = await supabase
         .from('shipments')
-        .select('generator_id, transporter_id')
+        .select('generator_id, transporter_id, recycler_id')
         .eq('id', shipmentId)
         .maybeSingle();
 
       if (!shipment) return declarations;
 
       const isGenerator = userOrgId === shipment.generator_id;
-      const isTransporter = userOrgId === shipment.transporter_id;
+      const isRecycler = userOrgId === shipment.recycler_id;
 
       // Filter: if user's org is specified, hide documents where visible_to marks them as hidden
       return declarations.filter((dec: any) => {
