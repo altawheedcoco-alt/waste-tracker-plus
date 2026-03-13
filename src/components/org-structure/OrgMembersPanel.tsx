@@ -458,6 +458,17 @@ export default function OrgMembersPanel() {
           onClose={() => setEditPermsId(null)}
         />
       )}
+
+      {/* Member Credentials Dialog */}
+      {credentialsMember && (
+        <MemberCredentialsDialog
+          open={!!credentialsMember}
+          onClose={() => setCredentialsMember(null)}
+          targetUserId={credentialsMember.user_id}
+          memberName={credentialsMember.profile?.full_name || credentialsMember.invitation_email || 'عضو'}
+          currentEmail={credentialsMember.profile?.email}
+        />
+      )}
     </div>
   );
 }
