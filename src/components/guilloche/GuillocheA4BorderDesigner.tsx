@@ -660,6 +660,7 @@ export default function GuillocheA4BorderDesigner() {
           </Button>
         </div>
       )}
+      </>}
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
