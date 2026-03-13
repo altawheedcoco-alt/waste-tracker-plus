@@ -329,18 +329,28 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         console.error('Error logging status change:', logError);
       }
 
-      // Auto-create declarations and receipts based on status
+      // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         
         // Generator declaration when shipment is approved/registered
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) {
           await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
         }
         
+        // Driver confirmation when picked_up/loading
+        if (['picked_up', 'loading'].includes(dbStatus) && organization?.organization_type === 'transporter') {
+          await autoCreateDriverConfirmation(shipment.id, organization.id, profile?.id || '', profile?.full_name);
+        }
+
+        // Transporter transport declaration when in_transit
+        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
+          await autoCreateTransporterDeclaration(shipment.id, organization.id, profile?.id || '');
+          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        }
+        
         // Recycler declaration when shipment is delivered/confirmed
         if (['delivered', 'confirmed'].includes(dbStatus)) {
-          // Fetch recycler_id from shipment
           const { data: fullShipment } = await supabase
             .from('shipments')
             .select('recycler_id, transporter_id')
@@ -349,19 +359,18 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
           
           if (fullShipment?.recycler_id) {
             await autoCreateRecyclerDeclaration(shipment.id, fullShipment.recycler_id, profile?.id || '');
-            
           }
           
-          // Auto-create receipt for transporter
           if (organization?.organization_type === 'transporter') {
             await autoCreateReceipt(shipment.id, organization.id, profile?.id);
           }
         }
-        
-        // Also create receipt when in_transit (transporter picking up)
-        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
-          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
-          
+
+        // Disposal declaration when disposal stages
+        if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(dbStatus)) {
+          if ((organization?.organization_type as string) === 'disposal') {
+            await autoCreateDisposalDeclaration(shipment.id, organization.id, profile?.id || '');
+          }
         }
       } catch (autoError) {
         console.error('Auto document creation failed (non-blocking):', autoError);
@@ -816,16 +825,23 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
       if (statusPhotos.length > 0) logEntry.photos = statusPhotos;
       await supabase.from('shipment_logs').insert([logEntry]);
 
-      // Auto documents
+      // Auto documents (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
+        if (['picked_up', 'loading'].includes(dbStatus) && organization?.organization_type === 'transporter') await autoCreateDriverConfirmation(shipment.id, organization.id, profile?.id || '', profile?.full_name);
+        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
+          await autoCreateTransporterDeclaration(shipment.id, organization.id, profile?.id || '');
+          await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        }
         if (['delivered', 'confirmed'].includes(dbStatus)) {
           const { data: fs } = await supabase.from('shipments').select('recycler_id, transporter_id').eq('id', shipment.id).single();
           if (fs?.recycler_id) await autoCreateRecyclerDeclaration(shipment.id, fs.recycler_id, profile?.id || '');
           if (organization?.organization_type === 'transporter') await autoCreateReceipt(shipment.id, organization.id, profile?.id);
         }
-        if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(dbStatus) && (organization?.organization_type as string) === 'disposal') {
+          await autoCreateDisposalDeclaration(shipment.id, organization.id, profile?.id || '');
+        }
       } catch {}
 
       // Impact

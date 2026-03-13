@@ -119,9 +119,9 @@ export const useRealtimeTracking = ({
 
       
 
-      // Auto-create declarations and receipts based on status
+      // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalDeclaration, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         const { withTagline, SHIPMENT_STATUS_LABELS } = await import('@/utils/platformTaglines');
 
@@ -159,29 +159,41 @@ export const useRealtimeTracking = ({
                   reference_id: shipmentId,
                   reference_type: 'shipment',
                 });
-                
               }
             }
           } catch (notifErr) {
             console.error('[RealtimeTracking] Status notification failed (non-blocking):', notifErr);
           }
 
-          // Generator declaration on approved/registered/in_transit
-          if (['approved', 'registered', 'in_transit'].includes(newStatus) && shipmentData.generator_id) {
+          // Generator declaration on approved/registered
+          if (['approved', 'registered'].includes(newStatus) && shipmentData.generator_id) {
             await autoCreateGeneratorDeclaration(shipmentId, shipmentData.generator_id, user.id);
-            
+          }
+
+          // Driver confirmation on picked_up/loading
+          if (['picked_up', 'loading'].includes(newStatus) && shipmentData.transporter_id) {
+            await autoCreateDriverConfirmation(shipmentId, shipmentData.transporter_id, user.id);
+          }
+
+          // Transporter declaration + receipt on in_transit
+          if (newStatus === 'in_transit' && shipmentData.transporter_id) {
+            await autoCreateTransporterDeclaration(shipmentId, shipmentData.transporter_id, user.id);
+            await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
           }
 
           // Recycler declaration on delivered/confirmed
           if (['delivered', 'confirmed'].includes(newStatus) && shipmentData.recycler_id) {
             await autoCreateRecyclerDeclaration(shipmentId, shipmentData.recycler_id, user.id);
-            
           }
 
-          // Receipt on in_transit/delivered
-          if (['in_transit', 'delivered'].includes(newStatus) && shipmentData.transporter_id) {
+          // Receipt on delivered
+          if (newStatus === 'delivered' && shipmentData.transporter_id) {
             await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
-            
+          }
+
+          // Disposal declaration on disposal stages
+          if (['disposal_treatment', 'disposal_final', 'disposal_completed'].includes(newStatus) && shipmentData.recycler_id) {
+            await autoCreateDisposalDeclaration(shipmentId, shipmentData.recycler_id, user.id);
           }
         }
       } catch (autoErr) {
