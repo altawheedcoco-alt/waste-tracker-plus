@@ -484,14 +484,18 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="patterns" dir="rtl">
-          <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="patterns" className="gap-2">
-              <Fingerprint className="h-4 w-4" />
-              أنماط الخلفية (1000)
+          <TabsList className="grid w-full max-w-lg grid-cols-3">
+            <TabsTrigger value="patterns" className="gap-1 text-xs">
+              <Fingerprint className="h-3.5 w-3.5" />
+              أنماط الخلفية
             </TabsTrigger>
-            <TabsTrigger value="borders" className="gap-2">
-              <FileText className="h-4 w-4" />
-              براويز الصفحة (1000)
+            <TabsTrigger value="saved" className="gap-1 text-xs">
+              <Star className="h-3.5 w-3.5" />
+              المحفوظة ({savedPatternIds.length})
+            </TabsTrigger>
+            <TabsTrigger value="borders" className="gap-1 text-xs">
+              <FileText className="h-3.5 w-3.5" />
+              براويز الصفحة
             </TabsTrigger>
           </TabsList>
 
