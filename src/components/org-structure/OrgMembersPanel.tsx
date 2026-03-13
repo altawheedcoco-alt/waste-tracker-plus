@@ -310,6 +310,9 @@ export default function OrgMembersPanel() {
         )}
       </div>
 
+      {/* Self Credentials Card */}
+      <MyCredentialsCard />
+
       {/* Members List */}
       <div className="space-y-2">
         {sorted.map(member => {
