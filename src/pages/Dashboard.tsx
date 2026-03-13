@@ -56,6 +56,12 @@ const Dashboard = () => {
   // PWA: reconnect realtime + invalidate cache when app resumes from background
   usePWARealtimeSync();
 
+  const isAdmin = roles.includes('admin');
+  const isDriver = roles.includes('driver');
+  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
+  const orgType = organization?.organization_type as string | undefined;
+  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
+
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);
   useEffect(() => {
@@ -78,29 +84,6 @@ const Dashboard = () => {
       navigate('/dashboard/my-workspace', { replace: true });
     }
   }, [user, loading, navigate, roles, isEmployee, isAdmin]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}
-        >
-          <Loader2 className="w-10 h-10 text-primary" />
-        </motion.div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return null;
-  }
-
-  const isAdmin = roles.includes('admin');
-  const isDriver = roles.includes('driver');
-  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
-  const orgType = organization?.organization_type as string | undefined;
-  const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
   const renderDashboard = () => {
     if (isDriver) return <DriverDashboard />;
