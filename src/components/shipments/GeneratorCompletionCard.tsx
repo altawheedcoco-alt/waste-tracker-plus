@@ -151,7 +151,7 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
           )}
           {shipment.delivery_address && (
             <div className="flex items-start gap-2 p-3 rounded-lg bg-background/80 border">
-              <MapPin className="w-4 h-4 text-emerald-500 mt-0.5 shrink-0" />
+              <MapPin className="w-4 h-4 text-primary mt-0.5 shrink-0" />
               <div>
                 <p className="text-xs text-muted-foreground">موقع التسليم</p>
                 <p className="text-sm">{shipment.delivery_address}</p>
