@@ -16,7 +16,7 @@ const MyAchievementsTab = () => {
       if (!user?.id || !organization?.id) return null;
 
       const [shipmentsRes, logsRes, notifsRes] = await Promise.all([
-        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'delivered'),
+        (supabase.from('shipments') as any).select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'delivered'),
         supabase.from('activity_logs').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
         supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', true),
       ]);
