@@ -231,6 +231,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
 export const dashboardRoutes = (
   <Route element={<DashboardRouteGuard />}>
     <Route path="/dashboard" element={<Dashboard />} />
+    <Route path="/dashboard/my-workspace" element={<MyWorkspace />} />
     <Route path="/dashboard/digital-identity-card" element={<DigitalIdentityCardPage />} />
     <Route path="/dashboard/print-center" element={<PrintCenter />} />
     <Route path="/dashboard/signing-status" element={<SigningStatus />} />
