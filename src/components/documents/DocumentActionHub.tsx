@@ -20,9 +20,9 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import type { DocumentSource } from './UnifiedDocumentViewer';
-import { useState as useStateHook, useEffect } from 'react';
+import { useEffect } from 'react';
 import { getStorageUrl, refreshStorageUrl } from '@/utils/storageUrl';
 
 // Lazy imports for action dialogs  
