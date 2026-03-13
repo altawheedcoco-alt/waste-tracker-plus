@@ -396,9 +396,73 @@ export async function autoCreateRecyclerDeclaration(
 }
 
 /**
- * Disposal final declaration — triggered at: disposal_treatment/disposal_final/disposal_completed
+ * Recycler recycling certificate — triggered at: recycling_complete/processing_complete
  */
-export async function autoCreateDisposalDeclaration(
+export async function autoCreateRecyclingCertificate(
+  shipmentId: string,
+  recyclerOrgId: string,
+  userId: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(recyclerOrgId, 'auto_delivery_certificate'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'recycling_certificate').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `CRT-RCY-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('recycling_certificate', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.recycler_id),
+  });
+
+  const maskedNames = applyVisibilityMasking(
+    { generator: getOrgName(shipment.generator_id), transporter: getOrgName(shipment.transporter_id), recycler: getOrgName(shipment.recycler_id) },
+    shipment, recyclerOrgId,
+  );
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: recyclerOrgId,
+    declaration_type: 'recycling_certificate',
+    declaration_text: RECYCLER_RECYCLING_CERTIFICATE_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    ...maskedNames,
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto recycling certificate error:', error);
+    return;
+  }
+
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id];
+  if (!shipment.hide_generator_from_recycler) notifyIds.push(shipment.generator_id);
+
+  await notifyOrgUsers(
+    notifyIds,
+    '♻️ شهادة تدوير — تم إتمام التدوير',
+    `أصدر المدوّر "${getOrgName(shipment.recycler_id)}" شهادة تدوير للشحنة ${shipment.shipment_number}.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Disposal reception declaration — triggered at: delivered to disposal facility
+ */
+export async function autoCreateDisposalReceptionDeclaration(
   shipmentId: string,
   disposalOrgId: string,
   userId: string
@@ -407,7 +471,7 @@ export async function autoCreateDisposalDeclaration(
 
   const { data: existing } = await (supabase.from('delivery_declarations') as any)
     .select('id').eq('shipment_id', shipmentId)
-    .eq('declaration_type', 'disposal_final').eq('status', 'active').maybeSingle();
+    .eq('declaration_type', 'disposal_receipt').eq('status', 'active').maybeSingle();
   if (existing) return;
 
   const shipment = await fetchShipmentWithParties(shipmentId);
@@ -415,8 +479,8 @@ export async function autoCreateDisposalDeclaration(
 
   const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
 
-  const declarationNumber = `DCL-DSP-${Date.now().toString(36).toUpperCase()}`;
-  const identity = generateDocumentIdentity('disposal_final', declarationNumber, {
+  const declarationNumber = `DCL-DSR-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('disposal_receipt', declarationNumber, {
     shipmentNumber: shipment.shipment_number,
     organizationName: getOrgName(disposalOrgId),
   });
@@ -430,8 +494,8 @@ export async function autoCreateDisposalDeclaration(
     shipment_id: shipmentId,
     declared_by_user_id: userId,
     declared_by_organization_id: disposalOrgId,
-    declaration_type: 'disposal_final',
-    declaration_text: DISPOSAL_AUTO_DECLARATION_TEXT,
+    declaration_type: 'disposal_receipt',
+    declaration_text: DISPOSAL_RECEIPT_DECLARATION_TEXT,
     auto_generated: true,
     status: 'active',
     shipment_number: shipment.shipment_number,
@@ -445,14 +509,76 @@ export async function autoCreateDisposalDeclaration(
 
   const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
   if (error) {
-    console.error('Auto disposal declaration error:', error);
+    console.error('Auto disposal reception declaration error:', error);
     return;
   }
 
   await notifyOrgUsers(
     [shipment.transporter_id],
-    '♻️ إقرار تخلص نهائي',
-    `أصدرت جهة التخلص إقرار تخلص نهائي للشحنة ${shipment.shipment_number}.`,
+    '📥 إقرار استلام من جهة التخلص',
+    `أصدرت جهة التخلص إقرار استلام للشحنة ${shipment.shipment_number}.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Disposal certificate — triggered at: disposal_treatment/disposal_final/disposal_completed
+ */
+export async function autoCreateDisposalCertificate(
+  shipmentId: string,
+  disposalOrgId: string,
+  userId: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(disposalOrgId, 'auto_delivery_certificate'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'disposal_certificate').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `CRT-DSP-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('disposal_certificate', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(disposalOrgId),
+  });
+
+  const maskedNames = applyVisibilityMasking(
+    { generator: getOrgName(shipment.generator_id), transporter: getOrgName(shipment.transporter_id), recycler: getOrgName(shipment.recycler_id) },
+    shipment, disposalOrgId,
+  );
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: disposalOrgId,
+    declaration_type: 'disposal_certificate',
+    declaration_text: DISPOSAL_CERTIFICATE_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    ...maskedNames,
+    disposal_name: getOrgName(disposalOrgId),
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto disposal certificate error:', error);
+    return;
+  }
+
+  await notifyOrgUsers(
+    [shipment.transporter_id],
+    '🏭 شهادة تخلص نهائي',
+    `أصدرت جهة التخلص شهادة تخلص نهائي للشحنة ${shipment.shipment_number}.`,
     shipmentId,
   );
 }
