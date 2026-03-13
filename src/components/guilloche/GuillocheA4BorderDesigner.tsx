@@ -122,260 +122,220 @@ const generateBorders = (): BorderConfig[] => {
   return borders;
 };
 
-// ─── SVG Border Renderer ───
+// ─── Interwoven Guilloche SVG Border Renderer ───
 const GuillocheA4Border = ({ border, width = 200, height = 283, showContent = false }: {
   border: BorderConfig; width?: number; height?: number; showContent?: boolean;
 }) => {
   const { color, thickness, cornerStyle, innerMargin, doubleBorder, cornerDecoration, borderStyle, density, seed } = border;
-  const m = innerMargin * (width / 595);  // scale margin
-  const sw = thickness * 0.6;
-  const r = cornerStyle === 'rounded' ? 8 : cornerStyle === 'chamfered' ? 4 : 0;
+  const scale = width / 595;
+  const m = innerMargin * scale;
+  const sw = Math.max(0.3, thickness * 0.35 * scale);
+  const bandWidth = (8 + thickness * 3) * scale;
+  const numWaves = 3 + density; // number of interwoven sine waves
+  const step = Math.max(0.8, 2 / scale); // point resolution
 
-  const generateBorderPaths = useCallback((): string[] => {
-    const paths: string[] = [];
+  // Generate complex interwoven guilloche band along a rectangular path
+  const generateInterwovenPaths = useCallback(() => {
+    const paths: { d: string; color: string; opacity: number }[] = [];
     const w = width;
     const h = height;
     const inset = m;
+    const bw = bandWidth;
 
-    // Outer frame
-    if (cornerStyle === 'rounded') {
-      paths.push(`M ${inset + r} ${inset} L ${w - inset - r} ${inset} Q ${w - inset} ${inset} ${w - inset} ${inset + r} L ${w - inset} ${h - inset - r} Q ${w - inset} ${h - inset} ${w - inset - r} ${h - inset} L ${inset + r} ${h - inset} Q ${inset} ${h - inset} ${inset} ${h - inset - r} L ${inset} ${inset + r} Q ${inset} ${inset} ${inset + r} ${inset} Z`);
-    } else {
-      paths.push(`M ${inset} ${inset} L ${w - inset} ${inset} L ${w - inset} ${h - inset} L ${inset} ${h - inset} Z`);
+    // Helper: generate a point on the rectangular border path given parameter t (0..1)
+    // t maps to perimeter: top(0-w) -> right(w-w+h) -> bottom(w+h-2w+h) -> left(2w+h-2w+2h)
+    const perimeter = 2 * (w - 2 * inset) + 2 * (h - 2 * inset);
+    const topLen = w - 2 * inset;
+    const rightLen = h - 2 * inset;
+    const bottomLen = topLen;
+
+    const getPointOnRect = (t: number): { x: number; y: number; nx: number; ny: number } => {
+      const dist = ((t % 1) + 1) % 1 * perimeter;
+      if (dist <= topLen) {
+        // Top edge, left to right
+        return { x: inset + dist, y: inset, nx: 0, ny: -1 };
+      } else if (dist <= topLen + rightLen) {
+        // Right edge, top to bottom
+        const d = dist - topLen;
+        return { x: w - inset, y: inset + d, nx: 1, ny: 0 };
+      } else if (dist <= topLen + rightLen + bottomLen) {
+        // Bottom edge, right to left
+        const d = dist - topLen - rightLen;
+        return { x: w - inset - d, y: h - inset, nx: 0, ny: 1 };
+      } else {
+        // Left edge, bottom to top
+        const d = dist - topLen - rightLen - bottomLen;
+        return { x: inset, y: h - inset - d, nx: -1, ny: 0 };
+      }
+    };
+
+    // Generate multiple frequency-shifted sinusoidal waves that weave over/under each other
+    const totalPoints = Math.floor(perimeter / step);
+    const seedMul = (seed % 100) * 0.01 + 0.5;
+
+    for (let wave = 0; wave < numWaves; wave++) {
+      const freq1 = (0.03 + wave * 0.007 + seed * 0.0001) * (2 + density * 0.3);
+      const freq2 = freq1 * (1.3 + wave * 0.15 * seedMul);
+      const freq3 = freq1 * (0.7 + wave * 0.11);
+      const amp1 = bw * (0.35 + (wave % 3) * 0.12);
+      const amp2 = bw * (0.25 + ((wave + 1) % 3) * 0.1);
+      const phase = (wave * Math.PI * 2) / numWaves + seed * 0.1;
+
+      let pathD = '';
+      for (let i = 0; i <= totalPoints; i++) {
+        const t = i / totalPoints;
+        const dist = t * perimeter;
+        const pt = getPointOnRect(t);
+        // Combine multiple sin waves for complex pattern
+        const offset = Math.sin(dist * freq1 + phase) * amp1
+                     + Math.sin(dist * freq2 + phase * 1.7) * amp2 * 0.6
+                     + Math.sin(dist * freq3 + phase * 2.3) * amp1 * 0.3;
+        const x = pt.x + pt.nx * offset;
+        const y = pt.y + pt.ny * offset;
+        pathD += (i === 0 ? 'M' : 'L') + ` ${x.toFixed(2)} ${y.toFixed(2)}`;
+      }
+
+      // Main wave
+      paths.push({ d: pathD, color: color.primary, opacity: 0.7 + (wave % 2) * 0.15 });
+
+      // Secondary interleaved wave (phase shifted)
+      if (wave < numWaves - 1) {
+        let pathD2 = '';
+        const phase2 = phase + Math.PI / numWaves;
+        for (let i = 0; i <= totalPoints; i++) {
+          const t = i / totalPoints;
+          const dist = t * perimeter;
+          const pt = getPointOnRect(t);
+          const offset = Math.sin(dist * freq1 + phase2) * amp1 * 0.8
+                       + Math.cos(dist * freq2 + phase2 * 1.4) * amp2 * 0.5
+                       + Math.sin(dist * freq3 * 1.2 + phase2 * 0.8) * amp1 * 0.25;
+          const x = pt.x + pt.nx * offset;
+          const y = pt.y + pt.ny * offset;
+          pathD2 += (i === 0 ? 'M' : 'L') + ` ${x.toFixed(2)} ${y.toFixed(2)}`;
+        }
+        paths.push({ d: pathD2, color: color.secondary, opacity: 0.5 + (wave % 3) * 0.1 });
+      }
     }
 
-    // Inner frame (double border)
+    // Inner boundary guilloche ring (double border creates second interwoven band)
     if (doubleBorder) {
-      const gap = 4 + thickness;
-      const i2 = inset + gap;
-      paths.push(`M ${i2} ${i2} L ${w - i2} ${i2} L ${w - i2} ${h - i2} L ${i2} ${h - i2} Z`);
-    }
+      const innerInset = inset + bw + 2 * scale;
+      const innerPerimeter = 2 * (w - 2 * innerInset) + 2 * (h - 2 * innerInset);
+      const innerTopLen = w - 2 * innerInset;
+      const innerRightLen = h - 2 * innerInset;
+      const innerBottomLen = innerTopLen;
 
-    // Decorative border elements
-    const segLen = Math.max(8, 20 - density);
-    switch (borderStyle) {
-      case 'wave-edge': {
-        let d = `M ${inset} ${inset + (h - 2 * inset) / 2}`;
-        for (let x = inset; x < w - inset; x += segLen) {
-          const y1 = inset - 3 + Math.sin((x + seed) * 0.3) * 3;
-          d = `M ${x} ${inset + y1}`;
-          paths.push(`M ${x} ${inset} Q ${x + segLen / 2} ${inset - 4} ${x + segLen} ${inset}`);
-          paths.push(`M ${x} ${h - inset} Q ${x + segLen / 2} ${h - inset + 4} ${x + segLen} ${h - inset}`);
+      const getInnerPoint = (t: number) => {
+        const dist = ((t % 1) + 1) % 1 * innerPerimeter;
+        if (dist <= innerTopLen) return { x: innerInset + dist, y: innerInset, nx: 0, ny: -1 };
+        else if (dist <= innerTopLen + innerRightLen) return { x: w - innerInset, y: innerInset + dist - innerTopLen, nx: 1, ny: 0 };
+        else if (dist <= innerTopLen + innerRightLen + innerBottomLen) return { x: w - innerInset - (dist - innerTopLen - innerRightLen), y: h - innerInset, nx: 0, ny: 1 };
+        else return { x: innerInset, y: h - innerInset - (dist - innerTopLen - innerRightLen - innerBottomLen), nx: -1, ny: 0 };
+      };
+
+      const innerTotal = Math.floor(innerPerimeter / step);
+      for (let wave = 0; wave < Math.min(numWaves, 5); wave++) {
+        const freq = (0.04 + wave * 0.009) * (2 + density * 0.2);
+        const amp = bw * 0.3 * (0.6 + wave * 0.1);
+        const ph = wave * Math.PI / 3 + seed * 0.07;
+        let d = '';
+        for (let i = 0; i <= innerTotal; i++) {
+          const t = i / innerTotal;
+          const dist = t * innerPerimeter;
+          const pt = getInnerPoint(t);
+          const off = Math.sin(dist * freq + ph) * amp + Math.cos(dist * freq * 1.5 + ph * 2) * amp * 0.4;
+          d += (i === 0 ? 'M' : 'L') + ` ${(pt.x + pt.nx * off).toFixed(2)} ${(pt.y + pt.ny * off).toFixed(2)}`;
         }
-        for (let y = inset; y < h - inset; y += segLen) {
-          paths.push(`M ${inset} ${y} Q ${inset - 4} ${y + segLen / 2} ${inset} ${y + segLen}`);
-          paths.push(`M ${w - inset} ${y} Q ${w - inset + 4} ${y + segLen / 2} ${w - inset} ${y + segLen}`);
-        }
-        break;
-      }
-      case 'scallop': {
-        for (let x = inset; x < w - inset - segLen; x += segLen) {
-          paths.push(`M ${x} ${inset} A ${segLen / 2} ${segLen / 2} 0 0 1 ${x + segLen} ${inset}`);
-          paths.push(`M ${x} ${h - inset} A ${segLen / 2} ${segLen / 2} 0 0 0 ${x + segLen} ${h - inset}`);
-        }
-        for (let y = inset; y < h - inset - segLen; y += segLen) {
-          paths.push(`M ${inset} ${y} A ${segLen / 2} ${segLen / 2} 0 0 0 ${inset} ${y + segLen}`);
-          paths.push(`M ${w - inset} ${y} A ${segLen / 2} ${segLen / 2} 0 0 1 ${w - inset} ${y + segLen}`);
-        }
-        break;
-      }
-      case 'zigzag': {
-        const amp = 3;
-        for (let x = inset; x < w - inset; x += segLen) {
-          const toggle = ((x - inset) / segLen) % 2 === 0;
-          paths.push(`M ${x} ${inset + (toggle ? -amp : amp)} L ${x + segLen / 2} ${inset + (toggle ? amp : -amp)} L ${x + segLen} ${inset + (toggle ? -amp : amp)}`);
-          paths.push(`M ${x} ${h - inset + (toggle ? -amp : amp)} L ${x + segLen / 2} ${h - inset + (toggle ? amp : -amp)} L ${x + segLen} ${h - inset + (toggle ? -amp : amp)}`);
-        }
-        break;
-      }
-      case 'chain': {
-        for (let x = inset; x < w - inset - segLen; x += segLen) {
-          const cx = x + segLen / 2;
-          const rr = segLen / 3;
-          paths.push(`M ${cx - rr} ${inset} A ${rr} ${rr} 0 1 1 ${cx + rr} ${inset} A ${rr} ${rr} 0 1 1 ${cx - rr} ${inset}`);
-          paths.push(`M ${cx - rr} ${h - inset} A ${rr} ${rr} 0 1 1 ${cx + rr} ${h - inset} A ${rr} ${rr} 0 1 1 ${cx - rr} ${h - inset}`);
-        }
-        break;
-      }
-      case 'diamond-chain': {
-        const ds = segLen * 0.6;
-        for (let x = inset + ds; x < w - inset - ds; x += segLen) {
-          paths.push(`M ${x} ${inset - ds / 2} L ${x + ds / 2} ${inset} L ${x} ${inset + ds / 2} L ${x - ds / 2} ${inset} Z`);
-          paths.push(`M ${x} ${h - inset - ds / 2} L ${x + ds / 2} ${h - inset} L ${x} ${h - inset + ds / 2} L ${x - ds / 2} ${h - inset} Z`);
-        }
-        for (let y = inset + ds; y < h - inset - ds; y += segLen) {
-          paths.push(`M ${inset - ds / 2} ${y} L ${inset} ${y - ds / 2} L ${inset + ds / 2} ${y} L ${inset} ${y + ds / 2} Z`);
-          paths.push(`M ${w - inset - ds / 2} ${y} L ${w - inset} ${y - ds / 2} L ${w - inset + ds / 2} ${y} L ${w - inset} ${y + ds / 2} Z`);
-        }
-        break;
-      }
-      case 'guilloche-band': {
-        for (let x = inset; x < w - inset; x += 2) {
-          const y1 = inset + Math.sin((x + seed) * 0.2) * 4;
-          const y2 = inset + Math.cos((x + seed) * 0.15) * 4;
-          if (x === inset) {
-            paths.push(`M ${x} ${y1}`);
-            paths.push(`M ${x} ${y2}`);
-          }
-        }
-        // Top guilloche band
-        let topBand1 = `M ${inset} ${inset}`;
-        let topBand2 = `M ${inset} ${inset}`;
-        for (let x = inset; x <= w - inset; x += 1.5) {
-          topBand1 += ` L ${x} ${inset + Math.sin((x + seed) * 0.25) * 3}`;
-          topBand2 += ` L ${x} ${inset + Math.cos((x + seed) * 0.2) * 3}`;
-        }
-        paths.push(topBand1);
-        paths.push(topBand2);
-        // Bottom
-        let botBand1 = `M ${inset} ${h - inset}`;
-        let botBand2 = `M ${inset} ${h - inset}`;
-        for (let x = inset; x <= w - inset; x += 1.5) {
-          botBand1 += ` L ${x} ${h - inset + Math.sin((x + seed) * 0.25) * 3}`;
-          botBand2 += ` L ${x} ${h - inset + Math.cos((x + seed) * 0.2) * 3}`;
-        }
-        paths.push(botBand1);
-        paths.push(botBand2);
-        // Left & Right
-        let leftBand = `M ${inset} ${inset}`;
-        let rightBand = `M ${w - inset} ${inset}`;
-        for (let y = inset; y <= h - inset; y += 1.5) {
-          leftBand += ` L ${inset + Math.sin((y + seed) * 0.25) * 3} ${y}`;
-          rightBand += ` L ${w - inset + Math.sin((y + seed) * 0.25) * 3} ${y}`;
-        }
-        paths.push(leftBand);
-        paths.push(rightBand);
-        break;
-      }
-      case 'meander': {
-        const ms = segLen * 0.7;
-        for (let x = inset; x < w - inset - ms * 2; x += ms * 2) {
-          paths.push(`M ${x} ${inset} L ${x} ${inset - ms} L ${x + ms} ${inset - ms} L ${x + ms} ${inset + ms} L ${x + ms * 2} ${inset + ms} L ${x + ms * 2} ${inset}`);
-        }
-        break;
-      }
-      case 'dot-dash': {
-        for (let x = inset; x < w - inset; x += segLen) {
-          // dash
-          paths.push(`M ${x} ${inset} L ${x + segLen * 0.6} ${inset}`);
-          paths.push(`M ${x} ${h - inset} L ${x + segLen * 0.6} ${h - inset}`);
-          // dot
-          const dx = x + segLen * 0.8;
-          paths.push(`M ${dx - 1} ${inset} A 1 1 0 1 1 ${dx + 1} ${inset} A 1 1 0 1 1 ${dx - 1} ${inset}`);
-        }
-        break;
-      }
-      case 'star-chain': {
-        const sr = segLen * 0.3;
-        for (let x = inset + sr * 2; x < w - inset - sr * 2; x += segLen) {
-          // 5-point star
-          let starPath = '';
-          for (let p = 0; p < 5; p++) {
-            const angle = (p * 72 - 90) * Math.PI / 180;
-            const px = x + Math.cos(angle) * sr;
-            const py = inset + Math.sin(angle) * sr;
-            starPath += (p === 0 ? 'M' : 'L') + ` ${px} ${py} `;
-            const innerAngle = ((p * 72) + 36 - 90) * Math.PI / 180;
-            const ipx = x + Math.cos(innerAngle) * sr * 0.4;
-            const ipy = inset + Math.sin(innerAngle) * sr * 0.4;
-            starPath += `L ${ipx} ${ipy} `;
-          }
-          starPath += 'Z';
-          paths.push(starPath);
-        }
-        break;
-      }
-      case 'scroll': {
-        for (let x = inset; x < w - inset - segLen; x += segLen * 1.5) {
-          paths.push(`M ${x} ${inset} Q ${x + segLen / 3} ${inset - 5} ${x + segLen / 2} ${inset} Q ${x + segLen * 0.67} ${inset + 5} ${x + segLen} ${inset}`);
-          paths.push(`M ${x} ${h - inset} Q ${x + segLen / 3} ${h - inset - 5} ${x + segLen / 2} ${h - inset} Q ${x + segLen * 0.67} ${h - inset + 5} ${x + segLen} ${h - inset}`);
-        }
-        break;
-      }
-      case 'arabesque-repeat': {
-        for (let x = inset; x < w - inset; x += segLen) {
-          const cx1 = x + segLen * 0.25;
-          const cx2 = x + segLen * 0.75;
-          paths.push(`M ${x} ${inset} C ${cx1} ${inset - 6} ${cx2} ${inset + 6} ${x + segLen} ${inset}`);
-          paths.push(`M ${x} ${h - inset} C ${cx1} ${h - inset + 6} ${cx2} ${h - inset - 6} ${x + segLen} ${h - inset}`);
-        }
-        for (let y = inset; y < h - inset; y += segLen) {
-          const cy1 = y + segLen * 0.25;
-          const cy2 = y + segLen * 0.75;
-          paths.push(`M ${inset} ${y} C ${inset - 6} ${cy1} ${inset + 6} ${cy2} ${inset} ${y + segLen}`);
-          paths.push(`M ${w - inset} ${y} C ${w - inset + 6} ${cy1} ${w - inset - 6} ${cy2} ${w - inset} ${y + segLen}`);
-        }
-        break;
-      }
-      case 'rope': {
-        let rope1 = `M ${inset} ${inset}`;
-        let rope2 = `M ${inset} ${inset}`;
-        for (let x = inset; x <= w - inset; x += 1) {
-          rope1 += ` L ${x} ${inset + Math.sin(x * 0.5) * 2}`;
-          rope2 += ` L ${x} ${inset + Math.cos(x * 0.5) * 2}`;
-        }
-        paths.push(rope1);
-        paths.push(rope2);
-        break;
-      }
-      default: {
-        // triple-line, ornate-corner, bracket, leaf-vine, geometric-repeat, interlocking, cross-hatch-border
-        // Add second line offset
-        const gap2 = 3 + thickness;
-        paths.push(`M ${inset + gap2} ${inset + gap2} L ${w - inset - gap2} ${inset + gap2} L ${w - inset - gap2} ${h - inset - gap2} L ${inset + gap2} ${h - inset - gap2} Z`);
-        if (borderStyle === 'triple-line') {
-          const gap3 = gap2 * 2;
-          paths.push(`M ${inset + gap3} ${inset + gap3} L ${w - inset - gap3} ${inset + gap3} L ${w - inset - gap3} ${h - inset - gap3} L ${inset + gap3} ${h - inset - gap3} Z`);
-        }
-        break;
+        paths.push({ d, color: color.tertiary, opacity: 0.45 + wave * 0.08 });
       }
     }
 
-    // Corner decorations
+    // Corner rosettes: complex guilloche spirals at corners
     if (cornerDecoration) {
-      const cs = 12 + thickness * 2;
-      // Top-left
-      paths.push(`M ${inset} ${inset + cs} Q ${inset} ${inset} ${inset + cs} ${inset}`);
-      paths.push(`M ${inset + 2} ${inset + cs - 2} Q ${inset + 2} ${inset + 2} ${inset + cs - 2} ${inset + 2}`);
-      // Top-right
-      paths.push(`M ${w - inset - cs} ${inset} Q ${w - inset} ${inset} ${w - inset} ${inset + cs}`);
-      // Bottom-left
-      paths.push(`M ${inset} ${h - inset - cs} Q ${inset} ${h - inset} ${inset + cs} ${h - inset}`);
-      // Bottom-right
-      paths.push(`M ${w - inset - cs} ${h - inset} Q ${w - inset} ${h - inset} ${w - inset} ${h - inset - cs}`);
+      const corners = [
+        { cx: inset, cy: inset },
+        { cx: w - inset, cy: inset },
+        { cx: w - inset, cy: h - inset },
+        { cx: inset, cy: h - inset },
+      ];
+      const roseSize = bw * 1.2;
+      corners.forEach((corner, ci) => {
+        for (let ring = 0; ring < 3; ring++) {
+          let d = '';
+          const pts = 60;
+          for (let i = 0; i <= pts; i++) {
+            const angle = (i / pts) * Math.PI / 2 + ci * Math.PI / 2;
+            const r = roseSize * (0.3 + ring * 0.25) + Math.sin(angle * (4 + ring * 2) + seed) * roseSize * 0.15;
+            const x = corner.cx + Math.cos(angle) * r * (ci === 0 || ci === 3 ? 1 : -1) * (ci < 2 ? 1 : 1);
+            const y = corner.cy + Math.sin(angle) * r;
+            // Proper quadrant direction
+            const qx = corner.cx + Math.cos(angle) * r;
+            const qy = corner.cy + Math.sin(angle) * r;
+            d += (i === 0 ? 'M' : 'L') + ` ${qx.toFixed(2)} ${qy.toFixed(2)}`;
+          }
+          paths.push({ d, color: [color.primary, color.secondary, color.tertiary][ring], opacity: 0.6 });
+        }
+      });
+    }
+
+    // Micropattern fill between bands (cross-hatching with sine modulation)
+    const microStep = step * 4;
+    const microAmp = bw * 0.15;
+    for (let i = 0; i < Math.floor(perimeter / microStep); i++) {
+      const t1 = (i * microStep) / perimeter;
+      const t2 = ((i + 0.5) * microStep) / perimeter;
+      const p1 = getPointOnRect(t1);
+      const p2 = getPointOnRect(t2);
+      const off1 = bw * 0.5 * Math.sin(i * 1.7 + seed);
+      const off2 = bw * 0.5 * Math.cos(i * 1.3 + seed);
+      const x1 = p1.x + p1.nx * off1;
+      const y1 = p1.y + p1.ny * off1;
+      const x2 = p2.x + p2.nx * off2;
+      const y2 = p2.y + p2.ny * off2;
+      paths.push({
+        d: `M ${x1.toFixed(2)} ${y1.toFixed(2)} L ${x2.toFixed(2)} ${y2.toFixed(2)}`,
+        color: color.tertiary,
+        opacity: 0.15,
+      });
     }
 
     return paths;
-  }, [width, height, m, sw, r, cornerStyle, doubleBorder, borderStyle, density, seed, thickness, cornerDecoration]);
+  }, [width, height, m, bandWidth, numWaves, step, cornerStyle, doubleBorder, borderStyle, density, seed, thickness, cornerDecoration, color, scale]);
 
-  const paths = generateBorderPaths();
+  const paths = generateInterwovenPaths();
+  const uid = `gb-${border.id}-${width}`;
 
   return (
     <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} className="bg-white">
       <defs>
-        <linearGradient id={`bgrad-${border.id}`} x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={`bgrad-${uid}`} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor={color.primary} />
           <stop offset="50%" stopColor={color.secondary} />
           <stop offset="100%" stopColor={color.tertiary} />
         </linearGradient>
+        <linearGradient id={`bgrad2-${uid}`} x1="100%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" stopColor={color.secondary} />
+          <stop offset="100%" stopColor={color.tertiary} />
+        </linearGradient>
       </defs>
-      {paths.map((d, i) => (
+      {paths.map((p, i) => (
         <path
           key={i}
-          d={d}
+          d={p.d}
           fill="none"
-          stroke={`url(#bgrad-${border.id})`}
+          stroke={p.color}
           strokeWidth={sw}
           strokeLinecap="round"
           strokeLinejoin="round"
+          opacity={p.opacity}
         />
       ))}
       {showContent && (
         <g>
-          <text x={width / 2} y={height * 0.35} textAnchor="middle" fontSize={width * 0.04} fill={color.primary} fontWeight="bold">شهادة رسمية</text>
-          <text x={width / 2} y={height * 0.42} textAnchor="middle" fontSize={width * 0.025} fill="#999">نموذج معاينة البرواز</text>
+          <text x={width / 2} y={height * 0.35} textAnchor="middle" fontSize={width * 0.04} fill={color.primary} fontWeight="bold" fontFamily="Cairo, sans-serif">شهادة رسمية</text>
+          <text x={width / 2} y={height * 0.42} textAnchor="middle" fontSize={width * 0.025} fill="#999" fontFamily="Cairo, sans-serif">نموذج معاينة البرواز</text>
           <line x1={width * 0.25} y1={height * 0.75} x2={width * 0.45} y2={height * 0.75} stroke={color.primary} strokeWidth={0.5} strokeDasharray="3,2" />
-          <text x={width * 0.35} y={height * 0.78} textAnchor="middle" fontSize={width * 0.02} fill="#aaa">التوقيع</text>
+          <text x={width * 0.35} y={height * 0.78} textAnchor="middle" fontSize={width * 0.02} fill="#aaa" fontFamily="Cairo, sans-serif">التوقيع</text>
         </g>
       )}
     </svg>
