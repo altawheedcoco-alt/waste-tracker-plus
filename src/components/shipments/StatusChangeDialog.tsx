@@ -922,7 +922,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
               )}
               {geofenceCheck.checking && <p className="text-xs text-muted-foreground text-center"><Loader2 className="w-3 h-3 animate-spin inline ml-1" />تحقق...</p>}
               {geofenceCheck.isInside === true && geofenceCheck.distance != null && (
-                <p className="text-xs text-emerald-600 dark:text-emerald-400">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
+                <p className="text-xs text-primary">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
               )}
 
               {/* Photos */}
