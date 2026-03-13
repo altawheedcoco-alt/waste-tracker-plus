@@ -267,7 +267,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/blog-manager" element={<BlogManager />} />
     <Route path="/dashboard/testimonials-management" element={<TestimonialsManagement />} />
     <Route path="/dashboard/partners" element={<Partners />} />
-    <Route path="/dashboard/employees" element={<EmployeeManagement />} />
+    <Route path="/dashboard/employees" element={<Navigate to="/dashboard/org-structure" replace />} />
     <Route path="/dashboard/organization/:organizationId" element={<OrganizationView />} />
     <Route path="/dashboard/aggregate-report" element={<AggregateShipmentReport />} />
     <Route path="/dashboard/non-hazardous-register" element={<NonHazardousWasteRegister />} />
