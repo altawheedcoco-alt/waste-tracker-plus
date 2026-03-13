@@ -73,8 +73,11 @@ const Dashboard = () => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
-    // Admin now lands on the Command Center dashboard directly at /dashboard
-  }, [user, loading, navigate, roles]);
+    // Redirect regular employees/members to their personal workspace
+    if (!loading && user && isEmployee && !isAdmin) {
+      navigate('/dashboard/my-workspace', { replace: true });
+    }
+  }, [user, loading, navigate, roles, isEmployee, isAdmin]);
 
   if (loading) {
     return (
