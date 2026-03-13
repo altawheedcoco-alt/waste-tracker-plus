@@ -178,7 +178,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       </header>
 
       {/* ===== VERIFICATION + DATE BAR ===== */}
-      <div className="flex justify-between items-center text-[8pt] text-gray-500 mb-2 pb-1.5 border-b border-gray-100">
+      <div className="flex justify-between items-center text-[8pt] text-gray-500 mb-2 pb-1.5 border-b border-gray-100" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center gap-1">
           <Shield className="w-3 h-3" />
           <span>كود التحقق: <span className="font-mono font-bold text-gray-700">{vCode}</span></span>
@@ -188,7 +188,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 
       {/* ===== PARTNER IDENTITY STRIP ===== */}
       {partners.length > 0 && (
-        <div className="mb-4 p-2 border border-gray-200 rounded-lg bg-gray-50/50">
+        <div className="mb-4 p-2 border border-gray-200 rounded-lg bg-gray-50/50" style={{ position: 'relative', zIndex: 1 }}>
           <p className="text-[7pt] text-gray-500 mb-1.5 font-bold text-center">الجهات المشاركة</p>
           <div className="flex items-center justify-around gap-2 flex-wrap">
             {partners.map((partner, idx) => (
@@ -209,7 +209,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       )}
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className="print-content flex-1" style={{ pageBreakInside: 'auto' }}>{children}</main>
+      <main className="print-content flex-1" style={{ pageBreakInside: 'auto', position: 'relative', zIndex: 1 }}>{children}</main>
 
       {/* ===== SECURE FOOTER ===== */}
       {showFooter && (
