@@ -44,6 +44,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
       { email: 'demo-generator@irecycle.test', label: 'المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'generator2@demo.com', label: 'الصناعات البلاستيكية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'transporter@demo.com', label: 'النقل السريع', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
+      { email: 'demo-transporter@irecycle.test', label: 'النقل التجريبية', desc: 'ناقل', icon: Truck, color: 'from-primary to-emerald-600' },
       { email: 'demo-transport-office@irecycle.test', label: 'مكتب النقل', desc: 'مكتب نقل', icon: Building2, color: 'from-sky-500 to-blue-700' },
       { email: 'recycler@demo.com', label: 'التدوير الخضراء', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
       { email: 'demo-recycler@irecycle.test', label: 'التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
