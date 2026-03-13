@@ -46,6 +46,25 @@ const DocumentArchivePanel = () => {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
   const [loadingFileId, setLoadingFileId] = useState<string | null>(null);
+  const [hubDoc, setHubDoc] = useState<any | null>(null);
+
+  const openDocHub = (doc: any) => setHubDoc(doc);
+
+  const docToSource = (doc: any): DocumentSource => ({
+    url: doc.file_url,
+    fileName: doc.file_name,
+    fileType: doc.file_type,
+    fileSize: doc.file_size,
+    title: doc.title || doc.file_name,
+    description: doc.description,
+    documentType: doc.document_type,
+    documentCategory: doc.document_category,
+    referenceNumber: doc.reference_number,
+    documentDate: doc.document_date,
+    uploadedAt: doc.created_at,
+    tags: doc.tags,
+    entityDocumentId: doc.id,
+  });
 
   const { data: documents = [], isLoading } = useQuery({
     queryKey: ['document-center-archive', organization?.id],
