@@ -405,11 +405,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [isAdmin, isDriver, organization]);
 
-  // Action chains for current org type
-  const currentOrgChains = useMemo(() => {
-    const orgType = organization?.organization_type as string;
-    return orgType ? getOrgChains(orgType) : undefined;
-  }, [organization?.organization_type]);
+
 
   // Use quick action preferences hook
   const { applyOrder, preferences: quickActionPrefs } = useQuickActionPreferences();
