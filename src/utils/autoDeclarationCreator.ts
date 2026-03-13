@@ -161,19 +161,60 @@ function applyVisibilityMasking(
   };
 }
 
-// ─── Transporter Docs Visibility Helper ───
+// ─── Visibility Resolver (uses granular JSONB settings) ───
 
 /**
- * Checks if transporter documents (declarations/receipts) should be visible to generator.
+ * @deprecated Use resolveDocVisibilityForAllParties from documentVisibilityResolver instead.
  */
 export async function isTransporterDocsVisibleToGenerator(transporterOrgId: string): Promise<boolean> {
-  const { data } = await supabase
-    .from('organization_auto_actions')
-    .select('transporter_docs_visible_to_generator')
-    .eq('organization_id', transporterOrgId)
-    .maybeSingle();
-  return data?.transporter_docs_visible_to_generator ?? true;
+  const vis = await resolveDocVisibilityForAllParties(transporterOrgId, 'declarations');
+  return vis.generator !== false;
 }
+
+/**
+ * Resolves visibility for a document and builds the visible_to JSONB + notification targets.
+ */
+async function resolveAndNotify(
+  transporterOrgId: string | null | undefined,
+  declarationType: string,
+  shipment: { generator_id?: string | null; transporter_id?: string | null; recycler_id?: string | null; hide_recycler_from_generator?: boolean; hide_generator_from_recycler?: boolean },
+  creatorOrgId: string,
+): Promise<{ visibleTo: DocumentVisibleTo; notifyOrgIds: (string | null | undefined)[] }> {
+  const category = getDocCategory(declarationType);
+
+  if (!transporterOrgId) {
+    return {
+      visibleTo: { generator: true, recycler: true, disposal: true },
+      notifyOrgIds: [shipment.generator_id, shipment.transporter_id, shipment.recycler_id].filter(id => id && id !== creatorOrgId),
+    };
+  }
+
+  const visibleTo = await resolveDocVisibilityForAllParties(transporterOrgId, category);
+
+  const notifyOrgIds: (string | null | undefined)[] = [];
+
+  // Transporter always gets notified (unless they're the creator)
+  if (shipment.transporter_id && shipment.transporter_id !== creatorOrgId) {
+    notifyOrgIds.push(shipment.transporter_id);
+  }
+
+  // Generator — check visibility + bidirectional masking
+  if (shipment.generator_id && shipment.generator_id !== creatorOrgId && visibleTo.generator !== false) {
+    if (!shipment.hide_generator_from_recycler || creatorOrgId !== shipment.recycler_id) {
+      notifyOrgIds.push(shipment.generator_id);
+    }
+  }
+
+  // Recycler — check visibility + bidirectional masking
+  if (shipment.recycler_id && shipment.recycler_id !== creatorOrgId && visibleTo.recycler !== false) {
+    if (!shipment.hide_recycler_from_generator || creatorOrgId !== shipment.generator_id) {
+      notifyOrgIds.push(shipment.recycler_id);
+    }
+  }
+
+  return { visibleTo, notifyOrgIds };
+}
+
 
 // ─── Shared Helpers ───
 
