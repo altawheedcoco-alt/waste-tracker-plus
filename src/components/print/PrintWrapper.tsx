@@ -1,9 +1,11 @@
-import React, { forwardRef, ReactNode } from 'react';
+import React, { forwardRef, ReactNode, useMemo } from 'react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { Leaf, FileCheck, Building2, CheckCircle2, Shield, Hash } from 'lucide-react';
+import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
+import { generatePatternPaths, GUILLOCHE_COLOR_PALETTES, type SavedPatternRef } from '@/lib/guillochePatternUtils';
 
 // ===== Partner Identity (Logo + Barcode) =====
 export interface PrintPartner {
@@ -40,6 +42,46 @@ interface PrintWrapperProps {
   className?: string;
 }
 
+/** Renders guilloche pattern layers as SVG background */
+const GuillocheBackgroundLayer = ({ patterns }: { patterns: SavedPatternRef[] }) => {
+  if (!patterns.length) return null;
+  const tileSize = 200;
+  return (
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }}>
+      {patterns.map((ref, idx) => {
+        const palette = GUILLOCHE_COLOR_PALETTES.find(c => c.id === ref.colorPaletteId);
+        if (!palette) return null;
+        const paths = generatePatternPaths(ref.patternType, tileSize, ref.scale, ref.seed);
+        const opacity = 0.08 - idx * 0.015;
+        const gradId = `pw-grad-${ref.id}-${idx}`;
+        const patId = `pw-pat-${ref.id}-${idx}`;
+        return (
+          <div key={ref.id} style={{ position: 'absolute', inset: 0, opacity }}>
+            <svg width="100%" height="100%" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
+              <defs>
+                <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor={palette.primary} />
+                  <stop offset="100%" stopColor={palette.secondary} />
+                </linearGradient>
+                <pattern id={patId} patternUnits="userSpaceOnUse" width={tileSize} height={tileSize}>
+                  <g transform={`rotate(${ref.rotation} ${tileSize / 2} ${tileSize / 2})`}>
+                    <g opacity={ref.opacity * 10}>
+                      {paths.map((d, i) => (
+                        <path key={i} d={d} fill="none" stroke={`url(#${gradId})`} strokeWidth={ref.strokeWidth} strokeLinecap="round" strokeLinejoin="round" />
+                      ))}
+                    </g>
+                  </g>
+                </pattern>
+              </defs>
+              <rect width="100%" height="100%" fill={`url(#${patId})`} />
+            </svg>
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   children,
   title,
@@ -69,10 +111,13 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   const barcodeContent = barcodeValue || documentNumber || `DOC${Date.now()}`;
   const vCode = verificationCode || `VRF-${Date.now().toString(36).toUpperCase()}`;
 
+  // Guilloche background from user preferences
+  const { savedPatterns, bgColor } = useGuillocheBackground();
+
   return (
     <div
       ref={ref}
-      className={`print-container bg-white text-black ${isOfficial ? 'print-official' : ''} ${className}`}
+      className={`print-container text-black ${isOfficial ? 'print-official' : ''} ${className}`}
       dir="rtl"
       style={{ 
         width: '210mm', 
@@ -85,15 +130,19 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         flexDirection: 'column',
         position: 'relative',
         overflow: 'hidden',
+        backgroundColor: bgColor || '#ffffff',
       }}
     >
+      {/* Guilloche Pattern Background */}
+      <GuillocheBackgroundLayer patterns={savedPatterns} />
+
       {/* Watermark */}
       {showWatermark && (
         <div className="print-watermark">{watermarkText}</div>
       )}
 
       {/* ===== HEADER: Title ===== */}
-      <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}` }}>
+      <header className="print-header flex items-start justify-between mb-3 pb-3" style={{ borderBottom: `2px solid ${accentColor}`, position: 'relative', zIndex: 1 }}>
 
         {/* Title Section */}
         <div className="text-center flex-1 px-3">
@@ -129,7 +178,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       </header>
 
       {/* ===== VERIFICATION + DATE BAR ===== */}
-      <div className="flex justify-between items-center text-[8pt] text-gray-500 mb-2 pb-1.5 border-b border-gray-100">
+      <div className="flex justify-between items-center text-[8pt] text-gray-500 mb-2 pb-1.5 border-b border-gray-100" style={{ position: 'relative', zIndex: 1 }}>
         <div className="flex items-center gap-1">
           <Shield className="w-3 h-3" />
           <span>كود التحقق: <span className="font-mono font-bold text-gray-700">{vCode}</span></span>
@@ -139,7 +188,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 
       {/* ===== PARTNER IDENTITY STRIP ===== */}
       {partners.length > 0 && (
-        <div className="mb-4 p-2 border border-gray-200 rounded-lg bg-gray-50/50">
+        <div className="mb-4 p-2 border border-gray-200 rounded-lg bg-gray-50/50" style={{ position: 'relative', zIndex: 1 }}>
           <p className="text-[7pt] text-gray-500 mb-1.5 font-bold text-center">الجهات المشاركة</p>
           <div className="flex items-center justify-around gap-2 flex-wrap">
             {partners.map((partner, idx) => (
@@ -160,7 +209,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
       )}
 
       {/* ===== MAIN CONTENT ===== */}
-      <main className="print-content flex-1" style={{ pageBreakInside: 'auto' }}>{children}</main>
+      <main className="print-content flex-1" style={{ pageBreakInside: 'auto', position: 'relative', zIndex: 1 }}>{children}</main>
 
       {/* ===== SECURE FOOTER ===== */}
       {showFooter && (
