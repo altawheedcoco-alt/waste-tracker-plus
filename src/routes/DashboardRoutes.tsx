@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { Route } from "react-router-dom";
+import { Route, Navigate } from "react-router-dom";
 import DashboardRouteGuard from "@/components/guards/DashboardRouteGuard";
 
 const Dashboard = lazy(() => import("@/pages/Dashboard"));
