@@ -7927,6 +7927,7 @@ export type Database = {
           unit: string | null
           user_agent: string | null
           verification_code: string | null
+          visible_to_generator: boolean | null
           waste_type: string | null
         }
         Insert: {
@@ -7957,6 +7958,7 @@ export type Database = {
           unit?: string | null
           user_agent?: string | null
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_type?: string | null
         }
         Update: {
@@ -7987,6 +7989,7 @@ export type Database = {
           unit?: string | null
           user_agent?: string | null
           verification_code?: string | null
+          visible_to_generator?: boolean | null
           waste_type?: string | null
         }
         Relationships: [
