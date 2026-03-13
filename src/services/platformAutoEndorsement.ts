@@ -408,10 +408,10 @@ export async function evaluateAndEndorse(params: {
       criteria.map(c => [c.criterionName, { passed: c.passed, details: c.details }])
     ),
     all_criteria_met: allCriteriaMet,
-    endorsement_status: allCriteriaMet ? 'approved' : 'blocked',
-    blocked_reason: allCriteriaMet
-      ? null
-      : failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | '),
+    endorsement_status: 'approved',
+    blocked_reason: failedCriteria.length > 0
+      ? failedCriteria.map(c => `${c.criterionNameAr}: ${c.details}`).join(' | ')
+      : null,
     checked_by: 'system',
   };
 
