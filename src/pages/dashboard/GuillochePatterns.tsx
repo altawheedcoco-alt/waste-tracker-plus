@@ -9,6 +9,7 @@ import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef } from '@/lib/guillochePatternUtils';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
+const GuillocheA4CombinedPreview = lazy(() => import('@/components/guilloche/GuillocheA4CombinedPreview'));
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -501,7 +502,7 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="patterns" dir="rtl">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="patterns" className="gap-1 text-xs">
               <Fingerprint className="h-3.5 w-3.5" />
               أنماط الخلفية
@@ -513,6 +514,10 @@ export default function GuillochePatterns() {
             <TabsTrigger value="borders" className="gap-1 text-xs">
               <FileText className="h-3.5 w-3.5" />
               براويز الصفحة
+            </TabsTrigger>
+            <TabsTrigger value="combined" className="gap-1 text-xs">
+              <Eye className="h-3.5 w-3.5" />
+              معاينة مجمعة
             </TabsTrigger>
           </TabsList>
 
@@ -1202,6 +1207,12 @@ export default function GuillochePatterns() {
           <TabsContent value="borders" className="mt-4">
             <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
               <GuillocheA4BorderDesigner />
+            </Suspense>
+          </TabsContent>
+
+          <TabsContent value="combined" className="mt-4">
+            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <GuillocheA4CombinedPreview />
             </Suspense>
           </TabsContent>
         </Tabs>
