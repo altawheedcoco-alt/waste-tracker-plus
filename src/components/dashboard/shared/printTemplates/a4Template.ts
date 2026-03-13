@@ -1,5 +1,5 @@
 import { format } from 'date-fns';
-
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 interface A4Data {
   orgName: string;
   dateStr: string;
