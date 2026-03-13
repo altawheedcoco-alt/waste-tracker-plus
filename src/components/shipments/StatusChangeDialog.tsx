@@ -588,7 +588,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         </div>
       )}
       {geofenceCheck.isInside === true && geofenceCheck.distance != null && (
-        <p className="text-xs text-emerald-600 dark:text-emerald-400 text-center">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
+        <p className="text-xs text-primary text-center">✅ داخل النطاق ({geofenceCheck.distance}م)</p>
       )}
 
       {/* Weighbridge Photos */}
