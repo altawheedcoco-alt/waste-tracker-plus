@@ -78,8 +78,8 @@ const GeneratorCompletionCard = ({ shipment }: GeneratorCompletionCardProps) => 
           </div>
           {completionDate && (
             <div className="flex items-center gap-2 p-3 rounded-lg bg-background/80 border" dir="rtl">
-              <div className="p-2 rounded-full bg-emerald-100 dark:bg-emerald-900">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <div className="p-2 rounded-full bg-primary/10">
+                <CheckCircle2 className="w-4 h-4 text-primary" />
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">تاريخ الاكتمال</p>
