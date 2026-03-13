@@ -337,6 +337,11 @@ export default function OrgMembersPanel() {
                             <Shield className="w-4 h-4 ml-2" /> الصلاحيات
                           </DropdownMenuItem>
                         )}
+                        {member.user_id && (
+                          <DropdownMenuItem onClick={() => setCredentialsMember(member)}>
+                            <Key className="w-4 h-4 ml-2" /> تعديل بيانات الدخول
+                          </DropdownMenuItem>
+                        )}
                         <DropdownMenuItem onClick={() => setConfirmAction({
                           type: member.status === 'suspended' ? 'activate' : 'suspend',
                           member,
