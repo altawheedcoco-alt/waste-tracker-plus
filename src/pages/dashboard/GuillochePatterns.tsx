@@ -502,7 +502,7 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="patterns" dir="rtl">
-          <TabsList className="grid w-full max-w-lg grid-cols-3">
+          <TabsList className="grid w-full max-w-2xl grid-cols-4">
             <TabsTrigger value="patterns" className="gap-1 text-xs">
               <Fingerprint className="h-3.5 w-3.5" />
               أنماط الخلفية
@@ -514,6 +514,10 @@ export default function GuillochePatterns() {
             <TabsTrigger value="borders" className="gap-1 text-xs">
               <FileText className="h-3.5 w-3.5" />
               براويز الصفحة
+            </TabsTrigger>
+            <TabsTrigger value="combined" className="gap-1 text-xs">
+              <Eye className="h-3.5 w-3.5" />
+              معاينة مجمعة
             </TabsTrigger>
           </TabsList>
 
