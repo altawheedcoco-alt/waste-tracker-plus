@@ -20,10 +20,10 @@ const MyTasksTab = () => {
         .from('shipments')
         .select('id, shipment_number, status, created_at, shipment_type')
         .eq('organization_id', organization.id)
-        .in('status', ['confirmed', 'in_transit'])
+        .in('status', ['confirmed', 'in_transit'] as any[])
         .order('created_at', { ascending: false })
         .limit(20);
-      return data || [];
+      return (data as any[]) || [];
     },
     enabled: !!user?.id && !!organization?.id,
     staleTime: 1000 * 60 * 2,
