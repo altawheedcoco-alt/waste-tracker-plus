@@ -464,10 +464,25 @@ export default function GuillochePatterns() {
               قوالب الرسم الغيوشي للمستندات
             </h1>
             <p className="text-muted-foreground mt-1">
-              اختر نمطاً من 1000 قالب مميز لخلفية المستندات الرسمية
+              اختر نمطاً من 1000 قالب خلفية أو 1000 برواز صفحة A4
             </p>
           </div>
+        </div>
 
+        <Tabs defaultValue="patterns" dir="rtl">
+          <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="patterns" className="gap-2">
+              <Fingerprint className="h-4 w-4" />
+              أنماط الخلفية (1000)
+            </TabsTrigger>
+            <TabsTrigger value="borders" className="gap-2">
+              <FileText className="h-4 w-4" />
+              براويز الصفحة (1000)
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="patterns" className="space-y-6 mt-4">
+          {/* Patterns mode controls */}
           <div className="flex flex-wrap items-center gap-3">
             {/* Layer Mode Toggle */}
             <Button
