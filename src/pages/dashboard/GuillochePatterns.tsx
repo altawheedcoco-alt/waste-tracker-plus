@@ -50,6 +50,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import GuillocheSecurityOverlay, { generateSecurityOverlayHTML } from '@/components/guilloche/GuillocheSecurityOverlay';
 
 // Pattern categories
 const PATTERN_CATEGORIES = [
@@ -979,15 +980,11 @@ export default function GuillochePatterns() {
                   </div>
                 ))}
 
-                {/* Organization Name Watermark - repeated diagonal */}
-                <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
-                  <defs>
-                    <pattern id="org-watermark-pattern" patternUnits="userSpaceOnUse" width="220" height="120" patternTransform="rotate(-35)">
-                      <text x="10" y="60" fontSize="14" fontWeight="300" fill={activePatterns[0]?.colorPalette.primary || '#059669'} opacity="0.06" fontFamily="Cairo, sans-serif">{orgName}</text>
-                    </pattern>
-                  </defs>
-                  <rect width="100%" height="100%" fill="url(#org-watermark-pattern)" />
-                </svg>
+                {/* Security Overlay — SHA-256, QR, Barcode, Microprint, VRF */}
+                <GuillocheSecurityOverlay 
+                  orgName={orgName} 
+                  color={activePatterns[0]?.colorPalette.primary || '#059669'} 
+                />
 
                 {/* Document Content */}
                 <div className="absolute inset-0 p-8 flex flex-col">
@@ -1069,6 +1066,7 @@ export default function GuillochePatterns() {
                     if (!printContent) return;
                     const printWindow = window.open('', '_blank');
                     if (!printWindow) return;
+                    const secColor = activePatterns[0]?.colorPalette.primary || '#059669';
                     printWindow.document.write(`
                       <html dir="rtl">
                       <head>
@@ -1079,20 +1077,12 @@ export default function GuillochePatterns() {
                           @page { size: A4; margin: 0; }
                           body { display: flex; justify-content: center; align-items: flex-start; font-family: 'Cairo', sans-serif; }
                           .print-container { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
-                          .org-watermark { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
                         </style>
                       </head>
                       <body>
                         <div class="print-container">
                           ${printContent.innerHTML}
-                          <svg class="org-watermark" viewBox="0 0 595 842" preserveAspectRatio="xMidYMid slice">
-                            <defs>
-                              <pattern id="print-org-wm" patternUnits="userSpaceOnUse" width="200" height="100" patternTransform="rotate(-35)">
-                                <text x="5" y="55" font-size="12" font-weight="300" fill="${activePatterns[0]?.colorPalette.primary || '#059669'}" opacity="0.05" font-family="Cairo, sans-serif">${orgName}</text>
-                              </pattern>
-                            </defs>
-                            <rect width="100%" height="100%" fill="url(#print-org-wm)" />
-                          </svg>
+                          ${generateSecurityOverlayHTML(orgName, secColor)}
                         </div>
                       </body>
                       </html>
