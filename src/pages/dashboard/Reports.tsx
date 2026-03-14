@@ -291,20 +291,29 @@ const Reports = () => {
         {/* Back Button */}
         <BackButton />
         {/* Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5 sm:p-6">
+        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-l from-primary/5 via-background to-primary/10 p-4 sm:p-6">
           <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-primary/5 blur-3xl" />
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="text-right w-full sm:w-auto">
+              <div className="flex items-center gap-2 justify-end mb-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <ChartBar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                </div>
+                <h1 className="text-lg sm:text-3xl font-bold truncate">{t('reports.title')}</h1>
+              </div>
+              <p className="text-muted-foreground text-xs sm:text-sm">{t('reports.subtitle')}</p>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto scrollbar-hide">
               <RegulatoryExport />
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="gap-2 rounded-xl shadow-sm">
-                    <FileText className="w-4 h-4" />
+                  <Button size="sm" className="gap-1.5 rounded-xl shadow-sm whitespace-nowrap text-xs sm:text-sm">
+                    <FileText className="w-3.5 h-3.5" />
                     {t('reports.officialReport')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                   </DialogHeader>
@@ -316,15 +325,6 @@ const Reports = () => {
                   />
                 </DialogContent>
               </Dialog>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center gap-3 justify-end mb-1">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <ChartBar className="w-5 h-5 text-primary" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold">{t('reports.title')}</h1>
-              </div>
-              <p className="text-muted-foreground text-sm">{t('reports.subtitle')}</p>
             </div>
           </div>
         </div>
