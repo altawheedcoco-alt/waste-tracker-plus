@@ -24,6 +24,7 @@ import { motion } from 'framer-motion';
 import type { DocumentSource } from './UnifiedDocumentViewer';
 import { useEffect } from 'react';
 import { getStorageUrl, refreshStorageUrl } from '@/utils/storageUrl';
+import { safeWindowOpen } from '@/lib/safeWindow';
 
 // Lazy imports for action dialogs  
 import ShareDocumentButton from './ShareDocumentButton';
@@ -164,6 +165,7 @@ const DocumentActionHub = ({
     a.href = resolvedUrl;
     a.download = source.fileName || 'document';
     a.target = '_blank';
+    a.rel = 'noopener noreferrer';
     a.click();
     toast.success('جاري التحميل...');
   }, [resolvedUrl, source.fileName]);
@@ -182,7 +184,7 @@ const DocumentActionHub = ({
 
   const handleOpenExternal = useCallback(() => {
     if (!resolvedUrl) return;
-    window.open(resolvedUrl, '_blank');
+    safeWindowOpen(resolvedUrl);
   }, [resolvedUrl]);
 
   const isActionHidden = (action: string) => hideActions.includes(action as any);
