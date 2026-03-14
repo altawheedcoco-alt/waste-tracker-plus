@@ -22,9 +22,10 @@ import PositionPermissionsEditor from '@/components/org-structure/PositionPermis
 import MemberProfileSheet from '@/components/org-structure/MemberProfileSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import OrgPermissionsPanel from '@/components/org-structure/OrgPermissionsPanel';
 import {
   Network, Plus, Share2, Bot, Users, Truck,
-  BarChart3, Building2, ArrowRight,
+  BarChart3, Building2, ArrowRight, Shield,
 } from 'lucide-react';
 import type { OrgMember } from '@/hooks/useOrgMembers';
 
@@ -154,9 +155,10 @@ const OrgStructure = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="tree" dir="rtl">
-        <TabsList className={`grid w-full ${isTransporter ? 'grid-cols-5' : 'grid-cols-4'} h-10`}>
+        <TabsList className={`grid w-full ${isTransporter ? 'grid-cols-6' : 'grid-cols-5'} h-10`}>
           <TabsTrigger value="tree" className="text-xs gap-1"><Network className="w-3.5 h-3.5" /> الشجرة</TabsTrigger>
           <TabsTrigger value="members" className="text-xs gap-1"><Users className="w-3.5 h-3.5" /> الأعضاء</TabsTrigger>
+          <TabsTrigger value="permissions" className="text-xs gap-1"><Shield className="w-3.5 h-3.5" /> الصلاحيات</TabsTrigger>
           <TabsTrigger value="stats" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" /> إحصائيات</TabsTrigger>
           {isTransporter && (
             <TabsTrigger value="drivers" className="text-xs gap-1"><Truck className="w-3.5 h-3.5" /> السائقين</TabsTrigger>
@@ -194,6 +196,11 @@ const OrgStructure = () => {
         {/* Members */}
         <TabsContent value="members" className="mt-4">
           <OrgMembersPanel />
+        </TabsContent>
+
+        {/* Permissions */}
+        <TabsContent value="permissions" className="mt-4">
+          <OrgPermissionsPanel />
         </TabsContent>
 
         {/* Stats */}
