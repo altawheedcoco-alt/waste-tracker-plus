@@ -257,18 +257,18 @@ const EmployeeManagement = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Back Button */}
         <BackButton />
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Users className="h-7 w-7 text-primary" />
-              {t('employees.title')}
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+              <Users className="h-5 w-5 sm:h-7 sm:w-7 text-primary shrink-0" />
+              <span className="truncate">{t('employees.title')}</span>
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground text-xs sm:text-base mt-0.5 truncate">
               {t('employees.subtitle')}
             </p>
           </div>
@@ -276,12 +276,12 @@ const EmployeeManagement = () => {
           {canManageEmployees && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2 w-full sm:w-auto self-stretch sm:self-start">
                   <UserPlus className="h-4 w-4" />
                   {t('employees.addEmployee')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t('employees.addNewEmployee')}</DialogTitle>
                   <DialogDescription>
@@ -385,7 +385,7 @@ const EmployeeManagement = () => {
                       <Shield className="h-4 w-4" />
                       {t('employees.permissions')}
                     </Label>
-                    <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/50">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 p-3 sm:p-4 border rounded-lg bg-muted/50">
                       {PERMISSIONS.map((perm) => (
                         <div key={perm.value} className="flex items-center gap-2">
                           <Checkbox
@@ -393,7 +393,7 @@ const EmployeeManagement = () => {
                             checked={newEmployee.permissions.includes(perm.value)}
                             onCheckedChange={() => togglePermission(perm.value)}
                           />
-                          <Label htmlFor={perm.value} className="cursor-pointer text-sm">
+                          <Label htmlFor={perm.value} className="cursor-pointer text-xs sm:text-sm leading-tight">
                             {perm.label}
                           </Label>
                         </div>
@@ -416,60 +416,60 @@ const EmployeeManagement = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Users className="h-5 w-5 text-primary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.totalEmployees')}</p>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.totalEmployees')}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Check className="h-5 w-5 text-green-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10 shrink-0">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.filter(e => e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.active')}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-red-500/10">
-                  <X className="h-5 w-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.filter(e => !e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.inactive')}</p>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.filter(e => e.is_active).length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.active')}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Briefcase className="h-5 w-5 text-blue-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-red-500/10 shrink-0">
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.filter(e => !e.is_active).length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.inactive')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10 shrink-0">
+                  <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
                     {new Set(employees.map(e => e.department).filter(Boolean)).size}
                   </p>
-                  <p className="text-sm text-muted-foreground">{t('employees.departments')}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.departments')}</p>
                 </div>
               </div>
             </CardContent>
@@ -515,11 +515,11 @@ const EmployeeManagement = () => {
                   "transition-all hover:shadow-md",
                   !employee.is_active && "opacity-60"
                 )}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start gap-2.5 sm:gap-4">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 shrink-0">
                         <AvatarImage src={employee.avatar_url || undefined} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
                           {employee.full_name.slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>

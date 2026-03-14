@@ -151,24 +151,24 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
   };
 
    return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-4 sm:space-y-6 pb-10">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5">
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-4">
+      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 sm:justify-between relative z-10">
+          <div className="flex items-center gap-2 sm:gap-4">
             <BackButton />
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Settings2 className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold">{t('settings.title')}</h1>
-                <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-2xl font-bold truncate">{t('settings.title')}</h1>
+                <p className="text-muted-foreground text-[11px] sm:text-sm truncate">{t('settings.subtitle')}</p>
               </div>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-2">
-            <RotateCcw className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-1.5 self-end sm:self-auto text-xs sm:text-sm shrink-0">
+            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {t('settings.resetDefault')}
           </Button>
         </div>
@@ -265,7 +265,7 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                 {themePresets.map((preset, index) => (
                   <motion.button
                     key={preset.name}
@@ -276,7 +276,7 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
                     whileTap={{ scale: 0.98 }}
                     onClick={() => applyPreset(preset)}
                     className={cn(
-                      'relative p-6 rounded-xl border-2 transition-all text-right overflow-hidden group',
+                      'relative p-3 sm:p-6 rounded-xl border-2 transition-all text-right overflow-hidden group touch-manipulation',
                       settings.themeColor === preset.color && 
                       settings.fontFamily === preset.font && 
                       settings.isDarkMode === preset.dark
@@ -291,29 +291,29 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
                     )} />
                     
                     <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-3xl">{preset.icon}</span>
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <span className="text-2xl sm:text-3xl">{preset.icon}</span>
                         {settings.themeColor === preset.color && 
                          settings.fontFamily === preset.font && 
                          settings.isDarkMode === preset.dark && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                            className="w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center"
                           >
-                            <Check className="h-4 w-4 text-primary-foreground" />
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
                           </motion.div>
                         )}
                       </div>
-                      <h3 className="font-bold text-lg mb-1">{preset.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <h3 className="font-bold text-sm sm:text-lg mb-0.5 sm:mb-1 truncate">{preset.name}</h3>
+                      <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm text-muted-foreground flex-wrap">
                         <div className={cn(
-                          'w-4 h-4 rounded-full',
+                          'w-3 h-3 sm:w-4 sm:h-4 rounded-full shrink-0',
                           colorOptions.find(c => c.value === preset.color)?.color
                         )} />
-                        <span>{fontOptions.find(f => f.value === preset.font)?.label}</span>
-                        <span>•</span>
-                        <span>{preset.dark ? 'ليلي' : 'نهاري'}</span>
+                        <span className="truncate">{fontOptions.find(f => f.value === preset.font)?.label}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="hidden sm:inline">{preset.dark ? 'ليلي' : 'نهاري'}</span>
                       </div>
                     </div>
                   </motion.button>
