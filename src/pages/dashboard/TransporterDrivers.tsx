@@ -262,17 +262,17 @@ const TransporterDrivers = () => {
 
   return (
     <DashboardLayout>
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BackButton />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">إدارة السائقين</h1>
-          <p className="text-muted-foreground">عرض وإدارة سائقي الشركة</p>
+          <h1 className="text-lg sm:text-2xl font-bold">إدارة السائقين</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">عرض وإدارة سائقي الشركة</p>
         </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="eco">
+            <Button variant="eco" size="sm" className="w-full sm:w-auto">
               <Plus className="ml-2 h-4 w-4" />
               إضافة سائق
             </Button>
