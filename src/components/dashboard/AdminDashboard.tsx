@@ -31,7 +31,7 @@ import DashboardPrintReports from './shared/DashboardPrintReports';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import DocumentVerificationWidget from './DocumentVerificationWidget';
+
 
 import {
   FileText, Truck, Building2, Users, Plus, Bot, Zap,
