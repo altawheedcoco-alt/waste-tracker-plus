@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import {
   User, ListTodo, ShieldCheck, Trophy, Bell, Loader2,
   Building2, Clock, Package, Zap, CalendarDays, LayoutDashboard, Settings, LogOut,
+  Gauge, Cog,
 } from 'lucide-react';
 
 const MyProfileTab = lazy(() => import('@/components/workspace/MyProfileTab'));
@@ -22,6 +23,8 @@ const MyTasksTab = lazy(() => import('@/components/workspace/MyTasksTab'));
 const MyPermissionsTab = lazy(() => import('@/components/workspace/MyPermissionsTab'));
 const MyAchievementsTab = lazy(() => import('@/components/workspace/MyAchievementsTab'));
 const MyNotificationsTab = lazy(() => import('@/components/workspace/MyNotificationsTab'));
+const MyDashboardTab = lazy(() => import('@/components/workspace/MyDashboardTab'));
+const MySettingsTab = lazy(() => import('@/components/workspace/MySettingsTab'));
 
 const TabFallback = () => (
   <div className="flex items-center justify-center py-16">
