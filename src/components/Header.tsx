@@ -312,40 +312,40 @@ const Header = memo(() => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-background border-t border-border animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
-          <div className="container mx-auto px-3 py-3">
-            <nav className="flex flex-col gap-0.5">
+        <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
+          <div className="container mx-auto px-4 py-4">
+            <nav className="flex flex-col gap-1">
               {dropdowns.map((dropdown) => (
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
-              <div className="flex flex-col gap-2 pt-3 border-t border-border/40 mt-2">
+              <div className="flex flex-col gap-2.5 pt-4 border-t border-border/40 mt-3">
                 <button
                   onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl border border-border/50 bg-background text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
                 >
                   <Globe className="w-4 h-4" />
                   {language === 'ar' ? 'English' : 'عربي'}
                 </button>
                 <GuideButton />
                 {user ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
-                      <LayoutDashboard className="w-3.5 h-3.5" />
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
+                      <LayoutDashboard className="w-4 h-4" />
                       {t('nav.dashboard') || 'لوحة التحكم'}
                     </Button>
-                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
-                      <LogOut className="w-3.5 h-3.5" />
+                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                      <LogOut className="w-4 h-4" />
                       {t('nav.logout') || 'خروج'}
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
-                      <UserPlus className="w-3.5 h-3.5" />
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm" onClick={handleEmployeeLogin}>
+                      <UserPlus className="w-4 h-4" />
                       {t('nav.employee')}
                     </Button>
-                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
-                      <LogIn className="w-3.5 h-3.5" />
+                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={handleLogin}>
+                      <LogIn className="w-4 h-4" />
                       {t('nav.login')}
                     </Button>
                   </div>
@@ -367,26 +367,26 @@ const MobileDropdown = ({ dropdown, onNavigate }: { dropdown: NavDropdown; onNav
     <div className="rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center justify-between w-full px-3 py-3 text-sm font-semibold rounded-xl transition-all touch-manipulation ${
-          open ? 'text-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+        className={`flex items-center justify-between w-full px-3.5 py-3.5 text-sm font-semibold rounded-xl transition-all touch-manipulation ${
+          open ? 'text-primary bg-primary/8' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
         }`}
       >
-        <div className="flex items-center gap-2">
-          <dropdown.icon className={`w-4 h-4 ${open ? 'text-primary' : 'text-muted-foreground/60'}`} />
+        <div className="flex items-center gap-2.5">
+          <dropdown.icon className={`w-4.5 h-4.5 ${open ? 'text-primary' : 'text-muted-foreground/60'}`} />
           {dropdown.label}
         </div>
         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="ps-3 pe-1 pb-2 flex flex-col gap-0.5 animate-fade-in">
+        <div className="ps-3 pe-1 pb-2.5 flex flex-col gap-0.5 animate-fade-in">
           {dropdown.items.map((item) => (
             <button
               key={item.href + item.label}
               onClick={() => onNavigate(item.href)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-colors text-start touch-manipulation group"
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-accent/60 active:bg-accent/80 transition-colors text-start touch-manipulation group"
             >
-              <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-                <item.icon className="w-3.5 h-3.5 text-primary" />
+              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                <item.icon className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -397,7 +397,7 @@ const MobileDropdown = ({ dropdown, onNavigate }: { dropdown: NavDropdown; onNav
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground line-clamp-1">{item.desc}</p>
+                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{item.desc}</p>
               </div>
             </button>
           ))}
