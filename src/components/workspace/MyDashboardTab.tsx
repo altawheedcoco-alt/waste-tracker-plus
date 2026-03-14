@@ -77,46 +77,42 @@ const MyDashboardTab = () => {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const weekStart = new Date(now.getTime() - 7 * 86400000).toISOString();
 
+      const wrap = <T,>(p: PromiseLike<T>): Promise<T> => Promise.resolve(p);
+
       const promises: Promise<any>[] = [];
 
-      // Shipments
       if (hasAny(['view_shipments', 'create_shipments'])) {
         promises.push(
-          (supabase.from('shipments') as any).select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).in('status', ['confirmed', 'in_transit', 'pending']).then((r: any) => { result.shipments = r.count || 0; }),
-          (supabase.from('shipments') as any).select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'delivered').gte('created_at', monthStart).then((r: any) => { result.delivered_month = r.count || 0; }),
+          wrap((supabase.from('shipments') as any).select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).in('status', ['confirmed', 'in_transit', 'pending'])).then((r: any) => { result.shipments = r.count || 0; }),
+          wrap((supabase.from('shipments') as any).select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'delivered').gte('created_at', monthStart)).then((r: any) => { result.delivered_month = r.count || 0; }),
         );
       }
 
-      // Deposits
       if (hasAny(['view_financials', 'manage_deposits'])) {
         promises.push(
-          supabase.from('deposits').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).then((r: any) => { result.deposits = r.count || 0; }),
+          wrap(supabase.from('deposits').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id)).then((r: any) => { result.deposits = r.count || 0; }),
         );
       }
 
-      // Partners
       if (hasAny(['view_partner_data', 'manage_partners'])) {
         promises.push(
-          (supabase as any).from('partner_relationships').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'active').then((r: any) => { result.partners = r.count || 0; }),
+          wrap((supabase as any).from('partner_relationships').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).eq('status', 'active')).then((r: any) => { result.partners = r.count || 0; }),
         );
       }
 
-      // Drivers
       if (hasAny(['manage_drivers'])) {
         promises.push(
-          supabase.from('drivers').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id).then((r: any) => { result.drivers = r.count || 0; }),
+          wrap(supabase.from('drivers').select('id', { count: 'exact', head: true }).eq('organization_id', organization.id)).then((r: any) => { result.drivers = r.count || 0; }),
         );
       }
 
-      // Activity this week
       promises.push(
-        supabase.from('activity_logs').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', weekStart).then((r: any) => { result.week_actions = r.count || 0; }),
-        supabase.from('activity_logs').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', monthStart).then((r: any) => { result.month_actions = r.count || 0; }),
+        wrap(supabase.from('activity_logs').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', weekStart)).then((r: any) => { result.week_actions = r.count || 0; }),
+        wrap(supabase.from('activity_logs').select('id', { count: 'exact', head: true }).eq('user_id', user.id).gte('created_at', monthStart)).then((r: any) => { result.month_actions = r.count || 0; }),
       );
 
-      // Unread notifications
       promises.push(
-        supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false).then((r: any) => { result.unread_notifs = r.count || 0; }),
+        wrap(supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('is_read', false)).then((r: any) => { result.unread_notifs = r.count || 0; }),
       );
 
       await Promise.all(promises);
