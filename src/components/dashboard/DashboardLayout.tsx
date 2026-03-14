@@ -974,19 +974,19 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   </div>
 
                   {/* Search */}
-                  <div className="px-3 pt-3 shrink-0">
+                  <div className="px-4 pt-3 shrink-0">
                     <div className="relative">
                       <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         value={sidebarSearch}
                         onChange={(e) => setSidebarSearch(e.target.value)}
                         placeholder={t('sidebar.searchPlaceholder')}
-                        className="pr-9 pl-8 h-11 text-sm bg-muted/50"
+                        className="pr-9 pl-8 h-11 text-sm bg-muted/40 rounded-xl border-border/40"
                       />
                       {sidebarSearch && (
                         <button
                           onClick={() => setSidebarSearch('')}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded touch-manipulation"
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-lg touch-manipulation"
                         >
                           <XIcon className="w-4 h-4 text-muted-foreground" />
                         </button>
