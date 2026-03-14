@@ -1083,7 +1083,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Actions: Permits + Quick Sign */}
+          {/* Floating Actions: Permits + Quick Sign — positioned above bottom nav on mobile */}
           <FloatingActionsStack
             actions={[
               {
@@ -1102,6 +1102,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               },
             ]}
             position="bottom-left"
+            className={isMobile ? 'bottom-[5rem]' : ''}
           />
 
           {/* Mobile Bottom Navigation */}

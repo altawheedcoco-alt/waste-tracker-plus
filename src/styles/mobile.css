@@ -207,6 +207,28 @@ body {
   .grid { gap: 0.5rem; }
   .grid.gap-4 { gap: 0.625rem; }
   .grid.gap-6 { gap: 0.75rem; }
+
+  /* v3.1: Dashboard internal pages — prevent button/element overlap */
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+
+  /* Floating actions: position above bottom nav */
+  .floating-widgets-container {
+    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Stat cards grid: ensure 2-col doesn't cramp */
+  .grid-cols-2 > * { min-width: 0; }
+
+  /* Action buttons in headers: prevent wrapping, enable scroll */
+  [class*="DashboardV2Header"] .flex-wrap { flex-wrap: nowrap; }
+
+  /* Card headers with buttons: stack vertically on small screens */
+  .card-header-actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
 }
 
 /* ——— Tablets (641px – 1024px) ——— */
