@@ -281,14 +281,29 @@ const Header = memo(() => {
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
-              <Button variant="default" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
-                <LogIn className="w-3.5 h-3.5" />
-                {t('nav.login')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
-                <UserPlus className="w-3.5 h-3.5" />
-                {t('nav.employeeLogin')}
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="default" size="sm" onClick={handleGoToDashboard} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
+                    <LayoutDashboard className="w-3.5 h-3.5" />
+                    {t('nav.dashboard') || 'لوحة التحكم'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50">
+                    <LogOut className="w-3.5 h-3.5" />
+                    {t('nav.logout') || 'خروج'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="default" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
+                    <LogIn className="w-3.5 h-3.5" />
+                    {t('nav.login')}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
+                    <UserPlus className="w-3.5 h-3.5" />
+                    {t('nav.employeeLogin')}
+                  </Button>
+                </>
+              )}
             </div>
 
           </div>
