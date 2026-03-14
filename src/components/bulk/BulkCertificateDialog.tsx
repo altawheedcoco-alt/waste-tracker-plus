@@ -201,17 +201,24 @@ const BulkCertificateDialog = ({
         if (error) throw error;
       } else if (isReceipt) {
         // Create bulk receipt certificates
-        const receipts = selectedShipments.map(shipment => ({
-          shipment_id: shipment.id,
-          receipt_number: `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          status: 'confirmed',
-          actual_weight: shipment.quantity,
-          declared_weight: shipment.quantity,
-          waste_type: shipment.waste_type,
-          notes: `شهادة استلام مجمعة - ${reportNumber}`,
-          pickup_date: new Date().toISOString(),
-          transporter_id: organization?.id || null,
-        }));
+        const receipts = selectedShipments.map(shipment => {
+          const receiptNum = `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+          const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
+            shipmentNumber: shipment.shipment_number,
+          });
+          return {
+            shipment_id: shipment.id,
+            receipt_number: receiptNum,
+            status: 'confirmed',
+            actual_weight: shipment.quantity,
+            declared_weight: shipment.quantity,
+            waste_type: shipment.waste_type,
+            notes: `شهادة استلام مجمعة - ${reportNumber}`,
+            pickup_date: new Date().toISOString(),
+            transporter_id: organization?.id || null,
+            ...identity,
+          };
+        });
 
         const { error } = await supabase
           .from('shipment_receipts')
