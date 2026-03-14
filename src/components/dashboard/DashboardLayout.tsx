@@ -530,7 +530,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="px-3 py-2 border-b border-border space-y-2"
+                className="px-3 py-2.5 border-b border-sidebar-border space-y-2"
               >
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
