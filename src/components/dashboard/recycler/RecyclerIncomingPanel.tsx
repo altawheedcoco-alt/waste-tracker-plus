@@ -91,18 +91,18 @@ const RecyclerIncomingPanel = () => {
   });
 
   const handleConfirm = async (id: string) => {
-    const { error } = await supabase
-      .from('shipments')
-      .update({ status: 'confirmed', confirmed_at: new Date().toISOString() })
-      .eq('id', id);
-
-    if (error) {
+    try {
+      // Use repository to ensure logs, auto-declarations, and timestamps are created
+      await ShipmentsRepository.updateStatus(id, 'confirmed', user?.id);
+      toast.success('تم تأكيد استلام الشحنة وإصدار المستندات تلقائياً');
+      queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
+      queryClient.invalidateQueries({ queryKey: ['recycler-awaiting-confirm'] });
+      queryClient.invalidateQueries({ queryKey: ['recycler-dashboard'] });
+      queryClient.invalidateQueries({ queryKey: ['recycler-command-center'] });
+    } catch (error) {
+      console.error('Confirm shipment error:', error);
       toast.error('حدث خطأ أثناء تأكيد الاستلام');
-      return;
     }
-    toast.success('تم تأكيد استلام الشحنة');
-    queryClient.invalidateQueries({ queryKey: ['recycler-incoming'] });
-    queryClient.invalidateQueries({ queryKey: ['recycler-awaiting-confirm'] });
   };
 
   if (isLoading) {
