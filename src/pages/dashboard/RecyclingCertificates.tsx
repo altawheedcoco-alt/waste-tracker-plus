@@ -65,8 +65,7 @@ import BackButton from '@/components/ui/back-button';
 import RecyclingCertificatePrint from '@/components/reports/RecyclingCertificatePrint';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
