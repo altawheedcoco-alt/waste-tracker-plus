@@ -52,7 +52,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
         <motion.div
           whileHover={{ x: -4 }}
           whileTap={{ scale: 0.98 }}
-          className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 touch-manipulation ${
+          className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 touch-manipulation ${
             isActive
               ? 'bg-primary text-primary-foreground shadow-md'
               : 'hover:bg-muted/80 text-foreground/80 hover:text-foreground active:bg-muted'
