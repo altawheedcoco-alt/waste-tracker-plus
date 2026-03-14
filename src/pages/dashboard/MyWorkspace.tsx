@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import {
   User, ListTodo, ShieldCheck, Trophy, Bell, Loader2,
   Building2, Clock, Package, Zap, CalendarDays, LayoutDashboard, Settings, LogOut,
+  Gauge, Cog,
 } from 'lucide-react';
 
 const MyProfileTab = lazy(() => import('@/components/workspace/MyProfileTab'));
@@ -22,6 +23,8 @@ const MyTasksTab = lazy(() => import('@/components/workspace/MyTasksTab'));
 const MyPermissionsTab = lazy(() => import('@/components/workspace/MyPermissionsTab'));
 const MyAchievementsTab = lazy(() => import('@/components/workspace/MyAchievementsTab'));
 const MyNotificationsTab = lazy(() => import('@/components/workspace/MyNotificationsTab'));
+const MyDashboardTab = lazy(() => import('@/components/workspace/MyDashboardTab'));
+const MySettingsTab = lazy(() => import('@/components/workspace/MySettingsTab'));
 
 const TabFallback = () => (
   <div className="flex items-center justify-center py-16">
@@ -30,11 +33,13 @@ const TabFallback = () => (
 );
 
 const TABS: TabItem[] = [
-  { value: 'overview', label: 'نظرة عامة', icon: Zap },
+  { value: 'dashboard', label: 'لوحة التحكم', icon: Gauge },
+  { value: 'overview', label: 'ملفي', icon: User },
   { value: 'tasks', label: 'مهامي', icon: ListTodo },
   { value: 'permissions', label: 'صلاحياتي', icon: ShieldCheck },
   { value: 'achievements', label: 'إنجازاتي', icon: Trophy },
   { value: 'notifications', label: 'إشعاراتي', icon: Bell },
+  { value: 'settings', label: 'الإعدادات', icon: Cog },
 ];
 
 const orgTypeLabels: Record<string, string> = {
@@ -51,7 +56,7 @@ const orgTypeLabels: Record<string, string> = {
 const MyWorkspace = () => {
   const { profile, organization, user } = useAuth();
   const { permissions, isLoading: permsLoading } = useMyPermissions();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -210,6 +215,12 @@ const MyWorkspace = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <V2TabsNav tabs={TABS} />
 
+        <TabsContent value="dashboard" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyDashboardTab />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="overview" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyProfileTab />
@@ -237,6 +248,12 @@ const MyWorkspace = () => {
         <TabsContent value="notifications" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyNotificationsTab />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MySettingsTab />
           </Suspense>
         </TabsContent>
       </Tabs>
