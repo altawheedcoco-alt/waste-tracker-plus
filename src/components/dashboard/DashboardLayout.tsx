@@ -567,7 +567,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </AnimatePresence>
 
           {/* Navigation */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
             {/* Return to Admin Banner (when viewing as org) */}
             {adminViewingOrg && isSidebarOpen && (
               <motion.button
