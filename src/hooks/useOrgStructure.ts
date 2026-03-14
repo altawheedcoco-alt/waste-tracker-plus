@@ -43,6 +43,7 @@ export interface Position {
   holder_name: string | null;
   holder_phone: string | null;
   holder_national_id: string | null;
+  dashboard_mode: 'management' | 'workspace';
   created_at: string;
   updated_at: string;
   assigned_user?: { full_name: string; avatar_url: string | null } | null;

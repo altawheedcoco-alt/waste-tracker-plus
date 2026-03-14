@@ -111,6 +111,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
       holder_phone: operatorType === 'human' ? holderPhone : null,
       holder_national_id: operatorType === 'human' ? holderNationalId : null,
       auto_email: autoEmail,
+      dashboard_mode: dashboardMode,
     });
 
     // Register as member if human + requested
