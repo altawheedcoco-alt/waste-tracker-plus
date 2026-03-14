@@ -165,6 +165,7 @@ const DocumentActionHub = ({
     a.href = resolvedUrl;
     a.download = source.fileName || 'document';
     a.target = '_blank';
+    a.rel = 'noopener noreferrer';
     a.click();
     toast.success('جاري التحميل...');
   }, [resolvedUrl, source.fileName]);
