@@ -13,6 +13,7 @@ interface SidebarPrefs {
 
 export function useSidebarPreferences() {
   const { user, organization, roles } = useAuth();
+  const { permissions, isEmployee } = useMyPermissions();
   const [prefs, setPrefs] = useState<SidebarPrefs | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
