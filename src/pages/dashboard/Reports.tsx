@@ -505,16 +505,16 @@ const Reports = () => {
         <RegulatoryExport />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-6 h-6 text-primary" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.totalShipments')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.totalShipments')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.shipmentsByStatus.reduce((a, b) => a + b.value, 0)}
                   </p>
                 </div>
@@ -522,14 +522,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-blue-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <Building2 className="w-4 h-4 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.generatorOrgs')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.generatorOrgs')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.generators'))?.value || 0}
                   </p>
                 </div>
@@ -537,14 +537,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-amber-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Truck className="w-4 h-4 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.transportCompanies')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.transportCompanies')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.transporters'))?.value || 0}
                   </p>
                 </div>
@@ -552,14 +552,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Recycle className="w-6 h-6 text-emerald-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Recycle className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.recyclerOrgs')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.recyclerOrgs')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.recyclers'))?.value || 0}
                   </p>
                 </div>
