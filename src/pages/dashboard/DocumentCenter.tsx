@@ -67,36 +67,34 @@ const DocumentCenter = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4" dir="rtl">
+      <div className="space-y-3 sm:space-y-4" dir="rtl">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <FolderOpen className="w-6 h-6 text-primary" />
-                {t('docCenter.title')}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('docCenter.subtitle')}
-              </p>
-            </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BackButton />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-xl font-bold flex items-center gap-1.5 sm:gap-2">
+              <FolderOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+              <span className="truncate">{t('docCenter.title')}</span>
+            </h1>
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">
+              {t('docCenter.subtitle')}
+            </p>
           </div>
         </div>
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <ScrollArea className="w-full" dir="rtl">
-            <TabsList className="inline-flex h-11 w-max gap-1 bg-muted/60 p-1 rounded-xl">
+            <TabsList className="inline-flex h-10 sm:h-11 w-max gap-0.5 sm:gap-1 bg-muted/60 p-0.5 sm:p-1 rounded-xl">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="gap-1.5 text-xs whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg px-3"
+                    className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg px-2 sm:px-3"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     {tab.label}
                   </TabsTrigger>
                 );

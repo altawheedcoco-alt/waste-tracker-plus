@@ -169,27 +169,27 @@ const Quotations = () => {
       <div className="grid gap-3">
         {list.map(q => (
           <Card key={q.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleView(q)}>
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">{q.title}</p>
+            <CardContent className="py-3 sm:py-4">
+              <div className="flex items-start sm:items-center justify-between gap-2 flex-col sm:flex-row">
+                <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="font-semibold text-foreground text-sm truncate">{q.title}</p>
                       {(q as any).document_type && (q as any).document_type !== 'price_quote' && (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-[9px] sm:text-[10px]">
                           {DOCUMENT_TYPE_LABELS[(q as any).document_type as DocumentType] || (q as any).document_type}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {q.quotation_number} • {q.client_name || 'عميل مسجل'} • {format(new Date(q.created_at!), 'dd MMM yyyy', { locale: ar })}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-foreground">{q.total_amount?.toLocaleString()} ج.م</span>
-                  <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'}>
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-end sm:self-center">
+                  <span className="font-bold text-foreground text-sm">{q.total_amount?.toLocaleString()} ج.م</span>
+                  <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'} className="text-[10px]">
                     {STATUS_MAP[q.status]?.label || q.status}
                   </Badge>
                 </div>
@@ -204,38 +204,40 @@ const Quotations = () => {
   const directionLabel = createDirection === 'outgoing' ? 'عرض صادر (هناخد)' : 'طلب وارد (هندفع)';
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">عروض الأسعار</h1>
-          <p className="text-sm text-muted-foreground">إنشاء وإدارة عروض الأسعار والتسعيرات - {ENTITY_LABELS[orgType] || orgType}</p>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4" dir="rtl">
+      <div className="space-y-2">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
+          <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1">
-            <ArrowUpRight className="w-4 h-4" />
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
+          <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
+            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             عرض صادر
           </Button>
-          <Button variant="outline" onClick={() => handleOpenCreate('incoming')} className="gap-1">
-            <ArrowDownLeft className="w-4 h-4" />
+          <Button variant="outline" onClick={() => handleOpenCreate('incoming')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
+            <ArrowDownLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             طلب وارد
           </Button>
         </div>
       </div>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="outgoing" className="gap-1.5">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            صادر - هناخد ({outgoingQuotations.length})
-          </TabsTrigger>
-          <TabsTrigger value="incoming" className="gap-1.5">
-            <ArrowDownLeft className="w-3.5 h-3.5" />
-            وارد - هندفع ({incomingQuotations.length})
-          </TabsTrigger>
-          <TabsTrigger value="received" className="gap-1.5">
-            📨 عروض مستلمة ({receivedQuotations.length})
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+          <TabsList className="w-max sm:w-full justify-start">
+            <TabsTrigger value="outgoing" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              صادر ({outgoingQuotations.length})
+            </TabsTrigger>
+            <TabsTrigger value="incoming" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              <ArrowDownLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              وارد ({incomingQuotations.length})
+            </TabsTrigger>
+            <TabsTrigger value="received" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              📨 مستلمة ({receivedQuotations.length})
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="outgoing" className="mt-4">
           {renderQuotationList(outgoingQuotations, 'outgoing')}
@@ -282,7 +284,7 @@ const Quotations = () => {
 
       {/* Create Quotation Dialog */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               {createDirection === 'outgoing' ? <ArrowUpRight className="w-5 h-5 text-primary" /> : <ArrowDownLeft className="w-5 h-5 text-orange-500" />}

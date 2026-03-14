@@ -546,8 +546,8 @@ const EncryptedChat = () => {
   return (
     <DashboardLayout>
       <div className={cn(
-        "flex h-[calc(100vh-4rem)] overflow-hidden rounded-xl border border-border bg-background shadow-sm",
-        isMobile ? "mx-1 my-1" : "mx-4 my-4"
+        "flex overflow-hidden rounded-xl border border-border bg-background shadow-sm",
+        isMobile ? "mx-0 my-0 h-[calc(100vh-3.5rem)] rounded-none border-0" : "mx-4 my-4 h-[calc(100vh-4rem)]"
       )}>
         {/* ===== SIDEBAR ===== */}
         <AnimatePresence mode="wait">
@@ -559,7 +559,7 @@ const EncryptedChat = () => {
               transition={{ type: 'spring', damping: 25 }}
               className={cn(
                 "h-full flex flex-col bg-card border-l border-border",
-                isMobile ? "w-full" : "w-[340px] min-w-[340px]"
+                isMobile ? "w-full" : "w-[300px] min-w-[300px]"
               )}
             >
               {/* Sidebar Header */}
