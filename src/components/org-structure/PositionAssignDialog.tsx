@@ -248,6 +248,42 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
 
               <Separator />
 
+              {/* Dashboard Mode Toggle */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <LayoutDashboard className="w-4 h-4 text-primary" />
+                  نوع الحساب عند الدخول
+                </h4>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDashboardMode('management')}
+                    className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                      dashboardMode === 'management'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-6 h-6" />
+                    <span className="font-medium text-xs">حساب إدارة</span>
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">يرى لوحة التحكم الكاملة للمنظمة</span>
+                  </button>
+                  <button
+                    onClick={() => setDashboardMode('workspace')}
+                    className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                      dashboardMode === 'workspace'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <UserCircle className="w-6 h-6" />
+                    <span className="font-medium text-xs">حساب عضو</span>
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">يرى مساحة العمل الشخصية فقط</span>
+                  </button>
+                </div>
+              </div>
+
+              <Separator />
+
               {/* Register as member toggle */}
               <div className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
                 <div className="flex items-center gap-2">
