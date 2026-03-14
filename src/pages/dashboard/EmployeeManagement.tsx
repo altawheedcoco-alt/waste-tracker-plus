@@ -416,60 +416,60 @@ const EmployeeManagement = () => {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-primary/10">
-                  <Users className="h-5 w-5 text-primary" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.totalEmployees')}</p>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.totalEmployees')}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <Check className="h-5 w-5 text-green-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10 shrink-0">
+                  <Check className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.filter(e => e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.active')}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-red-500/10">
-                  <X className="h-5 w-5 text-red-500" />
-                </div>
-                <div>
-                  <p className="text-2xl font-bold">{employees.filter(e => !e.is_active).length}</p>
-                  <p className="text-sm text-muted-foreground">{t('employees.inactive')}</p>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.filter(e => e.is_active).length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.active')}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
 
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-blue-500/10">
-                  <Briefcase className="h-5 w-5 text-blue-500" />
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-red-500/10 shrink-0">
+                  <X className="h-4 w-4 sm:h-5 sm:w-5 text-red-500" />
                 </div>
-                <div>
-                  <p className="text-2xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">{employees.filter(e => !e.is_active).length}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.inactive')}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center gap-2 sm:gap-3">
+                <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10 shrink-0">
+                  <Briefcase className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xl sm:text-2xl font-bold">
                     {new Set(employees.map(e => e.department).filter(Boolean)).size}
                   </p>
-                  <p className="text-sm text-muted-foreground">{t('employees.departments')}</p>
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('employees.departments')}</p>
                 </div>
               </div>
             </CardContent>
