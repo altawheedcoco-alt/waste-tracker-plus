@@ -90,8 +90,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const { profile, organization } = useAuth();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
-  const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
