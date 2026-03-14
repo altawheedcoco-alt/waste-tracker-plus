@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import {
   User, ListTodo, ShieldCheck, Trophy, Bell, Loader2,
   Building2, Clock, Package, Zap, CalendarDays, LayoutDashboard, Settings, LogOut,
-  Gauge, Cog,
+  Gauge, Cog, Calendar, FileText, BarChart3,
 } from 'lucide-react';
 
 const MyProfileTab = lazy(() => import('@/components/workspace/MyProfileTab'));
@@ -25,6 +25,9 @@ const MyAchievementsTab = lazy(() => import('@/components/workspace/MyAchievemen
 const MyNotificationsTab = lazy(() => import('@/components/workspace/MyNotificationsTab'));
 const MyDashboardTab = lazy(() => import('@/components/workspace/MyDashboardTab'));
 const MySettingsTab = lazy(() => import('@/components/workspace/MySettingsTab'));
+const MyCalendarTab = lazy(() => import('@/components/workspace/MyCalendarTab'));
+const MyDocumentsTab = lazy(() => import('@/components/workspace/MyDocumentsTab'));
+const MyStatsTab = lazy(() => import('@/components/workspace/MyStatsTab'));
 
 const TabFallback = () => (
   <div className="flex items-center justify-center py-16">
@@ -35,7 +38,10 @@ const TabFallback = () => (
 const TABS: TabItem[] = [
   { value: 'dashboard', label: 'لوحة التحكم', icon: Gauge },
   { value: 'overview', label: 'ملفي', icon: User },
+  { value: 'stats', label: 'الإحصائيات', icon: BarChart3 },
   { value: 'tasks', label: 'مهامي', icon: ListTodo },
+  { value: 'calendar', label: 'التقويم', icon: Calendar },
+  { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'permissions', label: 'صلاحياتي', icon: ShieldCheck },
   { value: 'achievements', label: 'إنجازاتي', icon: Trophy },
   { value: 'notifications', label: 'إشعاراتي', icon: Bell },
@@ -227,9 +233,27 @@ const MyWorkspace = () => {
           </Suspense>
         </TabsContent>
 
+        <TabsContent value="stats" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyStatsTab />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="tasks" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyTasksTab />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="calendar" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyCalendarTab />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyDocumentsTab />
           </Suspense>
         </TabsContent>
 
