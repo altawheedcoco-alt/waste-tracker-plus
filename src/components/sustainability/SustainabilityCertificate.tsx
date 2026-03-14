@@ -13,8 +13,7 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// jsPDF & html2canvas loaded dynamically
 import { usePDFExport } from '@/hooks/usePDFExport';
 
 interface Organization {
@@ -95,6 +94,10 @@ const SustainabilityCertificate = ({
     toast({ title: "جاري إنشاء الشهادة...", description: "يرجى الانتظار" });
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(certificateRef.current, {
         scale: 3,
         useCORS: true,

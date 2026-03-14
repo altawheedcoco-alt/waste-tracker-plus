@@ -15,8 +15,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically via usePDFExport / PDFService
 import {
   FileText,
   Printer,
@@ -206,6 +205,10 @@ const TransporterReceiptCertificateDialog = ({
   const generatePdfBlob = async (): Promise<Blob | null> => {
     if (!printRef.current) return null;
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,

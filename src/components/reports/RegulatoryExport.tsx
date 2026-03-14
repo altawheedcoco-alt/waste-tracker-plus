@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { createWorkbook, jsonToSheet, writeFile as writeExcel } from '@/lib/excelExport';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 import {
   Download,
   FileText,
@@ -141,6 +141,7 @@ const RegulatoryExport = () => {
     setLoading(true);
     try {
       const shipments = await fetchShipmentData();
+      const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       
       // Simple PDF with summary

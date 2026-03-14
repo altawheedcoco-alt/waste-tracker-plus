@@ -31,7 +31,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 
 interface ExportCategory {
   id: string;
@@ -156,7 +156,8 @@ const DataExport = () => {
   };
 
   // Generate PDF from data
-  const generatePDF = (allData: { label: string; data: any[] }[], orgName: string, userName: string) => {
+  const generatePDF = async (allData: { label: string; data: any[] }[], orgName: string, userName: string) => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();
     let y = 20;
@@ -350,7 +351,7 @@ const DataExport = () => {
 
       const totalRecords = results.reduce((sum, r) => sum + r.data.length, 0);
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-      const pdfDoc = generatePDF(results, organization.name || '', profile?.full_name || '');
+      const pdfDoc = await generatePDF(results, organization.name || '', profile?.full_name || '');
       pdfDoc.save(`data-export_${organization.name}_${timestamp}.pdf`);
       setProgress(100);
       

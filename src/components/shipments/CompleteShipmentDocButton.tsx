@@ -3,8 +3,6 @@ import { Button } from '@/components/ui/button';
 import { FileArchive, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 
 interface CompleteShipmentDocButtonProps {
   shipmentId: string;
@@ -41,6 +39,14 @@ const CompleteShipmentDocButton = ({
       if (error) throw error;
       if (!data?.html) throw new Error('No document data returned');
 
+      // Dynamic imports for code splitting
+      const [html2canvasModule, jsPDFModule] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+      const html2canvas = html2canvasModule.default;
+      const jsPDF = jsPDFModule.default;
+
       // Render HTML in offscreen iframe
       const iframe = document.createElement('iframe');
       iframe.style.position = 'fixed';
@@ -63,8 +69,8 @@ const CompleteShipmentDocButton = ({
       // Capture each .page as a separate PDF page
       const pages = iframeDoc.querySelectorAll('.page');
       const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth(); // 210mm
-      const pageHeight = pdf.internal.pageSize.getHeight(); // 297mm
+      const pageWidth = pdf.internal.pageSize.getWidth();
+      const pageHeight = pdf.internal.pageSize.getHeight();
 
       const captureOptions = {
         scale: 2,

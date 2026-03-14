@@ -15,7 +15,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import html2canvas from 'html2canvas';
+// html2canvas loaded dynamically
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 
@@ -395,6 +395,7 @@ const SystemScreenshots = () => {
       await new Promise(r => setTimeout(r, 1500));
 
       // Capture the actual rendered page
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(document.body, {
         width: window.innerWidth,
         height: window.innerHeight,

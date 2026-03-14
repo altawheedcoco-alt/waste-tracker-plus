@@ -28,8 +28,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { usePrintTracking } from '@/hooks/usePrintTracking';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF & html2canvas loaded dynamically
 
 type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'entity_docs' | 'print_log' | 'all';
 
@@ -565,6 +564,10 @@ const PrintCenter = () => {
 
       await new Promise(r => setTimeout(r, 800));
 
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(iDoc.body, { scale: 2, useCORS: true, logging: false, width: 794, windowWidth: 794 });
       document.body.removeChild(iframe);
 

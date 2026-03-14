@@ -18,8 +18,7 @@ import { calculateShipmentCarbon, type ShipmentCarbonResult } from '@/lib/carbon
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically via usePDFExport / PDFService
 import {
   FileText,
   Printer,
@@ -336,6 +335,10 @@ const RecyclingCertificateDialog = ({
     }
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,

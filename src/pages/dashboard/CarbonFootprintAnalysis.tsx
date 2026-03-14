@@ -56,8 +56,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF & html2canvas loaded dynamically
 
 // IPCC-based emission factors - loaded from database at runtime
 // Fallback values based on IPCC 2006 + GHG Protocol
@@ -426,6 +425,10 @@ const CarbonFootprintAnalysis = () => {
         description: t('carbon.creatingPdfDesc'),
       });
 
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const pdf = new jsPDF('p', 'mm', 'a4');
       const pageWidth = pdf.internal.pageSize.getWidth();
       const pageHeight = pdf.internal.pageSize.getHeight();

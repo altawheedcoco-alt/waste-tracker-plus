@@ -51,8 +51,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import BackButton from '@/components/ui/back-button';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically
 
 // Waste category definitions
 const HAZARDOUS_TYPES = ['chemical', 'electronic'];
@@ -438,6 +437,10 @@ const OperationalPlans = () => {
     setIsExportingPDF(true);
     try {
       const element = printRef.current;
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,

@@ -49,8 +49,7 @@ import { ar } from 'date-fns/locale';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import { motion, AnimatePresence } from 'framer-motion';
 import AggregateReportPrint from '@/components/reports/AggregateReportPrint';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically
 
 interface ShipmentData {
   id: string;
@@ -129,6 +128,10 @@ const AggregateShipmentReport = () => {
     }
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,

@@ -45,8 +45,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import BackButton from '@/components/ui/back-button';
@@ -261,6 +260,10 @@ const IssueRecyclingCertificates = () => {
     if (!printRef.current) return null;
     
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,
