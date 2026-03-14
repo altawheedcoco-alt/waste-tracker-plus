@@ -25,59 +25,61 @@ const AITools = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 p-4 md:p-6">
+      <div className="space-y-4 p-3 md:p-6">
         <BackButton />
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-12 h-12 rounded-xl gradient-eco flex items-center justify-center">
-              <Bot className="w-6 h-6 text-primary-foreground" />
+          <div className="flex items-center gap-2 mb-2">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl gradient-eco flex items-center justify-center shrink-0">
+              <Bot className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground" />
             </div>
-            <div className="text-right">
-              <h1 className="text-xl md:text-2xl font-bold">{t('aiTools.title')}</h1>
-              <p className="text-muted-foreground text-sm">{t('aiTools.subtitle')}</p>
+            <div className="text-right min-w-0">
+              <h1 className="text-base sm:text-2xl font-bold truncate">{t('aiTools.title')}</h1>
+              <p className="text-muted-foreground text-[11px] sm:text-sm truncate">{t('aiTools.subtitle')}</p>
             </div>
           </div>
         </motion.div>
 
         <Tabs defaultValue="advanced" className="w-full" dir="rtl">
-          <TabsList className={`grid grid-cols-8 w-full max-w-5xl`}>
-            <TabsTrigger value="advanced" className="flex items-center gap-2 text-xs md:text-sm">
-              <Sparkles className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.advanced')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="sentiment" className="flex items-center gap-2 text-xs md:text-sm">
-              <Heart className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.sentiment')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="predictions" className="flex items-center gap-2 text-xs md:text-sm">
-              <TrendingUp className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.predictions')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2 text-xs md:text-sm">
-              <Brain className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.insights')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="documents" className="flex items-center gap-2 text-xs md:text-sm">
-              <FileText className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.documents')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2 text-xs md:text-sm">
-              <BarChart3 className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.analytics')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="detailed" className="flex items-center gap-2 text-xs md:text-sm">
-              <CalendarDays className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.detailed')}</span>
-            </TabsTrigger>
-            <TabsTrigger value="reduction" className="flex items-center gap-2 text-xs md:text-sm">
-              <Lightbulb className="w-4 h-4" />
-              <span className="hidden sm:inline">{t('aiTools.reduction')}</span>
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide -mx-3 px-3 pb-1">
+            <TabsList className="inline-flex w-max gap-0.5 h-auto p-1">
+              <TabsTrigger value="advanced" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <Sparkles className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.advanced')}
+              </TabsTrigger>
+              <TabsTrigger value="sentiment" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <Heart className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.sentiment')}
+              </TabsTrigger>
+              <TabsTrigger value="predictions" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <TrendingUp className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.predictions')}
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <Brain className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.insights')}
+              </TabsTrigger>
+              <TabsTrigger value="documents" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <FileText className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.documents')}
+              </TabsTrigger>
+              <TabsTrigger value="analytics" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <BarChart3 className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.analytics')}
+              </TabsTrigger>
+              <TabsTrigger value="detailed" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <CalendarDays className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.detailed')}
+              </TabsTrigger>
+              <TabsTrigger value="reduction" className="flex items-center gap-1.5 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+                <Lightbulb className="w-3.5 h-3.5 shrink-0" />
+                {t('aiTools.reduction')}
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="advanced" className="mt-6">
             <AdvancedAIDashboard />

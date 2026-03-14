@@ -195,17 +195,17 @@ const WasteExchange = () => {
   }
 
   return (
-    <div className={`space-y-6 p-4 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
+    <div className={`space-y-4 p-3 md:p-6 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div className="flex items-center gap-3">
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
           <BackButton />
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Store className="w-7 h-7 text-primary" />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-2xl font-bold text-foreground flex items-center gap-2 truncate">
+              <Store className="w-5 h-5 sm:w-7 sm:h-7 text-primary shrink-0" />
               {t('exchangePage.title')}
             </h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">
               {t('exchangePage.subtitle')}
             </p>
           </div>
@@ -219,7 +219,7 @@ const WasteExchange = () => {
       {isAdmin && <AdminExchangePanel isRTL={isRTL} stats={adminStats} />}
 
       {/* Summary Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4 sm:gap-3">
         {[
           { label: t('exchangePage.activeListings'), value: listings.length, icon: Tag, color: 'text-green-500' },
           { label: t('exchangePage.myListings'), value: myListings.length, icon: Store, color: 'text-blue-500' },
@@ -231,11 +231,11 @@ const WasteExchange = () => {
               if (i === 1) setActiveTab('my-listings');
               if (i === 2) setActiveTab('my-bids');
             }}>
-              <CardContent className="p-4 flex items-center gap-3">
-                <s.icon className={`w-8 h-8 ${s.color}`} />
-                <div>
-                  <div className="text-2xl font-bold">{s.value}</div>
-                  <div className="text-xs text-muted-foreground">{s.label}</div>
+              <CardContent className="p-2.5 sm:p-4 flex items-center gap-2 sm:gap-3">
+                <s.icon className={`w-6 h-6 sm:w-8 sm:h-8 ${s.color} shrink-0`} />
+                <div className="min-w-0">
+                  <div className="text-lg sm:text-2xl font-bold">{s.value}</div>
+                  <div className="text-[10px] sm:text-xs text-muted-foreground truncate">{s.label}</div>
                 </div>
               </CardContent>
             </Card>
@@ -245,16 +245,18 @@ const WasteExchange = () => {
 
       {/* Main Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 w-full max-w-2xl">
-          <TabsTrigger value="marketplace">{t('exchangePage.market')}</TabsTrigger>
-          <TabsTrigger value="broker" className="gap-1">
-            <Briefcase className="w-3 h-3" />
-            {t('exchangePage.broker')}
-          </TabsTrigger>
-          <TabsTrigger value="my-listings">{t('exchangePage.myListings')}</TabsTrigger>
-          <TabsTrigger value="my-bids">{t('exchangePage.myBids')}</TabsTrigger>
-          <TabsTrigger value="price-index">{t('exchangePage.priceIndex')}</TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-3 px-3 pb-1">
+          <TabsList className="inline-flex w-max gap-0.5 h-auto p-1">
+            <TabsTrigger value="marketplace" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">{t('exchangePage.market')}</TabsTrigger>
+            <TabsTrigger value="broker" className="gap-1 text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">
+              <Briefcase className="w-3 h-3 shrink-0" />
+              {t('exchangePage.broker')}
+            </TabsTrigger>
+            <TabsTrigger value="my-listings" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">{t('exchangePage.myListings')}</TabsTrigger>
+            <TabsTrigger value="my-bids" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">{t('exchangePage.myBids')}</TabsTrigger>
+            <TabsTrigger value="price-index" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">{t('exchangePage.priceIndex')}</TabsTrigger>
+          </TabsList>
+        </div>
 
         {/* Marketplace */}
         <TabsContent value="marketplace" className="space-y-4">
