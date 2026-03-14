@@ -291,29 +291,29 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
                     )} />
                     
                     <div className="relative z-10">
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-3xl">{preset.icon}</span>
+                      <div className="flex items-center justify-between mb-2 sm:mb-3">
+                        <span className="text-2xl sm:text-3xl">{preset.icon}</span>
                         {settings.themeColor === preset.color && 
                          settings.fontFamily === preset.font && 
                          settings.isDarkMode === preset.dark && (
                           <motion.div
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
-                            className="w-6 h-6 bg-primary rounded-full flex items-center justify-center"
+                            className="w-5 h-5 sm:w-6 sm:h-6 bg-primary rounded-full flex items-center justify-center"
                           >
-                            <Check className="h-4 w-4 text-primary-foreground" />
+                            <Check className="h-3 w-3 sm:h-4 sm:w-4 text-primary-foreground" />
                           </motion.div>
                         )}
                       </div>
-                      <h3 className="font-bold text-lg mb-1">{preset.name}</h3>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <h3 className="font-bold text-sm sm:text-lg mb-0.5 sm:mb-1 truncate">{preset.name}</h3>
+                      <div className="flex items-center gap-1 sm:gap-2 text-[10px] sm:text-sm text-muted-foreground flex-wrap">
                         <div className={cn(
-                          'w-4 h-4 rounded-full',
+                          'w-3 h-3 sm:w-4 sm:h-4 rounded-full shrink-0',
                           colorOptions.find(c => c.value === preset.color)?.color
                         )} />
-                        <span>{fontOptions.find(f => f.value === preset.font)?.label}</span>
-                        <span>•</span>
-                        <span>{preset.dark ? 'ليلي' : 'نهاري'}</span>
+                        <span className="truncate">{fontOptions.find(f => f.value === preset.font)?.label}</span>
+                        <span className="hidden sm:inline">•</span>
+                        <span className="hidden sm:inline">{preset.dark ? 'ليلي' : 'نهاري'}</span>
                       </div>
                     </div>
                   </motion.button>
