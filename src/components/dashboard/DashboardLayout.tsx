@@ -486,39 +486,32 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     <TooltipProvider>
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
-        {/* Desktop Sidebar - Hidden on mobile when using display mode */}
+        {/* Desktop Sidebar — v4.0 Modern Elegant */}
         {!isMobile && (
             <aside
-              className={`flex flex-col bg-card/95 backdrop-blur-xl border-l border-border/40 fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
                 isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
               }`}
-              style={{ boxShadow: '-4px 0 20px hsl(220 16% 12% / 0.04)', width: sidebarWidth }}
+              style={{ width: sidebarWidth }}
             >
-              {/* Top Toggle Button + Logo */}
-              <div className="p-4 border-b border-border">
+              {/* Top: Logo + Close */}
+              <div className="px-4 py-3.5 border-b border-sidebar-border">
                 <div className="flex items-center justify-between gap-2">
                   <Link to="/dashboard" className="flex items-center gap-3 flex-1">
                     <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isSidebarOpen} />
                   </Link>
-                  
-                  {/* Top Hide Button */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsSidebarOpen(false)}
-                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
                       >
-                        <motion.div
-                          whileHover={{ x: 3 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <X className="w-4 h-4" />
-                        </motion.div>
+                        <X className="w-3.5 h-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">
+                    <TooltipContent side="left" className="text-xs">
                       <p>{t('common.close')}</p>
                     </TooltipContent>
                   </Tooltip>
