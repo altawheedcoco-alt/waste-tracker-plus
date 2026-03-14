@@ -367,26 +367,26 @@ const MobileDropdown = ({ dropdown, onNavigate }: { dropdown: NavDropdown; onNav
     <div className="rounded-xl overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center justify-between w-full px-3 py-3 text-sm font-semibold rounded-xl transition-all touch-manipulation ${
-          open ? 'text-primary bg-primary/5' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+        className={`flex items-center justify-between w-full px-3.5 py-3.5 text-sm font-semibold rounded-xl transition-all touch-manipulation ${
+          open ? 'text-primary bg-primary/8' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
         }`}
       >
-        <div className="flex items-center gap-2">
-          <dropdown.icon className={`w-4 h-4 ${open ? 'text-primary' : 'text-muted-foreground/60'}`} />
+        <div className="flex items-center gap-2.5">
+          <dropdown.icon className={`w-4.5 h-4.5 ${open ? 'text-primary' : 'text-muted-foreground/60'}`} />
           {dropdown.label}
         </div>
         <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="ps-3 pe-1 pb-2 flex flex-col gap-0.5 animate-fade-in">
+        <div className="ps-3 pe-1 pb-2.5 flex flex-col gap-0.5 animate-fade-in">
           {dropdown.items.map((item) => (
             <button
               key={item.href + item.label}
               onClick={() => onNavigate(item.href)}
-              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl hover:bg-accent/60 transition-colors text-start touch-manipulation group"
+              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-accent/60 active:bg-accent/80 transition-colors text-start touch-manipulation group"
             >
-              <div className="w-8 h-8 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-                <item.icon className="w-3.5 h-3.5 text-primary" />
+              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
+                <item.icon className="w-4 h-4 text-primary" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
@@ -397,7 +397,7 @@ const MobileDropdown = ({ dropdown, onNavigate }: { dropdown: NavDropdown; onNav
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground line-clamp-1">{item.desc}</p>
+                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{item.desc}</p>
               </div>
             </button>
           ))}
