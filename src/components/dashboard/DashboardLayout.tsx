@@ -402,6 +402,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       case 'generator': return 'generator';
       case 'recycler': return 'recycler';
       case 'disposal': return 'disposal';
+      case 'consultant': return 'consultant';
+      case 'consulting_office': return 'consulting_office';
       default: return 'generator';
     }
   }, [isAdmin, isDriver, organization]);

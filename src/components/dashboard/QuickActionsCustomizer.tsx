@@ -28,7 +28,7 @@ import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
 
 interface QuickActionsCustomizerProps {
-  userType: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal';
+  userType: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal' | 'consultant' | 'consulting_office';
   trigger?: React.ReactNode;
 }
 

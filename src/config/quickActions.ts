@@ -238,7 +238,7 @@ export const driverQuickActions: QuickActionConfig[] = [
  * Get quick actions by user type
  */
 export function getQuickActionsByType(
-  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal'
+  type: 'admin' | 'transporter' | 'generator' | 'recycler' | 'driver' | 'disposal' | 'consultant' | 'consulting_office'
 ): QuickActionConfig[] {
   switch (type) {
     case 'admin':
@@ -253,6 +253,9 @@ export function getQuickActionsByType(
       return driverQuickActions;
     case 'disposal':
       return disposalQuickActions;
+    case 'consultant':
+    case 'consulting_office':
+      return generatorQuickActions; // Consultants use generator actions as baseline
     default:
       return generatorQuickActions;
   }

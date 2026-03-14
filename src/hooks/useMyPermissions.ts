@@ -6,7 +6,7 @@ export type EmployeePermission =
   | 'create_deposits' | 'view_deposits' | 'manage_deposits'
   | 'create_shipments' | 'view_shipments' | 'manage_shipments' | 'cancel_shipments'
   | 'view_accounts' | 'view_account_details' | 'export_accounts'
-  | 'view_partners' | 'manage_partners' | 'create_external_partners'
+  | 'view_partners' | 'manage_partners' | 'create_external_partners' | 'view_partner_data'
   | 'view_reports' | 'create_reports' | 'export_reports'
   | 'view_drivers' | 'manage_drivers'
   | 'view_settings' | 'manage_settings'
