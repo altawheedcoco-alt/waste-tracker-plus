@@ -77,7 +77,7 @@ const MyDashboardTab = () => {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
       const weekStart = new Date(now.getTime() - 7 * 86400000).toISOString();
 
-      const promises: Promise<void>[] = [];
+      const promises: Promise<any>[] = [];
 
       // Shipments
       if (hasAny(['view_shipments', 'create_shipments'])) {
