@@ -20,7 +20,7 @@ export interface Profile {
 export interface Organization {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office';
   email: string;
   phone: string;
   is_verified: boolean;
