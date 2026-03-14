@@ -312,40 +312,40 @@ const Header = memo(() => {
 
       {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-background border-t border-border animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
-          <div className="container mx-auto px-3 py-3">
-            <nav className="flex flex-col gap-0.5">
+        <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
+          <div className="container mx-auto px-4 py-4">
+            <nav className="flex flex-col gap-1">
               {dropdowns.map((dropdown) => (
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
-              <div className="flex flex-col gap-2 pt-3 border-t border-border/40 mt-2">
+              <div className="flex flex-col gap-2.5 pt-4 border-t border-border/40 mt-3">
                 <button
                   onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                  className="flex items-center justify-center gap-2 w-full h-10 rounded-xl border border-border/50 bg-background text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
                 >
                   <Globe className="w-4 h-4" />
                   {language === 'ar' ? 'English' : 'عربي'}
                 </button>
                 <GuideButton />
                 {user ? (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
-                      <LayoutDashboard className="w-3.5 h-3.5" />
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
+                      <LayoutDashboard className="w-4 h-4" />
                       {t('nav.dashboard') || 'لوحة التحكم'}
                     </Button>
-                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
-                      <LogOut className="w-3.5 h-3.5" />
+                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                      <LogOut className="w-4 h-4" />
                       {t('nav.logout') || 'خروج'}
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2">
-                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
-                      <UserPlus className="w-3.5 h-3.5" />
+                  <div className="grid grid-cols-2 gap-2.5">
+                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm" onClick={handleEmployeeLogin}>
+                      <UserPlus className="w-4 h-4" />
                       {t('nav.employee')}
                     </Button>
-                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
-                      <LogIn className="w-3.5 h-3.5" />
+                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={handleLogin}>
+                      <LogIn className="w-4 h-4" />
                       {t('nav.login')}
                     </Button>
                   </div>
