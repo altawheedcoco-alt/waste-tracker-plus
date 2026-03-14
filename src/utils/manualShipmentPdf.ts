@@ -618,6 +618,10 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
 
     // Capture each page
     const pages = doc.querySelectorAll('.page');
+    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
     const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pdfWidth = 210;
     const pdfHeight = 297;

@@ -335,6 +335,10 @@ const RecyclingCertificateDialog = ({
     }
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(printRef.current, {
         scale: 2,
         useCORS: true,

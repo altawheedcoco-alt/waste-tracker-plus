@@ -94,6 +94,10 @@ const SustainabilityCertificate = ({
     toast({ title: "جاري إنشاء الشهادة...", description: "يرجى الانتظار" });
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(certificateRef.current, {
         scale: 3,
         useCORS: true,
