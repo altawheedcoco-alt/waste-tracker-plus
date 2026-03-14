@@ -24101,6 +24101,7 @@ export type Database = {
           assigned_user_id: string | null
           auto_email: string | null
           created_at: string
+          dashboard_mode: string
           department_id: string
           description: string | null
           description_ar: string | null
@@ -24124,6 +24125,7 @@ export type Database = {
           assigned_user_id?: string | null
           auto_email?: string | null
           created_at?: string
+          dashboard_mode?: string
           department_id: string
           description?: string | null
           description_ar?: string | null
@@ -24147,6 +24149,7 @@ export type Database = {
           assigned_user_id?: string | null
           auto_email?: string | null
           created_at?: string
+          dashboard_mode?: string
           department_id?: string
           description?: string | null
           description_ar?: string | null

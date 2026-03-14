@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Bot, User, Copy, Eye, EyeOff, Loader2, UserPlus, Sparkles } from 'lucide-react';
+import { Bot, User, Copy, Eye, EyeOff, Loader2, UserPlus, Sparkles, LayoutDashboard, UserCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Position } from '@/hooks/useOrgStructure';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,6 +70,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
   const [autoPassword, setAutoPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [registerAsMember, setRegisterAsMember] = useState(true);
+  const [dashboardMode, setDashboardMode] = useState<'management' | 'workspace'>('workspace');
 
   useEffect(() => {
     if (position && open) {
@@ -79,6 +80,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
       setHolderNationalId(position.holder_national_id || '');
       setAutoEmail(position.auto_email || generateEmail(position.title, organization?.name || 'org'));
       setAutoPassword(generatePassword());
+      setDashboardMode(position.dashboard_mode || (position.level >= 3 ? 'management' : 'workspace'));
     }
   }, [position, open, organization?.name]);
 
@@ -109,6 +111,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
       holder_phone: operatorType === 'human' ? holderPhone : null,
       holder_national_id: operatorType === 'human' ? holderNationalId : null,
       auto_email: autoEmail,
+      dashboard_mode: dashboardMode,
     });
 
     // Register as member if human + requested
@@ -240,6 +243,42 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
                       <Copy className="w-4 h-4" />
                     </Button>
                   </div>
+                </div>
+              </div>
+
+              <Separator />
+
+              {/* Dashboard Mode Toggle */}
+              <div className="space-y-3">
+                <h4 className="font-semibold text-sm flex items-center gap-2">
+                  <LayoutDashboard className="w-4 h-4 text-primary" />
+                  نوع الحساب عند الدخول
+                </h4>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => setDashboardMode('management')}
+                    className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                      dashboardMode === 'management'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <LayoutDashboard className="w-6 h-6" />
+                    <span className="font-medium text-xs">حساب إدارة</span>
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">يرى لوحة التحكم الكاملة للمنظمة</span>
+                  </button>
+                  <button
+                    onClick={() => setDashboardMode('workspace')}
+                    className={`flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border-2 transition-all ${
+                      dashboardMode === 'workspace'
+                        ? 'border-primary bg-primary/10 shadow-sm'
+                        : 'border-border/50 hover:bg-muted/50'
+                    }`}
+                  >
+                    <UserCircle className="w-6 h-6" />
+                    <span className="font-medium text-xs">حساب عضو</span>
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">يرى مساحة العمل الشخصية فقط</span>
+                  </button>
                 </div>
               </div>
 

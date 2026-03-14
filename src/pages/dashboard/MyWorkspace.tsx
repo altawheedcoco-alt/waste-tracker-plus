@@ -94,7 +94,7 @@ const MyWorkspace = () => {
     queryKey: ['my-position-header', profile?.id],
     queryFn: async () => {
       if (!profile?.user_id) return null;
-      const { data } = await supabase.from('organization_positions').select('title_ar, title, level, operator_type').eq('assigned_user_id', profile.user_id).maybeSingle();
+      const { data } = await supabase.from('organization_positions').select('title_ar, title, level, operator_type, dashboard_mode').eq('assigned_user_id', profile.user_id).maybeSingle();
       return data;
     },
     enabled: !!profile?.user_id,

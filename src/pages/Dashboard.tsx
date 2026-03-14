@@ -11,6 +11,8 @@ import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
 import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -62,6 +64,22 @@ const Dashboard = () => {
   const orgType = organization?.organization_type as string | undefined;
   const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
+  // Check dashboard_mode from organization_positions
+  const { data: positionDashboardMode } = useQuery({
+    queryKey: ['my-dashboard-mode', user?.id],
+    queryFn: async () => {
+      if (!user?.id) return null;
+      const { data } = await supabase
+        .from('organization_positions')
+        .select('dashboard_mode')
+        .eq('assigned_user_id', user.id)
+        .maybeSingle();
+      return (data?.dashboard_mode as string) || null;
+    },
+    enabled: !!user?.id,
+    staleTime: 1000 * 60 * 10,
+  });
+
   // Defer floating widgets to after main dashboard is interactive
   const [showWidgets, setShowWidgets] = useState(false);
   useEffect(() => {
@@ -79,11 +97,15 @@ const Dashboard = () => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
-    // Redirect regular employees/members to their personal workspace
-    if (!loading && user && isEmployee && !isAdmin) {
-      navigate('/dashboard/my-workspace', { replace: true });
+    // Redirect based on dashboard_mode setting from position
+    // 'workspace' = personal workspace, 'management' = full org dashboard
+    if (!loading && user && !isAdmin) {
+      const mode = positionDashboardMode;
+      if (mode === 'workspace' || (isEmployee && mode !== 'management')) {
+        navigate('/dashboard/my-workspace', { replace: true });
+      }
     }
-  }, [user, loading, navigate, roles, isEmployee, isAdmin]);
+  }, [user, loading, navigate, roles, isEmployee, isAdmin, positionDashboardMode]);
 
   if (loading) {
     return (
