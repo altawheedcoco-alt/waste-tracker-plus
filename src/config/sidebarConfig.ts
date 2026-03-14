@@ -86,12 +86,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Shipments & Certs',
     visibleFor: ['generator'],
     items: [
-      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
-      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center' },
-      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
-      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
-      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
-      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs' },
+      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments', requiredPermissions: ['view_shipments', 'create_shipments', 'manage_shipments'] },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center', requiredPermissions: ['view_shipments'] },
+      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected', requiredPermissions: ['view_shipments', 'manage_shipments'] },
+      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments', requiredPermissions: ['create_shipments', 'manage_shipments'] },
+      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts', requiredPermissions: ['view_shipments'] },
+      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs', requiredPermissions: ['view_shipments'] },
     ],
   },
 
