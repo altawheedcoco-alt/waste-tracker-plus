@@ -46,7 +46,7 @@ import DriverComplianceManager from '@/components/compliance/DriverComplianceMan
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+
 
 interface DisposalDashboardProps {
   embedded?: boolean;
