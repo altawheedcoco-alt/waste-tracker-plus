@@ -204,7 +204,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden mr-4 border-r-2 border-border pr-2 mt-1 space-y-0.5"
+            className="overflow-hidden mr-4 border-r-2 border-border/50 pr-2 mt-1 space-y-0.5"
           >
             {item.children!.map(child => (
               <SidebarNavGroup
