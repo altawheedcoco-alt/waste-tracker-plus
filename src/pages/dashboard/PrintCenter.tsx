@@ -28,8 +28,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { usePrintTracking } from '@/hooks/usePrintTracking';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF & html2canvas loaded dynamically
 
 type DocType = 'declarations' | 'certificates' | 'manifests' | 'invoices' | 'receipts' | 'signing' | 'signatures' | 'contracts' | 'org_documents' | 'stored_pdfs' | 'entity_docs' | 'print_log' | 'all';
 
