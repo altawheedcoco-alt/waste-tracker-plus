@@ -748,3 +748,30 @@ export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarG
 export function getDefaultGroupOrder(orgType: string, isAdmin: boolean): string[] {
   return getGroupsForOrgType(orgType, isAdmin).map(g => g.id);
 }
+
+/**
+ * Filter sidebar groups by employee permissions.
+ * Admins and company_admins bypass this filter entirely.
+ * For employees: items with requiredPermissions are only shown if the user has at least one of them.
+ * Groups with zero visible items after filtering are removed.
+ */
+export function filterGroupsByPermissions(
+  groups: SidebarGroupConfig[],
+  userPermissions: string[],
+  isEmployee: boolean
+): SidebarGroupConfig[] {
+  if (!isEmployee) return groups; // admins/company_admins see everything
+  
+  const hasFullAccess = userPermissions.includes('full_access');
+  if (hasFullAccess) return groups;
+
+  return groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      // No permission requirement → visible to all
+      if (!item.requiredPermissions || item.requiredPermissions.length === 0) return true;
+      // Check if user has ANY of the required permissions
+      return item.requiredPermissions.some(p => userPermissions.includes(p));
+    }),
+  })).filter(group => group.items.length > 0);
+}
