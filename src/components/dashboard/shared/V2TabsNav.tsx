@@ -19,21 +19,21 @@ interface V2TabsNavProps {
 
 const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1.5 shadow-sm">
-      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-1 h-auto p-0 scrollbar-hide">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1 sm:p-1.5 shadow-sm">
+      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
         {tabs.map((tab) => (
           <TabsTrigger
             key={tab.value}
             value={tab.value}
             className={cn(
-              "gap-1.5 text-xs sm:text-sm whitespace-nowrap rounded-xl px-3 py-2.5 relative",
+              "gap-1 sm:gap-1.5 text-[11px] sm:text-sm whitespace-nowrap rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 relative min-h-[36px] touch-manipulation",
               "data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80",
               "data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20",
               "hover:bg-muted/50 transition-all duration-300"
             )}
           >
-            <tab.icon className="w-3.5 h-3.5" />
-            {tab.label}
+            <tab.icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+            <span className="truncate">{tab.label}</span>
             {tab.bindingType && (
               <BindingIndicator type={tab.bindingType} dotOnly showTooltip />
             )}

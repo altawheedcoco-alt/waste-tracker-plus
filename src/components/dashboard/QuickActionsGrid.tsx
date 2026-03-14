@@ -163,7 +163,7 @@ const QuickActionsGrid = ({
                   />
                 </div>
 
-                <div className="flex gap-1.5 flex-wrap justify-end">
+                <div className="flex gap-1 sm:gap-1.5 overflow-x-auto scrollbar-hide justify-end pb-0.5">
                   {(Object.keys(categoryConfig) as CategoryFilter[]).map((cat) => {
                     const cfg = categoryConfig[cat];
                     const count = categoryCounts[cat];
@@ -176,16 +176,16 @@ const QuickActionsGrid = ({
                         size="sm"
                         onClick={() => setActiveCategory(cat)}
                         className={cn(
-                          'h-7 text-xs gap-1 rounded-full px-3 transition-all',
+                          'h-7 text-[11px] sm:text-xs gap-0.5 sm:gap-1 rounded-full px-2 sm:px-3 transition-all whitespace-nowrap shrink-0 touch-manipulation',
                           isActive 
                             ? 'shadow-sm' 
                             : 'bg-transparent hover:bg-muted'
                         )}
                       >
-                        <cfg.icon className={cn('h-3 w-3', !isActive && cfg.color)} />
+                        <cfg.icon className={cn('h-3 w-3 shrink-0', !isActive && cfg.color)} />
                         {cfg.label}
                         <span className={cn(
-                          'text-[10px] min-w-4 text-center rounded-full px-1',
+                          'text-[9px] sm:text-[10px] min-w-4 text-center rounded-full px-0.5 sm:px-1',
                           isActive ? 'bg-primary-foreground/20' : 'bg-muted text-muted-foreground'
                         )}>
                           {count}

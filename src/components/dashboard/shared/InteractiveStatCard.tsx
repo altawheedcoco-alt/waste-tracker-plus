@@ -114,12 +114,12 @@ const InteractiveStatCard = ({
             gradient ? `bg-gradient-to-br ${gradient}` : bgColor
           )} />
 
-          <CardContent className="pt-6 pb-5 relative">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1">
+          <CardContent className="pt-4 sm:pt-6 pb-4 sm:pb-5 px-3 sm:px-6 relative">
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1 shrink-0">
                 {isClickable && (
                   <motion.div
-                    className="opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="opacity-0 group-hover:opacity-100 transition-opacity hidden sm:block"
                     animate={{ x: [0, -3, 0] }}
                     transition={{ repeat: Infinity, duration: 1.5 }}
                   >
@@ -127,39 +127,39 @@ const InteractiveStatCard = ({
                   </motion.div>
                 )}
                 {badge && (
-                  <Badge variant={badgeVariant || 'destructive'} className="text-[10px] px-1.5 py-0.5">
+                  <Badge variant={badgeVariant || 'destructive'} className="text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0.5">
                     {badge}
                   </Badge>
                 )}
               </div>
-              <div className="flex items-center gap-3 flex-row-reverse">
+              <div className="flex items-center gap-2 sm:gap-3 flex-row-reverse flex-1 min-w-0">
                 <motion.div 
                   className={cn(
-                    'w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-300',
+                    'w-10 h-10 sm:w-12 sm:h-12 rounded-xl flex items-center justify-center transition-all duration-300 shrink-0',
                     'group-hover:scale-110 group-hover:shadow-lg',
                     gradient ? `bg-gradient-to-br ${gradient} text-white shadow-sm` : bgColor
                   )}
                   whileHover={{ rotate: [0, -5, 5, 0] }}
                   transition={{ duration: 0.4 }}
                 >
-                  <Icon className={cn('w-6 h-6', !gradient && color)} />
+                  <Icon className={cn('w-5 h-5 sm:w-6 sm:h-6', !gradient && color)} />
                 </motion.div>
-                <div className="min-w-0 text-right">
-                  <p className="text-sm text-muted-foreground truncate">{title}</p>
-                  <div className="flex items-baseline gap-1.5 mt-1 justify-end">
+                <div className="min-w-0 text-right flex-1">
+                  <p className="text-xs sm:text-sm text-muted-foreground truncate">{title}</p>
+                  <div className="flex items-baseline gap-1 sm:gap-1.5 mt-0.5 sm:mt-1 justify-end">
                     <AnimatedCounter
                       value={value}
-                      className="text-2xl font-bold tracking-tight"
+                      className="text-xl sm:text-2xl font-bold tracking-tight"
                     />
                     {suffix && (
-                      <span className="text-xs text-muted-foreground">{suffix}</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{suffix}</span>
                     )}
                   </div>
                   {subtitle && (
-                    <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5 truncate">{subtitle}</p>
                   )}
                   {trend && (
-                    <p className={cn('text-xs mt-1 font-medium', trend.value >= 0 ? 'text-emerald-600' : 'text-red-600')}>
+                    <p className={cn('text-[10px] sm:text-xs mt-0.5 sm:mt-1 font-medium', trend.value >= 0 ? 'text-emerald-600' : 'text-red-600')}>
                       {trend.value >= 0 ? '↑' : '↓'} {Math.abs(trend.value)}%
                       {trend.label && <span className="text-muted-foreground mr-1">{trend.label}</span>}
                     </p>
