@@ -995,7 +995,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   </div>
 
                   {/* Nav items - scrollable */}
-                  <nav className="flex-1 overflow-y-auto p-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {filteredMenuItems.length > 0 ? (
                       filteredMenuItems.map((item: SidebarMenuItem) => (
                         <div key={item.key} onClick={(e) => {
