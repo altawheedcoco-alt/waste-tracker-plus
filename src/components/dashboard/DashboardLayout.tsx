@@ -519,7 +519,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               </div>
 
           {/* Account Switcher / Organization info */}
-          <div className="border-b border-border">
+          <div className="border-b border-sidebar-border">
             <AccountSwitcher collapsed={!isSidebarOpen} />
           </div>
 
