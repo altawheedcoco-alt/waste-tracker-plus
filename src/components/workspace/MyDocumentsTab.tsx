@@ -133,12 +133,12 @@ const MyDocumentsTab = () => {
         title: `إيداع ${dep.reference_number || ''}`,
         subtitle: dep.amount ? `${dep.amount} ج.م` : '',
         date: dep.created_at,
-        status: dep.status,
+        status: dep.transfer_method,
         url: dep.receipt_url,
       })),
       emptyText: 'لا توجد إيداعات',
       link: '/dashboard/partner-accounts',
-      hidden: !hasPermission('view_financials'),
+      hidden: !hasPermission('manage_deposits'),
     },
   ].filter(s => !s.hidden);
 
