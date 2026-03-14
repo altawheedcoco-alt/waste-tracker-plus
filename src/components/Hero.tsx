@@ -87,7 +87,7 @@ const Hero = memo(() => {
 
           {/* Main heading — v3.0 tighter, bolder */}
           <motion.h1
-            className="text-[1.5rem] sm:text-5xl md:text-6xl lg:text-7xl font-black mb-2 sm:mb-5 leading-[1.2] sm:leading-[1.15] px-1 sm:px-2"
+            className="text-[1.65rem] sm:text-5xl md:text-6xl lg:text-7xl font-black mb-3 sm:mb-5 leading-[1.25] sm:leading-[1.15] px-1 sm:px-2"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
