@@ -34,7 +34,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 
 interface ChatHeaderProps {
   partnerName: string;
-  partnerType: 'generator' | 'transporter' | 'recycler';
+  partnerType: string;
   partnerLogo?: string | null;
   isOnline?: boolean;
   lastSeen?: string;

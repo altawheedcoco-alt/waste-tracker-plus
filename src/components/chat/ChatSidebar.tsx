@@ -33,7 +33,7 @@ import { cn } from '@/lib/utils';
 export interface ChatPartner {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: string;
   logo_url: string | null;
   lastMessage?: string;
   lastMessageTime?: string;

@@ -26,7 +26,7 @@ interface ChatPartnerInfoProps {
   partner: {
     id: string;
     name: string;
-    organization_type: 'generator' | 'transporter' | 'recycler';
+    organization_type: string;
     logo_url: string | null;
   };
   mediaCount?: number;
