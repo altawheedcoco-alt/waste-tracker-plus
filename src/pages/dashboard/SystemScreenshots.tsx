@@ -395,6 +395,7 @@ const SystemScreenshots = () => {
       await new Promise(r => setTimeout(r, 1500));
 
       // Capture the actual rendered page
+      const { default: html2canvas } = await import('html2canvas');
       const canvas = await html2canvas(document.body, {
         width: window.innerWidth,
         height: window.innerHeight,

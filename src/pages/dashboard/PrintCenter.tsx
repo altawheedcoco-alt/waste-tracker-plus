@@ -564,6 +564,10 @@ const PrintCenter = () => {
 
       await new Promise(r => setTimeout(r, 800));
 
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const canvas = await html2canvas(iDoc.body, { scale: 2, useCORS: true, logging: false, width: 794, windowWidth: 794 });
       document.body.removeChild(iframe);
 
