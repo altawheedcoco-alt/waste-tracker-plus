@@ -442,18 +442,18 @@ const Reports = () => {
             </div>
 
             {/* Print Options and Actions */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t">
+            <div className="flex flex-col gap-3 pt-4 border-t">
               {/* Print Options */}
-              <div className="flex flex-wrap items-center gap-6">
-                <span className="text-sm font-medium text-muted-foreground">{t('reports.printOptions')}:</span>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">{t('reports.printOptions')}:</span>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="includeStamps"
                     checked={includeStamps}
                     onCheckedChange={(checked) => setIncludeStamps(checked as boolean)}
                   />
-                  <Label htmlFor="includeStamps" className="flex items-center gap-1 cursor-pointer">
-                    <Stamp className="w-4 h-4" />
+                  <Label htmlFor="includeStamps" className="flex items-center gap-1 cursor-pointer text-xs sm:text-sm">
+                    <Stamp className="w-3.5 h-3.5" />
                     {t('reports.includeStamps')}
                   </Label>
                 </div>
@@ -463,27 +463,27 @@ const Reports = () => {
                     checked={includeSignatures}
                     onCheckedChange={(checked) => setIncludeSignatures(checked as boolean)}
                   />
-                  <Label htmlFor="includeSignatures" className="flex items-center gap-1 cursor-pointer">
-                    <PenLine className="w-4 h-4" />
+                  <Label htmlFor="includeSignatures" className="flex items-center gap-1 cursor-pointer text-xs sm:text-sm">
+                    <PenLine className="w-3.5 h-3.5" />
                     {t('reports.includeSignatures')}
                   </Label>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3">
-                <Button onClick={fetchReportData} variant="outline" className="gap-2">
-                  <RefreshCw className="w-4 h-4" />
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                <Button onClick={fetchReportData} variant="outline" size="sm" className="gap-1.5 whitespace-nowrap text-xs">
+                  <RefreshCw className="w-3.5 h-3.5" />
                   {t('reports.refreshData')}
                 </Button>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Printer className="w-4 h-4" />
+                    <Button size="sm" className="gap-1.5 whitespace-nowrap text-xs">
+                      <Printer className="w-3.5 h-3.5" />
                       {t('reports.printReport')}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                     <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                     </DialogHeader>
