@@ -39,7 +39,7 @@ const disposalMethodLabels: Record<string, string> = {
 };
 
 const statusLabels: Record<string, string> = {
-  new: 'جديدة', approved: 'معتمدة', collection_started: 'بدأ الجمع', in_transit: 'قيد النقل',
+  new: 'جديدة', registered: 'مسجلة', approved: 'معتمدة', collecting: 'بدأ الجمع', in_transit: 'قيد النقل',
   delivered: 'تم التسليم', processing: 'قيد المعالجة', confirmed: 'مؤكدة', completed: 'مكتملة',
 };
 
