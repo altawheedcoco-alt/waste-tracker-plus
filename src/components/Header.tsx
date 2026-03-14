@@ -1,10 +1,13 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
 import PlatformLogo from "@/components/common/PlatformLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface DropdownItem {
   label: string;
@@ -29,10 +32,17 @@ const Header = memo(() => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
+  const { user, profile } = useAuth();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
+  const handleGoToDashboard = () => navigate('/dashboard');
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    toast.success('تم تسجيل الخروج بنجاح');
+    navigate('/');
+  };
 
   const dropdowns: NavDropdown[] = [
     {
@@ -271,14 +281,29 @@ const Header = memo(() => {
                 <Globe className="w-3.5 h-3.5" />
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
-              <Button variant="default" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
-                <LogIn className="w-3.5 h-3.5" />
-                {t('nav.login')}
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
-                <UserPlus className="w-3.5 h-3.5" />
-                {t('nav.employeeLogin')}
-              </Button>
+              {user ? (
+                <>
+                  <Button variant="default" size="sm" onClick={handleGoToDashboard} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
+                    <LayoutDashboard className="w-3.5 h-3.5" />
+                    {t('nav.dashboard') || 'لوحة التحكم'}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50">
+                    <LogOut className="w-3.5 h-3.5" />
+                    {t('nav.logout') || 'خروج'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button variant="default" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
+                    <LogIn className="w-3.5 h-3.5" />
+                    {t('nav.login')}
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
+                    <UserPlus className="w-3.5 h-3.5" />
+                    {t('nav.employeeLogin')}
+                  </Button>
+                </>
+              )}
             </div>
 
           </div>
@@ -302,16 +327,29 @@ const Header = memo(() => {
                   {language === 'ar' ? 'English' : 'عربي'}
                 </button>
                 <GuideButton />
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
-                    <UserPlus className="w-3.5 h-3.5" />
-                    {t('nav.employee')}
-                  </Button>
-                  <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
-                    <LogIn className="w-3.5 h-3.5" />
-                    {t('nav.login')}
-                  </Button>
-                </div>
+                {user ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      {t('nav.dashboard') || 'لوحة التحكم'}
+                    </Button>
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                      <LogOut className="w-3.5 h-3.5" />
+                      {t('nav.logout') || 'خروج'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      {t('nav.employee')}
+                    </Button>
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
+                      <LogIn className="w-3.5 h-3.5" />
+                      {t('nav.login')}
+                    </Button>
+                  </div>
+                )}
               </div>
             </nav>
           </div>
