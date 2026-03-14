@@ -202,73 +202,73 @@ const DriverTracking = () => {
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6"
       >
         {/* Back Button */}
         <BackButton />
 
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <Button onClick={fetchDrivers} variant="outline" className="gap-2">
-            <RefreshCcw className="w-4 h-4" />
-            تحديث
+        <div className="flex items-center justify-between gap-2">
+          <Button onClick={fetchDrivers} variant="outline" size="sm" className="gap-1.5 shrink-0">
+            <RefreshCcw className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">تحديث</span>
           </Button>
-          <div className="text-right">
-            <h1 className="text-3xl font-bold">تتبع السائقين</h1>
-            <p className="text-muted-foreground">خريطة تفاعلية لمواقع السائقين</p>
+          <div className="text-right min-w-0">
+            <h1 className="text-lg sm:text-3xl font-bold truncate">تتبع السائقين</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">خريطة تفاعلية لمواقع السائقين</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <User className="w-5 h-5 text-primary" />
+            <CardContent className="p-3 sm:p-4 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <User className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">إجمالي السائقين</p>
-                  <p className="text-2xl font-bold">{drivers.length}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">إجمالي السائقين</p>
+                  <p className="text-lg sm:text-2xl font-bold">{drivers.length}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-green-500/30 bg-green-500/5">
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <Navigation className="w-5 h-5 text-green-500" />
+            <CardContent className="p-3 sm:p-4 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <Navigation className="w-4 h-4 sm:w-5 sm:h-5 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">متاح ونشط</p>
-                  <p className="text-2xl font-bold text-green-600">{activeDrivers}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">متاح ونشط</p>
+                  <p className="text-lg sm:text-2xl font-bold text-green-600">{activeDrivers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Truck className="w-5 h-5 text-amber-500" />
+            <CardContent className="p-3 sm:p-4 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Truck className="w-4 h-4 sm:w-5 sm:h-5 text-amber-500" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">في مهمة</p>
-                  <p className="text-2xl font-bold text-amber-600">{busyDrivers}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">في مهمة</p>
+                  <p className="text-lg sm:text-2xl font-bold text-amber-600">{busyDrivers}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-muted bg-muted/5">
-            <CardContent className="p-4 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 rounded-lg bg-muted flex items-center justify-center">
-                  <Circle className="w-5 h-5 text-muted-foreground" />
+            <CardContent className="p-3 sm:p-4 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                  <Circle className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
                 </div>
-                <div>
-                  <p className="text-xs text-muted-foreground">غير متصل</p>
-                  <p className="text-2xl font-bold text-muted-foreground">{offlineDrivers}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground truncate">غير متصل</p>
+                  <p className="text-lg sm:text-2xl font-bold text-muted-foreground">{offlineDrivers}</p>
                 </div>
               </div>
             </CardContent>
