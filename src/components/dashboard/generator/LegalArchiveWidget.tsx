@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInDays, addYears } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
