@@ -50,19 +50,24 @@ const ResponsivePageContainer = ({
   return (
     <div className={cn(containerClass, className)}>
       {(title || actions) && (
-        <div className={cn('flex items-start justify-between', headerClass)}>
-          {title && (
-            <div className="text-right">
-              <h1 className={cn('font-bold', titleClass)}>{title}</h1>
-              {subtitle && (
-                <p className={cn('text-muted-foreground', subtitleClass)}>
-                  {subtitle}
-                </p>
-              )}
-            </div>
-          )}
+        <div className="space-y-2 sm:space-y-0">
+          <div className={cn('flex items-start justify-between', headerClass)}>
+            {title && (
+              <div className="text-right flex-1 min-w-0">
+                <h1 className={cn('font-bold truncate', titleClass)}>{title}</h1>
+                {subtitle && (
+                  <p className={cn('text-muted-foreground truncate', subtitleClass)}>
+                    {subtitle}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
           {actions && (
-            <div className={cn('flex flex-wrap gap-2', isMobile ? 'w-full' : '')}>
+            <div className={cn(
+              'flex gap-1.5 sm:gap-2',
+              isMobile ? 'overflow-x-auto scrollbar-hide pb-0.5 -mx-1 px-1' : 'flex-wrap'
+            )}>
               {actions}
             </div>
           )}
