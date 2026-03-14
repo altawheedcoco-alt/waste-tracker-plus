@@ -67,20 +67,18 @@ const DocumentCenter = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-4" dir="rtl">
+      <div className="space-y-3 sm:space-y-4" dir="rtl">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <div>
-              <h1 className="text-xl font-bold flex items-center gap-2">
-                <FolderOpen className="w-6 h-6 text-primary" />
-                {t('docCenter.title')}
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {t('docCenter.subtitle')}
-              </p>
-            </div>
+        <div className="flex items-center gap-2 sm:gap-3">
+          <BackButton />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-base sm:text-xl font-bold flex items-center gap-1.5 sm:gap-2">
+              <FolderOpen className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+              <span className="truncate">{t('docCenter.title')}</span>
+            </h1>
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">
+              {t('docCenter.subtitle')}
+            </p>
           </div>
         </div>
 
