@@ -107,20 +107,20 @@ const AdminActiveTracking = () => {
         </div>
         <CardDescription className="text-right">{activeShipments.length} شحنات نشطة عبر جميع الجهات</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-2 sm:space-y-3">
         {activeShipments.map((shipment) => (
           <div
             key={shipment.id}
-            className="p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow cursor-pointer"
+            className="p-2.5 sm:p-3 rounded-lg border bg-card hover:shadow-sm transition-shadow cursor-pointer"
             onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
           >
-            <div className="flex items-start justify-between mb-2">
-              <Badge className={`text-[10px] ${statusColors[shipment.status] || ''}`}>
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <Badge className={`text-[10px] shrink-0 ${statusColors[shipment.status] || ''}`}>
                 {statusLabels[shipment.status] || shipment.status}
               </Badge>
-              <div className="text-right">
-                <span className="font-semibold text-sm">{shipment.shipment_number}</span>
-                <p className="text-xs text-muted-foreground">{shipment.waste_type} • {shipment.quantity} {shipment.unit}</p>
+              <div className="text-right min-w-0">
+                <span className="font-semibold text-xs sm:text-sm">{shipment.shipment_number}</span>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{shipment.waste_type} • {shipment.quantity} {shipment.unit}</p>
               </div>
             </div>
 
@@ -128,29 +128,28 @@ const AdminActiveTracking = () => {
               <ShipmentTimeline shipment={shipment} compact />
             </div>
 
-            <div className="flex items-center justify-between text-xs text-muted-foreground mt-2">
+            <div className="flex flex-col sm:flex-row items-end sm:items-center justify-between text-[10px] sm:text-xs text-muted-foreground mt-2 gap-1">
               <div className="flex items-center gap-1">
-                <Clock className="w-3 h-3" />
-                {shipment.expected_delivery_date
+                <Clock className="w-3 h-3 shrink-0" />
+                <span className="truncate">{shipment.expected_delivery_date
                   ? formatDistanceToNow(new Date(shipment.expected_delivery_date), { locale: ar, addSuffix: true })
-                  : 'غير محدد'}
+                  : 'غير محدد'}</span>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 sm:gap-3 flex-wrap justify-end">
                 {shipment.driver && (
                   <span className="flex items-center gap-1">
-                    <Truck className="w-3 h-3" />
-                    {shipment.driver.name}
-                    {shipment.driver.plate && ` (${shipment.driver.plate})`}
+                    <Truck className="w-3 h-3 shrink-0" />
+                    <span className="truncate max-w-[80px] sm:max-w-none">{shipment.driver.name}</span>
                   </span>
                 )}
                 <span className="flex items-center gap-1">
-                  <MapPin className="w-3 h-3" />
-                  {shipment.transporter_name}
+                  <MapPin className="w-3 h-3 shrink-0" />
+                  <span className="truncate max-w-[80px] sm:max-w-none">{shipment.transporter_name}</span>
                 </span>
               </div>
             </div>
 
-            <div className="text-[10px] text-muted-foreground text-right mt-1">
+            <div className="text-[10px] text-muted-foreground text-right mt-1 truncate">
               المولّد: {shipment.generator_name}
             </div>
           </div>

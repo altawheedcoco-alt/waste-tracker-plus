@@ -34,12 +34,12 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div className="flex items-center gap-4">
+      <div className="space-y-4 sm:space-y-6">
+        <div className="flex items-center gap-3">
           <BackButton />
-          <div>
-            <h1 className="text-2xl font-bold">{t('shipments.createNewShipment')}</h1>
-            <p className="text-muted-foreground">{t('shipments.createNewShipmentDesc')}</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold truncate">{t('shipments.createNewShipment')}</h1>
+            <p className="text-xs sm:text-sm text-muted-foreground">{t('shipments.createNewShipmentDesc')}</p>
           </div>
         </div>
 

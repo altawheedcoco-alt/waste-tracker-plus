@@ -291,20 +291,29 @@ const Reports = () => {
         {/* Back Button */}
         <BackButton />
         {/* Header */}
-        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5 sm:p-6">
+        <div className="relative overflow-hidden rounded-2xl border border-border/30 bg-gradient-to-l from-primary/5 via-background to-primary/10 p-4 sm:p-6">
           <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-primary/5 blur-3xl" />
           <div className="absolute -bottom-8 -left-8 w-24 h-24 rounded-full bg-primary/5 blur-3xl" />
-          <div className="flex items-center justify-between relative z-10">
-            <div className="flex items-center gap-3">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 relative z-10">
+            <div className="text-right w-full sm:w-auto">
+              <div className="flex items-center gap-2 justify-end mb-1">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                  <ChartBar className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                </div>
+                <h1 className="text-lg sm:text-3xl font-bold truncate">{t('reports.title')}</h1>
+              </div>
+              <p className="text-muted-foreground text-xs sm:text-sm">{t('reports.subtitle')}</p>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto overflow-x-auto scrollbar-hide">
               <RegulatoryExport />
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="gap-2 rounded-xl shadow-sm">
-                    <FileText className="w-4 h-4" />
+                  <Button size="sm" className="gap-1.5 rounded-xl shadow-sm whitespace-nowrap text-xs sm:text-sm">
+                    <FileText className="w-3.5 h-3.5" />
                     {t('reports.officialReport')}
                   </Button>
                 </DialogTrigger>
-                <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                   </DialogHeader>
@@ -316,15 +325,6 @@ const Reports = () => {
                   />
                 </DialogContent>
               </Dialog>
-            </div>
-            <div className="text-right">
-              <div className="flex items-center gap-3 justify-end mb-1">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <ChartBar className="w-5 h-5 text-primary" />
-                </div>
-                <h1 className="text-2xl sm:text-3xl font-bold">{t('reports.title')}</h1>
-              </div>
-              <p className="text-muted-foreground text-sm">{t('reports.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -342,7 +342,7 @@ const Reports = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Date Range and Status/Type Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* From Date */}
               <div className="space-y-2 text-right">
                 <Label>{t('reports.fromDate')}</Label>
@@ -442,18 +442,18 @@ const Reports = () => {
             </div>
 
             {/* Print Options and Actions */}
-            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pt-4 border-t">
+            <div className="flex flex-col gap-3 pt-4 border-t">
               {/* Print Options */}
-              <div className="flex flex-wrap items-center gap-6">
-                <span className="text-sm font-medium text-muted-foreground">{t('reports.printOptions')}:</span>
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6">
+                <span className="text-xs sm:text-sm font-medium text-muted-foreground">{t('reports.printOptions')}:</span>
                 <div className="flex items-center gap-2">
                   <Checkbox
                     id="includeStamps"
                     checked={includeStamps}
                     onCheckedChange={(checked) => setIncludeStamps(checked as boolean)}
                   />
-                  <Label htmlFor="includeStamps" className="flex items-center gap-1 cursor-pointer">
-                    <Stamp className="w-4 h-4" />
+                  <Label htmlFor="includeStamps" className="flex items-center gap-1 cursor-pointer text-xs sm:text-sm">
+                    <Stamp className="w-3.5 h-3.5" />
                     {t('reports.includeStamps')}
                   </Label>
                 </div>
@@ -463,27 +463,27 @@ const Reports = () => {
                     checked={includeSignatures}
                     onCheckedChange={(checked) => setIncludeSignatures(checked as boolean)}
                   />
-                  <Label htmlFor="includeSignatures" className="flex items-center gap-1 cursor-pointer">
-                    <PenLine className="w-4 h-4" />
+                  <Label htmlFor="includeSignatures" className="flex items-center gap-1 cursor-pointer text-xs sm:text-sm">
+                    <PenLine className="w-3.5 h-3.5" />
                     {t('reports.includeSignatures')}
                   </Label>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center gap-3">
-                <Button onClick={fetchReportData} variant="outline" className="gap-2">
-                  <RefreshCw className="w-4 h-4" />
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
+                <Button onClick={fetchReportData} variant="outline" size="sm" className="gap-1.5 whitespace-nowrap text-xs">
+                  <RefreshCw className="w-3.5 h-3.5" />
                   {t('reports.refreshData')}
                 </Button>
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="gap-2">
-                      <Printer className="w-4 h-4" />
+                    <Button size="sm" className="gap-1.5 whitespace-nowrap text-xs">
+                      <Printer className="w-3.5 h-3.5" />
                       {t('reports.printReport')}
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+                  <DialogContent className="max-w-[95vw] sm:max-w-5xl max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
                     <DialogTitle className="text-right">{t('reports.officialStatReport')}</DialogTitle>
                     </DialogHeader>
@@ -505,16 +505,16 @@ const Reports = () => {
         <RegulatoryExport />
 
         {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Package className="w-6 h-6 text-primary" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.totalShipments')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.totalShipments')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.shipmentsByStatus.reduce((a, b) => a + b.value, 0)}
                   </p>
                 </div>
@@ -522,14 +522,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center">
-                  <Building2 className="w-6 h-6 text-blue-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                  <Building2 className="w-4 h-4 sm:w-6 sm:h-6 text-blue-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.generatorOrgs')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.generatorOrgs')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.generators'))?.value || 0}
                   </p>
                 </div>
@@ -537,14 +537,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center">
-                  <Truck className="w-6 h-6 text-amber-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Truck className="w-4 h-4 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.transportCompanies')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.transportCompanies')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.transporters'))?.value || 0}
                   </p>
                 </div>
@@ -552,14 +552,14 @@ const Reports = () => {
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-12 h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-                  <Recycle className="w-6 h-6 text-emerald-500" />
+            <CardContent className="p-3 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-2">
+                <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg bg-emerald-500/10 flex items-center justify-center shrink-0">
+                  <Recycle className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-500" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('reportsPage.recyclerOrgs')}</p>
-                  <p className="text-3xl font-bold">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('reportsPage.recyclerOrgs')}</p>
+                  <p className="text-xl sm:text-3xl font-bold">
                     {data.organizationsByType.find(o => o.name === t('reports.recyclers'))?.value || 0}
                   </p>
                 </div>
@@ -580,7 +580,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.shipmentsTrendDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={data.shipmentsTrend}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
@@ -608,7 +608,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.shipmentsByStatusDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={data.shipmentsByStatus}
@@ -640,7 +640,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.shipmentsByWasteDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={data.shipmentsByWasteType} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
@@ -659,7 +659,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.orgDistributionDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={data.organizationsByType}

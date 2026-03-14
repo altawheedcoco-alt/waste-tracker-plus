@@ -262,17 +262,17 @@ const TransporterDrivers = () => {
 
   return (
     <DashboardLayout>
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       <BackButton />
 
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold">إدارة السائقين</h1>
-          <p className="text-muted-foreground">عرض وإدارة سائقي الشركة</p>
+          <h1 className="text-lg sm:text-2xl font-bold">إدارة السائقين</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground">عرض وإدارة سائقي الشركة</p>
         </div>
         <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="eco">
+            <Button variant="eco" size="sm" className="w-full sm:w-auto">
               <Plus className="ml-2 h-4 w-4" />
               إضافة سائق
             </Button>
@@ -496,37 +496,37 @@ const TransporterDrivers = () => {
       </Dialog>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4">
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-              <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center shrink-0">
+              <Users className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.total}</p>
-              <p className="text-sm text-muted-foreground">إجمالي السائقين</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground truncate">إجمالي السائقين</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-              <UserCheck className="w-6 h-6 text-emerald-600 dark:text-emerald-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center shrink-0">
+              <UserCheck className="w-4 h-4 sm:w-6 sm:h-6 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.available}</p>
-              <p className="text-sm text-muted-foreground">متاحين</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{stats.available}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground truncate">متاحين</p>
             </div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center">
-              <Truck className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+          <CardContent className="p-3 sm:p-4 flex items-center gap-2 sm:gap-4">
+            <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-100 dark:bg-amber-900 flex items-center justify-center shrink-0">
+              <Truck className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600 dark:text-amber-400" />
             </div>
-            <div>
-              <p className="text-2xl font-bold">{stats.busy}</p>
-              <p className="text-sm text-muted-foreground">في مهمة</p>
+            <div className="min-w-0">
+              <p className="text-lg sm:text-2xl font-bold">{stats.busy}</p>
+              <p className="text-[10px] sm:text-sm text-muted-foreground truncate">في مهمة</p>
             </div>
           </CardContent>
         </Card>
@@ -567,17 +567,17 @@ const TransporterDrivers = () => {
               transition={{ delay: index * 0.05 }}
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-eco-emerald flex items-center justify-center text-white font-bold">
+                <CardHeader className="pb-3 p-3 sm:p-6 sm:pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary to-eco-emerald flex items-center justify-center text-white font-bold text-sm shrink-0">
                         {driver.profile?.full_name?.charAt(0) || '؟'}
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{driver.profile?.full_name || 'غير معروف'}</CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <Truck className="w-3 h-3" />
-                          {driver.vehicle_type || 'غير محدد'} - {driver.vehicle_plate || 'بدون لوحة'}
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm sm:text-lg truncate">{driver.profile?.full_name || 'غير معروف'}</CardTitle>
+                        <CardDescription className="flex items-center gap-1 text-[10px] sm:text-sm">
+                          <Truck className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{driver.vehicle_type || 'غير محدد'} - {driver.vehicle_plate || 'بدون لوحة'}</span>
                         </CardDescription>
                       </div>
                     </div>
@@ -589,7 +589,7 @@ const TransporterDrivers = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 p-3 sm:p-6 pt-0 sm:pt-0">
                   <div className="flex items-center justify-between">
                     <Badge variant={driver.is_available ? 'default' : 'secondary'}>
                       {driver.is_available ? 'متاح' : 'غير متاح'}
