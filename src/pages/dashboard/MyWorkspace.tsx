@@ -56,7 +56,7 @@ const orgTypeLabels: Record<string, string> = {
 const MyWorkspace = () => {
   const { profile, organization, user } = useAuth();
   const { permissions, isLoading: permsLoading } = useMyPermissions();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('dashboard');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
