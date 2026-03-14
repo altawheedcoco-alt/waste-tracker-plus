@@ -70,6 +70,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
   const [autoPassword, setAutoPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [registerAsMember, setRegisterAsMember] = useState(true);
+  const [dashboardMode, setDashboardMode] = useState<'management' | 'workspace'>('workspace');
 
   useEffect(() => {
     if (position && open) {
