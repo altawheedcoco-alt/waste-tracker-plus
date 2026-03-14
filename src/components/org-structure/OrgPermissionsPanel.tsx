@@ -240,12 +240,36 @@ function PositionPermEditor({ position }: { position: Position }) {
                     )}
                   </div>
 
+                  {/* Tier filter */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] text-muted-foreground font-medium">تصفية حسب الأهمية:</span>
+                    <Button size="sm" variant={tierFilter === 'all' ? 'default' : 'outline'} onClick={() => setTierFilter('all')} className="text-[10px] h-6 px-2">
+                      الكل
+                    </Button>
+                    {(['essential', 'important', 'optional'] as PermTier[]).map(t => (
+                      <Button
+                        key={t}
+                        size="sm"
+                        variant={tierFilter === t ? 'default' : 'outline'}
+                        onClick={() => setTierFilter(t)}
+                        className="text-[10px] h-6 px-2"
+                      >
+                        {PERM_TIER_META[t].icon} {PERM_TIER_META[t].label}
+                      </Button>
+                    ))}
+                  </div>
+
                   {/* Permission groups */}
                   <div className="space-y-3">
                     {permissionGroups.map(group => {
-                      const allOn = group.permissions.every(p => localPerms[p.key]);
-                      const someOn = group.permissions.some(p => localPerms[p.key]);
-                      const groupCount = group.permissions.filter(p => localPerms[p.key]).length;
+                      const filteredPerms = tierFilter === 'all'
+                        ? group.permissions
+                        : group.permissions.filter(p => p.tier === tierFilter);
+
+                      if (filteredPerms.length === 0) return null;
+
+                      const allOn = filteredPerms.every(p => localPerms[p.key]);
+                      const groupCount = filteredPerms.filter(p => localPerms[p.key]).length;
 
                       return (
                         <div key={group.title} className={`rounded-lg border p-3 ${group.bg}`}>
@@ -260,7 +284,7 @@ function PositionPermEditor({ position }: { position: Position }) {
                                 {allOn ? <XCircle className="w-3 h-3 ml-1" /> : <CheckCircle2 className="w-3 h-3 ml-1" />}
                                 {allOn ? 'إلغاء' : 'تحديد الكل'}
                               </Button>
-                              <Badge variant="outline" className="text-[10px]">{groupCount}/{group.permissions.length}</Badge>
+                              <Badge variant="outline" className="text-[10px]">{groupCount}/{filteredPerms.length}</Badge>
                             </div>
                             <h4 className={`font-semibold text-sm flex items-center gap-1.5 ${group.color}`}>
                               <span>{group.icon}</span>
@@ -268,22 +292,33 @@ function PositionPermEditor({ position }: { position: Position }) {
                             </h4>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                            {group.permissions.map(perm => (
-                              <div
-                                key={perm.key}
-                                className={`flex items-center justify-between p-2 rounded-md transition-colors cursor-pointer ${
-                                  localPerms[perm.key] ? 'bg-background/80 shadow-sm' : 'hover:bg-background/50'
-                                }`}
-                                onClick={() => togglePerm(perm.key)}
-                              >
-                                <Switch
-                                  checked={localPerms[perm.key] || false}
-                                  onCheckedChange={() => togglePerm(perm.key)}
-                                  className="scale-75"
-                                />
-                                <span className="text-xs font-medium">{perm.label}</span>
-                              </div>
-                            ))}
+                            {filteredPerms.map(perm => {
+                              const tierMeta = PERM_TIER_META[perm.tier];
+                              return (
+                                <div
+                                  key={perm.key}
+                                  className={`flex items-center justify-between p-2 rounded-md transition-colors cursor-pointer border ${
+                                    localPerms[perm.key]
+                                      ? `bg-background/80 shadow-sm ${tierMeta.borderClass}`
+                                      : 'border-transparent hover:bg-background/50'
+                                  }`}
+                                  onClick={() => togglePerm(perm.key)}
+                                  title={perm.description}
+                                >
+                                  <div className="flex items-center gap-1.5">
+                                    <Switch
+                                      checked={localPerms[perm.key] || false}
+                                      onCheckedChange={() => togglePerm(perm.key)}
+                                      className="scale-75"
+                                    />
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tierMeta.bgClass} ${tierMeta.color}`}>
+                                      {tierMeta.label}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-medium">{perm.label}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       );
