@@ -104,7 +104,7 @@ const Hero = memo(() => {
           </motion.h1>
 
           <motion.p
-            className="text-[9px] sm:text-sm text-white/75 mt-0.5 sm:mt-1 font-semibold tracking-wide px-4 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
+            className="text-[10px] sm:text-sm text-white/80 mt-0.5 sm:mt-1 font-semibold tracking-wide px-4 drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, delay: 0.3 }}
