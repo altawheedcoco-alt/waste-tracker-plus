@@ -183,7 +183,7 @@ const DocumentActionHub = ({
 
   const handleOpenExternal = useCallback(() => {
     if (!resolvedUrl) return;
-    window.open(resolvedUrl, '_blank');
+    safeWindowOpen(resolvedUrl);
   }, [resolvedUrl]);
 
   const isActionHidden = (action: string) => hideActions.includes(action as any);
