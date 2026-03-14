@@ -18,7 +18,7 @@ interface ResponsiveCardProps {
 }
 
 /**
- * بطاقة مستجيبة تتكيف مع وضع العرض
+ * بطاقة مستجيبة تتكيف مع وضع العرض — v4.0 Modern Elegant
  */
 const ResponsiveCard = ({
   children,
@@ -31,7 +31,7 @@ const ResponsiveCard = ({
   interactive = false,
   compact = false,
 }: ResponsiveCardProps) => {
-  const { isMobile, isTablet, getResponsiveClass } = useDisplayMode();
+  const { isMobile, getResponsiveClass } = useDisplayMode();
 
   const paddingClass = getResponsiveClass({
     mobile: compact ? 'p-3' : 'p-4',
@@ -42,7 +42,7 @@ const ResponsiveCard = ({
   const titleClass = getResponsiveClass({
     mobile: 'text-sm',
     tablet: 'text-base',
-    desktop: 'text-lg',
+    desktop: 'text-base',
   });
 
   const descriptionClass = getResponsiveClass({
@@ -53,20 +53,20 @@ const ResponsiveCard = ({
 
   const iconSizeClass = getResponsiveClass({
     mobile: 'w-8 h-8',
-    tablet: 'w-10 h-10',
-    desktop: 'w-12 h-12',
+    tablet: 'w-9 h-9',
+    desktop: 'w-10 h-10',
   });
 
   const iconInnerClass = getResponsiveClass({
     mobile: 'w-4 h-4',
-    tablet: 'w-5 h-5',
-    desktop: 'w-6 h-6',
+    tablet: 'w-4.5 h-4.5',
+    desktop: 'w-5 h-5',
   });
 
   const cardContent = (
     <Card
       className={cn(
-        'transition-all duration-300 glass-card-hover',
+        'border-border/60 shadow-sm hover:shadow-md transition-shadow duration-200',
         interactive && 'cursor-pointer',
         className
       )}
@@ -76,26 +76,24 @@ const ResponsiveCard = ({
         <CardHeader className={cn(paddingClass, 'pb-2')}>
           <div className="flex items-start justify-between gap-3">
             {Icon && (
-              <motion.div
+              <div
                 className={cn(
-                  'rounded-xl flex items-center justify-center shrink-0 shadow-sm',
+                  'rounded-lg flex items-center justify-center shrink-0',
                   iconSizeClass,
                   iconBgClass
                 )}
-                whileHover={{ rotate: [0, -5, 5, 0] }}
-                transition={{ duration: 0.3 }}
               >
                 <Icon className={cn(iconInnerClass, 'text-primary')} />
-              </motion.div>
+              </div>
             )}
             <div className="flex-1 text-right">
               {title && (
-                <CardTitle className={cn('font-semibold', titleClass)}>
+                <CardTitle className={cn('font-semibold tracking-tight', titleClass)}>
                   {title}
                 </CardTitle>
               )}
               {description && (
-                <CardDescription className={cn('mt-1', descriptionClass)}>
+                <CardDescription className={cn('mt-0.5', descriptionClass)}>
                   {description}
                 </CardDescription>
               )}
@@ -114,8 +112,8 @@ const ResponsiveCard = ({
   if (interactive) {
     return (
       <motion.div
-        whileHover={{ scale: 1.02, y: -3 }}
-        whileTap={{ scale: 0.97 }}
+        whileHover={{ y: -2 }}
+        whileTap={{ scale: 0.98 }}
         transition={{ type: 'spring', stiffness: 400, damping: 25 }}
       >
         {cardContent}
