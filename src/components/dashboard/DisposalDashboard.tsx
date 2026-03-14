@@ -46,7 +46,7 @@ import DriverComplianceManager from '@/components/compliance/DriverComplianceMan
 import IncidentReportManager from '@/components/compliance/IncidentReportManager';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import BulkCertificateButton from '@/components/bulk/BulkCertificateButton';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+
 
 interface DisposalDashboardProps {
   embedded?: boolean;
@@ -90,8 +90,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const { profile, organization } = useAuth();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
-  const [showPrintDialog, setShowPrintDialog] = useState(false);
-  const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -408,7 +406,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
-      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
     </div>
   );
 };

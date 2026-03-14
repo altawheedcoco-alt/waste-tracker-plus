@@ -70,6 +70,21 @@ const DisposalIncomingPanel = ({ facilityId }: DisposalIncomingPanelProps) => {
       toast.error('حدث خطأ أثناء قبول الطلب');
       return;
     }
+
+    // Audit log
+    try {
+      await supabase.from('activity_logs').insert({
+        action: 'disposal_request_accepted',
+        action_type: 'update',
+        resource_type: 'disposal_incoming_request',
+        resource_id: requestId,
+        organization_id: organization?.id,
+        details: { status: 'accepted' },
+      });
+    } catch (e) {
+      console.error('Audit log error (non-blocking):', e);
+    }
+
     toast.success('تم قبول طلب التخلص');
     queryClient.invalidateQueries({ queryKey: ['disposal-incoming-pending'] });
   };
