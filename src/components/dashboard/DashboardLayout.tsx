@@ -707,7 +707,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         )}
 
 
-        {/* Floating Show Sidebar Button - Visible when sidebar is hidden */}
+        {/* Floating Show Sidebar Button */}
         <AnimatePresence>
           {!isSidebarOpen && !isMobile && (
             <motion.div
@@ -720,21 +720,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsSidebarOpen(true)}
-                    className="rounded-r-none rounded-l-xl h-24 w-8 flex flex-col items-center justify-center gap-1 shadow-lg bg-primary hover:bg-primary/90 transition-all duration-200"
+                    className="rounded-r-none rounded-l-lg h-16 w-7 flex flex-col items-center justify-center gap-0.5 shadow-md bg-card hover:bg-muted border-border transition-all duration-150"
                   >
-                    <motion.div
-                      animate={{ x: [0, -3, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-                    >
-                      <ChevronDown className="w-5 h-5 rotate-90 text-primary-foreground" />
-                    </motion.div>
-                    <span className="text-[10px] text-primary-foreground writing-mode-vertical">{t('nav.dashboard')}</span>
+                    <ChevronDown className="w-4 h-4 rotate-90 text-muted-foreground" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="left">
+                <TooltipContent side="left" className="text-xs">
                   <p>{t('nav.dashboard')}</p>
                 </TooltipContent>
               </Tooltip>
