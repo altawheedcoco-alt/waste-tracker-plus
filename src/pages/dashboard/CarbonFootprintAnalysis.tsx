@@ -56,8 +56,7 @@ import {
 } from 'lucide-react';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+// jsPDF & html2canvas loaded dynamically
 
 // IPCC-based emission factors - loaded from database at runtime
 // Fallback values based on IPCC 2006 + GHG Protocol
