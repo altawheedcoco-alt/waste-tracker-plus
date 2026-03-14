@@ -567,17 +567,17 @@ const TransporterDrivers = () => {
               transition={{ delay: index * 0.05 }}
             >
               <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-                <CardHeader className="pb-3">
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary to-eco-emerald flex items-center justify-center text-white font-bold">
+                <CardHeader className="pb-3 p-3 sm:p-6 sm:pb-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-primary to-eco-emerald flex items-center justify-center text-white font-bold text-sm shrink-0">
                         {driver.profile?.full_name?.charAt(0) || '؟'}
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{driver.profile?.full_name || 'غير معروف'}</CardTitle>
-                        <CardDescription className="flex items-center gap-1">
-                          <Truck className="w-3 h-3" />
-                          {driver.vehicle_type || 'غير محدد'} - {driver.vehicle_plate || 'بدون لوحة'}
+                      <div className="min-w-0">
+                        <CardTitle className="text-sm sm:text-lg truncate">{driver.profile?.full_name || 'غير معروف'}</CardTitle>
+                        <CardDescription className="flex items-center gap-1 text-[10px] sm:text-sm">
+                          <Truck className="w-3 h-3 shrink-0" />
+                          <span className="truncate">{driver.vehicle_type || 'غير محدد'} - {driver.vehicle_plate || 'بدون لوحة'}</span>
                         </CardDescription>
                       </div>
                     </div>
