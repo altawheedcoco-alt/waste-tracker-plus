@@ -916,7 +916,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-                  className="fixed top-0 right-0 z-50 h-full w-[82vw] max-w-[320px] bg-card/98 backdrop-blur-xl shadow-2xl lg:hidden flex flex-col touch-manipulation"
+                  className="fixed top-0 right-0 z-50 h-full w-[82vw] max-w-[320px] bg-card shadow-2xl lg:hidden flex flex-col touch-manipulation"
                   style={{ willChange: 'transform' }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
