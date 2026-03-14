@@ -131,6 +131,8 @@ function PositionPermEditor({ position }: { position: Position }) {
     setInitialized(true);
   }
 
+  const [tierFilter, setTierFilter] = useState<TierFilter>('all');
+
   const togglePerm = (key: string) => {
     setLocalPerms(prev => ({ ...prev, [key]: !prev[key] }));
     setHasChanges(true);
