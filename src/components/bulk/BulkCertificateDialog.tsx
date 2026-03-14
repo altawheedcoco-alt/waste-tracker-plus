@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { generateDocumentIdentity } from '@/utils/documentIdentityGenerator';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useOrganizationSignatures } from '@/hooks/useOrganizationSignatures';
@@ -171,20 +172,27 @@ const BulkCertificateDialog = ({
         const generatorStampUrl = includeStamp ? selectedStamp : null;
         const generatorSignatureUrl = includeSignature ? selectedSignature : null;
 
-        const receipts = selectedShipments.map(shipment => ({
-          shipment_id: shipment.id,
-          receipt_number: `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          status: 'pending_approval',
-          actual_weight: shipment.quantity,
-          declared_weight: shipment.quantity,
-          waste_type: shipment.waste_type,
-          notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
-          pickup_date: new Date().toISOString(),
-          generator_id: organization?.id || null,
-          generator_signature: generatorSignatureUrl,
-          transporter_approval_status: 'pending',
-          transporter_approval_deadline: approvalDeadline,
-        }));
+        const receipts = selectedShipments.map(shipment => {
+          const receiptNum = `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+          const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
+            shipmentNumber: shipment.shipment_number,
+          });
+          return {
+            shipment_id: shipment.id,
+            receipt_number: receiptNum,
+            status: 'pending_approval',
+            actual_weight: shipment.quantity,
+            declared_weight: shipment.quantity,
+            waste_type: shipment.waste_type,
+            notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
+            pickup_date: new Date().toISOString(),
+            generator_id: organization?.id || null,
+            generator_signature: generatorSignatureUrl,
+            transporter_approval_status: 'pending',
+            transporter_approval_deadline: approvalDeadline,
+            ...identity,
+          };
+        });
 
         const { error } = await supabase
           .from('shipment_receipts')
@@ -193,17 +201,24 @@ const BulkCertificateDialog = ({
         if (error) throw error;
       } else if (isReceipt) {
         // Create bulk receipt certificates
-        const receipts = selectedShipments.map(shipment => ({
-          shipment_id: shipment.id,
-          receipt_number: `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          status: 'confirmed',
-          actual_weight: shipment.quantity,
-          declared_weight: shipment.quantity,
-          waste_type: shipment.waste_type,
-          notes: `شهادة استلام مجمعة - ${reportNumber}`,
-          pickup_date: new Date().toISOString(),
-          transporter_id: organization?.id || null,
-        }));
+        const receipts = selectedShipments.map(shipment => {
+          const receiptNum = `RCP-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+          const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
+            shipmentNumber: shipment.shipment_number,
+          });
+          return {
+            shipment_id: shipment.id,
+            receipt_number: receiptNum,
+            status: 'confirmed',
+            actual_weight: shipment.quantity,
+            declared_weight: shipment.quantity,
+            waste_type: shipment.waste_type,
+            notes: `شهادة استلام مجمعة - ${reportNumber}`,
+            pickup_date: new Date().toISOString(),
+            transporter_id: organization?.id || null,
+            ...identity,
+          };
+        });
 
         const { error } = await supabase
           .from('shipment_receipts')
