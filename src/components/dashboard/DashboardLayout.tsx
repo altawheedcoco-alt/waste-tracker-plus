@@ -962,14 +962,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   }}
                 >
                   {/* Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+                  <div className="flex items-center justify-between px-4 py-3.5 border-b border-border/40 shrink-0">
                     <PlatformLogo size="sm" showText />
                     <button
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                      className="p-2.5 hover:bg-muted active:bg-muted/80 rounded-xl transition-colors touch-manipulation"
                       aria-label="إغلاق القائمة"
                     >
-                      <X size={22} />
+                      <X size={20} />
                     </button>
                   </div>
 
