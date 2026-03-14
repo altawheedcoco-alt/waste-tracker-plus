@@ -1048,17 +1048,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   </nav>
 
                   {/* Bottom - Music Player & Logout */}
-                  <div className="p-3 border-t border-border shrink-0 space-y-2">
+                  <div className="px-4 py-3 border-t border-border/40 shrink-0 space-y-2">
                     <div className="flex items-center justify-center">
                       <FocusMusicPlayer />
                     </div>
                     <Button
                       variant="ghost"
                       onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
-                      className="w-full flex items-center justify-center gap-2 h-12 text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation"
+                      className="w-full flex items-center justify-center gap-2 h-12 text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation rounded-xl"
                     >
                       <LogOut className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t('nav.logout')}</span>
+                      <span className="text-sm font-semibold">{t('nav.logout')}</span>
                     </Button>
                   </div>
                 </motion.div>
