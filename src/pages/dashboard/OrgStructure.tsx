@@ -22,9 +22,10 @@ import PositionPermissionsEditor from '@/components/org-structure/PositionPermis
 import MemberProfileSheet from '@/components/org-structure/MemberProfileSheet';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import OrgPermissionsPanel from '@/components/org-structure/OrgPermissionsPanel';
 import {
   Network, Plus, Share2, Bot, Users, Truck,
-  BarChart3, Building2, ArrowRight,
+  BarChart3, Building2, ArrowRight, Shield,
 } from 'lucide-react';
 import type { OrgMember } from '@/hooks/useOrgMembers';
 
