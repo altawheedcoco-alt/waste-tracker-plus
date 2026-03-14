@@ -41,57 +41,57 @@ const Contracts = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2 sm:gap-3">
             <BackButton fallbackPath="/dashboard" />
-            <div className="text-right">
-                <h1 className="text-2xl font-bold flex items-center gap-2">
-                <FileCheck className="w-6 h-6" />
-                {t('contracts.title')}
+            <div className="text-right min-w-0">
+                <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+                <FileCheck className="w-5 h-5 sm:w-6 sm:h-6 shrink-0" />
+                <span className="truncate">{t('contracts.title')}</span>
               </h1>
-              <p className="text-muted-foreground">{t('contracts.subtitle')}</p>
+              <p className="text-xs sm:text-sm text-muted-foreground">{t('contracts.subtitle')}</p>
             </div>
           </div>
-          <Button onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-2">
+          <Button size="sm" onClick={() => { resetForm(); setShowAddDialog(true); }} className="gap-1.5 w-full sm:w-auto">
             <Plus className="w-4 h-4" />
             {t('contracts.addContract')}
           </Button>
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('contracts.activeContracts')}</p>
-                  <p className="text-2xl font-bold text-primary">{activeContracts.length}</p>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('contracts.activeContracts')}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-primary">{activeContracts.length}</p>
                 </div>
-                <CheckCircle2 className="w-8 h-8 text-primary" />
+                <CheckCircle2 className="w-6 h-6 sm:w-8 sm:h-8 text-primary shrink-0" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('contracts.pendingContracts')}</p>
-                  <p className="text-2xl font-bold text-secondary-foreground">{pendingContracts.length}</p>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('contracts.pendingContracts')}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-secondary-foreground">{pendingContracts.length}</p>
                 </div>
-                <Clock className="w-8 h-8 text-secondary-foreground" />
+                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-secondary-foreground shrink-0" />
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground">{t('contracts.expiredContracts')}</p>
-                  <p className="text-2xl font-bold text-destructive">{expiredContracts.length}</p>
+            <CardContent className="p-3 sm:p-4">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('contracts.expiredContracts')}</p>
+                  <p className="text-lg sm:text-2xl font-bold text-destructive">{expiredContracts.length}</p>
                 </div>
-                <XCircle className="w-8 h-8 text-destructive" />
+                <XCircle className="w-6 h-6 sm:w-8 sm:h-8 text-destructive shrink-0" />
               </div>
             </CardContent>
           </Card>
@@ -110,20 +110,22 @@ const Contracts = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="active" className="gap-1">
-              <CheckCircle2 className="w-4 h-4" />
-              {t('contracts.activeContracts')} ({activeContracts.length})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-1">
-              <Clock className="w-4 h-4" />
-              {t('contracts.pendingContracts')} ({pendingContracts.length})
-            </TabsTrigger>
-            <TabsTrigger value="expired" className="gap-1">
-              <XCircle className="w-4 h-4" />
-              {t('contracts.expiredContracts')} ({expiredContracts.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="grid w-full min-w-[360px] grid-cols-3">
+              <TabsTrigger value="active" className="gap-1 text-xs sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.activeContracts')}</span> ({activeContracts.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="gap-1 text-xs sm:text-sm">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.pendingContracts')}</span> ({pendingContracts.length})
+              </TabsTrigger>
+              <TabsTrigger value="expired" className="gap-1 text-xs sm:text-sm">
+                <XCircle className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.expiredContracts')}</span> ({expiredContracts.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="active" className="mt-4">
             {loading ? (

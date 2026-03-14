@@ -272,27 +272,27 @@ export default function PartnerAccounts() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <BackButton />
-        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-3">
-              <div className="p-2 bg-primary/10 rounded-lg"><Wallet className="h-6 w-6 text-primary" /></div>
-              حسابات العملاء
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 sm:gap-3">
+              <div className="p-1.5 sm:p-2 bg-primary/10 rounded-lg shrink-0"><Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-primary" /></div>
+              <span className="truncate">حسابات العملاء</span>
             </h1>
-            <p className="text-muted-foreground mt-1">إدارة مركزية لجميع حسابات العملاء المسجلين والخارجيين</p>
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">إدارة مركزية لجميع حسابات العملاء</p>
           </div>
-          <div className="flex gap-2 self-start lg:self-center">
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
             <DepositButton />
-            <Button onClick={() => setShowCreateDialog(true)} variant="outline" className="gap-2">
-              <UserPlus className="h-4 w-4" />
+            <Button onClick={() => setShowCreateDialog(true)} variant="outline" size="sm" className="gap-1.5 whitespace-nowrap text-xs sm:text-sm">
+              <UserPlus className="h-3.5 w-3.5" />
               إضافة عميل جديد
             </Button>
           </div>
         </div>
 
         {/* Global Summary Cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <AccountSummaryCard title="إجمالي العملاء" value={globalTotals.totalPartners} icon={Users} variant="info" formatValue={(v) => String(v)} />
           <AccountSummaryCard title={t('partnerAccounts.receivable')} value={globalTotals.totalReceivables} icon={TrendingUp} variant="success" />
           <AccountSummaryCard title={t('partnerAccounts.payable')} value={globalTotals.totalPayables} icon={TrendingDown} variant="danger" />
@@ -300,14 +300,14 @@ export default function PartnerAccounts() {
         </div>
 
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="بحث باسم العميل..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-11" />
+            <Input placeholder="بحث باسم العميل..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-10 sm:h-11 text-sm" />
           </div>
           <Select value={balanceFilter} onValueChange={(v) => setBalanceFilter(v as any)}>
-            <SelectTrigger className="w-48 h-11">
-              <Filter className="h-4 w-4 ml-2" />
+            <SelectTrigger className="w-full sm:w-48 h-10 sm:h-11 text-sm">
+              <Filter className="h-3.5 w-3.5 ml-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -321,25 +321,27 @@ export default function PartnerAccounts() {
 
         {/* Tabs: All + Per Type */}
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="w-full max-w-2xl grid" style={{ gridTemplateColumns: `repeat(${tabsWithAll.length}, 1fr)` }}>
-            <TabsTrigger value="all" className="gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">الكل</span>
-              {allPartners.length > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{allPartners.length}</Badge>}
-            </TabsTrigger>
-            {partnerTypes.map((type) => {
-              const typeInfo = getPartnerTypeInfo(type);
-              const Icon = typeInfo.icon;
-              const count = filteredBalances(type).length;
-              return (
-                <TabsTrigger key={type} value={type} className="gap-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{typeInfo.label}</span>
-                  {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{count}</Badge>}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="w-full min-w-[300px] grid" style={{ gridTemplateColumns: `repeat(${tabsWithAll.length}, 1fr)` }}>
+              <TabsTrigger value="all" className="gap-1 text-xs sm:text-sm">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">الكل</span>
+                {allPartners.length > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">{allPartners.length}</Badge>}
+              </TabsTrigger>
+              {partnerTypes.map((type) => {
+                const typeInfo = getPartnerTypeInfo(type);
+                const Icon = typeInfo.icon;
+                const count = filteredBalances(type).length;
+                return (
+                  <TabsTrigger key={type} value={type} className="gap-1 text-xs sm:text-sm">
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{typeInfo.label}</span>
+                    {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">{count}</Badge>}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
           {/* All tab */}
           <TabsContent value="all" className="mt-6">
