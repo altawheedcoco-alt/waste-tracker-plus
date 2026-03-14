@@ -284,10 +284,8 @@ const AdminDashboard = () => {
       </Tabs>
 
       {/* ═══ Dialogs ═══ */}
-      <ShipmentPrintView isOpen={printDialogOpen} onClose={() => setPrintDialogOpen(false)} shipment={selectedShipmentForPrint} />
       <ResetPasswordDialog open={resetPasswordDialog} onOpenChange={setResetPasswordDialog} user={selectedUser} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       <Suspense fallback={null}>
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
