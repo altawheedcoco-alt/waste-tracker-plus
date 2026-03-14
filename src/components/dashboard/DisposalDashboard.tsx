@@ -406,7 +406,6 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
       <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
-      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
     </div>
   );
 };
