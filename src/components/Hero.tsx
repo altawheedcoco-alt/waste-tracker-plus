@@ -123,7 +123,7 @@ const Hero = memo(() => {
 
           {/* v3.0 — Stats bar: cleaner glass cards */}
           <motion.div
-            className="flex items-center justify-center gap-2 sm:gap-6 mb-4 sm:mb-7 px-2 sm:px-4"
+            className="flex items-center justify-center gap-2.5 sm:gap-6 mb-5 sm:mb-7 px-2 sm:px-4"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.4, delay: 0.45 }}
@@ -131,13 +131,13 @@ const Hero = memo(() => {
             {statsItems.map((stat) => (
               <motion.div
                 key={stat.label}
-                className="flex flex-col items-center gap-0.5 sm:gap-1 px-2.5 sm:px-5 py-2 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/[0.07] backdrop-blur-md border border-white/10 group flex-1 sm:flex-initial max-w-[110px] sm:max-w-none"
+                className="flex flex-col items-center gap-1 sm:gap-1 px-3 sm:px-5 py-2.5 sm:py-2.5 rounded-xl sm:rounded-2xl bg-white/[0.08] backdrop-blur-md border border-white/12 group flex-1 sm:flex-initial max-w-[120px] sm:max-w-none"
                 whileHover={{ scale: 1.05, backgroundColor: 'rgba(255,255,255,0.12)' }}
                 transition={{ type: 'spring', stiffness: 400 }}
               >
-                <stat.icon className="w-3 h-3 sm:w-4 sm:h-4 text-eco-green-light" />
-                <span className="text-base sm:text-2xl font-black text-white tabular-nums">{stat.value}</span>
-                <span className="text-[8px] sm:text-xs text-white/55 font-medium leading-tight text-center">{stat.label}</span>
+                <stat.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-eco-green-light" />
+                <span className="text-lg sm:text-2xl font-black text-white tabular-nums">{stat.value}</span>
+                <span className="text-[9px] sm:text-xs text-white/60 font-medium leading-tight text-center">{stat.label}</span>
               </motion.div>
             ))}
           </motion.div>
