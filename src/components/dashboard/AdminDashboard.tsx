@@ -114,17 +114,23 @@ const AdminDashboard = () => {
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
-      const { data: shipmentsRaw, count: totalShipments } = await supabase
-        .from('shipments')
-        .select('id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Parallel queries instead of sequential (4 queries instead of 6)
+      const [shipmentsResult, orgsResult, driversResult, pendingResult] = await Promise.all([
+        supabase
+          .from('shipments')
+          .select('id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase.from('organizations').select('id, name, organization_type'),
+        supabase.from('drivers').select('is_available'),
+        supabase.from('profiles').select('id').is('organization_id', null),
+      ]);
 
-      const { data: orgsData } = await supabase.from('organizations').select('id, name');
+      const orgsData = orgsResult.data || [];
       const orgsMap: Record<string, any> = {};
-      orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
+      orgsData.forEach(o => { orgsMap[o.id] = { name: o.name }; });
 
-      const shipments = (shipmentsRaw || []).map(s => ({
+      const shipments = (shipmentsResult.data || []).map(s => ({
         ...s,
         generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
         transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
@@ -133,19 +139,16 @@ const AdminDashboard = () => {
       }));
 
       const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status || '')).length;
-      const { data: organizations } = await supabase.from('organizations').select('organization_type');
-      const generatorCount = organizations?.filter(o => o.organization_type === 'generator').length || 0;
-      const transporterCount = organizations?.filter(o => o.organization_type === 'transporter').length || 0;
-      const recyclerCount = organizations?.filter(o => o.organization_type === 'recycler').length || 0;
-      const { data: drivers } = await supabase.from('drivers').select('is_available');
-      const activeDrivers = drivers?.filter(d => d.is_available).length || 0;
-      const { data: pendingProfiles } = await supabase.from('profiles').select('id').is('organization_id', null);
+      const generatorCount = orgsData.filter(o => o.organization_type === 'generator').length;
+      const transporterCount = orgsData.filter(o => o.organization_type === 'transporter').length;
+      const recyclerCount = orgsData.filter(o => o.organization_type === 'recycler').length;
+      const activeDrivers = (driversResult.data || []).filter(d => d.is_available).length;
 
       return {
         stats: {
-          totalShipments: totalShipments || 0, activeShipments,
-          registeredCompanies: organizations?.length || 0, activeDrivers,
-          totalDrivers: drivers?.length || 0, pendingUsers: pendingProfiles?.length || 0,
+          totalShipments: shipmentsResult.count || 0, activeShipments,
+          registeredCompanies: orgsData.length, activeDrivers,
+          totalDrivers: driversResult.data?.length || 0, pendingUsers: pendingResult.data?.length || 0,
           generatorCount, transporterCount, recyclerCount,
         },
         recentShipments: shipments as unknown as RecentShipment[],
