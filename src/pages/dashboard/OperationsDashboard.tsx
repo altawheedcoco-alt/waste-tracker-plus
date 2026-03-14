@@ -204,50 +204,49 @@ export default function OperationsDashboard() {
   return (
     <DashboardLayout>
       <BackButton />
-      <div className="h-[calc(100vh-120px)]">
-        <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
-          {/* Left Panel - Map Placeholder */}
-          <ResizablePanel defaultSize={50} minSize={30}>
-            <div className="h-full flex flex-col">
-              <div className="p-4 border-b">
-                <h2 className="text-lg font-bold flex items-center gap-2">
-                  <MapPin className="h-5 w-5 text-primary" />
-                  خريطة العمليات الحية
-                </h2>
-                <p className="text-sm text-muted-foreground">
-                  تتبع الشاحنات والمصانع على الخريطة
-                </p>
-              </div>
-
-              <div className="flex-1 bg-muted/30 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
-                  <p className="text-lg font-medium text-muted-foreground">
-                    خريطة Google Maps
-                  </p>
+      <div className="h-[calc(100vh-120px)] flex flex-col sm:block">
+        {/* Mobile: stacked layout, Desktop: resizable panels */}
+        <div className="hidden sm:block h-full">
+          <ResizablePanelGroup direction="horizontal" className="rounded-lg border">
+            {/* Left Panel - Map Placeholder */}
+            <ResizablePanel defaultSize={50} minSize={30}>
+              <div className="h-full flex flex-col">
+                <div className="p-4 border-b">
+                  <h2 className="text-lg font-bold flex items-center gap-2">
+                    <MapPin className="h-5 w-5 text-primary" />
+                    خريطة العمليات الحية
+                  </h2>
                   <p className="text-sm text-muted-foreground">
-                    يتم عرض مواقع الشاحنات والمصانع هنا
+                    تتبع الشاحنات والمصانع على الخريطة
                   </p>
-                  <Button
-                    variant="outline"
-                    className="mt-4"
-                    onClick={() => navigate('/dashboard/map')}
-                  >
-                    فتح الخريطة الكاملة
-                  </Button>
                 </div>
-              </div>
 
-              {/* Quick Stats */}
-              <div className="p-4 border-t grid grid-cols-4 gap-2">
-                {stats.byStatus.slice(0, 4).map(item => (
-                  <div key={item.status} className="text-center">
-                    <div className={cn('w-3 h-3 rounded-full mx-auto mb-1', item.color)} />
-                    <p className="text-lg font-bold">{item.count}</p>
-                    <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                <div className="flex-1 bg-muted/30 flex items-center justify-center">
+                  <div className="text-center">
+                    <MapPin className="h-16 w-16 mx-auto text-muted-foreground mb-4" />
+                    <p className="text-lg font-medium text-muted-foreground">
+                      خريطة Google Maps
+                    </p>
+                    <Button
+                      variant="outline"
+                      className="mt-4"
+                      onClick={() => navigate('/dashboard/map')}
+                    >
+                      فتح الخريطة الكاملة
+                    </Button>
                   </div>
-                ))}
-              </div>
+                </div>
+
+                {/* Quick Stats */}
+                <div className="p-4 border-t grid grid-cols-4 gap-2">
+                  {stats.byStatus.slice(0, 4).map(item => (
+                    <div key={item.status} className="text-center">
+                      <div className={cn('w-3 h-3 rounded-full mx-auto mb-1', item.color)} />
+                      <p className="text-lg font-bold">{item.count}</p>
+                      <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                    </div>
+                  ))}
+                </div>
             </div>
           </ResizablePanel>
 
@@ -388,6 +387,34 @@ export default function OperationsDashboard() {
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
+        </div>
+
+        {/* Mobile: simple stacked layout */}
+        <div className="sm:hidden space-y-3 p-2 overflow-y-auto flex-1">
+          <div className="grid grid-cols-4 gap-1.5">
+            {stats.byStatus.slice(0, 4).map(item => (
+              <div key={item.status} className="text-center p-2 rounded-lg bg-card border">
+                <div className={cn('w-2.5 h-2.5 rounded-full mx-auto mb-1', item.color)} />
+                <p className="text-sm font-bold">{item.count}</p>
+                <p className="text-[9px] text-muted-foreground">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="بحث..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-9 h-8 text-xs"
+            />
+          </div>
+          <ShipmentsList
+            shipments={filteredShipments}
+            onSelect={setSelectedShipment}
+            selectedId={selectedShipment?.id}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );

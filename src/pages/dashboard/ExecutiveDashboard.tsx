@@ -100,26 +100,21 @@ const ExecutiveDashboard = () => {
   };
 
   return (
-    <div className="space-y-6 p-4 md:p-6" dir="rtl">
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4 md:p-6" dir="rtl">
       <BackButton />
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Zap className="w-6 h-6 text-primary" />
-            اللوحة التنفيذية
-          </h1>
-          <p className="text-muted-foreground text-sm mt-1">
-            نظرة شاملة على أداء المنصة — {format(new Date(), 'EEEE d MMMM yyyy', { locale: ar })}
-          </p>
-        </div>
-        <Badge variant="outline" className="text-xs">
-          تحديث كل 5 دقائق
-        </Badge>
+      <div className="space-y-1">
+        <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-1.5 sm:gap-2">
+          <Zap className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+          اللوحة التنفيذية
+        </h1>
+        <p className="text-muted-foreground text-[11px] sm:text-sm truncate">
+          نظرة شاملة — {format(new Date(), 'EEEE d MMMM yyyy', { locale: ar })}
+        </p>
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-6 gap-2 sm:gap-4">
         {kpiCards.map((kpi, i) => {
           const Icon = kpi.icon;
           return (
@@ -130,15 +125,15 @@ const ExecutiveDashboard = () => {
               transition={{ delay: i * 0.05 }}
             >
               <Card className="hover:shadow-md transition-shadow">
-                <CardContent className="p-4">
-                  <div className={`w-10 h-10 rounded-lg ${kpi.bg} flex items-center justify-center mb-3`}>
-                    <Icon className={`w-5 h-5 ${kpi.color}`} />
+                <CardContent className="p-2.5 sm:p-4">
+                  <div className={`w-7 h-7 sm:w-10 sm:h-10 rounded-lg ${kpi.bg} flex items-center justify-center mb-1.5 sm:mb-3`}>
+                    <Icon className={`w-3.5 h-3.5 sm:w-5 sm:h-5 ${kpi.color}`} />
                   </div>
-                  <p className="text-2xl font-bold">{kpi.value}</p>
-                  <p className="text-xs text-muted-foreground mt-1">{kpi.title}</p>
+                  <p className="text-base sm:text-2xl font-bold">{kpi.value}</p>
+                  <p className="text-[9px] sm:text-xs text-muted-foreground mt-0.5 sm:mt-1 truncate">{kpi.title}</p>
                   {kpi.trend > 0 && (
-                    <div className="flex items-center gap-1 mt-2 text-xs text-green-600">
-                      <ArrowUpRight className="w-3 h-3" />
+                    <div className="flex items-center gap-0.5 mt-1 sm:mt-2 text-[9px] sm:text-xs text-green-600">
+                      <ArrowUpRight className="w-2.5 h-2.5 sm:w-3 sm:h-3" />
                       +{kpi.trend} {kpi.trendLabel}
                     </div>
                   )}
