@@ -351,7 +351,7 @@ const DataExport = () => {
 
       const totalRecords = results.reduce((sum, r) => sum + r.data.length, 0);
       const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
-      const pdfDoc = generatePDF(results, organization.name || '', profile?.full_name || '');
+      const pdfDoc = await generatePDF(results, organization.name || '', profile?.full_name || '');
       pdfDoc.save(`data-export_${organization.name}_${timestamp}.pdf`);
       setProgress(100);
       
