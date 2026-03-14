@@ -33,11 +33,13 @@ const TabFallback = () => (
 );
 
 const TABS: TabItem[] = [
-  { value: 'overview', label: 'نظرة عامة', icon: Zap },
+  { value: 'dashboard', label: 'لوحة التحكم', icon: Gauge },
+  { value: 'overview', label: 'ملفي', icon: User },
   { value: 'tasks', label: 'مهامي', icon: ListTodo },
   { value: 'permissions', label: 'صلاحياتي', icon: ShieldCheck },
   { value: 'achievements', label: 'إنجازاتي', icon: Trophy },
   { value: 'notifications', label: 'إشعاراتي', icon: Bell },
+  { value: 'settings', label: 'الإعدادات', icon: Cog },
 ];
 
 const orgTypeLabels: Record<string, string> = {

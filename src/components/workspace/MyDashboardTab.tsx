@@ -135,7 +135,7 @@ const MyDashboardTab = () => {
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', organization.id)
           .eq('status', 'active');
-        result.partners = r.count || 0;
+        result.partners = (r as any).count || 0;
       }
 
       if (hasAny(['manage_drivers'])) {
