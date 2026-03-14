@@ -319,6 +319,10 @@ const EnvironmentalSustainability = () => {
     toast({ title: "جاري إنشاء التقرير...", description: "يرجى الانتظار" });
 
     try {
+      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
       const pdf = new jsPDF("p", "mm", "a4");
       const pageWidth = pdf.internal.pageSize.getWidth();
       
