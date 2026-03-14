@@ -486,39 +486,32 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     <TooltipProvider>
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
-        {/* Desktop Sidebar - Hidden on mobile when using display mode */}
+        {/* Desktop Sidebar — v4.0 Modern Elegant */}
         {!isMobile && (
             <aside
-              className={`flex flex-col bg-card/95 backdrop-blur-xl border-l border-border/40 fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
+              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
                 isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
               }`}
-              style={{ boxShadow: '-4px 0 20px hsl(220 16% 12% / 0.04)', width: sidebarWidth }}
+              style={{ width: sidebarWidth }}
             >
-              {/* Top Toggle Button + Logo */}
-              <div className="p-4 border-b border-border">
+              {/* Top: Logo + Close */}
+              <div className="px-4 py-3.5 border-b border-sidebar-border">
                 <div className="flex items-center justify-between gap-2">
                   <Link to="/dashboard" className="flex items-center gap-3 flex-1">
                     <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isSidebarOpen} />
                   </Link>
-                  
-                  {/* Top Hide Button */}
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => setIsSidebarOpen(false)}
-                        className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive transition-colors shrink-0"
+                        className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
                       >
-                        <motion.div
-                          whileHover={{ x: 3 }}
-                          transition={{ type: 'spring', stiffness: 400 }}
-                        >
-                          <X className="w-4 h-4" />
-                        </motion.div>
+                        <X className="w-3.5 h-3.5" />
                       </Button>
                     </TooltipTrigger>
-                    <TooltipContent side="left">
+                    <TooltipContent side="left" className="text-xs">
                       <p>{t('common.close')}</p>
                     </TooltipContent>
                   </Tooltip>
@@ -526,7 +519,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               </div>
 
           {/* Account Switcher / Organization info */}
-          <div className="border-b border-border">
+          <div className="border-b border-sidebar-border">
             <AccountSwitcher collapsed={!isSidebarOpen} />
           </div>
 
@@ -537,7 +530,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
-                className="px-3 py-2 border-b border-border space-y-2"
+                className="px-3 py-2.5 border-b border-sidebar-border space-y-2"
               >
                 <div className="relative">
                   <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -545,7 +538,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     value={sidebarSearch}
                     onChange={(e) => setSidebarSearch(e.target.value)}
                     placeholder={t('sidebar.searchPlaceholder')}
-                    className="pr-9 pl-8 h-9 text-sm bg-muted/50"
+                    className="pr-9 pl-8 h-8 text-[13px] bg-muted/40 border-sidebar-border rounded-lg"
                   />
                   {sidebarSearch && (
                     <button
@@ -574,7 +567,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </AnimatePresence>
 
           {/* Navigation */}
-          <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
+          <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
             {/* Return to Admin Banner (when viewing as org) */}
             {adminViewingOrg && isSidebarOpen && (
               <motion.button
@@ -696,38 +689,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </nav>
 
           {/* Bottom Logout + Hide Button */}
-          <div className="p-3 border-t border-border space-y-2">
-            {/* Logout Button */}
+          <div className="p-2.5 border-t border-sidebar-border space-y-1.5">
             <Button
               variant="ghost"
               onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 h-10 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 h-9 text-destructive/80 hover:bg-destructive/8 hover:text-destructive transition-all duration-150 rounded-lg text-[13px]"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
               {isSidebarOpen && (
-                <span className="text-sm font-medium whitespace-nowrap">
+                <span className="font-medium whitespace-nowrap">
                   {t('nav.logout')}
                 </span>
-              )}
-            </Button>
-            
-            {/* Hide Sidebar Button */}
-            <Button
-              variant="outline"
-              onClick={() => setIsSidebarOpen(false)}
-              className="w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-muted transition-all duration-200"
-            >
-              <motion.div 
-                whileHover={{ x: 3 }}
-                transition={{ type: 'spring', stiffness: 400 }}
-                className="flex items-center justify-center"
-              >
-                <ChevronDown className="w-5 h-5 -rotate-90" />
-              </motion.div>
-              {isSidebarOpen && (
-                <span className="text-sm font-medium whitespace-nowrap">
-                   {t('common.close')}
-                 </span>
               )}
             </Button>
           </div>
@@ -735,7 +707,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         )}
 
 
-        {/* Floating Show Sidebar Button - Visible when sidebar is hidden */}
+        {/* Floating Show Sidebar Button */}
         <AnimatePresence>
           {!isSidebarOpen && !isMobile && (
             <motion.div
@@ -748,21 +720,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="default"
+                    variant="outline"
                     size="sm"
                     onClick={() => setIsSidebarOpen(true)}
-                    className="rounded-r-none rounded-l-xl h-24 w-8 flex flex-col items-center justify-center gap-1 shadow-lg bg-primary hover:bg-primary/90 transition-all duration-200"
+                    className="rounded-r-none rounded-l-lg h-16 w-7 flex flex-col items-center justify-center gap-0.5 shadow-md bg-card hover:bg-muted border-border transition-all duration-150"
                   >
-                    <motion.div
-                      animate={{ x: [0, -3, 0] }}
-                      transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
-                    >
-                      <ChevronDown className="w-5 h-5 rotate-90 text-primary-foreground" />
-                    </motion.div>
-                    <span className="text-[10px] text-primary-foreground writing-mode-vertical">{t('nav.dashboard')}</span>
+                    <ChevronDown className="w-4 h-4 rotate-90 text-muted-foreground" />
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent side="left">
+                <TooltipContent side="left" className="text-xs">
                   <p>{t('nav.dashboard')}</p>
                 </TooltipContent>
               </Tooltip>
@@ -778,8 +744,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             width: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
           }}
         >
-          {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/92 backdrop-blur-2xl border-b border-border/25 flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`} style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.6)', boxShadow: '0 1px 3px hsl(220 16% 12% / 0.04), 0 4px 12px hsl(160, 68%, 40%, 0.02)' }}>
+          {/* Top header — v4.0 clean, minimal */}
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card border-b border-border flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`}>
             <div className="flex items-center gap-2 shrink-0">
               {isMobile && (
                 <button
@@ -950,7 +916,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
                   transition={{ type: 'spring', damping: 30, stiffness: 320 }}
-                  className="fixed top-0 right-0 z-50 h-full w-[82vw] max-w-[320px] bg-card/98 backdrop-blur-xl shadow-2xl lg:hidden flex flex-col touch-manipulation"
+                  className="fixed top-0 right-0 z-50 h-full w-[82vw] max-w-[320px] bg-card shadow-2xl lg:hidden flex flex-col touch-manipulation"
                   style={{ willChange: 'transform' }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
