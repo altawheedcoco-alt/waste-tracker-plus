@@ -665,19 +665,19 @@ const Notifications = () => {
           )}
 
           {/* ═══ Search, Filter & View Toggle ═══ */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <div className="relative flex-1 min-w-[180px]">
+          <div className="flex flex-col sm:flex-row gap-1.5 sm:gap-2">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="ابحث في الإشعارات..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="pr-9 h-9 text-sm"
+                className="pr-9 h-8 sm:h-9 text-xs sm:text-sm"
               />
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 overflow-x-auto scrollbar-hide">
               {(['all', 'unread', 'read'] as const).map(f => (
-                <Button key={f} size="sm" variant={readFilter === f ? 'default' : 'outline'} onClick={() => setReadFilter(f)} className="h-9 text-xs">
+                <Button key={f} size="sm" variant={readFilter === f ? 'default' : 'outline'} onClick={() => setReadFilter(f)} className="h-8 sm:h-9 text-[11px] sm:text-xs px-2 sm:px-3 shrink-0">
                   {f === 'all' ? 'الكل' : f === 'unread' ? `غير مقروء (${unreadCount})` : 'مقروء'}
                 </Button>
               ))}

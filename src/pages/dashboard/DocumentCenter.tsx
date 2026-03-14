@@ -85,16 +85,16 @@ const DocumentCenter = () => {
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <ScrollArea className="w-full" dir="rtl">
-            <TabsList className="inline-flex h-11 w-max gap-1 bg-muted/60 p-1 rounded-xl">
+            <TabsList className="inline-flex h-10 sm:h-11 w-max gap-0.5 sm:gap-1 bg-muted/60 p-0.5 sm:p-1 rounded-xl">
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 return (
                   <TabsTrigger
                     key={tab.id}
                     value={tab.id}
-                    className="gap-1.5 text-xs whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg px-3"
+                    className="gap-1 sm:gap-1.5 text-[10px] sm:text-xs whitespace-nowrap data-[state=active]:bg-background data-[state=active]:shadow-sm rounded-lg px-2 sm:px-3"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                     {tab.label}
                   </TabsTrigger>
                 );

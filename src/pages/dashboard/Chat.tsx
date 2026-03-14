@@ -559,7 +559,7 @@ const EncryptedChat = () => {
               transition={{ type: 'spring', damping: 25 }}
               className={cn(
                 "h-full flex flex-col bg-card border-l border-border",
-                isMobile ? "w-full" : "w-[340px] min-w-[340px]"
+                isMobile ? "w-full" : "w-[300px] min-w-[300px]"
               )}
             >
               {/* Sidebar Header */}

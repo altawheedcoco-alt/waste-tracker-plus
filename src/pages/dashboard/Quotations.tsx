@@ -169,27 +169,27 @@ const Quotations = () => {
       <div className="grid gap-3">
         {list.map(q => (
           <Card key={q.id} className="hover:shadow-md transition-shadow cursor-pointer" onClick={() => handleView(q)}>
-            <CardContent className="py-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="w-5 h-5 text-primary" />
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <p className="font-semibold text-foreground">{q.title}</p>
+            <CardContent className="py-3 sm:py-4">
+              <div className="flex items-start sm:items-center justify-between gap-2 flex-col sm:flex-row">
+                <div className="flex items-start gap-2 sm:gap-3 min-w-0 flex-1">
+                  <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-primary shrink-0 mt-0.5" />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="font-semibold text-foreground text-sm truncate">{q.title}</p>
                       {(q as any).document_type && (q as any).document_type !== 'price_quote' && (
-                        <Badge variant="outline" className="text-[10px]">
+                        <Badge variant="outline" className="text-[9px] sm:text-[10px]">
                           {DOCUMENT_TYPE_LABELS[(q as any).document_type as DocumentType] || (q as any).document_type}
                         </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {q.quotation_number} • {q.client_name || 'عميل مسجل'} • {format(new Date(q.created_at!), 'dd MMM yyyy', { locale: ar })}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-bold text-foreground">{q.total_amount?.toLocaleString()} ج.م</span>
-                  <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'}>
+                <div className="flex items-center gap-2 sm:gap-3 shrink-0 self-end sm:self-center">
+                  <span className="font-bold text-foreground text-sm">{q.total_amount?.toLocaleString()} ج.م</span>
+                  <Badge variant={STATUS_MAP[q.status]?.variant || 'secondary'} className="text-[10px]">
                     {STATUS_MAP[q.status]?.label || q.status}
                   </Badge>
                 </div>
