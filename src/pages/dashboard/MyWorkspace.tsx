@@ -215,6 +215,12 @@ const MyWorkspace = () => {
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <V2TabsNav tabs={TABS} />
 
+        <TabsContent value="dashboard" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyDashboardTab />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="overview" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyProfileTab />
@@ -242,6 +248,12 @@ const MyWorkspace = () => {
         <TabsContent value="notifications" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyNotificationsTab />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="settings" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MySettingsTab />
           </Suspense>
         </TabsContent>
       </Tabs>
