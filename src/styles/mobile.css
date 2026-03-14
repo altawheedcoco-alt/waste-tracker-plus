@@ -229,6 +229,31 @@ body {
     align-items: stretch;
     gap: 0.5rem;
   }
+  /* v3.1: Landing page — force opaque backgrounds on mobile */
+  .landing-page section {
+    background-color: hsl(var(--background));
+  }
+
+  .landing-page .bg-card,
+  .landing-page .bg-card\/80,
+  .landing-page .bg-card\/90,
+  .landing-page [class*="bg-card/"] {
+    background-color: hsl(var(--card)) !important;
+  }
+
+  .landing-page .bg-white\/80,
+  .landing-page .bg-white\/90,
+  .landing-page [class*="bg-white/"] {
+    background-color: hsl(var(--card)) !important;
+  }
+
+  .landing-page .bg-muted\/30,
+  .landing-page .bg-muted\/40,
+  .landing-page .bg-muted\/50,
+  .landing-page .bg-muted\/60,
+  .landing-page [class*="bg-muted/"] {
+    background-color: hsl(var(--muted)) !important;
+  }
 }
 
 /* ——— Tablets (641px – 1024px) ——— */
