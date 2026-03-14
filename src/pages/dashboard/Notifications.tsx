@@ -562,7 +562,7 @@ const Notifications = () => {
           {!isMobile && <BackButton />}
 
           {/* ═══ Stats Dashboard ═══ */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-5 gap-1.5 sm:gap-3">
             {[
               { label: 'الإجمالي', value: stats.total, icon: Bell, color: 'text-primary', bg: 'bg-primary/10' },
               { label: 'غير مقروء', value: stats.unread, icon: BellRing, color: 'text-amber-500', bg: 'bg-amber-500/10' },
@@ -570,13 +570,13 @@ const Notifications = () => {
               { label: 'عاجل', value: stats.urgent, icon: Flame, color: 'text-red-500', bg: 'bg-red-500/10' },
               { label: 'مهم', value: stats.high, icon: AlertTriangle, color: 'text-orange-500', bg: 'bg-orange-500/10' },
             ].map(s => (
-              <div key={s.label} className="flex items-center gap-2.5 p-3 rounded-xl bg-card border border-border/50">
-                <div className={`w-9 h-9 rounded-lg ${s.bg} flex items-center justify-center shrink-0`}>
-                  <s.icon className={`w-4 h-4 ${s.color}`} />
+              <div key={s.label} className="flex items-center gap-1.5 sm:gap-2.5 p-2 sm:p-3 rounded-xl bg-card border border-border/50">
+                <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg ${s.bg} flex items-center justify-center shrink-0`}>
+                  <s.icon className={`w-3.5 h-3.5 sm:w-4 sm:h-4 ${s.color}`} />
                 </div>
-                <div>
-                  <p className="text-lg sm:text-xl font-black">{s.value}</p>
-                  <p className="text-[10px] text-muted-foreground">{s.label}</p>
+                <div className="min-w-0">
+                  <p className="text-sm sm:text-xl font-black">{s.value}</p>
+                  <p className="text-[9px] sm:text-[10px] text-muted-foreground truncate">{s.label}</p>
                 </div>
               </div>
             ))}
