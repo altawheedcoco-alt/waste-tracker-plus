@@ -14,7 +14,7 @@ import { ar } from 'date-fns/locale';
 interface Partner {
   id: string;
   name: string;
-  organization_type: 'generator' | 'transporter' | 'recycler';
+  organization_type: string;
   logo_url: string | null;
 }
 

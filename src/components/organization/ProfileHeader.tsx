@@ -14,7 +14,7 @@ interface ProfileHeaderProps {
     id: string;
     name: string;
     name_en?: string;
-    organization_type: 'generator' | 'transporter' | 'recycler';
+    organization_type: string;
     logo_url?: string;
     cover_url?: string;
     is_verified?: boolean;
