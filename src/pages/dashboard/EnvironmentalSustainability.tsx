@@ -58,8 +58,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// jsPDF & html2canvas loaded dynamically
 
 // معاملات الاستدامة البيئية
 const SUSTAINABILITY_METRICS = {
