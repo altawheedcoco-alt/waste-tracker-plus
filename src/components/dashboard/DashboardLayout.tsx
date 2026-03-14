@@ -538,7 +538,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     value={sidebarSearch}
                     onChange={(e) => setSidebarSearch(e.target.value)}
                     placeholder={t('sidebar.searchPlaceholder')}
-                    className="pr-9 pl-8 h-9 text-sm bg-muted/50"
+                    className="pr-9 pl-8 h-8 text-[13px] bg-muted/40 border-sidebar-border rounded-lg"
                   />
                   {sidebarSearch && (
                     <button
