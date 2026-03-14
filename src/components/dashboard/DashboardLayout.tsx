@@ -689,38 +689,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </nav>
 
           {/* Bottom Logout + Hide Button */}
-          <div className="p-3 border-t border-border space-y-2">
-            {/* Logout Button */}
+          <div className="p-2.5 border-t border-sidebar-border space-y-1.5">
             <Button
               variant="ghost"
               onClick={handleSignOut}
-              className="w-full flex items-center justify-center gap-2 h-10 text-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200"
+              className="w-full flex items-center justify-center gap-2 h-9 text-destructive/80 hover:bg-destructive/8 hover:text-destructive transition-all duration-150 rounded-lg text-[13px]"
             >
-              <LogOut className="w-5 h-5" />
+              <LogOut className="w-4 h-4" />
               {isSidebarOpen && (
-                <span className="text-sm font-medium whitespace-nowrap">
+                <span className="font-medium whitespace-nowrap">
                   {t('nav.logout')}
                 </span>
-              )}
-            </Button>
-            
-            {/* Hide Sidebar Button */}
-            <Button
-              variant="outline"
-              onClick={() => setIsSidebarOpen(false)}
-              className="w-full flex items-center justify-center gap-2 h-10 bg-muted/50 hover:bg-muted transition-all duration-200"
-            >
-              <motion.div 
-                whileHover={{ x: 3 }}
-                transition={{ type: 'spring', stiffness: 400 }}
-                className="flex items-center justify-center"
-              >
-                <ChevronDown className="w-5 h-5 -rotate-90" />
-              </motion.div>
-              {isSidebarOpen && (
-                <span className="text-sm font-medium whitespace-nowrap">
-                   {t('common.close')}
-                 </span>
               )}
             </Button>
           </div>
