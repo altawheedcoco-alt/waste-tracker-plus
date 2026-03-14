@@ -342,7 +342,7 @@ const Reports = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Date Range and Status/Type Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
               {/* From Date */}
               <div className="space-y-2 text-right">
                 <Label>{t('reports.fromDate')}</Label>
