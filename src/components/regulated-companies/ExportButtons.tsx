@@ -1,7 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { FileDown, FileSpreadsheet } from 'lucide-react';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 import { createWorkbook, jsonToSheet, writeFile } from '@/lib/excelExport';
 
 const LICENSE_LABELS: Record<string, string> = {
