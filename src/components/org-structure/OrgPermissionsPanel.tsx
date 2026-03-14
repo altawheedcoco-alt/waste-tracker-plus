@@ -104,6 +104,8 @@ const permissionGroups = [
 ];
 
 // فلتر حسب التصنيف
+type TierFilter = 'all' | PermTier;
+
 // تصنيف صلاحيات الأعضاء (organization_members.granted_permissions)
 const MEMBER_PERM_TIERS: Record<string, PermTier> = {
   create_shipments: 'essential', view_shipments: 'essential', edit_shipments: 'important',
