@@ -11,7 +11,7 @@ import { toast as sonnerToast } from 'sonner';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
-import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
+
 import StoryCircles from '@/components/stories/StoryCircles';
 import SmartRequestDialog from './SmartRequestDialog';
 import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
@@ -31,7 +31,7 @@ import DashboardPrintReports from './shared/DashboardPrintReports';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import DocumentVerificationWidget from './DocumentVerificationWidget';
+
 
 import {
   FileText, Truck, Building2, Users, Plus, Bot, Zap,
@@ -114,17 +114,23 @@ const AdminDashboard = () => {
   const { data: dashboardData, isLoading: loading } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
-      const { data: shipmentsRaw, count: totalShipments } = await supabase
-        .from('shipments')
-        .select('id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id', { count: 'exact' })
-        .order('created_at', { ascending: false })
-        .limit(5);
+      // Parallel queries instead of sequential (4 queries instead of 6)
+      const [shipmentsResult, orgsResult, driversResult, pendingResult] = await Promise.all([
+        supabase
+          .from('shipments')
+          .select('id, shipment_number, status, waste_type, quantity, unit, created_at, generator_id, transporter_id, recycler_id', { count: 'exact' })
+          .order('created_at', { ascending: false })
+          .limit(5),
+        supabase.from('organizations').select('id, name, organization_type'),
+        supabase.from('drivers').select('is_available'),
+        supabase.from('profiles').select('id').is('organization_id', null),
+      ]);
 
-      const { data: orgsData } = await supabase.from('organizations').select('id, name');
+      const orgsData = orgsResult.data || [];
       const orgsMap: Record<string, any> = {};
-      orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
+      orgsData.forEach(o => { orgsMap[o.id] = { name: o.name }; });
 
-      const shipments = (shipmentsRaw || []).map(s => ({
+      const shipments = (shipmentsResult.data || []).map(s => ({
         ...s,
         generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
         transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
@@ -133,19 +139,16 @@ const AdminDashboard = () => {
       }));
 
       const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status || '')).length;
-      const { data: organizations } = await supabase.from('organizations').select('organization_type');
-      const generatorCount = organizations?.filter(o => o.organization_type === 'generator').length || 0;
-      const transporterCount = organizations?.filter(o => o.organization_type === 'transporter').length || 0;
-      const recyclerCount = organizations?.filter(o => o.organization_type === 'recycler').length || 0;
-      const { data: drivers } = await supabase.from('drivers').select('is_available');
-      const activeDrivers = drivers?.filter(d => d.is_available).length || 0;
-      const { data: pendingProfiles } = await supabase.from('profiles').select('id').is('organization_id', null);
+      const generatorCount = orgsData.filter(o => o.organization_type === 'generator').length;
+      const transporterCount = orgsData.filter(o => o.organization_type === 'transporter').length;
+      const recyclerCount = orgsData.filter(o => o.organization_type === 'recycler').length;
+      const activeDrivers = (driversResult.data || []).filter(d => d.is_available).length;
 
       return {
         stats: {
-          totalShipments: totalShipments || 0, activeShipments,
-          registeredCompanies: organizations?.length || 0, activeDrivers,
-          totalDrivers: drivers?.length || 0, pendingUsers: pendingProfiles?.length || 0,
+          totalShipments: shipmentsResult.count || 0, activeShipments,
+          registeredCompanies: orgsData.length, activeDrivers,
+          totalDrivers: driversResult.data?.length || 0, pendingUsers: pendingResult.data?.length || 0,
           generatorCount, transporterCount, recyclerCount,
         },
         recentShipments: shipments as unknown as RecentShipment[],
@@ -163,12 +166,9 @@ const AdminDashboard = () => {
   const recentShipments = dashboardData?.recentShipments || [];
   const [resetPasswordDialog, setResetPasswordDialog] = useState(false);
   const [selectedUser, setSelectedUser] = useState<UserProfile | null>(null);
-  const [printDialogOpen, setPrintDialogOpen] = useState(false);
-  const [selectedShipmentForPrint, setSelectedShipmentForPrint] = useState<any>(null);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showWorkOrder, setShowWorkOrder] = useState(false);
-  const [showDocumentVerification, setShowDocumentVerification] = useState(false);
 
   const statCards: StatCard[] = [
     { title: t('dashboard.totalShipments'), value: stats.totalShipments, subtitle: t('dashboard.allShipments'), icon: FileText },
@@ -252,7 +252,7 @@ const AdminDashboard = () => {
         <DashboardAlertsHub orgType="admin" />
       </motion.div>
 
-      <AutomationSettingsDialog organizationType="generator" />
+      <AutomationSettingsDialog organizationType="admin" />
 
       {/* ═══ Strategic Pillars — Modular Tabs ═══ */}
       <Tabs defaultValue="command-center" className="w-full" dir="rtl">
@@ -287,10 +287,8 @@ const AdminDashboard = () => {
       </Tabs>
 
       {/* ═══ Dialogs ═══ */}
-      <ShipmentPrintView isOpen={printDialogOpen} onClose={() => setPrintDialogOpen(false)} shipment={selectedShipmentForPrint} />
       <ResetPasswordDialog open={resetPasswordDialog} onOpenChange={setResetPasswordDialog} user={selectedUser} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
-      <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       <Suspense fallback={null}>
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
