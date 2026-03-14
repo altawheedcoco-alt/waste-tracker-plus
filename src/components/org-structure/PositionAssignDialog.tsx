@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Separator } from '@/components/ui/separator';
-import { Bot, User, Copy, Eye, EyeOff, Loader2, UserPlus, Sparkles } from 'lucide-react';
+import { Bot, User, Copy, Eye, EyeOff, Loader2, UserPlus, Sparkles, LayoutDashboard, UserCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import type { Position } from '@/hooks/useOrgStructure';
 import { supabase } from '@/integrations/supabase/client';
