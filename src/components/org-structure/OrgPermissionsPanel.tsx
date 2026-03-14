@@ -104,7 +104,17 @@ const permissionGroups = [
 ];
 
 // فلتر حسب التصنيف
-type TierFilter = 'all' | PermTier;
+// تصنيف صلاحيات الأعضاء (organization_members.granted_permissions)
+const MEMBER_PERM_TIERS: Record<string, PermTier> = {
+  create_shipments: 'essential', view_shipments: 'essential', edit_shipments: 'important',
+  delete_shipments: 'optional', approve_shipments: 'essential',
+  view_financials: 'essential', create_invoices: 'important', approve_payments: 'essential', manage_deposits: 'important',
+  manage_drivers: 'important', assign_drivers: 'essential', track_vehicles: 'optional',
+  manage_partners: 'important', view_partner_data: 'optional',
+  manage_members: 'essential', manage_settings: 'essential',
+  view_reports: 'important', export_data: 'optional',
+  sign_documents: 'essential', issue_certificates: 'important', manage_templates: 'optional', manage_contracts: 'optional',
+};
 
 const allPermKeys = permissionGroups.flatMap(g => g.permissions.map(p => p.key));
 
