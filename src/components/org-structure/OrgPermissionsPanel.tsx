@@ -22,6 +22,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 
+// تصنيف الصلاحيات: أساسية / مهمة / اختيارية
+type PermTier = 'essential' | 'important' | 'optional';
+
+const PERM_TIER_META: Record<PermTier, { label: string; icon: string; color: string; bgClass: string; borderClass: string }> = {
+  essential: { label: 'أساسية', icon: '🔴', color: 'text-red-600', bgClass: 'bg-red-500/10', borderClass: 'border-red-300' },
+  important: { label: 'مهمة', icon: '🟡', color: 'text-amber-600', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-300' },
+  optional: { label: 'اختيارية', icon: '🟢', color: 'text-green-600', bgClass: 'bg-green-500/10', borderClass: 'border-green-300' },
+};
+
+interface PermDef {
+  key: string;
+  label: string;
+  tier: PermTier;
+  description?: string;
+}
+
 const permissionGroups = [
   {
     title: 'الشحنات',
@@ -29,11 +45,11 @@ const permissionGroups = [
     color: 'text-blue-600',
     bg: 'bg-blue-500/10',
     permissions: [
-      { key: 'can_create_shipments', label: 'إنشاء شحنات' },
-      { key: 'can_edit_shipments', label: 'تعديل شحنات' },
-      { key: 'can_delete_shipments', label: 'حذف شحنات' },
-      { key: 'can_approve_shipments', label: 'اعتماد شحنات' },
-      { key: 'can_change_status', label: 'تغيير الحالة' },
+      { key: 'can_create_shipments', label: 'إنشاء شحنات', tier: 'essential' as PermTier, description: 'إنشاء طلبات شحن جديدة' },
+      { key: 'can_edit_shipments', label: 'تعديل شحنات', tier: 'important' as PermTier, description: 'تعديل بيانات الشحنات القائمة' },
+      { key: 'can_delete_shipments', label: 'حذف شحنات', tier: 'optional' as PermTier, description: 'حذف شحنات من النظام' },
+      { key: 'can_approve_shipments', label: 'اعتماد شحنات', tier: 'essential' as PermTier, description: 'الموافقة أو رفض الشحنات' },
+      { key: 'can_change_status', label: 'تغيير الحالة', tier: 'important' as PermTier, description: 'تحديث حالة الشحنة' },
     ],
   },
   {
@@ -42,10 +58,10 @@ const permissionGroups = [
     color: 'text-emerald-600',
     bg: 'bg-emerald-500/10',
     permissions: [
-      { key: 'can_view_financials', label: 'عرض البيانات المالية' },
-      { key: 'can_create_invoices', label: 'إنشاء فواتير' },
-      { key: 'can_approve_payments', label: 'اعتماد مدفوعات' },
-      { key: 'can_manage_deposits', label: 'إدارة الإيداعات' },
+      { key: 'can_view_financials', label: 'عرض البيانات المالية', tier: 'essential' as PermTier, description: 'الاطلاع على التقارير والأرصدة المالية' },
+      { key: 'can_create_invoices', label: 'إنشاء فواتير', tier: 'important' as PermTier, description: 'إصدار فواتير جديدة' },
+      { key: 'can_approve_payments', label: 'اعتماد مدفوعات', tier: 'essential' as PermTier, description: 'الموافقة على صرف المبالغ' },
+      { key: 'can_manage_deposits', label: 'إدارة الإيداعات', tier: 'important' as PermTier, description: 'تسجيل ومتابعة الإيداعات' },
     ],
   },
   {
@@ -54,9 +70,9 @@ const permissionGroups = [
     color: 'text-amber-600',
     bg: 'bg-amber-500/10',
     permissions: [
-      { key: 'can_manage_drivers', label: 'إدارة السائقين' },
-      { key: 'can_assign_drivers', label: 'تعيين السائقين' },
-      { key: 'can_track_vehicles', label: 'تتبع المركبات' },
+      { key: 'can_manage_drivers', label: 'إدارة السائقين', tier: 'important' as PermTier, description: 'إضافة وتعديل بيانات السائقين' },
+      { key: 'can_assign_drivers', label: 'تعيين السائقين', tier: 'essential' as PermTier, description: 'تخصيص سائقين للشحنات' },
+      { key: 'can_track_vehicles', label: 'تتبع المركبات', tier: 'optional' as PermTier, description: 'مراقبة مواقع المركبات' },
     ],
   },
   {
@@ -65,11 +81,11 @@ const permissionGroups = [
     color: 'text-purple-600',
     bg: 'bg-purple-500/10',
     permissions: [
-      { key: 'can_manage_users', label: 'إدارة المستخدمين' },
-      { key: 'can_manage_settings', label: 'إدارة الإعدادات' },
-      { key: 'can_view_reports', label: 'عرض التقارير' },
-      { key: 'can_export_data', label: 'تصدير البيانات' },
-      { key: 'can_manage_contracts', label: 'إدارة العقود' },
+      { key: 'can_manage_users', label: 'إدارة المستخدمين', tier: 'essential' as PermTier, description: 'إضافة وتعديل حسابات الموظفين' },
+      { key: 'can_manage_settings', label: 'إدارة الإعدادات', tier: 'essential' as PermTier, description: 'ضبط إعدادات النظام العامة' },
+      { key: 'can_view_reports', label: 'عرض التقارير', tier: 'important' as PermTier, description: 'الاطلاع على تقارير الأداء' },
+      { key: 'can_export_data', label: 'تصدير البيانات', tier: 'optional' as PermTier, description: 'تنزيل البيانات بصيغ مختلفة' },
+      { key: 'can_manage_contracts', label: 'إدارة العقود', tier: 'optional' as PermTier, description: 'إنشاء وتعديل العقود' },
     ],
   },
   {
@@ -78,14 +94,17 @@ const permissionGroups = [
     color: 'text-teal-600',
     bg: 'bg-teal-500/10',
     permissions: [
-      { key: 'can_manage_partners', label: 'إدارة الجهات المرتبطة' },
-      { key: 'can_view_partner_data', label: 'عرض بيانات الشركاء' },
-      { key: 'can_sign_documents', label: 'توقيع المستندات' },
-      { key: 'can_issue_certificates', label: 'إصدار شهادات' },
-      { key: 'can_manage_templates', label: 'إدارة القوالب' },
+      { key: 'can_manage_partners', label: 'إدارة الجهات المرتبطة', tier: 'important' as PermTier, description: 'إدارة بيانات الشركاء والجهات' },
+      { key: 'can_view_partner_data', label: 'عرض بيانات الشركاء', tier: 'optional' as PermTier, description: 'الاطلاع على معلومات الشركاء' },
+      { key: 'can_sign_documents', label: 'توقيع المستندات', tier: 'essential' as PermTier, description: 'التوقيع الإلكتروني على الوثائق' },
+      { key: 'can_issue_certificates', label: 'إصدار شهادات', tier: 'important' as PermTier, description: 'إنشاء شهادات رسمية' },
+      { key: 'can_manage_templates', label: 'إدارة القوالب', tier: 'optional' as PermTier, description: 'تخصيص وإدارة قوالب المستندات' },
     ],
   },
 ];
+
+// فلتر حسب التصنيف
+type TierFilter = 'all' | PermTier;
 
 const allPermKeys = permissionGroups.flatMap(g => g.permissions.map(p => p.key));
 
