@@ -451,22 +451,31 @@ function MemberPermEditor({ member, onUpdate }: { member: OrgMember; onUpdate: (
                   <div key={catKey}>
                     <h4 className="text-xs font-semibold text-muted-foreground mb-1.5">{catLabel}</h4>
                     <div className="grid grid-cols-2 gap-1">
-                      {catPerms.map(perm => (
-                        <div
-                          key={perm}
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
-                            localPerms.includes(perm) ? 'bg-primary/5 shadow-sm' : 'hover:bg-muted/50'
-                          }`}
-                          onClick={() => togglePerm(perm)}
-                        >
-                          <Switch
-                            checked={localPerms.includes(perm)}
-                            onCheckedChange={() => togglePerm(perm)}
-                            className="scale-75"
-                          />
-                          <span className="text-xs">{PERMISSION_LABELS[perm].ar}</span>
-                        </div>
-                      ))}
+                      {catPerms.map(perm => {
+                        const tier = MEMBER_PERM_TIERS[perm] || 'optional';
+                        const tierMeta = PERM_TIER_META[tier];
+                        return (
+                          <div
+                            key={perm}
+                            className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors border ${
+                              localPerms.includes(perm) ? `bg-primary/5 shadow-sm ${tierMeta.borderClass}` : 'border-transparent hover:bg-muted/50'
+                            }`}
+                            onClick={() => togglePerm(perm)}
+                          >
+                            <div className="flex items-center gap-1">
+                              <Switch
+                                checked={localPerms.includes(perm)}
+                                onCheckedChange={() => togglePerm(perm)}
+                                className="scale-75"
+                              />
+                              <span className={`text-[8px] px-1 py-0.5 rounded-full ${tierMeta.bgClass} ${tierMeta.color}`}>
+                                {tierMeta.label}
+                              </span>
+                            </div>
+                            <span className="text-xs">{PERMISSION_LABELS[perm].ar}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
