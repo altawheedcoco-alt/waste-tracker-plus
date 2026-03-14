@@ -6,23 +6,23 @@ import { useNotifications } from '@/hooks/useNotifications';
  * Each notification type is associated with the sidebar menu item it relates to.
  */
 const TYPE_TO_SECTION: Record<string, string[]> = {
-  // Shipment-related
-  shipment_created: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops-group', 'recycler-ops-group', 'generator-ops-group', 'disposal-ops-group'],
-  shipment: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops-group', 'recycler-ops-group', 'generator-ops-group', 'disposal-ops-group'],
-  status_update: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops-group', 'recycler-ops-group', 'generator-ops-group', 'disposal-ops-group'],
+  // Shipment-related — maps to item keys AND group IDs for badge rollup
+  shipment_created: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
+  shipment: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
+  status_update: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
   // Recycling reports
-  recycling_report: ['transporter-certs', 'generator-certs', 'admin-certs', 'issue-certs', 'reports-group'],
+  recycling_report: ['transporter-certs', 'generator-certs', 'admin-certs', 'issue-certs', 'reports-analytics'],
   // Partner-related
-  partner_post: ['partners', 'partners-timeline', 'org-group'],
-  partner_note: ['partners', 'partner-accounts', 'org-group'],
-  partner_message: ['chat', 'comm-group'],
+  partner_post: ['partners', 'partners-timeline', 'org-structure'],
+  partner_note: ['partners', 'partner-accounts', 'org-structure'],
+  partner_message: ['chat', 'communication'],
   // Approvals
-  approval_request: ['company-approvals', 'driver-approvals', 'my-requests', 'requests-reg-group', 'admin-group'],
+  approval_request: ['company-approvals', 'driver-approvals', 'my-requests', 'communication', 'admin-entity-management'],
   // Documents
-  document_uploaded: ['org-docs', 'admin-group'],
+  document_uploaded: ['org-docs', 'admin-entity-management'],
   // Receipts
-  receipt_issued: ['transporter-receipts', 'generator-receipts', 'transporter-ops-group', 'generator-ops-group', 'recycler-ops-group'],
-  receipt_confirmed: ['transporter-receipts', 'generator-receipts', 'transporter-ops-group', 'generator-ops-group'],
+  receipt_issued: ['transporter-receipts', 'generator-receipts', 'transporter-ops', 'generator-ops', 'recycler-ops'],
+  receipt_confirmed: ['transporter-receipts', 'generator-receipts', 'transporter-ops', 'generator-ops'],
   // General notifications
   general: ['notifications'],
 };
