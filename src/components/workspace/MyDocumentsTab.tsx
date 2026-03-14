@@ -75,13 +75,13 @@ const MyDocumentsTab = () => {
       if (!organization?.id) return [];
       const { data } = await supabase
         .from('deposits')
-        .select('id, amount, status, created_at, receipt_url, reference_number')
+        .select('id, amount, created_at, receipt_url, reference_number, transfer_method')
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(20);
       return data || [];
     },
-    enabled: !!organization?.id && hasPermission('view_financials'),
+    enabled: !!organization?.id && hasPermission('manage_deposits'),
     staleTime: 1000 * 60 * 5,
   });
 
