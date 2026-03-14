@@ -515,11 +515,11 @@ const EmployeeManagement = () => {
                   "transition-all hover:shadow-md",
                   !employee.is_active && "opacity-60"
                 )}>
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-4">
-                      <Avatar className="h-12 w-12">
+                  <CardContent className="p-3 sm:p-4">
+                    <div className="flex items-start gap-2.5 sm:gap-4">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12 shrink-0">
                         <AvatarImage src={employee.avatar_url || undefined} />
-                        <AvatarFallback className="bg-primary/10 text-primary">
+                        <AvatarFallback className="bg-primary/10 text-primary text-sm">
                           {employee.full_name.slice(0, 2)}
                         </AvatarFallback>
                       </Avatar>
