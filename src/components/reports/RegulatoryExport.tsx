@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { createWorkbook, jsonToSheet, writeFile as writeExcel } from '@/lib/excelExport';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 import {
   Download,
   FileText,
