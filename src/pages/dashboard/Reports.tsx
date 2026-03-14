@@ -640,7 +640,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.shipmentsByWasteDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={data.shipmentsByWasteType} layout="vertical">
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis type="number" />
