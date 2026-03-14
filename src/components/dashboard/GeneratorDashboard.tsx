@@ -111,8 +111,6 @@ const GeneratorDashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isMobile } = useDisplayMode();
-  const [recentShipments, setRecentShipments] = useState<RecentShipment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
@@ -120,14 +118,11 @@ const GeneratorDashboard = () => {
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showWorkOrder, setShowWorkOrder] = useState(false);
 
-  useEffect(() => {
-    if (organization?.id) {
-      fetchDashboardData();
-    }
-  }, [organization?.id]);
+  const { data: recentShipments = [], isLoading: loading, refetch: fetchDashboardData } = useQuery({
+    queryKey: ['generator-dashboard-shipments', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
 
-  const fetchDashboardData = async () => {
-    try {
       const { data: shipmentsRaw, error } = await supabase
         .from('shipments')
         .select(`
@@ -138,66 +133,61 @@ const GeneratorDashboard = () => {
           in_transit_at, delivered_at, confirmed_at, manual_driver_name, manual_vehicle_plate,
           driver_id, generator_id, transporter_id, recycler_id
         `)
-        .eq('generator_id', organization?.id)
+        .eq('generator_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(10);
 
       if (error) throw error;
+      if (!shipmentsRaw) return [];
 
-      if (shipmentsRaw) {
-        const orgIds = [...new Set([
-          ...shipmentsRaw.map(s => s.transporter_id).filter(Boolean),
-          ...shipmentsRaw.map(s => s.recycler_id).filter(Boolean),
-          ...shipmentsRaw.map(s => s.generator_id).filter(Boolean),
-        ])] as string[];
-        
-        const orgsMap: Record<string, any> = {};
-        if (orgIds.length > 0) {
-          const { data: orgsData } = await supabase.from('organizations').select('*').in('id', orgIds);
-          orgsData?.forEach(o => { orgsMap[o.id] = o; });
-        }
+      const orgIds = [...new Set([
+        ...shipmentsRaw.map(s => s.transporter_id).filter(Boolean),
+        ...shipmentsRaw.map(s => s.recycler_id).filter(Boolean),
+        ...shipmentsRaw.map(s => s.generator_id).filter(Boolean),
+      ])] as string[];
 
-        const driverIds = [...new Set(shipmentsRaw.map(s => s.driver_id).filter(Boolean))] as string[];
-        const driversMap: Record<string, any> = {};
-        if (driverIds.length > 0) {
-          const { data: driversData } = await supabase.from('drivers').select('license_number, vehicle_type, vehicle_plate, id, profile:profiles(full_name, phone)').in('id', driverIds);
-          driversData?.forEach(d => { driversMap[d.id] = { ...d, profile: Array.isArray(d.profile) ? d.profile[0] : d.profile }; });
-        }
-
-        const shipments = shipmentsRaw.map(s => ({
-          ...s,
-          generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
-          transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
-          recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
-          driver: s.driver_id ? driversMap[s.driver_id] || null : null,
-        }));
-
-        const shipmentIds = shipments.map(s => s.id);
-        const [reportsRes, receiptsRes, deliveryCertsRes] = await Promise.all([
-          supabase.from('recycling_reports').select('shipment_id').in('shipment_id', shipmentIds),
-          supabase.from('shipment_receipts').select('shipment_id').in('shipment_id', shipmentIds),
-          supabase.from('shipment_receipts').select('shipment_id').in('shipment_id', shipmentIds).eq('generator_id', organization?.id || ''),
-        ]);
-
-        const reportedIds = new Set(reportsRes.data?.map(r => r.shipment_id) || []);
-        const receiptIds = new Set(receiptsRes.data?.map(r => r.shipment_id) || []);
-        const deliveryCertIds = new Set(deliveryCertsRes.data?.map(r => r.shipment_id) || []);
-
-        const shipmentsWithStatus = shipments.map(s => ({
-          ...s,
-          has_report: reportedIds.has(s.id),
-          has_receipt: receiptIds.has(s.id),
-          has_delivery_certificate: deliveryCertIds.has(s.id),
-        }));
-
-        setRecentShipments(shipmentsWithStatus as unknown as RecentShipment[]);
+      const orgsMap: Record<string, any> = {};
+      if (orgIds.length > 0) {
+        const { data: orgsData } = await supabase.from('organizations').select('*').in('id', orgIds);
+        orgsData?.forEach(o => { orgsMap[o.id] = o; });
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
+      const driverIds = [...new Set(shipmentsRaw.map(s => s.driver_id).filter(Boolean))] as string[];
+      const driversMap: Record<string, any> = {};
+      if (driverIds.length > 0) {
+        const { data: driversData } = await supabase.from('drivers').select('license_number, vehicle_type, vehicle_plate, id, profile:profiles(full_name, phone)').in('id', driverIds);
+        driversData?.forEach(d => { driversMap[d.id] = { ...d, profile: Array.isArray(d.profile) ? d.profile[0] : d.profile }; });
+      }
+
+      const shipments = shipmentsRaw.map(s => ({
+        ...s,
+        generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
+        transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
+        recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
+        driver: s.driver_id ? driversMap[s.driver_id] || null : null,
+      }));
+
+      const shipmentIds = shipments.map(s => s.id);
+      const [reportsRes, receiptsRes, deliveryCertsRes] = await Promise.all([
+        supabase.from('recycling_reports').select('shipment_id').in('shipment_id', shipmentIds),
+        supabase.from('shipment_receipts').select('shipment_id').in('shipment_id', shipmentIds),
+        supabase.from('shipment_receipts').select('shipment_id').in('shipment_id', shipmentIds).eq('generator_id', organization.id),
+      ]);
+
+      const reportedIds = new Set(reportsRes.data?.map(r => r.shipment_id) || []);
+      const receiptIds = new Set(receiptsRes.data?.map(r => r.shipment_id) || []);
+      const deliveryCertIds = new Set(deliveryCertsRes.data?.map(r => r.shipment_id) || []);
+
+      return shipments.map(s => ({
+        ...s,
+        has_report: reportedIds.has(s.id),
+        has_receipt: receiptIds.has(s.id),
+        has_delivery_certificate: deliveryCertIds.has(s.id),
+      })) as unknown as RecentShipment[];
+    },
+    enabled: !!organization?.id,
+    staleTime: 1000 * 60 * 2,
+  });
 
   const handlePrintShipment = (shipment: RecentShipment) => {
     setSelectedShipment(shipment);
