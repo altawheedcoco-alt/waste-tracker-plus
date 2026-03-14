@@ -207,30 +207,27 @@ const PartnersView = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div />
-        <div className="text-right">
-          <h1 className="text-2xl font-bold flex items-center gap-2 justify-end">
-            شركائي
-            <Building2 className="w-6 h-6 text-primary" />
-          </h1>
-          <p className="text-muted-foreground">
-            الجهات المرتبطة ({allPartners.length} شريك)
-          </p>
-        </div>
+      <div className="text-right">
+        <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2 justify-end">
+          <span className="truncate">شركائي</span>
+          <Building2 className="w-5 h-5 sm:w-6 sm:h-6 text-primary shrink-0" />
+        </h1>
+        <p className="text-xs sm:text-base text-muted-foreground">
+          الجهات المرتبطة ({allPartners.length} شريك)
+        </p>
       </div>
 
       {/* Partner Linking Card */}
       <PartnerLinkingCard />
 
       {allPartners.length === 0 && (
-        <div className="bg-muted/50 border rounded-lg p-4 flex items-start gap-3">
-          <Info className="w-5 h-5 text-muted-foreground mt-0.5" />
-          <div className="text-right">
-            <p className="font-medium">لا يوجد جهات مرتبطة بعد</p>
-            <p className="text-sm text-muted-foreground">
+        <div className="bg-muted/50 border rounded-lg p-3 sm:p-4 flex items-start gap-2.5 sm:gap-3">
+          <Info className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground mt-0.5 shrink-0" />
+          <div className="text-right min-w-0">
+            <p className="font-medium text-sm sm:text-base">لا يوجد جهات مرتبطة بعد</p>
+            <p className="text-xs sm:text-sm text-muted-foreground">
               يمكنك ربط جهات جديدة باستخدام كود التحقق أعلاه.
             </p>
           </div>
@@ -239,7 +236,7 @@ const PartnersView = () => {
 
       {/* Main Layout: Sidebar + Detail */}
       {allPartners.length > 0 && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-h-[600px]">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 min-h-[400px] sm:min-h-[600px]">
           {/* Sidebar - Organization List */}
           <div className="lg:col-span-1 space-y-3">
             <Card className="h-full">
