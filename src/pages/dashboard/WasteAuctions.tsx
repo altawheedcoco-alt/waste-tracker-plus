@@ -142,21 +142,21 @@ const WasteAuctions = () => {
   };
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
+    <div className="space-y-4 p-3 md:p-4" dir="rtl">
       <BackButton />
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-            <Gavel className="w-7 h-7 text-primary" />
+      <div className="space-y-2">
+        <div className="min-w-0">
+          <h1 className="text-base sm:text-2xl font-bold text-foreground flex items-center gap-2 truncate">
+            <Gavel className="w-5 h-5 sm:w-7 sm:h-7 text-primary shrink-0" />
             مزادات المخلفات
           </h1>
-          <p className="text-sm text-muted-foreground mt-1">اعرض مخلفاتك في مزاد إلكتروني وتنافس على أفضل سعر</p>
+          <p className="text-[11px] sm:text-sm text-muted-foreground truncate">اعرض مخلفاتك في مزاد إلكتروني وتنافس على أفضل سعر</p>
         </div>
         <Dialog open={createOpen} onOpenChange={setCreateOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2"><Plus className="w-4 h-4" />إنشاء مزاد جديد</Button>
+            <Button className="gap-1.5 text-xs sm:text-sm" size="sm"><Plus className="w-3.5 h-3.5" />إنشاء مزاد جديد</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg" dir="rtl">
+          <DialogContent className="max-w-[95vw] sm:max-w-lg" dir="rtl">
             <DialogHeader><DialogTitle>إنشاء مزاد مخلفات جديد</DialogTitle></DialogHeader>
             <div className="space-y-3">
               <div><Label>عنوان المزاد</Label><Input value={newAuction.title} onChange={e => setNewAuction(p => ({ ...p, title: e.target.value }))} placeholder="مثال: 50 طن كرتون نظيف" /></div>
@@ -166,9 +166,9 @@ const WasteAuctions = () => {
                   <SelectContent>{WASTE_TYPES.map(t => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
                 </Select>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>الكمية التقديرية (طن)</Label><Input type="number" value={newAuction.estimated_quantity} onChange={e => setNewAuction(p => ({ ...p, estimated_quantity: e.target.value }))} /></div>
-                <div><Label>درجة الجودة</Label>
+              <div className="grid grid-cols-2 gap-2">
+                <div><Label className="text-xs">الكمية (طن)</Label><Input type="number" value={newAuction.estimated_quantity} onChange={e => setNewAuction(p => ({ ...p, estimated_quantity: e.target.value }))} /></div>
+                <div><Label className="text-xs">درجة الجودة</Label>
                   <Select value={newAuction.quality_grade} onValueChange={v => setNewAuction(p => ({ ...p, quality_grade: v }))}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -179,9 +179,9 @@ const WasteAuctions = () => {
                   </Select>
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label>السعر الافتتاحي (ج.م)</Label><Input type="number" value={newAuction.minimum_price} onChange={e => setNewAuction(p => ({ ...p, minimum_price: e.target.value }))} /></div>
-                <div><Label>سعر الشراء الفوري (اختياري)</Label><Input type="number" value={newAuction.buy_now_price} onChange={e => setNewAuction(p => ({ ...p, buy_now_price: e.target.value }))} /></div>
+              <div className="grid grid-cols-2 gap-2">
+                <div><Label className="text-xs">السعر الافتتاحي (ج.م)</Label><Input type="number" value={newAuction.minimum_price} onChange={e => setNewAuction(p => ({ ...p, minimum_price: e.target.value }))} /></div>
+                <div><Label className="text-xs">شراء فوري (اختياري)</Label><Input type="number" value={newAuction.buy_now_price} onChange={e => setNewAuction(p => ({ ...p, buy_now_price: e.target.value }))} /></div>
               </div>
               <div><Label>ينتهي في</Label><Input type="datetime-local" value={newAuction.ends_at} onChange={e => setNewAuction(p => ({ ...p, ends_at: e.target.value }))} /></div>
               <div><Label>الموقع</Label><Input value={newAuction.location_text} onChange={e => setNewAuction(p => ({ ...p, location_text: e.target.value }))} placeholder="المنطقة الصناعية، القاهرة" /></div>
@@ -195,15 +195,21 @@ const WasteAuctions = () => {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card><CardContent className="p-4 text-center"><Gavel className="w-6 h-6 mx-auto text-primary mb-1" /><p className="text-2xl font-bold">{activeAuctions.length}</p><p className="text-xs text-muted-foreground">مزاد نشط</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><TrendingUp className="w-6 h-6 mx-auto text-green-500 mb-1" /><p className="text-2xl font-bold">{myBids.length}</p><p className="text-xs text-muted-foreground">عروضي</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><Award className="w-6 h-6 mx-auto text-amber-500 mb-1" /><p className="text-2xl font-bold">{myBids.filter((b: any) => b.status === 'won').length}</p><p className="text-xs text-muted-foreground">فائز</p></CardContent></Card>
-        <Card><CardContent className="p-4 text-center"><Users className="w-6 h-6 mx-auto text-blue-500 mb-1" /><p className="text-2xl font-bold">{myAuctions.length}</p><p className="text-xs text-muted-foreground">مزاداتي</p></CardContent></Card>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        <Card><CardContent className="p-2.5 sm:p-4 text-center"><Gavel className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-primary mb-1" /><p className="text-lg sm:text-2xl font-bold">{activeAuctions.length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">مزاد نشط</p></CardContent></Card>
+        <Card><CardContent className="p-2.5 sm:p-4 text-center"><TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-green-500 mb-1" /><p className="text-lg sm:text-2xl font-bold">{myBids.length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">عروضي</p></CardContent></Card>
+        <Card><CardContent className="p-2.5 sm:p-4 text-center"><Award className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-amber-500 mb-1" /><p className="text-lg sm:text-2xl font-bold">{myBids.filter((b: any) => b.status === 'won').length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">فائز</p></CardContent></Card>
+        <Card><CardContent className="p-2.5 sm:p-4 text-center"><Users className="w-5 h-5 sm:w-6 sm:h-6 mx-auto text-blue-500 mb-1" /><p className="text-lg sm:text-2xl font-bold">{myAuctions.length}</p><p className="text-[10px] sm:text-xs text-muted-foreground">مزاداتي</p></CardContent></Card>
       </div>
 
       <Tabs defaultValue="active" dir="rtl">
-        <TabsList><TabsTrigger value="active">المزادات النشطة</TabsTrigger><TabsTrigger value="mine">مزاداتي</TabsTrigger><TabsTrigger value="bids">عروضي</TabsTrigger></TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-3 px-3 pb-1">
+          <TabsList className="inline-flex w-max gap-0.5 h-auto p-1">
+            <TabsTrigger value="active" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">المزادات النشطة</TabsTrigger>
+            <TabsTrigger value="mine" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">مزاداتي</TabsTrigger>
+            <TabsTrigger value="bids" className="text-[10px] sm:text-sm px-2.5 py-1.5 whitespace-nowrap">عروضي</TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="active">
           {isLoading ? <div className="flex justify-center py-12"><div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" /></div> : (

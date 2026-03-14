@@ -237,82 +237,80 @@ const DriverData = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="space-y-6"
+           className="space-y-4"
         >
           {/* Header */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold">{t('driverData.title')}</h1>
-              <p className="text-muted-foreground">{t('driverData.subtitle')}</p>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-2xl font-bold truncate">{t('driverData.title')}</h1>
+              <p className="text-[11px] sm:text-sm text-muted-foreground truncate">{t('driverData.subtitle')}</p>
             </div>
-            <div className="flex items-center gap-2">
-              <Badge 
-                variant={formData.is_available ? 'default' : 'secondary'}
-                className="flex items-center gap-1"
-              >
-                {formData.is_available ? (
-                  <CheckCircle2 className="h-3 w-3" />
-                ) : (
-                  <Clock className="h-3 w-3" />
-                )}
-                {formData.is_available ? t('driverData.availableForWork') : t('driverData.unavailable')}
-              </Badge>
-            </div>
+            <Badge 
+              variant={formData.is_available ? 'default' : 'secondary'}
+              className="flex items-center gap-1 shrink-0"
+            >
+              {formData.is_available ? (
+                <CheckCircle2 className="h-3 w-3" />
+              ) : (
+                <Clock className="h-3 w-3" />
+              )}
+              {formData.is_available ? t('driverData.availableForWork') : t('driverData.unavailable')}
+            </Badge>
           </div>
 
           {/* Stats Grid */}
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-4 sm:grid-cols-4">
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <Truck className="h-5 w-5 text-primary" />
+              <CardContent className="p-2.5 sm:pt-6 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10 shrink-0">
+                    <Truck className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.totalShipments}</p>
-                    <p className="text-sm text-muted-foreground">{t('driverData.totalShipments')}</p>
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold">{stats.totalShipments}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('driverData.totalShipments')}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-blue-500/10">
-                    <Activity className="h-5 w-5 text-blue-500" />
+              <CardContent className="p-2.5 sm:pt-6 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-blue-500/10 shrink-0">
+                    <Activity className="h-4 w-4 sm:h-5 sm:w-5 text-blue-500" />
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.activeShipments}</p>
-                    <p className="text-sm text-muted-foreground">{t('driverData.activeShipments')}</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-green-500/10">
-                    <CheckCircle2 className="h-5 w-5 text-green-500" />
-                  </div>
-                  <div>
-                    <p className="text-2xl font-bold">{stats.completedShipments}</p>
-                    <p className="text-sm text-muted-foreground">{t('driverData.completedShipments')}</p>
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold">{stats.activeShipments}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('driverData.activeShipments')}</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
             <Card>
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg bg-amber-500/10">
-                    <MapPin className="h-5 w-5 text-amber-500" />
+              <CardContent className="p-2.5 sm:pt-6 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-green-500/10 shrink-0">
+                    <CheckCircle2 className="h-4 w-4 sm:h-5 sm:w-5 text-green-500" />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium">{t('driverData.lastLocationUpdate')}</p>
-                    <p className="text-xs text-muted-foreground">
+                  <div className="min-w-0">
+                    <p className="text-lg sm:text-2xl font-bold">{stats.completedShipments}</p>
+                    <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('driverData.completedShipments')}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-2.5 sm:pt-6 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-amber-500/10 shrink-0">
+                    <MapPin className="h-4 w-4 sm:h-5 sm:w-5 text-amber-500" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-xs sm:text-sm font-medium truncate">{t('driverData.lastLocationUpdate')}</p>
+                    <p className="text-[10px] sm:text-xs text-muted-foreground truncate">
                       {stats.lastLocationUpdate 
                         ? format(new Date(stats.lastLocationUpdate), 'dd MMM yyyy - hh:mm a', { locale: dateLocale })
                         : t('driverData.noLocation')}
