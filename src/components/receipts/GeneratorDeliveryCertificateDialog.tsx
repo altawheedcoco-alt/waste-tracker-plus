@@ -167,6 +167,9 @@ ${DECLARATION_TEXT}`;
     setIsSubmitting(true);
     try {
       // Create receipt
+      const identity = generateDocumentIdentity('shipment_receipt', certNumber, {
+        shipmentNumber: shipment.shipment_number,
+      });
       const { error } = await supabase
         .from('shipment_receipts')
         .insert({
@@ -180,6 +183,7 @@ ${DECLARATION_TEXT}`;
           pickup_date: new Date().toISOString(),
           generator_id: organization?.id || null,
           unit: shipment.unit || 'كجم',
+          ...identity,
         } as any);
 
       if (error) throw error;

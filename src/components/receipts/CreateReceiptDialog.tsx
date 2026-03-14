@@ -162,6 +162,10 @@ const CreateReceiptDialog = ({
       const selectedShipment = shipment || shipments.find(s => s.id === selectedShipmentId);
       if (!selectedShipment) throw new Error('الشحنة غير موجودة');
 
+      const receiptNum = `RCP-${Date.now().toString(36).toUpperCase()}`;
+      const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
+        shipmentNumber: selectedShipment.shipment_number,
+      });
       const insertData = {
         shipment_id: selectedShipmentId,
         transporter_id: organization.id,
@@ -174,6 +178,8 @@ const CreateReceiptDialog = ({
         pickup_location: formData.pickupLocation,
         notes: formData.notes || null,
         created_by: profile.user_id,
+        receipt_number: receiptNum,
+        ...identity,
       };
 
       const { error } = await supabase

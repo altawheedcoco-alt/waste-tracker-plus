@@ -172,20 +172,27 @@ const BulkCertificateDialog = ({
         const generatorStampUrl = includeStamp ? selectedStamp : null;
         const generatorSignatureUrl = includeSignature ? selectedSignature : null;
 
-        const receipts = selectedShipments.map(shipment => ({
-          shipment_id: shipment.id,
-          receipt_number: `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
-          status: 'pending_approval',
-          actual_weight: shipment.quantity,
-          declared_weight: shipment.quantity,
-          waste_type: shipment.waste_type,
-          notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
-          pickup_date: new Date().toISOString(),
-          generator_id: organization?.id || null,
-          generator_signature: generatorSignatureUrl,
-          transporter_approval_status: 'pending',
-          transporter_approval_deadline: approvalDeadline,
-        }));
+        const receipts = selectedShipments.map(shipment => {
+          const receiptNum = `DLV-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+          const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
+            shipmentNumber: shipment.shipment_number,
+          });
+          return {
+            shipment_id: shipment.id,
+            receipt_number: receiptNum,
+            status: 'pending_approval',
+            actual_weight: shipment.quantity,
+            declared_weight: shipment.quantity,
+            waste_type: shipment.waste_type,
+            notes: `شهادة تسليم مجمعة من المولد - ${reportNumber}`,
+            pickup_date: new Date().toISOString(),
+            generator_id: organization?.id || null,
+            generator_signature: generatorSignatureUrl,
+            transporter_approval_status: 'pending',
+            transporter_approval_deadline: approvalDeadline,
+            ...identity,
+          };
+        });
 
         const { error } = await supabase
           .from('shipment_receipts')
