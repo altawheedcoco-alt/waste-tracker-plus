@@ -141,11 +141,11 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Workforce Management',
     visibleFor: ['transporter'],
     items: [
-      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const },
-      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const },
-      { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const },
-      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const },
-      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const },
+      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers', 'view_drivers'] },
+      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
