@@ -10,7 +10,7 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 
 interface ComplianceMonitorTabProps {
   facilityId?: string | null;
