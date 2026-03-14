@@ -161,29 +161,29 @@ const Hero = memo(() => {
 
           {/* Quick access grid — v3.0 improved spacing & hover */}
           <motion.div
-            className="mt-5 sm:mt-10"
+            className="mt-6 sm:mt-10"
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.7 }}
           >
-            <p className="text-[9px] sm:text-sm text-white/45 mb-2.5 sm:mb-5 font-semibold tracking-wide">{t('landing.quickAccess')}</p>
-            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-x-3 gap-y-3 sm:gap-6 px-1 sm:px-4">
+            <p className="text-[10px] sm:text-sm text-white/50 mb-3 sm:mb-5 font-semibold tracking-wide">{t('landing.quickAccess')}</p>
+            <div className="grid grid-cols-3 sm:flex sm:flex-wrap items-center justify-center gap-x-4 gap-y-4 sm:gap-6 px-2 sm:px-4">
               {quickAccessItems.map((item, i) => (
                 <motion.button
                   key={item.label}
                   onClick={() => navigate(item.type ? `/auth?mode=${item.mode}&type=${item.type}` : `/auth?mode=${item.mode}`)}
-                  className="flex flex-col items-center gap-1 sm:gap-2.5 group cursor-pointer"
+                  className="flex flex-col items-center gap-1.5 sm:gap-2.5 group cursor-pointer"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.25, delay: 0.75 + i * 0.04 }}
                   whileHover={{ scale: 1.1, y: -5 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  <div className={`w-11 h-11 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all ring-1 sm:ring-2 ring-white/15 group-hover:ring-white/35 relative overflow-hidden`}>
+                  <div className={`w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-gradient-to-br ${item.color} flex items-center justify-center shadow-lg group-hover:shadow-2xl transition-all ring-1 sm:ring-2 ring-white/15 group-hover:ring-white/35 relative overflow-hidden`}>
                     <span className="absolute inset-0 bg-white/0 group-hover:bg-white/10 transition-colors" />
-                    <item.icon className="w-[18px] h-[18px] sm:w-7 sm:h-7 text-white relative z-10" />
+                    <item.icon className="w-5 h-5 sm:w-7 sm:h-7 text-white relative z-10" />
                   </div>
-                  <span className="text-[9px] sm:text-sm font-bold text-white/90 group-hover:text-white transition-colors leading-tight max-w-[72px] sm:max-w-none">{item.label}</span>
+                  <span className="text-[10px] sm:text-sm font-bold text-white/90 group-hover:text-white transition-colors leading-tight max-w-[80px] sm:max-w-none">{item.label}</span>
                   <span className="text-[10px] text-white/45 hidden sm:block font-medium">{item.desc}</span>
                 </motion.button>
               ))}
