@@ -249,7 +249,7 @@ const AdminDashboard = () => {
         <DashboardAlertsHub orgType="admin" />
       </motion.div>
 
-      <AutomationSettingsDialog organizationType="generator" />
+      <AutomationSettingsDialog organizationType="admin" />
 
       {/* ═══ Strategic Pillars — Modular Tabs ═══ */}
       <Tabs defaultValue="command-center" className="w-full" dir="rtl">
