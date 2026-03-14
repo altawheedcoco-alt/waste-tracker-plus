@@ -73,7 +73,10 @@ export function useSidebarPreferences() {
   }, [user, organization?.id]);
 
   // Get all available groups for this user
-  const allGroups = useMemo(() => getGroupsForOrgType(orgType, isAdmin), [orgType, isAdmin]);
+  const allGroups = useMemo(() => {
+    const groups = getGroupsForOrgType(orgType, isAdmin);
+    return filterGroupsByPermissions(groups, permissions, isEmployee);
+  }, [orgType, isAdmin, permissions, isEmployee]);
   const defaultOrder = useMemo(() => getDefaultGroupOrder(orgType, isAdmin), [orgType, isAdmin]);
 
   // Effective ordered + filtered groups
