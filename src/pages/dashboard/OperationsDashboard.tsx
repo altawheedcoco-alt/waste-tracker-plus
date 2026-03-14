@@ -387,6 +387,34 @@ export default function OperationsDashboard() {
             </div>
           </ResizablePanel>
         </ResizablePanelGroup>
+        </div>
+
+        {/* Mobile: simple stacked layout */}
+        <div className="sm:hidden space-y-3 p-2 overflow-y-auto flex-1">
+          <div className="grid grid-cols-4 gap-1.5">
+            {stats.byStatus.slice(0, 4).map(item => (
+              <div key={item.status} className="text-center p-2 rounded-lg bg-card border">
+                <div className={cn('w-2.5 h-2.5 rounded-full mx-auto mb-1', item.color)} />
+                <p className="text-sm font-bold">{item.count}</p>
+                <p className="text-[9px] text-muted-foreground">{item.label}</p>
+              </div>
+            ))}
+          </div>
+          <div className="relative">
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              placeholder="بحث..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pr-9 h-8 text-xs"
+            />
+          </div>
+          <ShipmentsList
+            shipments={filteredShipments}
+            onSelect={setSelectedShipment}
+            selectedId={selectedShipment?.id}
+          />
+        </div>
       </div>
     </DashboardLayout>
   );
