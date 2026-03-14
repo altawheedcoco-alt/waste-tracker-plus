@@ -750,8 +750,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             width: !isMobile && isSidebarOpen ? `calc(100% - ${sidebarWidth}px)` : '100%',
           }}
         >
-          {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/92 backdrop-blur-2xl border-b border-border/25 flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`} style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.6)', boxShadow: '0 1px 3px hsl(220 16% 12% / 0.04), 0 4px 12px hsl(160, 68%, 40%, 0.02)' }}>
+          {/* Top header — v4.0 clean, minimal */}
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card border-b border-border flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`}>
             <div className="flex items-center gap-2 shrink-0">
               {isMobile && (
                 <button
