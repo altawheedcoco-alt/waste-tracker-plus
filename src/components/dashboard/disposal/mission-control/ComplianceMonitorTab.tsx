@@ -106,6 +106,7 @@ const ComplianceMonitorTab = ({ facilityId, organizationId }: ComplianceMonitorT
   };
 
   const generateManifestPDF = (shipment: any) => {
+    const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     doc.setFont('helvetica');
     

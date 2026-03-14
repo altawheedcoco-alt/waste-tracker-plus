@@ -16,6 +16,7 @@ interface Props {
 const ExportButtons = ({ companies }: Props) => {
   const exportPDF = () => {
     try {
+      const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF({ orientation: 'landscape' });
       doc.setFont('helvetica');
       doc.setFontSize(16);

@@ -141,6 +141,7 @@ const RegulatoryExport = () => {
     setLoading(true);
     try {
       const shipments = await fetchShipmentData();
+      const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
       
       // Simple PDF with summary
