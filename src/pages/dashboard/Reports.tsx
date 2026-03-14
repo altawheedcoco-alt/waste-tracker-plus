@@ -580,7 +580,7 @@ const Reports = () => {
               <CardDescription>{t('reportsPage.shipmentsTrendDesc')}</CardDescription>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={data.shipmentsTrend}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="date" />
