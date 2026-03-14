@@ -80,6 +80,7 @@ export default function PositionAssignDialog({ position, open, onClose, onSave, 
       setHolderNationalId(position.holder_national_id || '');
       setAutoEmail(position.auto_email || generateEmail(position.title, organization?.name || 'org'));
       setAutoPassword(generatePassword());
+      setDashboardMode(position.dashboard_mode || (position.level >= 3 ? 'management' : 'workspace'));
     }
   }, [position, open, organization?.name]);
 
