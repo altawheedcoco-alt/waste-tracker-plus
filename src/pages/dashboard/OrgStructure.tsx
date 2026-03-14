@@ -155,9 +155,10 @@ const OrgStructure = () => {
 
       {/* Main Tabs */}
       <Tabs defaultValue="tree" dir="rtl">
-        <TabsList className={`grid w-full ${isTransporter ? 'grid-cols-5' : 'grid-cols-4'} h-10`}>
+        <TabsList className={`grid w-full ${isTransporter ? 'grid-cols-6' : 'grid-cols-5'} h-10`}>
           <TabsTrigger value="tree" className="text-xs gap-1"><Network className="w-3.5 h-3.5" /> الشجرة</TabsTrigger>
           <TabsTrigger value="members" className="text-xs gap-1"><Users className="w-3.5 h-3.5" /> الأعضاء</TabsTrigger>
+          <TabsTrigger value="permissions" className="text-xs gap-1"><Shield className="w-3.5 h-3.5" /> الصلاحيات</TabsTrigger>
           <TabsTrigger value="stats" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" /> إحصائيات</TabsTrigger>
           {isTransporter && (
             <TabsTrigger value="drivers" className="text-xs gap-1"><Truck className="w-3.5 h-3.5" /> السائقين</TabsTrigger>
