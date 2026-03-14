@@ -17,7 +17,7 @@ import {
   Loader2,
   Filter,
 } from 'lucide-react';
-import { usePDFExport } from '@/hooks/usePDFExport';
+import { useDocumentService } from '@/hooks/useDocumentService';
 import AccountLedgerPrint from './AccountLedgerPrint';
 import ShipmentsAccountPrint from './ShipmentsAccountPrint';
 import AccountLedgerFilterDialog from './AccountLedgerFilterDialog';
@@ -40,7 +40,7 @@ export default function PrintExportActions({
   organizationName,
 }: PrintExportActionsProps) {
   const [isPrinting, setIsPrinting] = useState(false);
-  const { exportToPDF, previewPDF, printContent, isExporting } = usePDFExport({
+  const { downloadPDF, previewPDF, print, isProcessing } = useDocumentService({
     filename: `كشف-حساب-${partnerName}`,
     orientation: 'portrait',
   });
@@ -72,9 +72,9 @@ export default function PrintExportActions({
       const element = container.firstChild as HTMLElement;
 
       if (action === 'print') {
-        printContent(element);
+        print(element);
       } else if (action === 'pdf') {
-        await exportToPDF(element, filename);
+        await downloadPDF(element, { customFilename: filename });
       } else if (action === 'preview') {
         await previewPDF(element);
       }
@@ -117,7 +117,7 @@ export default function PrintExportActions({
     );
   };
 
-  const isLoading = isPrinting || isExporting;
+  const isLoading = isPrinting || isProcessing;
 
   return (
     <div className="flex items-center gap-2">

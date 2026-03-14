@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Printer, Download, X } from 'lucide-react';
 import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
-import { usePDFExport } from '@/hooks/usePDFExport';
+import { useDocumentService } from '@/hooks/useDocumentService';
 import TermsDocumentPrint from './TermsDocumentPrint';
 import PrintThemeSelector from '@/components/print/PrintThemeSelector';
 import { type PrintThemeId } from '@/lib/printThemes';
@@ -42,7 +42,7 @@ interface TermsDocumentDialogProps {
 const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = false }: TermsDocumentDialogProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [themeOpen, setThemeOpen] = useState(false);
-  const { exportToPDF, printWithTheme, isExporting } = usePDFExport({
+  const { exportToPDF, printWithTheme, isExporting } = useDocumentService({
     filename: `terms-acceptance-${acceptance?.id?.slice(0, 8) || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
