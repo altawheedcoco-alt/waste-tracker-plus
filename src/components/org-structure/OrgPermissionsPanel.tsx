@@ -22,6 +22,22 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQueryClient } from '@tanstack/react-query';
 
+// تصنيف الصلاحيات: أساسية / مهمة / اختيارية
+type PermTier = 'essential' | 'important' | 'optional';
+
+const PERM_TIER_META: Record<PermTier, { label: string; icon: string; color: string; bgClass: string; borderClass: string }> = {
+  essential: { label: 'أساسية', icon: '🔴', color: 'text-red-600', bgClass: 'bg-red-500/10', borderClass: 'border-red-300' },
+  important: { label: 'مهمة', icon: '🟡', color: 'text-amber-600', bgClass: 'bg-amber-500/10', borderClass: 'border-amber-300' },
+  optional: { label: 'اختيارية', icon: '🟢', color: 'text-green-600', bgClass: 'bg-green-500/10', borderClass: 'border-green-300' },
+};
+
+interface PermDef {
+  key: string;
+  label: string;
+  tier: PermTier;
+  description?: string;
+}
+
 const permissionGroups = [
   {
     title: 'الشحنات',
@@ -29,11 +45,11 @@ const permissionGroups = [
     color: 'text-blue-600',
     bg: 'bg-blue-500/10',
     permissions: [
-      { key: 'can_create_shipments', label: 'إنشاء شحنات' },
-      { key: 'can_edit_shipments', label: 'تعديل شحنات' },
-      { key: 'can_delete_shipments', label: 'حذف شحنات' },
-      { key: 'can_approve_shipments', label: 'اعتماد شحنات' },
-      { key: 'can_change_status', label: 'تغيير الحالة' },
+      { key: 'can_create_shipments', label: 'إنشاء شحنات', tier: 'essential' as PermTier, description: 'إنشاء طلبات شحن جديدة' },
+      { key: 'can_edit_shipments', label: 'تعديل شحنات', tier: 'important' as PermTier, description: 'تعديل بيانات الشحنات القائمة' },
+      { key: 'can_delete_shipments', label: 'حذف شحنات', tier: 'optional' as PermTier, description: 'حذف شحنات من النظام' },
+      { key: 'can_approve_shipments', label: 'اعتماد شحنات', tier: 'essential' as PermTier, description: 'الموافقة أو رفض الشحنات' },
+      { key: 'can_change_status', label: 'تغيير الحالة', tier: 'important' as PermTier, description: 'تحديث حالة الشحنة' },
     ],
   },
   {
@@ -42,10 +58,10 @@ const permissionGroups = [
     color: 'text-emerald-600',
     bg: 'bg-emerald-500/10',
     permissions: [
-      { key: 'can_view_financials', label: 'عرض البيانات المالية' },
-      { key: 'can_create_invoices', label: 'إنشاء فواتير' },
-      { key: 'can_approve_payments', label: 'اعتماد مدفوعات' },
-      { key: 'can_manage_deposits', label: 'إدارة الإيداعات' },
+      { key: 'can_view_financials', label: 'عرض البيانات المالية', tier: 'essential' as PermTier, description: 'الاطلاع على التقارير والأرصدة المالية' },
+      { key: 'can_create_invoices', label: 'إنشاء فواتير', tier: 'important' as PermTier, description: 'إصدار فواتير جديدة' },
+      { key: 'can_approve_payments', label: 'اعتماد مدفوعات', tier: 'essential' as PermTier, description: 'الموافقة على صرف المبالغ' },
+      { key: 'can_manage_deposits', label: 'إدارة الإيداعات', tier: 'important' as PermTier, description: 'تسجيل ومتابعة الإيداعات' },
     ],
   },
   {
@@ -54,9 +70,9 @@ const permissionGroups = [
     color: 'text-amber-600',
     bg: 'bg-amber-500/10',
     permissions: [
-      { key: 'can_manage_drivers', label: 'إدارة السائقين' },
-      { key: 'can_assign_drivers', label: 'تعيين السائقين' },
-      { key: 'can_track_vehicles', label: 'تتبع المركبات' },
+      { key: 'can_manage_drivers', label: 'إدارة السائقين', tier: 'important' as PermTier, description: 'إضافة وتعديل بيانات السائقين' },
+      { key: 'can_assign_drivers', label: 'تعيين السائقين', tier: 'essential' as PermTier, description: 'تخصيص سائقين للشحنات' },
+      { key: 'can_track_vehicles', label: 'تتبع المركبات', tier: 'optional' as PermTier, description: 'مراقبة مواقع المركبات' },
     ],
   },
   {
@@ -65,11 +81,11 @@ const permissionGroups = [
     color: 'text-purple-600',
     bg: 'bg-purple-500/10',
     permissions: [
-      { key: 'can_manage_users', label: 'إدارة المستخدمين' },
-      { key: 'can_manage_settings', label: 'إدارة الإعدادات' },
-      { key: 'can_view_reports', label: 'عرض التقارير' },
-      { key: 'can_export_data', label: 'تصدير البيانات' },
-      { key: 'can_manage_contracts', label: 'إدارة العقود' },
+      { key: 'can_manage_users', label: 'إدارة المستخدمين', tier: 'essential' as PermTier, description: 'إضافة وتعديل حسابات الموظفين' },
+      { key: 'can_manage_settings', label: 'إدارة الإعدادات', tier: 'essential' as PermTier, description: 'ضبط إعدادات النظام العامة' },
+      { key: 'can_view_reports', label: 'عرض التقارير', tier: 'important' as PermTier, description: 'الاطلاع على تقارير الأداء' },
+      { key: 'can_export_data', label: 'تصدير البيانات', tier: 'optional' as PermTier, description: 'تنزيل البيانات بصيغ مختلفة' },
+      { key: 'can_manage_contracts', label: 'إدارة العقود', tier: 'optional' as PermTier, description: 'إنشاء وتعديل العقود' },
     ],
   },
   {
@@ -78,14 +94,29 @@ const permissionGroups = [
     color: 'text-teal-600',
     bg: 'bg-teal-500/10',
     permissions: [
-      { key: 'can_manage_partners', label: 'إدارة الجهات المرتبطة' },
-      { key: 'can_view_partner_data', label: 'عرض بيانات الشركاء' },
-      { key: 'can_sign_documents', label: 'توقيع المستندات' },
-      { key: 'can_issue_certificates', label: 'إصدار شهادات' },
-      { key: 'can_manage_templates', label: 'إدارة القوالب' },
+      { key: 'can_manage_partners', label: 'إدارة الجهات المرتبطة', tier: 'important' as PermTier, description: 'إدارة بيانات الشركاء والجهات' },
+      { key: 'can_view_partner_data', label: 'عرض بيانات الشركاء', tier: 'optional' as PermTier, description: 'الاطلاع على معلومات الشركاء' },
+      { key: 'can_sign_documents', label: 'توقيع المستندات', tier: 'essential' as PermTier, description: 'التوقيع الإلكتروني على الوثائق' },
+      { key: 'can_issue_certificates', label: 'إصدار شهادات', tier: 'important' as PermTier, description: 'إنشاء شهادات رسمية' },
+      { key: 'can_manage_templates', label: 'إدارة القوالب', tier: 'optional' as PermTier, description: 'تخصيص وإدارة قوالب المستندات' },
     ],
   },
 ];
+
+// فلتر حسب التصنيف
+type TierFilter = 'all' | PermTier;
+
+// تصنيف صلاحيات الأعضاء (organization_members.granted_permissions)
+const MEMBER_PERM_TIERS: Record<string, PermTier> = {
+  create_shipments: 'essential', view_shipments: 'essential', edit_shipments: 'important',
+  delete_shipments: 'optional', approve_shipments: 'essential',
+  view_financials: 'essential', create_invoices: 'important', approve_payments: 'essential', manage_deposits: 'important',
+  manage_drivers: 'important', assign_drivers: 'essential', track_vehicles: 'optional',
+  manage_partners: 'important', view_partner_data: 'optional',
+  manage_members: 'essential', manage_settings: 'essential',
+  view_reports: 'important', export_data: 'optional',
+  sign_documents: 'essential', issue_certificates: 'important', manage_templates: 'optional', manage_contracts: 'optional',
+};
 
 const allPermKeys = permissionGroups.flatMap(g => g.permissions.map(p => p.key));
 
@@ -111,6 +142,8 @@ function PositionPermEditor({ position }: { position: Position }) {
     initPerms();
     setInitialized(true);
   }
+
+  const [tierFilter, setTierFilter] = useState<TierFilter>('all');
 
   const togglePerm = (key: string) => {
     setLocalPerms(prev => ({ ...prev, [key]: !prev[key] }));
@@ -219,12 +252,36 @@ function PositionPermEditor({ position }: { position: Position }) {
                     )}
                   </div>
 
+                  {/* Tier filter */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] text-muted-foreground font-medium">تصفية حسب الأهمية:</span>
+                    <Button size="sm" variant={tierFilter === 'all' ? 'default' : 'outline'} onClick={() => setTierFilter('all')} className="text-[10px] h-6 px-2">
+                      الكل
+                    </Button>
+                    {(['essential', 'important', 'optional'] as PermTier[]).map(t => (
+                      <Button
+                        key={t}
+                        size="sm"
+                        variant={tierFilter === t ? 'default' : 'outline'}
+                        onClick={() => setTierFilter(t)}
+                        className="text-[10px] h-6 px-2"
+                      >
+                        {PERM_TIER_META[t].icon} {PERM_TIER_META[t].label}
+                      </Button>
+                    ))}
+                  </div>
+
                   {/* Permission groups */}
                   <div className="space-y-3">
                     {permissionGroups.map(group => {
-                      const allOn = group.permissions.every(p => localPerms[p.key]);
-                      const someOn = group.permissions.some(p => localPerms[p.key]);
-                      const groupCount = group.permissions.filter(p => localPerms[p.key]).length;
+                      const filteredPerms = tierFilter === 'all'
+                        ? group.permissions
+                        : group.permissions.filter(p => p.tier === tierFilter);
+
+                      if (filteredPerms.length === 0) return null;
+
+                      const allOn = filteredPerms.every(p => localPerms[p.key]);
+                      const groupCount = filteredPerms.filter(p => localPerms[p.key]).length;
 
                       return (
                         <div key={group.title} className={`rounded-lg border p-3 ${group.bg}`}>
@@ -239,7 +296,7 @@ function PositionPermEditor({ position }: { position: Position }) {
                                 {allOn ? <XCircle className="w-3 h-3 ml-1" /> : <CheckCircle2 className="w-3 h-3 ml-1" />}
                                 {allOn ? 'إلغاء' : 'تحديد الكل'}
                               </Button>
-                              <Badge variant="outline" className="text-[10px]">{groupCount}/{group.permissions.length}</Badge>
+                              <Badge variant="outline" className="text-[10px]">{groupCount}/{filteredPerms.length}</Badge>
                             </div>
                             <h4 className={`font-semibold text-sm flex items-center gap-1.5 ${group.color}`}>
                               <span>{group.icon}</span>
@@ -247,22 +304,33 @@ function PositionPermEditor({ position }: { position: Position }) {
                             </h4>
                           </div>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                            {group.permissions.map(perm => (
-                              <div
-                                key={perm.key}
-                                className={`flex items-center justify-between p-2 rounded-md transition-colors cursor-pointer ${
-                                  localPerms[perm.key] ? 'bg-background/80 shadow-sm' : 'hover:bg-background/50'
-                                }`}
-                                onClick={() => togglePerm(perm.key)}
-                              >
-                                <Switch
-                                  checked={localPerms[perm.key] || false}
-                                  onCheckedChange={() => togglePerm(perm.key)}
-                                  className="scale-75"
-                                />
-                                <span className="text-xs font-medium">{perm.label}</span>
-                              </div>
-                            ))}
+                            {filteredPerms.map(perm => {
+                              const tierMeta = PERM_TIER_META[perm.tier];
+                              return (
+                                <div
+                                  key={perm.key}
+                                  className={`flex items-center justify-between p-2 rounded-md transition-colors cursor-pointer border ${
+                                    localPerms[perm.key]
+                                      ? `bg-background/80 shadow-sm ${tierMeta.borderClass}`
+                                      : 'border-transparent hover:bg-background/50'
+                                  }`}
+                                  onClick={() => togglePerm(perm.key)}
+                                  title={perm.description}
+                                >
+                                  <div className="flex items-center gap-1.5">
+                                    <Switch
+                                      checked={localPerms[perm.key] || false}
+                                      onCheckedChange={() => togglePerm(perm.key)}
+                                      className="scale-75"
+                                    />
+                                    <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-medium ${tierMeta.bgClass} ${tierMeta.color}`}>
+                                      {tierMeta.label}
+                                    </span>
+                                  </div>
+                                  <span className="text-xs font-medium">{perm.label}</span>
+                                </div>
+                              );
+                            })}
                           </div>
                         </div>
                       );
@@ -395,22 +463,31 @@ function MemberPermEditor({ member, onUpdate }: { member: OrgMember; onUpdate: (
                   <div key={catKey}>
                     <h4 className="text-xs font-semibold text-muted-foreground mb-1.5">{catLabel}</h4>
                     <div className="grid grid-cols-2 gap-1">
-                      {catPerms.map(perm => (
-                        <div
-                          key={perm}
-                          className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors ${
-                            localPerms.includes(perm) ? 'bg-primary/5 shadow-sm' : 'hover:bg-muted/50'
-                          }`}
-                          onClick={() => togglePerm(perm)}
-                        >
-                          <Switch
-                            checked={localPerms.includes(perm)}
-                            onCheckedChange={() => togglePerm(perm)}
-                            className="scale-75"
-                          />
-                          <span className="text-xs">{PERMISSION_LABELS[perm].ar}</span>
-                        </div>
-                      ))}
+                      {catPerms.map(perm => {
+                        const tier = MEMBER_PERM_TIERS[perm] || 'optional';
+                        const tierMeta = PERM_TIER_META[tier];
+                        return (
+                          <div
+                            key={perm}
+                            className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors border ${
+                              localPerms.includes(perm) ? `bg-primary/5 shadow-sm ${tierMeta.borderClass}` : 'border-transparent hover:bg-muted/50'
+                            }`}
+                            onClick={() => togglePerm(perm)}
+                          >
+                            <div className="flex items-center gap-1">
+                              <Switch
+                                checked={localPerms.includes(perm)}
+                                onCheckedChange={() => togglePerm(perm)}
+                                className="scale-75"
+                              />
+                              <span className={`text-[8px] px-1 py-0.5 rounded-full ${tierMeta.bgClass} ${tierMeta.color}`}>
+                                {tierMeta.label}
+                              </span>
+                            </div>
+                            <span className="text-xs">{PERMISSION_LABELS[perm].ar}</span>
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 );
