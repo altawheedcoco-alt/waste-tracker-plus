@@ -463,9 +463,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   // Get responsive values
   const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
-  const headerHeight = isMobile ? 'h-14' : 'h-16';
+  const headerHeight = isMobile ? 'h-[52px]' : 'h-16';
   const mainPadding = getResponsiveClass({
-    mobile: 'px-2 pt-2 pb-0',
+    mobile: 'px-3 pt-3 pb-0',
     tablet: 'p-4',
     desktop: 'p-6',
   });
@@ -779,15 +779,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           }}
         >
           {/* Top header - Responsive height */}
-          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/90 backdrop-blur-2xl border-b border-border/30 flex items-center justify-between gap-1 sm:gap-2 px-2 sm:px-4 lg:px-6`} style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.6)', boxShadow: '0 1px 3px hsl(220 16% 12% / 0.04), 0 4px 12px hsl(160, 68%, 40%, 0.02)' }}>
+          <header className={`sticky top-0 z-40 ${headerHeight} bg-card/92 backdrop-blur-2xl border-b border-border/25 flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`} style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.6)', boxShadow: '0 1px 3px hsl(220 16% 12% / 0.04), 0 4px 12px hsl(160, 68%, 40%, 0.02)' }}>
             <div className="flex items-center gap-2 shrink-0">
               {isMobile && (
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                  className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                  className="p-2.5 hover:bg-muted rounded-xl transition-colors touch-manipulation active:bg-muted/80"
                   aria-label="فتح القائمة"
                 >
-                  {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+                  {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
                 </button>
               )}
               {isMobile && (
@@ -949,8 +949,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   initial={{ x: '100%' }}
                   animate={{ x: 0 }}
                   exit={{ x: '100%' }}
-                  transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-                  className="fixed top-0 right-0 z-50 h-full w-[85vw] max-w-[320px] bg-card/98 backdrop-blur-xl shadow-2xl lg:hidden flex flex-col touch-manipulation"
+                  transition={{ type: 'spring', damping: 30, stiffness: 320 }}
+                  className="fixed top-0 right-0 z-50 h-full w-[82vw] max-w-[320px] bg-card/98 backdrop-blur-xl shadow-2xl lg:hidden flex flex-col touch-manipulation"
                   style={{ willChange: 'transform' }}
                   drag="x"
                   dragConstraints={{ left: 0, right: 0 }}
@@ -962,31 +962,31 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   }}
                 >
                   {/* Header */}
-                  <div className="flex items-center justify-between p-4 border-b border-border shrink-0">
+                  <div className="flex items-center justify-between px-4 py-3.5 border-b border-border/40 shrink-0">
                     <PlatformLogo size="sm" showText />
                     <button
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className="p-2 hover:bg-muted rounded-lg transition-colors touch-manipulation"
+                      className="p-2.5 hover:bg-muted active:bg-muted/80 rounded-xl transition-colors touch-manipulation"
                       aria-label="إغلاق القائمة"
                     >
-                      <X size={22} />
+                      <X size={20} />
                     </button>
                   </div>
 
                   {/* Search */}
-                  <div className="px-3 pt-3 shrink-0">
+                  <div className="px-4 pt-3 shrink-0">
                     <div className="relative">
                       <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                       <Input
                         value={sidebarSearch}
                         onChange={(e) => setSidebarSearch(e.target.value)}
                         placeholder={t('sidebar.searchPlaceholder')}
-                        className="pr-9 pl-8 h-11 text-sm bg-muted/50"
+                        className="pr-9 pl-8 h-11 text-sm bg-muted/40 rounded-xl border-border/40"
                       />
                       {sidebarSearch && (
                         <button
                           onClick={() => setSidebarSearch('')}
-                          className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded touch-manipulation"
+                          className="absolute left-2.5 top-1/2 -translate-y-1/2 p-1.5 hover:bg-muted rounded-lg touch-manipulation"
                         >
                           <XIcon className="w-4 h-4 text-muted-foreground" />
                         </button>
@@ -995,7 +995,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   </div>
 
                   {/* Nav items - scrollable */}
-                  <nav className="flex-1 overflow-y-auto p-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
+                  <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {filteredMenuItems.length > 0 ? (
                       filteredMenuItems.map((item: SidebarMenuItem) => (
                         <div key={item.key} onClick={(e) => {
@@ -1048,17 +1048,17 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   </nav>
 
                   {/* Bottom - Music Player & Logout */}
-                  <div className="p-3 border-t border-border shrink-0 space-y-2">
+                  <div className="px-4 py-3 border-t border-border/40 shrink-0 space-y-2">
                     <div className="flex items-center justify-center">
                       <FocusMusicPlayer />
                     </div>
                     <Button
                       variant="ghost"
                       onClick={() => { setIsMobileMenuOpen(false); handleSignOut(); }}
-                      className="w-full flex items-center justify-center gap-2 h-12 text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation"
+                      className="w-full flex items-center justify-center gap-2 h-12 text-destructive hover:bg-destructive/10 hover:text-destructive touch-manipulation rounded-xl"
                     >
                       <LogOut className="w-5 h-5" />
-                      <span className="text-sm font-medium">{t('nav.logout')}</span>
+                      <span className="text-sm font-semibold">{t('nav.logout')}</span>
                     </Button>
                   </div>
                 </motion.div>
@@ -1067,7 +1067,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </AnimatePresence>
 
           {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
-          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-24' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[5.5rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
             <DashboardBreadcrumb />
             <div className="w-full max-w-full">
               <OnboardingGuard>

@@ -52,7 +52,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
         <motion.div
           whileHover={{ x: -4 }}
           whileTap={{ scale: 0.98 }}
-          className={`relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 touch-manipulation ${
+          className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 touch-manipulation ${
             isActive
               ? 'bg-primary text-primary-foreground shadow-md'
               : 'hover:bg-muted/80 text-foreground/80 hover:text-foreground active:bg-muted'
@@ -120,7 +120,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
     <motion.button
       whileTap={{ scale: 0.98 }}
       onClick={toggleOpen}
-      className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200 touch-manipulation ${
+      className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 touch-manipulation ${
         isChildActive
           ? 'bg-primary/10 text-primary font-semibold'
           : 'hover:bg-muted/80 text-foreground/80 hover:text-foreground'
@@ -204,7 +204,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="overflow-hidden mr-4 border-r-2 border-border pr-2 mt-1 space-y-0.5"
+            className="overflow-hidden mr-4 border-r-2 border-border/50 pr-2 mt-1 space-y-0.5"
           >
             {item.children!.map(child => (
               <SidebarNavGroup

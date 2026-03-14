@@ -89,10 +89,10 @@ const MobileBottomNav = memo(() => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/80 backdrop-blur-xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
-      style={{ WebkitBackdropFilter: 'blur(24px) saturate(1.8)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/85 backdrop-blur-2xl border-t border-border/20 pb-[env(safe-area-inset-bottom)]"
+      style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)', boxShadow: '0 -2px 12px hsl(220 16% 12% / 0.06)' }}
     >
-      <div className="flex items-center justify-around h-16 px-2">
+      <div className="flex items-center justify-around h-[60px] px-1">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;
@@ -102,7 +102,7 @@ const MobileBottomNav = memo(() => {
               key={tab.id}
               onClick={() => navigate(tab.path)}
               className={cn(
-                'flex flex-col items-center justify-center gap-1 flex-1 h-full relative',
+                'flex flex-col items-center justify-center gap-0.5 flex-1 h-full relative',
                 'touch-manipulation spring-press',
                 active ? 'text-primary' : 'text-muted-foreground/70'
               )}
@@ -111,7 +111,7 @@ const MobileBottomNav = memo(() => {
               {active && (
                 <motion.div
                   layoutId="bottomNavBg"
-                  className="absolute inset-x-2 inset-y-1 rounded-2xl bg-primary/10"
+                  className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-primary/8"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -120,17 +120,17 @@ const MobileBottomNav = memo(() => {
               {active && (
                 <motion.div
                   layoutId="bottomNavIndicator"
-                  className="absolute -top-px left-1/4 right-1/4 h-[3px] bg-primary rounded-full"
+                  className="absolute -top-px left-1/4 right-1/4 h-[2.5px] bg-primary rounded-full"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
 
               <div className="relative z-10">
                 <motion.div
-                  animate={active ? { scale: 1.15 } : { scale: 1 }}
+                  animate={active ? { scale: 1.12 } : { scale: 1 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Icon className={cn('w-5 h-5', active && 'stroke-[2.5]')} />
+                  <Icon className={cn('w-[22px] h-[22px]', active && 'stroke-[2.5]')} />
                 </motion.div>
                 
                 {/* Badge */}
