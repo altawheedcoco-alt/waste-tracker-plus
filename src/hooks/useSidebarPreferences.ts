@@ -2,7 +2,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import { SidebarGroupConfig, getGroupsForOrgType, getDefaultGroupOrder } from '@/config/sidebarConfig';
+import { SidebarGroupConfig, getGroupsForOrgType, getDefaultGroupOrder, filterGroupsByPermissions } from '@/config/sidebarConfig';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
 
 interface SidebarPrefs {
   group_order: string[];
@@ -12,6 +13,7 @@ interface SidebarPrefs {
 
 export function useSidebarPreferences() {
   const { user, organization, roles } = useAuth();
+  const { permissions, isEmployee } = useMyPermissions();
   const [prefs, setPrefs] = useState<SidebarPrefs | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -71,7 +73,10 @@ export function useSidebarPreferences() {
   }, [user, organization?.id]);
 
   // Get all available groups for this user
-  const allGroups = useMemo(() => getGroupsForOrgType(orgType, isAdmin), [orgType, isAdmin]);
+  const allGroups = useMemo(() => {
+    const groups = getGroupsForOrgType(orgType, isAdmin);
+    return filterGroupsByPermissions(groups, permissions, isEmployee);
+  }, [orgType, isAdmin, permissions, isEmployee]);
   const defaultOrder = useMemo(() => getDefaultGroupOrder(orgType, isAdmin), [orgType, isAdmin]);
 
   // Effective ordered + filtered groups

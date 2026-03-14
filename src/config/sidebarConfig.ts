@@ -39,6 +39,8 @@ export interface SidebarItemConfig {
   visibleFor?: string[];
   /** نوع الارتباط الوظيفي */
   bindingType?: import('@/types/bindingTypes').BindingType;
+  /** Required employee permissions to see this item (any one suffices) */
+  requiredPermissions?: string[];
 }
 
 type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office' | 'admin' | 'driver';
@@ -66,11 +68,11 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Building2, labelAr: 'ملف المنظمة', labelEn: 'Org Profile', path: '/dashboard/organization-profile', key: 'org-profile' },
       { icon: FileText, labelAr: 'الإفادة الرقمية', labelEn: 'Digital Attestation', path: '/dashboard/organization-attestation', key: 'org-attestation' },
-      { icon: Network, labelAr: 'الهيكل التنظيمي', labelEn: 'Org Structure', path: '/dashboard/org-structure', key: 'org-structure' },
-      { icon: Users, labelAr: 'إدارة الموظفين', labelEn: 'Employees', path: '/dashboard/employees', key: 'employees' },
-      { icon: Users, labelAr: 'بيانات الفريق', labelEn: 'Team Data', path: '/dashboard/team-credentials', key: 'other-team' },
-      { icon: Handshake, labelAr: 'الشركاء', labelEn: 'Partners', path: '/dashboard/partners', key: 'partners', badgeKey: 'partners' },
-      { icon: Rss, labelAr: 'آخر أخبار الشركاء', labelEn: 'Partners Timeline', path: '/dashboard/partners-timeline', key: 'partners-timeline', badgeKey: 'partners-timeline' },
+      { icon: Network, labelAr: 'الهيكل التنظيمي', labelEn: 'Org Structure', path: '/dashboard/org-structure', key: 'org-structure', requiredPermissions: ['manage_members', 'manage_settings'] },
+      { icon: Users, labelAr: 'إدارة الموظفين', labelEn: 'Employees', path: '/dashboard/employees', key: 'employees', requiredPermissions: ['manage_members'] },
+      { icon: Users, labelAr: 'بيانات الفريق', labelEn: 'Team Data', path: '/dashboard/team-credentials', key: 'other-team', requiredPermissions: ['manage_members'] },
+      { icon: Handshake, labelAr: 'الشركاء', labelEn: 'Partners', path: '/dashboard/partners', key: 'partners', badgeKey: 'partners', requiredPermissions: ['manage_partners', 'view_partner_data'] },
+      { icon: Rss, labelAr: 'آخر أخبار الشركاء', labelEn: 'Partners Timeline', path: '/dashboard/partners-timeline', key: 'partners-timeline', badgeKey: 'partners-timeline', requiredPermissions: ['view_partner_data'] },
       { icon: Newspaper, labelAr: 'منشورات المنظمة', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'posts' },
       { icon: Fingerprint, labelAr: 'بطاقة الهوية الرقمية', labelEn: 'Digital Identity', path: '/dashboard/digital-identity-card', key: 'digital-identity-card' },
     ],
@@ -84,12 +86,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Shipments & Certs',
     visibleFor: ['generator'],
     items: [
-      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments' },
-      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center' },
-      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected' },
-      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments' },
-      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts' },
-      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs' },
+      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/shipments', key: 'generator-shipments', badgeKey: 'generator-shipments', requiredPermissions: ['view_shipments', 'create_shipments', 'manage_shipments'] },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking', path: '/dashboard/tracking-center', key: 'generator-tracking-center', requiredPermissions: ['view_shipments'] },
+      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'generator-rejected', requiredPermissions: ['view_shipments', 'manage_shipments'] },
+      { icon: CalendarClock, labelAr: 'شحنات متكررة', labelEn: 'Recurring Shipments', path: '/dashboard/recurring-shipments', key: 'recurring-shipments', requiredPermissions: ['create_shipments', 'manage_shipments'] },
+      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/generator-receipts', key: 'generator-receipts', requiredPermissions: ['view_shipments'] },
+      { icon: FolderCheck, labelAr: 'شهادات التدوير', labelEn: 'Recycling Certs', path: '/dashboard/recycling-certificates', key: 'generator-certs', badgeKey: 'generator-certs', requiredPermissions: ['view_shipments'] },
     ],
   },
 
@@ -101,16 +103,16 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Shipping Operations',
     visibleFor: ['transporter'],
     items: [
-      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/transporter-shipments', key: 'transporter-shipments', badgeKey: 'transporter-shipments' },
-      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'transporter-rejected' },
-      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/transporter-receipts', key: 'transporter-receipts' },
-      { icon: Scale, labelAr: 'سجل الكميات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'transporter-external-records' },
-      { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'transporter-bulk-weight' },
+      { icon: Package, labelAr: 'الشحنات', labelEn: 'Shipments', path: '/dashboard/transporter-shipments', key: 'transporter-shipments', badgeKey: 'transporter-shipments', requiredPermissions: ['view_shipments', 'create_shipments', 'manage_shipments'] },
+      { icon: AlertTriangle, labelAr: 'الشحنات المرفوضة', labelEn: 'Rejected', path: '/dashboard/rejected-shipments', key: 'transporter-rejected', requiredPermissions: ['view_shipments', 'manage_shipments'] },
+      { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/transporter-receipts', key: 'transporter-receipts', requiredPermissions: ['view_shipments'] },
+      { icon: Scale, labelAr: 'سجل الكميات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'transporter-external-records', requiredPermissions: ['view_shipments'] },
+      { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'transporter-bulk-weight', requiredPermissions: ['manage_shipments'] },
       { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche' },
-      { icon: Inbox, labelAr: 'طلبات الجمع', labelEn: 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests' },
-      { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Manual Shipment', path: '/dashboard/manual-shipment', key: 'manual-shipment' },
-      { icon: FileText, labelAr: 'أرشيف النماذج اليدوية', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts' },
-      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center' },
+      { icon: Inbox, labelAr: 'طلبات الجمع', labelEn: 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests', requiredPermissions: ['view_shipments', 'manage_shipments'] },
+      { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Manual Shipment', path: '/dashboard/manual-shipment', key: 'manual-shipment', requiredPermissions: ['create_shipments'] },
+      { icon: FileText, labelAr: 'أرشيف النماذج اليدوية', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts', requiredPermissions: ['view_shipments'] },
+      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center', requiredPermissions: ['view_shipments', 'export_reports'] },
     ],
   },
 
@@ -122,12 +124,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Fleet & Tracking',
     visibleFor: ['transporter'],
     items: [
-      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const },
-      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const },
-      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const },
-      { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Container Management', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const },
-      { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassignment', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const },
-      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments', 'view_drivers'] },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'] },
+      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Container Management', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassignment', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
@@ -139,11 +141,11 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Workforce Management',
     visibleFor: ['transporter'],
     items: [
-      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const },
-      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const },
-      { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const },
-      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const },
-      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const },
+      { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers', 'view_drivers'] },
+      { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
@@ -400,20 +402,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Finance & Accounting',
     visibleFor: [],
     items: [
-      { icon: Calculator, labelAr: 'المحاسبة', labelEn: 'Accounting', path: '/dashboard/erp/accounting', key: 'erp-accounting' },
-      { icon: Package, labelAr: 'المخزون', labelEn: 'Inventory', path: '/dashboard/erp/inventory', key: 'erp-inventory' },
-      { icon: Users, labelAr: 'الموارد البشرية', labelEn: 'HR', path: '/dashboard/erp/hr', key: 'erp-hr' },
-      { icon: Banknote, labelAr: 'مسيّر الرواتب', labelEn: 'Payroll', path: '/dashboard/hr/payroll', key: 'hr-payroll' },
-      { icon: Award, labelAr: 'تقييم الأداء', labelEn: 'Performance', path: '/dashboard/hr/performance', key: 'hr-performance' },
-      { icon: Activity, labelAr: 'إدارة الورديات', labelEn: 'Shifts', path: '/dashboard/hr/shifts', key: 'hr-shifts' },
+      { icon: Calculator, labelAr: 'المحاسبة', labelEn: 'Accounting', path: '/dashboard/erp/accounting', key: 'erp-accounting', requiredPermissions: ['view_accounts', 'view_account_details'] },
+      { icon: Package, labelAr: 'المخزون', labelEn: 'Inventory', path: '/dashboard/erp/inventory', key: 'erp-inventory', requiredPermissions: ['view_accounts'] },
+      { icon: Users, labelAr: 'الموارد البشرية', labelEn: 'HR', path: '/dashboard/erp/hr', key: 'erp-hr', requiredPermissions: ['manage_members', 'manage_settings'] },
+      { icon: Banknote, labelAr: 'مسيّر الرواتب', labelEn: 'Payroll', path: '/dashboard/hr/payroll', key: 'hr-payroll', requiredPermissions: ['manage_members', 'manage_settings'] },
+      { icon: Award, labelAr: 'تقييم الأداء', labelEn: 'Performance', path: '/dashboard/hr/performance', key: 'hr-performance', requiredPermissions: ['manage_members'] },
+      { icon: Activity, labelAr: 'إدارة الورديات', labelEn: 'Shifts', path: '/dashboard/hr/shifts', key: 'hr-shifts', requiredPermissions: ['manage_members'] },
       { icon: Network, labelAr: 'الهيكل التنظيمي', labelEn: 'Org Chart', path: '/dashboard/hr/org-chart', key: 'hr-org-chart' },
-      { icon: UserPlus, labelAr: 'نهاية الخدمة', labelEn: 'End of Service', path: '/dashboard/hr/end-of-service', key: 'hr-eos' },
+      { icon: UserPlus, labelAr: 'نهاية الخدمة', labelEn: 'End of Service', path: '/dashboard/hr/end-of-service', key: 'hr-eos', requiredPermissions: ['manage_members', 'manage_settings'] },
       { icon: Inbox, labelAr: 'الخدمة الذاتية', labelEn: 'Self Service', path: '/dashboard/hr/self-service', key: 'hr-self-service' },
-      { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales' },
-      { icon: BarChart3, labelAr: 'التقارير المالية', labelEn: 'Financial Reports', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard' },
-      { icon: Activity, labelAr: 'الإيرادات والمصروفات', labelEn: 'Revenue & Expenses', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses' },
-      { icon: Banknote, labelAr: 'تكلفة البضاعة', labelEn: 'COGS', path: '/dashboard/erp/cogs', key: 'erp-cogs' },
-      { icon: GitCompareArrows, labelAr: 'المقارنات المالية', labelEn: 'Comparisons', path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons' },
+      { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales', requiredPermissions: ['view_accounts', 'create_deposits'] },
+      { icon: BarChart3, labelAr: 'التقارير المالية', labelEn: 'Financial Reports', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard', requiredPermissions: ['view_accounts', 'view_reports'] },
+      { icon: Activity, labelAr: 'الإيرادات والمصروفات', labelEn: 'Revenue & Expenses', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses', requiredPermissions: ['view_accounts'] },
+      { icon: Banknote, labelAr: 'تكلفة البضاعة', labelEn: 'COGS', path: '/dashboard/erp/cogs', key: 'erp-cogs', requiredPermissions: ['view_accounts'] },
+      { icon: GitCompareArrows, labelAr: 'المقارنات المالية', labelEn: 'Comparisons', path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons', requiredPermissions: ['view_accounts', 'view_reports'] },
       { icon: Umbrella, labelAr: 'التأمين الذكي', labelEn: 'Smart Insurance', path: '/dashboard/smart-insurance', key: 'smart-insurance', visibleFor: ['transporter'] },
       { icon: TrendingUp, labelAr: 'العقود الآجلة', labelEn: 'Futures Market', path: '/dashboard/futures-market', key: 'futures-market', visibleFor: ['transporter'] },
       { icon: Wallet, labelAr: 'المحفظة الرقمية', labelEn: 'Digital Wallet', path: '/dashboard/digital-wallet', key: 'digital-wallet', visibleFor: ['transporter'] },
@@ -428,19 +430,19 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Reports & Analytics',
     visibleFor: [],
     items: [
-      { icon: BarChart3, labelAr: 'التقارير', labelEn: 'Reports', path: '/dashboard/reports', key: 'reports' },
-      { icon: FileText, labelAr: 'تقارير الشحنات', labelEn: 'Shipment Reports', path: '/dashboard/shipment-reports', key: 'shipment-reports' },
-      { icon: ClipboardList, labelAr: 'التقرير التجميعي', labelEn: 'Aggregate Report', path: '/dashboard/aggregate-report', key: 'aggregate-report' },
-      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Reports Guide', path: '/dashboard/reports-guide', key: 'reports-guide' },
-      { icon: FileSpreadsheet, labelAr: 'سجل غير خطرة', labelEn: 'Non-Hazardous', path: '/dashboard/non-hazardous-register', key: 'non-hazardous' },
-      { icon: AlertTriangle, labelAr: 'سجل خطرة', labelEn: 'Hazardous', path: '/dashboard/hazardous-register', key: 'hazardous' },
-      { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types' },
-      { icon: Leaf, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'carbon-footprint' },
-      { icon: TreePine, labelAr: 'الاستدامة البيئية', labelEn: 'Sustainability', path: '/dashboard/environmental-sustainability', key: 'environmental-sustainability' },
-      { icon: Leaf, labelAr: 'تقارير ESG', labelEn: 'ESG Reports', path: '/dashboard/esg-reports', key: 'esg-reports' },
-      { icon: Shield, labelAr: 'تقارير السلامة', labelEn: 'OHS Reports', path: '/dashboard/ohs-reports', key: 'ohs-reports' },
-      { icon: BarChart3, labelAr: 'تحليل النفايات التفصيلي', labelEn: 'Waste Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis' },
-      { icon: Activity, labelAr: 'خريطة تدفق النفايات', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap' },
+      { icon: BarChart3, labelAr: 'التقارير', labelEn: 'Reports', path: '/dashboard/reports', key: 'reports', requiredPermissions: ['view_reports', 'create_reports'] },
+      { icon: FileText, labelAr: 'تقارير الشحنات', labelEn: 'Shipment Reports', path: '/dashboard/shipment-reports', key: 'shipment-reports', requiredPermissions: ['view_reports', 'view_shipments'] },
+      { icon: ClipboardList, labelAr: 'التقرير التجميعي', labelEn: 'Aggregate Report', path: '/dashboard/aggregate-report', key: 'aggregate-report', requiredPermissions: ['view_reports'] },
+      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Reports Guide', path: '/dashboard/reports-guide', key: 'reports-guide', requiredPermissions: ['view_reports'] },
+      { icon: FileSpreadsheet, labelAr: 'سجل غير خطرة', labelEn: 'Non-Hazardous', path: '/dashboard/non-hazardous-register', key: 'non-hazardous', requiredPermissions: ['view_reports', 'view_shipments'] },
+      { icon: AlertTriangle, labelAr: 'سجل خطرة', labelEn: 'Hazardous', path: '/dashboard/hazardous-register', key: 'hazardous', requiredPermissions: ['view_reports', 'view_shipments'] },
+      { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', requiredPermissions: ['view_reports'] },
+      { icon: Leaf, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'carbon-footprint', requiredPermissions: ['view_reports'] },
+      { icon: TreePine, labelAr: 'الاستدامة البيئية', labelEn: 'Sustainability', path: '/dashboard/environmental-sustainability', key: 'environmental-sustainability', requiredPermissions: ['view_reports'] },
+      { icon: Leaf, labelAr: 'تقارير ESG', labelEn: 'ESG Reports', path: '/dashboard/esg-reports', key: 'esg-reports', requiredPermissions: ['view_reports'] },
+      { icon: Shield, labelAr: 'تقارير السلامة', labelEn: 'OHS Reports', path: '/dashboard/ohs-reports', key: 'ohs-reports', requiredPermissions: ['view_reports'] },
+      { icon: BarChart3, labelAr: 'تحليل النفايات التفصيلي', labelEn: 'Waste Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', requiredPermissions: ['view_reports'] },
+      { icon: Activity, labelAr: 'خريطة تدفق النفايات', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', requiredPermissions: ['view_reports'] },
     ],
   },
 
@@ -646,12 +648,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Headphones, labelAr: 'الدعم الفني', labelEn: 'Support', path: '/dashboard/support', key: 'support' },
       { icon: Bell, labelAr: 'الإشعارات', labelEn: 'Notifications', path: '/dashboard/notifications', key: 'notifications' },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'all-system-status' },
-      { icon: Wallet, labelAr: 'إدارة الاشتراك', labelEn: 'Subscription', path: '/dashboard/subscription', key: 'subscription' },
-      { icon: Database, labelAr: 'تصدير البيانات', labelEn: 'Data Export', path: '/dashboard/data-export', key: 'data-export' },
+      { icon: Wallet, labelAr: 'إدارة الاشتراك', labelEn: 'Subscription', path: '/dashboard/subscription', key: 'subscription', requiredPermissions: ['manage_settings'] },
+      { icon: Database, labelAr: 'تصدير البيانات', labelEn: 'Data Export', path: '/dashboard/data-export', key: 'data-export', requiredPermissions: ['export_reports', 'export_accounts'] },
       { icon: WifiOff, labelAr: 'وضع بدون إنترنت', labelEn: 'Offline Mode', path: '/dashboard/offline-mode', key: 'offline-mode' },
       { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform' },
-      { icon: Settings, labelAr: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', key: 'settings' },
-      { icon: Zap, labelAr: 'الإجراءات التلقائية', labelEn: 'Auto Actions', path: '/dashboard/auto-actions', key: 'auto-actions' },
+      { icon: Settings, labelAr: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', key: 'settings', requiredPermissions: ['manage_settings', 'view_settings'] },
+      { icon: Zap, labelAr: 'الإجراءات التلقائية', labelEn: 'Auto Actions', path: '/dashboard/auto-actions', key: 'auto-actions', requiredPermissions: ['manage_settings'] },
     ],
   },
 ];
@@ -745,4 +747,31 @@ export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarG
  */
 export function getDefaultGroupOrder(orgType: string, isAdmin: boolean): string[] {
   return getGroupsForOrgType(orgType, isAdmin).map(g => g.id);
+}
+
+/**
+ * Filter sidebar groups by employee permissions.
+ * Admins and company_admins bypass this filter entirely.
+ * For employees: items with requiredPermissions are only shown if the user has at least one of them.
+ * Groups with zero visible items after filtering are removed.
+ */
+export function filterGroupsByPermissions(
+  groups: SidebarGroupConfig[],
+  userPermissions: string[],
+  isEmployee: boolean
+): SidebarGroupConfig[] {
+  if (!isEmployee) return groups; // admins/company_admins see everything
+  
+  const hasFullAccess = userPermissions.includes('full_access');
+  if (hasFullAccess) return groups;
+
+  return groups.map(group => ({
+    ...group,
+    items: group.items.filter(item => {
+      // No permission requirement → visible to all
+      if (!item.requiredPermissions || item.requiredPermissions.length === 0) return true;
+      // Check if user has ANY of the required permissions
+      return item.requiredPermissions.some(p => userPermissions.includes(p));
+    }),
+  })).filter(group => group.items.length > 0);
 }

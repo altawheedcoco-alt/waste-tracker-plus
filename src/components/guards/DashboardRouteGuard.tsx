@@ -2,12 +2,14 @@ import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import ProtectedRoute from './ProtectedRoute';
 import { DashboardErrorBoundary } from '@/components/shared/DashboardErrorBoundary';
+import RoutePermissionGuard from '@/components/common/RoutePermissionGuard';
 
 /**
  * Layout route guard that wraps ALL dashboard sub-routes with:
  * 1. ProtectedRoute — redirects unauthenticated users to /auth
  * 2. DashboardErrorBoundary — catches render errors per-page
- * 3. Suspense — shows loader while lazy chunks load
+ * 3. RoutePermissionGuard — blocks employees from unauthorized pages
+ * 4. Suspense — shows loader while lazy chunks load
  */
 const DashboardRouteGuard = () => (
   <ProtectedRoute>
@@ -19,7 +21,9 @@ const DashboardRouteGuard = () => (
           </div>
         }
       >
-        <Outlet />
+        <RoutePermissionGuard>
+          <Outlet />
+        </RoutePermissionGuard>
       </Suspense>
     </DashboardErrorBoundary>
   </ProtectedRoute>
