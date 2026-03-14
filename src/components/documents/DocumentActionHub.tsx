@@ -24,6 +24,7 @@ import { motion } from 'framer-motion';
 import type { DocumentSource } from './UnifiedDocumentViewer';
 import { useEffect } from 'react';
 import { getStorageUrl, refreshStorageUrl } from '@/utils/storageUrl';
+import { safeWindowOpen } from '@/lib/safeWindow';
 
 // Lazy imports for action dialogs  
 import ShareDocumentButton from './ShareDocumentButton';
