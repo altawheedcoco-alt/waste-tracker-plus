@@ -252,7 +252,7 @@ const PartnersView = () => {
                   />
                 </div>
                 {/* Filter buttons */}
-                <div className="flex flex-wrap gap-1.5 mt-3">
+                <div className="flex gap-1 sm:gap-1.5 mt-2 sm:mt-3 overflow-x-auto scrollbar-hide pb-0.5">
                   {filterButtons.map(fb => {
                     const count = counts[fb.key];
                     if (fb.key !== 'all' && count === 0) return null;
@@ -262,7 +262,7 @@ const PartnersView = () => {
                         key={fb.key}
                         variant={filterType === fb.key ? 'default' : 'outline'}
                         size="sm"
-                        className="gap-1 text-xs"
+                        className="gap-0.5 sm:gap-1 text-[10px] sm:text-xs shrink-0 h-7 px-2 sm:px-2.5 touch-manipulation"
                         onClick={() => setFilterType(fb.key)}
                       >
                         <Icon className="h-3 w-3" />
