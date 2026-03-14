@@ -183,26 +183,26 @@ const ShipmentDetailsPage = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5">
+      <div className="space-y-4 sm:space-y-5">
         <BackButton />
 
         {/* Compact Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div className="flex flex-col gap-3">
           <div className="text-right">
-            <div className="flex items-center gap-3 mb-1">
+            <div className="flex items-center gap-2 sm:gap-3 mb-1 flex-wrap justify-end">
               <Badge className={statusConfig.className}>{statusConfig.label}</Badge>
-              <h1 className="text-xl sm:text-2xl font-bold font-mono">{shipment.shipment_number}</h1>
+              <h1 className="text-lg sm:text-2xl font-bold font-mono">{shipment.shipment_number}</h1>
             </div>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               {t('shipmentDetails.createdAt')} {format(new Date(shipment.created_at), 'PPP', { locale: dateLocale })}
               {shipment.waste_type && <> • {wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</>}
               {shipment.quantity && <> • {shipment.quantity} {shipment.unit || 'كجم'}</>}
             </p>
           </div>
-          <div className="flex gap-2 flex-wrap">
+          <div className="flex gap-2 flex-wrap overflow-x-auto scrollbar-hide">
             {shipment.driver_id && visibility.canViewTracking && (
-              <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm">
-                <Navigation className="ml-1.5 h-4 w-4" />{t('shipmentDetails.liveTracking')}
+              <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm" className="text-xs">
+                <Navigation className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.liveTracking')}
               </Button>
             )}
             <Suspense fallback={null}>
@@ -219,8 +219,8 @@ const ShipmentDetailsPage = () => {
                 />
               )}
             </Suspense>
-            <Button variant="eco" size="sm" onClick={() => setShowPrintDialog(true)}>
-              <Printer className="ml-1.5 h-4 w-4" />{t('shipmentDetails.printPdf')}
+            <Button variant="eco" size="sm" className="text-xs" onClick={() => setShowPrintDialog(true)}>
+              <Printer className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.printPdf')}
             </Button>
             <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />

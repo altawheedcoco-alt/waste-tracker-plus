@@ -275,22 +275,22 @@ const DriverTracking = () => {
           </Card>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
           {/* Map */}
           <Card className="lg:col-span-2">
-            <CardHeader className="text-right">
-              <div className="flex items-center justify-between">
-                <Badge variant="outline" className="gap-1">
+            <CardHeader className="text-right p-3 sm:p-6">
+              <div className="flex items-center justify-between gap-2">
+                <Badge variant="outline" className="gap-1 text-[10px] sm:text-xs shrink-0">
                   <Satellite className="w-3 h-3" />
                   تحديث تلقائي
                 </Badge>
-                <div>
-                  <CardTitle>خريطة المواقع</CardTitle>
-                  <CardDescription>مواقع السائقين في الوقت الفعلي</CardDescription>
+                <div className="min-w-0">
+                  <CardTitle className="text-sm sm:text-base">خريطة المواقع</CardTitle>
+                  <CardDescription className="text-[10px] sm:text-sm">مواقع السائقين في الوقت الفعلي</CardDescription>
                 </div>
               </div>
             </CardHeader>
-            <CardContent>
+            <CardContent className="p-2 sm:p-6 pt-0">
               <LeafletMultiDriverMap
                 drivers={filteredDrivers.map(d => ({
                   id: d.id,
@@ -306,7 +306,7 @@ const DriverTracking = () => {
                   const driver = filteredDrivers.find(d => d.id === id);
                   if (driver) setSelectedDriver(driver as any);
                 }}
-                height="500px"
+                height="400px"
                 autoRefresh
                 refreshInterval={30000}
               />

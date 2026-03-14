@@ -321,25 +321,27 @@ export default function PartnerAccounts() {
 
         {/* Tabs: All + Per Type */}
         <Tabs defaultValue="all" className="w-full">
-          <TabsList className="w-full max-w-2xl grid" style={{ gridTemplateColumns: `repeat(${tabsWithAll.length}, 1fr)` }}>
-            <TabsTrigger value="all" className="gap-2">
-              <LayoutGrid className="h-4 w-4" />
-              <span className="hidden sm:inline">الكل</span>
-              {allPartners.length > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{allPartners.length}</Badge>}
-            </TabsTrigger>
-            {partnerTypes.map((type) => {
-              const typeInfo = getPartnerTypeInfo(type);
-              const Icon = typeInfo.icon;
-              const count = filteredBalances(type).length;
-              return (
-                <TabsTrigger key={type} value={type} className="gap-2">
-                  <Icon className="h-4 w-4" />
-                  <span className="hidden sm:inline">{typeInfo.label}</span>
-                  {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1.5 text-xs">{count}</Badge>}
-                </TabsTrigger>
-              );
-            })}
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="w-full min-w-[300px] grid" style={{ gridTemplateColumns: `repeat(${tabsWithAll.length}, 1fr)` }}>
+              <TabsTrigger value="all" className="gap-1 text-xs sm:text-sm">
+                <LayoutGrid className="h-3.5 w-3.5" />
+                <span className="hidden sm:inline">الكل</span>
+                {allPartners.length > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">{allPartners.length}</Badge>}
+              </TabsTrigger>
+              {partnerTypes.map((type) => {
+                const typeInfo = getPartnerTypeInfo(type);
+                const Icon = typeInfo.icon;
+                const count = filteredBalances(type).length;
+                return (
+                  <TabsTrigger key={type} value={type} className="gap-1 text-xs sm:text-sm">
+                    <Icon className="h-3.5 w-3.5" />
+                    <span className="hidden sm:inline">{typeInfo.label}</span>
+                    {count > 0 && <Badge variant="secondary" className="h-5 min-w-5 px-1 text-[10px]">{count}</Badge>}
+                  </TabsTrigger>
+                );
+              })}
+            </TabsList>
+          </div>
 
           {/* All tab */}
           <TabsContent value="all" className="mt-6">

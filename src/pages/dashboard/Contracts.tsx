@@ -110,20 +110,22 @@ const Contracts = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="active" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="active" className="gap-1">
-              <CheckCircle2 className="w-4 h-4" />
-              {t('contracts.activeContracts')} ({activeContracts.length})
-            </TabsTrigger>
-            <TabsTrigger value="pending" className="gap-1">
-              <Clock className="w-4 h-4" />
-              {t('contracts.pendingContracts')} ({pendingContracts.length})
-            </TabsTrigger>
-            <TabsTrigger value="expired" className="gap-1">
-              <XCircle className="w-4 h-4" />
-              {t('contracts.expiredContracts')} ({expiredContracts.length})
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide">
+            <TabsList className="grid w-full min-w-[360px] grid-cols-3">
+              <TabsTrigger value="active" className="gap-1 text-xs sm:text-sm">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.activeContracts')}</span> ({activeContracts.length})
+              </TabsTrigger>
+              <TabsTrigger value="pending" className="gap-1 text-xs sm:text-sm">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.pendingContracts')}</span> ({pendingContracts.length})
+              </TabsTrigger>
+              <TabsTrigger value="expired" className="gap-1 text-xs sm:text-sm">
+                <XCircle className="w-3.5 h-3.5" />
+                <span className="truncate">{t('contracts.expiredContracts')}</span> ({expiredContracts.length})
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="active" className="mt-4">
             {loading ? (
