@@ -113,7 +113,7 @@ const Hero = memo(() => {
           </motion.p>
 
           <motion.p
-            className="text-[11px] sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-4 sm:mb-7 px-3 sm:px-4 leading-relaxed font-medium mt-1.5 sm:mt-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
+            className="text-[12px] sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-5 sm:mb-7 px-4 sm:px-4 leading-relaxed font-medium mt-2 sm:mt-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.4 }}
