@@ -78,27 +78,27 @@ const B2BMarketplace = () => {
 
   return (
     <DashboardLayout>
-      <div className="p-4 md:p-6 space-y-5" dir="rtl">
+        <div className="p-3 md:p-6 space-y-4" dir="rtl">
         <BackButton />
 
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              <Store className="h-7 w-7 text-primary" />
+        <div className="space-y-3">
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-2xl font-bold text-foreground flex items-center gap-2 truncate">
+              <Store className="h-5 w-5 sm:h-7 sm:w-7 text-primary shrink-0" />
               سوق B2B المتكامل
             </h1>
-            <p className="text-muted-foreground text-sm mt-1">
+            <p className="text-muted-foreground text-[11px] sm:text-sm mt-0.5 truncate">
               منصة تبادل شاملة — عرض وطلب مواد وخدمات بين كافة الجهات المسجلة
             </p>
           </div>
-          <div className="flex gap-2">
-            <Button onClick={() => setShowCreateListing(true)} className="gap-1.5">
-              <Plus className="h-4 w-4" />
+          <div className="flex gap-2 overflow-x-auto scrollbar-hide">
+            <Button onClick={() => setShowCreateListing(true)} className="gap-1.5 text-xs sm:text-sm whitespace-nowrap" size="sm">
+              <Plus className="h-3.5 w-3.5" />
               نشر عرض
             </Button>
-            <Button onClick={() => setShowCreateRequest(true)} variant="outline" className="gap-1.5">
-              <Megaphone className="h-4 w-4" />
+            <Button onClick={() => setShowCreateRequest(true)} variant="outline" className="gap-1.5 text-xs sm:text-sm whitespace-nowrap" size="sm">
+              <Megaphone className="h-3.5 w-3.5" />
               نشر طلب
             </Button>
           </div>
@@ -106,16 +106,16 @@ const B2BMarketplace = () => {
 
         {/* Visibility hint */}
         <Card className="border-primary/20 bg-primary/5">
-          <CardContent className="p-3 flex items-start gap-2">
+          <CardContent className="p-2.5 sm:p-3 flex items-start gap-2">
             <Info className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-            <div>
-              <p className="text-sm text-foreground font-medium flex items-center gap-2">
+            <div className="min-w-0">
+              <p className="text-xs sm:text-sm text-foreground font-medium flex items-center gap-1.5 flex-wrap">
                 أنت مسجل كـ
                 <Badge variant="outline" className={ORG_TYPE_COLORS[myOrgType]}>
                   {ORG_TYPE_LABELS[myOrgType]}
                 </Badge>
               </p>
-              <p className="text-xs text-muted-foreground mt-0.5">{visibilityExplainer()}</p>
+              <p className="text-[10px] sm:text-xs text-muted-foreground mt-0.5">{visibilityExplainer()}</p>
             </div>
           </CardContent>
         </Card>
@@ -125,33 +125,35 @@ const B2BMarketplace = () => {
 
         {/* Main Tabs */}
         <Tabs defaultValue="supply" dir="rtl">
-          <TabsList className="w-full flex flex-wrap h-auto gap-1 p-1">
-            <TabsTrigger value="supply" className="gap-1.5 text-xs">
-              <ShoppingBag className="h-3.5 w-3.5" />
-              العروض (العرض)
-              {listings.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{listings.length}</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="demand" className="gap-1.5 text-xs">
-              <Megaphone className="h-3.5 w-3.5" />
-              الطلبات (الطلب)
-              {requests.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{requests.length}</Badge>}
-            </TabsTrigger>
-            <TabsTrigger value="my-listings" className="gap-1.5 text-xs">
-              <Package className="h-3.5 w-3.5" />
-              عروضي وطلباتي
-              {(myListings.length + myRequests.length) > 0 && (
-                <Badge variant="secondary" className="text-[9px] px-1">{myListings.length + myRequests.length}</Badge>
-              )}
-            </TabsTrigger>
-            <TabsTrigger value="deals" className="gap-1.5 text-xs">
-              <Handshake className="h-3.5 w-3.5" />
-              صفقاتي
-            </TabsTrigger>
-            <TabsTrigger value="rules" className="gap-1.5 text-xs">
-              <ArrowLeftRight className="h-3.5 w-3.5" />
-              قواعد الرؤية
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto scrollbar-hide -mx-3 px-3 pb-1">
+            <TabsList className="inline-flex w-max gap-0.5 h-auto p-1">
+              <TabsTrigger value="supply" className="gap-1 text-[10px] sm:text-xs px-2 py-1.5 whitespace-nowrap">
+                <ShoppingBag className="h-3.5 w-3.5 shrink-0" />
+                العروض
+                {listings.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{listings.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="demand" className="gap-1 text-[10px] sm:text-xs px-2 py-1.5 whitespace-nowrap">
+                <Megaphone className="h-3.5 w-3.5 shrink-0" />
+                الطلبات
+                {requests.length > 0 && <Badge variant="secondary" className="text-[9px] px-1">{requests.length}</Badge>}
+              </TabsTrigger>
+              <TabsTrigger value="my-listings" className="gap-1 text-[10px] sm:text-xs px-2 py-1.5 whitespace-nowrap">
+                <Package className="h-3.5 w-3.5 shrink-0" />
+                عروضي
+                {(myListings.length + myRequests.length) > 0 && (
+                  <Badge variant="secondary" className="text-[9px] px-1">{myListings.length + myRequests.length}</Badge>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="deals" className="gap-1 text-[10px] sm:text-xs px-2 py-1.5 whitespace-nowrap">
+                <Handshake className="h-3.5 w-3.5 shrink-0" />
+                صفقاتي
+              </TabsTrigger>
+              <TabsTrigger value="rules" className="gap-1 text-[10px] sm:text-xs px-2 py-1.5 whitespace-nowrap">
+                <ArrowLeftRight className="h-3.5 w-3.5 shrink-0" />
+                قواعد الرؤية
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           {/* ==================== SUPPLY TAB ==================== */}
           <TabsContent value="supply" className="space-y-4 mt-4">
