@@ -7,7 +7,9 @@
  * @deprecated Use useDocumentService directly for new code.
  */
 
+import { useCallback } from 'react';
 import { useDocumentService, type UseDocumentServiceOptions } from './useDocumentService';
+import { PDFService } from '@/services/documentService';
 import type { PrintThemeId } from '@/lib/printThemes';
 
 interface UsePDFExportOptions {
@@ -27,14 +29,24 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
 
   const svc = useDocumentService(svcOpts);
 
+  /** Generate a jsPDF instance (with .output('blob') etc.) — used by AttestationDialog */
+  const generatePDF = useCallback(async (el: HTMLElement | null) => {
+    if (!el) return null;
+    return PDFService.generate(el, {
+      filename: options.filename,
+      orientation: options.orientation,
+      format: options.format,
+      fitSinglePage: options.fitSinglePage ?? true,
+    });
+  }, [options]);
+
   return {
     exportToPDF: svc.exportToPDF,
     previewPDF: (el: HTMLElement | null) => svc.previewPDF(el),
     printContent: svc.printContent,
     printWithTheme: (el: HTMLElement | null, themeId: PrintThemeId) => svc.printWithTheme(el, themeId),
     isExporting: svc.isProcessing,
-    // Extra aliases some consumers use
-    generatePDF: svc.downloadPDF,
+    generatePDF,
   };
 };
 
