@@ -1,10 +1,9 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileText, Loader2, Download } from 'lucide-react';
+import { FileText, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import { PDFService } from '@/services/documentService';
 
 interface ManifestPDFButtonProps {
   shipmentId: string;
@@ -51,37 +50,16 @@ const ManifestPDFButton = ({
       // Wait for rendering
       await new Promise(resolve => setTimeout(resolve, 500));
 
-      const canvas = await html2canvas(iframeDoc.body, {
+      // Use unified PDFService instead of direct jsPDF/html2canvas imports
+      await PDFService.download(iframeDoc.body, {
+        filename: `manifest-${shipmentNumber}`,
+        orientation: 'portrait',
+        format: 'a4',
         scale: 2,
-        useCORS: true,
-        logging: false,
-        width: 794,
-        windowWidth: 794,
+        fitSinglePage: false,
       });
 
       document.body.removeChild(iframe);
-
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      const imgWidth = pageWidth;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position = -(imgHeight - heightLeft);
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      pdf.save(`manifest-${shipmentNumber}.pdf`);
       toast.success('تم تحميل المانيفست بنجاح');
     } catch (error: any) {
       console.error('Manifest generation error:', error);

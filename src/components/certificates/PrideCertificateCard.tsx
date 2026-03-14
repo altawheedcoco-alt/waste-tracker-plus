@@ -4,7 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Printer, Award, Star, Trophy } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import type { PrideCertificate } from '@/hooks/usePrideCertificates';
-import { usePDFExport } from '@/hooks/usePDFExport';
+import { useDocumentService } from '@/hooks/useDocumentService';
 
 interface PrideCertificateCardProps {
   certificate: PrideCertificate;
@@ -43,20 +43,10 @@ const getCertificateStyle = (type: string) => {
   }
 };
 
-const getOrgTypeAr = (type: string) => {
-  switch (type) {
-    case 'generator': return 'جهة مولدة';
-    case 'transporter': return 'جهة ناقلة';
-    case 'recycler': return 'جهة تدوير';
-    case 'disposal': return 'جهة تخلص نهائي';
-    default: return 'منظمة';
-  }
-};
-
 const PrideCertificateCard = ({ certificate, organizationName }: PrideCertificateCardProps) => {
   const { organization } = useAuth();
   const printRef = useRef<HTMLDivElement>(null);
-  const { printContent } = usePDFExport({ filename: `pride-certificate-${certificate.certificate_number}` });
+  const { printContent } = useDocumentService({ filename: `pride-certificate-${certificate.certificate_number}` });
   const style = getCertificateStyle(certificate.certificate_type);
   const Icon = style.icon;
   const orgName = organizationName || organization?.name || '';
