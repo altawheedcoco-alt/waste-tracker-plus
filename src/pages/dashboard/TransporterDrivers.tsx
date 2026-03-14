@@ -589,7 +589,7 @@ const TransporterDrivers = () => {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent className="space-y-3">
+                <CardContent className="space-y-3 p-3 sm:p-6 pt-0 sm:pt-0">
                   <div className="flex items-center justify-between">
                     <Badge variant={driver.is_available ? 'default' : 'secondary'}>
                       {driver.is_available ? 'متاح' : 'غير متاح'}

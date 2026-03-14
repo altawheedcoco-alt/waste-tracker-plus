@@ -114,15 +114,15 @@ const AdminDailyOperationsSummary = () => {
         </div>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3">
           {metrics.map((m) => (
-            <div key={m.label} className="flex items-center gap-3 p-3 rounded-lg border bg-card">
-              <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${m.color}`}>
-                <m.icon className="w-5 h-5" />
+            <div key={m.label} className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 rounded-lg border bg-card">
+              <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center shrink-0 ${m.color}`}>
+                <m.icon className="w-4 h-4 sm:w-5 sm:h-5" />
               </div>
               <div className="min-w-0 text-right">
-                <p className="text-2xl font-bold">{m.value}</p>
-                <p className="text-xs text-muted-foreground truncate">{m.label}</p>
+                <p className="text-lg sm:text-2xl font-bold">{m.value}</p>
+                <p className="text-[10px] sm:text-xs text-muted-foreground truncate">{m.label}</p>
               </div>
             </div>
           ))}

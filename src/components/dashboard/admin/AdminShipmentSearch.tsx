@@ -106,18 +106,18 @@ const AdminShipmentSearch = () => {
             بحث سريع عن شحنة — طباعة وإرسال
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-3">
           <div className="flex gap-2">
-            <Button onClick={handleSearch} disabled={loading || !query.trim()}>
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
-              <span className="mr-1">بحث</span>
+            <Button size="sm" onClick={handleSearch} disabled={loading || !query.trim()} className="shrink-0">
+              {loading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Search className="w-3.5 h-3.5" />}
+              <span className="mr-1 text-xs">بحث</span>
             </Button>
             <Input
               placeholder="رقم الشحنة أو العنوان..."
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              className="text-right"
+              className="text-right text-sm"
               dir="rtl"
             />
           </div>
