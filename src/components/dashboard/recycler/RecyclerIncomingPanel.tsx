@@ -15,7 +15,7 @@ import QuickCertificateButton from '@/components/reports/QuickCertificateButton'
 import { ShipmentsRepository } from '@/repositories/ShipmentsRepository';
 
 const RecyclerIncomingPanel = () => {
-  const { organization } = useAuth();
+  const { organization, user } = useAuth();
   const navigate = useNavigate();
   const orgId = organization?.id;
   const queryClient = useQueryClient();
