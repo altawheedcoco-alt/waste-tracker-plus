@@ -245,6 +245,18 @@ const MyWorkspace = () => {
           </Suspense>
         </TabsContent>
 
+        <TabsContent value="calendar" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyCalendarTab />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="documents" className="mt-4">
+          <Suspense fallback={<TabFallback />}>
+            <MyDocumentsTab />
+          </Suspense>
+        </TabsContent>
+
         <TabsContent value="permissions" className="mt-4">
           <Suspense fallback={<TabFallback />}>
             <MyPermissionsTab />
