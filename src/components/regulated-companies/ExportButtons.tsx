@@ -14,7 +14,7 @@ interface Props {
 }
 
 const ExportButtons = ({ companies }: Props) => {
-  const exportPDF = () => {
+  const exportPDF = async () => {
     try {
       const { default: jsPDF } = await import('jspdf');
       const doc = new jsPDF({ orientation: 'landscape' });

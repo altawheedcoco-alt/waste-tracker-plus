@@ -156,7 +156,7 @@ const DataExport = () => {
   };
 
   // Generate PDF from data
-  const generatePDF = (allData: { label: string; data: any[] }[], orgName: string, userName: string) => {
+  const generatePDF = async (allData: { label: string; data: any[] }[], orgName: string, userName: string) => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const pageW = doc.internal.pageSize.getWidth();

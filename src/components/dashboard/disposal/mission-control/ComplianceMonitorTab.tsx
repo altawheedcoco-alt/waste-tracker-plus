@@ -105,7 +105,7 @@ const ComplianceMonitorTab = ({ facilityId, organizationId }: ComplianceMonitorT
     return { color: 'text-green-600 bg-green-50 border-green-200', label: `فرق ${pct}% ✓`, alert: false };
   };
 
-  const generateManifestPDF = (shipment: any) => {
+  const generateManifestPDF = async (shipment: any) => {
     const { default: jsPDF } = await import('jspdf');
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     doc.setFont('helvetica');
