@@ -223,19 +223,21 @@ const Quotations = () => {
       </div>
 
       <Tabs value={mainTab} onValueChange={setMainTab}>
-        <TabsList className="w-full justify-start">
-          <TabsTrigger value="outgoing" className="gap-1.5">
-            <ArrowUpRight className="w-3.5 h-3.5" />
-            صادر - هناخد ({outgoingQuotations.length})
-          </TabsTrigger>
-          <TabsTrigger value="incoming" className="gap-1.5">
-            <ArrowDownLeft className="w-3.5 h-3.5" />
-            وارد - هندفع ({incomingQuotations.length})
-          </TabsTrigger>
-          <TabsTrigger value="received" className="gap-1.5">
-            📨 عروض مستلمة ({receivedQuotations.length})
-          </TabsTrigger>
-        </TabsList>
+        <div className="overflow-x-auto scrollbar-hide -mx-1 px-1">
+          <TabsList className="w-max sm:w-full justify-start">
+            <TabsTrigger value="outgoing" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              صادر ({outgoingQuotations.length})
+            </TabsTrigger>
+            <TabsTrigger value="incoming" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              <ArrowDownLeft className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+              وارد ({incomingQuotations.length})
+            </TabsTrigger>
+            <TabsTrigger value="received" className="gap-1 text-[11px] sm:text-sm px-2 sm:px-3">
+              📨 مستلمة ({receivedQuotations.length})
+            </TabsTrigger>
+          </TabsList>
+        </div>
 
         <TabsContent value="outgoing" className="mt-4">
           {renderQuotationList(outgoingQuotations, 'outgoing')}
