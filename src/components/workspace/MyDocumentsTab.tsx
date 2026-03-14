@@ -40,7 +40,7 @@ const MyDocumentsTab = () => {
     queryKey: ['my-documents-certs', organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
-      const { data } = await (supabase.from('recycling_certificates') as any)
+      const { data } = await (supabase as any).from('recycling_certificates')
         .select('id, certificate_number, status, created_at, waste_type')
         .eq('generator_organization_id', organization.id)
         .order('created_at', { ascending: false })
