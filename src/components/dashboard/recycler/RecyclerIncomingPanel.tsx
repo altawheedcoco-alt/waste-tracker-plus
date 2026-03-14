@@ -12,6 +12,7 @@ import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import ShipmentTimeline from '@/components/shipments/ShipmentTimeline';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
+import { ShipmentsRepository } from '@/repositories/ShipmentsRepository';
 
 const RecyclerIncomingPanel = () => {
   const { organization } = useAuth();
