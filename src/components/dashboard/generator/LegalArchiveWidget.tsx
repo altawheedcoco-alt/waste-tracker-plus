@@ -29,6 +29,7 @@ const docTypeIcons: Record<string, string> = {
 
 const LegalArchiveWidget = () => {
   const { organization } = useAuth();
+  const navigate = useNavigate();
   const orgId = organization?.id;
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
