@@ -131,11 +131,11 @@ const MyDashboardTab = () => {
       }
 
       if (hasAny(['view_partner_data', 'manage_partners'])) {
-        const r = await (supabase.from('partner_relationships') as any)
+        const r: any = await (supabase as any).from('partner_relationships')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', organization.id)
           .eq('status', 'active');
-        result.partners = (r as any).count || 0;
+        result.partners = r.count || 0;
       }
 
       if (hasAny(['manage_drivers'])) {
