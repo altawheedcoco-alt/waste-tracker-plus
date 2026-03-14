@@ -300,14 +300,14 @@ export default function PartnerAccounts() {
         </div>
 
         {/* Search & Filters */}
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1 max-w-md">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+          <div className="relative flex-1">
             <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input placeholder="بحث باسم العميل..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-11" />
+            <Input placeholder="بحث باسم العميل..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className="pr-10 h-10 sm:h-11 text-sm" />
           </div>
           <Select value={balanceFilter} onValueChange={(v) => setBalanceFilter(v as any)}>
-            <SelectTrigger className="w-48 h-11">
-              <Filter className="h-4 w-4 ml-2" />
+            <SelectTrigger className="w-full sm:w-48 h-10 sm:h-11 text-sm">
+              <Filter className="h-3.5 w-3.5 ml-2" />
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
