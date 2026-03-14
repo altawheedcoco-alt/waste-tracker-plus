@@ -31,7 +31,7 @@ import {
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { useLanguage } from '@/contexts/LanguageContext';
-import jsPDF from 'jspdf';
+// jsPDF loaded dynamically
 
 interface ExportCategory {
   id: string;
