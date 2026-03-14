@@ -265,7 +265,7 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
               </CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
                 {themePresets.map((preset, index) => (
                   <motion.button
                     key={preset.name}
@@ -276,7 +276,7 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
                     whileTap={{ scale: 0.98 }}
                     onClick={() => applyPreset(preset)}
                     className={cn(
-                      'relative p-6 rounded-xl border-2 transition-all text-right overflow-hidden group',
+                      'relative p-3 sm:p-6 rounded-xl border-2 transition-all text-right overflow-hidden group touch-manipulation',
                       settings.themeColor === preset.color && 
                       settings.fontFamily === preset.font && 
                       settings.isDarkMode === preset.dark
