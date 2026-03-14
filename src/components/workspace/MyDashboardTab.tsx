@@ -115,47 +115,35 @@ const MyDashboardTab = () => {
       if (!organization?.id) return {};
       const result: Record<string, number> = {};
 
-      const promises: Promise<void>[] = [];
-
       if (hasAny(['view_shipments', 'create_shipments'])) {
-        promises.push(
-          (supabase.from('shipments') as any)
-            .select('id', { count: 'exact', head: true })
-            .eq('organization_id', organization.id)
-            .in('status', ['confirmed', 'in_transit', 'pending'])
-            .then((r: any) => { result.shipments = r.count || 0; })
-        );
+        const r = await (supabase.from('shipments') as any)
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', organization.id)
+          .in('status', ['confirmed', 'in_transit', 'pending']);
+        result.shipments = r.count || 0;
       }
 
       if (hasAny(['view_financials', 'manage_deposits'])) {
-        promises.push(
-          supabase.from('deposits')
-            .select('id', { count: 'exact', head: true })
-            .eq('organization_id', organization.id)
-            .then(r => { result.deposits = r.count || 0; })
-        );
+        const r = await supabase.from('deposits')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', organization.id);
+        result.deposits = r.count || 0;
       }
 
       if (hasAny(['view_partner_data', 'manage_partners'])) {
-        promises.push(
-          supabase.from('partner_relationships')
-            .select('id', { count: 'exact', head: true })
-            .eq('organization_id', organization.id)
-            .eq('status', 'active')
-            .then(r => { result.partners = r.count || 0; })
-        );
+        const r = await (supabase.from('partner_relationships') as any)
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', organization.id)
+          .eq('status', 'active');
+        result.partners = r.count || 0;
       }
 
       if (hasAny(['manage_drivers'])) {
-        promises.push(
-          supabase.from('drivers')
-            .select('id', { count: 'exact', head: true })
-            .eq('organization_id', organization.id)
-            .then(r => { result.drivers = r.count || 0; })
-        );
+        const r = await supabase.from('drivers')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', organization.id);
+        result.drivers = r.count || 0;
       }
-
-      await Promise.all(promises);
       return result;
     },
     enabled: !!organization?.id,
