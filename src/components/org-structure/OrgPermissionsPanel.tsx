@@ -105,10 +105,6 @@ function PositionPermEditor({ position }: { position: Position }) {
     setHasChanges(false);
   };
 
-  useState(() => {
-    if (permissions) initPerms();
-  });
-
   // Re-init when permissions load
   const [initialized, setInitialized] = useState(false);
   if (permissions && !initialized) {
