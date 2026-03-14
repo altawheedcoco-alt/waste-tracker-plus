@@ -324,6 +324,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'driver-dashboard' },
     { icon: Package, label: t('sidebar.myShipments'), path: '/dashboard/transporter-shipments', badge: sectionBadges['driver-shipments'], key: 'driver-shipments' },
     { icon: MapPin, label: language === 'ar' ? 'موقعي' : 'My Location', path: '/dashboard/my-location', key: 'driver-location' },
+    { icon: User, label: t('sidebar.driverProfile'), path: '/dashboard/driver-profile', key: 'driver-profile' },
+    { icon: FileText, label: t('sidebar.driverData'), path: '/dashboard/driver-data', key: 'driver-data' },
+    { icon: GraduationCap, label: language === 'ar' ? 'الأكاديمية' : 'Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
+    { icon: Trophy, label: language === 'ar' ? 'المكافآت' : 'Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards' },
     { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
     { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
   ];
