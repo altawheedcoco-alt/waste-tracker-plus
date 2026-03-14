@@ -463,9 +463,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   // Get responsive values
   const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
-  const headerHeight = isMobile ? 'h-14' : 'h-16';
+  const headerHeight = isMobile ? 'h-[52px]' : 'h-16';
   const mainPadding = getResponsiveClass({
-    mobile: 'px-2 pt-2 pb-0',
+    mobile: 'px-3 pt-3 pb-0',
     tablet: 'p-4',
     desktop: 'p-6',
   });
