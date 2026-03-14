@@ -235,7 +235,7 @@ const ESGReportWidget = () => {
         </div>
         <CardDescription className="text-right">ملخص الأثر البيئي لعملياتك وشركائك</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" data-esg-report>
         {/* Partner Sources Banner */}
         {partnerOrgs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap p-2 rounded-lg bg-muted/50 border text-xs">
