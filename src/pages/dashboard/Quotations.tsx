@@ -204,19 +204,19 @@ const Quotations = () => {
   const directionLabel = createDirection === 'outgoing' ? 'عرض صادر (هناخد)' : 'طلب وارد (هندفع)';
 
   return (
-    <div className="space-y-6 p-4" dir="rtl">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground">عروض الأسعار</h1>
-          <p className="text-sm text-muted-foreground">إنشاء وإدارة عروض الأسعار والتسعيرات - {ENTITY_LABELS[orgType] || orgType}</p>
+    <div className="space-y-4 sm:space-y-6 p-2 sm:p-4" dir="rtl">
+      <div className="space-y-2">
+        <div className="min-w-0">
+          <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
+          <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
         </div>
-        <div className="flex gap-2">
-          <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1">
-            <ArrowUpRight className="w-4 h-4" />
+        <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
+          <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
+            <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             عرض صادر
           </Button>
-          <Button variant="outline" onClick={() => handleOpenCreate('incoming')} className="gap-1">
-            <ArrowDownLeft className="w-4 h-4" />
+          <Button variant="outline" onClick={() => handleOpenCreate('incoming')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
+            <ArrowDownLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             طلب وارد
           </Button>
         </div>
