@@ -198,6 +198,11 @@ const OrgStructure = () => {
           <OrgMembersPanel />
         </TabsContent>
 
+        {/* Permissions */}
+        <TabsContent value="permissions" className="mt-4">
+          <OrgPermissionsPanel />
+        </TabsContent>
+
         {/* Stats */}
         <TabsContent value="stats" className="mt-4">
           <OrgStatsPanel departments={departments} positions={positions} members={members} />
