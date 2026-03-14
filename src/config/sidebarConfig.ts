@@ -124,12 +124,12 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Fleet & Tracking',
     visibleFor: ['transporter'],
     items: [
-      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const },
-      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const },
-      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const },
-      { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Container Management', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const },
-      { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassignment', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const },
-      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const },
+      { icon: MapPin, labelAr: 'مركز التتبع المباشر', labelEn: 'Live Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments', 'view_drivers'] },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'] },
+      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Container Management', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassignment', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Preventive Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
