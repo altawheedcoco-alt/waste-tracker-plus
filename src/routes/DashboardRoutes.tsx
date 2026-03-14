@@ -460,8 +460,12 @@ export const dashboardRoutes = (
     <Route path="/dashboard/compliance-assessment" element={<ConsultantPortal />} />
     <Route path="/dashboard/consultant-clients" element={<Partners />} />
     <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
+    <Route path="/dashboard/office-consultants" element={<OrgStructure />} />
     <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />
     <Route path="/dashboard/office-performance" element={<AdvancedAnalytics />} />
+    {/* Admin alias routes */}
+    <Route path="/dashboard/admin-cyber-security" element={<CyberSecurityCenter />} />
+    <Route path="/dashboard/call-center" element={<SupportCenter />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
