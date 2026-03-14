@@ -327,16 +327,29 @@ const Header = memo(() => {
                   {language === 'ar' ? 'English' : 'عربي'}
                 </button>
                 <GuideButton />
-                <div className="grid grid-cols-2 gap-2">
-                  <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
-                    <UserPlus className="w-3.5 h-3.5" />
-                    {t('nav.employee')}
-                  </Button>
-                  <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
-                    <LogIn className="w-3.5 h-3.5" />
-                    {t('nav.login')}
-                  </Button>
-                </div>
+                {user ? (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
+                      <LayoutDashboard className="w-3.5 h-3.5" />
+                      {t('nav.dashboard') || 'لوحة التحكم'}
+                    </Button>
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                      <LogOut className="w-3.5 h-3.5" />
+                      {t('nav.logout') || 'خروج'}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs" onClick={handleEmployeeLogin}>
+                      <UserPlus className="w-3.5 h-3.5" />
+                      {t('nav.employee')}
+                    </Button>
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-xl touch-manipulation font-semibold text-xs shadow-md shadow-primary/20" onClick={handleLogin}>
+                      <LogIn className="w-3.5 h-3.5" />
+                      {t('nav.login')}
+                    </Button>
+                  </div>
+                )}
               </div>
             </nav>
           </div>
