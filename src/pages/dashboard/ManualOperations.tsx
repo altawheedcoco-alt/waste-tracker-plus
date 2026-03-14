@@ -151,87 +151,89 @@ const ManualOperations = () => {
   }, [logs, totalCount]);
 
   return (
-    <div className="space-y-4" dir="rtl">
+    <div className="space-y-3 sm:space-y-4" dir="rtl">
       <BackButton />
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
-            <FolderOpen className="w-5 h-5 text-primary-foreground" />
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0">
+            <FolderOpen className="w-4 h-4 sm:w-5 sm:h-5 text-primary-foreground" />
           </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">الأعمال اليدوية والمستندات</h1>
-            <p className="text-sm text-muted-foreground">جميع المستندات المُنشأة والمطبوعة والمحفوظة</p>
+          <div className="min-w-0">
+            <h1 className="text-base sm:text-xl font-bold text-foreground truncate">الأعمال اليدوية والمستندات</h1>
+            <p className="text-[10px] sm:text-sm text-muted-foreground truncate">جميع المستندات المُنشأة والمطبوعة</p>
           </div>
         </div>
-        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1">
-          <RefreshCw className="w-4 h-4" />
-          تحديث
+        <Button variant="outline" size="sm" onClick={() => refetch()} className="gap-1 h-8 px-2 sm:px-3 shrink-0">
+          <RefreshCw className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+          <span className="hidden sm:inline">تحديث</span>
         </Button>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-3 gap-3">
-        <Card className="p-3">
-          <div className="text-2xl font-bold text-foreground">{stats.total}</div>
-          <div className="text-xs text-muted-foreground">إجمالي السجلات</div>
+      <div className="grid grid-cols-3 gap-2 sm:gap-3">
+        <Card className="p-2 sm:p-3">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.total}</div>
+          <div className="text-[9px] sm:text-xs text-muted-foreground">إجمالي السجلات</div>
         </Card>
-        <Card className="p-3">
-          <div className="text-2xl font-bold text-primary">{stats.withFile}</div>
-          <div className="text-xs text-muted-foreground">ملفات محفوظة</div>
+        <Card className="p-2 sm:p-3">
+          <div className="text-lg sm:text-2xl font-bold text-primary">{stats.withFile}</div>
+          <div className="text-[9px] sm:text-xs text-muted-foreground">ملفات محفوظة</div>
         </Card>
-        <Card className="p-3">
-          <div className="text-2xl font-bold text-foreground">{stats.types}</div>
-          <div className="text-xs text-muted-foreground">أنواع المستندات</div>
+        <Card className="p-2 sm:p-3">
+          <div className="text-lg sm:text-2xl font-bold text-foreground">{stats.types}</div>
+          <div className="text-[9px] sm:text-xs text-muted-foreground">أنواع المستندات</div>
         </Card>
       </div>
 
       {/* Filters */}
       <Card>
-        <CardContent className="pt-4 space-y-4">
-          <div className="flex flex-wrap gap-2">
-            <div className="relative flex-1 min-w-[200px]">
+        <CardContent className="pt-3 sm:pt-4 space-y-3 sm:space-y-4">
+          <div className="flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="بحث برقم التتبع أو رقم المستند أو الوصف..."
+                placeholder="بحث برقم التتبع أو الوصف..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pr-9"
+                className="pr-9 h-8 sm:h-9 text-xs sm:text-sm"
               />
             </div>
-            <Select value={filterType} onValueChange={handleFilterChange(setFilterType)}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="نوع المستند" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">الكل</SelectItem>
-                {Object.entries(docTypeLabels).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterAction} onValueChange={handleFilterChange(setFilterAction)}>
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="نوع الإجراء" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">الكل</SelectItem>
-                {Object.entries(actionLabels).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v.label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
-              <SelectTrigger className="w-[130px]">
-                <SelectValue placeholder="التصنيف" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">الكل</SelectItem>
-                {Object.entries(categoryLabels).map(([k, v]) => (
-                  <SelectItem key={k} value={k}>{v}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="flex gap-1.5 overflow-x-auto scrollbar-hide">
+              <Select value={filterType} onValueChange={handleFilterChange(setFilterType)}>
+                <SelectTrigger className="w-[110px] sm:w-[140px] h-8 sm:h-9 text-xs sm:text-sm shrink-0">
+                  <SelectValue placeholder="نوع المستند" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  {Object.entries(docTypeLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterAction} onValueChange={handleFilterChange(setFilterAction)}>
+                <SelectTrigger className="w-[100px] sm:w-[130px] h-8 sm:h-9 text-xs sm:text-sm shrink-0">
+                  <SelectValue placeholder="الإجراء" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  {Object.entries(actionLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v.label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <Select value={filterCategory} onValueChange={handleFilterChange(setFilterCategory)}>
+                <SelectTrigger className="w-[100px] sm:w-[130px] h-8 sm:h-9 text-xs sm:text-sm shrink-0">
+                  <SelectValue placeholder="التصنيف" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  {Object.entries(categoryLabels).map(([k, v]) => (
+                    <SelectItem key={k} value={k}>{v}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Table */}
