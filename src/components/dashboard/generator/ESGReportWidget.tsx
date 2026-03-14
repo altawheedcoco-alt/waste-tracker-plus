@@ -169,9 +169,30 @@ const ESGReportWidget = () => {
 
   const handleGenerateReport = async () => {
     setGenerating(true);
-    await new Promise(r => setTimeout(r, 1500));
-    toast.success('تم توليد تقرير الاستدامة البيئية بنجاح');
-    setGenerating(false);
+    try {
+      const { useDocumentService } = await import('@/hooks/useDocumentService');
+      // Generate a printable ESG report from the widget content
+      const reportEl = document.querySelector('[data-esg-report]');
+      if (reportEl) {
+        const { jsPDF } = await import('jspdf');
+        const html2canvas = (await import('html2canvas')).default;
+        const canvas = await html2canvas(reportEl as HTMLElement, { scale: 2 });
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const imgData = canvas.toDataURL('image/png');
+        const pdfW = pdf.internal.pageSize.getWidth();
+        const pdfH = (canvas.height * pdfW) / canvas.width;
+        pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
+        pdf.save(`ESG_Report_${organization?.name || 'org'}_${period}m.pdf`);
+        toast.success('تم توليد تقرير الاستدامة البيئية بنجاح');
+      } else {
+        toast.error('لم يتم العثور على محتوى التقرير');
+      }
+    } catch (err) {
+      console.error('ESG report generation error:', err);
+      toast.error('حدث خطأ أثناء توليد التقرير');
+    } finally {
+      setGenerating(false);
+    }
   };
 
   if (isLoading) {
@@ -214,7 +235,7 @@ const ESGReportWidget = () => {
         </div>
         <CardDescription className="text-right">ملخص الأثر البيئي لعملياتك وشركائك</CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" data-esg-report>
         {/* Partner Sources Banner */}
         {partnerOrgs.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap p-2 rounded-lg bg-muted/50 border text-xs">

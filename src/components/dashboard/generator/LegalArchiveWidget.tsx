@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Skeleton } from '@/components/ui/skeleton';
 import { format, differenceInDays, addYears } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '@/components/ui/input';
 import { useState, useMemo } from 'react';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ const docTypeIcons: Record<string, string> = {
 
 const LegalArchiveWidget = () => {
   const { organization } = useAuth();
+  const navigate = useNavigate();
   const orgId = organization?.id;
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
@@ -113,12 +115,44 @@ const LegalArchiveWidget = () => {
     return result;
   }, [documents, searchQuery, typeFilter, sortBy]);
 
-  const handleDownload = (doc: any) => {
-    toast.success(`جاري تحميل ${docTypeLabels[doc.type]} رقم ${doc.number}`);
+  const handleDownload = async (doc: any) => {
+    toast.loading(`جاري تحميل ${docTypeLabels[doc.type]} رقم ${doc.number}...`);
+    try {
+      // Try to find document in entity_documents or document_registry
+      const { data: entityDoc } = await supabase
+        .from('entity_documents')
+        .select('file_url')
+        .or(`entity_id.eq.${doc.id}`)
+        .maybeSingle();
+
+      if (entityDoc?.file_url) {
+        window.open(entityDoc.file_url, '_blank');
+        toast.dismiss();
+        toast.success('تم فتح المستند');
+      } else {
+        // Navigate to the relevant page for viewing
+        if (doc.type === 'invoice') {
+          navigate(`/dashboard/accounting`);
+        } else if (doc.shipment_number) {
+          const { data: shipment } = await supabase
+            .from('shipments')
+            .select('id')
+            .eq('shipment_number', doc.shipment_number)
+            .maybeSingle();
+          if (shipment) navigate(`/dashboard/shipments/${shipment.id}`);
+        }
+        toast.dismiss();
+        toast.info('تم التوجيه لصفحة المستند لتحميله');
+      }
+    } catch {
+      toast.dismiss();
+      toast.error('حدث خطأ أثناء تحميل المستند');
+    }
   };
 
   const handleBulkDownload = () => {
-    toast.success(`جاري تحميل ${filteredDocs.length} مستند...`);
+    toast.info(`${filteredDocs.length} مستند — استخدم صفحة الأرشيف للتحميل الجماعي`);
+    navigate('/dashboard/archive');
   };
 
   if (isLoading) {

@@ -13,8 +13,9 @@ import ShipmentTimeline from '@/components/shipments/ShipmentTimeline';
 
 const statusLabels: Record<string, string> = {
   new: 'جديدة',
+  registered: 'مسجلة',
   approved: 'تمت الموافقة',
-  collection_started: 'بدأ التجميع',
+  collecting: 'بدأ التجميع',
   in_transit: 'قيد النقل',
   delivered: 'تم التسليم',
   confirmed: 'مؤكدة',
@@ -22,8 +23,9 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
   new: 'bg-blue-100 text-blue-800',
+  registered: 'bg-sky-100 text-sky-800',
   approved: 'bg-amber-100 text-amber-800',
-  collection_started: 'bg-orange-100 text-orange-800',
+  collecting: 'bg-orange-100 text-orange-800',
   in_transit: 'bg-purple-100 text-purple-800',
   delivered: 'bg-emerald-100 text-emerald-800',
   confirmed: 'bg-green-100 text-green-800',
