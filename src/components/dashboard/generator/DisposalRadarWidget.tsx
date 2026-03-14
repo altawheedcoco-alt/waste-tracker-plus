@@ -25,7 +25,7 @@ const disposalSteps = [
 ];
 
 const statusToStep: Record<string, number> = {
-  new: 0, approved: 0, collection_started: 1, in_transit: 1,
+  new: 0, registered: 0, approved: 0, collecting: 1, in_transit: 1,
   delivered: 2, processing: 3, confirmed: 4, completed: 4,
 };
 
