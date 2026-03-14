@@ -473,10 +473,14 @@ const ShipmentManagement = () => {
         <BackButton />
 
         {/* Header */}
-        <div className="flex items-center justify-between gap-2 flex-wrap-reverse">
-          <div className="flex items-center gap-2">
+        <div className="flex flex-col gap-2">
+          <div className="text-right min-w-0">
+            <h1 className="text-lg sm:text-3xl font-bold truncate">{t('shipmentMgmt.title')}</h1>
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.subtitle')}</p>
+          </div>
+          <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide pb-0.5">
             <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogContent className="max-w-2xl" dir="rtl">
+            <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto" dir="rtl">
               <DialogHeader className="text-right">
                 <DialogTitle>{t('shipmentMgmt.createNew')}</DialogTitle>
                 <DialogDescription>
@@ -485,7 +489,7 @@ const ShipmentManagement = () => {
               </DialogHeader>
 
               <div className="grid gap-4 py-4">
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>{t('shipmentMgmt.generator')}</Label>
                     <Select
@@ -536,7 +540,7 @@ const ShipmentManagement = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <div className="space-y-2">
                     <Label>{t('shipmentMgmt.wasteType')}</Label>
                     <Select
@@ -592,11 +596,11 @@ const ShipmentManagement = () => {
                 </div>
               </div>
 
-              <DialogFooter>
-                <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              <DialogFooter className="flex-col sm:flex-row gap-2">
+                <Button variant="outline" onClick={() => setDialogOpen(false)} className="w-full sm:w-auto">
                   {t('common.cancel')}
                 </Button>
-                <Button onClick={handleCreateShipment} disabled={createLoading}>
+                <Button onClick={handleCreateShipment} disabled={createLoading} className="w-full sm:w-auto">
                   {createLoading && <Loader2 className="w-4 h-4 ml-2 animate-spin" />}
                   {t('shipmentMgmt.create')}
                 </Button>
@@ -610,54 +614,50 @@ const ShipmentManagement = () => {
               onClick={() => fetchData()}
               disabled={loading}
               title={t('shipmentMgmt.refreshPage')}
+              className="shrink-0"
             >
               <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             </Button>
-          </div>
-
-          <div className="text-right min-w-0">
-            <h1 className="text-xl sm:text-3xl font-bold truncate">{t('shipmentMgmt.title')}</h1>
-            <p className="text-xs sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.subtitle')}</p>
           </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-3 sm:p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <Package className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+            <CardContent className="p-2.5 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.totalShipments')}</p>
-                  <p className="text-xl sm:text-3xl font-bold">{statsData.total}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.totalShipments')}</p>
+                  <p className="text-lg sm:text-3xl font-bold">{statsData.total}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-amber-500/30 bg-amber-500/5">
-            <CardContent className="p-3 sm:p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
-                  <Truck className="w-5 h-5 sm:w-6 sm:h-6 text-amber-500" />
+            <CardContent className="p-2.5 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                  <Truck className="w-4 h-4 sm:w-6 sm:h-6 text-amber-500" />
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.activeShipments')}</p>
-                  <p className="text-xl sm:text-3xl font-bold text-amber-600">{statsData.active}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.activeShipments')}</p>
+                  <p className="text-lg sm:text-3xl font-bold text-amber-600">{statsData.active}</p>
                 </div>
               </div>
             </CardContent>
           </Card>
           <Card className="border-green-500/30 bg-green-500/5">
-            <CardContent className="p-3 sm:p-6 text-right">
-              <div className="flex items-center justify-between">
-                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
-                  <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-green-500" />
+            <CardContent className="p-2.5 sm:p-6 text-right">
+              <div className="flex items-center justify-between gap-1.5">
+                <div className="w-8 h-8 sm:w-12 sm:h-12 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
+                  <CheckCircle className="w-4 h-4 sm:w-6 sm:h-6 text-green-500" />
                 </div>
-                <div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">{t('shipmentMgmt.completedShipments')}</p>
-                  <p className="text-xl sm:text-3xl font-bold text-green-600">{statsData.completed}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] sm:text-sm text-muted-foreground truncate">{t('shipmentMgmt.completedShipments')}</p>
+                  <p className="text-lg sm:text-3xl font-bold text-green-600">{statsData.completed}</p>
                 </div>
               </div>
             </CardContent>

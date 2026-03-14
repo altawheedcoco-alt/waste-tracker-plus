@@ -151,24 +151,24 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
   };
 
    return (
-    <div className="space-y-6 pb-10">
+    <div className="space-y-4 sm:space-y-6 pb-10">
       {/* Header */}
-      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-5">
-        <div className="flex items-center justify-between relative z-10">
-          <div className="flex items-center gap-4">
+      <div className="relative overflow-hidden rounded-xl border bg-gradient-to-l from-primary/5 via-background to-primary/10 p-3 sm:p-5">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-0 sm:justify-between relative z-10">
+          <div className="flex items-center gap-2 sm:gap-4">
             <BackButton />
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Settings2 className="h-5 w-5 text-primary" />
+            <div className="flex items-center gap-2 sm:gap-3">
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Settings2 className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
               </div>
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold">{t('settings.title')}</h1>
-                <p className="text-muted-foreground text-sm">{t('settings.subtitle')}</p>
+              <div className="min-w-0">
+                <h1 className="text-base sm:text-2xl font-bold truncate">{t('settings.title')}</h1>
+                <p className="text-muted-foreground text-[11px] sm:text-sm truncate">{t('settings.subtitle')}</p>
               </div>
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-2">
-            <RotateCcw className="h-4 w-4" />
+          <Button variant="outline" size="sm" onClick={resetToDefaults} className="gap-1.5 self-end sm:self-auto text-xs sm:text-sm shrink-0">
+            <RotateCcw className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
             {t('settings.resetDefault')}
           </Button>
         </div>

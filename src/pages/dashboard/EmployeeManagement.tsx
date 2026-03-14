@@ -257,18 +257,18 @@ const EmployeeManagement = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         {/* Back Button */}
         <BackButton />
 
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <Users className="h-7 w-7 text-primary" />
-              {t('employees.title')}
+        <div className="flex flex-col gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+              <Users className="h-5 w-5 sm:h-7 sm:w-7 text-primary shrink-0" />
+              <span className="truncate">{t('employees.title')}</span>
             </h1>
-            <p className="text-muted-foreground mt-1">
+            <p className="text-muted-foreground text-xs sm:text-base mt-0.5 truncate">
               {t('employees.subtitle')}
             </p>
           </div>
@@ -276,12 +276,12 @@ const EmployeeManagement = () => {
           {canManageEmployees && (
             <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="gap-2">
+                <Button className="gap-2 w-full sm:w-auto self-stretch sm:self-start">
                   <UserPlus className="h-4 w-4" />
                   {t('employees.addEmployee')}
                 </Button>
               </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+              <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>{t('employees.addNewEmployee')}</DialogTitle>
                   <DialogDescription>
