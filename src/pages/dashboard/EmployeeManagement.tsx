@@ -385,7 +385,7 @@ const EmployeeManagement = () => {
                       <Shield className="h-4 w-4" />
                       {t('employees.permissions')}
                     </Label>
-                    <div className="grid grid-cols-2 gap-3 p-4 border rounded-lg bg-muted/50">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 p-3 sm:p-4 border rounded-lg bg-muted/50">
                       {PERMISSIONS.map((perm) => (
                         <div key={perm.value} className="flex items-center gap-2">
                           <Checkbox
@@ -393,7 +393,7 @@ const EmployeeManagement = () => {
                             checked={newEmployee.permissions.includes(perm.value)}
                             onCheckedChange={() => togglePermission(perm.value)}
                           />
-                          <Label htmlFor={perm.value} className="cursor-pointer text-sm">
+                          <Label htmlFor={perm.value} className="cursor-pointer text-xs sm:text-sm leading-tight">
                             {perm.label}
                           </Label>
                         </div>
