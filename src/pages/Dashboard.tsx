@@ -79,11 +79,7 @@ const Dashboard = () => {
     if (!loading && !user) {
       navigate('/auth', { replace: true });
     }
-    // Redirect regular employees/members to their personal workspace
-    if (!loading && user && isEmployee && !isAdmin) {
-      navigate('/dashboard/my-workspace', { replace: true });
-    }
-  }, [user, loading, navigate, roles, isEmployee, isAdmin]);
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (
