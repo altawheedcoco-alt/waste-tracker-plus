@@ -13,8 +13,7 @@ import {
   Shield,
   Loader2
 } from "lucide-react";
-import jsPDF from "jspdf";
-import html2canvas from "html2canvas";
+// jsPDF & html2canvas loaded dynamically
 import { usePDFExport } from '@/hooks/usePDFExport';
 
 interface Organization {

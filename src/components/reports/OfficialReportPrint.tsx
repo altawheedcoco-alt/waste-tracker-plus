@@ -1,8 +1,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, FileText } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically
 import { usePDFExport } from '@/hooks/usePDFExport';
 
 interface ChartData {

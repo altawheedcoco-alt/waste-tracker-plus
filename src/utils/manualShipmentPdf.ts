@@ -1,6 +1,5 @@
 import { ManualShipmentData, WasteItem } from '@/hooks/useManualShipmentDraft';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// jsPDF & html2canvas loaded dynamically for code-splitting
 
 const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
