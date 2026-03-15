@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, Loader2, FileDown } from 'lucide-react';
@@ -12,6 +12,8 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
+import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 
 interface ShipmentQuickPrintProps {
   isOpen: boolean;
@@ -562,6 +564,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                 </tr>
               </tbody>
             </table>
+
+            {/* Role-based tagline */}
+            <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
             {/* Footer */}
             <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#9ca3af' }}>

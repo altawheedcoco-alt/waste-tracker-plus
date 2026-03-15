@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, PenTool } from 'lucide-react';
@@ -14,6 +14,8 @@ import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
+import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 
 interface ShipmentData {
   id: string;
@@ -538,6 +540,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                 </tr>
               </tbody>
             </table>
+
+            {/* Role-based tagline */}
+            <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
             {/* Footer */}
             <div style={{ textAlign: 'center', fontSize: '6pt', color: theme.colors.footerText, paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>

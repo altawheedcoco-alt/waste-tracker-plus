@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -37,6 +37,8 @@ import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import SendForSigningButton from '@/components/documents/SendForSigningButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import AddNoteButton from '@/components/notes/AddNoteButton';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
+import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 
 interface OrganizationData {
   name: string;
@@ -654,6 +656,9 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                       </tbody>
                     </table>
                   )}
+
+                  {/* Role-based tagline */}
+                  <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
                   {/* Footer */}
                   <div style={{ textAlign: 'center', fontSize: '6pt', color: '#9ca3af', paddingTop: '4px', borderTop: '1px solid #e5e7eb' }}>
