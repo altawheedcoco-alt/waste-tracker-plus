@@ -76,6 +76,16 @@ export function calcFitScale(element: HTMLElement): number {
   return Math.min(scaleX, scaleY, 1);
 }
 
+/**
+ * Calculate the exact scale needed to fit content within A4 page.
+ * Uses the full A4 page dimensions (with internal padding already in the element).
+ */
+function calcFitScaleForPDF(elementHeight: number, elementWidth: number, pageH: number, pageW: number): number {
+  const imgH = (elementHeight * pageW) / elementWidth;
+  if (imgH <= pageH) return 1;
+  return pageH / imgH;
+}
+
 function applyScaling(el: HTMLElement): () => void {
   const scale = calcFitScale(el);
   const orig = { transform: el.style.transform, origin: el.style.transformOrigin, overflow: el.style.overflow };
@@ -117,14 +127,25 @@ export const PDFService = {
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Temporarily constrain to A4 width
+    // Temporarily constrain to A4 width with minimal padding
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '8mm';
+    element.style.padding = '5mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
+    
+    // For fitSinglePage: also reduce font sizes to help fit
+    if (fitSinglePage) {
+      element.style.fontSize = '6.5pt';
+      const allTds = element.querySelectorAll('td, th');
+      allTds.forEach(td => {
+        (td as HTMLElement).style.padding = '2px 4px';
+        (td as HTMLElement).style.fontSize = '6.5pt';
+        (td as HTMLElement).style.lineHeight = '1.2';
+      });
+    }
 
     // Hide no-print elements
     const noPrint = element.querySelectorAll('.no-print');
@@ -151,7 +172,8 @@ export const PDFService = {
       await new Promise(r => setTimeout(r, 50));
 
       if (fitSinglePage) {
-        cleanupScale = applyScaling(element);
+        // Don't use CSS transform - it doesn't work well with html2canvas
+        // Instead we'll scale at the image level after capture
         await new Promise(r => setTimeout(r, 30));
       }
 
@@ -204,8 +226,18 @@ export const PDFService = {
       if (fitSinglePage) {
         const imgData = canvas.toDataURL('image/jpeg', quality);
         const imgH = (canvas.height * imgW) / canvas.width;
-        const fitScale = Math.min(1, pageH / imgH);
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
+        if (imgH <= pageH) {
+          // Content fits naturally — place at top
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        } else {
+          // Content overflows — scale down to fit exactly in one page
+          const fitScale = pageH / imgH;
+          const scaledW = imgW * fitScale;
+          const scaledH = pageH;
+          // Center horizontally if scaled down
+          const offsetX = (pageW - scaledW) / 2;
+          pdf.addImage(imgData, 'JPEG', Math.max(0, offsetX), 0, scaledW, scaledH);
+        }
         return pdf;
       }
 
@@ -399,7 +431,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
 
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 0; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -411,6 +443,10 @@ const DEFAULT_PRINT_CSS = `
   html, body {
     margin: 0;
     padding: 0;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
     background: white !important;
     font-family: 'Cairo', sans-serif !important;
     direction: rtl;
@@ -431,9 +467,8 @@ const DEFAULT_PRINT_CSS = `
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
-    padding: 0;
-    overflow: visible !important;
-    break-inside: auto;
+    padding: 5mm 8mm;
+    overflow: hidden !important;
   }
 
   .no-print { display: none !important; }
@@ -445,19 +480,19 @@ const DEFAULT_PRINT_CSS = `
     print-color-adjust: exact !important;
   }
 
-  table { width: 100%; border-collapse: collapse; page-break-inside: auto; background: transparent !important; }
+  table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
   thead { display: table-header-group; background: transparent !important; }
-  tr { page-break-inside: avoid; page-break-after: auto; background: transparent !important; }
-  th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; background: transparent !important; }
+  tr { page-break-inside: avoid; background: transparent !important; }
+  th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
 
-  h1 { font-size: 16pt; margin: 4px 0; }
-  h2 { font-size: 13pt; margin: 3px 0; }
-  h3 { font-size: 11pt; margin: 2px 0; }
-  p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+  h1 { font-size: 12pt; margin: 2px 0; }
+  h2 { font-size: 10pt; margin: 2px 0; }
+  h3 { font-size: 9pt; margin: 1px 0; }
+  p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
 
   @media print {
-    body { margin: 0; padding: 0; }
-    .print-container { overflow: visible !important; }
+    body { margin: 0; padding: 0; overflow: hidden; }
+    .print-container { overflow: hidden !important; }
   }
 `;
 
@@ -561,22 +596,25 @@ export const PrintService = {
 
     // === LAYER 3: Document content (in .print-container) ===
 
-    const fitScript = opts.fitSinglePage === true ? `
+    const fitScript = `
       <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('DOMContentLoaded', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = 257 * 3.7795;
+          // A4 content area: 297mm page - 10mm top/bottom padding = 277mm
+          // Convert to px: 277mm * 3.7795 ≈ 1047px
+          var maxH = 277 * 3.7795;
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
             c.style.transform = 'scale(' + s + ')';
             c.style.transformOrigin = 'top right';
+            c.style.height = maxH + 'px';
             c.style.overflow = 'hidden';
           }
         });
       </script>
-    ` : '';
+    `;
 
     const printCSS = `
 
@@ -596,7 +634,9 @@ export const PrintService = {
         margin: 0;
         padding: 0;
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
+        max-height: 297mm;
+        overflow: hidden;
         background: white !important;
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
@@ -606,7 +646,8 @@ export const PrintService = {
 
       .page-wrapper {
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
+        max-height: 297mm;
         position: relative;
         overflow: hidden;
         background: white;
@@ -637,10 +678,9 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 10mm 12mm;
+        padding: 5mm 8mm;
         box-sizing: border-box;
-        overflow: visible !important;
-        break-inside: auto;
+        overflow: hidden !important;
       }
 
       .no-print { display: none !important; }
@@ -652,28 +692,32 @@ export const PrintService = {
         print-color-adjust: exact !important;
       }
 
-      table { width: 100%; border-collapse: collapse; page-break-inside: auto; background: transparent !important; }
+      table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
       thead { display: table-header-group; background: transparent !important; }
-      tr { page-break-inside: avoid; page-break-after: auto; background: transparent !important; }
-      th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; background: transparent !important; }
+      tr { page-break-inside: avoid; background: transparent !important; }
+      th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
       .print-container, .print-container * { background-color: transparent !important; }
       .print-container table th, .print-container table td { background: transparent !important; }
       .bg-white, .bg-gray-50, .bg-gray-100, [class*="bg-"] { background-color: transparent !important; }
 
-      h1 { font-size: 16pt; margin: 4px 0; }
-      h2 { font-size: 13pt; margin: 3px 0; }
-      h3 { font-size: 11pt; margin: 2px 0; }
-      p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+      h1 { font-size: 12pt; margin: 2px 0; }
+      h2 { font-size: 10pt; margin: 2px 0; }
+      h3 { font-size: 9pt; margin: 1px 0; }
+      p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
 
       @media print {
         html, body {
           width: 210mm;
           height: 297mm;
+          overflow: hidden;
         }
         .page-wrapper {
           width: 210mm;
           height: 297mm;
+          max-height: 297mm;
+          overflow: hidden;
           page-break-after: always;
+          page-break-inside: avoid;
         }
       }
 
