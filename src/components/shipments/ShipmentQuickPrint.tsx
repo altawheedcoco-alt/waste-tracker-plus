@@ -5,7 +5,7 @@ import { Printer, Download, Loader2, FileDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import TermsBackPage from '@/components/print/TermsBackPage';
+
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
@@ -573,7 +573,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام | {format(new Date(), 'PPP', { locale: ar })}
             </div>
           </div>
-          <TermsBackPage />
+          
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0 flex-wrap">

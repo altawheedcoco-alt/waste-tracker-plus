@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
-import TermsBackPage from '@/components/print/TermsBackPage';
+
 import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
@@ -558,7 +558,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </div>
             </div>
           </div>
-          <TermsBackPage />
+          
         </div>
 
         {/* Signatures display */}
