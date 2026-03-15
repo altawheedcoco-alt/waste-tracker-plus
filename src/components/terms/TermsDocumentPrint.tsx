@@ -88,7 +88,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
     return (
       <div 
         ref={ref} 
-        className="bg-white text-black mx-auto print:m-0" 
+        className="bg-white text-black mx-auto print:m-0 no-guilloche" 
         dir="rtl" 
         style={{ 
           fontFamily: 'Cairo, sans-serif',
