@@ -151,6 +151,12 @@ const DashboardPrintReports = memo(() => {
       });
     }
 
+    // Inject guilloche background if set
+    if (hasBackground && backgroundHTML && type !== 'receipt') {
+      const bgDiv = `<div style="position:fixed;inset:0;z-index:0;pointer-events:none;">${backgroundHTML}</div>`;
+      html = html.replace('<body>', `<body style="position:relative;">${bgDiv}`);
+    }
+
     const printWindow = window.open('', '_blank', type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100');
     if (printWindow) {
       printWindow.document.write(html);
@@ -160,7 +166,7 @@ const DashboardPrintReports = memo(() => {
       toast.error('يرجى السماح بالنوافذ المنبثقة للطباعة');
       setIsPrinting(false);
     }
-  }, [todayData, organization, profile]);
+  }, [todayData, organization, profile, hasBackground, backgroundHTML]);
 
   return (
     <DropdownMenu>
