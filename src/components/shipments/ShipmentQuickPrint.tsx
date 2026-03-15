@@ -402,9 +402,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#3b82f6', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #2563eb' }}>
+                  <td colSpan={8} style={{ background: '#dbeafe', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #93c5fd' }}>
                     بيانات الجهة المولدة: {shipment.generator?.name || '-'}
-                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#dbeafe', color: '#1e40af', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
+                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#bfdbfe', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
