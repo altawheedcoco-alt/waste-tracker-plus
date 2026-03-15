@@ -8,6 +8,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeShipment } from '@/lib/supabaseHelpers';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
@@ -227,7 +228,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         .eq('shipment_id', shipmentResult.data.id)
         .order('created_at', { ascending: true });
 
-      setShipment(shipmentResult.data as unknown as ShipmentData);
+      const normalized = normalizeShipment(shipmentResult.data);
+      setShipment(normalized as unknown as ShipmentData);
       
       if (!logsResult.error && logsResult.data) {
         setShipmentLogs(logsResult.data as unknown as ShipmentLogEntry[]);
