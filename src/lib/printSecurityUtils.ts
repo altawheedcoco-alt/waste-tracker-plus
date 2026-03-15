@@ -100,23 +100,23 @@ export function generatePrintWatermarkHTML(
     hour: '2-digit', minute: '2-digit', hour12: true,
   });
 
-  // Build identity line with org codes
+  // Build identity line — text only, no icons or symbols
   const identityParts = [orgName];
-  if (orgClientCode) identityParts.push(`🆔${orgClientCode}`);
-  if (orgVerificationCode) identityParts.push(`🔐${orgVerificationCode}`);
+  if (orgClientCode) identityParts.push(orgClientCode);
+  if (orgVerificationCode) identityParts.push(orgVerificationCode);
 
-  const line1 = `✦ ${identityParts.join(' ⟐ ')} ⟐ ${userName} ✦`;
-  const line2 = `${dateAr} ${timeAr} ● ${dateEn} ${timeEn}`;
-  const watermarkText = `${line1} ❖ ${line2}`;
+  const line1 = `${identityParts.join(' - ')} - ${userName}`;
+  const line2 = `${dateAr} ${timeAr} | ${dateEn} ${timeEn}`;
+  const watermarkText = `${line1} | ${line2}`;
 
   const rows: string[] = [];
   for (let i = 0; i < 12; i++) {
     const top = 1 + i * 8.5;
     const angle = i % 2 === 0 ? -33 : -28;
-    const size = i % 2 === 0 ? 12 : 10;
-    const alpha = i % 2 === 0 ? 0.065 : 0.045;
+    const size = i % 2 === 0 ? 13 : 11;
+    const alpha = i % 2 === 0 ? 0.08 : 0.055;
     rows.push(
-      `<div style="position:absolute;top:${top}%;left:-20%;right:-20%;text-align:center;font-size:${size}px;font-family:'Aref Ruqaa Ink','Reem Kufi Ink','Noto Kufi Arabic','Cairo',serif;color:rgba(6,95,70,${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:2.2px;font-weight:700;line-height:1.5;text-shadow:0 0 0.3px rgba(6,95,70,0.4);pointer-events:none;user-select:none;">${watermarkText}&nbsp;&nbsp;❖&nbsp;&nbsp;${watermarkText}&nbsp;&nbsp;❖&nbsp;&nbsp;${watermarkText}</div>`
+      `<div style="position:absolute;top:${top}%;left:-20%;right:-20%;text-align:center;font-size:${size}px;font-family:'Cairo','Segoe UI','Helvetica Neue',sans-serif;color:rgba(6,95,70,${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:1.8px;font-weight:600;line-height:1.5;pointer-events:none;user-select:none;">${watermarkText}    ${watermarkText}    ${watermarkText}</div>`
     );
   }
 
