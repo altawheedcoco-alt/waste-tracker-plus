@@ -236,8 +236,15 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     }
   };
 
+  const pdfFileName = [
+    shipment.transporter?.name || 'الناقل',
+    `شحنة-${shipment.shipment_number}`,
+    shipment.generator?.name || 'المولد',
+    wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
+  ].join('-');
+
   const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, `نموذج-تتبع-${shipment.shipment_number}`);
+    await exportToPDF(printRef.current, pdfFileName);
   };
 
   const formatDate = (date: string | null) => {

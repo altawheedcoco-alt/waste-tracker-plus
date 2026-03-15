@@ -276,9 +276,16 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
+  const pdfFileName = [
+    shipment.transporter?.name || 'الناقل',
+    `شحنة-${shipment.shipment_number}`,
+    shipment.generator?.name || 'المولد',
+    wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
+  ].join('-');
+
   const handleDownloadPDF = async () => {
     if (!pdfRef.current || !shipment) return;
-    await exportToPDF(pdfRef.current, `نموذج-تتبع-${shipment.shipment_number}`);
+    await exportToPDF(pdfRef.current, pdfFileName);
   };
 
   const handlePrint = () => {
