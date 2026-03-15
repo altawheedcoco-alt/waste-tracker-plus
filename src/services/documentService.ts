@@ -108,8 +108,8 @@ export const PDFService = {
     const {
       orientation = 'portrait',
       format = 'a4',
-      scale = 2,
-      quality = 0.92,
+      scale = 1.5,
+      quality = 0.85,
       fitSinglePage = false,
     } = opts;
 
@@ -133,22 +133,26 @@ export const PDFService = {
     let cleanupScale: (() => void) | null = null;
 
     try {
-      // Wait for images
+      // Wait for incomplete images (fast timeout)
       const imgs = Array.from(element.querySelectorAll('img'));
-      await Promise.allSettled(
-        imgs.filter(i => !i.complete).map(i =>
-          new Promise<void>(r => {
-            i.onload = () => r();
-            i.onerror = () => r();
-            setTimeout(r, 3000);
-          })
-        )
-      );
-      await new Promise(r => setTimeout(r, 180));
+      const pending = imgs.filter(i => !i.complete);
+      if (pending.length > 0) {
+        await Promise.allSettled(
+          pending.map(i =>
+            new Promise<void>(r => {
+              i.onload = () => r();
+              i.onerror = () => r();
+              setTimeout(r, 1500);
+            })
+          )
+        );
+      }
+      // Minimal reflow wait
+      await new Promise(r => setTimeout(r, 50));
 
       if (fitSinglePage) {
         cleanupScale = applyScaling(element);
-        await new Promise(r => setTimeout(r, 120));
+        await new Promise(r => setTimeout(r, 30));
       }
 
       // Smart section-based capture (prevents cutting text lines between pages)
