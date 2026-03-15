@@ -312,7 +312,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
       ? bgParts.join('')
       : '';
 
-    const watermarkHTML = orgName ? generateWatermarkHTMLForPrint(orgName, userName) : '';
+    const watermarkHTML = orgName ? generateWatermarkHTML(orgName, userName) : '';
 
     if (combinedBgHTML || watermarkHTML) {
       PrintService.printWithBackground(el, combinedBgHTML + watermarkHTML, { ...opts, customCSS: extraCSS });
