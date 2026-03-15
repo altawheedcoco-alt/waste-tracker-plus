@@ -1,12 +1,76 @@
 /**
- * أدوات التأمين المشتركة للطباعة — علامة مائية ديناميكية + تسجيل النشاط
+ * أدوات التأمين المشتركة للطباعة — علامة مائية ديناميكية + خيوط جيلوشي نصية + تسجيل النشاط
  * 
  * 3-Layer Document Architecture:
- *   Layer 1 (z-index:0) — Guilloche frame & pattern background
+ *   Layer 1 (z-index:0) — Guilloche frame & pattern background + Guilloche text threads
  *   Layer 2 (z-index:1) — Dynamic watermark (org, user, date/time AR+EN)
  *   Layer 3 (z-index:2) — Document content
  */
 import { supabase } from '@/integrations/supabase/client';
+
+// ─── Trilingual Guilloche Text Threads ────────────────────────
+const GUILLOCHE_TEXT_EN = 'iRecycle Waste Management System';
+const GUILLOCHE_TEXT_AR = 'آي ريسايكل لإدارة المخلفات';
+// Hieroglyphic transliteration using Egyptian Unicode block
+const GUILLOCHE_TEXT_HIERO = '𓇋𓂋𓇌𓋴𓇌𓎡𓃭 𓅱𓇌𓋴𓏏 𓅓𓈖𓇌𓆓𓅓𓈖𓏏 𓋴𓇌𓋴𓏏𓅓';
+
+/**
+ * Generate guilloche text filler threads HTML — fills empty spaces
+ * with fine sinusoidal SVG waves interspersed with trilingual text.
+ * Injected as part of Layer 1 (z-index: 0).
+ */
+export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string {
+  const textLine = `${GUILLOCHE_TEXT_EN}  ✦  ${GUILLOCHE_TEXT_AR}  ✦  ${GUILLOCHE_TEXT_HIERO}`;
+  const rows: string[] = [];
+
+  // Generate horizontal wave-text rows covering the full page
+  for (let i = 0; i < 28; i++) {
+    const top = 2 + i * 3.5; // % spacing
+    const alpha = i % 3 === 0 ? 0.045 : i % 3 === 1 ? 0.035 : 0.028;
+    const fontSize = i % 2 === 0 ? 7.5 : 6.5;
+    const angle = i % 4 === 0 ? -18 : i % 4 === 1 ? 12 : i % 4 === 2 ? -8 : 15;
+    const offsetX = (i % 5) * -60; // stagger
+
+    rows.push(
+      `<div style="position:absolute;top:${top}%;left:${offsetX}px;right:-200px;text-align:center;font-size:${fontSize}px;font-family:'Noto Sans Egyptian Hieroglyphs','Cairo','Aref Ruqaa Ink',serif;color:rgba(${hexToRgb(accentColor)},${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:3px;font-weight:400;line-height:1;pointer-events:none;user-select:none;">${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}</div>`
+    );
+  }
+
+  // Add SVG guilloche wave threads between text rows
+  const waveSVGs: string[] = [];
+  for (let w = 0; w < 14; w++) {
+    const y = 5 + w * 7;
+    const amp = 8 + (w % 3) * 4;
+    const freq = 0.008 + (w % 4) * 0.002;
+    const alpha = 0.04 + (w % 3) * 0.01;
+    const sw = 0.3 + (w % 2) * 0.2;
+
+    // Build SVG sine wave path
+    let d = `M 0 ${amp}`;
+    for (let x = 0; x <= 900; x += 3) {
+      const yp = amp * Math.sin(freq * x * Math.PI * 2 + w * 0.7);
+      d += ` L ${x} ${amp + yp}`;
+    }
+
+    waveSVGs.push(
+      `<div style="position:absolute;top:${y}%;left:0;right:0;height:${amp * 2 + 4}px;pointer-events:none;opacity:${alpha};overflow:hidden;">` +
+      `<svg width="100%" height="${amp * 2 + 4}" viewBox="0 0 900 ${amp * 2 + 4}" preserveAspectRatio="none" style="display:block;">` +
+      `<path d="${d}" fill="none" stroke="${accentColor}" stroke-width="${sw}" stroke-linecap="round"/>` +
+      `</svg></div>`
+    );
+  }
+
+  return `<div class="guilloche-text-filler" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>`;
+}
+
+/** Helper: hex color to r,g,b string */
+function hexToRgb(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r},${g},${b}`;
+}
 
 /**
  * Generate anti-forgery watermark HTML — Layer 2
