@@ -271,6 +271,28 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   }
   .footer .r { display: table-cell; text-align: right; }
   .footer .l { display: table-cell; text-align: left; width: 100px; }
+  .tagline-box {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: rgba(240,253,244,0.4);
+    font-size: 7.5px;
+    line-height: 1.6;
+    color: #374151;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+  }
+  .tagline-box .tagline-role {
+    font-size: 6.5px;
+    color: #059669;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+  .tagline-box .tagline-text {
+    font-style: italic;
+    color: #1f2937;
+  }
 
   /* Terms page */
   .terms-body { font-size: 9px; line-height: 1.9; }
