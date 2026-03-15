@@ -168,34 +168,34 @@ export async function fetchShipmentByIdOrNumber(
   if (error) throw error;
   if (!data) return null;
 
-  // Fetch related data
+  // Fetch orgs + driver in parallel
   const orgIds = [data.generator_id, data.transporter_id, data.recycler_id].filter(Boolean) as string[];
-  
-  const orgsMap = new Map<string, ShipmentOrganization>();
-  if (orgIds.length > 0) {
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, email, phone, address, city, representative_name, commercial_register, environmental_license, stamp_url, signature_url, logo_url')
-      .in('id', orgIds);
 
-    orgsData?.forEach((org) => orgsMap.set(org.id, org));
-  }
-
-  let driver: ShipmentDriver | null = null;
-  if (data.driver_id) {
-    const { data: driverData } = await supabase
-      .from('drivers')
-      .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)')
-      .eq('id', data.driver_id)
-      .maybeSingle();
-
-    if (driverData) {
-      driver = {
+  const [orgsMap, driver] = await Promise.all([
+    (async () => {
+      const map = new Map<string, ShipmentOrganization>();
+      if (orgIds.length === 0) return map;
+      const { data: orgsData } = await supabase
+        .from('organizations')
+        .select('id,name,email,phone,address,city,representative_name,commercial_register,environmental_license,stamp_url,signature_url,logo_url')
+        .in('id', orgIds);
+      orgsData?.forEach((org) => map.set(org.id, org));
+      return map;
+    })(),
+    (async (): Promise<ShipmentDriver | null> => {
+      if (!data.driver_id) return null;
+      const { data: driverData } = await supabase
+        .from('drivers')
+        .select('id,license_number,vehicle_type,vehicle_plate,profile:profiles(full_name,phone)')
+        .eq('id', data.driver_id)
+        .maybeSingle();
+      if (!driverData) return null;
+      return {
         ...driverData,
         profile: Array.isArray(driverData.profile) ? driverData.profile[0] : driverData.profile,
       };
-    }
-  }
+    })(),
+  ]);
 
   return {
     ...data,
