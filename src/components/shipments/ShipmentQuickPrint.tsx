@@ -327,9 +327,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
         {/* Hidden QR Code and Barcode for data URL generation */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={60} level="M" includeMargin={false} />
+          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={100} level="H" includeMargin={true} />
           <div ref={barcodeRef}>
-            <Barcode value={shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
+            <Barcode value={shipment.shipment_number} format="CODE128" width={1.8} height={45} displayValue={false} background="#ffffff" lineColor="#000000" />
           </div>
         </div>
 
