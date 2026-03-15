@@ -439,10 +439,10 @@ const DEFAULT_PRINT_CSS = `
     print-color-adjust: exact !important;
   }
 
-  table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
-  thead { display: table-header-group; }
-  tr { page-break-inside: avoid; page-break-after: auto; }
-  th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; }
+  table { width: 100%; border-collapse: collapse; page-break-inside: auto; background: transparent !important; }
+  thead { display: table-header-group; background: transparent !important; }
+  tr { page-break-inside: avoid; page-break-after: auto; background: transparent !important; }
+  th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; background: transparent !important; }
 
   h1 { font-size: 16pt; margin: 4px 0; }
   h2 { font-size: 13pt; margin: 3px 0; }
