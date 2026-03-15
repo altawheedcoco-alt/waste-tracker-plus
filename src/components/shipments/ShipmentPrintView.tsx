@@ -558,7 +558,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </div>
             </div>
           </div>
-          <TermsBackPage />
+          
         </div>
 
         {/* Signatures display */}

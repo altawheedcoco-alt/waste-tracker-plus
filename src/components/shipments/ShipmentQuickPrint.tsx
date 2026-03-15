@@ -573,7 +573,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام | {format(new Date(), 'PPP', { locale: ar })}
             </div>
           </div>
-          <TermsBackPage />
+          
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0 flex-wrap">

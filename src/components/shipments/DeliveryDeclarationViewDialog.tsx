@@ -171,8 +171,6 @@ const DeliveryDeclarationViewDialog = ({
               </div>
             </div>
 
-            {/* Page 2 — Terms Back Page */}
-            <TermsBackPage />
           </div>
         </ScrollArea>
       </DialogContent>
