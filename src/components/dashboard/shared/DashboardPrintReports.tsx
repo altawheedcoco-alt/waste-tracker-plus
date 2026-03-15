@@ -44,6 +44,7 @@ const orgTypeLabel = (t: string) => {
 const DashboardPrintReports = memo(() => {
   const { organization, profile } = useAuth();
   const [isPrinting, setIsPrinting] = useState(false);
+  const { backgroundHTML, hasBackground } = useGuillocheBackground();
   const orgId = organization?.id;
 
   const { data: todayData } = useQuery({
