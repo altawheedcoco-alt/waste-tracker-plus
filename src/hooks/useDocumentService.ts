@@ -285,42 +285,34 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     await wrap(() => ExcelService.exportJSON(data, filename));
   }, [wrap]);
 
-  // ─── Print ──────────────────────────────────────────────────
+  // ─── Print (3-Layer: Guilloche → Watermark → Content) ─────
 
   const print = useCallback((el: HTMLElement | null, opts?: PrintOptions) => {
     if (!el) return;
     if (!guardPrint('print')) return;
 
-    // Build combined background + watermark HTML for print window
-    const bgParts: string[] = [];
+    // Build 3-layer HTML for the print window
+    const layers: string[] = [];
     let extraCSS = opts?.customCSS || '';
 
-    // Guilloche background
+    // Layer 1: Guilloche frame & pattern
     if (hasBackground && backgroundHTML) {
-      const guillocheCSS = `
-        .guilloche-print-bg {
-          position: fixed; inset: 0; z-index: 0; pointer-events: none;
-          ${bgColor ? `background-color: ${bgColor};` : ''}
-        }
-        .print-container { position: relative; z-index: 1; }
-      `;
-      extraCSS += '\n' + guillocheCSS;
-      bgParts.push(backgroundHTML);
+      layers.push(backgroundHTML);
+      if (bgColor) {
+        extraCSS += `\n.page-wrapper { background-color: ${bgColor} !important; }`;
+      }
     }
 
-    // Dynamic watermark
+    // Layer 2: Watermark (AR+EN date/time)
     if (orgName) {
       extraCSS += '\n' + generateWatermarkCSS();
+      layers.push(generateWatermarkHTML(orgName, userName));
     }
 
-    const combinedBgHTML = bgParts.length > 0
-      ? bgParts.join('')
-      : '';
+    const combinedBgHTML = layers.join('\n');
 
-    const watermarkHTML = orgName ? generateWatermarkHTML(orgName, userName) : '';
-
-    if (combinedBgHTML || watermarkHTML) {
-      PrintService.printWithBackground(el, combinedBgHTML + watermarkHTML, { ...opts, customCSS: extraCSS });
+    if (combinedBgHTML) {
+      PrintService.printWithBackground(el, combinedBgHTML, { ...opts, customCSS: extraCSS });
     } else {
       PrintService.print(el, opts);
     }
