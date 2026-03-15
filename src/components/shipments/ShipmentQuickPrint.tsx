@@ -153,6 +153,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
     orientation: 'portrait',
     format: 'a4',
     scale: 2,
+    fitSinglePage: true,
   });
 
   useEffect(() => {

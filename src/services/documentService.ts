@@ -121,7 +121,7 @@ export const PDFService = {
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = `${A4.margin}mm`;
+    element.style.padding = '8mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
@@ -159,7 +159,7 @@ export const PDFService = {
       if (!fitSinglePage) {
         const sectionNodes = Array.from(element.querySelectorAll<HTMLElement>('[data-pdf-section]'));
         if (sectionNodes.length > 0) {
-          let currentY = A4.margin;
+          let currentY = 0;
 
           for (const section of sectionNodes) {
             const sectionCanvas = await html2canvas(section, {
@@ -170,17 +170,17 @@ export const PDFService = {
               logging: false,
             });
 
-            const imgW = A4.contentWidth;
+            const imgW = pageW;
             const imgH = (sectionCanvas.height * imgW) / sectionCanvas.width;
-            const remaining = pageH - A4.margin - currentY;
+            const remaining = pageH - currentY;
 
-            if (imgH > remaining && currentY > A4.margin) {
+            if (imgH > remaining && currentY > 0) {
               pdf.addPage();
-              currentY = A4.margin;
+              currentY = 0;
             }
 
             const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
-            pdf.addImage(imgData, 'JPEG', A4.margin, currentY, imgW, imgH);
+            pdf.addImage(imgData, 'JPEG', 0, currentY, imgW, imgH);
             currentY += imgH + 2;
           }
 
@@ -198,18 +198,19 @@ export const PDFService = {
         windowWidth: A4_PX.fullWidth,
       });
 
-      const imgW = A4.contentWidth;
+      // Use full page width since padding is already inside the element
+      const imgW = pageW;
 
       if (fitSinglePage) {
         const imgData = canvas.toDataURL('image/jpeg', quality);
         const imgH = (canvas.height * imgW) / canvas.width;
-        const fitScale = Math.min(1, A4.contentHeight / imgH);
-        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW * fitScale, imgH * fitScale);
+        const fitScale = Math.min(1, pageH / imgH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
         return pdf;
       }
 
       // Robust multi-page slicing by exact page pixel height
-      const pageHeightPx = Math.floor((A4.contentHeight * canvas.width) / A4.contentWidth);
+      const pageHeightPx = Math.floor((pageH * canvas.width) / imgW);
       const pageCanvas = document.createElement('canvas');
       const pageCtx = pageCanvas.getContext('2d');
       if (!pageCtx) return pdf;
@@ -229,7 +230,7 @@ export const PDFService = {
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW, imgH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
