@@ -13,6 +13,7 @@ import { toast } from 'sonner';
 import { generateReceiptTemplate } from './printTemplates/receiptTemplate';
 import { generateA4Template } from './printTemplates/a4Template';
 import { generateComprehensiveTemplate } from './printTemplates/comprehensiveTemplate';
+import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 
 const statusLabel = (s: string) => {
   const map: Record<string, string> = {
@@ -43,6 +44,7 @@ const orgTypeLabel = (t: string) => {
 const DashboardPrintReports = memo(() => {
   const { organization, profile } = useAuth();
   const [isPrinting, setIsPrinting] = useState(false);
+  const { backgroundHTML, hasBackground } = useGuillocheBackground();
   const orgId = organization?.id;
 
   const { data: todayData } = useQuery({
@@ -149,6 +151,12 @@ const DashboardPrintReports = memo(() => {
       });
     }
 
+    // Inject guilloche background if set
+    if (hasBackground && backgroundHTML && type !== 'receipt') {
+      const bgDiv = `<div style="position:fixed;inset:0;z-index:0;pointer-events:none;">${backgroundHTML}</div>`;
+      html = html.replace('<body>', `<body style="position:relative;">${bgDiv}`);
+    }
+
     const printWindow = window.open('', '_blank', type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100');
     if (printWindow) {
       printWindow.document.write(html);
@@ -158,7 +166,7 @@ const DashboardPrintReports = memo(() => {
       toast.error('يرجى السماح بالنوافذ المنبثقة للطباعة');
       setIsPrinting(false);
     }
-  }, [todayData, organization, profile]);
+  }, [todayData, organization, profile, hasBackground, backgroundHTML]);
 
   return (
     <DropdownMenu>

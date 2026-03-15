@@ -385,6 +385,16 @@ const DEFAULT_PRINT_CSS = `
 export const PrintService = {
   /** Open browser print dialog with vector-based text rendering */
   print(element: HTMLElement, opts: PrintOptions = {}): void {
+    this._doPrint(element, '', opts);
+  },
+
+  /** Print with guilloche background HTML injected before the content */
+  printWithBackground(element: HTMLElement, backgroundHTML: string, opts: PrintOptions = {}): void {
+    this._doPrint(element, backgroundHTML, opts);
+  },
+
+  /** Internal print implementation */
+  _doPrint(element: HTMLElement, backgroundHTML: string, opts: PrintOptions = {}): void {
     if (!element) { toast.error('لا يوجد محتوى للطباعة'); return; }
 
     const win = window.open('', '_blank');
@@ -419,6 +429,10 @@ export const PrintService = {
       </script>
     ` : '';
 
+    const bgSection = backgroundHTML 
+      ? `<div class="guilloche-print-bg">${backgroundHTML}</div>` 
+      : '';
+
     win.document.write(`
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -429,6 +443,7 @@ export const PrintService = {
           ${fitScript}
         </head>
         <body>
+          ${bgSection}
           <div class="print-container">${element.outerHTML}</div>
         </body>
       </html>
