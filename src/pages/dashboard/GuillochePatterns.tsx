@@ -10,6 +10,7 @@ import { patternToRef } from '@/lib/guillochePatternUtils';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 const GuillocheA4CombinedPreview = lazy(() => import('@/components/guilloche/GuillocheA4CombinedPreview'));
+const GuillocheTemplateDesigns = lazy(() => import('@/components/guilloche/GuillocheTemplateDesigns'));
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
