@@ -336,7 +336,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
         {/* Print Preview */}
         <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
-          <div className="page">
+          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '6px', border: 'none' }}>
               <tbody>
@@ -554,8 +554,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               </tbody>
             </table>
 
-            {/* Stamps and Signatures Table */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
+            {/* Stamps and Signatures Table - flex-grow to fill remaining space */}
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
                   <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
@@ -606,9 +606,12 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             {/* Role-based tagline */}
             <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
-            {/* Footer */}
-            <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#000' }}>
-              تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام | {format(new Date(), 'PPP', { locale: ar })}
+            {/* Footer - always at the very bottom */}
+            <div style={{ marginTop: 'auto', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#000' }}>
+              <div>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام</div>
+              <div style={{ marginTop: '2px' }}>
+                رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
+              </div>
             </div>
           </div>
           
