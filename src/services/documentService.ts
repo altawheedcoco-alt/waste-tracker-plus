@@ -642,10 +642,16 @@ export const PrintService = {
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
+    var printed = false;
+    function doPrint() {
+      if (printed) return;
+      printed = true;
+      window.print();
+    }
     window.addEventListener('load', function() {
-      setTimeout(function() { window.print(); }, 600);
+      setTimeout(doPrint, 600);
     });
-    setTimeout(function() { window.print(); }, 2500);
+    setTimeout(doPrint, 2500);
   </script>
 </body>
 </html>`);
