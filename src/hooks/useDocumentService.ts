@@ -24,6 +24,7 @@ import DocumentService, {
 import { generateThemeCSS, getThemeById, type PrintThemeId } from '@/lib/printThemes';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 
 export interface UseDocumentServiceReturn {
   // PDF
