@@ -559,6 +559,11 @@ export type { GuillocheTemplate };
 
 // ─── Main Component ───
 export default function GuillocheTemplateDesigns() {
+  const { organization, profile, user } = useAuth();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
+  const orgName = organization?.name || 'اسم الجهة';
+  const userName = profile?.full_name || 'المستخدم';
   const { getPref, setPref } = useUserPreferences();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
