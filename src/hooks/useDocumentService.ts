@@ -209,8 +209,22 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
   // ─── Print ──────────────────────────────────────────────────
 
   const print = useCallback((el: HTMLElement | null, opts?: PrintOptions) => {
-    if (el) PrintService.print(el, opts);
-  }, []);
+    if (!el) return;
+    // Inject guilloche background HTML into print options
+    if (hasBackground && backgroundHTML) {
+      const guillocheCSS = `
+        .guilloche-print-bg {
+          position: fixed; inset: 0; z-index: 0; pointer-events: none;
+          ${bgColor ? `background-color: ${bgColor};` : ''}
+        }
+        .print-container { position: relative; z-index: 1; }
+      `;
+      const mergedCSS = (opts?.customCSS || '') + '\n' + guillocheCSS;
+      PrintService.printWithBackground(el, backgroundHTML, { ...opts, customCSS: mergedCSS });
+    } else {
+      PrintService.print(el, opts);
+    }
+  }, [hasBackground, backgroundHTML, bgColor]);
 
   const printWithTheme = useCallback((el: HTMLElement | null, themeId: PrintThemeId) => {
     if (!el) {
