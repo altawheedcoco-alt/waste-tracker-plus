@@ -11,6 +11,7 @@ export type EmployeePermission =
   | 'view_drivers' | 'manage_drivers'
   | 'view_settings' | 'manage_settings'
   | 'manage_members'
+  | 'print_documents' | 'share_documents'
   | 'full_access';
 
 export const useMyPermissions = () => {
