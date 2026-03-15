@@ -300,7 +300,7 @@ export const generateLeaveBalance = (d: HRDocData & {
 <!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>كشف حساب إجازات</title>
 <style>${commonStyles}
   .balance-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 20px 0; }
-  .balance-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 10px; padding: 20px; text-align: center; }
+  .balance-card { background: rgba(240,253,244,0.55); border: 1px solid #bbf7d0; border-radius: 10px; padding: 20px; text-align: center; }
   .balance-value { font-size: 28px; font-weight: bold; color: #059669; }
   .balance-label { font-size: 12px; color: #666; margin-top: 4px; }
 </style></head><body>
