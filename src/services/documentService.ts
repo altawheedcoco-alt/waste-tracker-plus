@@ -578,7 +578,6 @@ export const PrintService = {
     ` : '';
 
     const printCSS = `
-      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&family=Noto+Sans+Egyptian+Hieroglyphs&display=swap');
 
       @page {
         size: A4 portrait;
