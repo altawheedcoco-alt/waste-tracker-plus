@@ -123,7 +123,12 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     return false;
   }, [canPrint]);
 
-  /** Inject guilloche background + dynamic watermark overlay into an element, returns cleanup fn */
+  /**
+   * Inject 3-layer structure into an element for PDF capture:
+   *   Layer 1 (z:0) — Guilloche frame & pattern background
+   *   Layer 2 (z:1) — Dynamic watermark (org, user, date AR+EN)
+   *   Layer 3 (z:2) — Original content stays on top
+   */
   const injectGuillocheOverlay = useCallback((el: HTMLElement): (() => void) => {
     const cleanups: (() => void)[] = [];
 
@@ -135,30 +140,30 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
       el.style.position = 'relative';
     }
 
-    // 1. Inject guilloche background
+    // ── Layer 1: Guilloche background ──
     if (hasBackground && backgroundHTML) {
       if (bgColor) {
         el.style.backgroundColor = bgColor;
       }
-      const overlay = document.createElement('div');
-      overlay.className = 'guilloche-bg-overlay';
-      overlay.innerHTML = backgroundHTML;
-      overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;';
-      el.insertBefore(overlay, el.firstChild);
-      cleanups.push(() => overlay.remove());
+      const guillocheDiv = document.createElement('div');
+      guillocheDiv.className = 'guilloche-bg-overlay';
+      guillocheDiv.innerHTML = backgroundHTML;
+      guillocheDiv.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;';
+      el.insertBefore(guillocheDiv, el.firstChild);
+      cleanups.push(() => guillocheDiv.remove());
     }
 
-    // 2. Inject dynamic watermark
+    // ── Layer 2: Dynamic watermark (AR+EN date/time) ──
     if (orgName) {
       const watermarkDiv = document.createElement('div');
       watermarkDiv.className = 'dynamic-watermark-overlay';
       watermarkDiv.innerHTML = generateWatermarkHTML(orgName, userName);
-      watermarkDiv.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:2;overflow:hidden;';
+      watermarkDiv.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;';
       el.appendChild(watermarkDiv);
       cleanups.push(() => watermarkDiv.remove());
     }
 
-    // Ensure content is above overlays
+    // ── Layer 3: Ensure all content children sit above overlays ──
     Array.from(el.children).forEach(child => {
       const c = child as HTMLElement;
       if (!c.classList.contains('guilloche-bg-overlay') && !c.classList.contains('dynamic-watermark-overlay')) {
@@ -166,7 +171,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
           c.style.position = 'relative';
         }
         if (!c.style.zIndex) {
-          c.style.zIndex = '1';
+          c.style.zIndex = '2';
         }
       }
     });
@@ -280,42 +285,34 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     await wrap(() => ExcelService.exportJSON(data, filename));
   }, [wrap]);
 
-  // ─── Print ──────────────────────────────────────────────────
+  // ─── Print (3-Layer: Guilloche → Watermark → Content) ─────
 
   const print = useCallback((el: HTMLElement | null, opts?: PrintOptions) => {
     if (!el) return;
     if (!guardPrint('print')) return;
 
-    // Build combined background + watermark HTML for print window
-    const bgParts: string[] = [];
+    // Build 3-layer HTML for the print window
+    const layers: string[] = [];
     let extraCSS = opts?.customCSS || '';
 
-    // Guilloche background
+    // Layer 1: Guilloche frame & pattern
     if (hasBackground && backgroundHTML) {
-      const guillocheCSS = `
-        .guilloche-print-bg {
-          position: fixed; inset: 0; z-index: 0; pointer-events: none;
-          ${bgColor ? `background-color: ${bgColor};` : ''}
-        }
-        .print-container { position: relative; z-index: 1; }
-      `;
-      extraCSS += '\n' + guillocheCSS;
-      bgParts.push(backgroundHTML);
+      layers.push(backgroundHTML);
+      if (bgColor) {
+        extraCSS += `\n.page-wrapper { background-color: ${bgColor} !important; }`;
+      }
     }
 
-    // Dynamic watermark
+    // Layer 2: Watermark (AR+EN date/time)
     if (orgName) {
       extraCSS += '\n' + generateWatermarkCSS();
+      layers.push(generateWatermarkHTML(orgName, userName));
     }
 
-    const combinedBgHTML = bgParts.length > 0
-      ? bgParts.join('')
-      : '';
+    const combinedBgHTML = layers.join('\n');
 
-    const watermarkHTML = orgName ? generateWatermarkHTML(orgName, userName) : '';
-
-    if (combinedBgHTML || watermarkHTML) {
-      PrintService.printWithBackground(el, combinedBgHTML + watermarkHTML, { ...opts, customCSS: extraCSS });
+    if (combinedBgHTML) {
+      PrintService.printWithBackground(el, combinedBgHTML, { ...opts, customCSS: extraCSS });
     } else {
       PrintService.print(el, opts);
     }
