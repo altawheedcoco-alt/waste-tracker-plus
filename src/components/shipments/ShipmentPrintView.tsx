@@ -274,7 +274,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         </div>
 
         {/* Print Preview */}
-        <div ref={printRef} className="bg-white p-3 rounded-lg border text-foreground" style={{ direction: 'rtl', fontSize: '7pt' }}>
+        <div ref={printRef} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
           <div className="page">
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '4px', border: 'none' }}>
