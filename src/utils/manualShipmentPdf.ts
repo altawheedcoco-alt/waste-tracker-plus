@@ -86,6 +86,13 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   const verificationCode = `iRC-${(form.shipment_number || 'DRAFT').replace(/[^a-zA-Z0-9]/g, '')}-${Date.now().toString(36).toUpperCase()}`;
   const qrUrl = encodeURIComponent(`https://irecycle21.lovable.app/verify/${verificationCode}`);
 
+  // Deterministic role-based tagline — stays the same for the same shipment
+  const shipmentSeed = form.shipment_number || form.id || 'DRAFT';
+  const destRole = form.destination_type === 'disposal' ? 'disposal' as const : 'recycler' as const;
+  const taglineGenerator = generateRoleTagline('generator', shipmentSeed);
+  const taglineTransporter = generateRoleTagline('transporter', shipmentSeed);
+  const taglineDestination = generateRoleTagline(destRole, shipmentSeed);
+
   const partyTable = (title: string, name: string, addr: string, phone: string, email: string, lic: string, cr: string, tax: string, rep: string) => `
     <table class="classic">
       <thead><tr><th colspan="2">${title}</th></tr></thead>
