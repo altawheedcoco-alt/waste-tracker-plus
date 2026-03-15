@@ -14,6 +14,9 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Printer, FileText, Layers, Frame, AlertCircle, Fingerprint } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { toast } from 'sonner';
 
 // ─── Border Types (mirrored from GuillocheA4BorderDesigner) ───
 const BORDER_COLORS = [

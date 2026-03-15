@@ -23,6 +23,9 @@ import { toast } from 'sonner';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef, GUILLOCHE_COLOR_PALETTES } from '@/lib/guillochePatternUtils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
 
 // ─── Template Color Schemes ───
 const TEMPLATE_COLORS = [
