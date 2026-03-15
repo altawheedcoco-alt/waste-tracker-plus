@@ -431,7 +431,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
 
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 0; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -443,6 +443,10 @@ const DEFAULT_PRINT_CSS = `
   html, body {
     margin: 0;
     padding: 0;
+    width: 210mm;
+    height: 297mm;
+    max-height: 297mm;
+    overflow: hidden;
     background: white !important;
     font-family: 'Cairo', sans-serif !important;
     direction: rtl;
@@ -463,9 +467,8 @@ const DEFAULT_PRINT_CSS = `
     width: 100%;
     max-width: 100%;
     margin: 0 auto;
-    padding: 0;
-    overflow: visible !important;
-    break-inside: auto;
+    padding: 5mm 8mm;
+    overflow: hidden !important;
   }
 
   .no-print { display: none !important; }
@@ -477,19 +480,19 @@ const DEFAULT_PRINT_CSS = `
     print-color-adjust: exact !important;
   }
 
-  table { width: 100%; border-collapse: collapse; page-break-inside: auto; background: transparent !important; }
+  table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
   thead { display: table-header-group; background: transparent !important; }
-  tr { page-break-inside: avoid; page-break-after: auto; background: transparent !important; }
-  th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; background: transparent !important; }
+  tr { page-break-inside: avoid; background: transparent !important; }
+  th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
 
-  h1 { font-size: 16pt; margin: 4px 0; }
-  h2 { font-size: 13pt; margin: 3px 0; }
-  h3 { font-size: 11pt; margin: 2px 0; }
-  p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+  h1 { font-size: 12pt; margin: 2px 0; }
+  h2 { font-size: 10pt; margin: 2px 0; }
+  h3 { font-size: 9pt; margin: 1px 0; }
+  p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
 
   @media print {
-    body { margin: 0; padding: 0; }
-    .print-container { overflow: visible !important; }
+    body { margin: 0; padding: 0; overflow: hidden; }
+    .print-container { overflow: hidden !important; }
   }
 `;
 
