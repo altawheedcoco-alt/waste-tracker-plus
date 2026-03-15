@@ -72,9 +72,7 @@ const CVBuilder = () => {
   const handlePrint = () => {
     const content = cvRef.current;
     if (!content) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`
+    const htmlContent = `
       <html dir="rtl"><head><title>السيرة الذاتية - ${personalInfo.fullName}</title>
       <style>
         body { font-family: 'Segoe UI', Tahoma, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; color: #1a1a1a; }
@@ -106,7 +104,7 @@ const CVBuilder = () => {
         
         ${certificates.length > 0 ? `<h2>🏆 الشهادات</h2>${certificates.map(c => `<div class="cert-item">• ${c}</div>`).join('')}` : ''}
       </body></html>
-    `);
+    `;
     import('@/services/documentService').then(({ PrintService }) => {
       PrintService.printHTML(htmlContent, { title: 'السيرة الذاتية' });
     });
