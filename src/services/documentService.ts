@@ -512,7 +512,7 @@ export const PrintService = {
         <head>
           <meta charset="UTF-8">
           <title>طباعة الوثيقة</title>
-          <style>${DEFAULT_PRINT_CSS}\n${opts.customCSS || ''}</style>
+          <style>${DEFAULT_PRINT_CSS}\n${collected}\n${opts.customCSS || ''}</style>
           ${fitScript}
         </head>
         <body>
