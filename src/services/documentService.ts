@@ -19,6 +19,7 @@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createWorkbook, aoaToSheet, jsonToSheet, writeFile } from '@/lib/excelExport';
+import { generateGuillocheTextFillerHTML } from '@/lib/printSecurityUtils';
 
 // ─── A4 Constants ────────────────────────────────────────────
 export const A4 = {
@@ -473,10 +474,12 @@ export const PrintService = {
     // Wrap in unified print structure if not already a full HTML doc
     const isFullDoc = htmlContent.trim().toLowerCase().startsWith('<!doctype') || htmlContent.trim().toLowerCase().startsWith('<html');
     
+    const textFillerHTML = generateGuillocheTextFillerHTML();
+
     if (isFullDoc) {
-      // Inject dedup print script
+      // Inject guilloche text filler + dedup print script
       const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
-      const injected = htmlContent.replace('</body>', `${dedupScript}</body>`);
+      const injected = htmlContent.replace('<body>', `<body>${textFillerHTML}`).replace('</body>', `${dedupScript}</body>`);
       win.document.open();
       win.document.write(injected);
       win.document.close();
@@ -490,14 +493,16 @@ export const PrintService = {
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     @page { size: A4 portrait; margin: 12mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; }
+    html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
+    .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
     table { background: transparent !important; }
     tr, th, td { background: transparent !important; }
     ${opts.customCSS || ''}
   </style>
 </head>
 <body>
-  ${htmlContent}
+  ${textFillerHTML}
+  <div style="position:relative;z-index:2;">${htmlContent}</div>
   <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>
 </body>
 </html>`);
@@ -522,10 +527,13 @@ export const PrintService = {
     const win = window.open('', '_blank');
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
-    // === LAYER 1: Guilloche background ===
+    // === LAYER 1a: Guilloche background ===
     const guillocheLayer = backgroundHTML
       ? `<div class="layer-guilloche" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${backgroundHTML}</div>`
       : '';
+
+    // === LAYER 1b: Guilloche text filler threads (trilingual) ===
+    const guillocheTextFiller = generateGuillocheTextFillerHTML();
 
     // === LAYER 2: Watermark — injected via backgroundHTML which may contain watermark ===
     // (Watermark HTML is appended to backgroundHTML by useDocumentService)
@@ -550,7 +558,7 @@ export const PrintService = {
     ` : '';
 
     const printCSS = `
-      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&family=Noto+Sans+Egyptian+Hieroglyphs&display=swap');
 
       @page {
         size: A4 portrait;
@@ -686,6 +694,7 @@ export const PrintService = {
 <body>
   <div class="page-wrapper">
     ${guillocheLayer}
+    ${guillocheTextFiller}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
