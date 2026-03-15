@@ -233,8 +233,9 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     }
     const theme = getThemeById(themeId);
     const themeCSS = generateThemeCSS(theme);
-    PrintService.print(el, { customCSS: themeCSS });
-  }, []);
+    // Use the print function which already handles guilloche injection
+    print(el, { customCSS: themeCSS });
+  }, [print]);
 
   // ─── Backward-compatible aliases ────────────────────────────
 
