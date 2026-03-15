@@ -72,7 +72,7 @@ export const generateComprehensiveTemplate = (data: ComprehensiveData): string =
   @page { size: A4; margin: 12mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 11px; color: #1a1a1a; direction: rtl; }
-  .cover-header { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 20px; }
+  .cover-header { background: linear-gradient(135deg, rgba(5,150,105,0.88) 0%, rgba(4,120,87,0.88) 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 20px; }
   .cover-header h1 { font-size: 26px; margin-bottom: 4px; }
   .cover-header .subtitle { font-size: 14px; opacity: 0.9; }
   .cover-meta { display: flex; gap: 24px; margin-top: 12px; font-size: 12px; opacity: 0.85; }
