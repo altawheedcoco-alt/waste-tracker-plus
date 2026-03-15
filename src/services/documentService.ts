@@ -690,6 +690,7 @@ export const PrintService = {
 <body>
   <div class="page-wrapper">
     ${guillocheLayer}
+    ${guillocheTextFiller}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
