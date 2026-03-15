@@ -172,7 +172,8 @@ export const PDFService = {
       await new Promise(r => setTimeout(r, 50));
 
       if (fitSinglePage) {
-        cleanupScale = applyScaling(element);
+        // Don't use CSS transform - it doesn't work well with html2canvas
+        // Instead we'll scale at the image level after capture
         await new Promise(r => setTimeout(r, 30));
       }
 
