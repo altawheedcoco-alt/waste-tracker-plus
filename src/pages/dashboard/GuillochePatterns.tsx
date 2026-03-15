@@ -847,7 +847,7 @@ export default function GuillochePatterns() {
 
         {/* Preview Dialog */}
         <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-          <DialogContent className="max-w-2xl" dir="rtl">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl" dir="rtl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
