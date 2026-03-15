@@ -51,7 +51,7 @@ import { useQuery } from '@tanstack/react-query';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import BackButton from '@/components/ui/back-button';
-// jsPDF & html2canvas loaded dynamically
+import { PDFService } from '@/services/documentService';
 
 // Waste category definitions
 const HAZARDOUS_TYPES = ['chemical', 'electronic'];
