@@ -163,6 +163,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     opts: { orgId: string; docType: string; docId: string; customFilename?: string }
   ): Promise<string | null> => {
     if (!el) return null;
+    const cleanup = injectGuillocheOverlay(el);
 
     const result = await wrap(async () => {
       const url = await PDFService.uploadToStorage(el, {
@@ -187,8 +188,9 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
       return url;
     });
 
+    cleanup();
     return result ?? null;
-  }, [wrap, options]);
+  }, [wrap, options, injectGuillocheOverlay]);
 
   // ─── Excel ──────────────────────────────────────────────────
 
