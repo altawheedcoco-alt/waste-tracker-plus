@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { 
   Printer, Download, Send, FileText, Share2, Copy, 
-  Mail, MessageSquare, Palette, FileDown, Award, Layout
+  Mail, MessageSquare, Palette, FileDown, Award, Layout, Layers
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/tooltip';
 import PrintThemeSelector from './PrintThemeSelector';
 import LayoutTemplateSelector from './LayoutTemplateSelector';
+import UnifiedDocumentPreview, { type DocumentOutputConfig } from './UnifiedDocumentPreview';
 import { type PrintThemeId } from '@/lib/printThemes';
 import { type LayoutTemplateId } from '@/lib/layoutTemplates';
 import { usePDFExport } from '@/hooks/usePDFExport';
@@ -60,6 +61,7 @@ const DocumentActionsToolbar = ({
 }: DocumentActionsToolbarProps) => {
   const [themeOpen, setThemeOpen] = useState(false);
   const [layoutOpen, setLayoutOpen] = useState(false);
+  const [unifiedOpen, setUnifiedOpen] = useState(false);
   const { exportToPDF, printWithTheme, printContent, isExporting } = usePDFExport({
     filename: documentTitle,
   });
@@ -111,10 +113,36 @@ const DocumentActionsToolbar = ({
     }
   };
 
+  /** Unified preview → print */
+  const handleUnifiedPrint = async (config: DocumentOutputConfig) => {
+    if (printRef.current) {
+      printWithTheme(printRef.current, config.themeId);
+      await logPrint({ documentType, documentId, documentNumber, themeId: config.themeId, actionType: 'print' });
+    }
+  };
+
+  /** Unified preview → export PDF */
+  const handleUnifiedExportPDF = async (config: DocumentOutputConfig) => {
+    if (printRef.current) {
+      exportToPDF(printRef.current, documentTitle);
+      await logPrint({ documentType, documentId, documentNumber, themeId: config.themeId, actionType: 'pdf_export' });
+    }
+  };
+
   if (compact) {
     return (
       <TooltipProvider>
         <div className={`flex items-center gap-1 ${className}`} dir="rtl">
+          {/* Unified Preview Button */}
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="default" size="icon" onClick={() => setUnifiedOpen(true)} className="h-8 w-8">
+                <Layers className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>معاينة شاملة</TooltipContent>
+          </Tooltip>
+
           <Tooltip>
             <TooltipTrigger asChild>
               <Button variant="outline" size="icon" onClick={handleQuickPrint} className="h-8 w-8">
@@ -206,6 +234,14 @@ const DocumentActionsToolbar = ({
               onSelect={handleLayoutSelect}
             />
           )}
+          <UnifiedDocumentPreview
+            open={unifiedOpen}
+            onOpenChange={setUnifiedOpen}
+            onPrint={handleUnifiedPrint}
+            onExportPDF={handleUnifiedExportPDF}
+            documentTitle={documentTitle}
+            entityType={entityType}
+          />
         </div>
       </TooltipProvider>
     );
@@ -213,6 +249,14 @@ const DocumentActionsToolbar = ({
 
   return (
     <div className={`flex flex-wrap items-center gap-2 p-3 bg-muted/30 rounded-lg border ${className}`} dir="rtl">
+      {/* Unified Preview — Primary Action */}
+      <Button size="sm" onClick={() => setUnifiedOpen(true)} className="gap-1.5">
+        <Layers className="h-4 w-4" />
+        معاينة شاملة
+      </Button>
+
+      <div className="h-6 w-px bg-border" />
+
       {/* Print Actions */}
       <div className="flex items-center gap-1">
         <Button variant="outline" size="sm" onClick={handleQuickPrint} className="gap-1.5">
@@ -302,6 +346,14 @@ const DocumentActionsToolbar = ({
           onSelect={handleLayoutSelect}
         />
       )}
+      <UnifiedDocumentPreview
+        open={unifiedOpen}
+        onOpenChange={setUnifiedOpen}
+        onPrint={handleUnifiedPrint}
+        onExportPDF={handleUnifiedExportPDF}
+        documentTitle={documentTitle}
+        entityType={entityType}
+      />
     </div>
   );
 };
