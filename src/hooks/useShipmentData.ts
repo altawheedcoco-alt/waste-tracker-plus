@@ -69,8 +69,7 @@ export async function fetchShipmentsWithRelations(
     select?: string;
   }
 ): Promise<EnrichedShipment[]> {
-  const selectCols = filters?.select || 'id,shipment_number,status,waste_type,waste_description,quantity,unit,pickup_address,delivery_address,created_at,generator_id,transporter_id,recycler_id,driver_id,generator_approval_status,generator_approval_at,generator_rejection_reason,generator_auto_approve_deadline,recycler_approval_status,recycler_approval_at,recycler_rejection_reason,recycler_auto_approve_deadline';
-  let query = supabase.from('shipments').select(selectCols);
+  let query = supabase.from('shipments').select('*');
 
   if (filters?.organizationId) {
     query = query.or(
