@@ -201,7 +201,7 @@ const DashboardPrintReports = memo(() => {
         action_type: 'print',
         resource_type: 'document',
         details: { report_type: type } as any,
-      }).then(() => {}).catch(() => {});
+      }).then();
     }
   }, [canPrint, todayData, organization, profile, user, orgId, hasBackground, backgroundHTML]);
 
