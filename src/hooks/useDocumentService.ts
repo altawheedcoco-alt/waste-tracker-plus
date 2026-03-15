@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 
 export interface UseDocumentServiceReturn {
   // PDF
