@@ -466,23 +466,34 @@ export const PrintService = {
     this._doPrint(element, backgroundHTML, opts);
   },
 
-  /** Internal print implementation */
+  /**
+   * Internal print implementation — 3-Layer Architecture:
+   *   Layer 1 (z:0) — Guilloche frame & pattern background
+   *   Layer 2 (z:1) — Dynamic watermark (org, user, date AR+EN)
+   *   Layer 3 (z:2) — Document content
+   */
   _doPrint(element: HTMLElement, backgroundHTML: string, opts: PrintOptions = {}): void {
     if (!element) { toast.error('لا يوجد محتوى للطباعة'); return; }
 
     const win = window.open('', '_blank');
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
-    const bgSection = backgroundHTML
-      ? `<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${backgroundHTML}</div>`
+    // === LAYER 1: Guilloche background ===
+    const guillocheLayer = backgroundHTML
+      ? `<div class="layer-guilloche" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${backgroundHTML}</div>`
       : '';
+
+    // === LAYER 2: Watermark — injected via backgroundHTML which may contain watermark ===
+    // (Watermark HTML is appended to backgroundHTML by useDocumentService)
+
+    // === LAYER 3: Document content (in .print-container) ===
 
     const fitScript = opts.fitSinglePage === true ? `
       <script>
         window.addEventListener('load', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = 257 * 3.7795; // 257mm in px
+          var maxH = 257 * 3.7795;
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
@@ -530,6 +541,26 @@ export const PrintService = {
         margin: 0 auto;
       }
 
+      /* ── Layer 1: Guilloche ── */
+      .layer-guilloche {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        overflow: hidden;
+      }
+
+      /* ── Layer 2: Watermark ── */
+      .watermark-layer {
+        position: fixed;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        overflow: hidden;
+        mix-blend-mode: multiply;
+      }
+
+      /* ── Layer 3: Document Content ── */
       .print-container {
         position: relative;
         z-index: 2;
@@ -589,13 +620,11 @@ export const PrintService = {
 
     // Clone and clean content
     const contentClone = element.cloneNode(true) as HTMLElement;
-    // Remove inline width/minHeight that PrintWrapper sets (we handle it in .page-wrapper)
     contentClone.style.width = '';
     contentClone.style.minHeight = '';
     contentClone.style.margin = '';
     contentClone.style.padding = '';
     contentClone.style.boxSizing = '';
-    // Remove no-print elements
     contentClone.querySelectorAll('.no-print').forEach(el => el.remove());
 
     win.document.write(`<!DOCTYPE html>
@@ -609,7 +638,7 @@ export const PrintService = {
 </head>
 <body>
   <div class="page-wrapper">
-    ${bgSection}
+    ${guillocheLayer}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
