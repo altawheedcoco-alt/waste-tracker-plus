@@ -308,7 +308,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     // Layer 2: Watermark (AR+EN date/time)
     if (orgName) {
       extraCSS += '\n' + generateWatermarkCSS();
-      layers.push(generateWatermarkHTML(orgName, userName));
+      layers.push(generateWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode));
     }
 
     const combinedBgHTML = layers.join('\n');
