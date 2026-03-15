@@ -14,6 +14,7 @@ import { generateReceiptTemplate } from './printTemplates/receiptTemplate';
 import { generateA4Template } from './printTemplates/a4Template';
 import { generateComprehensiveTemplate } from './printTemplates/comprehensiveTemplate';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
 
 const statusLabel = (s: string) => {
   const map: Record<string, string> = {
