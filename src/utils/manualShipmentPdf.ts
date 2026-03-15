@@ -245,10 +245,10 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   .sig-hint { font-size: 7px; color: #888; }
 
   /* Verification */
-  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 5px; }
-  .verify-cell { display: table-cell; vertical-align: middle; padding: 4px; text-align: center; }
-  .qr-img { width: 56px; height: 56px; border: 1px solid #ccc; }
-  .barcode-img { height: 22px; max-width: 160px; margin-top: 3px; }
+  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 8px; padding: 6px 0; }
+  .verify-cell { display: table-cell; vertical-align: middle; padding: 6px 8px; text-align: center; }
+  .qr-img { width: 80px; height: 80px; border: 1px solid #ccc; padding: 2px; background: #fff; }
+  .barcode-img { height: 36px; max-width: 220px; margin-top: 4px; }
   .v-code { font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
   .stamp-circle {
     width: 50px; height: 50px;
@@ -441,14 +441,14 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
   <!-- Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:80px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${qrUrl}&bgcolor=ffffff&color=222222" class="qr-img" alt="QR"/>
-      <div style="font-size:6px;color:#888;margin-top:2px;">رمز QR</div>
+    <div class="verify-cell" style="width:100px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrUrl}&bgcolor=ffffff&color=000000" class="qr-img" alt="QR"/>
+      <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للتحقق</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:7px;color:#888;margin-bottom:2px;">رمز التحقق الإلكتروني</div>
+      <div style="font-size:7px;color:#555;margin-bottom:3px;font-family:'Cairo',sans-serif;">رمز التحقق الإلكتروني</div>
       <div class="v-code">${verificationCode}</div>
-      <img src="https://barcodeapi.org/api/128/${encodeURIComponent(verificationCode)}" class="barcode-img" alt="Barcode"/>
+      <img src="https://barcodeapi.org/api/128/${encodeURIComponent(verificationCode)}" class="barcode-img" alt="Barcode" style="height:36px;"/>
     </div>
     <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">
@@ -566,14 +566,14 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
   <!-- Page 2 Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:72px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=222222" class="qr-img" style="width:56px;height:56px;" alt="QR"/>
-      <div style="font-size:6px;color:#888;margin-top:2px;">QR الشروط</div>
+    <div class="verify-cell" style="width:100px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=000000" class="qr-img" style="width:80px;height:80px;" alt="QR"/>
+      <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للشروط</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:7px;color:#888;">رمز مصادقة الشروط والأحكام</div>
+      <div style="font-size:7px;color:#555;font-family:'Cairo',sans-serif;">رمز مصادقة الشروط والأحكام</div>
       <div class="v-code">TRM-${verificationCode}</div>
-      <img src="https://barcodeapi.org/api/128/${encodeURIComponent('TRM-' + verificationCode)}" class="barcode-img" alt="Barcode"/>
+      <img src="https://barcodeapi.org/api/128/${encodeURIComponent('TRM-' + verificationCode)}" class="barcode-img" alt="Barcode" style="height:36px;"/>
     </div>
     <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">

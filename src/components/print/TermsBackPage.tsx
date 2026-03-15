@@ -138,8 +138,8 @@ const TermsBackPage = () => {
         </div>
         <QRCodeSVG
           value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=${POLICY_VERSION}`}
-          size={55}
-          level="M"
+          size={75}
+          level="H"
         />
       </div>
 
@@ -206,10 +206,10 @@ const TermsBackPage = () => {
           <div className="text-center">
             <QRCodeSVG
               value={`${typeof window !== 'undefined' ? window.location.origin : ''}/qr-verify?type=platform-terms&version=${POLICY_VERSION}`}
-              size={55}
+              size={75}
               level="H"
             />
-            <p className="text-muted-foreground mt-1" style={{ fontSize: '6pt' }}>امسح للتحقق من صحة الوثيقة</p>
+            <p className="text-muted-foreground mt-1" style={{ fontSize: '7pt' }}>امسح للتحقق من صحة الوثيقة</p>
           </div>
         </div>
 

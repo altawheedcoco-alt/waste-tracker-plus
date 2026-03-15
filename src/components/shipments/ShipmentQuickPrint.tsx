@@ -327,9 +327,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
         {/* Hidden QR Code and Barcode for data URL generation */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={60} level="M" includeMargin={false} />
+          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={100} level="H" includeMargin={true} />
           <div ref={barcodeRef}>
-            <Barcode value={shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
+            <Barcode value={shipment.shipment_number} format="CODE128" width={1.8} height={45} displayValue={false} background="#ffffff" lineColor="#000000" />
           </div>
         </div>
 
@@ -341,8 +341,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               <tbody>
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '35px', width: '100%' }} />}
-                    <div style={{ fontSize: '6pt', color: '#374151', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '45px', width: '100%' }} />}
+                    <div style={{ fontSize: '7pt', color: '#374151', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                     <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
@@ -357,8 +357,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                     </div>
                   </td>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '70px', height: '70px' }} />}
-                    <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '85px', height: '85px' }} />}
+                    <div style={{ fontSize: '7pt', color: '#374151', fontWeight: '600', marginTop: '2px' }}>امسح للتتبع</div>
                   </td>
                 </tr>
               </tbody>

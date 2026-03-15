@@ -234,8 +234,8 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
           <div className="flex items-center justify-between mb-2 px-2">
             {/* QR Code — Always shown */}
             <div className="flex-shrink-0">
-              <QRCodeSVG value={qrContent} size={56} level="M" includeMargin={false} />
-              <p className="text-[6pt] text-gray-400 mt-0.5">امسح للتحقق</p>
+              <QRCodeSVG value={qrContent} size={80} level="H" includeMargin={true} />
+              <p className="text-[7pt] text-gray-500 mt-1 font-semibold">امسح للتحقق</p>
             </div>
 
             <div className="text-center flex-1 px-3">
@@ -256,7 +256,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 
             {/* Barcode — Always shown */}
             <div className="flex-shrink-0">
-              <Barcode value={barcodeContent} width={1} height={28} fontSize={7} displayValue={true} margin={0} />
+              <Barcode value={barcodeContent} width={1.5} height={40} fontSize={8} displayValue={true} margin={2} />
             </div>
           </div>
           <p className="text-gray-400 text-[7pt]">
