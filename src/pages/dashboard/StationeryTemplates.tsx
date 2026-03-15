@@ -119,16 +119,15 @@ const StationeryTemplates = () => {
 
   const handlePrint = () => {
     if (!printRef.current) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`
+    const htmlContent = `
       <html dir="rtl"><head>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Amiri:wght@400;700&display=swap" rel="stylesheet">
         <style>@page{size:A4;margin:0}body{margin:0;padding:0}*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}</style>
       </head><body>${printRef.current.innerHTML}</body></html>
-    `);
-    printWindow.document.close();
-    setTimeout(() => { printWindow.print(); }, 500);
+    `;
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: `stationery-${selectedTemplate?.name || 'document'}` });
+    });
     logPrintUsage('print');
   };
 

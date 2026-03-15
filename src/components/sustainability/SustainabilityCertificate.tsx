@@ -94,30 +94,13 @@ const SustainabilityCertificate = ({
     toast({ title: "جاري إنشاء الشهادة...", description: "يرجى الانتظار" });
 
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf'),
-      ]);
-      const canvas = await html2canvas(certificateRef.current, {
+      const { PDFService } = await import('@/services/documentService');
+      await PDFService.download(certificateRef.current, {
+        filename: `شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}`,
+        orientation: 'landscape',
+        format: 'a4',
         scale: 3,
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff"
       });
-      
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF("l", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const pageHeight = pdf.internal.pageSize.getHeight();
-      
-      const imgWidth = pageWidth - 20;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      const xPos = 10;
-      const yPos = (pageHeight - imgHeight) / 2;
-      
-      pdf.addImage(imgData, "PNG", xPos, yPos, imgWidth, imgHeight);
-      pdf.save(`شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}.pdf`);
       
       toast({ title: "تم التصدير بنجاح", description: "تم حفظ شهادة PDF" });
     } catch (error) {
