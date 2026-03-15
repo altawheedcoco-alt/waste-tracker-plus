@@ -198,6 +198,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
         filename: opts?.customFilename || opts?.filename || options.filename || 'document',
         orientation: opts?.orientation || options.orientation,
         format: opts?.format || options.format,
+        fitSinglePage: opts?.fitSinglePage ?? options.fitSinglePage,
       };
       await wrap(() => PDFService.download(el, mergedOpts));
       logPrintAction(userId, orgId, 'pdf_download', { filename: mergedOpts.filename });
