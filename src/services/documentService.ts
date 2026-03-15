@@ -127,14 +127,25 @@ export const PDFService = {
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Temporarily constrain to A4 width
+    // Temporarily constrain to A4 width with minimal padding
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '8mm';
+    element.style.padding = '5mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
+    
+    // For fitSinglePage: also reduce font sizes to help fit
+    if (fitSinglePage) {
+      element.style.fontSize = '6.5pt';
+      const allTds = element.querySelectorAll('td, th');
+      allTds.forEach(td => {
+        (td as HTMLElement).style.padding = '2px 4px';
+        (td as HTMLElement).style.fontSize = '6.5pt';
+        (td as HTMLElement).style.lineHeight = '1.2';
+      });
+    }
 
     // Hide no-print elements
     const noPrint = element.querySelectorAll('.no-print');
