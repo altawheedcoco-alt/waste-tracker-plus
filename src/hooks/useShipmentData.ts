@@ -66,9 +66,11 @@ export async function fetchShipmentsWithRelations(
     organizationId?: string;
     status?: string | string[];
     limit?: number;
+    select?: string;
   }
 ): Promise<EnrichedShipment[]> {
-  let query = supabase.from('shipments').select('*');
+  const selectCols = filters?.select || 'id,shipment_number,status,waste_type,waste_description,quantity,unit,pickup_address,delivery_address,created_at,generator_id,transporter_id,recycler_id,driver_id,generator_approval_status,generator_approval_at,generator_rejection_reason,generator_auto_approve_deadline,recycler_approval_status,recycler_approval_at,recycler_rejection_reason,recycler_auto_approve_deadline';
+  let query = supabase.from('shipments').select(selectCols);
 
   if (filters?.organizationId) {
     query = query.or(
@@ -106,32 +108,34 @@ export async function fetchShipmentsWithRelations(
     if (s.driver_id) driverIds.add(s.driver_id);
   });
 
-  // Fetch organizations
-  const orgsMap = new Map<string, ShipmentOrganization>();
-  if (orgIds.size > 0) {
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, email, phone, address, city, representative_name, commercial_register, environmental_license, stamp_url, signature_url, logo_url')
-      .in('id', Array.from(orgIds));
-
-    orgsData?.forEach((org) => orgsMap.set(org.id, org));
-  }
-
-  // Fetch drivers
-  const driversMap = new Map<string, ShipmentDriver>();
-  if (driverIds.size > 0) {
-    const { data: driversData } = await supabase
-      .from('drivers')
-      .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)')
-      .in('id', Array.from(driverIds));
-
-    driversData?.forEach((driver) => {
-      driversMap.set(driver.id, {
-        ...driver,
-        profile: Array.isArray(driver.profile) ? driver.profile[0] : driver.profile,
+  // Fetch organizations AND drivers in parallel
+  const [orgsMap, driversMap] = await Promise.all([
+    (async () => {
+      const map = new Map<string, ShipmentOrganization>();
+      if (orgIds.size === 0) return map;
+      const { data } = await supabase
+        .from('organizations')
+        .select('id,name,email,phone,address,city,representative_name,commercial_register,environmental_license,stamp_url,signature_url,logo_url')
+        .in('id', Array.from(orgIds));
+      data?.forEach((org) => map.set(org.id, org));
+      return map;
+    })(),
+    (async () => {
+      const map = new Map<string, ShipmentDriver>();
+      if (driverIds.size === 0) return map;
+      const { data } = await supabase
+        .from('drivers')
+        .select('id,license_number,vehicle_type,vehicle_plate,profile:profiles(full_name,phone)')
+        .in('id', Array.from(driverIds));
+      data?.forEach((driver) => {
+        map.set(driver.id, {
+          ...driver,
+          profile: Array.isArray(driver.profile) ? driver.profile[0] : driver.profile,
+        });
       });
-    });
-  }
+      return map;
+    })(),
+  ]);
 
   // Enrich shipments
   return shipmentsData.map((shipment) => ({
