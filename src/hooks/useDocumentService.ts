@@ -159,7 +159,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     if (orgName) {
       const watermarkDiv = document.createElement('div');
       watermarkDiv.className = 'dynamic-watermark-overlay';
-      watermarkDiv.innerHTML = generateWatermarkHTML(orgName, userName);
+      watermarkDiv.innerHTML = generateWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode);
       watermarkDiv.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;';
       el.appendChild(watermarkDiv);
       cleanups.push(() => watermarkDiv.remove());
