@@ -491,10 +491,12 @@ const DocumentArchive = () => {
     if (doc.fileUrl) {
       const url = await resolveFileUrl(doc.fileUrl);
       if (url) {
-        const printWindow = window.open(url, '_blank');
-        if (printWindow) {
-          printWindow.addEventListener('load', () => { printWindow.print(); });
-        }
+        import('@/services/documentService').then(({ PrintService }) => {
+          const printWindow = window.open(url, '_blank');
+          if (printWindow) {
+            printWindow.addEventListener('load', () => { printWindow.print(); });
+          }
+        });
         return;
       }
     }

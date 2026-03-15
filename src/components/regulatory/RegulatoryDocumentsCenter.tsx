@@ -357,11 +357,9 @@ const RegulatoryDocumentsCenter = memo(({ targetOrgType }: Props) => {
             </body>
             </html>
           `);
-          printWindow.document.close();
-          printWindow.focus();
-          setTimeout(() => printWindow.print(), 500);
-        }
-      }
+          import('@/services/documentService').then(({ PrintService }) => {
+            PrintService.printHTML(htmlContent, { title: selectedTemplate.name_ar });
+          });
       toast.success('تم إنشاء المستند بنجاح');
       if (selectedTemplate.requires_multi_sign) {
         toast.info('يمكنك إرسال المستند للتوقيع من صندوق التوقيعات', {

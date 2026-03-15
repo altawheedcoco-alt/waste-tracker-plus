@@ -315,10 +315,7 @@ export function printDigitalIdentityCard({ organization, stats, visibility, reso
 </body>
 </html>`;
 
-  const printWindow = window.open('', '_blank');
-  if (printWindow) {
-    printWindow.document.write(html);
-    printWindow.document.close();
-    setTimeout(() => printWindow.print(), 600);
-  }
+  import('@/services/documentService').then(({ PrintService }) => {
+    PrintService.printHTML(html, { title: 'بطاقة الهوية الرقمية' });
+  });
 }

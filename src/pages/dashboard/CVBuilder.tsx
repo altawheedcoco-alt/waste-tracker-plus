@@ -107,8 +107,9 @@ const CVBuilder = () => {
         ${certificates.length > 0 ? `<h2>🏆 الشهادات</h2>${certificates.map(c => `<div class="cert-item">• ${c}</div>`).join('')}` : ''}
       </body></html>
     `);
-    printWindow.document.close();
-    printWindow.print();
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: 'السيرة الذاتية' });
+    });
   };
 
   return (

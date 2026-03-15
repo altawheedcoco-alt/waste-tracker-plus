@@ -85,7 +85,13 @@ export default function FullBrochure() {
   const printRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    if (printRef.current) {
+      import('@/services/documentService').then(({ PrintService }) => {
+        PrintService.printHTML(printRef.current!.innerHTML, { title: 'بروشور المنصة' });
+      });
+    }
+  };
 
   const envSections = sections.filter(s => s.category === 'environment');
   const opsSections = sections.filter(s => s.category === 'operations');
