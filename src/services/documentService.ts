@@ -482,7 +482,7 @@ export const PrintService = {
 
     if (isFullDoc) {
       // For full HTML docs: inject guilloche per-page (skip pages with .no-guilloche)
-      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
+      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>`;
       // Inject a script that adds guilloche filler to each .page that doesn't have .no-guilloche
       const guillocheInjectorScript = `<script>
         window.addEventListener('DOMContentLoaded', function() {
