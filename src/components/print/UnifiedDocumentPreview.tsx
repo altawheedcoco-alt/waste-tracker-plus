@@ -422,12 +422,14 @@ const UnifiedDocumentPreview = ({
 
   const orgName = organization?.name || 'اسم الجهة';
   const userName = profile?.full_name || user?.email || 'المستخدم';
+  const orgClientCode = (organization as any)?.client_code || null;
+  const orgVerificationCode = (organization as any)?.verification_code || null;
 
   const filteredThemes = entityType ? getThemesByEntity(entityType) : PRINT_THEMES;
   const currentTheme = PRINT_THEMES.find(t => t.id === selectedTheme) || PRINT_THEMES[0];
   const currentLayout = LAYOUT_TEMPLATES.find(l => l.id === selectedLayout) || LAYOUT_TEMPLATES[0];
 
-  const watermarkHTML = useMemo(() => generatePrintWatermarkHTML(orgName, userName), [orgName, userName]);
+  const watermarkHTML = useMemo(() => generatePrintWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode), [orgName, userName, orgClientCode, orgVerificationCode]);
 
   const outputConfig: DocumentOutputConfig = {
     themeId: selectedTheme,
