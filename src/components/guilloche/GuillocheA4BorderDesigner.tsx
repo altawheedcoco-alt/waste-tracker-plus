@@ -412,6 +412,10 @@ export default function GuillocheA4BorderDesigner() {
   };
 
   const handlePrintA4 = () => {
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات');
+      return;
+    }
     if (!activeBorder) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -437,11 +441,16 @@ export default function GuillocheA4BorderDesigner() {
           ${svgEl.outerHTML}
           ${generateSecurityOverlayHTML(orgName, activeBorder.color.primary)}
         </div>
+        ${generatePrintWatermarkHTML(orgName, userName)}
       </body>
       </html>
     `);
     printWindow.document.close();
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+
+    if (user?.id && organization?.id) {
+      logPrintAudit({ userId: user.id, orgId: organization.id, action: 'print_guilloche_border', details: { border: activeBorder.name } });
+    }
   };
 
   const gridCols = {
