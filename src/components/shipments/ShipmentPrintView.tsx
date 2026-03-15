@@ -503,7 +503,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={2} style={{ background: '#1e293b', color: '#ffffff', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td>
+                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td>
                 </tr>
                 <tr>
                   <td style={{ background: theme.colors.generatorLight || '#eff6ff', fontWeight: '600', width: '15%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
