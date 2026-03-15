@@ -76,6 +76,16 @@ export function calcFitScale(element: HTMLElement): number {
   return Math.min(scaleX, scaleY, 1);
 }
 
+/**
+ * Calculate the exact scale needed to fit content within A4 page.
+ * Uses the full A4 page dimensions (with internal padding already in the element).
+ */
+function calcFitScaleForPDF(elementHeight: number, elementWidth: number, pageH: number, pageW: number): number {
+  const imgH = (elementHeight * pageW) / elementWidth;
+  if (imgH <= pageH) return 1;
+  return pageH / imgH;
+}
+
 function applyScaling(el: HTMLElement): () => void {
   const scale = calcFitScale(el);
   const orig = { transform: el.style.transform, origin: el.style.transformOrigin, overflow: el.style.overflow };
