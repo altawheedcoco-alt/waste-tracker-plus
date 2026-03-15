@@ -4,7 +4,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { motion, AnimatePresence } from 'framer-motion';
 import GuillocheSecurityOverlay, { generateSecurityOverlayHTML } from './GuillocheSecurityOverlay';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

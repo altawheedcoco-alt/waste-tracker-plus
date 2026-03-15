@@ -25,7 +25,7 @@ import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef, GUILLOCHE_COLOR_PALETTES } from '@/lib/guillochePatternUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 
 // ─── Template Color Schemes ───
 const TEMPLATE_COLORS = [
