@@ -681,11 +681,28 @@ export const PrintService = {
           background: #e5e7eb !important;
           display: flex;
           justify-content: center;
-          padding: 20px 0;
+          padding: 0;
+          margin: 0;
+          min-height: 100vh;
         }
         .page-wrapper {
           box-shadow: 0 4px 24px rgba(0,0,0,0.15);
-          border-radius: 2px;
+          border-radius: 0;
+          width: 100vw;
+          max-width: 210mm;
+          min-height: 100vh;
+          transform-origin: top center;
+        }
+      }
+
+      /* Scale A4 to fit viewport on small screens */
+      @media screen and (max-width: 210mm) {
+        .page-wrapper {
+          width: 100vw !important;
+          min-height: auto !important;
+          transform: scale(calc(100vw / 793.7px));
+          transform-origin: top right;
+          height: calc(297mm * (100vw / 210mm));
         }
       }
 
