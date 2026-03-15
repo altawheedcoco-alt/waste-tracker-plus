@@ -643,7 +643,8 @@ export const PrintService = {
 
       .page-wrapper {
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
+        max-height: 297mm;
         position: relative;
         overflow: hidden;
         background: white;
@@ -674,10 +675,9 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 10mm 12mm;
+        padding: 5mm 8mm;
         box-sizing: border-box;
-        overflow: visible !important;
-        break-inside: auto;
+        overflow: hidden !important;
       }
 
       .no-print { display: none !important; }
@@ -689,18 +689,18 @@ export const PrintService = {
         print-color-adjust: exact !important;
       }
 
-      table { width: 100%; border-collapse: collapse; page-break-inside: auto; background: transparent !important; }
+      table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
       thead { display: table-header-group; background: transparent !important; }
-      tr { page-break-inside: avoid; page-break-after: auto; background: transparent !important; }
-      th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; background: transparent !important; }
+      tr { page-break-inside: avoid; background: transparent !important; }
+      th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
       .print-container, .print-container * { background-color: transparent !important; }
       .print-container table th, .print-container table td { background: transparent !important; }
       .bg-white, .bg-gray-50, .bg-gray-100, [class*="bg-"] { background-color: transparent !important; }
 
-      h1 { font-size: 16pt; margin: 4px 0; }
-      h2 { font-size: 13pt; margin: 3px 0; }
-      h3 { font-size: 11pt; margin: 2px 0; }
-      p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+      h1 { font-size: 12pt; margin: 2px 0; }
+      h2 { font-size: 10pt; margin: 2px 0; }
+      h3 { font-size: 9pt; margin: 1px 0; }
+      p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
 
       @media print {
         html, body {
