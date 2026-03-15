@@ -3,6 +3,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { motion, AnimatePresence } from 'framer-motion';
 import GuillocheSecurityOverlay, { generateSecurityOverlayHTML } from './GuillocheSecurityOverlay';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -344,9 +346,12 @@ const GuillocheA4Border = ({ border, width = 200, height = 283, showContent = fa
 
 // ─── Main Component ───
 export default function GuillocheA4BorderDesigner() {
-  const { organization } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const orgName = organization?.name || 'اسم الجهة';
+  const userName = profile?.full_name || 'المستخدم';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -407,6 +412,10 @@ export default function GuillocheA4BorderDesigner() {
   };
 
   const handlePrintA4 = () => {
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات');
+      return;
+    }
     if (!activeBorder) return;
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
@@ -432,11 +441,16 @@ export default function GuillocheA4BorderDesigner() {
           ${svgEl.outerHTML}
           ${generateSecurityOverlayHTML(orgName, activeBorder.color.primary)}
         </div>
+        ${generatePrintWatermarkHTML(orgName, userName)}
       </body>
       </html>
     `);
     printWindow.document.close();
     setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+
+    if (user?.id && organization?.id) {
+      logPrintAudit({ userId: user.id, orgId: organization.id, action: 'print_guilloche_border', details: { border: activeBorder.name } });
+    }
   };
 
   const gridCols = {

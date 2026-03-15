@@ -23,6 +23,9 @@ import { toast } from 'sonner';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef, GUILLOCHE_COLOR_PALETTES } from '@/lib/guillochePatternUtils';
+import { useAuth } from '@/contexts/AuthContext';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
 
 // ─── Template Color Schemes ───
 const TEMPLATE_COLORS = [
@@ -556,6 +559,11 @@ export type { GuillocheTemplate };
 
 // ─── Main Component ───
 export default function GuillocheTemplateDesigns() {
+  const { organization, profile, user } = useAuth();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
+  const orgName = organization?.name || 'اسم الجهة';
+  const userName = profile?.full_name || 'المستخدم';
   const { getPref, setPref } = useUserPreferences();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -605,6 +613,10 @@ export default function GuillocheTemplateDesigns() {
 
   const handlePrintPreview = () => {
     if (!selectedTemplate) return;
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات');
+      return;
+    }
     const html = `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -628,14 +640,21 @@ export default function GuillocheTemplateDesigns() {
           <div class="content">
             <h1>♻ شهادة إعادة التدوير</h1>
             <p>هذه معاينة للقالب مع محتوى تجريبي</p>
-            <p style="margin-top:30px;font-size:18px;font-weight:bold;">اسم المنشأة</p>
+            <p style="margin-top:30px;font-size:18px;font-weight:bold;">${orgName}</p>
             <p style="margin-top:60px;color:#999;font-size:12px;">رقم الشهادة: RC-2026-001234</p>
           </div>
         </div>
+        ${generatePrintWatermarkHTML(orgName, userName)}
       </body>
       </html>`;
     const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
+    if (user?.id && organization?.id) {
+      logPrintAudit({ userId: user.id, orgId: organization.id, action: 'print_guilloche_template', details: { template: selectedTemplate.name } });
+    }
   };
 
   const gridCols = {

@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef } from '@/lib/guillochePatternUtils';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 const GuillocheA4CombinedPreview = lazy(() => import('@/components/guilloche/GuillocheA4CombinedPreview'));
@@ -355,9 +357,10 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles, organization } = useAuth();
+  const { roles, organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
-  const isAdmin = roles.includes('admin');
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
@@ -1090,7 +1093,7 @@ export default function GuillochePatterns() {
               <Button variant="outline" onClick={() => setDocumentPreviewOpen(false)}>
                 إغلاق
               </Button>
-              {isAdmin && (
+              {canPrint && (
                 <Button
                   className="gap-2"
                   onClick={() => {
@@ -1099,6 +1102,7 @@ export default function GuillochePatterns() {
                     const printWindow = window.open('', '_blank');
                     if (!printWindow) return;
                     const secColor = activePatterns[0]?.colorPalette.primary || '#059669';
+                    const userName = profile?.full_name || 'المستخدم';
                     printWindow.document.write(`
                       <html dir="rtl">
                       <head>
@@ -1116,11 +1120,22 @@ export default function GuillochePatterns() {
                           ${printContent.innerHTML}
                           ${generateSecurityOverlayHTML(orgName, secColor)}
                         </div>
+                        ${generatePrintWatermarkHTML(orgName, userName)}
                       </body>
                       </html>
                     `);
                     printWindow.document.close();
                     setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+
+                    // Audit log
+                    if (user?.id && organization?.id) {
+                      logPrintAudit({
+                        userId: user.id,
+                        orgId: organization.id,
+                        action: 'print_guilloche_pattern',
+                        details: { patterns: activePatterns.map(p => p.name) },
+                      });
+                    }
                   }}
                 >
                   <Printer className="h-4 w-4" />
