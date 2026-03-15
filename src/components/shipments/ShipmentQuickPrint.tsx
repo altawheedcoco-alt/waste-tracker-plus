@@ -8,6 +8,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
+import { normalizeShipment } from '@/lib/supabaseHelpers';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
