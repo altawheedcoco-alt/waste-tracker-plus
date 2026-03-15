@@ -357,9 +357,10 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles, organization } = useAuth();
+  const { roles, organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
-  const isAdmin = roles.includes('admin');
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [selectedColor, setSelectedColor] = useState<string>('all');
@@ -374,8 +375,6 @@ export default function GuillochePatterns() {
 
   // Org name for watermark
   const orgName = organization?.name || 'اسم الجهة';
-  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
-  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
 
   // Saved/used patterns from preferences
   const savedPatternIds: string[] = getPref('guilloche_saved_patterns', []);
