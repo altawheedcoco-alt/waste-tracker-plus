@@ -524,8 +524,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </tbody>
             </table>
 
-            {/* Stamps and Signatures Table */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
+            {/* Stamps and Signatures Table - flex-grow to fill remaining space */}
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
                   <td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td>
