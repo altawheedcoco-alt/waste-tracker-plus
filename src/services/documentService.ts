@@ -198,18 +198,19 @@ export const PDFService = {
         windowWidth: A4_PX.fullWidth,
       });
 
-      const imgW = A4.contentWidth;
+      // Use full page width since padding is already inside the element
+      const imgW = pageW;
 
       if (fitSinglePage) {
         const imgData = canvas.toDataURL('image/jpeg', quality);
         const imgH = (canvas.height * imgW) / canvas.width;
-        const fitScale = Math.min(1, A4.contentHeight / imgH);
-        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW * fitScale, imgH * fitScale);
+        const fitScale = Math.min(1, pageH / imgH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
         return pdf;
       }
 
       // Robust multi-page slicing by exact page pixel height
-      const pageHeightPx = Math.floor((A4.contentHeight * canvas.width) / A4.contentWidth);
+      const pageHeightPx = Math.floor((pageH * canvas.width) / imgW);
       const pageCanvas = document.createElement('canvas');
       const pageCtx = pageCanvas.getContext('2d');
       if (!pageCtx) return pdf;
@@ -229,7 +230,7 @@ export const PDFService = {
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW, imgH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
