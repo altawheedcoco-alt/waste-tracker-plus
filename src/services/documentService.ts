@@ -391,9 +391,9 @@ export const ExcelService = {
 // 3. PRINT SERVICE — CSS Print Media Queries (Vector Text)
 // ═══════════════════════════════════════════════════════════════
 const DEFAULT_PRINT_CSS = `
-  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
 
-  @page { size: A4 portrait; margin: 20mm; }
+  @page { size: A4 portrait; margin: 12mm; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -403,7 +403,8 @@ const DEFAULT_PRINT_CSS = `
   }
 
   html, body {
-    margin: 0; padding: 0;
+    margin: 0;
+    padding: 0;
     background: white !important;
     font-family: 'Cairo', sans-serif !important;
     direction: rtl;
@@ -411,30 +412,46 @@ const DEFAULT_PRINT_CSS = `
     text-rendering: optimizeLegibility !important;
   }
 
+  .guilloche-print-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
   .print-container {
-    width: 170mm; max-width: 170mm;
-    max-height: 257mm;
-    margin: 0 auto; padding: 0;
-    box-sizing: border-box;
-    overflow: hidden !important;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0;
+    overflow: visible !important;
+    break-inside: auto;
   }
 
   .no-print { display: none !important; }
 
-  img { max-width: 100%; height: auto; max-height: 60mm; object-fit: contain; }
+  img, svg, canvas {
+    max-width: 100%;
+    height: auto;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 
   table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+  thead { display: table-header-group; }
   tr { page-break-inside: avoid; page-break-after: auto; }
   th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; }
 
   h1 { font-size: 16pt; margin: 4px 0; }
   h2 { font-size: 13pt; margin: 3px 0; }
   h3 { font-size: 11pt; margin: 2px 0; }
-  p { font-size: 10pt; margin: 2px 0; line-height: 1.4; }
+  p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
 
   @media print {
     body { margin: 0; padding: 0; }
-    .print-container { overflow: hidden !important; }
+    .print-container { overflow: visible !important; }
   }
 `;
 
