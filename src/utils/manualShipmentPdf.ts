@@ -639,7 +639,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
     doc.close();
 
     // Wait for fonts and images to load
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Find all .page divs — each becomes a separate PDF page
     const pages = Array.from(doc.querySelectorAll<HTMLElement>('.page'));
@@ -664,7 +664,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
       page.style.overflow = 'visible';
 
       const canvas = await html2canvas(page, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
@@ -673,7 +673,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
         windowWidth: 794,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       const imgW = CONTENT_W_MM;
       const imgH = (canvas.height * imgW) / canvas.width;
 

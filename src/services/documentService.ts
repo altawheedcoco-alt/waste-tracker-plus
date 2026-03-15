@@ -108,8 +108,8 @@ export const PDFService = {
     const {
       orientation = 'portrait',
       format = 'a4',
-      scale = 2,
-      quality = 0.92,
+      scale = 1.5,
+      quality = 0.85,
       fitSinglePage = false,
     } = opts;
 
@@ -133,22 +133,26 @@ export const PDFService = {
     let cleanupScale: (() => void) | null = null;
 
     try {
-      // Wait for images
+      // Wait for incomplete images (fast timeout)
       const imgs = Array.from(element.querySelectorAll('img'));
-      await Promise.allSettled(
-        imgs.filter(i => !i.complete).map(i =>
-          new Promise<void>(r => {
-            i.onload = () => r();
-            i.onerror = () => r();
-            setTimeout(r, 3000);
-          })
-        )
-      );
-      await new Promise(r => setTimeout(r, 180));
+      const pending = imgs.filter(i => !i.complete);
+      if (pending.length > 0) {
+        await Promise.allSettled(
+          pending.map(i =>
+            new Promise<void>(r => {
+              i.onload = () => r();
+              i.onerror = () => r();
+              setTimeout(r, 1500);
+            })
+          )
+        );
+      }
+      // Minimal reflow wait
+      await new Promise(r => setTimeout(r, 50));
 
       if (fitSinglePage) {
         cleanupScale = applyScaling(element);
-        await new Promise(r => setTimeout(r, 120));
+        await new Promise(r => setTimeout(r, 30));
       }
 
       // Smart section-based capture (prevents cutting text lines between pages)
@@ -478,7 +482,7 @@ export const PrintService = {
 
     if (isFullDoc) {
       // For full HTML docs: inject guilloche per-page (skip pages with .no-guilloche)
-      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
+      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>`;
       // Inject a script that adds guilloche filler to each .page that doesn't have .no-guilloche
       const guillocheInjectorScript = `<script>
         window.addEventListener('DOMContentLoaded', function() {
@@ -505,8 +509,8 @@ export const PrintService = {
 <head>
   <meta charset="UTF-8">
   <title>${opts.title || 'طباعة الوثيقة'}</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     @page { size: A4 portrait; margin: 12mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
@@ -519,7 +523,7 @@ export const PrintService = {
 <body>
   ${textFillerHTML}
   <div style="position:relative;z-index:2;">${htmlContent}</div>
-  <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>
+  <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>
 </body>
 </html>`);
       win.document.close();
@@ -574,7 +578,6 @@ export const PrintService = {
     ` : '';
 
     const printCSS = `
-      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&family=Noto+Sans+Egyptian+Hieroglyphs&display=swap');
 
       @page {
         size: A4 portrait;
@@ -704,6 +707,7 @@ export const PrintService = {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>طباعة الوثيقة</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>${printCSS}</style>
   ${fitScript}
 </head>
@@ -721,9 +725,9 @@ export const PrintService = {
       window.print();
     }
     window.addEventListener('load', function() {
-      setTimeout(doPrint, 600);
+      setTimeout(doPrint, 200);
     });
-    setTimeout(doPrint, 2500);
+    setTimeout(doPrint, 1200);
   </script>
 </body>
 </html>`);
