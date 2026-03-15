@@ -524,10 +524,13 @@ export const PrintService = {
     const win = window.open('', '_blank');
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
-    // === LAYER 1: Guilloche background ===
+    // === LAYER 1a: Guilloche background ===
     const guillocheLayer = backgroundHTML
       ? `<div class="layer-guilloche" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${backgroundHTML}</div>`
       : '';
+
+    // === LAYER 1b: Guilloche text filler threads (trilingual) ===
+    const guillocheTextFiller = generateGuillocheTextFillerHTML();
 
     // === LAYER 2: Watermark — injected via backgroundHTML which may contain watermark ===
     // (Watermark HTML is appended to backgroundHTML by useDocumentService)
