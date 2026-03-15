@@ -200,7 +200,14 @@ const TechnicalReportsPanel = memo(({ assignments }: TechnicalReportsPanelProps)
               )}
 
               <div className="flex gap-2 justify-end">
-                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => window.print()}>
+                <Button variant="outline" size="sm" className="gap-1.5" onClick={() => {
+                    const el = document.querySelector('[data-emissions-report]') as HTMLElement;
+                    if (el) {
+                      import('@/services/documentService').then(({ PrintService }) => {
+                        PrintService.printHTML(el.innerHTML, { title: 'التقرير الفني' });
+                      });
+                    }
+                  }}>
                   <Printer className="w-4 h-4" />طباعة التقرير
                 </Button>
               </div>

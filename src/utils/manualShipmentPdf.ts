@@ -547,36 +547,9 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
 export async function generateManualShipmentPDF(form: ManualShipmentData, options?: PdfOptions) {
   const htmlContent = generateFullHTML(form, options);
-
-  const printWindow = window.open('', '_blank', 'width=800,height=600');
-  if (!printWindow) {
-    const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.left = '-9999px';
-    iframe.style.width = '794px';
-    iframe.style.height = '1123px';
-    document.body.appendChild(iframe);
-    const doc = iframe.contentDocument || iframe.contentWindow?.document;
-    if (doc) {
-      doc.open();
-      doc.write(htmlContent);
-      doc.close();
-      setTimeout(() => {
-        iframe.contentWindow?.print();
-        setTimeout(() => document.body.removeChild(iframe), 1000);
-      }, 1000);
-    }
-    return;
-  }
-
-  printWindow.document.open();
-  printWindow.document.write(htmlContent);
-  printWindow.document.close();
-
-  printWindow.onload = () => {
-    setTimeout(() => { printWindow.print(); }, 800);
-  };
-  setTimeout(() => { printWindow.print(); }, 2000);
+  
+  const { PrintService } = await import('@/services/documentService');
+  PrintService.printHTML(htmlContent, { title: 'نموذج شحنة يدوي' });
 }
 
 /**

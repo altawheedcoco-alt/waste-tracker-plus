@@ -164,7 +164,9 @@ const ManualShipmentForm = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(document.querySelector('.manual-shipment-form')?.innerHTML || '', { title: 'نموذج شحنة يدوي' });
+    });
   };
 
   const wasteTypes = [

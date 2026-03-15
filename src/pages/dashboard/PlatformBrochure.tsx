@@ -348,7 +348,11 @@ export default function PlatformBrochure() {
   const printRef = useRef<HTMLDivElement>(null);
 
   const handlePrint = () => {
-    window.print();
+    if (printRef.current) {
+      import('@/services/documentService').then(({ PrintService }) => {
+        PrintService.printHTML(printRef.current!.innerHTML, { title: 'بروشور المنصة' });
+      });
+    }
   };
 
   const totalFeatures = [...environmentSections, ...operationSections].reduce((sum, s) => sum + s.features.length, 0);

@@ -19,9 +19,7 @@ const CarbonCertificateView = ({ data, type, onBack, onIssue }: CarbonCertificat
 
   const handlePrint = () => {
     if (!printRef.current) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`
+    const htmlContent = `
       <html dir="rtl"><head><title>شهادة البصمة الكربونية</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -29,9 +27,10 @@ const CarbonCertificateView = ({ data, type, onBack, onIssue }: CarbonCertificat
         @media print { body { padding: 10mm; } }
       </style></head>
       <body>${printRef.current.innerHTML}</body></html>
-    `);
-    printWindow.document.close();
-    setTimeout(() => { printWindow.print(); printWindow.close(); }, 500);
+    `;
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: 'شهادة البصمة الكربونية' });
+    });
   };
 
   const isProduct = type === 'product';

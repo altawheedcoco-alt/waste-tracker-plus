@@ -619,12 +619,12 @@ const NotificationDetailDialog = ({
                   size="sm"
                   className="gap-2 border-emerald-300 text-emerald-700 hover:bg-emerald-100"
                   onClick={() => {
-                    const printWindow = window.open(notification.pdf_url!, '_blank');
-                    if (printWindow) {
-                      printWindow.onload = () => {
-                        printWindow.print();
-                      };
-                    }
+                    import('@/services/documentService').then(({ PrintService }) => {
+                      const printWindow = window.open(notification.pdf_url!, '_blank');
+                      if (printWindow) {
+                        printWindow.addEventListener('load', () => { printWindow.print(); });
+                      }
+                    });
                   }}
                 >
                   <Printer className="w-4 h-4" />

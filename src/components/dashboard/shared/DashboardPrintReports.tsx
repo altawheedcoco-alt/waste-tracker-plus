@@ -182,15 +182,13 @@ const DashboardPrintReports = memo(() => {
       }
     }
 
-    const printWindow = window.open('', '_blank', type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      setTimeout(() => { printWindow.print(); setIsPrinting(false); }, 500);
-    } else {
-      toast.error('يرجى السماح بالنوافذ المنبثقة للطباعة');
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(html, { 
+        title: 'تقرير طباعة',
+        windowFeatures: type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100',
+      });
       setIsPrinting(false);
-    }
+    }).catch(() => setIsPrinting(false));
 
     // Audit log
     if (user?.id && orgId) {

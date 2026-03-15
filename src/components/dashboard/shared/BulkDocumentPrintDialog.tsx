@@ -463,12 +463,9 @@ ${generateDigitalVerificationStamp({
 </body>
 </html>`;
 
-      const printWindow = window.open('', '_blank', 'width=900,height=700');
-      if (printWindow) {
-        printWindow.document.write(html);
-        printWindow.document.close();
-        setTimeout(() => printWindow.print(), 500);
-      }
+      import('@/services/documentService').then(({ PrintService }) => {
+        PrintService.printHTML(html, { title: 'تقرير مجمع', windowFeatures: 'width=900,height=700' });
+      });
 
       toast.success('تم تجهيز التقرير للطباعة');
     } catch (error) {

@@ -131,18 +131,10 @@ export default function HRSelfService() {
       default: return;
     }
 
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      printWindow.document.write(html);
-      printWindow.document.close();
-      setTimeout(() => {
-        printWindow.print();
-        setPrintingDoc(null);
-      }, 500);
-    } else {
-      toast.error('تعذر فتح نافذة الطباعة');
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(html, { title: key });
       setPrintingDoc(null);
-    }
+    }).catch(() => setPrintingDoc(null));
 
     setDocDialog(null);
     setTargetEntity('');

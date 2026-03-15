@@ -30,11 +30,7 @@ const ComplianceCertificateView = ({ certificate, open, onClose }: ComplianceCer
   const verifyUrl = `${window.location.origin}/verify?code=${certificate.verification_code}`;
 
   const handlePrint = () => {
-    const content = printRef.current;
-    if (!content) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) { toast.error('يرجى السماح بالنوافذ المنبثقة'); return; }
-    printWindow.document.write(`
+    const htmlContent = `
       <html dir="rtl"><head><title>شهادة امتثال - ${certificate.certificate_number}</title>
       <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
@@ -92,9 +88,10 @@ const ComplianceCertificateView = ({ certificate, open, onClose }: ComplianceCer
         </div>
       </div>
       </body></html>
-    `);
-    printWindow.document.close();
-    setTimeout(() => { printWindow.print(); }, 500);
+    `;
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: `شهادة امتثال - ${certificate.certificate_number}` });
+    });
   };
 
   return (

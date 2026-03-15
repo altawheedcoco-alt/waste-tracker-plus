@@ -171,18 +171,12 @@ const ESGReportWidget = () => {
     setGenerating(true);
     try {
       const { useDocumentService } = await import('@/hooks/useDocumentService');
-      // Generate a printable ESG report from the widget content
-      const reportEl = document.querySelector('[data-esg-report]');
+      const reportEl = document.querySelector('[data-esg-report]') as HTMLElement;
       if (reportEl) {
-        const { jsPDF } = await import('jspdf');
-        const html2canvas = (await import('html2canvas')).default;
-        const canvas = await html2canvas(reportEl as HTMLElement, { scale: 2 });
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const imgData = canvas.toDataURL('image/png');
-        const pdfW = pdf.internal.pageSize.getWidth();
-        const pdfH = (canvas.height * pdfW) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfW, pdfH);
-        pdf.save(`ESG_Report_${organization?.name || 'org'}_${period}m.pdf`);
+        const { PDFService } = await import('@/services/documentService');
+        await PDFService.download(reportEl, {
+          filename: `ESG_Report_${organization?.name || 'org'}_${period}m`,
+        });
         toast.success('تم توليد تقرير الاستدامة البيئية بنجاح');
       } else {
         toast.error('لم يتم العثور على محتوى التقرير');

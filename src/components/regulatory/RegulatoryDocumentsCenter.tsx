@@ -252,8 +252,6 @@ const RegulatoryDocumentsCenter = memo(({ targetOrgType }: Props) => {
     setTimeout(() => {
       setGenerating(false);
       if (printRef.current) {
-        const printWindow = window.open('', '_blank');
-        if (printWindow) {
           const fieldsToRender = selectedTemplate.sections
             ? selectedTemplate.sections.flatMap(s => s.fields)
             : selectedTemplate.fields;
@@ -294,7 +292,7 @@ const RegulatoryDocumentsCenter = memo(({ targetOrgType }: Props) => {
             treater: 'جهة المعالجة', sender: 'المُرسل', client: 'العميل', applicant: 'مقدم الطلب',
           };
 
-          printWindow.document.write(`
+          const htmlContent = `
             <!DOCTYPE html>
             <html dir="rtl" lang="ar">
             <head>
@@ -356,11 +354,10 @@ const RegulatoryDocumentsCenter = memo(({ targetOrgType }: Props) => {
               ` : ''}
             </body>
             </html>
-          `);
-          printWindow.document.close();
-          printWindow.focus();
-          setTimeout(() => printWindow.print(), 500);
-        }
+          `;
+          import('@/services/documentService').then(({ PrintService }) => {
+            PrintService.printHTML(htmlContent, { title: selectedTemplate.title });
+          });
       }
       toast.success('تم إنشاء المستند بنجاح');
       if (selectedTemplate.requires_multi_sign) {

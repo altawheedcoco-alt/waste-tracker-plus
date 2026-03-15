@@ -461,6 +461,50 @@ export const PrintService = {
     this._doPrint(element, '', opts);
   },
 
+  /**
+   * Print raw HTML string in a new window with unified A4 styling.
+   * This is the centralized method — ALL components should use this
+   * instead of manual window.open() + window.print().
+   */
+  printHTML(htmlContent: string, opts: { title?: string; windowFeatures?: string; customCSS?: string } = {}): void {
+    const win = window.open('', '_blank', opts.windowFeatures);
+    if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
+
+    // Wrap in unified print structure if not already a full HTML doc
+    const isFullDoc = htmlContent.trim().toLowerCase().startsWith('<!doctype') || htmlContent.trim().toLowerCase().startsWith('<html');
+    
+    if (isFullDoc) {
+      // Inject dedup print script
+      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
+      const injected = htmlContent.replace('</body>', `${dedupScript}</body>`);
+      win.document.open();
+      win.document.write(injected);
+      win.document.close();
+    } else {
+      win.document.write(`<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>${opts.title || 'طباعة الوثيقة'}</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+    @page { size: A4 portrait; margin: 12mm; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; }
+    table { background: transparent !important; }
+    tr, th, td { background: transparent !important; }
+    ${opts.customCSS || ''}
+  </style>
+</head>
+<body>
+  ${htmlContent}
+  <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>
+</body>
+</html>`);
+      win.document.close();
+    }
+  },
+
   /** Print with guilloche background HTML injected before the content */
   printWithBackground(element: HTMLElement, backgroundHTML: string, opts: PrintOptions = {}): void {
     this._doPrint(element, backgroundHTML, opts);
