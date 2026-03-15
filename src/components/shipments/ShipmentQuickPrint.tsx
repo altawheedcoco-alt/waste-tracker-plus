@@ -554,8 +554,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               </tbody>
             </table>
 
-            {/* Stamps and Signatures Table */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
+            {/* Stamps and Signatures Table - flex-grow to fill remaining space */}
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
                   <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
