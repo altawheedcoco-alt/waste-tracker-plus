@@ -70,8 +70,8 @@ export interface UseDocumentServiceOptions {
 }
 
 // ─── Dynamic Watermark Generator ─────────────────────────────
-function generateWatermarkHTML(orgName: string, userName: string): string {
-  return generatePrintWatermarkHTML(orgName, userName);
+function generateWatermarkHTML(orgName: string, userName: string, orgClientCode?: string | null, orgVerificationCode?: string | null): string {
+  return generatePrintWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode);
 }
 
 // ─── Print watermark CSS for print window ────────────────────
