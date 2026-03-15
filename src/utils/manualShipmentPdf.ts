@@ -1,4 +1,5 @@
 import { ManualShipmentData, WasteItem } from '@/hooks/useManualShipmentDraft';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 // PDF generated via unified PDFService
 
 const wasteTypeLabels: Record<string, string> = {
