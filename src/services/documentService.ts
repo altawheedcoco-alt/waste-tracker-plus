@@ -109,8 +109,12 @@ export const PDFService = {
       format = 'a4',
       scale = 2,
       quality = 0.92,
-      fitSinglePage = true,
+      fitSinglePage = false,
     } = opts;
+
+    const pdf = new jsPDF({ orientation, unit: 'mm', format, compress: true });
+    const pageW = pdf.internal.pageSize.getWidth();
+    const pageH = pdf.internal.pageSize.getHeight();
 
     // Temporarily constrain to A4 width
     const origCSS = element.style.cssText;
@@ -123,63 +127,115 @@ export const PDFService = {
 
     // Hide no-print elements
     const noPrint = element.querySelectorAll('.no-print');
-    noPrint.forEach(el => (el as HTMLElement).style.display = 'none');
+    noPrint.forEach(el => ((el as HTMLElement).style.display = 'none'));
 
-    // Wait for images
-    const imgs = Array.from(element.querySelectorAll('img'));
-    await Promise.allSettled(
-      imgs.filter(i => !i.complete).map(i =>
-        new Promise<void>(r => { i.onload = () => r(); i.onerror = () => r(); setTimeout(r, 3000); })
-      )
-    );
-    await new Promise(r => setTimeout(r, 200));
-
-    // Apply single-page scaling
     let cleanupScale: (() => void) | null = null;
-    if (fitSinglePage) {
-      cleanupScale = applyScaling(element);
-      await new Promise(r => setTimeout(r, 100));
-    }
 
-    const canvas = await html2canvas(element, {
-      scale,
-      useCORS: true,
-      allowTaint: false,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: A4_PX.fullWidth,
-      windowWidth: A4_PX.fullWidth,
-    });
+    try {
+      // Wait for images
+      const imgs = Array.from(element.querySelectorAll('img'));
+      await Promise.allSettled(
+        imgs.filter(i => !i.complete).map(i =>
+          new Promise<void>(r => {
+            i.onload = () => r();
+            i.onerror = () => r();
+            setTimeout(r, 3000);
+          })
+        )
+      );
+      await new Promise(r => setTimeout(r, 180));
 
-    const pdf = new jsPDF({ orientation, unit: 'mm', format, compress: true });
-    const pageW = pdf.internal.pageSize.getWidth();
-    const pageH = pdf.internal.pageSize.getHeight();
-    const imgData = canvas.toDataURL('image/jpeg', quality);
-    const imgW = A4.contentWidth;
-    const imgH = (canvas.height * imgW) / canvas.width;
-
-    if (fitSinglePage || imgH <= A4.contentHeight) {
-      const fitScale = Math.min(1, A4.contentHeight / imgH);
-      pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW * fitScale, imgH * fitScale);
-    } else {
-      let left = imgH;
-      let pos = 0;
-      pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW, imgH);
-      left -= A4.contentHeight;
-      while (left > 0) {
-        pos = -(imgH - left);
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin + pos, imgW, imgH);
-        left -= A4.contentHeight;
+      if (fitSinglePage) {
+        cleanupScale = applyScaling(element);
+        await new Promise(r => setTimeout(r, 120));
       }
+
+      // Smart section-based capture (prevents cutting text lines between pages)
+      if (!fitSinglePage) {
+        const sectionNodes = Array.from(element.querySelectorAll<HTMLElement>('[data-pdf-section]'));
+        if (sectionNodes.length > 0) {
+          let currentY = A4.margin;
+
+          for (const section of sectionNodes) {
+            const sectionCanvas = await html2canvas(section, {
+              scale,
+              useCORS: true,
+              allowTaint: false,
+              backgroundColor: '#ffffff',
+              logging: false,
+            });
+
+            const imgW = A4.contentWidth;
+            const imgH = (sectionCanvas.height * imgW) / sectionCanvas.width;
+            const remaining = pageH - A4.margin - currentY;
+
+            if (imgH > remaining && currentY > A4.margin) {
+              pdf.addPage();
+              currentY = A4.margin;
+            }
+
+            const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
+            pdf.addImage(imgData, 'JPEG', A4.margin, currentY, imgW, imgH);
+            currentY += imgH + 2;
+          }
+
+          return pdf;
+        }
+      }
+
+      const canvas = await html2canvas(element, {
+        scale,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: A4_PX.fullWidth,
+        windowWidth: A4_PX.fullWidth,
+      });
+
+      const imgW = A4.contentWidth;
+
+      if (fitSinglePage) {
+        const imgData = canvas.toDataURL('image/jpeg', quality);
+        const imgH = (canvas.height * imgW) / canvas.width;
+        const fitScale = Math.min(1, A4.contentHeight / imgH);
+        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW * fitScale, imgH * fitScale);
+        return pdf;
+      }
+
+      // Robust multi-page slicing by exact page pixel height
+      const pageHeightPx = Math.floor((A4.contentHeight * canvas.width) / A4.contentWidth);
+      const pageCanvas = document.createElement('canvas');
+      const pageCtx = pageCanvas.getContext('2d');
+      if (!pageCtx) return pdf;
+
+      pageCanvas.width = canvas.width;
+
+      let offsetY = 0;
+      let pageIndex = 0;
+
+      while (offsetY < canvas.height) {
+        const sliceHeight = Math.min(pageHeightPx, canvas.height - offsetY);
+        pageCanvas.height = sliceHeight;
+        pageCtx.clearRect(0, 0, canvas.width, sliceHeight);
+        pageCtx.drawImage(canvas, 0, offsetY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+
+        const imgData = pageCanvas.toDataURL('image/jpeg', quality);
+        const imgH = (sliceHeight * imgW) / canvas.width;
+
+        if (pageIndex > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', A4.margin, A4.margin, imgW, imgH);
+
+        offsetY += sliceHeight;
+        pageIndex += 1;
+      }
+
+      return pdf;
+    } finally {
+      if (cleanupScale) cleanupScale();
+      element.style.cssText = origCSS;
+      noPrint.forEach(el => ((el as HTMLElement).style.display = ''));
     }
-
-    // Cleanup
-    if (cleanupScale) cleanupScale();
-    element.style.cssText = origCSS;
-    noPrint.forEach(el => (el as HTMLElement).style.display = '');
-
-    return pdf;
   },
 
   /** Generate and download PDF */
