@@ -138,8 +138,8 @@ const TermsBackPage = () => {
         </div>
         <QRCodeSVG
           value={`${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/platform-terms?v=${POLICY_VERSION}`}
-          size={55}
-          level="M"
+          size={75}
+          level="H"
         />
       </div>
 
