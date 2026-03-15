@@ -195,10 +195,13 @@ function BorderLayer({ border, width, height }: { border: BorderConfig; width: n
 
 // ─── Main Combined Preview ───
 export default function GuillocheA4CombinedPreview() {
-  const { organization } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { getPref } = useUserPreferences();
   const { savedPatterns, bgColor, hasBackground } = useGuillocheBackground();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const orgName = organization?.name || 'اسم الجهة';
+  const userName = profile?.full_name || 'المستخدم';
   const previewRef = useRef<HTMLDivElement>(null);
 
   const activeBorder: BorderConfig | null = getPref('guilloche_document_border', null);
@@ -233,12 +236,17 @@ export default function GuillocheA4CombinedPreview() {
           ${el.innerHTML}
           ${generateSecurityOverlayHTML(orgName, secColor)}
         </div>
+        ${generatePrintWatermarkHTML(orgName, userName)}
       </body>
       </html>
     `;
-  }, [orgName, secColor]);
+  }, [orgName, secColor, userName]);
 
   const handlePrint = () => {
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات');
+      return;
+    }
     const html = generatePrintHTML();
     if (!html) return;
     const w = window.open('', '_blank');
@@ -246,6 +254,9 @@ export default function GuillocheA4CombinedPreview() {
     w.document.write(html);
     w.document.close();
     setTimeout(() => { w.print(); w.close(); }, 500);
+    if (user?.id && organization?.id) {
+      logPrintAudit({ userId: user.id, orgId: organization.id, action: 'print_guilloche_combined' });
+    }
   };
 
   const handlePreviewWindow = () => {
