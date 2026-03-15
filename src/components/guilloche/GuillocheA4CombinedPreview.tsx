@@ -310,10 +310,10 @@ export default function GuillocheA4CombinedPreview() {
       </div>
 
       {/* A4 Preview */}
-      <div className="flex justify-center">
+      <div className="flex justify-center overflow-x-auto pb-2">
         <div
           ref={previewRef}
-          className="relative border-2 shadow-2xl rounded-lg overflow-hidden"
+          className="relative border-2 shadow-2xl rounded-lg overflow-hidden min-w-[320px]"
           style={{
             width: '100%',
             maxWidth: `${previewWidth}px`,
