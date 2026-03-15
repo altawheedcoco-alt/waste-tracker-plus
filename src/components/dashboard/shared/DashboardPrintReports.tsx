@@ -182,12 +182,13 @@ const DashboardPrintReports = memo(() => {
       }
     }
 
-    const { PrintService } = await import('@/services/documentService');
-    PrintService.printHTML(html, { 
-      title: 'تقرير طباعة',
-      windowFeatures: type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100',
-    });
-    setIsPrinting(false);
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(html, { 
+        title: 'تقرير طباعة',
+        windowFeatures: type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100',
+      });
+      setIsPrinting(false);
+    }).catch(() => setIsPrinting(false));
 
     // Audit log
     if (user?.id && orgId) {
