@@ -564,7 +564,8 @@ export default function GuillocheTemplateDesigns() {
   const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const orgName = organization?.name || 'اسم الجهة';
   const userName = profile?.full_name || 'المستخدم';
-  const { getPref, setPref } = useUserPreferences();
+  const { getPref } = useUserPreferences();
+  const { setTemplateBackground, clearDocumentBackground } = useGuillocheBackground();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [selectedColor, setSelectedColor] = useState('all');
@@ -593,15 +594,14 @@ export default function GuillocheTemplateDesigns() {
   const visibleTemplates = useMemo(() => filteredTemplates.slice(0, visibleCount), [filteredTemplates, visibleCount]);
 
   const handleApply = (template: GuillocheTemplate) => {
-    setPref('guilloche_active_template', template.id);
-    setPref('guilloche_active_template_data', template);
+    const html = generateTemplateHTML(template, 595, 842);
+    setTemplateBackground(template.id, html, template.colorScheme.bg);
     setActiveTemplateId(template.id);
-    toast.success(`تم تطبيق "${template.name}" كقالب للمستندات`);
+    toast.success(`تم تطبيق "${template.name}" كخلفية لجميع المستندات المطبوعة`);
   };
 
   const handleClear = () => {
-    setPref('guilloche_active_template', null);
-    setPref('guilloche_active_template_data', null);
+    clearDocumentBackground();
     setActiveTemplateId(null);
     toast.info('تم إلغاء القالب - سيتم استخدام الإعدادات الأخرى');
   };
