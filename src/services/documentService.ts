@@ -226,8 +226,18 @@ export const PDFService = {
       if (fitSinglePage) {
         const imgData = canvas.toDataURL('image/jpeg', quality);
         const imgH = (canvas.height * imgW) / canvas.width;
-        const fitScale = Math.min(1, pageH / imgH);
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
+        if (imgH <= pageH) {
+          // Content fits naturally — place at top
+          pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        } else {
+          // Content overflows — scale down to fit exactly in one page
+          const fitScale = pageH / imgH;
+          const scaledW = imgW * fitScale;
+          const scaledH = pageH;
+          // Center horizontally if scaled down
+          const offsetX = (pageW - scaledW) / 2;
+          pdf.addImage(imgData, 'JPEG', Math.max(0, offsetX), 0, scaledW, scaledH);
+        }
         return pdf;
       }
 
