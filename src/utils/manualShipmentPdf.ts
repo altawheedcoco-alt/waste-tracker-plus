@@ -1,4 +1,5 @@
 import { ManualShipmentData, WasteItem } from '@/hooks/useManualShipmentDraft';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 // PDF generated via unified PDFService
 
 const wasteTypeLabels: Record<string, string> = {
@@ -84,6 +85,13 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   const timeNow = new Date().toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
   const verificationCode = `iRC-${(form.shipment_number || 'DRAFT').replace(/[^a-zA-Z0-9]/g, '')}-${Date.now().toString(36).toUpperCase()}`;
   const qrUrl = encodeURIComponent(`https://irecycle21.lovable.app/verify/${verificationCode}`);
+
+  // Deterministic role-based tagline — stays the same for the same shipment
+  const shipmentSeed = form.shipment_number || form.id || 'DRAFT';
+  const destRole = form.destination_type === 'disposal' ? 'disposal' as const : 'recycler' as const;
+  const taglineGenerator = generateRoleTagline('generator', shipmentSeed);
+  const taglineTransporter = generateRoleTagline('transporter', shipmentSeed);
+  const taglineDestination = generateRoleTagline(destRole, shipmentSeed);
 
   const partyTable = (title: string, name: string, addr: string, phone: string, email: string, lic: string, cr: string, tax: string, rep: string) => `
     <table class="classic">
@@ -263,6 +271,28 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   }
   .footer .r { display: table-cell; text-align: right; }
   .footer .l { display: table-cell; text-align: left; width: 100px; }
+  .tagline-box {
+    margin-top: 4px;
+    padding: 4px 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: rgba(240,253,244,0.4);
+    font-size: 7.5px;
+    line-height: 1.6;
+    color: #374151;
+    text-align: center;
+    font-family: 'Cairo', sans-serif;
+  }
+  .tagline-box .tagline-role {
+    font-size: 6.5px;
+    color: #059669;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+  .tagline-box .tagline-text {
+    font-style: italic;
+    color: #1f2937;
+  }
 
   /* Terms page */
   .terms-body { font-size: 9px; line-height: 1.9; }
@@ -425,6 +455,26 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
         <div style="font-size:6px;font-weight:700;">iRecycle</div>
         <div style="font-size:5px;color:#888;">مصدّق</div>
         <div style="font-size:5px;">${dateNow}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Role-based taglines -->
+  <div class="tagline-box">
+    <div style="display:table;width:100%;border-collapse:separate;border-spacing:4px 2px;">
+      <div style="display:table-row;">
+        <div style="display:table-cell;width:33%;vertical-align:top;padding:2px 4px;border-left:1px solid #e5e7eb;">
+          <div class="tagline-role">🏭 رسالة للمولّد</div>
+          <div class="tagline-text">${taglineGenerator}</div>
+        </div>
+        <div style="display:table-cell;width:33%;vertical-align:top;padding:2px 4px;border-left:1px solid #e5e7eb;">
+          <div class="tagline-role">🚛 رسالة للناقل</div>
+          <div class="tagline-text">${taglineTransporter}</div>
+        </div>
+        <div style="display:table-cell;width:34%;vertical-align:top;padding:2px 4px;">
+          <div class="tagline-role">${form.destination_type === 'disposal' ? '🏗️ رسالة لجهة التخلص' : '♻ رسالة للمُدوّر'}</div>
+          <div class="tagline-text">${taglineDestination}</div>
+        </div>
       </div>
     </div>
   </div>
