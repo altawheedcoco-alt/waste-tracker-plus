@@ -159,7 +159,7 @@ export const PDFService = {
       if (!fitSinglePage) {
         const sectionNodes = Array.from(element.querySelectorAll<HTMLElement>('[data-pdf-section]'));
         if (sectionNodes.length > 0) {
-          let currentY = A4.margin;
+          let currentY = 0;
 
           for (const section of sectionNodes) {
             const sectionCanvas = await html2canvas(section, {
@@ -170,17 +170,17 @@ export const PDFService = {
               logging: false,
             });
 
-            const imgW = A4.contentWidth;
+            const imgW = pageW;
             const imgH = (sectionCanvas.height * imgW) / sectionCanvas.width;
-            const remaining = pageH - A4.margin - currentY;
+            const remaining = pageH - currentY;
 
-            if (imgH > remaining && currentY > A4.margin) {
+            if (imgH > remaining && currentY > 0) {
               pdf.addPage();
-              currentY = A4.margin;
+              currentY = 0;
             }
 
             const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
-            pdf.addImage(imgData, 'JPEG', A4.margin, currentY, imgW, imgH);
+            pdf.addImage(imgData, 'JPEG', 0, currentY, imgW, imgH);
             currentY += imgH + 2;
           }
 

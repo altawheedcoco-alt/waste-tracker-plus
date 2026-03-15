@@ -156,6 +156,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     orientation: 'portrait',
     format: 'a4',
     scale: 2,
+    fitSinglePage: true,
   });
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
