@@ -346,9 +346,12 @@ const GuillocheA4Border = ({ border, width = 200, height = 283, showContent = fa
 
 // ─── Main Component ───
 export default function GuillocheA4BorderDesigner() {
-  const { organization } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
   const orgName = organization?.name || 'اسم الجهة';
+  const userName = profile?.full_name || 'المستخدم';
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
