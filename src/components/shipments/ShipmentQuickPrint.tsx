@@ -342,7 +342,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                     {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '45px', width: '100%' }} />}
-                    <div style={{ fontSize: '7pt', color: '#374151', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
+                    <div style={{ fontSize: '7pt', color: '#000000', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                     <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
