@@ -523,7 +523,7 @@ export const PrintService = {
 <body>
   ${textFillerHTML}
   <div style="position:relative;z-index:2;">${htmlContent}</div>
-  <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>
+  <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>
 </body>
 </html>`);
       win.document.close();
