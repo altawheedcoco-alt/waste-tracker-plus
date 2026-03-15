@@ -64,6 +64,7 @@ export interface UseDocumentServiceOptions {
 export const useDocumentService = (options: UseDocumentServiceOptions = {}): UseDocumentServiceReturn => {
   const [isProcessing, setIsProcessing] = useState(false);
   const processingRef = useRef(false);
+  const { backgroundHTML, bgColor, hasBackground } = useGuillocheBackground();
 
   const wrap = useCallback(async <T>(fn: () => Promise<T>): Promise<T | undefined> => {
     if (processingRef.current) return undefined;
@@ -76,6 +77,43 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
       setIsProcessing(false);
     }
   }, []);
+
+  /** Inject guilloche background overlay into an element, returns cleanup fn */
+  const injectGuillocheOverlay = useCallback((el: HTMLElement): (() => void) => {
+    if (!hasBackground || !backgroundHTML) return () => {};
+    // Set position relative so absolute overlay works
+    const origPosition = el.style.position;
+    const origBg = el.style.backgroundColor;
+    if (!origPosition || origPosition === 'static') {
+      el.style.position = 'relative';
+    }
+    if (bgColor) {
+      el.style.backgroundColor = bgColor;
+    }
+    // Insert overlay as first child
+    const overlay = document.createElement('div');
+    overlay.className = 'guilloche-bg-overlay';
+    overlay.innerHTML = backgroundHTML;
+    overlay.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden;';
+    el.insertBefore(overlay, el.firstChild);
+    // Ensure content is above overlay
+    Array.from(el.children).forEach(child => {
+      if (child !== overlay) {
+        const c = child as HTMLElement;
+        if (!c.style.position || c.style.position === 'static') {
+          c.style.position = 'relative';
+        }
+        if (!c.style.zIndex) {
+          c.style.zIndex = '1';
+        }
+      }
+    });
+    return () => {
+      overlay.remove();
+      el.style.position = origPosition;
+      el.style.backgroundColor = origBg;
+    };
+  }, [hasBackground, backgroundHTML, bgColor]);
 
   // ─── PDF ────────────────────────────────────────────────────
 
