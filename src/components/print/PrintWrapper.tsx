@@ -114,8 +114,8 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
   const barcodeContent = barcodeValue || documentNumber || `DOC${Date.now()}`;
   const vCode = verificationCode || `VRF-${Date.now().toString(36).toUpperCase()}`;
 
-  // Guilloche background from user preferences
-  const { savedPatterns, bgColor } = useGuillocheBackground();
+  // Guilloche background from user preferences (supports both pattern refs and templates)
+  const { savedPatterns, bgColor, hasBackground, backgroundHTML, isTemplateBased } = useGuillocheBackground();
 
   return (
     <div
@@ -136,8 +136,12 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         backgroundColor: bgColor || '#ffffff',
       }}
     >
-      {/* Guilloche Pattern Background */}
-      <GuillocheBackgroundLayer patterns={savedPatterns} />
+      {/* Guilloche Pattern Background — Template-based or pattern-based */}
+      {isTemplateBased && backgroundHTML ? (
+        <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0 }} dangerouslySetInnerHTML={{ __html: backgroundHTML }} />
+      ) : (
+        <GuillocheBackgroundLayer patterns={savedPatterns} />
+      )}
 
       {/* Watermark */}
       {showWatermark && (
