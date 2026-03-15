@@ -352,7 +352,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                       <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: '#000000', color: '#ffffff', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt', border: '1px solid #d1d5db' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
@@ -402,9 +402,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#3b82f6', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #2563eb' }}>
+                  <td colSpan={8} style={{ background: '#dbeafe', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #93c5fd' }}>
                     بيانات الجهة المولدة: {shipment.generator?.name || '-'}
-                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#dbeafe', color: '#1e40af', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
+                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#bfdbfe', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
@@ -440,7 +440,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#eab308', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #ca8a04' }}>
+                  <td colSpan={8} style={{ background: '#fef3c7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #fde68a' }}>
                     بيانات الجهة الناقلة: {shipment.transporter?.name || '-'}
                   </td>
                 </tr>
@@ -487,9 +487,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#22c55e', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #16a34a' }}>
+                  <td colSpan={8} style={{ background: '#dcfce7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #86efac' }}>
                     بيانات جهة التدوير: {shipment.recycler?.name || '-'}
-                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
+                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#bbf7d0', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
@@ -533,7 +533,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={2} style={{ background: '#1e293b', color: '#ffffff', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #334155' }}>الإقرارات القانونية والبيئية</td>
+                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>الإقرارات القانونية والبيئية</td>
                 </tr>
                 <tr>
                   <td style={{ background: '#eff6ff', fontWeight: '600', width: '15%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
@@ -558,7 +558,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: '#166534', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #14532d' }}>التوقيعات والأختام</td>
+                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
                 </tr>
                 <tr>
                   <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
