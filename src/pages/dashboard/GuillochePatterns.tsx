@@ -8,7 +8,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef } from '@/lib/guillochePatternUtils';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 const GuillocheA4CombinedPreview = lazy(() => import('@/components/guilloche/GuillocheA4CombinedPreview'));
@@ -357,7 +357,7 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles, organization, profile, user } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
   const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
   const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
@@ -506,28 +506,30 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="templates" dir="rtl">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5">
-            <TabsTrigger value="templates" className="gap-1 text-xs">
-              <Sparkles className="h-3.5 w-3.5" />
-              قوالب جاهزة
-            </TabsTrigger>
-            <TabsTrigger value="patterns" className="gap-1 text-xs">
-              <Fingerprint className="h-3.5 w-3.5" />
-              أنماط الخلفية
-            </TabsTrigger>
-            <TabsTrigger value="saved" className="gap-1 text-xs">
-              <Star className="h-3.5 w-3.5" />
-              المحفوظة ({savedPatternIds.length})
-            </TabsTrigger>
-            <TabsTrigger value="borders" className="gap-1 text-xs">
-              <FileText className="h-3.5 w-3.5" />
-              براويز الصفحة
-            </TabsTrigger>
-            <TabsTrigger value="combined" className="gap-1 text-xs">
-              <Eye className="h-3.5 w-3.5" />
-              معاينة مجمعة
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto pb-2">
+            <TabsList className="inline-flex w-max min-w-full sm:min-w-0 sm:w-full sm:max-w-3xl">
+              <TabsTrigger value="templates" className="gap-1 text-xs whitespace-nowrap">
+                <Sparkles className="h-3.5 w-3.5" />
+                قوالب جاهزة
+              </TabsTrigger>
+              <TabsTrigger value="patterns" className="gap-1 text-xs whitespace-nowrap">
+                <Fingerprint className="h-3.5 w-3.5" />
+                أنماط الخلفية
+              </TabsTrigger>
+              <TabsTrigger value="saved" className="gap-1 text-xs whitespace-nowrap">
+                <Star className="h-3.5 w-3.5" />
+                المحفوظة ({savedPatternIds.length})
+              </TabsTrigger>
+              <TabsTrigger value="borders" className="gap-1 text-xs whitespace-nowrap">
+                <FileText className="h-3.5 w-3.5" />
+                براويز الصفحة
+              </TabsTrigger>
+              <TabsTrigger value="combined" className="gap-1 text-xs whitespace-nowrap">
+                <Eye className="h-3.5 w-3.5" />
+                معاينة مجمعة
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="templates" className="mt-4">
             <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
@@ -845,7 +847,7 @@ export default function GuillochePatterns() {
 
         {/* Preview Dialog */}
         <Dialog open={previewDialogOpen} onOpenChange={setPreviewDialogOpen}>
-          <DialogContent className="max-w-2xl" dir="rtl">
+          <DialogContent className="max-w-[95vw] sm:max-w-2xl" dir="rtl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <Palette className="h-5 w-5 text-primary" />
@@ -962,7 +964,7 @@ export default function GuillochePatterns() {
 
         {/* Document Preview Dialog */}
         <Dialog open={documentPreviewOpen} onOpenChange={setDocumentPreviewOpen}>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+          <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto" dir="rtl">
             <DialogHeader>
               <DialogTitle className="flex items-center gap-2">
                 <FileText className="h-5 w-5 text-primary" />
@@ -1109,6 +1111,7 @@ export default function GuillochePatterns() {
                         <title>طباعة الرسم الغيوشي - ${orgName}</title>
                         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
                         <style>
+                          ${getSecurePrintCSS()}
                           * { margin: 0; padding: 0; box-sizing: border-box; }
                           @page { size: A4; margin: 0; }
                           body { display: flex; justify-content: center; align-items: flex-start; font-family: 'Cairo', sans-serif; }

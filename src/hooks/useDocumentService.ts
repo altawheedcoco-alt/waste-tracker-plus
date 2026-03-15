@@ -30,6 +30,7 @@ import { toast } from 'sonner';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 
 export interface UseDocumentServiceReturn {
   // PDF
@@ -70,91 +71,18 @@ export interface UseDocumentServiceOptions {
 
 // ─── Dynamic Watermark Generator ─────────────────────────────
 function generateWatermarkHTML(orgName: string, userName: string): string {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-  const watermarkText = `${orgName} | ${userName} | ${dateStr} ${timeStr}`;
-
-  // Create multiple rows of diagonal watermark text
-  const rows: string[] = [];
-  for (let i = 0; i < 8; i++) {
-    const top = 5 + i * 12;
-    rows.push(`
-      <div style="
-        position: absolute;
-        top: ${top}%;
-        left: -10%;
-        right: -10%;
-        text-align: center;
-        font-size: 14px;
-        font-family: 'Cairo', 'Segoe UI', sans-serif;
-        color: rgba(0, 0, 0, 0.04);
-        transform: rotate(-35deg);
-        white-space: nowrap;
-        letter-spacing: 4px;
-        font-weight: 700;
-        pointer-events: none;
-        user-select: none;
-      ">${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}</div>
-    `);
-  }
-
-  return `
-    <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:2;">
-      ${rows.join('')}
-    </div>
-  `;
+  return generatePrintWatermarkHTML(orgName, userName);
 }
 
 // ─── Print watermark CSS for print window ────────────────────
 function generateWatermarkCSS(): string {
-  return `
-    .dynamic-watermark-layer {
-      position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden;
-    }
-    .dynamic-watermark-layer div {
-      position: absolute; left: -10%; right: -10%; text-align: center;
-      font-size: 14px; font-family: 'Cairo', 'Segoe UI', sans-serif;
-      color: rgba(0, 0, 0, 0.04) !important;
-      -webkit-print-color-adjust: exact !important;
-      print-color-adjust: exact !important;
-      transform: rotate(-35deg); white-space: nowrap;
-      letter-spacing: 4px; font-weight: 700;
-      pointer-events: none; user-select: none;
-    }
-  `;
-}
-
-function generateWatermarkHTMLForPrint(orgName: string, userName: string): string {
-  const now = new Date();
-  const dateStr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
-  const timeStr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' });
-  const watermarkText = `${orgName} | ${userName} | ${dateStr} ${timeStr}`;
-
-  const rows: string[] = [];
-  for (let i = 0; i < 8; i++) {
-    const top = 5 + i * 12;
-    rows.push(`<div style="top:${top}%;">${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}</div>`);
-  }
-
-  return `<div class="dynamic-watermark-layer">${rows.join('')}</div>`;
+  return getSecurePrintCSS();
 }
 
 // ─── Audit Logger ────────────────────────────────────────────
 async function logPrintAction(userId: string | undefined, orgId: string | undefined, action: string, details?: Record<string, any>) {
   if (!userId || !orgId) return;
-  try {
-    await supabase.from('activity_logs').insert({
-      user_id: userId,
-      organization_id: orgId,
-      action,
-      action_type: 'print',
-      resource_type: 'document',
-      details: details as any,
-    });
-  } catch (e) {
-    console.error('Failed to log print action:', e);
-  }
+  await logPrintAudit({ userId, orgId, action, details });
 }
 
 export const useDocumentService = (options: UseDocumentServiceOptions = {}): UseDocumentServiceReturn => {
@@ -384,7 +312,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
       ? bgParts.join('')
       : '';
 
-    const watermarkHTML = orgName ? generateWatermarkHTMLForPrint(orgName, userName) : '';
+    const watermarkHTML = orgName ? generateWatermarkHTML(orgName, userName) : '';
 
     if (combinedBgHTML || watermarkHTML) {
       PrintService.printWithBackground(el, combinedBgHTML + watermarkHTML, { ...opts, customCSS: extraCSS });

@@ -4,7 +4,7 @@ import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { motion, AnimatePresence } from 'framer-motion';
 import GuillocheSecurityOverlay, { generateSecurityOverlayHTML } from './GuillocheSecurityOverlay';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -429,10 +429,11 @@ export default function GuillocheA4BorderDesigner() {
         <title>طباعة البرواز الغيلوشي A4 - ${orgName}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
+          ${getSecurePrintCSS()}
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A4; margin: 0; }
           body { display: flex; justify-content: center; font-family: 'Cairo', sans-serif; }
-          .print-wrapper { width: 210mm; height: 297mm; position: relative; }
+          .print-wrapper { width: 210mm; height: 297mm; position: relative; overflow: hidden; }
           .print-wrapper > svg { width: 210mm; height: 297mm; }
         </style>
       </head>
@@ -733,7 +734,7 @@ export default function GuillocheA4BorderDesigner() {
 
       {/* Full A4 Preview Dialog */}
       <Dialog open={a4PreviewOpen} onOpenChange={setA4PreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[95vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Maximize className="h-5 w-5 text-primary" />

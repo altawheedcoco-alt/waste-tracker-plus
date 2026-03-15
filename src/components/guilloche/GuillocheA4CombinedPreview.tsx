@@ -15,7 +15,7 @@ import { Eye, Printer, FileText, Layers, Frame, AlertCircle, Fingerprint } from 
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 import { toast } from 'sonner';
 
 // ─── Border Types (mirrored from GuillocheA4BorderDesigner) ───
@@ -225,6 +225,7 @@ export default function GuillocheA4CombinedPreview() {
         <title>معاينة مجمعة - ${orgName}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
+          ${getSecurePrintCSS()}
           * { margin: 0; padding: 0; box-sizing: border-box; }
           @page { size: A4; margin: 0; }
           body { display: flex; justify-content: center; font-family: 'Cairo', sans-serif; }
@@ -296,7 +297,7 @@ export default function GuillocheA4CombinedPreview() {
             برواز: {activeBorder ? activeBorder.name : 'غير محدد'}
           </Badge>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <Button variant="outline" size="sm" className="gap-2" onClick={handlePreviewWindow}>
             <Eye className="h-4 w-4" />
             معاينة كاملة
@@ -309,10 +310,10 @@ export default function GuillocheA4CombinedPreview() {
       </div>
 
       {/* A4 Preview */}
-      <div className="flex justify-center">
+      <div className="flex justify-center overflow-x-auto pb-2">
         <div
           ref={previewRef}
-          className="relative border-2 shadow-2xl rounded-lg overflow-hidden"
+          className="relative border-2 shadow-2xl rounded-lg overflow-hidden min-w-[320px]"
           style={{
             width: '100%',
             maxWidth: `${previewWidth}px`,

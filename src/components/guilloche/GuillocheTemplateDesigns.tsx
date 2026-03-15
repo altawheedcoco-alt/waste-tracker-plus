@@ -25,7 +25,7 @@ import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef, GUILLOCHE_COLOR_PALETTES } from '@/lib/guillochePatternUtils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useMyPermissions } from '@/hooks/useMyPermissions';
-import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
+import { generatePrintWatermarkHTML, getSecurePrintCSS, logPrintAudit } from '@/lib/printSecurityUtils';
 
 // ─── Template Color Schemes ───
 const TEMPLATE_COLORS = [
@@ -625,11 +625,12 @@ export default function GuillocheTemplateDesigns() {
         <title>معاينة القالب - ${selectedTemplate.name}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
+          ${getSecurePrintCSS()}
           * { margin:0; padding:0; box-sizing:border-box; }
           @page { size:A4; margin:0; }
           body { display:flex; justify-content:center; font-family:'Cairo',sans-serif; }
           .page { width:210mm; height:297mm; position:relative; overflow:hidden; }
-          .content { position:absolute; inset:25mm; z-index:5; text-align:center; }
+          .content { position:absolute; inset:22mm; z-index:5; text-align:center; }
           .content h1 { font-size:24px; color:${selectedTemplate.colorScheme.border}; margin-top:40px; }
           .content p { font-size:14px; color:#666; margin-top:10px; }
         </style>
@@ -797,7 +798,7 @@ export default function GuillocheTemplateDesigns() {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
           {selectedTemplate && (
             <>
               <DialogHeader>
