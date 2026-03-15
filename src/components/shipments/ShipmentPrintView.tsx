@@ -576,14 +576,11 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             {/* Role-based tagline */}
             <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
-            {/* Footer */}
-            <div style={{ textAlign: 'center', fontSize: '6pt', color: '#000', paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>
-              <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
+            {/* Footer - always at the very bottom */}
+            <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '6pt', color: '#000', paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>
+              <div>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام</div>
               <div style={{ marginTop: '2px' }}>
-                رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`}
-              </div>
-              <div style={{ marginTop: '3px', fontSize: '6pt' }}>
-                📅 تاريخ وصول الشحنة: {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.created_at ? format(new Date(shipment.created_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : '-'}
+                رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               </div>
             </div>
           </div>
