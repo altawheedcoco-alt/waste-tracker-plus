@@ -459,6 +459,26 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
     </div>
   </div>
 
+  <!-- Role-based taglines -->
+  <div class="tagline-box">
+    <div style="display:table;width:100%;border-collapse:separate;border-spacing:4px 2px;">
+      <div style="display:table-row;">
+        <div style="display:table-cell;width:33%;vertical-align:top;padding:2px 4px;border-left:1px solid #e5e7eb;">
+          <div class="tagline-role">🏭 رسالة للمولّد</div>
+          <div class="tagline-text">${taglineGenerator}</div>
+        </div>
+        <div style="display:table-cell;width:33%;vertical-align:top;padding:2px 4px;border-left:1px solid #e5e7eb;">
+          <div class="tagline-role">🚛 رسالة للناقل</div>
+          <div class="tagline-text">${taglineTransporter}</div>
+        </div>
+        <div style="display:table-cell;width:34%;vertical-align:top;padding:2px 4px;">
+          <div class="tagline-role">${form.destination_type === 'disposal' ? '🏗️ رسالة لجهة التخلص' : '♻ رسالة للمُدوّر'}</div>
+          <div class="tagline-text">${taglineDestination}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="footer">
     <div class="r">مستند صادر إلكترونياً من منصة <strong>iRecycle</strong> لإدارة المخلفات — صفحة 1 من 2 — يُرجى مراجعة الشروط والأحكام في الصفحة التالية</div>
     <div class="l">${dateNow}</div>
