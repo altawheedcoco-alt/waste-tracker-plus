@@ -66,6 +66,7 @@ export async function fetchShipmentsWithRelations(
     organizationId?: string;
     status?: string | string[];
     limit?: number;
+    select?: string;
   }
 ): Promise<EnrichedShipment[]> {
   let query = supabase.from('shipments').select('*');
@@ -106,32 +107,34 @@ export async function fetchShipmentsWithRelations(
     if (s.driver_id) driverIds.add(s.driver_id);
   });
 
-  // Fetch organizations
-  const orgsMap = new Map<string, ShipmentOrganization>();
-  if (orgIds.size > 0) {
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, email, phone, address, city, representative_name, commercial_register, environmental_license, stamp_url, signature_url, logo_url')
-      .in('id', Array.from(orgIds));
-
-    orgsData?.forEach((org) => orgsMap.set(org.id, org));
-  }
-
-  // Fetch drivers
-  const driversMap = new Map<string, ShipmentDriver>();
-  if (driverIds.size > 0) {
-    const { data: driversData } = await supabase
-      .from('drivers')
-      .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)')
-      .in('id', Array.from(driverIds));
-
-    driversData?.forEach((driver) => {
-      driversMap.set(driver.id, {
-        ...driver,
-        profile: Array.isArray(driver.profile) ? driver.profile[0] : driver.profile,
+  // Fetch organizations AND drivers in parallel
+  const [orgsMap, driversMap] = await Promise.all([
+    (async () => {
+      const map = new Map<string, ShipmentOrganization>();
+      if (orgIds.size === 0) return map;
+      const { data } = await supabase
+        .from('organizations')
+        .select('id,name,email,phone,address,city,representative_name,commercial_register,environmental_license,stamp_url,signature_url,logo_url')
+        .in('id', Array.from(orgIds));
+      data?.forEach((org) => map.set(org.id, org));
+      return map;
+    })(),
+    (async () => {
+      const map = new Map<string, ShipmentDriver>();
+      if (driverIds.size === 0) return map;
+      const { data } = await supabase
+        .from('drivers')
+        .select('id,license_number,vehicle_type,vehicle_plate,profile:profiles(full_name,phone)')
+        .in('id', Array.from(driverIds));
+      data?.forEach((driver) => {
+        map.set(driver.id, {
+          ...driver,
+          profile: Array.isArray(driver.profile) ? driver.profile[0] : driver.profile,
+        });
       });
-    });
-  }
+      return map;
+    })(),
+  ]);
 
   // Enrich shipments
   return shipmentsData.map((shipment) => ({
@@ -164,34 +167,34 @@ export async function fetchShipmentByIdOrNumber(
   if (error) throw error;
   if (!data) return null;
 
-  // Fetch related data
+  // Fetch orgs + driver in parallel
   const orgIds = [data.generator_id, data.transporter_id, data.recycler_id].filter(Boolean) as string[];
-  
-  const orgsMap = new Map<string, ShipmentOrganization>();
-  if (orgIds.length > 0) {
-    const { data: orgsData } = await supabase
-      .from('organizations')
-      .select('id, name, email, phone, address, city, representative_name, commercial_register, environmental_license, stamp_url, signature_url, logo_url')
-      .in('id', orgIds);
 
-    orgsData?.forEach((org) => orgsMap.set(org.id, org));
-  }
-
-  let driver: ShipmentDriver | null = null;
-  if (data.driver_id) {
-    const { data: driverData } = await supabase
-      .from('drivers')
-      .select('id, license_number, vehicle_type, vehicle_plate, profile:profiles(full_name, phone)')
-      .eq('id', data.driver_id)
-      .maybeSingle();
-
-    if (driverData) {
-      driver = {
+  const [orgsMap, driver] = await Promise.all([
+    (async () => {
+      const map = new Map<string, ShipmentOrganization>();
+      if (orgIds.length === 0) return map;
+      const { data: orgsData } = await supabase
+        .from('organizations')
+        .select('id,name,email,phone,address,city,representative_name,commercial_register,environmental_license,stamp_url,signature_url,logo_url')
+        .in('id', orgIds);
+      orgsData?.forEach((org) => map.set(org.id, org));
+      return map;
+    })(),
+    (async (): Promise<ShipmentDriver | null> => {
+      if (!data.driver_id) return null;
+      const { data: driverData } = await supabase
+        .from('drivers')
+        .select('id,license_number,vehicle_type,vehicle_plate,profile:profiles(full_name,phone)')
+        .eq('id', data.driver_id)
+        .maybeSingle();
+      if (!driverData) return null;
+      return {
         ...driverData,
         profile: Array.isArray(driverData.profile) ? driverData.profile[0] : driverData.profile,
       };
-    }
-  }
+    })(),
+  ]);
 
   return {
     ...data,
