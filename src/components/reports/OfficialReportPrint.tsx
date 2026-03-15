@@ -1,8 +1,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, FileText } from 'lucide-react';
-// jsPDF & html2canvas loaded dynamically
-import { usePDFExport } from '@/hooks/usePDFExport';
+import { useDocumentService } from '@/hooks/useDocumentService';
 
 interface ChartData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
