@@ -645,7 +645,7 @@ export default function GuillocheTemplateDesigns() {
             <p style="margin-top:60px;color:#999;font-size:12px;">رقم الشهادة: RC-2026-001234</p>
           </div>
         </div>
-        ${generatePrintWatermarkHTML(orgName, userName)}
+        ${generatePrintWatermarkHTML(orgName, userName, (organization as any)?.client_code, (organization as any)?.verification_code)}
       </body>
       </html>`;
     const w = window.open('', '_blank');

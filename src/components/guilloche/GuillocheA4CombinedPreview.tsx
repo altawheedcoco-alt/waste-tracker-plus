@@ -237,7 +237,7 @@ export default function GuillocheA4CombinedPreview() {
           ${el.innerHTML}
           ${generateSecurityOverlayHTML(orgName, secColor)}
         </div>
-        ${generatePrintWatermarkHTML(orgName, userName)}
+        ${generatePrintWatermarkHTML(orgName, userName, (organization as any)?.client_code, (organization as any)?.verification_code)}
       </body>
       </html>
     `;

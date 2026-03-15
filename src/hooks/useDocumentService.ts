@@ -70,8 +70,8 @@ export interface UseDocumentServiceOptions {
 }
 
 // ─── Dynamic Watermark Generator ─────────────────────────────
-function generateWatermarkHTML(orgName: string, userName: string): string {
-  return generatePrintWatermarkHTML(orgName, userName);
+function generateWatermarkHTML(orgName: string, userName: string, orgClientCode?: string | null, orgVerificationCode?: string | null): string {
+  return generatePrintWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode);
 }
 
 // ─── Print watermark CSS for print window ────────────────────
@@ -94,6 +94,8 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
 
   const orgName = organization?.name || '';
   const userName = profile?.full_name || user?.email || '';
+  const orgClientCode = (organization as any)?.client_code || null;
+  const orgVerificationCode = (organization as any)?.verification_code || null;
   const orgId = organization?.id;
   const userId = user?.id;
 
@@ -157,7 +159,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     if (orgName) {
       const watermarkDiv = document.createElement('div');
       watermarkDiv.className = 'dynamic-watermark-overlay';
-      watermarkDiv.innerHTML = generateWatermarkHTML(orgName, userName);
+      watermarkDiv.innerHTML = generateWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode);
       watermarkDiv.style.cssText = 'position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden;';
       el.appendChild(watermarkDiv);
       cleanups.push(() => watermarkDiv.remove());
@@ -306,7 +308,7 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     // Layer 2: Watermark (AR+EN date/time)
     if (orgName) {
       extraCSS += '\n' + generateWatermarkCSS();
-      layers.push(generateWatermarkHTML(orgName, userName));
+      layers.push(generateWatermarkHTML(orgName, userName, orgClientCode, orgVerificationCode));
     }
 
     const combinedBgHTML = layers.join('\n');
