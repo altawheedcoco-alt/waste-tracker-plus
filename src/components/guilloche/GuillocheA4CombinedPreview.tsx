@@ -297,7 +297,7 @@ export default function GuillocheA4CombinedPreview() {
             برواز: {activeBorder ? activeBorder.name : 'غير محدد'}
           </Badge>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap justify-end">
           <Button variant="outline" size="sm" className="gap-2" onClick={handlePreviewWindow}>
             <Eye className="h-4 w-4" />
             معاينة كاملة

@@ -798,7 +798,7 @@ export default function GuillocheTemplateDesigns() {
 
       {/* Preview Dialog */}
       <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-[95vw] sm:max-w-3xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto">
           {selectedTemplate && (
             <>
               <DialogHeader>

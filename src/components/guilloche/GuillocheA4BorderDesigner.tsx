@@ -734,7 +734,7 @@ export default function GuillocheA4BorderDesigner() {
 
       {/* Full A4 Preview Dialog */}
       <Dialog open={a4PreviewOpen} onOpenChange={setA4PreviewOpen}>
-        <DialogContent className="max-w-4xl max-h-[95vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-[95vw] sm:max-w-4xl max-h-[85vh] sm:max-h-[95vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Maximize className="h-5 w-5 text-primary" />

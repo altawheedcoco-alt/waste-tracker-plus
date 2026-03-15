@@ -1111,6 +1111,7 @@ export default function GuillochePatterns() {
                         <title>طباعة الرسم الغيوشي - ${orgName}</title>
                         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
                         <style>
+                          ${getSecurePrintCSS()}
                           * { margin: 0; padding: 0; box-sizing: border-box; }
                           @page { size: A4; margin: 0; }
                           body { display: flex; justify-content: center; align-items: flex-start; font-family: 'Cairo', sans-serif; }
