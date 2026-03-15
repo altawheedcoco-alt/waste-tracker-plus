@@ -474,10 +474,12 @@ export const PrintService = {
     // Wrap in unified print structure if not already a full HTML doc
     const isFullDoc = htmlContent.trim().toLowerCase().startsWith('<!doctype') || htmlContent.trim().toLowerCase().startsWith('<html');
     
+    const textFillerHTML = generateGuillocheTextFillerHTML();
+
     if (isFullDoc) {
-      // Inject dedup print script
+      // Inject guilloche text filler + dedup print script
       const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
-      const injected = htmlContent.replace('</body>', `${dedupScript}</body>`);
+      const injected = htmlContent.replace('<body>', `<body>${textFillerHTML}`).replace('</body>', `${dedupScript}</body>`);
       win.document.open();
       win.document.write(injected);
       win.document.close();
@@ -491,14 +493,16 @@ export const PrintService = {
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
     @page { size: A4 portrait; margin: 12mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; }
+    html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
+    .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
     table { background: transparent !important; }
     tr, th, td { background: transparent !important; }
     ${opts.customCSS || ''}
   </style>
 </head>
 <body>
-  ${htmlContent}
+  ${textFillerHTML}
+  <div style="position:relative;z-index:2;">${htmlContent}</div>
   <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>
 </body>
 </html>`);
