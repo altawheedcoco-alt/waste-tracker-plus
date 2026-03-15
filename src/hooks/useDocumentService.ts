@@ -65,6 +65,7 @@ export interface UseDocumentServiceOptions {
   filename?: string;
   orientation?: 'portrait' | 'landscape';
   format?: 'a4' | 'letter';
+  fitSinglePage?: boolean;
   /** Skip permission check (for public-facing docs) */
   skipPermissionCheck?: boolean;
 }
