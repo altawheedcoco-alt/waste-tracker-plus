@@ -93,6 +93,11 @@ const ComplianceCertificateView = ({ certificate, open, onClose }: ComplianceCer
       </div>
       </body></html>
     `);
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(printWindow_html, { title: 'شهادة الامتثال' });
+    });
+    return;
+    // Legacy: removed direct printWindow.print()
     printWindow.document.close();
     setTimeout(() => { printWindow.print(); }, 500);
   };
