@@ -440,7 +440,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#eab308', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #ca8a04' }}>
+                  <td colSpan={8} style={{ background: '#fef3c7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #fde68a' }}>
                     بيانات الجهة الناقلة: {shipment.transporter?.name || '-'}
                   </td>
                 </tr>
