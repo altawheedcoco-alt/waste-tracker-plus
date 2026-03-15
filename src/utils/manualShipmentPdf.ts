@@ -245,10 +245,10 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
   .sig-hint { font-size: 7px; color: #888; }
 
   /* Verification */
-  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 5px; }
-  .verify-cell { display: table-cell; vertical-align: middle; padding: 4px; text-align: center; }
-  .qr-img { width: 56px; height: 56px; border: 1px solid #ccc; }
-  .barcode-img { height: 22px; max-width: 160px; margin-top: 3px; }
+  .verify-row { display: table; width: 100%; border: 1px solid #bbb; margin-top: 8px; padding: 6px 0; }
+  .verify-cell { display: table-cell; vertical-align: middle; padding: 6px 8px; text-align: center; }
+  .qr-img { width: 80px; height: 80px; border: 1px solid #ccc; padding: 2px; background: #fff; }
+  .barcode-img { height: 36px; max-width: 220px; margin-top: 4px; }
   .v-code { font-family: 'Courier New', monospace; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; }
   .stamp-circle {
     width: 50px; height: 50px;
