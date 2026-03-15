@@ -593,24 +593,27 @@ export const PrintService = {
 
     // === LAYER 3: Document content (in .print-container) ===
 
-    const fitScript = opts.fitSinglePage === true ? `
+    const fitScript = `
       <script>
-        window.addEventListener('load', function() {
+        window.addEventListener('DOMContentLoaded', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = 257 * 3.7795;
+          // A4 content area: 297mm page - 10mm top/bottom padding = 277mm
+          // Convert to px: 277mm * 3.7795 ≈ 1047px
+          var maxH = 277 * 3.7795;
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
             c.style.transform = 'scale(' + s + ')';
             c.style.transformOrigin = 'top right';
+            c.style.height = maxH + 'px';
             c.style.overflow = 'hidden';
           }
         });
       </script>
-    ` : '';
+    `;
 
-    const printCSS = `
+    const printCSS = \`
 
       @page {
         size: A4 portrait;
@@ -628,7 +631,9 @@ export const PrintService = {
         margin: 0;
         padding: 0;
         width: 210mm;
-        min-height: 297mm;
+        height: 297mm;
+        max-height: 297mm;
+        overflow: hidden;
         background: white !important;
         font-family: 'Cairo', sans-serif !important;
         direction: rtl;
