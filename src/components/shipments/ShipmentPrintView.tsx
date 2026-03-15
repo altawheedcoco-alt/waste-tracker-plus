@@ -540,6 +540,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </tbody>
             </table>
 
+            {/* Role-based tagline */}
+            <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
+
             {/* Footer */}
             <div style={{ textAlign: 'center', fontSize: '6pt', color: theme.colors.footerText, paddingTop: '4px', borderTop: `1px solid ${theme.colors.borderLight}` }}>
               <div>تم إنشاء هذا المستند إلكترونياً بتاريخ {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })} • نظام إدارة المخلفات - آي ريسايكل</div>
