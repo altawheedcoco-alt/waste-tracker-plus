@@ -1,8 +1,7 @@
 import React, { useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, FileText } from 'lucide-react';
-// jsPDF & html2canvas loaded dynamically
-import { usePDFExport } from '@/hooks/usePDFExport';
+import { useDocumentService } from '@/hooks/useDocumentService';
 
 interface ChartData {
   shipmentsByStatus: { name: string; value: number; color: string }[];
@@ -37,7 +36,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
 }) => {
   const printRef = useRef<HTMLDivElement>(null);
   const chartsRef = useRef<HTMLDivElement>(null);
-  const { printContent } = usePDFExport({ filename: 'تقرير-رسمي' });
+  const { printContent, downloadPDF, isProcessing } = useDocumentService({ filename: 'تقرير-رسمي' });
 
   const currentDate = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
@@ -65,44 +64,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
 
   const handleExportPDF = async () => {
     if (!printRef.current) return;
-
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ]);
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    // Capture main report
-    const mainCanvas = await html2canvas(printRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-    });
-
-    const mainImgData = mainCanvas.toDataURL('image/png');
-    const mainImgHeight = (mainCanvas.height * pageWidth) / mainCanvas.width;
-    
-    pdf.addImage(mainImgData, 'PNG', 0, 0, pageWidth, mainImgHeight);
-
-    // If charts exist, add as appendix
-    if (chartsRef.current) {
-      pdf.addPage();
-      
-      const chartsCanvas = await html2canvas(chartsRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const chartsImgData = chartsCanvas.toDataURL('image/png');
-      const chartsImgHeight = (chartsCanvas.height * pageWidth) / chartsCanvas.width;
-      
-      pdf.addImage(chartsImgData, 'PNG', 0, 0, pageWidth, chartsImgHeight);
-    }
-
-    pdf.save(`تقرير-إحصائي-${new Date().toISOString().split('T')[0]}.pdf`);
+    await downloadPDF(printRef.current, { customFilename: `تقرير-إحصائي` });
   };
 
   return (
