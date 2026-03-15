@@ -14,6 +14,7 @@ import { generateReceiptTemplate } from './printTemplates/receiptTemplate';
 import { generateA4Template } from './printTemplates/a4Template';
 import { generateComprehensiveTemplate } from './printTemplates/comprehensiveTemplate';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
 
 const statusLabel = (s: string) => {
   const map: Record<string, string> = {
@@ -42,9 +43,10 @@ const orgTypeLabel = (t: string) => {
 
 /** Shared print reports button for all dashboard headers */
 const DashboardPrintReports = memo(() => {
-  const { organization, profile } = useAuth();
+  const { organization, profile, user } = useAuth();
   const [isPrinting, setIsPrinting] = useState(false);
   const { backgroundHTML, hasBackground } = useGuillocheBackground();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
   const orgId = organization?.id;
 
   const { data: todayData } = useQuery({
@@ -124,7 +126,13 @@ const DashboardPrintReports = memo(() => {
     },
   });
 
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
+
   const printReport = useCallback((type: 'receipt' | 'a4' | 'comprehensive') => {
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات. تواصل مع مدير الجهة لمنحك الصلاحية.');
+      return;
+    }
     if (!todayData || !organization) {
       toast.error('لا توجد بيانات متاحة');
       return;
@@ -151,10 +159,27 @@ const DashboardPrintReports = memo(() => {
       });
     }
 
-    // Inject guilloche background if set
-    if (hasBackground && backgroundHTML && type !== 'receipt') {
-      const bgDiv = `<div style="position:fixed;inset:0;z-index:0;pointer-events:none;">${backgroundHTML}</div>`;
-      html = html.replace('<body>', `<body style="position:relative;">${bgDiv}`);
+    // Inject guilloche background + dynamic watermark for non-receipt docs
+    if (type !== 'receipt') {
+      const securityLayers: string[] = [];
+
+      // Guilloche background
+      if (hasBackground && backgroundHTML) {
+        securityLayers.push(`<div style="position:fixed;inset:0;z-index:0;pointer-events:none;">${backgroundHTML}</div>`);
+      }
+
+      // Dynamic watermark
+      const watermarkText = `${orgName} | ${userName} | ${dateStr} ${timeStr}`;
+      const watermarkRows: string[] = [];
+      for (let i = 0; i < 8; i++) {
+        const top = 5 + i * 12;
+        watermarkRows.push(`<div style="position:absolute;top:${top}%;left:-10%;right:-10%;text-align:center;font-size:14px;font-family:'Cairo',sans-serif;color:rgba(0,0,0,0.04);transform:rotate(-35deg);white-space:nowrap;letter-spacing:4px;font-weight:700;pointer-events:none;user-select:none;">${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${watermarkText}</div>`);
+      }
+      securityLayers.push(`<div style="position:fixed;inset:0;z-index:2;pointer-events:none;overflow:hidden;">${watermarkRows.join('')}</div>`);
+
+      if (securityLayers.length > 0) {
+        html = html.replace('<body>', `<body style="position:relative;">${securityLayers.join('')}`);
+      }
     }
 
     const printWindow = window.open('', '_blank', type === 'receipt' ? 'width=320,height=600' : 'width=900,height=1100');
@@ -166,7 +191,19 @@ const DashboardPrintReports = memo(() => {
       toast.error('يرجى السماح بالنوافذ المنبثقة للطباعة');
       setIsPrinting(false);
     }
-  }, [todayData, organization, profile, hasBackground, backgroundHTML]);
+
+    // Audit log
+    if (user?.id && orgId) {
+      supabase.from('activity_logs').insert({
+        user_id: user.id,
+        organization_id: orgId,
+        action: `print_report_${type}`,
+        action_type: 'print',
+        resource_type: 'document',
+        details: { report_type: type } as any,
+      }).then();
+    }
+  }, [canPrint, todayData, organization, profile, user, orgId, hasBackground, backgroundHTML]);
 
   return (
     <DropdownMenu>
