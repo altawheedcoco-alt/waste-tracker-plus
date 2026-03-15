@@ -119,29 +119,44 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
 
   const downloadPDF = useCallback(async (el: HTMLElement | null, opts?: PDFOptions & { customFilename?: string }) => {
     if (!el) return;
-    const mergedOpts: PDFOptions = {
-      ...opts,
-      filename: opts?.customFilename || opts?.filename || options.filename || 'document',
-      orientation: opts?.orientation || options.orientation,
-      format: opts?.format || options.format,
-    };
-    await wrap(() => PDFService.download(el, mergedOpts));
-  }, [wrap, options]);
+    const cleanup = injectGuillocheOverlay(el);
+    try {
+      const mergedOpts: PDFOptions = {
+        ...opts,
+        filename: opts?.customFilename || opts?.filename || options.filename || 'document',
+        orientation: opts?.orientation || options.orientation,
+        format: opts?.format || options.format,
+      };
+      await wrap(() => PDFService.download(el, mergedOpts));
+    } finally {
+      cleanup();
+    }
+  }, [wrap, options, injectGuillocheOverlay]);
 
   const previewPDF = useCallback(async (el: HTMLElement | null, opts?: PDFOptions) => {
     if (!el) return;
-    const mergedOpts: PDFOptions = {
-      ...opts,
-      orientation: opts?.orientation || options.orientation,
-      format: opts?.format || options.format,
-    };
-    await wrap(() => PDFService.preview(el, mergedOpts));
-  }, [wrap, options]);
+    const cleanup = injectGuillocheOverlay(el);
+    try {
+      const mergedOpts: PDFOptions = {
+        ...opts,
+        orientation: opts?.orientation || options.orientation,
+        format: opts?.format || options.format,
+      };
+      await wrap(() => PDFService.preview(el, mergedOpts));
+    } finally {
+      cleanup();
+    }
+  }, [wrap, options, injectGuillocheOverlay]);
 
   const uploadPDF = useCallback(async (el: HTMLElement | null, upload: UploadOptions, opts?: PDFOptions) => {
     if (!el) return null;
-    return (await wrap(() => PDFService.uploadToStorage(el, upload, opts))) ?? null;
-  }, [wrap]);
+    const cleanup = injectGuillocheOverlay(el);
+    try {
+      return (await wrap(() => PDFService.uploadToStorage(el, upload, opts))) ?? null;
+    } finally {
+      cleanup();
+    }
+  }, [wrap, injectGuillocheOverlay]);
 
   const exportAndUpload = useCallback(async (
     el: HTMLElement | null,
