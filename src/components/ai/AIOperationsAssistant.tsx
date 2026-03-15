@@ -195,16 +195,17 @@ const AIOperationsAssistant = () => {
         body { font-family: 'Cairo', Arial, sans-serif; padding: 40px; line-height: 2; direction: rtl; color: #1a1a1a; font-size: 13px; }
         h1 { font-size: 18px; font-weight: 700; color: #1a5632; border-bottom: 3px solid #1a5632; padding-bottom: 8px; margin-bottom: 20px; }
         h2 { font-size: 15px; font-weight: 700; color: #1a5632; border-right: 4px solid #1a5632; padding-right: 12px; margin-top: 24px; margin-bottom: 10px; }
-        table { border-collapse: collapse; width: 100%; margin: 12px 0; }
-        td, th { border: 1px solid #ddd; padding: 8px 12px; text-align: right; font-size: 12px; }
-        th { background: #e8f5e9; font-weight: 700; color: #1a5632; }
+        table { border-collapse: collapse; width: 100%; margin: 12px 0; background: transparent !important; }
+        td, th { border: 1px solid #ddd; padding: 8px 12px; text-align: right; font-size: 12px; background: transparent !important; }
+        th { font-weight: 700; color: #1a5632; }
         strong { color: #1a5632; }
       </style></head>
       <body>
       <div>${lastAssistant.content.replace(/\n/g, '<br/>')}</div>
-      </body></html>`);
-    printWindow.document.close();
-    printWindow.onload = () => { setTimeout(() => printWindow.print(), 300); };
+      </body></html>`;
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: 'تقرير مساعد الذكاء الاصطناعي' });
+    });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

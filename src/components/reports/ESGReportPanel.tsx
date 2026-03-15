@@ -249,9 +249,10 @@ const ESGReportPanel = memo(({ organizationId, showPrint = true, embedded = fals
           <p style="margin-top:12px;text-align:center;color:#6b7280;font-size:12px">تم إنشاء هذا التقرير آلياً بواسطة منصة iRecycle | ${format(new Date(), 'PPP', { locale: ar })}</p>
           </body></html>
         `);
-        printWindow.document.close();
-        printWindow.print();
-      }
+        import('@/services/documentService').then(({ PrintService }) => {
+          PrintService.printHTML(printWindow.document.documentElement.outerHTML, { title: 'تقرير ESG' });
+        });
+        printWindow.close();
     }
   };
 

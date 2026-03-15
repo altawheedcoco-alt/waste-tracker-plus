@@ -19,9 +19,7 @@ const SafetyCardPrintView = ({ record, organizationName, onClose }: SafetyCardPr
   const handlePrint = () => {
     const printContent = cardRef.current;
     if (!printContent) return;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`
+    const htmlContent = `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
       <head>
@@ -35,11 +33,12 @@ const SafetyCardPrintView = ({ record, organizationName, onClose }: SafetyCardPr
       </head>
       <body>
         ${printContent.outerHTML}
-        <script>setTimeout(() => { window.print(); window.close(); }, 500);</script>
       </body>
       </html>
-    `);
-    printWindow.document.close();
+    `;
+    import('@/services/documentService').then(({ PrintService }) => {
+      PrintService.printHTML(htmlContent, { title: `كارنيه السيفتي - ${record.trainee_name}` });
+    });
   };
 
   const expired = record.card_expires_at && new Date(record.card_expires_at) < new Date();
