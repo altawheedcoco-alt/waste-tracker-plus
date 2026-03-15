@@ -446,9 +446,9 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
       <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للتحقق</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:7px;color:#888;margin-bottom:2px;">رمز التحقق الإلكتروني</div>
+      <div style="font-size:7px;color:#555;margin-bottom:3px;font-family:'Cairo',sans-serif;">رمز التحقق الإلكتروني</div>
       <div class="v-code">${verificationCode}</div>
-      <img src="https://barcodeapi.org/api/128/${encodeURIComponent(verificationCode)}" class="barcode-img" alt="Barcode"/>
+      <img src="https://barcodeapi.org/api/128/${encodeURIComponent(verificationCode)}" class="barcode-img" alt="Barcode" style="height:36px;"/>
     </div>
     <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">
