@@ -613,7 +613,7 @@ export const PrintService = {
       </script>
     `;
 
-    const printCSS = \`
+    const printCSS = `
 
       @page {
         size: A4 portrait;
