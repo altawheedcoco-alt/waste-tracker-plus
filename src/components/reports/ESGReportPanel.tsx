@@ -199,9 +199,7 @@ const ESGReportPanel = memo(({ organizationId, showPrint = true, embedded = fals
 
   const handlePrint = () => {
     if (printRef.current) {
-      const printWindow = window.open('', '_blank');
-      if (printWindow) {
-        printWindow.document.write(`
+      const htmlContent = `
           <html dir="rtl"><head><title>تقرير ESG - ${organization?.name}</title>
           <style>body{font-family:Arial,sans-serif;padding:40px;direction:rtl}
           .grid{display:grid;gap:16px}.grid-2{grid-template-columns:1fr 1fr}
@@ -247,12 +245,10 @@ const ESGReportPanel = memo(({ organizationId, showPrint = true, embedded = fals
             compact: true,
           })}
           <p style="margin-top:12px;text-align:center;color:#6b7280;font-size:12px">تم إنشاء هذا التقرير آلياً بواسطة منصة iRecycle | ${format(new Date(), 'PPP', { locale: ar })}</p>
-          </body></html>
-        `);
-        import('@/services/documentService').then(({ PrintService }) => {
-          PrintService.printHTML(printWindow.document.documentElement.outerHTML, { title: 'تقرير ESG' });
-        });
-        printWindow.close();
+          </body></html>`;
+      import('@/services/documentService').then(({ PrintService }) => {
+        PrintService.printHTML(htmlContent, { title: `تقرير ESG - ${organization?.name}` });
+      });
     }
   };
 
