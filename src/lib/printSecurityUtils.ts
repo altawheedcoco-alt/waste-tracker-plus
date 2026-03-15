@@ -10,9 +10,14 @@ import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Generate anti-forgery watermark HTML — Layer 2
- * Includes: org name, user name, date+time in Arabic AND English
+ * Includes: org name, user name, org client code, org verification code, date+time in Arabic AND English
  */
-export function generatePrintWatermarkHTML(orgName: string, userName: string): string {
+export function generatePrintWatermarkHTML(
+  orgName: string,
+  userName: string,
+  orgClientCode?: string | null,
+  orgVerificationCode?: string | null,
+): string {
   const now = new Date();
 
   // Arabic date & time
@@ -31,7 +36,12 @@ export function generatePrintWatermarkHTML(orgName: string, userName: string): s
     hour: '2-digit', minute: '2-digit', hour12: true,
   });
 
-  const line1 = `✦ ${orgName} ⟐ ${userName} ✦`;
+  // Build identity line with org codes
+  const identityParts = [orgName];
+  if (orgClientCode) identityParts.push(`🆔${orgClientCode}`);
+  if (orgVerificationCode) identityParts.push(`🔐${orgVerificationCode}`);
+
+  const line1 = `✦ ${identityParts.join(' ⟐ ')} ⟐ ${userName} ✦`;
   const line2 = `${dateAr} ${timeAr} ● ${dateEn} ${timeEn}`;
   const watermarkText = `${line1} ❖ ${line2}`;
 
