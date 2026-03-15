@@ -256,7 +256,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
 
             {/* Barcode — Always shown */}
             <div className="flex-shrink-0">
-              <Barcode value={barcodeContent} width={1} height={28} fontSize={7} displayValue={true} margin={0} />
+              <Barcode value={barcodeContent} width={1.5} height={40} fontSize={8} displayValue={true} margin={2} />
             </div>
           </div>
           <p className="text-gray-400 text-[7pt]">

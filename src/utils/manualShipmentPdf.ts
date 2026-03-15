@@ -571,9 +571,9 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
       <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للشروط</div>
     </div>
     <div class="verify-cell" style="width:auto;">
-      <div style="font-size:7px;color:#888;">رمز مصادقة الشروط والأحكام</div>
+      <div style="font-size:7px;color:#555;font-family:'Cairo',sans-serif;">رمز مصادقة الشروط والأحكام</div>
       <div class="v-code">TRM-${verificationCode}</div>
-      <img src="https://barcodeapi.org/api/128/${encodeURIComponent('TRM-' + verificationCode)}" class="barcode-img" alt="Barcode"/>
+      <img src="https://barcodeapi.org/api/128/${encodeURIComponent('TRM-' + verificationCode)}" class="barcode-img" alt="Barcode" style="height:36px;"/>
     </div>
     <div class="verify-cell" style="width:72px;">
       <div class="stamp-circle">
