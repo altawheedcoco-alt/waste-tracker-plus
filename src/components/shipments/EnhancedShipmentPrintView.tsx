@@ -37,6 +37,7 @@ import ShareDocumentButton from '@/components/documents/ShareDocumentButton';
 import SendForSigningButton from '@/components/documents/SendForSigningButton';
 import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import AddNoteButton from '@/components/notes/AddNoteButton';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 
 interface OrganizationData {
   name: string;

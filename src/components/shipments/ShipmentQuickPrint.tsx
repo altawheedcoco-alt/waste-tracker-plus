@@ -12,6 +12,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 
 interface ShipmentQuickPrintProps {
   isOpen: boolean;

@@ -14,6 +14,7 @@ import Barcode from 'react-barcode';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
+import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 
 interface ShipmentData {
   id: string;
