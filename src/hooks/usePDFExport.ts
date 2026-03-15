@@ -25,6 +25,7 @@ export const usePDFExport = (options: UsePDFExportOptions = {}) => {
     filename: options.filename,
     orientation: options.orientation,
     format: options.format,
+    fitSinglePage: options.fitSinglePage,
   };
 
   const svc = useDocumentService(svcOpts);
