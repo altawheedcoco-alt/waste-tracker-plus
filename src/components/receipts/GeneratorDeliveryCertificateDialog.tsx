@@ -395,8 +395,8 @@ ${DECLARATION_TEXT}`;
                   </div>
                 </div>
                 <div className="text-center">
-                  <Barcode value={certNumber} width={0.8} height={22} fontSize={5} displayValue={false} />
-                  <p className="font-mono" style={{ fontSize: '5pt', color: '#374151', marginTop: '1px' }}>{certNumber}</p>
+                  <Barcode value={certNumber} width={1.3} height={38} fontSize={7} displayValue={false} margin={2} />
+                  <p className="font-mono" style={{ fontSize: '6pt', color: '#374151', marginTop: '2px', fontWeight: 'bold' }}>{certNumber}</p>
                 </div>
               </header>
 
