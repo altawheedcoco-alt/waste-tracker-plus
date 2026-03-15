@@ -274,7 +274,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         </div>
 
         {/* Print Preview */}
-        <div ref={printRef} className="bg-white p-3 rounded-lg border text-foreground" style={{ direction: 'rtl', fontSize: '7pt' }}>
+        <div ref={printRef} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
           <div className="page">
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '4px', border: 'none' }}>
@@ -282,7 +282,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                     {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '35px', width: '100%' }} />}
-                    <div style={{ fontSize: '6pt', color: '#374151', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                    <div style={{ fontSize: '6pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                     <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
@@ -291,12 +291,12 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: theme.colors.primary, color: theme.colors.headerText, padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                      <span style={{ background: '#000000', color: '#ffffff', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
                     <div style={{ fontSize: '7pt', color: '#6b7280' }}>
-                      الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
+                      الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
                     </div>
                   </td>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>

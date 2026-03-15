@@ -334,7 +334,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border text-foreground" style={{ direction: 'rtl', fontSize: '7pt' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
           <div className="page">
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '6px', border: 'none' }}>
@@ -342,7 +342,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                     {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '45px', width: '100%' }} />}
-                    <div style={{ fontSize: '7pt', color: '#374151', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
+                    <div style={{ fontSize: '7pt', color: '#000000', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
                     <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
@@ -351,7 +351,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                       <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: theme.colors.primary, color: theme.colors.headerText, padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                      <span style={{ background: '#000000', color: '#ffffff', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
