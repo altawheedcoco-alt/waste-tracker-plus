@@ -7,6 +7,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { useGuillocheBackground } from '@/hooks/useGuillocheBackground';
 import { patternToRef } from '@/lib/guillochePatternUtils';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
+import { generatePrintWatermarkHTML, logPrintAudit } from '@/lib/printSecurityUtils';
 
 const GuillocheA4BorderDesigner = lazy(() => import('@/components/guilloche/GuillocheA4BorderDesigner'));
 const GuillocheA4CombinedPreview = lazy(() => import('@/components/guilloche/GuillocheA4CombinedPreview'));
