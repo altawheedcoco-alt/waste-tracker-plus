@@ -664,7 +664,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
       page.style.overflow = 'visible';
 
       const canvas = await html2canvas(page, {
-        scale: 2,
+        scale: 1.5,
         useCORS: true,
         allowTaint: false,
         backgroundColor: '#ffffff',
