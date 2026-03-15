@@ -706,11 +706,15 @@ export const PrintService = {
         html, body {
           width: 210mm;
           height: 297mm;
+          overflow: hidden;
         }
         .page-wrapper {
           width: 210mm;
           height: 297mm;
+          max-height: 297mm;
+          overflow: hidden;
           page-break-after: always;
+          page-break-inside: avoid;
         }
       }
 
