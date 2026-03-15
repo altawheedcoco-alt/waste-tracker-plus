@@ -603,27 +603,29 @@ export async function generateManualShipmentPDF(form: ManualShipmentData, option
 }
 
 /**
- * Generate PDF as Blob for uploading/sending via WhatsApp
+ * Generate PDF as Blob for uploading/sending via WhatsApp.
+ * Captures each .page div individually for proper A4 page-by-page rendering.
  */
 export async function generateManualShipmentPDFBlob(form: ManualShipmentData, options?: PdfOptions): Promise<Blob | null> {
   try {
     const htmlContent = generateFullHTML(form, options);
-    
-    // Create hidden container
+
+    // Dynamic imports
+    const [html2canvasModule, jspdfModule] = await Promise.all([
+      import('html2canvas'),
+      import('jspdf'),
+    ]);
+    const html2canvas = html2canvasModule.default;
+    const jsPDF = jspdfModule.default;
+
+    // Create hidden container for rendering
     const container = document.createElement('div');
-    container.style.position = 'fixed';
-    container.style.left = '-9999px';
-    container.style.top = '0';
-    container.style.width = '794px';
-    container.style.background = 'white';
-    container.style.zIndex = '-1';
+    container.style.cssText = 'position:fixed;left:-9999px;top:0;width:794px;background:white;z-index:-1;';
     document.body.appendChild(container);
 
     // Create iframe for isolated rendering
     const iframe = document.createElement('iframe');
-    iframe.style.width = '794px';
-    iframe.style.height = '1123px';
-    iframe.style.border = 'none';
+    iframe.style.cssText = 'width:794px;height:2400px;border:none;';
     container.appendChild(iframe);
 
     const doc = iframe.contentDocument || iframe.contentWindow?.document;
@@ -636,16 +638,53 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
     doc.write(htmlContent);
     doc.close();
 
-    // Wait for fonts and content to load
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait for fonts and images to load
+    await new Promise(resolve => setTimeout(resolve, 2500));
 
-    // Use unified PDFService for consistent A4 output
-    const { PDFService } = await import('@/services/documentService');
-    const pdf = await PDFService.generate(doc.body, {
-      orientation: 'portrait',
-      format: 'a4',
-      scale: 2,
-    });
+    // Find all .page divs — each becomes a separate PDF page
+    const pages = Array.from(doc.querySelectorAll<HTMLElement>('.page'));
+    if (pages.length === 0) {
+      // Fallback: treat body as single page
+      pages.push(doc.body);
+    }
+
+    const A4_W_MM = 210;
+    const A4_H_MM = 297;
+    const MARGIN_MM = 8;
+    const CONTENT_W_MM = A4_W_MM - MARGIN_MM * 2;
+    const CONTENT_H_MM = A4_H_MM - MARGIN_MM * 2;
+
+    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+
+    for (let i = 0; i < pages.length; i++) {
+      const page = pages[i];
+
+      // Ensure page is visible and properly sized for capture
+      page.style.pageBreakAfter = 'auto';
+      page.style.overflow = 'visible';
+
+      const canvas = await html2canvas(page, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff',
+        logging: false,
+        width: 794,
+        windowWidth: 794,
+      });
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgW = CONTENT_W_MM;
+      const imgH = (canvas.height * imgW) / canvas.width;
+
+      // Scale down if content exceeds page height
+      const fitScale = imgH > CONTENT_H_MM ? CONTENT_H_MM / imgH : 1;
+      const finalW = imgW * fitScale;
+      const finalH = imgH * fitScale;
+
+      if (i > 0) pdf.addPage();
+      pdf.addImage(imgData, 'JPEG', MARGIN_MM, MARGIN_MM, finalW, finalH);
+    }
 
     document.body.removeChild(container);
     return pdf.output('blob');
