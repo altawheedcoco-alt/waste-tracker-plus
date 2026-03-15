@@ -473,24 +473,16 @@ export const PrintService = {
     const win = window.open('', '_blank');
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
-    // Collect existing stylesheets
-    let collected = '';
-    Array.from(document.styleSheets).forEach(sheet => {
-      try {
-        if (sheet.cssRules) {
-          Array.from(sheet.cssRules).forEach(r => { collected += r.cssText + '\n'; });
-        }
-      } catch {
-        if (sheet.href) collected += `@import url("${sheet.href}");\n`;
-      }
-    });
+    const bgSection = backgroundHTML
+      ? `<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${backgroundHTML}</div>`
+      : '';
 
     const fitScript = opts.fitSinglePage === true ? `
       <script>
         window.addEventListener('load', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = ${A4_PX.height};
+          var maxH = 257 * 3.7795; // 257mm in px
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
@@ -502,31 +494,133 @@ export const PrintService = {
       </script>
     ` : '';
 
-    const bgSection = backgroundHTML
-      ? `<div class="guilloche-print-bg" aria-hidden="true">${backgroundHTML}</div>`
-      : '';
+    const printCSS = `
+      @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
 
-    win.document.write(`
-      <!DOCTYPE html>
-      <html dir="rtl" lang="ar">
-        <head>
-          <meta charset="UTF-8">
-          <title>طباعة الوثيقة</title>
-          <style>${DEFAULT_PRINT_CSS}\n${collected}\n${opts.customCSS || ''}</style>
-          ${fitScript}
-        </head>
-        <body>
-          ${bgSection}
-          <div class="print-container">${element.outerHTML}</div>
-        </body>
-      </html>
-    `);
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+
+      * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 210mm;
+        min-height: 297mm;
+        background: white !important;
+        font-family: 'Cairo', sans-serif !important;
+        direction: rtl;
+        -webkit-font-smoothing: antialiased !important;
+        text-rendering: optimizeLegibility !important;
+      }
+
+      .page-wrapper {
+        width: 210mm;
+        min-height: 297mm;
+        position: relative;
+        overflow: hidden;
+        background: white;
+        margin: 0 auto;
+      }
+
+      .print-container {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        padding: 10mm 12mm;
+        box-sizing: border-box;
+        overflow: visible !important;
+        break-inside: auto;
+      }
+
+      .no-print { display: none !important; }
+
+      img, svg, canvas {
+        max-width: 100%;
+        height: auto;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+      }
+
+      table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
+      thead { display: table-header-group; }
+      tr { page-break-inside: avoid; page-break-after: auto; }
+      th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; }
+
+      h1 { font-size: 16pt; margin: 4px 0; }
+      h2 { font-size: 13pt; margin: 3px 0; }
+      h3 { font-size: 11pt; margin: 2px 0; }
+      p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+
+      @media print {
+        html, body {
+          width: 210mm;
+          height: 297mm;
+        }
+        .page-wrapper {
+          width: 210mm;
+          height: 297mm;
+          page-break-after: always;
+        }
+      }
+
+      @media screen {
+        body {
+          background: #e5e7eb !important;
+          display: flex;
+          justify-content: center;
+          padding: 20px 0;
+        }
+        .page-wrapper {
+          box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+          border-radius: 2px;
+        }
+      }
+
+      ${opts.customCSS || ''}
+    `;
+
+    // Clone and clean content
+    const contentClone = element.cloneNode(true) as HTMLElement;
+    // Remove inline width/minHeight that PrintWrapper sets (we handle it in .page-wrapper)
+    contentClone.style.width = '';
+    contentClone.style.minHeight = '';
+    contentClone.style.margin = '';
+    contentClone.style.padding = '';
+    contentClone.style.boxSizing = '';
+    // Remove no-print elements
+    contentClone.querySelectorAll('.no-print').forEach(el => el.remove());
+
+    win.document.write(`<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>طباعة الوثيقة</title>
+  <style>${printCSS}</style>
+  ${fitScript}
+</head>
+<body>
+  <div class="page-wrapper">
+    ${bgSection}
+    <div class="print-container">${contentClone.innerHTML}</div>
+  </div>
+  <script>
+    window.addEventListener('load', function() {
+      setTimeout(function() { window.print(); }, 600);
+    });
+    setTimeout(function() { window.print(); }, 2500);
+  </script>
+</body>
+</html>`);
     win.document.close();
-
-    let printed = false;
-    const doPrint = () => { if (printed) return; printed = true; win.print(); };
-    win.onload = () => setTimeout(doPrint, 500);
-    setTimeout(doPrint, 2000);
   },
 };
 
