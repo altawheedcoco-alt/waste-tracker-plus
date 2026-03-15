@@ -441,9 +441,9 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
   <!-- Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:80px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${qrUrl}&bgcolor=ffffff&color=222222" class="qr-img" alt="QR"/>
-      <div style="font-size:6px;color:#888;margin-top:2px;">رمز QR</div>
+    <div class="verify-cell" style="width:100px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${qrUrl}&bgcolor=ffffff&color=000000" class="qr-img" alt="QR"/>
+      <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للتحقق</div>
     </div>
     <div class="verify-cell" style="width:auto;">
       <div style="font-size:7px;color:#888;margin-bottom:2px;">رمز التحقق الإلكتروني</div>
