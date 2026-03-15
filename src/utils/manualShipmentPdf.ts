@@ -566,9 +566,9 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
   <!-- Page 2 Verification -->
   <div class="verify-row">
-    <div class="verify-cell" style="width:72px;">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=70x70&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=222222" class="qr-img" style="width:56px;height:56px;" alt="QR"/>
-      <div style="font-size:6px;color:#888;margin-top:2px;">QR الشروط</div>
+    <div class="verify-cell" style="width:100px;">
+      <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent('https://irecycle21.lovable.app/terms')}&bgcolor=ffffff&color=000000" class="qr-img" style="width:80px;height:80px;" alt="QR"/>
+      <div style="font-size:7px;color:#555;margin-top:3px;font-family:'Cairo',sans-serif;">امسح للشروط</div>
     </div>
     <div class="verify-cell" style="width:auto;">
       <div style="font-size:7px;color:#888;">رمز مصادقة الشروط والأحكام</div>
