@@ -442,7 +442,7 @@ export default function GuillocheA4BorderDesigner() {
           ${svgEl.outerHTML}
           ${generateSecurityOverlayHTML(orgName, activeBorder.color.primary)}
         </div>
-        ${generatePrintWatermarkHTML(orgName, userName)}
+        ${generatePrintWatermarkHTML(orgName, userName, (organization as any)?.client_code, (organization as any)?.verification_code)}
       </body>
       </html>
     `);
