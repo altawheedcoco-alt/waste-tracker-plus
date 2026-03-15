@@ -506,28 +506,30 @@ export default function GuillochePatterns() {
         </div>
 
         <Tabs defaultValue="templates" dir="rtl">
-          <TabsList className="grid w-full max-w-3xl grid-cols-5">
-            <TabsTrigger value="templates" className="gap-1 text-xs">
-              <Sparkles className="h-3.5 w-3.5" />
-              قوالب جاهزة
-            </TabsTrigger>
-            <TabsTrigger value="patterns" className="gap-1 text-xs">
-              <Fingerprint className="h-3.5 w-3.5" />
-              أنماط الخلفية
-            </TabsTrigger>
-            <TabsTrigger value="saved" className="gap-1 text-xs">
-              <Star className="h-3.5 w-3.5" />
-              المحفوظة ({savedPatternIds.length})
-            </TabsTrigger>
-            <TabsTrigger value="borders" className="gap-1 text-xs">
-              <FileText className="h-3.5 w-3.5" />
-              براويز الصفحة
-            </TabsTrigger>
-            <TabsTrigger value="combined" className="gap-1 text-xs">
-              <Eye className="h-3.5 w-3.5" />
-              معاينة مجمعة
-            </TabsTrigger>
-          </TabsList>
+          <div className="w-full overflow-x-auto pb-2">
+            <TabsList className="inline-flex w-max min-w-full sm:min-w-0 sm:w-full sm:max-w-3xl">
+              <TabsTrigger value="templates" className="gap-1 text-xs whitespace-nowrap">
+                <Sparkles className="h-3.5 w-3.5" />
+                قوالب جاهزة
+              </TabsTrigger>
+              <TabsTrigger value="patterns" className="gap-1 text-xs whitespace-nowrap">
+                <Fingerprint className="h-3.5 w-3.5" />
+                أنماط الخلفية
+              </TabsTrigger>
+              <TabsTrigger value="saved" className="gap-1 text-xs whitespace-nowrap">
+                <Star className="h-3.5 w-3.5" />
+                المحفوظة ({savedPatternIds.length})
+              </TabsTrigger>
+              <TabsTrigger value="borders" className="gap-1 text-xs whitespace-nowrap">
+                <FileText className="h-3.5 w-3.5" />
+                براويز الصفحة
+              </TabsTrigger>
+              <TabsTrigger value="combined" className="gap-1 text-xs whitespace-nowrap">
+                <Eye className="h-3.5 w-3.5" />
+                معاينة مجمعة
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="templates" className="mt-4">
             <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
