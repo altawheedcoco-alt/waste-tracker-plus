@@ -528,21 +528,49 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               </tbody>
             </table>
 
-            {/* Stamps and Signatures Table - Dark Green Header */}
+            {/* Legal Declarations Section */}
+            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+              <tbody>
+                <tr>
+                  <td colSpan={2} style={{ background: '#1e293b', color: '#ffffff', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #334155' }}>الإقرارات القانونية والبيئية</td>
+                </tr>
+                <tr>
+                  <td style={{ background: '#eff6ff', fontWeight: '600', width: '15%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
+                </tr>
+                <tr>
+                  <td style={{ background: '#fffbeb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
+                </tr>
+                <tr>
+                  <td style={{ background: '#f0fdf4', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
+                </tr>
+                <tr>
+                  <td style={{ background: '#fef2f2', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
+                </tr>
+              </tbody>
+            </table>
+
+            {/* Stamps and Signatures Table */}
             <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: '#166534', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #14532d' }}>الأختام والتوقيعات</td>
+                  <td colSpan={3} style={{ background: '#166534', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #14532d' }}>التوقيعات والأختام</td>
                 </tr>
                 <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#1e40af', marginBottom: '4px' }}>الجهة المولدة</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المولّد</div>
+                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.generator?.representative_name || shipment.generator?.name || '-'}</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>الجهة الناقلة</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#fffbeb' }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>الناقل</div>
+                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.transporter?.representative_name || shipment.transporter?.name || '-'}</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '6px', border: '1px solid #d1d5db', background: '#f9fafb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '600', color: '#166534', marginBottom: '4px' }}>جهة التدوير</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#f0fdf4' }}>
+                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المستقبل</div>
+                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.recycler?.representative_name || shipment.recycler?.name || '-'}</div>
                   </td>
                 </tr>
                 <tr>
@@ -556,8 +584,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                         {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
                         {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
                       </div>
-                      <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: '#6b7280' }}>التوقيع والختم</div>
-                      {/* Signer QR */}
+                      <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
                       <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
                         <QRCodeSVG 
                           value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
@@ -565,8 +592,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                           level="L" 
                         />
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280' }}>{item.org?.commercial_register || '-'}</div>
-                          <div style={{ fontSize: '5pt', color: '#9ca3af' }}>QR الموقع</div>
+                          <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
+                          <div style={{ fontSize: '5pt', color: '#666' }}>QR الموقع</div>
                         </div>
                       </div>
                     </td>
@@ -579,7 +606,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
             {/* Footer */}
-            <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#9ca3af' }}>
+            <div style={{ marginTop: '4px', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#000' }}>
               تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام | {format(new Date(), 'PPP', { locale: ar })}
             </div>
           </div>
