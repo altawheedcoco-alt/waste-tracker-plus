@@ -43,9 +43,10 @@ const orgTypeLabel = (t: string) => {
 
 /** Shared print reports button for all dashboard headers */
 const DashboardPrintReports = memo(() => {
-  const { organization, profile } = useAuth();
+  const { organization, profile, user } = useAuth();
   const [isPrinting, setIsPrinting] = useState(false);
   const { backgroundHTML, hasBackground } = useGuillocheBackground();
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
   const orgId = organization?.id;
 
   const { data: todayData } = useQuery({
