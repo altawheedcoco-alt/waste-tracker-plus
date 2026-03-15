@@ -15,6 +15,7 @@ import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
+import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 
 interface ShipmentData {
   id: string;

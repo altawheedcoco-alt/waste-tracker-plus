@@ -13,6 +13,7 @@ import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
+import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 
 interface ShipmentQuickPrintProps {
   isOpen: boolean;
