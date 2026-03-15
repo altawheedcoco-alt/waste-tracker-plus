@@ -445,11 +445,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.representative_name || '-'}</td>
                 </tr>
                 <tr>
+                  <td style={{ background: theme.colors.transporterLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.email || '-'}</td>
                   <td style={{ background: theme.colors.transporterLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>السائق</td>
                   <td style={{ background: theme.colors.transporterLight, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{driverName}</td>
                   <td style={{ background: theme.colors.transporterLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>لوحة المركبة</td>
                   <td style={{ background: theme.colors.transporterLight, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{vehiclePlate}</td>
-                  <td colSpan={4} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}></td>
+                  <td colSpan={2} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}></td>
                 </tr>
               </tbody>
             </table>
