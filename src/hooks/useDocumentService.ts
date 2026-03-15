@@ -94,6 +94,8 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
 
   const orgName = organization?.name || '';
   const userName = profile?.full_name || user?.email || '';
+  const orgClientCode = (organization as any)?.client_code || null;
+  const orgVerificationCode = (organization as any)?.verification_code || null;
   const orgId = organization?.id;
   const userId = user?.id;
 
