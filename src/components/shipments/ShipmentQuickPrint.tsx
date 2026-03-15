@@ -334,7 +334,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border text-foreground" style={{ direction: 'rtl', fontSize: '7pt' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
           <div className="page">
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '6px', border: 'none' }}>
