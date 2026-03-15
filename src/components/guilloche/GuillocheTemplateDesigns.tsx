@@ -613,6 +613,10 @@ export default function GuillocheTemplateDesigns() {
 
   const handlePrintPreview = () => {
     if (!selectedTemplate) return;
+    if (!canPrint) {
+      toast.error('ليس لديك صلاحية طباعة المستندات');
+      return;
+    }
     const html = `
       <!DOCTYPE html>
       <html dir="rtl" lang="ar">
@@ -636,14 +640,21 @@ export default function GuillocheTemplateDesigns() {
           <div class="content">
             <h1>♻ شهادة إعادة التدوير</h1>
             <p>هذه معاينة للقالب مع محتوى تجريبي</p>
-            <p style="margin-top:30px;font-size:18px;font-weight:bold;">اسم المنشأة</p>
+            <p style="margin-top:30px;font-size:18px;font-weight:bold;">${orgName}</p>
             <p style="margin-top:60px;color:#999;font-size:12px;">رقم الشهادة: RC-2026-001234</p>
           </div>
         </div>
+        ${generatePrintWatermarkHTML(orgName, userName)}
       </body>
       </html>`;
     const w = window.open('', '_blank');
-    if (w) { w.document.write(html); w.document.close(); }
+    if (w) {
+      w.document.write(html);
+      w.document.close();
+    }
+    if (user?.id && organization?.id) {
+      logPrintAudit({ userId: user.id, orgId: organization.id, action: 'print_guilloche_template', details: { template: selectedTemplate.name } });
+    }
   };
 
   const gridCols = {
