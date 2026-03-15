@@ -485,7 +485,7 @@ export const PrintService = {
       }
     });
 
-    const fitScript = opts.fitSinglePage !== false ? `
+    const fitScript = opts.fitSinglePage === true ? `
       <script>
         window.addEventListener('load', function() {
           var c = document.querySelector('.print-container');
