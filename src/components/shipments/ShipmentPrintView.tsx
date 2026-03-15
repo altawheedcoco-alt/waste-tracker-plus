@@ -296,7 +296,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       </span>
                     </div>
                     <div style={{ fontSize: '7pt', color: '#6b7280' }}>
-                      الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
+                      الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
                     </div>
                   </td>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
