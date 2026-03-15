@@ -487,9 +487,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#22c55e', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #16a34a' }}>
+                  <td colSpan={8} style={{ background: '#dcfce7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #86efac' }}>
                     بيانات جهة التدوير: {shipment.recycler?.name || '-'}
-                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#dcfce7', color: '#166534', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
+                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#bbf7d0', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
