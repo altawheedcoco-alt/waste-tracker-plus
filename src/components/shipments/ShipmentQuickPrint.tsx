@@ -351,7 +351,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                       <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: theme.colors.primary, color: theme.colors.headerText, padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
+                      <span style={{ background: '#000000', color: '#ffffff', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
