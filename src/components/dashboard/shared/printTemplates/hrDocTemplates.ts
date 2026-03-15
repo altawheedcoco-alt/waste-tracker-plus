@@ -36,9 +36,9 @@ const commonStyles = `
   .ref-date { display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 13px; color: #555; }
   .body-text { font-size: 15px; line-height: 2; text-align: justify; margin-bottom: 20px; }
   .body-text strong { color: #059669; }
-  .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
-  .info-table th { background: #f0fdf4; color: #059669; padding: 10px 14px; text-align: right; border: 1px solid #d1d5db; font-size: 13px; width: 35%; }
-  .info-table td { padding: 10px 14px; border: 1px solid #d1d5db; font-size: 14px; }
+  .info-table { width: 100%; border-collapse: collapse; margin: 20px 0; background: transparent !important; }
+  .info-table th { background: rgba(240,253,244,0.55) !important; color: #059669; padding: 10px 14px; text-align: right; border: 1px solid #d1d5db; font-size: 13px; width: 35%; }
+  .info-table td { padding: 10px 14px; border: 1px solid #d1d5db; font-size: 14px; background: transparent !important; }
   .signature-section { margin-top: 60px; display: flex; justify-content: space-between; }
   .signature-box { text-align: center; width: 200px; }
   .signature-box .line { border-top: 1px solid #333; margin-top: 50px; padding-top: 8px; font-size: 13px; color: #555; }

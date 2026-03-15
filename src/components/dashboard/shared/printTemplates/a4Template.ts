@@ -35,18 +35,18 @@ export const generateA4Template = (data: A4Data): string => {
   h2 { font-size: 16px; color: #059669; margin: 18px 0 8px; border-bottom: 1px solid #d1d5db; padding-bottom: 4px; }
   .subtitle { font-size: 13px; color: #666; }
   .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
-  .stat-card { background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; text-align: center; }
+  .stat-card { background: rgba(240,253,244,0.55); border: 1px solid #bbf7d0; border-radius: 8px; padding: 14px; text-align: center; }
   .stat-value { font-size: 24px; font-weight: bold; color: #059669; }
   .stat-label { font-size: 11px; color: #666; margin-top: 4px; }
-  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11px; }
-  th { background: #059669; color: white; padding: 8px 6px; text-align: right; }
-  td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right; }
-  tr:nth-child(even) { background: #f9fafb; }
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 11px; background: transparent !important; }
+  th { background: rgba(5,150,105,0.85) !important; color: white; padding: 8px 6px; text-align: right; }
+  td { padding: 6px; border-bottom: 1px solid #e5e7eb; text-align: right; background: transparent !important; }
+  tr:nth-child(even) { background: rgba(249,250,251,0.35) !important; }
   .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: bold; }
-  .badge-success { background: #dcfce7; color: #166534; }
-  .badge-warning { background: #fef3c7; color: #92400e; }
-  .badge-info { background: #dbeafe; color: #1e40af; }
-  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-success { background: rgba(220,252,231,0.6); color: #166534; }
+  .badge-warning { background: rgba(254,243,199,0.6); color: #92400e; }
+  .badge-info { background: rgba(219,234,254,0.6); color: #1e40af; }
+  .badge-danger { background: rgba(254,226,226,0.6); color: #991b1b; }
   .footer { margin-top: 30px; padding-top: 12px; border-top: 2px solid #059669; font-size: 10px; color: #999; text-align: center; }
   .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-30deg); font-size: 80px; color: rgba(5,150,105,0.04); font-weight: bold; pointer-events: none; z-index: -1; }
   @media print { .no-print { display: none; } }
