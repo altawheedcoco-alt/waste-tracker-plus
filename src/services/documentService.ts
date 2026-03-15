@@ -707,6 +707,7 @@ export const PrintService = {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>طباعة الوثيقة</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>${printCSS}</style>
   ${fitScript}
 </head>
@@ -724,9 +725,9 @@ export const PrintService = {
       window.print();
     }
     window.addEventListener('load', function() {
-      setTimeout(doPrint, 600);
+      setTimeout(doPrint, 200);
     });
-    setTimeout(doPrint, 2500);
+    setTimeout(doPrint, 1200);
   </script>
 </body>
 </html>`);

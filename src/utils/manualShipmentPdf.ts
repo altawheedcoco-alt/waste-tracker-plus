@@ -673,7 +673,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
         windowWidth: 794,
       });
 
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
+      const imgData = canvas.toDataURL('image/jpeg', 0.85);
       const imgW = CONTENT_W_MM;
       const imgH = (canvas.height * imgW) / canvas.width;
 
