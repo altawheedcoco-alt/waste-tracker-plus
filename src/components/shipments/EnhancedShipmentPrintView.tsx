@@ -384,9 +384,9 @@ const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipme
                         </td>
                         <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
                           <div className="qr-container bg-white p-2 border rounded-lg inline-block">
-                            <QRCodeSVG value={qrData} size={60} level="M" />
+                            <QRCodeSVG value={qrData} size={80} level="H" />
                           </div>
-                          <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                          <div style={{ fontSize: '7pt', color: '#374151', fontWeight: '600', marginTop: '2px' }}>امسح للتتبع</div>
                         </td>
                       </tr>
                     </tbody>
