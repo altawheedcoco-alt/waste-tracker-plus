@@ -1,5 +1,5 @@
 import { ManualShipmentData, WasteItem } from '@/hooks/useManualShipmentDraft';
-// jsPDF & html2canvas loaded dynamically for code-splitting
+// PDF generated via unified PDFService
 
 const wasteTypeLabels: Record<string, string> = {
   plastic: 'بلاستيك', paper: 'ورق', metal: 'معادن', glass: 'زجاج',
