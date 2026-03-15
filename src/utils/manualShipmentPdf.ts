@@ -616,31 +616,13 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
     // Wait for fonts and content to load
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Capture each page
-    const pages = doc.querySelectorAll('.page');
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ]);
-    const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-    const pdfWidth = 210;
-    const pdfHeight = 297;
-
-    for (let i = 0; i < pages.length; i++) {
-      if (i > 0) pdf.addPage();
-      
-      const canvas = await html2canvas(pages[i] as HTMLElement, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: '#ffffff',
-        width: 794,
-      });
-
-      const imgData = canvas.toDataURL('image/jpeg', 0.92);
-      const imgHeight = (canvas.height * pdfWidth) / canvas.width;
-      pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, Math.min(imgHeight, pdfHeight));
-    }
+    // Use unified PDFService for consistent A4 output
+    const { PDFService } = await import('@/services/documentService');
+    const pdf = await PDFService.generate(doc.body, {
+      orientation: 'portrait',
+      format: 'a4',
+      scale: 2,
+    });
 
     document.body.removeChild(container);
     return pdf.output('blob');

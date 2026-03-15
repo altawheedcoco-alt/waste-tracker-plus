@@ -64,44 +64,7 @@ const OfficialReportPrint: React.FC<OfficialReportPrintProps> = ({
 
   const handleExportPDF = async () => {
     if (!printRef.current) return;
-
-    const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-      import('html2canvas'),
-      import('jspdf'),
-    ]);
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-
-    // Capture main report
-    const mainCanvas = await html2canvas(printRef.current, {
-      scale: 2,
-      useCORS: true,
-      backgroundColor: '#ffffff',
-    });
-
-    const mainImgData = mainCanvas.toDataURL('image/png');
-    const mainImgHeight = (mainCanvas.height * pageWidth) / mainCanvas.width;
-    
-    pdf.addImage(mainImgData, 'PNG', 0, 0, pageWidth, mainImgHeight);
-
-    // If charts exist, add as appendix
-    if (chartsRef.current) {
-      pdf.addPage();
-      
-      const chartsCanvas = await html2canvas(chartsRef.current, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-      });
-
-      const chartsImgData = chartsCanvas.toDataURL('image/png');
-      const chartsImgHeight = (chartsCanvas.height * pageWidth) / chartsCanvas.width;
-      
-      pdf.addImage(chartsImgData, 'PNG', 0, 0, pageWidth, chartsImgHeight);
-    }
-
-    pdf.save(`تقرير-إحصائي-${new Date().toISOString().split('T')[0]}.pdf`);
+    await downloadPDF(printRef.current, { customFilename: `تقرير-إحصائي` });
   };
 
   return (

@@ -315,115 +315,17 @@ const EnvironmentalSustainability = () => {
 
   // تصدير PDF
   const exportToPdf = async () => {
+    if (!reportRef.current) return;
     setExportingPdf(true);
     toast({ title: "جاري إنشاء التقرير...", description: "يرجى الانتظار" });
 
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf'),
-      ]);
-      const pdf = new jsPDF("p", "mm", "a4");
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      
-      // إعداد الخط العربي
-      pdf.setFont("helvetica");
-      
-      // العنوان
-      pdf.setFontSize(24);
-      pdf.setTextColor(34, 197, 94);
-      pdf.text("تقرير الاستدامة البيئية", pageWidth / 2, 20, { align: "center" });
-      
-      // التاريخ
-      pdf.setFontSize(12);
-      pdf.setTextColor(100);
-      pdf.text(`تاريخ التقرير: ${new Date().toLocaleDateString("en-US")}`, pageWidth / 2, 30, { align: "center" });
-      
-      // الدرجة الإجمالية
-      pdf.setFontSize(18);
-      pdf.setTextColor(0);
-      pdf.text(`درجة الاستدامة: ${metrics.overallScore}%`, pageWidth / 2, 45, { align: "center" });
-      pdf.text(`المستوى: ${sustainabilityLevel.level}`, pageWidth / 2, 55, { align: "center" });
-      
-      // المؤشرات
-      let yPos = 75;
-      pdf.setFontSize(14);
-      pdf.text("مؤشرات الأداء البيئي:", pageWidth - 20, yPos, { align: "right" });
-      yPos += 10;
-      
-      pdf.setFontSize(11);
-      const metricsData = [
-        ["معدل إعادة التدوير", `${metrics.recyclingRate}%`],
-        ["تقليل النفايات", `${metrics.wasteReduction}%`],
-        ["كفاءة الطاقة", `${metrics.energyEfficiency}%`],
-        ["تقليل الانبعاثات", `${metrics.carbonReduction}%`],
-        ["الامتثال البيئي", `${metrics.compliance}%`],
-        ["الابتكار المستدام", `${metrics.innovation}%`],
-      ];
-      
-      metricsData.forEach(([label, value]) => {
-        pdf.text(`${label}: ${value}`, pageWidth - 20, yPos, { align: "right" });
-        yPos += 8;
+      await PDFService.download(reportRef.current, {
+        filename: `تقرير-الاستدامة-البيئية`,
+        orientation: 'portrait',
+        format: 'a4',
+        scale: 2,
       });
-      
-      // إحصائيات عامة
-      yPos += 10;
-      pdf.setFontSize(14);
-      pdf.text("إحصائيات عامة:", pageWidth - 20, yPos, { align: "right" });
-      yPos += 10;
-      
-      pdf.setFontSize(11);
-      const totalQuantity = shipments.reduce((sum, s) => sum + Number(s.quantity || 0), 0);
-      const recycledQuantity = shipments
-        .filter(s => s.disposal_method === "recycling" || s.disposal_method === "remanufacturing")
-        .reduce((sum, s) => sum + Number(s.quantity || 0), 0);
-      
-      pdf.text(`إجمالي الشحنات: ${shipments.length}`, pageWidth - 20, yPos, { align: "right" });
-      yPos += 8;
-      pdf.text(`إجمالي الكميات: ${totalQuantity.toLocaleString()} كجم`, pageWidth - 20, yPos, { align: "right" });
-      yPos += 8;
-      pdf.text(`الكميات المعاد تدويرها: ${recycledQuantity.toLocaleString()} كجم`, pageWidth - 20, yPos, { align: "right" });
-      
-      // التقاط الرسوم البيانية
-      if (reportRef.current) {
-        const canvas = await html2canvas(reportRef.current, { 
-          scale: 2,
-          useCORS: true,
-          logging: false
-        });
-        const imgData = canvas.toDataURL("image/png");
-        
-        pdf.addPage();
-        pdf.setFontSize(16);
-        pdf.text("الرسوم البيانية والتحليلات", pageWidth / 2, 15, { align: "center" });
-        
-        const imgWidth = pageWidth - 20;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        pdf.addImage(imgData, "PNG", 10, 25, imgWidth, Math.min(imgHeight, 250));
-      }
-      
-      // التوصيات
-      pdf.addPage();
-      pdf.setFontSize(16);
-      pdf.text("التوصيات لتحسين الاستدامة:", pageWidth - 20, 20, { align: "right" });
-      
-      yPos = 35;
-      pdf.setFontSize(11);
-      const recommendations = [
-        "زيادة معدل إعادة التدوير من خلال فرز النفايات بشكل أفضل",
-        "تحسين كفاءة النقل لتقليل الانبعاثات الكربونية",
-        "الاستثمار في تقنيات إعادة التصنيع الحديثة",
-        "تدريب الموظفين على ممارسات الاستدامة",
-        "مراقبة وتحسين مؤشرات الأداء البيئي بشكل دوري"
-      ];
-      
-      recommendations.forEach((rec, i) => {
-        pdf.text(`${i + 1}. ${rec}`, pageWidth - 20, yPos, { align: "right" });
-        yPos += 10;
-      });
-      
-      pdf.save(`تقرير-الاستدامة-البيئية-${new Date().toISOString().split("T")[0]}.pdf`);
-      
       toast({ title: "تم التصدير بنجاح", description: "تم حفظ تقرير PDF" });
     } catch (error) {
       toast({ title: "خطأ في التصدير", description: "حدث خطأ أثناء إنشاء التقرير", variant: "destructive" });

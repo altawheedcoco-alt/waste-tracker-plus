@@ -436,45 +436,12 @@ const OperationalPlans = () => {
     
     setIsExportingPDF(true);
     try {
-      const element = printRef.current;
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas'),
-        import('jspdf'),
-      ]);
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff',
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF({
+      await PDFService.download(printRef.current, {
+        filename: `operational-plan-${format(new Date(), 'yyyy-MM-dd')}`,
         orientation: 'portrait',
-        unit: 'mm',
         format: 'a4',
+        scale: 2,
       });
-      
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      let heightLeft = imgHeight;
-      let position = 0;
-
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft >= 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const fileName = `operational-plan-${format(new Date(), 'yyyy-MM-dd')}.pdf`;
-      pdf.save(fileName);
-      
-      toast.success('تم تصدير الخطة التشغيلية بنجاح');
     } catch (error) {
       console.error('Error exporting PDF:', error);
       toast.error('حدث خطأ أثناء تصدير PDF');
