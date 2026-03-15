@@ -639,7 +639,7 @@ export async function generateManualShipmentPDFBlob(form: ManualShipmentData, op
     doc.close();
 
     // Wait for fonts and images to load
-    await new Promise(resolve => setTimeout(resolve, 2500));
+    await new Promise(resolve => setTimeout(resolve, 1000));
 
     // Find all .page divs — each becomes a separate PDF page
     const pages = Array.from(doc.querySelectorAll<HTMLElement>('.page'));
