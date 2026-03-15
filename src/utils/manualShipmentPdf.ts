@@ -436,8 +436,8 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 
 </div>
 
-<!-- ===== PAGE 2: TERMS & CONDITIONS ===== -->
-<div class="page">
+<!-- ===== PAGE 2: TERMS & CONDITIONS (no guilloche) ===== -->
+<div class="page no-guilloche">
 
   <div class="header">
     <h1>الشروط والأحكام والسياسات</h1>

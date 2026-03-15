@@ -477,9 +477,25 @@ export const PrintService = {
     const textFillerHTML = generateGuillocheTextFillerHTML();
 
     if (isFullDoc) {
-      // Inject guilloche text filler + dedup print script
+      // For full HTML docs: inject guilloche per-page (skip pages with .no-guilloche)
       const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,600);});setTimeout(doPrint,2500);</script>`;
-      const injected = htmlContent.replace('<body>', `<body>${textFillerHTML}`).replace('</body>', `${dedupScript}</body>`);
+      // Inject a script that adds guilloche filler to each .page that doesn't have .no-guilloche
+      const guillocheInjectorScript = `<script>
+        window.addEventListener('DOMContentLoaded', function() {
+          var pages = document.querySelectorAll('.page:not(.no-guilloche)');
+          var fillerHTML = ${JSON.stringify(textFillerHTML.replace('position:fixed', 'position:absolute'))};
+          pages.forEach(function(page) {
+            page.style.position = 'relative';
+            page.style.overflow = 'hidden';
+            page.insertAdjacentHTML('afterbegin', fillerHTML);
+          });
+          // If no .page elements, apply globally
+          if (!pages.length && !document.querySelector('.no-guilloche')) {
+            document.body.insertAdjacentHTML('afterbegin', ${JSON.stringify(textFillerHTML)});
+          }
+        });
+      </script>`;
+      const injected = htmlContent.replace('</body>', `${guillocheInjectorScript}${dedupScript}</body>`);
       win.document.open();
       win.document.write(injected);
       win.document.close();
