@@ -502,8 +502,8 @@ export const PrintService = {
       </script>
     ` : '';
 
-    const bgSection = backgroundHTML 
-      ? `<div class="guilloche-print-bg">${backgroundHTML}</div>` 
+    const bgSection = backgroundHTML
+      ? `<div class="guilloche-print-bg" aria-hidden="true">${backgroundHTML}</div>`
       : '';
 
     win.document.write(`
