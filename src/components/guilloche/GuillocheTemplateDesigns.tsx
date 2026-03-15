@@ -625,11 +625,12 @@ export default function GuillocheTemplateDesigns() {
         <title>معاينة القالب - ${selectedTemplate.name}</title>
         <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
         <style>
+          ${getSecurePrintCSS()}
           * { margin:0; padding:0; box-sizing:border-box; }
           @page { size:A4; margin:0; }
           body { display:flex; justify-content:center; font-family:'Cairo',sans-serif; }
           .page { width:210mm; height:297mm; position:relative; overflow:hidden; }
-          .content { position:absolute; inset:25mm; z-index:5; text-align:center; }
+          .content { position:absolute; inset:22mm; z-index:5; text-align:center; }
           .content h1 { font-size:24px; color:${selectedTemplate.colorScheme.border}; margin-top:40px; }
           .content p { font-size:14px; color:#666; margin-top:10px; }
         </style>

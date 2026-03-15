@@ -357,7 +357,7 @@ const GuillochePatternSVG = ({ pattern, size = 200 }: { pattern: PatternConfig; 
 };
 
 export default function GuillochePatterns() {
-  const { roles, organization, profile, user } = useAuth();
+  const { organization, profile, user } = useAuth();
   const { getPref, setPref } = useUserPreferences();
   const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
   const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
