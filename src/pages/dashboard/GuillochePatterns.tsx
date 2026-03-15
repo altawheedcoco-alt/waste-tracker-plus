@@ -374,6 +374,8 @@ export default function GuillochePatterns() {
 
   // Org name for watermark
   const orgName = organization?.name || 'اسم الجهة';
+  const { hasPermission, isAdmin, isCompanyAdmin } = useMyPermissions();
+  const canPrint = isAdmin || isCompanyAdmin || hasPermission('print_documents');
 
   // Saved/used patterns from preferences
   const savedPatternIds: string[] = getPref('guilloche_saved_patterns', []);
