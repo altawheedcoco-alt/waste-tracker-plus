@@ -502,8 +502,12 @@ export default function GuillochePatterns() {
           </div>
         </div>
 
-        <Tabs defaultValue="patterns" dir="rtl">
-          <TabsList className="grid w-full max-w-2xl grid-cols-4">
+        <Tabs defaultValue="templates" dir="rtl">
+          <TabsList className="grid w-full max-w-3xl grid-cols-5">
+            <TabsTrigger value="templates" className="gap-1 text-xs">
+              <Sparkles className="h-3.5 w-3.5" />
+              قوالب جاهزة
+            </TabsTrigger>
             <TabsTrigger value="patterns" className="gap-1 text-xs">
               <Fingerprint className="h-3.5 w-3.5" />
               أنماط الخلفية
@@ -521,6 +525,12 @@ export default function GuillochePatterns() {
               معاينة مجمعة
             </TabsTrigger>
           </TabsList>
+
+          <TabsContent value="templates" className="mt-4">
+            <Suspense fallback={<div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>}>
+              <GuillocheTemplateDesigns />
+            </Suspense>
+          </TabsContent>
 
           <TabsContent value="patterns" className="space-y-6 mt-4">
           <div className="flex flex-wrap items-center gap-3">
