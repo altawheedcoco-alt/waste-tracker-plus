@@ -165,6 +165,7 @@ const UnifiedShipmentPrint = ({
         title={`نموذج تتبع - ${shipment.shipment_number}`}
       >
         <ShipmentA4Document
+          ref={a4PrintRef}
           shipment={shipment}
           theme={theme}
           qrData={qrData}
