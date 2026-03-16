@@ -394,9 +394,9 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
           {/* ═══ FOOTER ═══ */}
-          <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '5pt', color: '#000', paddingTop: '2px', paddingBottom: '1px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
-            <div style={{ fontWeight: '600' }}>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي</div>
-            <div style={{ fontFamily: 'monospace', fontSize: '4.5pt' }}>
+           <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '6.5pt', color: '#000', paddingTop: '3px', paddingBottom: '2px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
+             <div style={{ fontWeight: '600' }}>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي</div>
+             <div style={{ fontFamily: 'monospace', fontSize: '6pt' }}>
               رقم التتبع: {shipment.shipment_number} | {documentSerial} | {verificationCode} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
             </div>
           </div>
