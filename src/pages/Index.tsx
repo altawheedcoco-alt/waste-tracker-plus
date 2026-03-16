@@ -4,38 +4,58 @@ import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 
+// Retry wrapper for lazy imports — handles stale chunk errors after deploys
+function lazyRetry<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>,
+  retries = 2
+): React.LazyExoticComponent<T> {
+  return lazy(() =>
+    factory().catch((err) => {
+      if (retries > 0) {
+        // Force reload on stale chunk error
+        return new Promise<{ default: T }>((resolve) =>
+          setTimeout(() => resolve(lazyRetry(factory, retries - 1) as any), 500)
+        );
+      }
+      // Final fallback: reload page
+      window.location.reload();
+      throw err;
+    })
+  );
+}
+
 // Critical above-fold: load eagerly
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
-const LandingWrapper = lazy(() => import("@/components/LandingWrapper"));
+const LandingWrapper = lazyRetry(() => import("@/components/LandingWrapper"));
 
 // NewsTicker is visually secondary — defer it
-const NewsTicker = lazy(() => import("@/components/NewsTicker"));
+const NewsTicker = lazyRetry(() => import("@/components/NewsTicker"));
 
 // Lazy load all below-fold sections
-const Stats = lazy(() => import("@/components/Stats"));
-const FeaturesList = lazy(() => import("@/components/FeaturesList"));
-const Features = lazy(() => import("@/components/Features"));
-const Services = lazy(() => import("@/components/Services"));
-const CTA = lazy(() => import("@/components/CTA"));
-const Footer = lazy(() => import("@/components/Footer"));
-const DocumentVerification = lazy(() => import("@/components/DocumentVerification"));
-const HomepageAds = lazy(() => import("@/components/ads/HomepageAds"));
-const FeaturedConsultants = lazy(() => import("@/components/landing/FeaturedConsultants"));
-const OmalunaSection = lazy(() => import("@/components/landing/OmalunaSection"));
-const TestimonialsSection = lazy(() => import("@/components/landing/TestimonialsSection"));
-const NationalInitiativeSection = lazy(() => import("@/components/landing/NationalInitiativeSection"));
-const DocumentAIShowcase = lazy(() => import("@/components/landing/DocumentAIShowcase"));
-const SmartAgentShowcase = lazy(() => import("@/components/landing/SmartAgentShowcase"));
-const WhatsAppShowcase = lazy(() => import("@/components/landing/WhatsAppShowcase"));
-const TrustedPartnersSection = lazy(() => import("@/components/landing/TrustedPartnersSection"));
-const HomepageCustomBlockRenderer = lazy(() => import("@/components/landing/HomepageCustomBlockRenderer"));
-const PlatformShowcase = lazy(() => import("@/components/landing/PlatformShowcase"));
-const SaaSTechSection = lazy(() => import("@/components/landing/SaaSTechSection"));
-const VisitorCounter = lazy(() => import("@/components/landing/VisitorCounter"));
-const C2BSubmissionForm = lazy(() => import("@/components/c2b/C2BSubmissionForm"));
+const Stats = lazyRetry(() => import("@/components/Stats"));
+const FeaturesList = lazyRetry(() => import("@/components/FeaturesList"));
+const Features = lazyRetry(() => import("@/components/Features"));
+const Services = lazyRetry(() => import("@/components/Services"));
+const CTA = lazyRetry(() => import("@/components/CTA"));
+const Footer = lazyRetry(() => import("@/components/Footer"));
+const DocumentVerification = lazyRetry(() => import("@/components/DocumentVerification"));
+const HomepageAds = lazyRetry(() => import("@/components/ads/HomepageAds"));
+const FeaturedConsultants = lazyRetry(() => import("@/components/landing/FeaturedConsultants"));
+const OmalunaSection = lazyRetry(() => import("@/components/landing/OmalunaSection"));
+const TestimonialsSection = lazyRetry(() => import("@/components/landing/TestimonialsSection"));
+const NationalInitiativeSection = lazyRetry(() => import("@/components/landing/NationalInitiativeSection"));
+const DocumentAIShowcase = lazyRetry(() => import("@/components/landing/DocumentAIShowcase"));
+const SmartAgentShowcase = lazyRetry(() => import("@/components/landing/SmartAgentShowcase"));
+const WhatsAppShowcase = lazyRetry(() => import("@/components/landing/WhatsAppShowcase"));
+const TrustedPartnersSection = lazyRetry(() => import("@/components/landing/TrustedPartnersSection"));
+const HomepageCustomBlockRenderer = lazyRetry(() => import("@/components/landing/HomepageCustomBlockRenderer"));
+const PlatformShowcase = lazyRetry(() => import("@/components/landing/PlatformShowcase"));
+const SaaSTechSection = lazyRetry(() => import("@/components/landing/SaaSTechSection"));
+const VisitorCounter = lazyRetry(() => import("@/components/landing/VisitorCounter"));
+const C2BSubmissionForm = lazyRetry(() => import("@/components/c2b/C2BSubmissionForm"));
 
 /** Renders children when the container scrolls into view — with proper placeholder height */
 const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
