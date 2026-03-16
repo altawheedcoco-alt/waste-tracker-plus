@@ -1050,6 +1050,19 @@ const HazardousWasteRegister = () => {
           }
         }
       `}</style>
+
+      {/* Unified Print Preview */}
+      <UnifiedDocumentPreview
+        isOpen={showPrintPreview}
+        onClose={() => setShowPrintPreview(false)}
+        title="سجل المخلفات الخطرة"
+        filename="سجل-المخلفات-الخطرة"
+        orientation="landscape"
+      >
+        {printRef.current && (
+          <div dangerouslySetInnerHTML={{ __html: printRef.current.innerHTML }} />
+        )}
+      </UnifiedDocumentPreview>
     </DashboardLayout>
   );
 };
