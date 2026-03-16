@@ -619,7 +619,7 @@ export const PrintService = {
 
       /* ── Layer 1: Guilloche ── */
       .layer-guilloche {
-        position: fixed;
+        position: absolute;
         inset: 0;
         z-index: 0;
         pointer-events: none;
@@ -628,7 +628,7 @@ export const PrintService = {
 
       /* ── Layer 2: Watermark ── */
       .watermark-layer {
-        position: fixed;
+        position: absolute;
         inset: 0;
         z-index: 1;
         pointer-events: none;
