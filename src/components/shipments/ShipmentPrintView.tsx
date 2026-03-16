@@ -297,7 +297,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
           `}</style>
           <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box', paddingBottom: '6px' }}>
             {/* Header Table - Barcode left, QR right */}
-            <table style={{ marginBottom: '4px', border: 'none' }}>
+            <table style={{ marginBottom: '0px', border: 'none' }}>
               <tbody>
                 <tr>
                   <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
