@@ -70,12 +70,26 @@ const SUGGESTIONS = [
 
 const DOC_TYPES = [
   { value: 'quotation', label: 'عرض سعر' },
-  { value: 'letter', label: 'خطاب رسمي' },
+  { value: 'proforma', label: 'فاتورة أولية' },
+  { value: 'statement', label: 'كشف حساب' },
   { value: 'contract', label: 'عقد' },
+  { value: 'sla', label: 'اتفاقية مستوى خدمة' },
+  { value: 'addendum', label: 'ملحق عقد' },
+  { value: 'letter', label: 'خطاب رسمي' },
+  { value: 'guarantee', label: 'خطاب ضمان' },
   { value: 'report', label: 'تقرير' },
+  { value: 'safety_report', label: 'تقرير سلامة' },
+  { value: 'environmental', label: 'تقرير بيئي' },
+  { value: 'work_order', label: 'أمر تشغيل' },
+  { value: 'bill_of_lading', label: 'بوليصة شحن' },
+  { value: 'hazmat_permit', label: 'تصريح نقل خطر' },
+  { value: 'maintenance', label: 'جدول صيانة' },
   { value: 'announcement', label: 'إعلان' },
-  { value: 'invoice', label: 'فاتورة' },
+  { value: 'policy', label: 'سياسة داخلية' },
+  { value: 'certificate', label: 'شهادة إتمام' },
+  { value: 'memo', label: 'مذكرة داخلية' },
   { value: 'general', label: 'عام' },
+];
 ];
 
 export default function AIDocumentStudioPage() {
