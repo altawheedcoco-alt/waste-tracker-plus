@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,7 +10,7 @@ import {
   Send, StopCircle, Trash2, Download, Printer, Eye, Save,
   FileText, Sparkles, Bot, User, Loader2, Copy, X, Share2,
   MessageSquare, Archive, LayoutTemplate, Users, Building2,
-  BookmarkPlus, MessageCircle, Edit3
+  BookmarkPlus, MessageCircle, Edit3, Code
 } from 'lucide-react';
 import { useAIDocumentChat } from '@/hooks/useAIDocumentChat';
 import { useAuth } from '@/contexts/auth/AuthContext';
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import BackButton from '@/components/ui/back-button';
 
 const DocumentArchiveTab = lazy(() => import('@/components/ai-studio/DocumentArchiveTab'));
 const DocumentTemplatesTab = lazy(() => import('@/components/ai-studio/DocumentTemplatesTab'));
@@ -79,6 +80,8 @@ export default function AIDocumentStudioPage() {
 
   // Edit mode
   const [editHtml, setEditHtml] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
+  const editableRef = useRef<HTMLDivElement>(null);
 
   const orgData = organization ? {
     name: organization.name,
@@ -249,6 +252,7 @@ export default function AIDocumentStudioPage() {
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3 border-b bg-card">
         <div className="flex items-center gap-3">
+          <BackButton fallbackPath="/dashboard" />
           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
             <Sparkles className="w-5 h-5 text-white" />
           </div>
@@ -517,45 +521,101 @@ export default function AIDocumentStudioPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Modal (Simple HTML Editor) */}
-      {editHtml && (
+      {/* Edit Modal - Visual + Code */}
+      {editHtml !== null && (
         <div className="fixed inset-0 z-50 bg-black/80 flex flex-col">
-          <div className="flex items-center justify-between px-4 py-2 bg-gray-900">
-            <Badge variant="secondary" className="gap-1">
-              <Edit3 className="w-3 h-3" /> تحرير المستند
-            </Badge>
+          <div className="flex items-center justify-between px-4 py-2 bg-gray-900" dir="rtl">
             <div className="flex items-center gap-2">
-              <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => handlePreview(editHtml)}>
+              <Badge variant="secondary" className="gap-1">
+                <Edit3 className="w-3 h-3" /> تحرير المستند
+              </Badge>
+              <div className="flex items-center bg-gray-800 rounded-lg p-0.5 gap-0.5">
+                <Button size="sm" variant={editMode === 'visual' ? 'secondary' : 'ghost'}
+                  className="h-7 text-xs gap-1 text-gray-200" onClick={() => {
+                    if (editMode === 'code' && editableRef.current) {
+                      // switching to visual - sync html
+                    }
+                    setEditMode('visual');
+                  }}>
+                  <Edit3 className="w-3 h-3" /> تحرير مباشر
+                </Button>
+                <Button size="sm" variant={editMode === 'code' ? 'secondary' : 'ghost'}
+                  className="h-7 text-xs gap-1 text-gray-200" onClick={() => {
+                    if (editMode === 'visual' && editableRef.current) {
+                      setEditHtml(editableRef.current.innerHTML);
+                    }
+                    setEditMode('code');
+                  }}>
+                  <Code className="w-3 h-3" /> كود HTML
+                </Button>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => {
+                const html = editMode === 'visual' && editableRef.current ? editableRef.current.innerHTML : editHtml;
+                handlePreview(html);
+              }}>
                 <Eye className="w-4 h-4" /> معاينة
               </Button>
-              <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => handleDownloadPDF(editHtml)}>
+              <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => {
+                const html = editMode === 'visual' && editableRef.current ? editableRef.current.innerHTML : editHtml;
+                handleDownloadPDF(html);
+              }}>
                 <Download className="w-4 h-4" /> PDF
               </Button>
+              <Button size="sm" variant="secondary" className="gap-1.5" onClick={() => {
+                const html = editMode === 'visual' && editableRef.current ? editableRef.current.innerHTML : editHtml;
+                handlePrint(html);
+              }}>
+                <Printer className="w-4 h-4" /> طباعة
+              </Button>
               <Button size="sm" variant="secondary" className="gap-1.5"
-                onClick={() => setSaveDialog({ html: editHtml })}>
+                onClick={() => {
+                  const html = editMode === 'visual' && editableRef.current ? editableRef.current.innerHTML : editHtml;
+                  setSaveDialog({ html });
+                }}>
                 <Save className="w-4 h-4" /> حفظ
               </Button>
-              <Button size="icon" variant="ghost" className="text-white hover:bg-white/20" onClick={() => setEditHtml(null)}>
+              <Button size="icon" variant="ghost" className="text-white hover:bg-white/20" onClick={() => { setEditHtml(null); setEditMode('visual'); }}>
                 <X className="w-5 h-5" />
               </Button>
             </div>
           </div>
-          <div className="flex-1 flex gap-0 min-h-0">
-            {/* HTML Editor */}
-            <div className="flex-1 min-h-0">
-              <textarea
-                value={editHtml}
-                onChange={e => setEditHtml(e.target.value)}
-                className="w-full h-full bg-gray-900 text-green-400 font-mono text-xs p-4 resize-none border-none outline-none"
-                dir="ltr"
-                spellCheck={false}
-              />
-            </div>
-            {/* Live Preview */}
-            <div className="flex-1 bg-gray-600 overflow-auto hidden md:flex justify-center py-4">
-              <div className="bg-white shadow-xl" style={{ width: '794px', minHeight: '1123px', transform: 'scale(0.7)', transformOrigin: 'top center' }}
-                dangerouslySetInnerHTML={{ __html: editHtml }} />
-            </div>
+
+          <div className="flex-1 min-h-0 overflow-auto flex justify-center" style={{ background: '#4b5563' }}>
+            {editMode === 'visual' ? (
+              <div className="py-8">
+                <div
+                  ref={editableRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  className="bg-white shadow-2xl outline-none"
+                  style={{ width: '794px', minHeight: '1123px', direction: 'rtl' }}
+                  dangerouslySetInnerHTML={{ __html: editHtml }}
+                  onBlur={() => {
+                    if (editableRef.current) {
+                      setEditHtml(editableRef.current.innerHTML);
+                    }
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="flex w-full min-h-0">
+                <div className="flex-1 min-h-0">
+                  <textarea
+                    value={editHtml}
+                    onChange={e => setEditHtml(e.target.value)}
+                    className="w-full h-full bg-gray-900 text-green-400 font-mono text-xs p-4 resize-none border-none outline-none"
+                    dir="ltr"
+                    spellCheck={false}
+                  />
+                </div>
+                <div className="flex-1 bg-gray-600 overflow-auto hidden md:flex justify-center py-4">
+                  <div className="bg-white shadow-xl" style={{ width: '794px', minHeight: '1123px', transform: 'scale(0.7)', transformOrigin: 'top center' }}
+                    dangerouslySetInnerHTML={{ __html: editHtml }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
