@@ -310,9 +310,9 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tbody>
                 <tr><td colSpan={4} style={{ background: '#e0e7ff', color: '#312e81', fontWeight: 'bold', textAlign: 'center', fontSize: '7.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>👁️ مسئولو الحركة والمتابعة</td></tr>
                 <tr>
-                  {['الجهة', 'المسئول', 'الهاتف', 'وضع التوقيع'].map(h => (
-                    <td key={h} style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{h}</td>
-                  ))}
+                   {['الجهة', 'المسئول', 'الهاتف', 'وضع التوقيع'].map(h => (
+                     <td key={h} style={{ background: '#eef2ff', fontWeight: '600', fontSize: '7pt', padding: '2px 4px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{h}</td>
+                   ))}
                 </tr>
                 {supervisors.map((sup, i) => {
                   const roleLabels: Record<string, string> = { generator: 'المولد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
