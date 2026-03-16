@@ -576,7 +576,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
+                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
                 </tr>
                 <tr>
                   <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
