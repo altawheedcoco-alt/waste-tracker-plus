@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
+import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentDetailsDialog from './shipments/ShipmentDetailsDialog';
 import { STATUS_CONFIG, WASTE_TYPE_LABELS, HAZARD_LEVELS } from './shipments/shipmentConstants';
 
@@ -326,7 +326,7 @@ const AdminShipmentsView = () => {
       />
 
       {/* Print View */}
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={showPrintDialog}
         onClose={() => { setShowPrintDialog(false); setPrintShipmentData(null); }}
         shipment={printShipmentData}

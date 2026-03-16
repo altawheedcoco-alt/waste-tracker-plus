@@ -19,7 +19,7 @@ import InteractiveStatCard from './shared/InteractiveStatCard';
 import { DetailSection } from './shared/InteractiveDetailDrawer';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav, { TabItem } from './shared/V2TabsNav';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
@@ -452,7 +452,7 @@ const GeneratorDashboard = () => {
       </Tabs>
 
       {/* Dialogs */}
-      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
+      <UnifiedShipmentPrint isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
       <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       <Suspense fallback={null}>

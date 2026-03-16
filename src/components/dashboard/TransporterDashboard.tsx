@@ -24,7 +24,7 @@ import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
 import TransporterIncomingRequests from './transporter/TransporterIncomingRequests';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
-import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
+import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
@@ -200,7 +200,7 @@ const TransporterDashboard = () => {
       </motion.div>
 
       {/* Dialogs */}
-      <EnhancedShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         shipment={selectedShipment as any}

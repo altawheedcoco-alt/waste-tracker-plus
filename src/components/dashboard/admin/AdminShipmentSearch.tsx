@@ -7,7 +7,7 @@ import { Search, Printer, ExternalLink, Package, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
-import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
+import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 
 const statusLabels: Record<string, string> = {
   new: 'جديدة', approved: 'تمت الموافقة', in_transit: 'قيد النقل',
@@ -153,7 +153,7 @@ const AdminShipmentSearch = () => {
         </CardContent>
       </Card>
 
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={printOpen}
         onClose={() => setPrintOpen(false)}
         shipment={selectedShipment}

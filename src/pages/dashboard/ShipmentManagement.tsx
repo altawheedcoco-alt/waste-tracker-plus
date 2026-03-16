@@ -38,7 +38,7 @@ import {
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import ShipmentRouteMap from '@/components/maps/RouteMapDialog';
-import ShipmentPrintView from '@/components/shipments/ShipmentPrintView';
+import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
@@ -757,7 +757,7 @@ const ShipmentManagement = () => {
       />
 
       {/* Print Dialog */}
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={!!printShipment}
         onClose={() => setPrintShipment(null)}
         shipment={printShipment}

@@ -36,7 +36,7 @@ const ShipmentDocumentsPanel = lazy(() => import('@/components/documents/Shipmen
 const ShipmentProgressLogs = lazy(() => import('@/components/shipments/ShipmentProgressLogs'));
 const ShipmentStatusDialog = lazy(() => import('@/components/shipments/StatusChangeDialog'));
 const InlineStatusChange = lazy(() => import('@/components/shipments/StatusChangeDialog').then(m => ({ default: m.InlineStatusChange })));
-const ShipmentQuickPrint = lazy(() => import('@/components/shipments/ShipmentQuickPrint'));
+const ShipmentQuickPrint = lazy(() => import('@/components/shipments/unified-print/UnifiedShipmentPrint'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
