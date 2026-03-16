@@ -58,6 +58,8 @@ export async function autoAssignMovementSupervisors(
           supervisor_phone: entry.supervisor_phone || null,
           supervisor_email: entry.supervisor_email || null,
           supervisor_position: entry.supervisor_position || null,
+          auto_sign_enabled: entry.auto_sign_enabled || false,
+          auto_sign_method: entry.auto_sign_method || 'manual',
         });
       }
     } else if (!isManual) {
