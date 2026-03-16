@@ -380,6 +380,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Document Center',
     visibleFor: [],
     items: [
+      { icon: Sparkles, labelAr: 'استوديو المستندات الذكي', labelEn: 'AI Document Studio', path: '/dashboard/ai-document-studio', key: 'ai-document-studio', bindingType: 'internal' as const,
+        visibleFor: ['transporter', 'recycler', 'disposal'] },
       { icon: Database, labelAr: 'بياناتي', labelEn: 'My Data', path: '/dashboard/my-data', key: 'my-data', bindingType: 'internal' as const },
       { icon: FolderOpen, labelAr: 'مركز المستندات', labelEn: 'Document Center', path: '/dashboard/document-center', key: 'document-center', bindingType: 'internal' as const },
       { icon: Upload, labelAr: 'رفع المستندات', labelEn: 'Upload Documents', path: '/dashboard/document-center?tab=upload', key: 'doc-upload', bindingType: 'internal' as const },
