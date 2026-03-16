@@ -99,6 +99,8 @@ export async function autoAssignMovementSupervisors(
           supervisor_phone: null,
           supervisor_email: null,
           supervisor_position: ai.supervisor_position,
+          auto_sign_enabled: ai.auto_sign_enabled,
+          auto_sign_method: ai.auto_sign_method,
         });
       }
     } else {
@@ -114,6 +116,8 @@ export async function autoAssignMovementSupervisors(
         supervisor_phone: null,
         supervisor_email: null,
         supervisor_position: ai.supervisor_position,
+        auto_sign_enabled: ai.auto_sign_enabled,
+        auto_sign_method: ai.auto_sign_method,
       });
     }
   }
