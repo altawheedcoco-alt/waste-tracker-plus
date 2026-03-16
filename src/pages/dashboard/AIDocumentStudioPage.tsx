@@ -90,7 +90,6 @@ const DOC_TYPES = [
   { value: 'memo', label: 'مذكرة داخلية' },
   { value: 'general', label: 'عام' },
 ];
-];
 
 export default function AIDocumentStudioPage() {
   const { organization, profile } = useAuth();
