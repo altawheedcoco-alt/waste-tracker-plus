@@ -79,12 +79,16 @@ const UnifiedShipmentPrint = ({
     if (!isOpen) autoActionDone.current = false;
   }, [isOpen]);
 
+  const getActiveRef = () => showA4Preview ? a4PrintRef.current : printRef.current;
+
   const handlePrint = () => {
-    if (printRef.current) printWithTheme(printRef.current, themeId as any);
+    const el = getActiveRef();
+    if (el) printWithTheme(el, themeId as any);
   };
 
   const handleDownloadPDF = () => {
-    if (printRef.current) exportToPDF(printRef.current, pdfFileName);
+    const el = getActiveRef();
+    if (el) exportToPDF(el, pdfFileName);
   };
 
   const handleShareWhatsApp = () => {
