@@ -75,10 +75,11 @@ import CompleteShipmentDocButton from './CompleteShipmentDocButton';
 const ShipmentEndorsementButton = lazy(() => import('./ShipmentEndorsementButton'));
 import DocumentChainStrip from './DocumentChainStrip';
 
-// Lazy load the live tracking map dialog and inline map
+// Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const ShipmentInlineTrackingMap = lazy(() => import('./ShipmentInlineTrackingMap'));
 const GPSTrackingStatusWidget = lazy(() => import('@/components/tracking/GPSTrackingStatusWidget'));
+const SupervisorComplianceDashboard = lazy(() => import('@/components/supervisors/SupervisorComplianceDashboard'));
 
 interface ShipmentCardProps {
   shipment: {
