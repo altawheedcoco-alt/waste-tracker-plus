@@ -369,7 +369,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
+                  <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
                 </tr>
                 <tr>
                   <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '10%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>

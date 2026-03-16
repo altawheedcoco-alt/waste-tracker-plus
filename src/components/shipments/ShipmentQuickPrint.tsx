@@ -387,7 +387,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
+                  <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
                 </tr>
                 <tr>
                   <td style={{ background: '#f9fafb', fontWeight: '600', width: '10%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>
