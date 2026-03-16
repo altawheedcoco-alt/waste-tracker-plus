@@ -328,23 +328,37 @@ export default function AIDocumentStudioPage() {
           <ScrollArea className="flex-1 px-4" ref={scrollRef as any}>
             <div className="max-w-3xl mx-auto py-4 space-y-4">
               {!hasMessages && (
-                <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-600/20 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-emerald-600" />
+                <div className="flex flex-col items-center justify-center py-6 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-primary" />
                   </div>
                   <div className="text-center space-y-1">
-                    <h2 className="text-lg font-bold text-foreground">مرحباً! أنا مساعدك لإنشاء المستندات</h2>
+                    <h2 className="text-lg font-bold text-foreground">مساعد المستندات للجهة الناقلة</h2>
                     <p className="text-xs text-muted-foreground max-w-md">
-                      أخبرني بما تريد إنشاءه وسأقوم بتجهيز مستند احترافي بتنسيق A4
+                      أنشئ عروض أسعار، عقود، بوالص شحن، تقارير، وكل ما تحتاجه لإدارة عمليات النقل
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
-                    {SUGGESTIONS.map((s, i) => (
-                      <button key={i} onClick={() => { setInput(s.prompt); inputRef.current?.focus(); }}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl border bg-card hover:bg-accent/50 transition-colors text-sm text-start">
-                        <span className="text-lg">{s.icon}</span>
-                        <span className="text-foreground font-medium">{s.label}</span>
-                      </button>
+                  <div className="w-full max-w-2xl space-y-3">
+                    {[
+                      { title: '💼 المالية', items: SUGGESTIONS.slice(0, 3) },
+                      { title: '📋 العقود', items: SUGGESTIONS.slice(3, 6) },
+                      { title: '✉️ الخطابات', items: SUGGESTIONS.slice(6, 9) },
+                      { title: '📊 التقارير', items: SUGGESTIONS.slice(9, 12) },
+                      { title: '🚛 التشغيل', items: SUGGESTIONS.slice(12, 16) },
+                      { title: '📃 الإدارية', items: SUGGESTIONS.slice(16) },
+                    ].map((group, gi) => (
+                      <div key={gi}>
+                        <p className="text-xs font-semibold text-muted-foreground mb-1.5">{group.title}</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+                          {group.items.map((s, i) => (
+                            <button key={i} onClick={() => { setInput(s.prompt); inputRef.current?.focus(); }}
+                              className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors text-xs text-start">
+                              <span className="text-sm">{s.icon}</span>
+                              <span className="text-foreground font-medium truncate">{s.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
