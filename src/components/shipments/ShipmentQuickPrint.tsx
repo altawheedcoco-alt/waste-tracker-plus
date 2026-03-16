@@ -351,6 +351,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               background-color: transparent !important;
               background: transparent !important;
             }
+            .print-transparent-tables table {
+              margin-bottom: 0 !important;
+            }
           `}</style>
           <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box', paddingBottom: '6px' }}>
             {/* Header Table - Barcode left, QR right */}
