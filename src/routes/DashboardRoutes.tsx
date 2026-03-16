@@ -23,6 +23,7 @@ const ShipmentDetails = lazy(() => import("@/pages/dashboard/ShipmentDetails"));
 const TransporterShipments = lazy(() => import("@/pages/dashboard/TransporterShipments"));
 const TransporterDrivers = lazy(() => import("@/pages/dashboard/TransporterDrivers"));
 const AITools = lazy(() => import("@/pages/dashboard/AITools"));
+const AIDocumentStudioPage = lazy(() => import("@/pages/dashboard/AIDocumentStudioPage"));
 const RecyclerAITools = lazy(() => import("@/pages/dashboard/RecyclerAITools"));
 const TransporterAITools = lazy(() => import("@/pages/dashboard/TransporterAITools"));
 const Notifications = lazy(() => import("@/pages/dashboard/Notifications"));
@@ -466,6 +467,7 @@ export const dashboardRoutes = (
     {/* Admin alias routes */}
     <Route path="/dashboard/admin-cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/call-center" element={<SupportCenter />} />
+    <Route path="/dashboard/ai-document-studio" element={<AIDocumentStudioPage />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
