@@ -159,16 +159,17 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
         </div>
       </div>
 
-      <div ref={ref} className="print-transparent-tables bg-white p-3 rounded-lg border"
-        style={{ direction: 'rtl', fontSize: compact ? '7pt' : '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3', WebkitFontSmoothing: 'antialiased' }}>
+      <div ref={ref} className="print-transparent-tables bg-white rounded-lg border"
+        style={{ direction: 'rtl', fontSize: compact ? '7pt' : '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3', WebkitFontSmoothing: 'antialiased', padding: '15mm 15mm 20mm 15mm' }}>
         <style>{`
           .print-transparent-tables table { margin-bottom: 0 !important; }
           @media print {
             .print-transparent-tables { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+            @page { margin: 15mm 15mm 20mm 15mm; }
           }
         `}</style>
 
-        <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
+        <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '257mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
           {/* ═══ HEADER ═══ */}
           <table style={{ marginBottom: '0px', border: 'none', width: '100%' }}>
             <tbody>
