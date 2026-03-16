@@ -333,7 +333,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           {/* ═══ STAMPS & SIGNATURES ═══ */}
           <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1, width: '100%' }}>
             <tbody>
-              <tr><td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '6pt', padding: '1px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td></tr>
+              <tr><td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '7.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td></tr>
               <tr>
                 {[
                   { org: shipment.generator, label: 'المولّد', bg: theme.colors.generatorLight || '#eff6ff' },
