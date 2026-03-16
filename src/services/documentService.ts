@@ -205,10 +205,10 @@ export const PDFService = {
       const imgW = pageW;
 
       if (fitSinglePage) {
-        const imgData = canvas.toDataURL('image/jpeg', quality);
+        const imgData = canvas.toDataURL('image/png');
         const imgH = (canvas.height * imgW) / canvas.width;
         const fitScale = Math.min(1, pageH / imgH);
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW * fitScale, imgH * fitScale);
         return pdf;
       }
 
