@@ -571,7 +571,7 @@ export const PrintService = {
         window.addEventListener('load', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = 257 * 3.7795;
+          var maxH = 296.6 * 3.7795;
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
