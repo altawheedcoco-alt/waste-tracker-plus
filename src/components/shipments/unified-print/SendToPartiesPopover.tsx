@@ -129,32 +129,21 @@ const SendToPartiesPopover = ({ shipment, compact }: SendToPartiesPopoverProps) 
 
       // Send to each selected party via whatsapp-send edge function
       const promises = targets.map(async (party) => {
-        // 1. WhatsApp via platform
-        const waPromise = supabase.functions.invoke('whatsapp-send', {
+        // WhatsApp via platform (also triggers internal notification via DB trigger)
+        return supabase.functions.invoke('whatsapp-send', {
           body: {
             action: 'send_to_phone',
             phone: party.phone,
             message_text: messageText,
             notification_type: 'shipment_document',
+            metadata: {
+              shipment_id: shipment.id,
+              shipment_number: shipment.shipment_number,
+              party_role: party.role,
+              party_name: party.name,
+            },
           },
         });
-
-        // 2. Internal notification - find user by phone
-        const notifPromise = supabase.from('notifications').insert({
-          title: `📄 نموذج تتبع الشحنة ${shipment.shipment_number}`,
-          message: `تم إرسال نموذج تتبع الشحنة ${shipment.shipment_number} إلى ${party.label} (${party.name})`,
-          type: 'shipment_document',
-          is_read: false,
-          metadata: {
-            shipment_id: shipment.id,
-            shipment_number: shipment.shipment_number,
-            party_role: party.role,
-            party_name: party.name,
-            party_phone: party.phone,
-          } as any,
-        });
-
-        return Promise.allSettled([waPromise, notifPromise]);
       });
 
       await Promise.all(promises);
