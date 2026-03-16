@@ -62,6 +62,8 @@ const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/Corre
 const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -268,6 +270,20 @@ const GeneratorDashboard = () => {
 
         {/* ── نظرة عامة ── */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+          {/* Environmental KPIs & License Alerts */}
+          <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+                <EnvironmentalKPIWidget />
+              </ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={<TabFallback />}>
+              <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+                <LicenseExpiryWidget />
+              </ErrorBoundary>
+            </Suspense>
+          </div>
+
           <Suspense fallback={<TabFallback />}>
             <DashboardBrief />
           </Suspense>

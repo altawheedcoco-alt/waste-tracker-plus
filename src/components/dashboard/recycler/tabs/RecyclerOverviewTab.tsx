@@ -29,6 +29,8 @@ import TabFallback from '@/components/dashboard/shared/TabFallback';
 const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
 const RecyclerBulkStatusDropdown = lazy(() => import('@/components/shipments/RecyclerBulkStatusDropdown'));
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const VehicleComplianceManager = lazy(() => import('@/components/compliance/VehicleComplianceManager'));
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
@@ -52,6 +54,20 @@ const RecyclerOverviewTab = ({
 
   return (
     <TabsContent value="overview" className="space-y-6 mt-4">
+      {/* Environmental KPIs & License Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+            <EnvironmentalKPIWidget />
+          </ErrorBoundary>
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+            <LicenseExpiryWidget />
+          </ErrorBoundary>
+        </Suspense>
+      </div>
+
       <RecyclerCommandCenter />
       <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
       <AutomationSettingsDialog organizationType="recycler" />

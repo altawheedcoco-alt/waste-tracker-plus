@@ -31,6 +31,8 @@ const TransporterDriverTracking = lazy(() => import('@/components/dashboard/tran
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPriorityQueue'));
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -68,6 +70,19 @@ const TransporterOperationsTabs = ({
 }: OperationsTabsProps) => (
   <>
     <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
+      {/* Environmental KPIs & License Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+            <EnvironmentalKPIWidget />
+          </ErrorBoundary>
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+            <LicenseExpiryWidget />
+          </ErrorBoundary>
+        </Suspense>
+      </div>
       <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
         <FleetUtilizationWidget />
       </ErrorBoundary>

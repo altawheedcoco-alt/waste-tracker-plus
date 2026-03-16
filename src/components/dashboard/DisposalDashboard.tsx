@@ -10,6 +10,8 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
 const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
@@ -244,6 +246,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
         {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
+          {/* Environmental KPIs & License Alerts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Suspense fallback={<Skeleton className="h-[280px]" />}>
+              <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+                <EnvironmentalKPIWidget />
+              </ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={<Skeleton className="h-[280px]" />}>
+              <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+                <LicenseExpiryWidget />
+              </ErrorBoundary>
+            </Suspense>
+          </div>
+
           <DisposalDailyOperations />
           <DashboardAlertsHub orgType="disposal" />
 
