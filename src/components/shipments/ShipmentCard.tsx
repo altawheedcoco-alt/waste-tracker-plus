@@ -244,6 +244,19 @@ const ShipmentCard = ({
 
   const handlePrintButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setPrintAutoAction(null);
+    setIsPrintDialogOpen(true);
+  };
+
+  const handleDirectPrint = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPrintAutoAction('print');
+    setIsPrintDialogOpen(true);
+  };
+
+  const handleDirectPDF = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPrintAutoAction('pdf');
     setIsPrintDialogOpen(true);
   };
 
