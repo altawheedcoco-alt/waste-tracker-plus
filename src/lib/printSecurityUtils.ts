@@ -129,6 +129,30 @@ export function generatePrintWatermarkHTML(
 }
 
 /**
+ * Generate MICR (Magnetic Ink Character Recognition) line — bottom-left of document
+ * Shows the printing/exporting organization's unique identifier code
+ */
+export function generateMICRLineHTML(
+  orgClientCode?: string | null,
+  orgVerificationCode?: string | null,
+  orgName?: string,
+): string {
+  const code = orgClientCode || orgVerificationCode || '000000';
+  const now = new Date();
+  const dateStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  const timeStamp = `${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
+  // MICR E-13B style: ⑆ (transit) ⑇ (on-us) ⑈ (amount) ⑉ (dash)
+  const micrLine = `⑆${code}⑆ ⑇${dateStamp}⑉${timeStamp}⑇ ⑈iRCYL⑈`;
+
+  return `<div class="micr-line" style="position:fixed;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B','OCR B','Courier New',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(0,0,0,0.45);line-height:1;">
+    <div style="display:flex;align-items:center;gap:6px;">
+      <span style="font-size:7px;color:rgba(0,0,0,0.3);">MICR</span>
+      <span>${micrLine}</span>
+    </div>
+  </div>`;
+}
+
+/**
  * Shared secure print CSS to preserve guilloche + watermark colors in print
  */
 export function getSecurePrintCSS(): string {
