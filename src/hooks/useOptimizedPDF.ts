@@ -54,7 +54,7 @@ const generatePDFWorker = async (
   let heightLeft = imgHeight;
   let position = 0;
 
-  pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight, undefined, 'FAST');
   heightLeft -= pageHeight;
 
   while (heightLeft > 0) {
