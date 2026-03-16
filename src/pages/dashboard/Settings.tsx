@@ -47,6 +47,7 @@ import LanguageSettings from '@/components/settings/LanguageSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 import ProfileCustomization from '@/components/settings/ProfileCustomization';
+import MovementSupervisorSettings from '@/components/settings/MovementSupervisorSettings';
 
 const Settings = () => {
   const { t } = useLanguage();
@@ -238,6 +239,10 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
             <TabsTrigger value="document-templates" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('sidebar.docArchive')}</span>
+            </TabsTrigger>
+            <TabsTrigger value="movement-supervisors" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">مسئولو الحركة</span>
             </TabsTrigger>
           </TabsList>
         </div>
@@ -735,6 +740,11 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
         {/* Document Templates Tab */}
         <TabsContent value="document-templates" className="space-y-6">
           <DocumentTemplateManager />
+        </TabsContent>
+
+        {/* Movement Supervisors Tab */}
+        <TabsContent value="movement-supervisors" className="space-y-6">
+          <MovementSupervisorSettings />
         </TabsContent>
       </Tabs>
     </div>

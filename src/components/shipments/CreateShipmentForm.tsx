@@ -7,7 +7,8 @@ import { SmartInput } from '@/components/ui/smart-input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon, Camera, Upload, Check, X } from 'lucide-react';
+import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon, Camera, Upload, Check, X, Eye } from 'lucide-react';
+import MovementSupervisorSelector, { type MovementSupervisorEntry } from '@/components/shipments/MovementSupervisorSelector';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { toast } from 'sonner';
 import { ComboboxWithInput } from '@/components/ui/combobox-with-input';
@@ -137,6 +138,14 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
     setComplianceResults(prev => ({ ...prev, [party]: result }));
   }, []);
 
+  // Movement Supervisors state
+  const [movementSupervisors, setMovementSupervisors] = useState<Record<string, MovementSupervisorEntry[]>>({
+    generator: [],
+    transporter: [],
+    recycler: [],
+    disposal: [],
+  });
+
   const handleWeightTicketUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -193,8 +202,20 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
     setWeightExtracted(false);
   };
 
+  const handleAfterCreate = useCallback((shipmentId: string) => {
+    import('@/utils/autoMovementSupervisors').then(({ autoAssignMovementSupervisors }) => {
+      const parties = [
+        { role: 'generator' as const, organizationId: formData.generator_id || null },
+        { role: 'transporter' as const, organizationId: formData.transporter_id || organization?.id || null },
+        { role: 'recycler' as const, organizationId: formData.recycler_id || null },
+        { role: 'disposal' as const, organizationId: formData.disposal_facility_id || null },
+      ];
+      autoAssignMovementSupervisors(shipmentId, parties, movementSupervisors).catch(console.error);
+    });
+  }, [formData, organization, movementSupervisors]);
+
   return (
-    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
+    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose, handleAfterCreate)} className="space-y-5">
       
       {/* Progress indicator - visual only */}
       <div className="flex items-center gap-1.5 justify-center opacity-60">
@@ -902,6 +923,48 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
           <PricingModeSelector formData={formData} setFormData={setFormData} />
         </FormSection>
       )}
+
+      {/* ══════════ SECTION 8: Movement Supervisors ══════════ */}
+      <FormSection icon={Eye} title="مسئولو الحركة" subtitle="تعيين مسئول متابعة خط السير لكل جهة — إلزامي وتلقائي">
+        <div className="space-y-4">
+          {formData.generator_id && (
+            <MovementSupervisorSelector
+              label="مسئول حركة المولد"
+              organizationId={formData.generator_id}
+              partyRole="generator"
+              value={movementSupervisors.generator}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, generator: entries }))}
+            />
+          )}
+          {(formData.transporter_id || organization?.id) && (
+            <MovementSupervisorSelector
+              label="مسئول حركة الناقل"
+              organizationId={formData.transporter_id || organization?.id || ''}
+              partyRole="transporter"
+              value={movementSupervisors.transporter}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, transporter: entries }))}
+            />
+          )}
+          {formData.recycler_id && formData.destination_type === 'recycling' && (
+            <MovementSupervisorSelector
+              label="مسئول حركة المدوّر"
+              organizationId={formData.recycler_id}
+              partyRole="recycler"
+              value={movementSupervisors.recycler}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, recycler: entries }))}
+            />
+          )}
+          {formData.disposal_facility_id && formData.destination_type === 'disposal' && (
+            <MovementSupervisorSelector
+              label="مسئول حركة جهة التخلص"
+              organizationId={formData.disposal_facility_id}
+              partyRole="disposal"
+              value={movementSupervisors.disposal}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, disposal: entries }))}
+            />
+          )}
+        </div>
+      </FormSection>
 
       {/* ══════════ Submit ══════════ */}
       <motion.div

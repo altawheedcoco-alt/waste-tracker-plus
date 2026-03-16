@@ -193,6 +193,18 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     }
   }, [shipment?.id]);
 
+  // Load movement supervisors
+  const [movementSupervisors, setMovementSupervisors] = useState<any[]>([]);
+  useEffect(() => {
+    if (shipment?.id && isOpen) {
+      supabase
+        .from('shipment_movement_supervisors')
+        .select('*')
+        .eq('shipment_id', shipment.id)
+        .then(({ data }) => setMovementSupervisors(data || []));
+    }
+  }, [shipment?.id, isOpen]);
+
   // Load existing signatures
   useEffect(() => {
     if (shipment?.id && isOpen) {
@@ -544,6 +556,48 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                 </tr>
               </tbody>
             </table>
+
+            {/* Movement Supervisors Section */}
+            {movementSupervisors.length > 0 && (
+              <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
+                <tbody>
+                  <tr>
+                    <td colSpan={4} style={{ background: '#e0e7ff', color: '#312e81', fontWeight: 'bold', textAlign: 'center', fontSize: '6pt', padding: '1.5px', border: `1px solid ${theme.colors.border}` }}>
+                      👁️ مسئولو الحركة والمتابعة
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '15%', color: '#000' }}>الجهة</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '25%', color: '#000' }}>المسئول</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '20%', color: '#000' }}>الهاتف</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '40%', color: '#000' }}>البصمة الإلكترونية</td>
+                  </tr>
+                  {movementSupervisors.map((sup, idx) => {
+                    const roleLabels: Record<string, string> = { generator: 'المولد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
+                    return (
+                      <tr key={idx}>
+                        <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
+                          {roleLabels[sup.party_role] || sup.party_role}
+                        </td>
+                        <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
+                          {sup.supervisor_type === 'ai' ? '🤖 ' : ''}{sup.supervisor_name || '-'}
+                        </td>
+                        <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
+                          {sup.supervisor_phone || '-'}
+                        </td>
+                        <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000', textAlign: 'center' }}>
+                          {sup.signed_at ? (
+                            <span style={{ color: '#059669' }}>✅ {new Date(sup.signed_at).toLocaleDateString('ar-EG')}</span>
+                          ) : (
+                            <span style={{ color: '#9ca3af' }}>⏳ في انتظار البصمة</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
 
             {/* Stamps and Signatures Table - flex-grow to fill remaining space */}
             <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>

@@ -24048,6 +24048,70 @@ export type Database = {
           },
         ]
       }
+      organization_movement_supervisors: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean | null
+          organization_id: string
+          supervisor_email: string | null
+          supervisor_name: string | null
+          supervisor_phone: string | null
+          supervisor_position: string | null
+          supervisor_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          organization_id: string
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          supervisor_position?: string | null
+          supervisor_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          organization_id?: string
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          supervisor_position?: string | null
+          supervisor_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_movement_supervisors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_movement_supervisors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organization_movement_supervisors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organization_photos: {
         Row: {
           caption: string | null
@@ -32579,6 +32643,95 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      shipment_movement_supervisors: {
+        Row: {
+          created_at: string
+          id: string
+          is_mandatory: boolean | null
+          notes: string | null
+          organization_id: string
+          party_role: string
+          shipment_id: string
+          signature_hash: string | null
+          signature_url: string | null
+          signed_at: string | null
+          supervisor_email: string | null
+          supervisor_name: string | null
+          supervisor_phone: string | null
+          supervisor_position: string | null
+          supervisor_type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          notes?: string | null
+          organization_id: string
+          party_role: string
+          shipment_id: string
+          signature_hash?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          supervisor_position?: string | null
+          supervisor_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_mandatory?: boolean | null
+          notes?: string | null
+          organization_id?: string
+          party_role?: string
+          shipment_id?: string
+          signature_hash?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          supervisor_email?: string | null
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          supervisor_position?: string | null
+          supervisor_type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "shipment_movement_supervisors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "shipment_movement_supervisors_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_movement_supervisors_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shipment_movement_supervisors_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
