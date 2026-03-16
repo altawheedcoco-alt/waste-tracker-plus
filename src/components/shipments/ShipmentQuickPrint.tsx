@@ -563,63 +563,66 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               </tbody>
             </table>
 
-            {/* Stamps and Signatures Table - flex-grow to fill remaining space */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
-              <tbody>
-                <tr>
-                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
-                </tr>
-                <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المولّد</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.generator?.representative_name || shipment.generator?.name || '-'}</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#fffbeb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>الناقل</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.transporter?.representative_name || shipment.transporter?.name || '-'}</div>
-                  </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#f0fdf4' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المستقبل</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.recycler?.representative_name || shipment.recycler?.name || '-'}</div>
-                  </td>
-                </tr>
-                <tr>
-                  {[
-                    { org: shipment.generator, label: 'المولدة' },
-                    { org: shipment.transporter, label: 'الناقلة' },
-                    { org: shipment.recycler, label: 'المدورة' },
-                  ].map((item, idx) => (
-                    <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '80px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
-                        {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
-                        {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
-                      </div>
-                      <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
-                      <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
-                        <QRCodeSVG 
-                          value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
-                          size={28} 
-                          level="L" 
-                        />
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
-                          <div style={{ fontSize: '5pt', color: '#666' }}>QR الموقع</div>
-                        </div>
-                      </div>
+            {/* Bottom section: pinned to page bottom */}
+            <div style={{ marginTop: 'auto' }}>
+              {/* Stamps and Signatures Table */}
+              <table style={{ borderCollapse: 'collapse', marginBottom: '0' }}>
+                <tbody>
+                  <tr>
+                    <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
+                  </tr>
+                  <tr>
+                    <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
+                      <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المولّد</div>
+                      <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.generator?.representative_name || shipment.generator?.name || '-'}</div>
                     </td>
-                  ))}
-                </tr>
-              </tbody>
-            </table>
+                    <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#fffbeb' }}>
+                      <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>الناقل</div>
+                      <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.transporter?.representative_name || shipment.transporter?.name || '-'}</div>
+                    </td>
+                    <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#f0fdf4' }}>
+                      <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المستقبل</div>
+                      <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.recycler?.representative_name || shipment.recycler?.name || '-'}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    {[
+                      { org: shipment.generator, label: 'المولدة' },
+                      { org: shipment.transporter, label: 'الناقلة' },
+                      { org: shipment.recycler, label: 'المدورة' },
+                    ].map((item, idx) => (
+                      <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '8px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '80px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '45px' }}>
+                          {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '40px', maxWidth: '40px', objectFit: 'contain' }} />}
+                          {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '35px', maxWidth: '60px', objectFit: 'contain' }} />}
+                        </div>
+                        <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '6px', paddingTop: '3px', fontSize: '6pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
+                        <div style={{ marginTop: '4px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '4px' }}>
+                          <QRCodeSVG 
+                            value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
+                            size={28} 
+                            level="L" 
+                          />
+                          <div style={{ textAlign: 'right' }}>
+                            <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
+                            <div style={{ fontSize: '5pt', color: '#666' }}>QR الموقع</div>
+                          </div>
+                        </div>
+                      </td>
+                    ))}
+                  </tr>
+                </tbody>
+              </table>
 
-            {/* Role-based tagline */}
-            <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
+              {/* Role-based tagline */}
+              <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
-            {/* Footer - always at the very bottom */}
-            <div style={{ marginTop: 'auto', paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#000' }}>
-              <div>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام</div>
-              <div style={{ marginTop: '2px' }}>
-                رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
+              {/* Footer */}
+              <div style={{ paddingTop: '4px', borderTop: '1px solid #e5e7eb', textAlign: 'center', fontSize: '6pt', color: '#000' }}>
+                <div>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام</div>
+                <div style={{ marginTop: '2px' }}>
+                  رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
+                </div>
               </div>
             </div>
           </div>
