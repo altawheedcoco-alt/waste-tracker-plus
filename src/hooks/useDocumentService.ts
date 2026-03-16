@@ -315,10 +315,12 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
 
     const combinedBgHTML = layers.join('\n');
 
+    const micrOpts = { orgClientCode, orgVerificationCode };
+
     if (combinedBgHTML) {
-      PrintService.printWithBackground(el, combinedBgHTML, { ...opts, customCSS: extraCSS });
+      PrintService.printWithBackground(el, combinedBgHTML, { ...opts, ...micrOpts, customCSS: extraCSS });
     } else {
-      PrintService.print(el, opts);
+      PrintService.print(el, { ...opts, ...micrOpts });
     }
 
     logPrintAction(userId, orgId, 'browser_print');

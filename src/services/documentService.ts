@@ -61,6 +61,8 @@ export interface ExcelSheetDef {
 export interface PrintOptions {
   customCSS?: string;
   fitSinglePage?: boolean;
+  orgClientCode?: string | null;
+  orgVerificationCode?: string | null;
 }
 
 export interface UploadOptions {
@@ -472,7 +474,7 @@ export const PrintService = {
    * This is the centralized method — ALL components should use this
    * instead of manual window.open() + window.print().
    */
-  printHTML(htmlContent: string, opts: { title?: string; windowFeatures?: string; customCSS?: string } = {}): void {
+  printHTML(htmlContent: string, opts: { title?: string; windowFeatures?: string; customCSS?: string; orgClientCode?: string | null; orgVerificationCode?: string | null } = {}): void {
     const win = window.open('', '_blank', opts.windowFeatures);
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
@@ -524,7 +526,7 @@ export const PrintService = {
 </head>
 <body>
   ${textFillerHTML}
-  ${generateMICRLineHTML()}
+  ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
   <div style="position:relative;z-index:2;">${htmlContent}</div>
   <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>
 </body>
@@ -735,7 +737,7 @@ export const PrintService = {
   <div class="page-wrapper">
     ${guillocheLayer}
     ${guillocheTextFiller}
-    ${generateMICRLineHTML()}
+    ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
