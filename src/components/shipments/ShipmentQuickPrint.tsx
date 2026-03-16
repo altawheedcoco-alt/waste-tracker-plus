@@ -9,6 +9,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
