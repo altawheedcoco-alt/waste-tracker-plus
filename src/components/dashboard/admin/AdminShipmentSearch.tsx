@@ -153,7 +153,7 @@ const AdminShipmentSearch = () => {
         </CardContent>
       </Card>
 
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={printOpen}
         onClose={() => setPrintOpen(false)}
         shipment={selectedShipment}

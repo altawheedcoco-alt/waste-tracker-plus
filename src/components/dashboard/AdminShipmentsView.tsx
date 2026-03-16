@@ -326,7 +326,7 @@ const AdminShipmentsView = () => {
       />
 
       {/* Print View */}
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={showPrintDialog}
         onClose={() => { setShowPrintDialog(false); setPrintShipmentData(null); }}
         shipment={printShipmentData}

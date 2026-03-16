@@ -452,7 +452,7 @@ const GeneratorDashboard = () => {
       </Tabs>
 
       {/* Dialogs */}
-      <EnhancedShipmentPrintView isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
+      <UnifiedShipmentPrint isOpen={showPrintDialog} onClose={() => setShowPrintDialog(false)} shipment={selectedShipment as any} />
       <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
       <AddDepositDialog open={showDepositDialog} onOpenChange={setShowDepositDialog} />
       <Suspense fallback={null}>

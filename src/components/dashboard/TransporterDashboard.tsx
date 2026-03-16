@@ -200,7 +200,7 @@ const TransporterDashboard = () => {
       </motion.div>
 
       {/* Dialogs */}
-      <EnhancedShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={showPrintDialog}
         onClose={() => setShowPrintDialog(false)}
         shipment={selectedShipment as any}
