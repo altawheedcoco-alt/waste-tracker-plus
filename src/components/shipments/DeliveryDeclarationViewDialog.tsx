@@ -1,16 +1,9 @@
-import { useRef } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Printer, Download, X, FileCheck } from 'lucide-react';
+import { Eye, FileCheck } from 'lucide-react';
 import MemberNameLink from '@/components/org-structure/MemberNameLink';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
-import { usePDFExport } from '@/hooks/usePDFExport';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
