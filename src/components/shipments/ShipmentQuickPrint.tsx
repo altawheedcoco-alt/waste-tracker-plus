@@ -19,6 +19,7 @@ interface ShipmentQuickPrintProps {
   isOpen: boolean;
   onClose: () => void;
   shipmentId: string;
+  autoAction?: 'print' | 'pdf' | null;
 }
 
 interface ShipmentLogEntry {
