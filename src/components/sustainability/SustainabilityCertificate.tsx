@@ -114,36 +114,19 @@ const SustainabilityCertificate = ({
   if (!organization) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-green-600" />
-            شهادة الاستدامة البيئية
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex gap-2 mb-4">
-          <Button onClick={exportToPdf} disabled={exporting} className="gradient-eco">
-            {exporting ? (
-              <Loader2 className="h-4 w-4 animate-spin ml-2" />
-            ) : (
-              <Download className="h-4 w-4 ml-2" />
-            )}
-            تحميل PDF
-          </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 ml-2" />
-            طباعة
-          </Button>
-        </div>
-
-        {/* Certificate */}
-        <div 
-          ref={certificateRef} 
-          className="bg-white p-8 rounded-lg border-8 border-double border-green-600 relative overflow-hidden print:border-green-700"
-          style={{ minHeight: "500px" }}
-        >
+    <UnifiedDocumentPreview
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title="شهادة الاستدامة البيئية"
+      filename={`شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}`}
+      orientation="landscape"
+    >
+      {/* Certificate */}
+      <div 
+        ref={certificateRef} 
+        className="bg-white p-8 rounded-lg border-8 border-double border-green-600 relative overflow-hidden print:border-green-700"
+        style={{ minHeight: "500px" }}
+      >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
