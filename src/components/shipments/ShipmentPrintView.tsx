@@ -547,7 +547,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td>
+                  <td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td>
                 </tr>
                 <tr>
                   <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.border}`, background: theme.colors.generatorLight || '#eff6ff' }}>
