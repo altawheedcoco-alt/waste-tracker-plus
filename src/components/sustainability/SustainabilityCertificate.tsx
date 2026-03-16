@@ -1,20 +1,15 @@
 import { useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Award, 
   Leaf, 
-  Download, 
-  Printer, 
   CheckCircle2, 
   Star,
   Shield,
-  Loader2
 } from "lucide-react";
-// jsPDF & html2canvas loaded dynamically
-import { usePDFExport } from '@/hooks/usePDFExport';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 interface Organization {
   id: string;
