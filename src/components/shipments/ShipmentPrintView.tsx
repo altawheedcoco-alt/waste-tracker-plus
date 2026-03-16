@@ -320,9 +320,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
                     </div>
                   </td>
-                  <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '70px', height: '70px' }} />}
-                    <div style={{ fontSize: '6pt', color: '#6b7280' }}>امسح للتتبع</div>
+                  <td style={{ width: '15%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '55px', height: '55px' }} />}
+                    <div style={{ fontSize: '5pt', color: '#6b7280' }}>امسح للتتبع</div>
                   </td>
                 </tr>
               </tbody>
