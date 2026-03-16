@@ -127,23 +127,26 @@ export const PDFService = {
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Temporarily constrain to A4 width with minimal padding
+    // Temporarily constrain to A4 width with proper margins
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '5mm';
+    element.style.padding = '8mm 10mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
+    element.style.fontFamily = "'Cairo', 'Segoe UI', sans-serif";
+    element.style.webkitFontSmoothing = 'antialiased';
+    element.style.textRendering = 'optimizeLegibility';
     
-    // For fitSinglePage: also reduce font sizes to help fit
+    // For fitSinglePage: use moderate font sizes (not too small)
     if (fitSinglePage) {
-      element.style.fontSize = '6.5pt';
+      element.style.fontSize = '7.5pt';
       const allTds = element.querySelectorAll('td, th');
       allTds.forEach(td => {
-        (td as HTMLElement).style.padding = '2px 4px';
-        (td as HTMLElement).style.fontSize = '6.5pt';
-        (td as HTMLElement).style.lineHeight = '1.2';
+        (td as HTMLElement).style.padding = '3px 5px';
+        (td as HTMLElement).style.fontSize = '7.5pt';
+        (td as HTMLElement).style.lineHeight = '1.3';
       });
     }
 
