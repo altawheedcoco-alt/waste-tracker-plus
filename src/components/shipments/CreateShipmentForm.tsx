@@ -202,8 +202,20 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
     setWeightExtracted(false);
   };
 
+  const handleAfterCreate = useCallback((shipmentId: string) => {
+    import('@/utils/autoMovementSupervisors').then(({ autoAssignMovementSupervisors }) => {
+      const parties = [
+        { role: 'generator' as const, organizationId: formData.generator_id || null },
+        { role: 'transporter' as const, organizationId: formData.transporter_id || organization?.id || null },
+        { role: 'recycler' as const, organizationId: formData.recycler_id || null },
+        { role: 'disposal' as const, organizationId: formData.disposal_facility_id || null },
+      ];
+      autoAssignMovementSupervisors(shipmentId, parties, movementSupervisors).catch(console.error);
+    });
+  }, [formData, organization, movementSupervisors]);
+
   return (
-    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose)} className="space-y-5">
+    <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose, handleAfterCreate)} className="space-y-5">
       
       {/* Progress indicator - visual only */}
       <div className="flex items-center gap-1.5 justify-center opacity-60">
