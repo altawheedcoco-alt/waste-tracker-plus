@@ -191,10 +191,10 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                        {shipment.shipment_number}
                      </span>
                   </div>
-                  <div style={{ fontSize: compact ? '5pt' : '7pt', color: '#6b7280' }}>
-                    الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{documentSerial}</span>
-                    {verificationCode && <> | كود التحقق: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#dc2626' }}>{verificationCode}</span></>}
-                  </div>
+                   <div style={{ fontSize: compact ? '6.5pt' : '7pt', color: '#6b7280' }}>
+                     الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{documentSerial}</span>
+                     {verificationCode && <> | كود التحقق: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#dc2626' }}>{verificationCode}</span></>}
+                   </div>
                 </td>
                 <td style={{ width: '13%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
                   {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '50px', height: '50px' }} />}
