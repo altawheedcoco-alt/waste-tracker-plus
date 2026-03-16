@@ -159,8 +159,8 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
         </div>
       </div>
 
-      <div ref={ref} className="print-transparent-tables bg-white p-2 rounded-lg border"
-        style={{ direction: 'rtl', fontSize: compact ? '5pt' : '7pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.15' }}>
+      <div ref={ref} className="print-transparent-tables bg-white p-3 rounded-lg border"
+        style={{ direction: 'rtl', fontSize: compact ? '7pt' : '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3', WebkitFontSmoothing: 'antialiased' }}>
         <style>{`
           .print-transparent-tables table, .print-transparent-tables tr,
           .print-transparent-tables th, .print-transparent-tables td,
