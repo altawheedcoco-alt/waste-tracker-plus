@@ -246,6 +246,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
         {/* 1. Operations Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
+          {/* Environmental KPIs & License Alerts */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Suspense fallback={<Skeleton className="h-[280px]" />}>
+              <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+                <EnvironmentalKPIWidget />
+              </ErrorBoundary>
+            </Suspense>
+            <Suspense fallback={<Skeleton className="h-[280px]" />}>
+              <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+                <LicenseExpiryWidget />
+              </ErrorBoundary>
+            </Suspense>
+          </div>
+
           <DisposalDailyOperations />
           <DashboardAlertsHub orgType="disposal" />
 
