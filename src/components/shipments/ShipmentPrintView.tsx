@@ -408,30 +408,30 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
-                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.commercial_register || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>البطاقة الضريبية</td>
-                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.tax_card || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
-                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.environmental_approval_number || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>رخصة إدارة المخلفات</td>
-                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.wmra_license || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>السجل التجاري</td>
+                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.commercial_register || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>البطاقة الضريبية</td>
+                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.tax_card || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>رقم الموافقة البيئية</td>
+                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.environmental_approval_number || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>رخصة إدارة المخلفات</td>
+                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.wmra_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>تسجيل المنشأة</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.establishment_registration || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>النشاط المسجل</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.registered_activity || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.address || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.representative_name || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>تسجيل المنشأة</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.establishment_registration || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.registered_activity || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.address || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.representative_name || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.phone || '-'}</td>
-                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
-                  <td colSpan={5} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.email || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.phone || '-'}</td>
+                  <td style={{ background: theme.colors.generatorLight, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
+                  <td colSpan={5} style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.email || '-'}</td>
                 </tr>
               </tbody>
             </table>
