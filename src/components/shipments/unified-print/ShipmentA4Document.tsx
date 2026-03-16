@@ -353,7 +353,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                       {org?.stamp_url && <img src={org.stamp_url} alt="ختم" style={{ maxHeight: '22px', maxWidth: '22px', objectFit: 'contain' }} crossOrigin="anonymous" />}
                       {org?.signature_url && <img src={org.signature_url} alt="توقيع" style={{ maxHeight: '20px', maxWidth: '40px', objectFit: 'contain' }} crossOrigin="anonymous" />}
                     </div>
-                    <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '2px', paddingTop: '1px', fontSize: '4.5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
+                    <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '2px', paddingTop: '1px', fontSize: '6pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
                     <div style={{ marginTop: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
                       <QRCodeSVG
                         value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(org?.commercial_register || org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`}
