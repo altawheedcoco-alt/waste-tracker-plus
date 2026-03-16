@@ -9,26 +9,21 @@ function lazyRetry<T extends React.ComponentType<any>>(
   factory: () => Promise<{ default: T }>,
   retries = 2
 ): React.LazyExoticComponent<T> {
-  return lazy(() =>
-    factory().catch((err) => {
-      if (retries > 0) {
-        return new Promise<{ default: T }>((resolve, reject) =>
-          setTimeout(() => {
-            factory().then(resolve).catch((e) => {
-              if (retries > 1) {
-                resolve(lazyRetry(factory, retries - 1) as any);
-              } else {
-                window.location.reload();
-                reject(e);
-              }
-            });
-          }, 500)
-        );
+  return lazy(async () => {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        return await factory();
+      } catch (err) {
+        if (i < retries) {
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        } else {
+          window.location.reload();
+          throw err;
+        }
       }
-      window.location.reload();
-      throw err;
-    })
-  );
+    }
+    throw new Error('lazyRetry exhausted');
+  });
 }
 
 // Critical above-fold: load eagerly
