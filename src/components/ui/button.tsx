@@ -18,9 +18,9 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
-        eco: "gradient-eco text-primary-foreground shadow-eco-md hover:shadow-eco-lg hover:scale-105 active:scale-95",
-        ecoOutline: "border-2 border-primary bg-transparent text-primary hover:gradient-eco hover:text-primary-foreground hover:border-transparent transition-all duration-300",
-        hero: "gradient-eco text-primary-foreground shadow-eco-lg hover:shadow-eco-glow hover:scale-105 active:scale-95 text-base px-8 py-6",
+        eco: "bg-primary gradient-eco text-white shadow-eco-md hover:shadow-eco-lg hover:scale-105 active:scale-95",
+        ecoOutline: "border-2 border-primary bg-transparent text-primary hover:bg-primary hover:gradient-eco hover:text-white hover:border-transparent transition-all duration-300",
+        hero: "bg-primary gradient-eco text-white shadow-eco-lg hover:shadow-eco-glow hover:scale-105 active:scale-95 text-base px-8 py-6",
         heroOutline: "border-2 border-primary/30 bg-card/80 backdrop-blur-sm text-foreground hover:border-primary hover:bg-primary/5 text-base px-8 py-6",
       },
       size: {
