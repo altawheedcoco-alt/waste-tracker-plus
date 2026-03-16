@@ -240,6 +240,10 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
               <FileText className="h-4 w-4" />
               <span className="hidden sm:inline">{t('sidebar.docArchive')}</span>
             </TabsTrigger>
+            <TabsTrigger value="movement-supervisors" className="gap-2 rounded-xl px-3.5 py-2.5 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20 transition-all duration-300">
+              <Eye className="h-4 w-4" />
+              <span className="hidden sm:inline">مسئولو الحركة</span>
+            </TabsTrigger>
           </TabsList>
         </div>
 
