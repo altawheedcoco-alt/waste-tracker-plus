@@ -25,9 +25,9 @@ import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_C
 export const A4 = {
   width: 210,        // mm
   height: 297,       // mm
-  margin: 0.2,       // mm — minimal margins, content fills page
-  contentWidth: 209.6,  // 210 - 2×0.2
-  contentHeight: 296.6, // 297 - 2×0.2
+  margin: 0.5,       // mm — minimal margins, content fills page
+  contentWidth: 209,  // 210 - 2×0.5
+  contentHeight: 296, // 297 - 2×0.5
 } as const;
 
 export const A4_PX = {
@@ -123,7 +123,7 @@ export const PDFService = {
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '0.2mm';
+    element.style.padding = '0.5mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
@@ -402,7 +402,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
   ${MICR_FONT_FACE_CSS}
-  @page { size: A4 portrait; margin: 3mm; }
+  @page { size: A4 portrait; margin: 0.5mm; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -426,6 +426,7 @@ const DEFAULT_PRINT_CSS = `
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.12;
   }
 
   .print-container {
@@ -451,12 +452,12 @@ const DEFAULT_PRINT_CSS = `
   table { width: 100%; border-collapse: collapse; page-break-inside: auto; }
   thead { display: table-header-group; }
   tr { page-break-inside: avoid; page-break-after: auto; }
-  th, td { padding: 3px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.3; }
+  th, td { padding: 4px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.4; }
 
-  h1 { font-size: 16pt; margin: 4px 0; }
-  h2 { font-size: 13pt; margin: 3px 0; }
-  h3 { font-size: 11pt; margin: 2px 0; }
-  p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+  h1 { font-size: 16pt; margin: 6px 0; line-height: 1.3; }
+  h2 { font-size: 13pt; margin: 5px 0; line-height: 1.3; }
+  h3 { font-size: 11pt; margin: 4px 0; line-height: 1.3; }
+  p { font-size: 10pt; margin: 3px 0; line-height: 1.5; }
 
   @media print {
     body { margin: 0; padding: 0; }
@@ -516,7 +517,7 @@ export const PrintService = {
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
     ${MICR_FONT_FACE_CSS}
-    @page { size: A4 portrait; margin: 0.2mm; }
+    @page { size: A4 portrait; margin: 0.5mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
     .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
