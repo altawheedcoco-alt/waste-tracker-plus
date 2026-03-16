@@ -50,6 +50,7 @@ import {
   Timer,
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 // Import from unified waste classification
 import { 
