@@ -426,6 +426,7 @@ const DEFAULT_PRINT_CSS = `
     inset: 0;
     z-index: 0;
     pointer-events: none;
+    opacity: 0.12;
   }
 
   .print-container {
