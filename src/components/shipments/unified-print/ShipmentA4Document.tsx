@@ -181,8 +181,8 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                   {qrData?.docHash && <div style={{ fontSize: '4pt', color: '#6b7280', fontFamily: 'monospace' }}>H:{qrData.docHash}</div>}
                 </td>
                 <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
-                  <div style={{ fontSize: compact ? '10pt' : '14pt', fontWeight: 'bold', color: theme.colors.primary }}>نموذج تتبع نقل المخلفات</div>
-                  <div style={{ fontSize: compact ? '6pt' : '9pt', color: '#6b7280', marginBottom: '1px' }}>Waste Transport Tracking Form</div>
+                   <div style={{ fontSize: compact ? '12pt' : '14pt', fontWeight: 'bold', color: theme.colors.primary }}>نموذج تتبع نقل المخلفات</div>
+                   <div style={{ fontSize: compact ? '8pt' : '9pt', color: '#6b7280', marginBottom: '1px' }}>Waste Transport Tracking Form</div>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '1px' }}>
                     <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '1px 6px', borderRadius: theme.borderRadius, fontSize: compact ? '5.5pt' : '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                       {statusLabels[shipment.status] || shipment.status}
