@@ -221,6 +221,7 @@ export const PDFService = {
         logging: false,
         width: A4_PX.fullWidth,
         windowWidth: A4_PX.fullWidth,
+        imageTimeout: 3000,
       });
 
       // Use full page width since padding is already inside the element
