@@ -9,7 +9,7 @@ interface Props {
 
 const QuotationPrintView = ({ quotation, items, organizationName }: Props) => {
   return (
-    <div dir="rtl" style={{ fontFamily: 'Arial, sans-serif', padding: '40px', maxWidth: '210mm', margin: '0 auto', color: '#1a1a1a', fontSize: '12px', lineHeight: '1.6' }}>
+    <div dir="rtl" style={{ fontFamily: 'Arial, sans-serif', padding: '15mm 15mm 20mm 15mm', maxWidth: '210mm', margin: '0 auto', color: '#1a1a1a', fontSize: '12px', lineHeight: '1.6', boxSizing: 'border-box' }}>
       {/* Header */}
       <div style={{ borderBottom: '3px solid #1e40af', paddingBottom: '20px', marginBottom: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

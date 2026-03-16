@@ -122,7 +122,7 @@ const SecureLetterhead = forwardRef<HTMLDivElement, SecureLetterheadProps>(
     return (
       <div ref={ref} className={`bg-white relative ${className}`} style={{ width: '210mm', minHeight: '297mm', margin: '0 auto', fontFamily: "'Cairo', sans-serif" }} dir="rtl">
         <BorderWrapper style={borderStyle} color={accentColor}>
-          <div className="relative" style={{ padding: '15mm 18mm' }}>
+          <div className="relative" style={{ padding: '15mm 15mm 20mm 15mm' }}>
             
             {/* Watermark */}
             {showWatermark && <WatermarkOverlay text={watermarkText} opacity={watermarkOpacity} />}

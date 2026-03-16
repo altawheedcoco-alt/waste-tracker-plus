@@ -421,7 +421,7 @@ const UserGuidePage = () => {
           [data-sidebar], [role="navigation"], footer:not(.print-footer) { display: none !important; }
           
           /* Reset page */
-          @page { size: A4; margin: 8mm 10mm; }
+          @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
           html, body { margin: 0 !important; padding: 0 !important; background: white !important; }
           body { font-size: 9px !important; line-height: 1.35 !important; font-family: 'Cairo', 'Segoe UI', sans-serif !important; direction: rtl !important; }
           

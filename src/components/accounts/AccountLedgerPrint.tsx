@@ -61,13 +61,15 @@ const AccountLedgerPrint = forwardRef<HTMLDivElement, AccountLedgerPrintProps>(
     return (
       <div 
         ref={ref} 
-        className="bg-white text-black p-6"
+        className="bg-white text-black"
         style={{ 
           width: '210mm', 
           minHeight: '297mm', 
+          padding: '15mm 15mm 20mm 15mm',
           fontFamily: 'Arial, sans-serif',
           fontSize: '10pt',
-          direction: 'rtl'
+          direction: 'rtl',
+          boxSizing: 'border-box',
         }}
       >
         {/* Header */}
