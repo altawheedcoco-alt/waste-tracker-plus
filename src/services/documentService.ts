@@ -685,18 +685,58 @@ export const PrintService = {
         body {
           background: #e5e7eb !important;
           display: flex;
-          justify-content: center;
+          flex-direction: column;
+          align-items: center;
           padding: 0;
           margin: 0;
           min-height: 100vh;
+          overflow-y: auto;
         }
+        .print-toolbar {
+          position: sticky;
+          top: 0;
+          z-index: 9999;
+          width: 100%;
+          background: #1e293b;
+          color: white;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 12px;
+          padding: 8px 16px;
+          font-family: 'Cairo', sans-serif;
+          font-size: 13px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          direction: rtl;
+        }
+        .print-toolbar button {
+          background: #3b82f6;
+          color: white;
+          border: none;
+          padding: 6px 20px;
+          border-radius: 6px;
+          font-family: 'Cairo', sans-serif;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          transition: background 0.15s;
+        }
+        .print-toolbar button:hover { background: #2563eb; }
+        .print-toolbar button.close-btn {
+          background: #64748b;
+        }
+        .print-toolbar button.close-btn:hover { background: #475569; }
         .page-wrapper {
-          box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+          box-shadow: 0 4px 24px rgba(0,0,0,0.18);
           border-radius: 0;
-          width: 100vw;
-          max-width: 210mm;
-          min-height: 100vh;
+          width: 210mm;
+          min-height: 297mm;
+          margin: 20px auto;
           transform-origin: top center;
+          flex-shrink: 0;
         }
       }
 
@@ -709,6 +749,10 @@ export const PrintService = {
           transform-origin: top right;
           height: calc(297mm * (100vw / 210mm));
         }
+      }
+
+      @media print {
+        .print-toolbar { display: none !important; }
       }
 
       ${opts.customCSS || ''}
@@ -734,24 +778,17 @@ export const PrintService = {
   ${fitScript}
 </head>
 <body>
+  <div class="print-toolbar">
+    <span>معاينة الطباعة — صفحة A4 بنسبة 100%</span>
+    <button onclick="window.print()">🖨️ طباعة</button>
+    <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
+  </div>
   <div class="page-wrapper">
     ${guillocheLayer}
     ${guillocheTextFiller}
     ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
-  <script>
-    var printed = false;
-    function doPrint() {
-      if (printed) return;
-      printed = true;
-      window.print();
-    }
-    window.addEventListener('load', function() {
-      setTimeout(doPrint, 200);
-    });
-    setTimeout(doPrint, 1200);
-  </script>
 </body>
 </html>`);
     win.document.close();
