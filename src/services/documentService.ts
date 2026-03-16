@@ -696,7 +696,7 @@ export const PrintService = {
       table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
       thead { display: table-header-group; background: transparent !important; }
       tr { page-break-inside: avoid; background: transparent !important; }
-      th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
+      th, td { padding: 3px 5px; border: 1px solid #000; text-align: right; font-size: 8pt; line-height: 1.3; background: transparent !important; }
       .print-container, .print-container * { background-color: transparent !important; }
       .print-container table th, .print-container table td { background: transparent !important; }
       .bg-white, .bg-gray-50, .bg-gray-100, [class*="bg-"] { background-color: transparent !important; }
