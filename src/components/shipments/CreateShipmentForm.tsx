@@ -912,6 +912,48 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
         </FormSection>
       )}
 
+      {/* ══════════ SECTION 8: Movement Supervisors ══════════ */}
+      <FormSection icon={Eye} title="مسئولو الحركة" subtitle="تعيين مسئول متابعة خط السير لكل جهة — إلزامي وتلقائي">
+        <div className="space-y-4">
+          {formData.generator_id && (
+            <MovementSupervisorSelector
+              label="مسئول حركة المولد"
+              organizationId={formData.generator_id}
+              partyRole="generator"
+              value={movementSupervisors.generator}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, generator: entries }))}
+            />
+          )}
+          {(formData.transporter_id || organization?.id) && (
+            <MovementSupervisorSelector
+              label="مسئول حركة الناقل"
+              organizationId={formData.transporter_id || organization?.id || ''}
+              partyRole="transporter"
+              value={movementSupervisors.transporter}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, transporter: entries }))}
+            />
+          )}
+          {formData.recycler_id && formData.destination_type === 'recycling' && (
+            <MovementSupervisorSelector
+              label="مسئول حركة المدوّر"
+              organizationId={formData.recycler_id}
+              partyRole="recycler"
+              value={movementSupervisors.recycler}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, recycler: entries }))}
+            />
+          )}
+          {formData.disposal_facility_id && formData.destination_type === 'disposal' && (
+            <MovementSupervisorSelector
+              label="مسئول حركة جهة التخلص"
+              organizationId={formData.disposal_facility_id}
+              partyRole="disposal"
+              value={movementSupervisors.disposal}
+              onChange={(entries) => setMovementSupervisors(prev => ({ ...prev, disposal: entries }))}
+            />
+          )}
+        </div>
+      </FormSection>
+
       {/* ══════════ Submit ══════════ */}
       <motion.div
         initial={{ opacity: 0 }}
