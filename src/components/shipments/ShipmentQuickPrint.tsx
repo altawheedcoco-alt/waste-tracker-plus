@@ -341,7 +341,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '5.5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.2' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-2 rounded-lg border" style={{ direction: 'rtl', fontSize: '5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.15' }}>
           <style>{`
             .print-transparent-tables table,
             .print-transparent-tables tr,
@@ -356,30 +356,30 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               margin-bottom: 0 !important;
             }
           `}</style>
-          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '4px' }}>
+          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '0px', border: 'none' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '45px', width: '100%' }} />}
-                    <div style={{ fontSize: '7pt', color: '#000000', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '2px' }}>{shipment.shipment_number}</div>
+                  <td style={{ width: '18%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '28px', width: '100%' }} />}
+                    <div style={{ fontSize: '5.5pt', color: '#000000', fontFamily: 'monospace', fontWeight: 'bold', marginTop: '1px' }}>{shipment.shipment_number}</div>
                   </td>
-                  <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '1px' }}>نموذج تتبع نقل المخلفات</div>
-                    <div style={{ fontSize: '7.5pt', color: '#6b7280', marginBottom: '2px' }}>Waste Transport Tracking Form</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px' }}>
-                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '2px 8px', borderRadius: theme.borderRadius, fontSize: '6.5pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
+                  <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
+                    <div style={{ fontSize: '10pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '0px' }}>نموذج تتبع نقل المخلفات</div>
+                    <div style={{ fontSize: '6pt', color: '#6b7280', marginBottom: '1px' }}>Waste Transport Tracking Form</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px' }}>
+                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '1px 6px', borderRadius: theme.borderRadius, fontSize: '5.5pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '2px 8px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '7.5pt', border: '1px solid #d1d5db' }}>
+                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '1px 6px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '6pt', border: '1px solid #d1d5db' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
                   </td>
-                  <td style={{ width: '15%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '55px', height: '55px' }} />}
-                    <div style={{ fontSize: '5pt', color: '#374151', fontWeight: '600', marginTop: '1px' }}>امسح للتتبع</div>
+                  <td style={{ width: '13%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '45px', height: '45px' }} />}
+                    <div style={{ fontSize: '4.5pt', color: '#374151', fontWeight: '600' }}>امسح للتتبع</div>
                   </td>
                 </tr>
               </tbody>
@@ -553,23 +553,23 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #cbd5e1' }}>الإقرارات القانونية والبيئية</td>
+                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '5.5pt', padding: '1px', border: '1px solid #cbd5e1' }}>الإقرارات القانونية والبيئية</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#eff6ff', fontWeight: '600', width: '15%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
+                  <td style={{ background: '#eff6ff', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', lineHeight: '1.25', color: '#000' }}>يُقر المولّد بأن المخلفات ناتجة عن نشاطه وملتزم بيئياً وفقاً للقانون 202/2020 والقانون 4/1994 ولوائحهما.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fffbeb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
+                  <td style={{ background: '#fffbeb', fontWeight: '600', border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', lineHeight: '1.25', color: '#000' }}>يُقر الناقل بتطبيق المعايير البيئية واشتراطات WMRA ويتحمل المسؤولية عن سلامة المخلفات خلال النقل.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f0fdf4', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
+                  <td style={{ background: '#f0fdf4', fontWeight: '600', border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', lineHeight: '1.25', color: '#000' }}>يُقر المستقبل باستلام المخلفات وتطبيق المعايير البيئية وفقاً لترخيصه ومعايير WMRA.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef2f2', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
+                  <td style={{ background: '#fef2f2', fontWeight: '600', border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '1px 3px', fontSize: '5pt', lineHeight: '1.25', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق فقط ولا تتحمل مسؤولية قانونية. المسؤولية على الأطراف الموقّعة.</td>
                 </tr>
               </tbody>
             </table>
@@ -578,20 +578,20 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <table style={{ borderCollapse: 'collapse', marginBottom: '0', flexGrow: 1 }}>
               <tbody>
                 <tr>
-                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
+                  <td colSpan={3} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6pt', padding: '1px', border: '1px solid #cbd5e1' }}>التوقيعات والأختام</td>
                 </tr>
                 <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المولّد</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.generator?.representative_name || shipment.generator?.name || '-'}</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: '1px solid #d1d5db', background: '#eff6ff' }}>
+                    <div style={{ fontSize: '6pt', fontWeight: '700', color: '#000' }}>المولّد</div>
+                    <div style={{ fontSize: '5pt', color: '#000' }}>{shipment.generator?.representative_name || shipment.generator?.name || '-'}</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#fffbeb' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>الناقل</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.transporter?.representative_name || shipment.transporter?.name || '-'}</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: '1px solid #d1d5db', background: '#fffbeb' }}>
+                    <div style={{ fontSize: '6pt', fontWeight: '700', color: '#000' }}>الناقل</div>
+                    <div style={{ fontSize: '5pt', color: '#000' }}>{shipment.transporter?.representative_name || shipment.transporter?.name || '-'}</div>
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: '1px solid #d1d5db', background: '#f0fdf4' }}>
-                    <div style={{ fontSize: '7pt', fontWeight: '700', color: '#000', marginBottom: '2px' }}>المستقبل</div>
-                    <div style={{ fontSize: '6pt', color: '#000' }}>{shipment.recycler?.representative_name || shipment.recycler?.name || '-'}</div>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: '1px solid #d1d5db', background: '#f0fdf4' }}>
+                    <div style={{ fontSize: '6pt', fontWeight: '700', color: '#000' }}>المستقبل</div>
+                    <div style={{ fontSize: '5pt', color: '#000' }}>{shipment.recycler?.representative_name || shipment.recycler?.name || '-'}</div>
                   </td>
                 </tr>
                 <tr>
@@ -600,21 +600,21 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                     { org: shipment.transporter, label: 'الناقلة' },
                     { org: shipment.recycler, label: 'المدورة' },
                   ].map((item, idx) => (
-                    <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '6px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '70px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'center', gap: '6px', alignItems: 'flex-end', minHeight: '35px' }}>
-                        {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '35px', maxWidth: '35px', objectFit: 'contain' }} />}
-                        {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '30px', maxWidth: '55px', objectFit: 'contain' }} />}
+                    <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '3px', verticalAlign: 'top', border: '1px solid #d1d5db', minHeight: '45px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', alignItems: 'flex-end', minHeight: '22px' }}>
+                        {item.org?.stamp_url && <img src={item.org.stamp_url} alt="ختم" style={{ maxHeight: '22px', maxWidth: '22px', objectFit: 'contain' }} />}
+                        {item.org?.signature_url && <img src={item.org.signature_url} alt="توقيع" style={{ maxHeight: '20px', maxWidth: '40px', objectFit: 'contain' }} />}
                       </div>
-                      <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '4px', paddingTop: '2px', fontSize: '5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
-                      <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '3px' }}>
+                      <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '2px', paddingTop: '1px', fontSize: '4.5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
+                      <div style={{ marginTop: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
                         <QRCodeSVG 
                           value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
-                          size={38} 
+                          size={28} 
                           level="M" 
                         />
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
-                          <div style={{ fontSize: '4.5pt', color: '#666' }}>QR الموقع</div>
+                          <div style={{ fontSize: '4pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
+                          <div style={{ fontSize: '4pt', color: '#666' }}>QR</div>
                         </div>
                       </div>
                     </td>
@@ -627,9 +627,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
             <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
             {/* Footer - always at the very bottom */}
-            <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '5.5pt', color: '#000', paddingTop: '3px', paddingBottom: '2px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
+            <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '5pt', color: '#000', paddingTop: '2px', paddingBottom: '1px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
               <div style={{ fontWeight: '600' }}>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي طبقاً للبيانات المدخلة والواردة إلينا على النظام، دون أدنى مسؤولية على النظام</div>
-              <div style={{ marginTop: '1px', fontFamily: 'monospace', fontSize: '5pt' }}>
+              <div style={{ fontFamily: 'monospace', fontSize: '4.5pt' }}>
                 رقم التتبع: {shipment.shipment_number} | الرقم التسلسلي: {`DOC-${shipment.shipment_number.replace('SHP-', '')}`} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
               </div>
             </div>

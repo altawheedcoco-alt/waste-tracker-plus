@@ -333,8 +333,8 @@ export const useDocumentService = (options: UseDocumentServiceOptions = {}): Use
     }
     const theme = getThemeById(themeId);
     const themeCSS = generateThemeCSS(theme);
-    print(el, { customCSS: themeCSS });
-  }, [print]);
+    print(el, { customCSS: themeCSS, fitSinglePage: options.fitSinglePage });
+  }, [print, options.fitSinglePage]);
 
   // ─── Backward-compatible aliases ────────────────────────────
 

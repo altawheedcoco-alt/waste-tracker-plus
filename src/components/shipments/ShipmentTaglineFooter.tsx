@@ -26,30 +26,30 @@ const ShipmentTaglineFooter: React.FC<ShipmentTaglineFooterProps> = ({ shipmentN
 
   return (
     <div style={{
-      marginTop: '3px',
-      marginBottom: '2px',
-      padding: '2px 4px',
+      marginTop: '1px',
+      marginBottom: '1px',
+      padding: '1px 3px',
       border: '1px solid #d1d5db',
-      borderRadius: '3px',
+      borderRadius: '2px',
       background: 'rgba(240,253,244,0.4)',
-      fontSize: '5pt',
-      lineHeight: 1.3,
+      fontSize: '4.5pt',
+      lineHeight: 1.2,
       color: '#374151',
       textAlign: 'center',
     }}>
-      <div style={{ display: 'table', width: '100%', borderCollapse: 'separate', borderSpacing: '3px 1px' }}>
+      <div style={{ display: 'table', width: '100%', borderCollapse: 'separate', borderSpacing: '2px 0px' }}>
         <div style={{ display: 'table-row' }}>
-          <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🏭 رسالة للمولّد</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.generator}</div>
+          <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '1px 2px', borderLeft: '1px solid #e5e7eb' }}>
+            <div style={{ fontSize: '4.5pt', color: '#059669', fontWeight: 700 }}>🏭 المولّد</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '4.5pt' }}>{taglines.generator}</div>
           </div>
-          <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.transporter}</div>
+          <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '1px 2px', borderLeft: '1px solid #e5e7eb' }}>
+            <div style={{ fontSize: '4.5pt', color: '#059669', fontWeight: 700 }}>🚛 الناقل</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '4.5pt' }}>{taglines.transporter}</div>
           </div>
-          <div style={{ display: 'table-cell', width: '34%', verticalAlign: 'top', padding: '2px 3px' }}>
-            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>{taglines.destLabel}</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.destination}</div>
+          <div style={{ display: 'table-cell', width: '34%', verticalAlign: 'top', padding: '1px 2px' }}>
+            <div style={{ fontSize: '4.5pt', color: '#059669', fontWeight: 700 }}>{taglines.destLabel}</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '4.5pt' }}>{taglines.destination}</div>
           </div>
         </div>
       </div>
