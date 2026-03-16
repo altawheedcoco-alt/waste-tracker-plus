@@ -54,6 +54,20 @@ const RecyclerOverviewTab = ({
 
   return (
     <TabsContent value="overview" className="space-y-6 mt-4">
+      {/* Environmental KPIs & License Alerts */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
+            <EnvironmentalKPIWidget />
+          </ErrorBoundary>
+        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
+            <LicenseExpiryWidget />
+          </ErrorBoundary>
+        </Suspense>
+      </div>
+
       <RecyclerCommandCenter />
       <StatsCardsGrid stats={statCards} isLoading={shipmentsLoading} />
       <AutomationSettingsDialog organizationType="recycler" />

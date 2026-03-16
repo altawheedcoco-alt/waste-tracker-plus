@@ -10,6 +10,8 @@ const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'))
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
 const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
