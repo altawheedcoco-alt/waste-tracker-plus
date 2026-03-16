@@ -204,8 +204,8 @@ export const PDFService = {
               currentY = 0;
             }
 
-            const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
-            pdf.addImage(imgData, 'JPEG', 0, currentY, imgW, imgH);
+            const imgData = sectionCanvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, currentY, imgW, imgH);
             currentY += imgH + 2;
           }
 
