@@ -1416,6 +1416,150 @@ export type Database = {
           },
         ]
       }
+      ai_document_shares: {
+        Row: {
+          created_at: string
+          document_id: string
+          expires_at: string | null
+          id: string
+          is_active: boolean | null
+          share_code: string | null
+          share_type: string
+          shared_by: string
+          shared_with_org_id: string | null
+          views_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          document_id: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_code?: string | null
+          share_type?: string
+          shared_by: string
+          shared_with_org_id?: string | null
+          views_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          document_id?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          share_code?: string | null
+          share_type?: string
+          shared_by?: string
+          shared_with_org_id?: string | null
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_document_shares_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "ai_documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_document_shares_shared_by_fkey"
+            columns: ["shared_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_document_shares_shared_with_org_id_fkey"
+            columns: ["shared_with_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_document_shares_shared_with_org_id_fkey"
+            columns: ["shared_with_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ai_documents: {
+        Row: {
+          chat_messages: Json | null
+          created_at: string
+          created_by: string
+          document_type: string
+          html_content: string
+          id: string
+          is_template: boolean | null
+          organization_id: string
+          shared_count: number | null
+          status: string
+          tags: string[] | null
+          template_category: string | null
+          template_description: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          chat_messages?: Json | null
+          created_at?: string
+          created_by: string
+          document_type?: string
+          html_content: string
+          id?: string
+          is_template?: boolean | null
+          organization_id: string
+          shared_count?: number | null
+          status?: string
+          tags?: string[] | null
+          template_category?: string | null
+          template_description?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          chat_messages?: Json | null
+          created_at?: string
+          created_by?: string
+          document_type?: string
+          html_content?: string
+          id?: string
+          is_template?: boolean | null
+          organization_id?: string
+          shared_count?: number | null
+          status?: string
+          tags?: string[] | null
+          template_category?: string | null
+          template_description?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_documents_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "ai_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ai_platform_config: {
         Row: {
           anomaly_threshold: number | null
