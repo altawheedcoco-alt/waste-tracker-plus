@@ -61,11 +61,11 @@ export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string
   }
 
   // Vertical digital watermark — left side, bottom third, rotated 90°
-  const verticalStamp = `<div style="position:fixed;left:17mm;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:left center;z-index:1;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:7.5px;letter-spacing:1.5px;color:#000000;font-weight:900;direction:rtl;">
+  const verticalStamp = `<div style="position:absolute;left:17mm;top:50%;transform:rotate(-90deg) translateX(-50%);transform-origin:left center;z-index:1;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:7.5px;letter-spacing:1.5px;color:#000000;font-weight:900;direction:rtl;">
     <span style="background:rgba(255,255,255,0.85);padding:3px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:2px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية | iRecycle Platform — This Document is Secured &amp; Smart | 𓇋𓂋𓇌𓋴𓇌𓎡𓃭 — 𓅓𓋴𓏏𓈖𓂧 𓅓𓀀𓅓𓈖 𓅱𓇌𓎡𓇌 ◂</span>
   </div>`;
 
-  return `<div class="guilloche-text-filler" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
+  return `<div class="guilloche-text-filler" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
 }
 
 /** Helper: hex color to r,g,b string */
