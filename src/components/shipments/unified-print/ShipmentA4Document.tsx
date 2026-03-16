@@ -318,12 +318,12 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                   const roleLabels: Record<string, string> = { generator: 'المولد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
                   const methodLabels: Record<string, string> = { manual: 'يدوي', otp: 'OTP', national_id: 'رقم قومي', digital_stamp: 'ختم رقمي', full_auto: 'تلقائي كامل' };
                   return (
-                    <tr key={i}>
-                      <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{roleLabels[sup.party_role] || sup.party_role}</td>
-                      <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{sup.supervisor_type === 'ai' ? '🤖 ' : '👤 '}{sup.supervisor_name || '-'}</td>
-                      <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000', fontFamily: 'monospace' }}>{sup.supervisor_phone || '-'}</td>
-                      <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{methodLabels[sup.auto_sign_method || 'manual'] || 'يدوي'}</td>
-                    </tr>
+                     <tr key={i}>
+                       <td style={{ fontSize: '6.5pt', padding: '2px 4px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{roleLabels[sup.party_role] || sup.party_role}</td>
+                       <td style={{ fontSize: '6.5pt', padding: '2px 4px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{sup.supervisor_type === 'ai' ? '🤖 ' : '👤 '}{sup.supervisor_name || '-'}</td>
+                       <td style={{ fontSize: '6.5pt', padding: '2px 4px', border: `1px solid ${theme.colors.border}`, color: '#000', fontFamily: 'monospace' }}>{sup.supervisor_phone || '-'}</td>
+                       <td style={{ fontSize: '6.5pt', padding: '2px 4px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>{methodLabels[sup.auto_sign_method || 'manual'] || 'يدوي'}</td>
+                     </tr>
                   );
                 })}
               </tbody>
