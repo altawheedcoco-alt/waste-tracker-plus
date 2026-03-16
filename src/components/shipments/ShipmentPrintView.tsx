@@ -399,10 +399,10 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             </table>
 
             {/* Generator Section - Blue Header */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: theme.colors.generatorBg, color: theme.colors.generatorText, fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>
+                  <td colSpan={8} style={{ background: theme.colors.generatorBg, color: theme.colors.generatorText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>
                     بيانات الجهة المولدة: {shipment.generator?.name || '-'}
                     {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: theme.colors.generatorLight, color: theme.colors.generatorBg, padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
                   </td>
