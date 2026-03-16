@@ -131,6 +131,7 @@ const ShipmentCard = ({
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
   const [printAutoAction, setPrintAutoAction] = useState<'print' | 'pdf' | null>(null);
+  const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
   const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
