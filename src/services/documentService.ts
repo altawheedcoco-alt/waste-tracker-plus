@@ -682,39 +682,45 @@ export const PrintService = {
       }
 
       @media screen {
+        html, body {
+          width: auto;
+          min-width: 210mm;
+          min-height: auto;
+          overflow: auto;
+        }
         body {
-          background: #e5e7eb !important;
+          background: #525659 !important;
           display: flex;
           flex-direction: column;
           align-items: center;
           padding: 0;
           margin: 0;
-          min-height: 100vh;
-          overflow-y: auto;
         }
         .print-toolbar {
           position: sticky;
           top: 0;
           z-index: 9999;
           width: 100%;
-          background: #1e293b;
-          color: white;
+          min-width: 210mm;
+          background: #323639;
+          color: #e2e8f0;
           display: flex;
           align-items: center;
           justify-content: center;
           gap: 12px;
-          padding: 8px 16px;
+          padding: 6px 16px;
           font-family: 'Cairo', sans-serif;
           font-size: 13px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
           direction: rtl;
+          flex-shrink: 0;
         }
         .print-toolbar button {
           background: #3b82f6;
           color: white;
           border: none;
-          padding: 6px 20px;
-          border-radius: 6px;
+          padding: 5px 18px;
+          border-radius: 4px;
           font-family: 'Cairo', sans-serif;
           font-size: 13px;
           font-weight: 600;
@@ -722,32 +728,19 @@ export const PrintService = {
           display: flex;
           align-items: center;
           gap: 6px;
-          transition: background 0.15s;
         }
         .print-toolbar button:hover { background: #2563eb; }
-        .print-toolbar button.close-btn {
-          background: #64748b;
-        }
+        .print-toolbar button.close-btn { background: #64748b; }
         .print-toolbar button.close-btn:hover { background: #475569; }
         .page-wrapper {
-          box-shadow: 0 4px 24px rgba(0,0,0,0.18);
-          border-radius: 0;
           width: 210mm;
-          min-height: 297mm;
-          margin: 20px auto;
-          transform-origin: top center;
+          height: 297mm;
+          max-height: 297mm;
+          background: white;
+          box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+          margin: 16px auto;
           flex-shrink: 0;
-        }
-      }
-
-      /* Scale A4 to fit viewport on small screens */
-      @media screen and (max-width: 210mm) {
-        .page-wrapper {
-          width: 100vw !important;
-          min-height: auto !important;
-          transform: scale(calc(100vw / 793.7px));
-          transform-origin: top right;
-          height: calc(297mm * (100vw / 210mm));
+          overflow: hidden;
         }
       }
 
