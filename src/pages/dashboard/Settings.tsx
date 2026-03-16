@@ -741,6 +741,11 @@ const fontOptions = [...arabicFontOptions, ...englishFontOptions];
         <TabsContent value="document-templates" className="space-y-6">
           <DocumentTemplateManager />
         </TabsContent>
+
+        {/* Movement Supervisors Tab */}
+        <TabsContent value="movement-supervisors" className="space-y-6">
+          <MovementSupervisorSettings />
+        </TabsContent>
       </Tabs>
     </div>
   );
