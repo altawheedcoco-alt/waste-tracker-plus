@@ -275,12 +275,12 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
-  const pdfFileName = [
+  const pdfFileName = shipment ? [
     shipment.transporter?.name || 'الناقل',
     `شحنة-${shipment.shipment_number}`,
     shipment.generator?.name || 'المولد',
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
-  ].join('-');
+  ].join('-') : 'tracking-form';
 
   const handleDownloadPDF = () => {
     handlePrint();
