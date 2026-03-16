@@ -297,8 +297,8 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                 { bg: '#fef2f2', label: 'إخلاء مسؤولية', text: 'منصة iRecycle أداة رقمية للتوثيق فقط ولا تتحمل مسؤولية قانونية. المسؤولية على الأطراف الموقّعة.', labelColor: '#991b1b' },
               ].map((d, i) => (
                 <tr key={i}>
-                  <td style={{ background: d.bg, fontWeight: '600', width: '12%', border: `1px solid ${theme.colors.border}`, padding: '1px 3px', fontSize: '5pt', verticalAlign: 'top', color: d.labelColor || '#000' }}>{d.label}</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '1px 3px', fontSize: '5pt', lineHeight: '1.25', color: '#000' }}>{d.text}</td>
+                  <td style={{ background: d.bg, fontWeight: '600', width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6.5pt', verticalAlign: 'top', color: d.labelColor || '#000' }}>{d.label}</td>
+                   <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6.5pt', lineHeight: '1.35', color: '#000' }}>{d.text}</td>
                 </tr>
               ))}
             </tbody>
