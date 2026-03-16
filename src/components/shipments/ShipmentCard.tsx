@@ -45,6 +45,7 @@ import {
   Send,
   ClipboardCheck,
   EyeOff,
+  Download,
 } from 'lucide-react';
 import {
   getStatusConfig,
