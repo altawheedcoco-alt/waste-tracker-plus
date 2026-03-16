@@ -305,17 +305,17 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                     <div style={{ fontSize: '6pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
                   </td>
                   <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
-                    <div style={{ fontSize: '14pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '2px' }}>نموذج تتبع نقل المخلفات</div>
-                    <div style={{ fontSize: '9pt', color: '#6b7280', marginBottom: '4px' }}>Waste Transport Tracking Form</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginBottom: '4px' }}>
-                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '3px 12px', borderRadius: theme.borderRadius, fontSize: '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
+                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '1px' }}>نموذج تتبع نقل المخلفات</div>
+                    <div style={{ fontSize: '7.5pt', color: '#6b7280', marginBottom: '2px' }}>Waste Transport Tracking Form</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
+                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '2px 8px', borderRadius: theme.borderRadius, fontSize: '6.5pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '3px 12px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '9pt', border: '1px solid #d1d5db' }}>
+                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '2px 8px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '7.5pt', border: '1px solid #d1d5db' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
-                    <div style={{ fontSize: '7pt', color: '#6b7280' }}>
+                    <div style={{ fontSize: '5.5pt', color: '#6b7280' }}>
                       الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
                     </div>
                   </td>
