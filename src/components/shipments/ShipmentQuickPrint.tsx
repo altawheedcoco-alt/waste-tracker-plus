@@ -131,7 +131,6 @@ const statusLabels: Record<string, string> = {
   new: 'جديدة',
   approved: 'معتمدة',
   collecting: 'جاري التجميع',
-  in_transit: 'في الطريق',
   delivered: 'تم التسليم',
   confirmed: 'مكتمل',
 };
