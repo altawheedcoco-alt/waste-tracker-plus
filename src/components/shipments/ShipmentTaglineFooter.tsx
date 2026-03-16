@@ -44,8 +44,8 @@ const ShipmentTaglineFooter: React.FC<ShipmentTaglineFooterProps> = ({ shipmentN
             <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.generator}</div>
           </div>
           <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5.5pt' }}>{taglines.transporter}</div>
+            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.transporter}</div>
           </div>
           <div style={{ display: 'table-cell', width: '34%', verticalAlign: 'top', padding: '2px 3px' }}>
             <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>{taglines.destLabel}</div>
