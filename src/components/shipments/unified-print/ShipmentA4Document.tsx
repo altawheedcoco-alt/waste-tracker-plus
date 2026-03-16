@@ -177,7 +177,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tr>
                 <td style={{ width: '18%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
                   {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '28px', width: '100%' }} />}
-                  <div style={{ fontSize: '5.5pt', color: '#000', fontFamily: 'monospace', fontWeight: 'bold' }}>{shipment.shipment_number}</div>
+                  <div style={{ fontSize: '7pt', color: '#000', fontFamily: 'monospace', fontWeight: 'bold' }}>{shipment.shipment_number}</div>
                   {qrData?.docHash && <div style={{ fontSize: '4pt', color: '#6b7280', fontFamily: 'monospace' }}>H:{qrData.docHash}</div>}
                 </td>
                 <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
