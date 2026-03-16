@@ -24,6 +24,8 @@ function createDefaultAISupervisor(role: string): Partial<MovementSupervisorEntr
     supervisor_phone: null,
     supervisor_email: null,
     supervisor_position: 'مراقب حركة تلقائي',
+    auto_sign_enabled: true,
+    auto_sign_method: 'full_auto' as const,
   };
 }
 
