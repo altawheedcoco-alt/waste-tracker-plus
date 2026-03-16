@@ -150,7 +150,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [signingLoading, setSigningLoading] = useState(false);
   const theme = getThemeById(themeId);
   
-  const { printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
+  const { printContent: printContentFn, printWithTheme, exportToPDF, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
