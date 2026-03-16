@@ -222,6 +222,7 @@ const SustainabilityCertificate = ({
           </div>
         </div>
       </div>
+    </UnifiedDocumentPreview>
   );
 };
 
