@@ -529,16 +529,16 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.transporterLight || '#fffbeb', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
+                  <td style={{ background: theme.colors.transporterLight || '#fffbeb', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.recyclerLight || '#f0fdf4', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
+                  <td style={{ background: theme.colors.recyclerLight || '#f0fdf4', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef2f2', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
+                  <td style={{ background: '#fef2f2', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
                 </tr>
               </tbody>
             </table>
