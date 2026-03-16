@@ -328,7 +328,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             </table>
 
             {/* Organization Logos & Security Bar */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '4px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
                   <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.generatorLight || '#f0f9ff' }}>
