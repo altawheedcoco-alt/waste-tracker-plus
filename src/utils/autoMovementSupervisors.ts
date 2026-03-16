@@ -121,3 +121,44 @@ export async function autoAssignMovementSupervisors(
     if (error) console.error('Auto movement supervisors error:', error);
   }
 }
+
+/**
+ * Replace AI supervisor with a human supervisor for a specific shipment and party role.
+ * The human supervisor inherits and continues all duties previously handled by the AI.
+ */
+export async function replaceAISupervisorWithHuman(
+  shipmentId: string,
+  partyRole: string,
+  humanEntry: MovementSupervisorEntry,
+  organizationId?: string,
+) {
+  // Remove existing AI supervisors for this role
+  const { error: deleteError } = await supabase
+    .from('shipment_movement_supervisors')
+    .delete()
+    .eq('shipment_id', shipmentId)
+    .eq('party_role', partyRole)
+    .eq('supervisor_type', 'ai');
+
+  if (deleteError) {
+    console.error('Error removing AI supervisor:', deleteError);
+    return;
+  }
+
+  // Insert the human supervisor
+  const { error: insertError } = await supabase
+    .from('shipment_movement_supervisors')
+    .insert({
+      shipment_id: shipmentId,
+      organization_id: organizationId || null,
+      party_role: partyRole,
+      supervisor_type: 'human',
+      user_id: humanEntry.user_id || null,
+      supervisor_name: humanEntry.supervisor_name || null,
+      supervisor_phone: humanEntry.supervisor_phone || null,
+      supervisor_email: humanEntry.supervisor_email || null,
+      supervisor_position: humanEntry.supervisor_position || null,
+    });
+
+  if (insertError) console.error('Error assigning human supervisor:', insertError);
+}
