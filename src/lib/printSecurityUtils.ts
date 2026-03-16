@@ -158,7 +158,7 @@ export function generateMICRLineHTML(
   // MICR E-13B special chars: A=Transit(⑆) B=On-Us(⑇) C=Amount(⑈) D=Dash(⑉)
   const micrLine = `A${code}A B${dateStamp}D${timeStamp}B C0000C`;
 
-  return `<div class="micr-line" style="position:fixed;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B',monospace;font-size:11px;letter-spacing:1px;color:#000000;line-height:1;">
+  return `<div class="micr-line" style="position:absolute;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B',monospace;font-size:11px;letter-spacing:1px;color:#000000;line-height:1;">
     <span>${micrLine}</span>
   </div>`;
 }
