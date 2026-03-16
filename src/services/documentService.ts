@@ -512,6 +512,7 @@ export const PrintService = {
   <title>${opts.title || 'طباعة الوثيقة'}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
+    ${MICR_FONT_FACE_CSS}
     @page { size: A4 portrait; margin: 12mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
