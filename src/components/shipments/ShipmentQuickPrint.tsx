@@ -282,9 +282,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
   ].join('-');
 
-  const handleDownloadPDF = async () => {
-    if (!pdfRef.current || !shipment) return;
-    await exportToPDF(pdfRef.current, pdfFileName);
+  const handleDownloadPDF = () => {
+    handlePrint();
   };
 
   const handlePrint = () => {
