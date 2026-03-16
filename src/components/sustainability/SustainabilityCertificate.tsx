@@ -82,35 +82,6 @@ const SustainabilityCertificate = ({
 
   const stars = getStarRating(metrics.overallScore);
 
-  const exportToPdf = async () => {
-    if (!certificateRef.current) return;
-    
-    setExporting(true);
-    toast({ title: "جاري إنشاء الشهادة...", description: "يرجى الانتظار" });
-
-    try {
-      const { PDFService } = await import('@/services/documentService');
-      await PDFService.download(certificateRef.current, {
-        filename: `شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}`,
-        orientation: 'landscape',
-        format: 'a4',
-        scale: 3,
-      });
-      
-      toast({ title: "تم التصدير بنجاح", description: "تم حفظ شهادة PDF" });
-    } catch (error) {
-      toast({ title: "خطأ في التصدير", description: "حدث خطأ أثناء إنشاء الشهادة", variant: "destructive" });
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handlePrint = () => {
-    if (certificateRef.current) {
-      printContent(certificateRef.current);
-    }
-  };
-
   if (!organization) return null;
 
   return (
