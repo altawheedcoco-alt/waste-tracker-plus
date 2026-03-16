@@ -24,20 +24,15 @@ export interface LicenseAlert {
   actionRequired: string;
 }
 
-// All license fields to scan across organizations table
+// Organization license fields (matching actual DB schema)
 const ORG_LICENSE_FIELDS = [
-  { field: 'license_expiry', label: 'الترخيص العام', number: 'license_number' },
-  { field: 'wmra_license_expiry', label: 'تصريح WMRA', number: 'wmra_license_number' },
-  { field: 'eia_permit_expiry', label: 'تقييم الأثر البيئي (EIA)', number: 'eia_permit_number' },
-  { field: 'hazardous_license_expiry', label: 'ترخيص المخلفات الخطرة', number: 'hazardous_license_number' },
-  { field: 'operation_license_expiry', label: 'رخصة التشغيل', number: 'operation_license_number' },
-  { field: 'activity_specific_license_expiry', label: 'ترخيص النشاط التخصصي', number: 'activity_specific_license_number' },
-];
-
-// Driver license fields
-const DRIVER_LICENSE_FIELDS = [
-  { field: 'license_expiry', label: 'رخصة القيادة', number: 'license_number' },
-  { field: 'hazmat_license_expiry', label: 'رخصة نقل المواد الخطرة', number: 'hazmat_license_number' },
+  { field: 'license_expiry_date', label: 'الترخيص العام', number: 'license_number' },
+  { field: 'wmra_license_expiry_date', label: 'ترخيص WMRA', number: 'wmra_license' },
+  { field: 'wmra_permit_expiry', label: 'تصريح WMRA', number: 'wmra_permit_number' },
+  { field: 'eeaa_license_expiry_date', label: 'ترخيص جهاز شئون البيئة', number: 'environmental_license' },
+  { field: 'env_approval_expiry', label: 'الموافقة البيئية', number: 'env_approval_number' },
+  { field: 'ida_license_expiry_date', label: 'ترخيص هيئة التنمية الصناعية', number: 'ida_license' },
+  { field: 'land_transport_license_expiry_date', label: 'رخصة النقل البري', number: 'land_transport_license' },
 ];
 
 function getSeverity(daysRemaining: number): AlertSeverity {
@@ -70,7 +65,7 @@ export function useLicenseExpiryAlerts() {
       // 1. Scan own organization licenses
       const { data: org } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, license_expiry, license_number, wmra_license_expiry, wmra_license_number, eia_permit_expiry, eia_permit_number, hazardous_license_expiry, hazardous_license_number, operation_license_expiry, operation_license_number, activity_specific_license_expiry, activity_specific_license_number')
+        .select('id, name, organization_type, license_expiry_date, license_number, wmra_license_expiry_date, wmra_license, wmra_permit_expiry, wmra_permit_number, eeaa_license_expiry_date, environmental_license, env_approval_expiry, env_approval_number, ida_license_expiry_date, ida_license, land_transport_license_expiry_date, land_transport_license')
         .eq('id', orgId)
         .single();
 
@@ -98,39 +93,38 @@ export function useLicenseExpiryAlerts() {
         }
       }
 
-      // 2. Scan drivers linked to org
+      // 2. Scan drivers linked to org (drivers table has license_expiry)
       const { data: drivers } = await supabase
         .from('drivers')
-        .select('id, full_name, license_expiry, license_number, hazmat_license_expiry, hazmat_license_number, organization_id')
+        .select('id, license_expiry, license_number, organization_id, profile_id, profiles(full_name)')
         .eq('organization_id', orgId);
 
       if (drivers) {
         for (const driver of drivers) {
-          for (const lf of DRIVER_LICENSE_FIELDS) {
-            const expiry = (driver as any)[lf.field];
-            if (!expiry) continue;
-            const days = differenceInDays(parseISO(expiry), today);
-            if (days <= 90) {
-              const severity = getSeverity(days);
-              alerts.push({
-                id: `driver-${driver.id}-${lf.field}`,
-                licenseType: lf.field,
-                licenseLabel: `${lf.label} — ${driver.full_name || 'سائق'}`,
-                licenseNumber: (driver as any)[lf.number] || null,
-                expiryDate: expiry,
-                daysRemaining: days,
-                severity,
-                orgId: orgId,
-                orgName: driver.full_name || 'سائق',
-                orgType: 'driver',
-                actionRequired: getActionRequired(severity, lf.label),
-              });
-            }
+          const expiry = driver.license_expiry;
+          if (!expiry) continue;
+          const days = differenceInDays(parseISO(expiry), today);
+          if (days <= 90) {
+            const severity = getSeverity(days);
+            const driverName = (driver as any).profiles?.full_name || 'سائق';
+            alerts.push({
+              id: `driver-${driver.id}-license`,
+              licenseType: 'driver_license',
+              licenseLabel: `رخصة القيادة — ${driverName}`,
+              licenseNumber: driver.license_number || null,
+              expiryDate: expiry,
+              daysRemaining: days,
+              severity,
+              orgId: orgId,
+              orgName: driverName,
+              orgType: 'driver',
+              actionRequired: getActionRequired(severity, 'رخصة القيادة'),
+            });
           }
         }
       }
 
-      // Sort by severity (expired first, then critical, warning, info)
+      // Sort: expired first, then critical, warning, info
       const severityOrder: Record<AlertSeverity, number> = { expired: 0, critical: 1, warning: 2, info: 3 };
       alerts.sort((a, b) => severityOrder[a.severity] - severityOrder[b.severity] || a.daysRemaining - b.daysRemaining);
 

@@ -63,7 +63,7 @@ export function useEnvironmentalKPIs(period: 'month' | 'quarter' | 'year' | 'all
         .from('shipments')
         .select('id, waste_type, quantity, unit, status, created_at')
         .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId},disposal_facility_id.eq.${orgId}`)
-        .in('status', ['delivered', 'completed', 'recycled', 'processed', 'accepted']);
+        .in('status', ['delivered', 'confirmed'] as any[]);
 
       if (fromDate) {
         query = query.gte('created_at', fromDate);
