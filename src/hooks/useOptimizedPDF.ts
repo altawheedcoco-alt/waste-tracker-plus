@@ -47,7 +47,7 @@ const generatePDFWorker = async (
 
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgData = canvas.toDataURL('image/jpeg', settings.quality);
+  const imgData = canvas.toDataURL('image/png');
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
