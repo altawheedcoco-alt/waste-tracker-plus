@@ -118,8 +118,8 @@ export const PDFService = {
     const {
       orientation = 'portrait',
       format = 'a4',
-      scale = 1.5,
-      quality = 0.85,
+      scale = 3,
+      quality = 1.0,
       fitSinglePage = false,
     } = opts;
 
