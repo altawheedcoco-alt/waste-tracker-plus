@@ -376,9 +376,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                       </span>
                     </div>
                   </td>
-                  <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '85px', height: '85px' }} />}
-                    <div style={{ fontSize: '7pt', color: '#374151', fontWeight: '600', marginTop: '2px' }}>امسح للتتبع</div>
+                  <td style={{ width: '15%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '55px', height: '55px' }} />}
+                    <div style={{ fontSize: '5pt', color: '#374151', fontWeight: '600', marginTop: '1px' }}>امسح للتتبع</div>
                   </td>
                 </tr>
               </tbody>
