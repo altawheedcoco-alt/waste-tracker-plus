@@ -333,34 +333,34 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.generatorLight || '#f0f9ff' }}>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.generatorLight || '#f0f9ff' }}>
                     {shipment.generator?.stamp_url ? (
-                      <img src={shipment.generator.stamp_url} alt="لوجو المولد" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                      <img src={shipment.generator.stamp_url} alt="لوجو المولد" style={{ maxHeight: '20px', maxWidth: '60px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
                     ) : (
-                      <div style={{ fontSize: '7pt', color: theme.colors.generatorBg, fontWeight: '600' }}>🏢 {shipment.generator?.name || 'الجهة المولدة'}</div>
+                      <div style={{ fontSize: '6pt', color: theme.colors.generatorBg, fontWeight: '600' }}>🏢 {shipment.generator?.name || 'الجهة المولدة'}</div>
                     )}
                     {shipment.generator?.client_code && (
-                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.generator.client_code}</div>
+                      <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#6b7280' }}>{shipment.generator.client_code}</div>
                     )}
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.transporterLight || '#fffbeb' }}>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.transporterLight || '#fffbeb' }}>
                     {shipment.transporter?.stamp_url ? (
-                      <img src={shipment.transporter.stamp_url} alt="لوجو الناقل" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                      <img src={shipment.transporter.stamp_url} alt="لوجو الناقل" style={{ maxHeight: '20px', maxWidth: '60px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
                     ) : (
-                      <div style={{ fontSize: '7pt', color: theme.colors.transporterBg, fontWeight: '600' }}>🚛 {shipment.transporter?.name || 'الجهة الناقلة'}</div>
+                      <div style={{ fontSize: '6pt', color: theme.colors.transporterBg, fontWeight: '600' }}>🚛 {shipment.transporter?.name || 'الجهة الناقلة'}</div>
                     )}
                     {shipment.transporter?.client_code && (
-                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.transporter.client_code}</div>
+                      <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#6b7280' }}>{shipment.transporter.client_code}</div>
                     )}
                   </td>
-                  <td style={{ width: '33.33%', textAlign: 'center', padding: '4px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.recyclerLight || '#f0fdf4' }}>
+                  <td style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: `1px solid ${theme.colors.borderLight}`, background: theme.colors.recyclerLight || '#f0fdf4' }}>
                     {shipment.recycler?.stamp_url ? (
-                      <img src={shipment.recycler.stamp_url} alt="لوجو المدور" style={{ maxHeight: '25px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                      <img src={shipment.recycler.stamp_url} alt="لوجو المدور" style={{ maxHeight: '20px', maxWidth: '60px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
                     ) : (
-                      <div style={{ fontSize: '7pt', color: theme.colors.recyclerBg, fontWeight: '600' }}>♻️ {shipment.recycler?.name || 'جهة التدوير'}</div>
+                      <div style={{ fontSize: '6pt', color: theme.colors.recyclerBg, fontWeight: '600' }}>♻️ {shipment.recycler?.name || 'جهة التدوير'}</div>
                     )}
                     {shipment.recycler?.client_code && (
-                      <div style={{ fontSize: '5pt', fontFamily: 'monospace', color: '#6b7280', marginTop: '1px' }}>{shipment.recycler.client_code}</div>
+                      <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#6b7280' }}>{shipment.recycler.client_code}</div>
                     )}
                   </td>
                 </tr>
