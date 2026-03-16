@@ -322,11 +322,20 @@ const ShipmentCard = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={handlePrintButtonClick}
+                    onClick={handleDirectPrint}
                     className="gap-1 text-xs"
-                    title="طباعة نموذج التتبع"
+                    title="طباعة مباشرة"
                   >
                     <Printer className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleDirectPDF}
+                    className="gap-1 text-xs"
+                    title="تحميل PDF"
+                  >
+                    <Download className="w-3 h-3" />
                   </Button>
                   {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
                   {(isRecycler || isTransporter) && (
