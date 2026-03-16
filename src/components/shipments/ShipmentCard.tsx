@@ -535,8 +535,9 @@ const ShipmentCard = ({
 
         <ShipmentQuickPrint
           isOpen={isPrintDialogOpen}
-          onClose={() => setIsPrintDialogOpen(false)}
+          onClose={() => { setIsPrintDialogOpen(false); setPrintAutoAction(null); }}
           shipmentId={shipment.id}
+          autoAction={printAutoAction}
         />
 
         <ShipmentRouteMap
