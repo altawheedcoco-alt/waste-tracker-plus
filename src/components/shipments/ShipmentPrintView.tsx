@@ -193,6 +193,18 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     }
   }, [shipment?.id]);
 
+  // Load movement supervisors
+  const [movementSupervisors, setMovementSupervisors] = useState<any[]>([]);
+  useEffect(() => {
+    if (shipment?.id && isOpen) {
+      supabase
+        .from('shipment_movement_supervisors')
+        .select('*')
+        .eq('shipment_id', shipment.id)
+        .then(({ data }) => setMovementSupervisors(data || []));
+    }
+  }, [shipment?.id, isOpen]);
+
   // Load existing signatures
   useEffect(() => {
     if (shipment?.id && isOpen) {
