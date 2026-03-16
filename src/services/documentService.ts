@@ -484,12 +484,12 @@ const DEFAULT_PRINT_CSS = `
   table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
   thead { display: table-header-group; background: transparent !important; }
   tr { page-break-inside: avoid; background: transparent !important; }
-  th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
+  th, td { padding: 3px 5px; border: 1px solid #000; text-align: right; font-size: 8pt; line-height: 1.3; background: transparent !important; }
 
-  h1 { font-size: 12pt; margin: 2px 0; }
-  h2 { font-size: 10pt; margin: 2px 0; }
-  h3 { font-size: 9pt; margin: 1px 0; }
-  p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
+  h1 { font-size: 13pt; margin: 3px 0; }
+  h2 { font-size: 11pt; margin: 2px 0; }
+  h3 { font-size: 9.5pt; margin: 2px 0; }
+  p { font-size: 8pt; margin: 1px 0; line-height: 1.4; }
 
   @media print {
     body { margin: 0; padding: 0; overflow: hidden; }
