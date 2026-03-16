@@ -1080,6 +1080,13 @@ const ShipmentCard = ({
               </div>
             </div>
 
+            {/* Supervisor Compliance Dashboard */}
+            <div className="border-t px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+              <Suspense fallback={<div className="h-8 flex items-center justify-center text-xs text-muted-foreground">جاري تحميل لوحة الامتثال...</div>}>
+                <SupervisorComplianceDashboard shipment={shipment} compact />
+              </Suspense>
+            </div>
+
             {/* Simplified Progress Steps — 5 key milestones only */}
             <div className="border-t bg-gradient-to-l from-muted/50 to-transparent px-4 py-2">
               <div className="flex items-center justify-between gap-1">
