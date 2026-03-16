@@ -289,9 +289,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
 
         {/* Hidden QR Code and Barcode for data URL generation */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={60} level="M" includeMargin={false} />
+          <QRCodeCanvas ref={qrRef} value={qrData?.fullPayload || shipmentUrl} size={80} level="H" includeMargin={false} />
           <div ref={barcodeRef}>
-            <Barcode value={shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
+            <Barcode value={qrData?.barcodeValue || shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
           </div>
         </div>
 
