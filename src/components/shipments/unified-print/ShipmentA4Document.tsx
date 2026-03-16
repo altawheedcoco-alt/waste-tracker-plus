@@ -341,8 +341,8 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                   { org: shipment.recycler, label: 'المستقبل', bg: theme.colors.recyclerLight || '#f0fdf4' },
                 ].map((item, i) => (
                   <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: `1px solid ${theme.colors.border}`, background: item.bg }}>
-                    <div style={{ fontSize: '6pt', fontWeight: '700', color: '#000' }}>{item.label}</div>
-                    <div style={{ fontSize: '5pt', color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
+                     <div style={{ fontSize: '7.5pt', fontWeight: '700', color: '#000' }}>{item.label}</div>
+                     <div style={{ fontSize: '6.5pt', color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
                   </td>
                 ))}
               </tr>
