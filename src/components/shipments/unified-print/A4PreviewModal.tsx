@@ -4,26 +4,27 @@
  */
 import { useRef, useEffect, useState, ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
-import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Share2 } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText } from 'lucide-react';
+import SendToPartiesPopover from './SendToPartiesPopover';
+import type { ShipmentPrintData } from './types';
 
 interface A4PreviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onPrint: () => void;
   onDownloadPDF: () => void;
-  onShareWhatsApp?: () => void;
   children: ReactNode;
   title?: string;
   isPDFExporting?: boolean;
   pages?: number;
+  shipment?: ShipmentPrintData | null;
 }
 
 const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5];
 
 const A4PreviewModal = ({
-  isOpen, onClose, onPrint, onDownloadPDF, onShareWhatsApp,
-  children, title = 'معاينة المستند', isPDFExporting, pages = 1,
+  isOpen, onClose, onPrint, onDownloadPDF,
+  children, title = 'معاينة المستند', isPDFExporting, pages = 1, shipment,
 }: A4PreviewModalProps) => {
   const [zoom, setZoom] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
@@ -32,7 +33,6 @@ const A4PreviewModal = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
-      // Auto-fit zoom based on screen width
       const screenW = window.innerWidth;
       if (screenW < 768) setZoom(0.5);
       else if (screenW < 1200) setZoom(0.75);
@@ -41,7 +41,6 @@ const A4PreviewModal = ({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
@@ -55,8 +54,6 @@ const A4PreviewModal = ({
   }, [isOpen]);
 
   if (!isOpen) return null;
-
-  const zoomIdx = ZOOM_LEVELS.indexOf(zoom);
 
   return (
     <div className="fixed inset-0 z-[100] flex flex-col" style={{ background: '#374151' }}>
@@ -91,12 +88,7 @@ const A4PreviewModal = ({
           <div className="w-px h-6 bg-border mx-1" />
 
           {/* Actions */}
-          {onShareWhatsApp && (
-            <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={onShareWhatsApp}>
-              <Share2 className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline text-xs">واتساب</span>
-            </Button>
-          )}
+          {shipment && <SendToPartiesPopover shipment={shipment} compact />}
           <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={onDownloadPDF} disabled={isPDFExporting}>
             <Download className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-xs">PDF</span>
