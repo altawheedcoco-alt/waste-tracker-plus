@@ -132,8 +132,8 @@ const SendToPartiesPopover = ({ shipment, compact }: SendToPartiesPopoverProps) 
         // WhatsApp via platform (also triggers internal notification via DB trigger)
         return supabase.functions.invoke('whatsapp-send', {
           body: {
-            action: 'send_to_phone',
-            phone: party.phone,
+            action: 'send',
+            to_phone: party.phone,
             message_text: messageText,
             notification_type: 'shipment_document',
             metadata: {
