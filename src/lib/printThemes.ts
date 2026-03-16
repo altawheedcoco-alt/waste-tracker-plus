@@ -178,7 +178,7 @@ export const PRINT_THEMES: PrintTheme[] = [
     entityType: 'all',
     fonts: { heading: "'Amiri', serif", body: "'Tajawal', sans-serif", googleImport: 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Tajawal:wght@400;500;700&display=swap' },
     colors: { primary: '#78350f', secondary: '#92400e', accent: '#d97706', headerBg: '#78350f', headerText: '#fef3c7', tableBorder: '#fde68a', tableHeaderBg: '#78350f', tableHeaderText: '#fef3c7', tableStripeBg: '#fffbeb', bodyText: '#451a03', mutedText: '#b45309', borderColor: '#fde68a', pageBg: '#fffef5' },
-    spacing: { pageMargin: '22mm', sectionGap: '24px', headerPadding: '24px' },
+    spacing: { pageMargin: '15mm 15mm 20mm 15mm', sectionGap: '24px', headerPadding: '24px' },
     borders: { headerBorder: '4px solid #d97706', sectionBorder: '1px dashed #fde68a', tableBorder: '1px solid #fde68a', radius: '4px' },
     decorations: { headerStyle: 'solid', watermark: false, ornaments: true },
   },
