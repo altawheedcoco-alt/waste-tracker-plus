@@ -561,40 +561,62 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
               </tbody>
             </table>
 
-            {/* Movement Supervisors Section */}
+            {/* Movement Supervisors Section - always shown */}
             {movementSupervisors.length > 0 && (
               <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
                 <tbody>
                   <tr>
-                    <td colSpan={4} style={{ background: '#e0e7ff', color: '#312e81', fontWeight: 'bold', textAlign: 'center', fontSize: '6pt', padding: '1.5px', border: `1px solid ${theme.colors.border}` }}>
+                    <td colSpan={5} style={{ background: '#e0e7ff', color: '#312e81', fontWeight: 'bold', textAlign: 'center', fontSize: '6pt', padding: '1.5px', border: `1px solid ${theme.colors.border}` }}>
                       👁️ مسئولو الحركة والمتابعة
                     </td>
                   </tr>
                   <tr>
-                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '15%', color: '#000' }}>الجهة</td>
-                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '25%', color: '#000' }}>المسئول</td>
-                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '20%', color: '#000' }}>الهاتف</td>
-                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '40%', color: '#000' }}>البصمة الإلكترونية</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '12%', color: '#000' }}>الجهة</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '20%', color: '#000' }}>المسئول</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '13%', color: '#000' }}>الهاتف</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '15%', color: '#000' }}>وضع التوقيع</td>
+                    <td style={{ background: '#eef2ff', fontWeight: '600', fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, width: '40%', color: '#000' }}>QR التحقق / البصمة</td>
                   </tr>
                   {movementSupervisors.map((sup, idx) => {
                     const roleLabels: Record<string, string> = { generator: 'المولد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
+                    const methodLabels: Record<string, string> = { manual: 'يدوي', otp: 'OTP', national_id: 'رقم قومي', digital_stamp: 'ختم رقمي', full_auto: 'تلقائي كامل' };
+                    const supervisorQRValue = JSON.stringify({
+                      v: 1, t: 'SUP',
+                      doc: shipment.shipment_number,
+                      role: sup.party_role,
+                      name: sup.supervisor_name?.slice(0, 30),
+                      type: sup.supervisor_type,
+                      auto: sup.auto_sign_enabled ? 1 : 0,
+                      method: sup.auto_sign_method || 'manual',
+                      hash: qrData?.docHash || '',
+                    });
                     return (
                       <tr key={idx}>
                         <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
                           {roleLabels[sup.party_role] || sup.party_role}
                         </td>
                         <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
-                          {sup.supervisor_type === 'ai' ? '🤖 ' : ''}{sup.supervisor_name || '-'}
+                          {sup.supervisor_type === 'ai' ? '🤖 ' : '👤 '}{sup.supervisor_name || '-'}
+                          {sup.auto_sign_enabled && <span style={{ color: '#2563eb', marginRight: '2px', fontSize: '4pt' }}> ⚡تلقائي</span>}
                         </td>
                         <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000' }}>
                           {sup.supervisor_phone || '-'}
                         </td>
                         <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000', textAlign: 'center' }}>
-                          {sup.signed_at ? (
-                            <span style={{ color: '#059669' }}>✅ {new Date(sup.signed_at).toLocaleDateString('ar-EG')}</span>
-                          ) : (
-                            <span style={{ color: '#9ca3af' }}>⏳ في انتظار البصمة</span>
-                          )}
+                          {sup.auto_sign_enabled 
+                            ? <span style={{ color: '#2563eb', fontWeight: '600' }}>⚡ {methodLabels[sup.auto_sign_method] || 'تلقائي'}</span>
+                            : <span style={{ color: '#6b7280' }}>✍️ يدوي</span>
+                          }
+                        </td>
+                        <td style={{ fontSize: '5pt', padding: '1px 3px', border: `1px solid ${theme.colors.border}`, color: '#000', textAlign: 'center' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px' }}>
+                            <QRCodeSVG value={supervisorQRValue} size={24} level="H" />
+                            {sup.signed_at ? (
+                              <span style={{ color: '#059669', fontSize: '4.5pt' }}>✅ {new Date(sup.signed_at).toLocaleDateString('ar-EG')}</span>
+                            ) : (
+                              <span style={{ color: '#9ca3af', fontSize: '4.5pt' }}>⏳ في انتظار البصمة</span>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

@@ -24050,6 +24050,8 @@ export type Database = {
       }
       organization_movement_supervisors: {
         Row: {
+          auto_sign_enabled: boolean | null
+          auto_sign_method: string | null
           created_at: string
           id: string
           is_active: boolean | null
@@ -24063,6 +24065,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          auto_sign_enabled?: boolean | null
+          auto_sign_method?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -24076,6 +24080,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          auto_sign_enabled?: boolean | null
+          auto_sign_method?: string | null
           created_at?: string
           id?: string
           is_active?: boolean | null
@@ -32649,11 +32655,13 @@ export type Database = {
       }
       shipment_movement_supervisors: {
         Row: {
+          auto_sign_enabled: boolean | null
+          auto_sign_method: string | null
           created_at: string
           id: string
           is_mandatory: boolean | null
           notes: string | null
-          organization_id: string
+          organization_id: string | null
           party_role: string
           shipment_id: string
           signature_hash: string | null
@@ -32668,11 +32676,13 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
+          auto_sign_enabled?: boolean | null
+          auto_sign_method?: string | null
           created_at?: string
           id?: string
           is_mandatory?: boolean | null
           notes?: string | null
-          organization_id: string
+          organization_id?: string | null
           party_role: string
           shipment_id: string
           signature_hash?: string | null
@@ -32687,11 +32697,13 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
+          auto_sign_enabled?: boolean | null
+          auto_sign_method?: string | null
           created_at?: string
           id?: string
           is_mandatory?: boolean | null
           notes?: string | null
-          organization_id?: string
+          organization_id?: string | null
           party_role?: string
           shipment_id?: string
           signature_hash?: string | null

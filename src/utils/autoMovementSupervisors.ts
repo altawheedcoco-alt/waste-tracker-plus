@@ -24,6 +24,8 @@ function createDefaultAISupervisor(role: string): Partial<MovementSupervisorEntr
     supervisor_phone: null,
     supervisor_email: null,
     supervisor_position: 'مراقب حركة تلقائي',
+    auto_sign_enabled: true,
+    auto_sign_method: 'full_auto' as const,
   };
 }
 
@@ -58,6 +60,8 @@ export async function autoAssignMovementSupervisors(
           supervisor_phone: entry.supervisor_phone || null,
           supervisor_email: entry.supervisor_email || null,
           supervisor_position: entry.supervisor_position || null,
+          auto_sign_enabled: entry.auto_sign_enabled || false,
+          auto_sign_method: entry.auto_sign_method || 'manual',
         });
       }
     } else if (!isManual) {
@@ -95,6 +99,8 @@ export async function autoAssignMovementSupervisors(
           supervisor_phone: null,
           supervisor_email: null,
           supervisor_position: ai.supervisor_position,
+          auto_sign_enabled: ai.auto_sign_enabled,
+          auto_sign_method: ai.auto_sign_method,
         });
       }
     } else {
@@ -110,6 +116,8 @@ export async function autoAssignMovementSupervisors(
         supervisor_phone: null,
         supervisor_email: null,
         supervisor_position: ai.supervisor_position,
+        auto_sign_enabled: ai.auto_sign_enabled,
+        auto_sign_method: ai.auto_sign_method,
       });
     }
   }

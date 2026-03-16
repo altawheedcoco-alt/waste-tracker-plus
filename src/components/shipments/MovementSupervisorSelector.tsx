@@ -3,8 +3,9 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
-import { Plus, X, Bot, User, Eye } from 'lucide-react';
+import { Plus, X, Bot, User, Eye, Zap } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +16,8 @@ export interface MovementSupervisorEntry {
   supervisor_phone?: string;
   supervisor_email?: string;
   supervisor_position?: string;
+  auto_sign_enabled?: boolean;
+  auto_sign_method?: 'manual' | 'otp' | 'national_id' | 'digital_stamp' | 'full_auto';
 }
 
 interface OrgMember {
@@ -183,6 +186,40 @@ const MovementSupervisorSelector = ({ label, organizationId, partyRole, value, o
                 {entry.supervisor_phone && <span>{entry.supervisor_phone}</span>}
               </div>
             )}
+
+            {/* Auto-sign toggle */}
+            <div className="flex items-center justify-between gap-2 pt-1 border-t border-dashed">
+              <div className="flex items-center gap-1.5">
+                <Switch
+                  checked={entry.auto_sign_enabled || false}
+                  onCheckedChange={(checked) => updateEntry(idx, { 
+                    auto_sign_enabled: checked,
+                    auto_sign_method: checked ? (entry.auto_sign_method || 'full_auto') : 'manual',
+                  })}
+                  className="h-4 w-7"
+                />
+                <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <Zap className="h-2.5 w-2.5" />
+                  توقيع تلقائي نيابةً عنه
+                </span>
+              </div>
+              {entry.auto_sign_enabled && (
+                <Select 
+                  value={entry.auto_sign_method || 'full_auto'} 
+                  onValueChange={(v) => updateEntry(idx, { auto_sign_method: v as any })}
+                >
+                  <SelectTrigger className="h-6 w-[110px] text-[10px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="full_auto">⚡ تلقائي كامل</SelectItem>
+                    <SelectItem value="otp">🔑 OTP</SelectItem>
+                    <SelectItem value="national_id">🪪 رقم قومي</SelectItem>
+                    <SelectItem value="digital_stamp">🔏 ختم رقمي</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            </div>
           </div>
         </div>
       ))}
