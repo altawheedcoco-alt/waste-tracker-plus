@@ -12,12 +12,19 @@ function lazyRetry<T extends React.ComponentType<any>>(
   return lazy(() =>
     factory().catch((err) => {
       if (retries > 0) {
-        // Force reload on stale chunk error
-        return new Promise<{ default: T }>((resolve) =>
-          setTimeout(() => resolve(lazyRetry(factory, retries - 1) as any), 500)
+        return new Promise<{ default: T }>((resolve, reject) =>
+          setTimeout(() => {
+            factory().then(resolve).catch((e) => {
+              if (retries > 1) {
+                resolve(lazyRetry(factory, retries - 1) as any);
+              } else {
+                window.location.reload();
+                reject(e);
+              }
+            });
+          }, 500)
         );
       }
-      // Final fallback: reload page
       window.location.reload();
       throw err;
     })
