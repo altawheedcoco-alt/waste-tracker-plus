@@ -426,30 +426,11 @@ const OperationalPlans = () => {
   }, {} as Record<string, { count: number; quantity: number; clientCode?: string | null; city?: string; phone?: string }>);
 
   const handlePrint = () => {
-    if (printRef.current) {
-      setIsPrinting(true);
-      printContent(printRef.current);
-      setTimeout(() => setIsPrinting(false), 500);
-    }
+    setShowPrintPreview(true);
   };
 
   const handleExportPDF = async () => {
-    if (!printRef.current) return;
-    
-    setIsExportingPDF(true);
-    try {
-      await PDFService.download(printRef.current, {
-        filename: `operational-plan-${format(new Date(), 'yyyy-MM-dd')}`,
-        orientation: 'portrait',
-        format: 'a4',
-        scale: 2,
-      });
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast.error('حدث خطأ أثناء تصدير PDF');
-    } finally {
-      setIsExportingPDF(false);
-    }
+    setShowPrintPreview(true);
   };
 
   const formatDate = (dateStr: string | null) => {
