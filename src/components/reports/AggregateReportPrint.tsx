@@ -299,7 +299,7 @@ const AggregateReportPrint = ({
         height: '297mm', 
         width: '210mm', 
         margin: '0 auto',
-        padding: '8mm 10mm',
+        padding: '15mm 15mm 20mm 15mm',
         fontFamily: 'Cairo, sans-serif',
         fontSize: '8pt',
         overflow: 'hidden',
@@ -310,7 +310,7 @@ const AggregateReportPrint = ({
     >
       <style>{`
         @media print {
-          @page { size: A4 portrait; margin: 0; }
+          @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
           .print-container { 
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;

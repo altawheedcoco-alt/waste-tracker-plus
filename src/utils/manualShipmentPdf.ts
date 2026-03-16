@@ -127,7 +127,7 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .page { padding: 8mm 10mm; page-break-after: always; }
+  .page { padding: 15mm 15mm 20mm 15mm; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
   /* Classic Header */

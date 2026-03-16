@@ -588,7 +588,7 @@ export const PrintService = {
       ${MICR_FONT_FACE_CSS}
       @page {
         size: A4 portrait;
-        margin: 0.2mm;
+        margin: 15mm 15mm 20mm 15mm;
       }
 
       * {

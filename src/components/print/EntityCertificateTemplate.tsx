@@ -121,9 +121,9 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
     const qrValue = `${window.location.origin}/qr-verify?type=entity_certificate&code=${encodeURIComponent(data.certificateNumber)}`;
 
     const borderStyle = designVariant === 'bordered'
-      ? { border: `6px double ${config.accentColor}`, padding: '12mm' }
+      ? { border: `6px double ${config.accentColor}`, padding: '15mm 15mm 20mm 15mm' }
       : designVariant === 'ornate'
-      ? { border: `4px solid ${config.borderColor}`, boxShadow: `inset 0 0 0 2px ${config.accentColor}`, padding: '10mm' }
+      ? { border: `4px solid ${config.borderColor}`, boxShadow: `inset 0 0 0 2px ${config.accentColor}`, padding: '15mm 15mm 20mm 15mm' }
       : {};
 
     return (
@@ -135,7 +135,7 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
           width: '210mm',
           minHeight: '297mm',
           margin: '0 auto',
-          padding: designVariant === 'minimal' ? '12mm' : '8mm',
+          padding: '15mm 15mm 20mm 15mm',
           fontFamily: "'Cairo', 'Amiri', sans-serif",
           position: 'relative',
           ...borderStyle,

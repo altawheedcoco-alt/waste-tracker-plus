@@ -299,8 +299,8 @@ const RegulatoryDocumentsCenter = memo(({ targetOrgType }: Props) => {
               <meta charset="utf-8">
               <title>${selectedTemplate.title}</title>
               <style>
-                @page { size: A4; margin: 20mm; }
-                body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; padding: 0; margin: 0; color: #1a1a1a; font-size: 13px; line-height: 1.7; }
+                @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
+                body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; padding: 15mm 15mm 20mm 15mm; margin: 0; color: #1a1a1a; font-size: 13px; line-height: 1.7; }
                 .header { text-align: center; border-bottom: 3px double #1a5632; padding-bottom: 20px; margin-bottom: 24px; }
                 .header h1 { font-size: 22px; color: #1a5632; margin: 0 0 4px; }
                 .header h2 { font-size: 15px; color: #555; margin: 0; font-weight: normal; }
