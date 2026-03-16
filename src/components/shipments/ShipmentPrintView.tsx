@@ -151,11 +151,10 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [signingLoading, setSigningLoading] = useState(false);
   const theme = getThemeById(themeId);
   
-  const { exportToPDF, printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
+  const { printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
-    scale: 2,
     fitSinglePage: true,
   });
 
@@ -243,8 +242,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
   ].join('-');
 
-  const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, pdfFileName);
+  const handleExportPDF = () => {
+    handlePrint();
   };
 
   const formatDate = (date: string | null) => {
@@ -282,7 +281,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         </div>
 
         {/* Print Preview */}
-        <div ref={printRef} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
+        <div ref={printRef} className="bg-white p-4 rounded-lg border" style={{ direction: 'rtl', fontSize: '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.4' }}>
           <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '4px', border: 'none' }}>
@@ -608,13 +607,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <PenTool className="w-4 h-4" />
             توقيع وختم
           </Button>
-          <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
-            <Download className="w-4 h-4" />
-            تصدير PDF
-          </Button>
           <Button onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
-            طباعة
+            طباعة / حفظ PDF
           </Button>
         </DialogFooter>
 

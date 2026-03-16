@@ -148,11 +148,10 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
   const [themeId, setThemeId] = useState('eco-green');
   const theme = getThemeById(themeId);
-  const { exportToPDF, printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
+  const { printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
     filename: `tracking-form-${shipmentId}`,
     orientation: 'portrait',
     format: 'a4',
-    scale: 2,
     fitSinglePage: true,
   });
 
@@ -276,16 +275,15 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
-  const pdfFileName = [
+  const pdfFileName = shipment ? [
     shipment.transporter?.name || 'الناقل',
     `شحنة-${shipment.shipment_number}`,
     shipment.generator?.name || 'المولد',
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
-  ].join('-');
+  ].join('-') : 'tracking-form';
 
-  const handleDownloadPDF = async () => {
-    if (!pdfRef.current || !shipment) return;
-    await exportToPDF(pdfRef.current, pdfFileName);
+  const handleDownloadPDF = () => {
+    handlePrint();
   };
 
   const handlePrint = () => {
@@ -342,7 +340,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-4 rounded-lg border" style={{ direction: 'rtl', fontSize: '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.4' }}>
           <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '6px', border: 'none' }}>
@@ -626,22 +624,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
         <DialogFooter className="gap-2 sm:gap-0 flex-wrap">
           <Button variant="outline" onClick={onClose}>إغلاق</Button>
-          <Button 
-            variant="outline" 
-            onClick={handleDownloadPDF} 
-            disabled={isExporting}
-            className="gap-2"
-          >
-            {isExporting ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : (
-              <FileDown className="w-4 h-4" />
-            )}
-            تحميل PDF
-          </Button>
           <Button variant="eco" onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
-            طباعة
+            طباعة / حفظ PDF
           </Button>
         </DialogFooter>
       </DialogContent>
