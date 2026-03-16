@@ -801,6 +801,11 @@ export const useCreateShipment = () => {
         });
       }
 
+      // Call afterCreate callback for movement supervisors etc.
+      if (shipmentData && afterCreate) {
+        try { afterCreate(shipmentData.id); } catch {}
+      }
+
       toast.success('تم إنشاء الشحنة بنجاح');
 
       // Save form data for repeat functionality
