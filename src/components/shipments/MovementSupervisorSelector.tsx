@@ -15,6 +15,8 @@ export interface MovementSupervisorEntry {
   supervisor_phone?: string;
   supervisor_email?: string;
   supervisor_position?: string;
+  auto_sign_enabled?: boolean;
+  auto_sign_method?: 'manual' | 'otp' | 'national_id' | 'digital_stamp' | 'full_auto';
 }
 
 interface OrgMember {
