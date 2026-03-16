@@ -214,10 +214,10 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                   { org: shipment.recycler, bg: theme.colors.recyclerLight || '#f0fdf4', icon: '♻️', label: 'جهة التدوير' },
                 ].map((item, i) => (
                   <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '2px', border: `1px solid ${theme.colors.borderLight}`, background: item.bg }}>
-                    {item.org?.stamp_url ? (
-                      <img src={item.org.stamp_url} alt="logo" style={{ maxHeight: '20px', maxWidth: '60px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
-                    ) : (
-                      <div style={{ fontSize: '6pt', fontWeight: '600' }}>{item.icon} {item.org?.name || item.label}</div>
+                     {item.org?.stamp_url ? (
+                       <img src={item.org.stamp_url} alt="logo" style={{ maxHeight: '24px', maxWidth: '70px', objectFit: 'contain', margin: '0 auto' }} crossOrigin="anonymous" />
+                     ) : (
+                       <div style={{ fontSize: '7.5pt', fontWeight: '600' }}>{item.icon} {item.org?.name || item.label}</div>
                     )}
                     {item.org?.client_code && <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#6b7280' }}>{item.org.client_code}</div>}
                   </td>
