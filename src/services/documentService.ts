@@ -118,8 +118,8 @@ export const PDFService = {
     const {
       orientation = 'portrait',
       format = 'a4',
-      scale = 1.5,
-      quality = 0.85,
+      scale = 3,
+      quality = 1.0,
       fitSinglePage = false,
     } = opts;
 
@@ -127,23 +127,26 @@ export const PDFService = {
     const pageW = pdf.internal.pageSize.getWidth();
     const pageH = pdf.internal.pageSize.getHeight();
 
-    // Temporarily constrain to A4 width with minimal padding
+    // Temporarily constrain to A4 width with proper margins
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '5mm';
+    element.style.padding = '8mm 10mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
+    element.style.fontFamily = "'Cairo', 'Segoe UI', sans-serif";
+    (element.style as any).webkitFontSmoothing = 'antialiased';
+    element.style.textRendering = 'optimizeLegibility';
     
-    // For fitSinglePage: also reduce font sizes to help fit
+    // For fitSinglePage: use moderate font sizes (not too small)
     if (fitSinglePage) {
-      element.style.fontSize = '6.5pt';
+      element.style.fontSize = '7.5pt';
       const allTds = element.querySelectorAll('td, th');
       allTds.forEach(td => {
-        (td as HTMLElement).style.padding = '2px 4px';
-        (td as HTMLElement).style.fontSize = '6.5pt';
-        (td as HTMLElement).style.lineHeight = '1.2';
+        (td as HTMLElement).style.padding = '3px 5px';
+        (td as HTMLElement).style.fontSize = '7.5pt';
+        (td as HTMLElement).style.lineHeight = '1.3';
       });
     }
 
@@ -201,8 +204,8 @@ export const PDFService = {
               currentY = 0;
             }
 
-            const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
-            pdf.addImage(imgData, 'JPEG', 0, currentY, imgW, imgH);
+            const imgData = sectionCanvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, currentY, imgW, imgH);
             currentY += imgH + 2;
           }
 
@@ -218,25 +221,23 @@ export const PDFService = {
         logging: false,
         width: A4_PX.fullWidth,
         windowWidth: A4_PX.fullWidth,
+        imageTimeout: 3000,
       });
 
       // Use full page width since padding is already inside the element
       const imgW = pageW;
 
       if (fitSinglePage) {
-        const imgData = canvas.toDataURL('image/jpeg', quality);
+        const imgData = canvas.toDataURL('image/png');
         const imgH = (canvas.height * imgW) / canvas.width;
         if (imgH <= pageH) {
-          // Content fits naturally — place at top
-          pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+          pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
         } else {
-          // Content overflows — scale down to fit exactly in one page
           const fitScale = pageH / imgH;
           const scaledW = imgW * fitScale;
           const scaledH = pageH;
-          // Center horizontally if scaled down
           const offsetX = (pageW - scaledW) / 2;
-          pdf.addImage(imgData, 'JPEG', Math.max(0, offsetX), 0, scaledW, scaledH);
+          pdf.addImage(imgData, 'PNG', Math.max(0, offsetX), 0, scaledW, scaledH);
         }
         return pdf;
       }
@@ -258,11 +259,11 @@ export const PDFService = {
         pageCtx.clearRect(0, 0, canvas.width, sliceHeight);
         pageCtx.drawImage(canvas, 0, offsetY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
 
-        const imgData = pageCanvas.toDataURL('image/jpeg', quality);
+        const imgData = pageCanvas.toDataURL('image/png');
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
@@ -297,7 +298,7 @@ export const PDFService = {
   async preview(element: HTMLElement, opts: PDFOptions = {}): Promise<void> {
     const toastId = toast.loading('جاري إنشاء المعاينة...');
     try {
-      const pdf = await this.generate(element, { ...opts, scale: 1.5, quality: 0.8 });
+      const pdf = await this.generate(element, { ...opts, scale: 3, quality: 1.0 });
       const blob = pdf.output('blob');
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
@@ -483,12 +484,12 @@ const DEFAULT_PRINT_CSS = `
   table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
   thead { display: table-header-group; background: transparent !important; }
   tr { page-break-inside: avoid; background: transparent !important; }
-  th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
+  th, td { padding: 3px 5px; border: 1px solid #000; text-align: right; font-size: 8pt; line-height: 1.3; background: transparent !important; }
 
-  h1 { font-size: 12pt; margin: 2px 0; }
-  h2 { font-size: 10pt; margin: 2px 0; }
-  h3 { font-size: 9pt; margin: 1px 0; }
-  p { font-size: 7pt; margin: 1px 0; line-height: 1.3; }
+  h1 { font-size: 13pt; margin: 3px 0; }
+  h2 { font-size: 11pt; margin: 2px 0; }
+  h3 { font-size: 9.5pt; margin: 2px 0; }
+  p { font-size: 8pt; margin: 1px 0; line-height: 1.4; }
 
   @media print {
     body { margin: 0; padding: 0; overflow: hidden; }
@@ -678,7 +679,7 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 5mm 8mm;
+        padding: 8mm 10mm;
         box-sizing: border-box;
         overflow: hidden !important;
       }
@@ -695,7 +696,7 @@ export const PrintService = {
       table { width: 100%; border-collapse: collapse; page-break-inside: avoid; background: transparent !important; }
       thead { display: table-header-group; background: transparent !important; }
       tr { page-break-inside: avoid; background: transparent !important; }
-      th, td { padding: 2px 4px; border: 1px solid #ddd; text-align: right; font-size: 7pt; line-height: 1.2; background: transparent !important; }
+      th, td { padding: 3px 5px; border: 1px solid #000; text-align: right; font-size: 8pt; line-height: 1.3; background: transparent !important; }
       .print-container, .print-container * { background-color: transparent !important; }
       .print-container table th, .print-container table td { background: transparent !important; }
       .bg-white, .bg-gray-50, .bg-gray-100, [class*="bg-"] { background-color: transparent !important; }
