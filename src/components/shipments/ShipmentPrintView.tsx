@@ -16,6 +16,7 @@ import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 import ShipmentTaglineFooter from './ShipmentTaglineFooter';
+import { generateShipmentQRData } from '@/lib/shipmentQRData';
 
 interface ShipmentData {
   id: string;
@@ -157,7 +158,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     fitSinglePage: true,
   });
 
-  const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
+  const qrData = useMemo(() => shipment ? generateShipmentQRData(shipment) : null, [shipment]);
+  const shipmentUrl = qrData?.url || '';
 
   useEffect(() => {
     if (qrRef.current && shipment) {
@@ -287,9 +289,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
 
         {/* Hidden QR Code and Barcode for data URL generation */}
         <div style={{ position: 'absolute', left: '-9999px', top: '-9999px' }}>
-          <QRCodeCanvas ref={qrRef} value={shipmentUrl} size={60} level="M" includeMargin={false} />
+          <QRCodeCanvas ref={qrRef} value={qrData?.fullPayload || shipmentUrl} size={80} level="H" includeMargin={false} />
           <div ref={barcodeRef}>
-            <Barcode value={shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
+            <Barcode value={qrData?.barcodeValue || shipment.shipment_number} format="CODE128" width={1.2} height={35} displayValue={false} background="#ffffff" lineColor="#000000" />
           </div>
         </div>
 
@@ -317,6 +319,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   <td style={{ width: '18%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
                     {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '28px', width: '100%' }} />}
                     <div style={{ fontSize: '5.5pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                    {qrData?.docHash && <div style={{ fontSize: '4pt', color: '#6b7280', fontFamily: 'monospace' }}>H:{qrData.docHash}</div>}
                   </td>
                   <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
                     <div style={{ fontSize: '10pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '0px' }}>نموذج تتبع نقل المخلفات</div>
@@ -331,11 +334,12 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                     </div>
                     <div style={{ fontSize: '5pt', color: '#6b7280' }}>
                       الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
+                      {qrData?.docHash && <> | بصمة الوثيقة: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#b45309' }}>{qrData.docHash}</span></>}
                     </div>
                   </td>
                   <td style={{ width: '13%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '45px', height: '45px' }} />}
-                    <div style={{ fontSize: '4.5pt', color: '#6b7280' }}>امسح للتتبع</div>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '50px', height: '50px' }} />}
+                    <div style={{ fontSize: '4pt', color: '#6b7280' }}>امسح للتحقق والتتبع</div>
                   </td>
                 </tr>
               </tbody>
@@ -621,9 +625,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                 </tr>
                 <tr>
                   {[
-                    { org: shipment.generator, label: 'المولدة' },
-                    { org: shipment.transporter, label: 'الناقلة' },
-                    { org: shipment.recycler, label: 'المدورة' },
+                    { org: shipment.generator, label: 'المولدة', role: 'generator' },
+                    { org: shipment.transporter, label: 'الناقلة', role: 'transporter' },
+                    { org: shipment.recycler, label: 'المدورة', role: 'recycler' },
                   ].map((item, idx) => (
                     <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '3px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '45px' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', alignItems: 'flex-end', minHeight: '22px' }}>
@@ -633,13 +637,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '2px', paddingTop: '1px', fontSize: '4.5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
                       <div style={{ marginTop: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
                         <QRCodeSVG 
-                          value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
+                          value={qrData?.signerPayload({ name: item.org?.name || '', commercialRegister: item.org?.commercial_register, role: item.role }) || `${window.location.origin}/qr-verify?type=signer&doc=${shipment.shipment_number}`} 
                           size={28} 
-                          level="M" 
+                          level="H" 
                         />
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: '4pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
-                          <div style={{ fontSize: '4pt', color: '#666' }}>QR</div>
+                          <div style={{ fontSize: '3.5pt', color: '#b45309', fontFamily: 'monospace' }}>H:{qrData?.docHash || ''}</div>
                         </div>
                       </div>
                     </td>
