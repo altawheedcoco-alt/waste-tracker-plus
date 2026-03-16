@@ -17,6 +17,7 @@ import { getThemeById } from './printThemes';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 import { generateShipmentQRData } from '@/lib/shipmentQRData';
+import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 
 interface ShipmentData {
   id: string;

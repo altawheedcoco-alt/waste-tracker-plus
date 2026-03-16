@@ -39,6 +39,7 @@ import SignDocumentButton from '@/components/signature/SignDocumentButton';
 import AddNoteButton from '@/components/notes/AddNoteButton';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 import ShipmentTaglineFooter from './ShipmentTaglineFooter';
+import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 
 interface OrganizationData {
   name: string;
