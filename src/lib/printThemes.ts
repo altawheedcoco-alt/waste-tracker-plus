@@ -81,7 +81,7 @@ export const PRINT_THEMES: PrintTheme[] = [
     entityType: 'all',
     fonts: { heading: "'Rubik', sans-serif", body: "'Noto Sans Arabic', sans-serif", googleImport: 'https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap' },
     colors: { primary: '#6366f1', secondary: '#4f46e5', accent: '#a78bfa', headerBg: 'linear-gradient(135deg, #6366f1, #8b5cf6)', headerText: '#ffffff', tableBorder: '#e0e7ff', tableHeaderBg: '#6366f1', tableHeaderText: '#ffffff', tableStripeBg: '#f5f3ff', bodyText: '#1e1b4b', mutedText: '#6b7280', borderColor: '#e0e7ff', pageBg: '#ffffff' },
-    spacing: { pageMargin: '18mm', sectionGap: '20px', headerPadding: '20px' },
+    spacing: { pageMargin: '15mm 15mm 20mm 15mm', sectionGap: '20px', headerPadding: '20px' },
     borders: { headerBorder: '0', sectionBorder: 'none', tableBorder: '1px solid #e0e7ff', radius: '12px' },
     decorations: { headerStyle: 'gradient', watermark: false, ornaments: false },
   },
