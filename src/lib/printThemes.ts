@@ -227,7 +227,7 @@ export const PRINT_THEMES: PrintTheme[] = [
     entityType: 'recycler',
     fonts: { heading: "'Cairo', sans-serif", body: "'Tajawal', sans-serif", googleImport: 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap' },
     colors: { primary: '#134e4a', secondary: '#115e59', accent: '#14b8a6', headerBg: 'linear-gradient(135deg, #134e4a, #0d9488, #2dd4bf)', headerText: '#ffffff', tableBorder: '#99f6e4', tableHeaderBg: '#134e4a', tableHeaderText: '#f0fdfa', tableStripeBg: '#f0fdfa', bodyText: '#042f2e', mutedText: '#0d9488', borderColor: '#99f6e4', pageBg: '#f8fffe' },
-    spacing: { pageMargin: '18mm', sectionGap: '22px', headerPadding: '24px' },
+    spacing: { pageMargin: '15mm 15mm 20mm 15mm', sectionGap: '22px', headerPadding: '24px' },
     borders: { headerBorder: '4px solid #14b8a6', sectionBorder: '1px solid #99f6e4', tableBorder: '1px solid #99f6e4', radius: '10px' },
     decorations: { headerStyle: 'gradient', watermark: true, ornaments: true },
   },
