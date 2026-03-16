@@ -757,7 +757,7 @@ const ShipmentManagement = () => {
       />
 
       {/* Print Dialog */}
-      <ShipmentPrintView
+      <UnifiedShipmentPrint
         isOpen={!!printShipment}
         onClose={() => setPrintShipment(null)}
         shipment={printShipment}
