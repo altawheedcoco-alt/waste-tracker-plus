@@ -82,6 +82,9 @@ const ExportActions = ({
         </Button>
       )}
       {shipment && <SendToPartiesPopover shipment={shipment} />}
+      {shipment && (
+        <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" />
+      )}
       <Button variant="eco" onClick={onPrint} className="gap-2">
         <Printer className="w-4 h-4" />
         طباعة
