@@ -60,7 +60,12 @@ export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string
     );
   }
 
-  return `<div class="guilloche-text-filler" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>`;
+  // Vertical digital watermark — left side, bottom third, rotated 90°
+  const verticalStamp = `<div style="position:fixed;left:8px;top:66%;transform:rotate(-90deg);transform-origin:left center;z-index:0;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:9px;letter-spacing:4px;color:rgba(${hexToRgb(accentColor)},0.13);font-weight:700;text-transform:uppercase;direction:rtl;">
+    <span style="background:linear-gradient(90deg,rgba(${hexToRgb(accentColor)},0.06),transparent);padding:4px 18px;border:1px solid rgba(${hexToRgb(accentColor)},0.08);border-radius:3px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية ◂</span>
+  </div>`;
+
+  return `<div class="guilloche-text-filler" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
 }
 
 /** Helper: hex color to r,g,b string */
