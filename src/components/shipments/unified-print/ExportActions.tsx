@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Printer, Download, Eye, ChevronDown, Loader2, FileText } from 'lucide-react';
 import SendToPartiesPopover from './SendToPartiesPopover';
+import ManifestPDFButton from '../ManifestPDFButton';
 import type { ShipmentPrintData } from './types';
 
 interface ExportActionsProps {
