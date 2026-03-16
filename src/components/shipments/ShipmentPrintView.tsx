@@ -625,9 +625,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                 </tr>
                 <tr>
                   {[
-                    { org: shipment.generator, label: 'المولدة' },
-                    { org: shipment.transporter, label: 'الناقلة' },
-                    { org: shipment.recycler, label: 'المدورة' },
+                    { org: shipment.generator, label: 'المولدة', role: 'generator' },
+                    { org: shipment.transporter, label: 'الناقلة', role: 'transporter' },
+                    { org: shipment.recycler, label: 'المدورة', role: 'recycler' },
                   ].map((item, idx) => (
                     <td key={idx} style={{ width: '33.33%', textAlign: 'center', padding: '3px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '45px' }}>
                       <div style={{ display: 'flex', justifyContent: 'center', gap: '4px', alignItems: 'flex-end', minHeight: '22px' }}>
@@ -637,13 +637,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                       <div style={{ borderTop: `1px dashed ${theme.colors.accent}`, marginTop: '2px', paddingTop: '1px', fontSize: '4.5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
                       <div style={{ marginTop: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '2px' }}>
                         <QRCodeSVG 
-                          value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`} 
+                          value={qrData?.signerPayload({ name: item.org?.name || '', commercialRegister: item.org?.commercial_register, role: item.role }) || `${window.location.origin}/qr-verify?type=signer&doc=${shipment.shipment_number}`} 
                           size={28} 
-                          level="M" 
+                          level="H" 
                         />
                         <div style={{ textAlign: 'right' }}>
                           <div style={{ fontSize: '4pt', fontFamily: 'monospace', color: '#000' }}>{item.org?.commercial_register || '-'}</div>
-                          <div style={{ fontSize: '4pt', color: '#666' }}>QR</div>
+                          <div style={{ fontSize: '3.5pt', color: '#b45309', fontFamily: 'monospace' }}>H:{qrData?.docHash || ''}</div>
                         </div>
                       </div>
                     </td>
