@@ -219,7 +219,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                      ) : (
                        <div style={{ fontSize: '7.5pt', fontWeight: '600' }}>{item.icon} {item.org?.name || item.label}</div>
                     )}
-                    {item.org?.client_code && <div style={{ fontSize: '4.5pt', fontFamily: 'monospace', color: '#6b7280' }}>{item.org.client_code}</div>}
+                    {item.org?.client_code && <div style={{ fontSize: '6pt', fontFamily: 'monospace', color: '#6b7280' }}>{item.org.client_code}</div>}
                   </td>
                 ))}
               </tr>
