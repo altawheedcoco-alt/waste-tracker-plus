@@ -129,6 +129,7 @@ const OperationalPlans = () => {
   const [includeSignatures, setIncludeSignatures] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [excludedShipments, setExcludedShipments] = useState<Set<string>>(new Set());
   const [selectedShipment, setSelectedShipment] = useState<ShipmentData | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
