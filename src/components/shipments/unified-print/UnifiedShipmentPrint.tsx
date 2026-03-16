@@ -37,6 +37,7 @@ const UnifiedShipmentPrint = ({
   autoAction, mode = 'dialog',
 }: UnifiedShipmentPrintProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const a4PrintRef = useRef<HTMLDivElement>(null);
   const [themeId, setThemeId] = useState('eco-green');
   const [showA4Preview, setShowA4Preview] = useState(false);
   const theme = getThemeById(themeId);
