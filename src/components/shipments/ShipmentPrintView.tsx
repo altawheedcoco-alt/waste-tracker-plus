@@ -242,7 +242,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   ].join('-');
 
   const handleExportPDF = () => {
-    handlePrint();
+    if (printRef.current) {
+      exportToPDF(printRef.current, pdfFileName);
+    }
   };
 
   const formatDate = (date: string | null) => {
