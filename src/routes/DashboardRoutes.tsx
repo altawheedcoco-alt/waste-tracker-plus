@@ -295,6 +295,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/auto-actions" element={<AutoActions />} />
     <Route path="/dashboard/pride-certificates" element={<PrideCertificates />} />
     <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
+    <Route path="/dashboard/platform-features" element={<PlatformFeaturesDoc />} />
     <Route path="/dashboard/offline-mode" element={<OfflineMode />} />
     <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
