@@ -156,9 +156,9 @@ const UnifiedShipmentPrint = ({
         onClose={() => setShowA4Preview(false)}
         onPrint={handlePrint}
         onDownloadPDF={handleDownloadPDF}
-        onShareWhatsApp={handleShareWhatsApp}
         isPDFExporting={isExporting}
         title={`نموذج تتبع - ${shipment.shipment_number}`}
+        shipment={shipment}
       >
         <ShipmentA4Document
           ref={a4PrintRef}
