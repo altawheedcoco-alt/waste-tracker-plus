@@ -66,6 +66,7 @@ import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import GeneratorDeliveryCertificateDialog from '@/components/receipts/GeneratorDeliveryCertificateDialog';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
+import ManifestPDFButton from './ManifestPDFButton';
 import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -765,6 +766,12 @@ const ShipmentCard = ({
                       <Download className="w-4 h-4" />
                       PDF
                     </Button>
+                    <ManifestPDFButton
+                      shipmentId={shipment.id}
+                      shipmentNumber={shipment.shipment_number || ''}
+                      variant="ghost"
+                      size="sm"
+                    />
                     {/* Show recycling certificate button for recycler (to issue) or transporter/admin (to view) */}
                     {(isRecycler || isTransporter || shipment.has_report) && (
                       <QuickCertificateButton

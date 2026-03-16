@@ -8,6 +8,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Printer, Download, Eye, ChevronDown, Loader2, FileText } from 'lucide-react';
 import SendToPartiesPopover from './SendToPartiesPopover';
+import ManifestPDFButton from '../ManifestPDFButton';
 import type { ShipmentPrintData } from './types';
 
 interface ExportActionsProps {
@@ -53,6 +54,9 @@ const ExportActions = ({
           </DropdownMenuContent>
         </DropdownMenu>
         {shipment && <SendToPartiesPopover shipment={shipment} compact />}
+        {shipment && (
+          <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
+        )}
         <Button variant="eco" size="sm" onClick={onPrint} className="gap-1.5 h-8">
           <Printer className="w-3.5 h-3.5" />
           طباعة
@@ -78,6 +82,9 @@ const ExportActions = ({
         </Button>
       )}
       {shipment && <SendToPartiesPopover shipment={shipment} />}
+      {shipment && (
+        <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" />
+      )}
       <Button variant="eco" onClick={onPrint} className="gap-2">
         <Printer className="w-4 h-4" />
         طباعة
