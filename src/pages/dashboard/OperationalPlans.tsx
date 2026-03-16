@@ -1309,6 +1309,18 @@ const OperationalPlans = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Unified Print Preview */}
+      <UnifiedDocumentPreview
+        isOpen={showPrintPreview}
+        onClose={() => setShowPrintPreview(false)}
+        title="خطة التشغيل"
+        filename={`operational-plan-${format(new Date(), 'yyyy-MM-dd')}`}
+      >
+        {printRef.current && (
+          <div dangerouslySetInnerHTML={{ __html: printRef.current.innerHTML }} />
+        )}
+      </UnifiedDocumentPreview>
     </DashboardLayout>
   );
 };
