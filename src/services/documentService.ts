@@ -402,7 +402,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
   ${MICR_FONT_FACE_CSS}
-  @page { size: A4 portrait; margin: 0.5mm; }
+  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -517,7 +517,7 @@ export const PrintService = {
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
     ${MICR_FONT_FACE_CSS}
-    @page { size: A4 portrait; margin: 0.5mm; }
+    @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
     .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -588,7 +588,7 @@ export const PrintService = {
       ${MICR_FONT_FACE_CSS}
       @page {
         size: A4 portrait;
-        margin: 0.2mm;
+        margin: 15mm 15mm 20mm 15mm;
       }
 
       * {

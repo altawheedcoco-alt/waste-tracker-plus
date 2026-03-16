@@ -25,9 +25,9 @@ export const generateA4Template = (data: A4Data): string => {
 <meta charset="UTF-8">
 <title>تقرير النظام المفصل</title>
 <style>
-  @page { size: A4; margin: 15mm; }
+  @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; color: #1a1a1a; direction: rtl; padding: 0; }
+  body { font-family: 'Segoe UI', Tahoma, sans-serif; font-size: 12px; color: #1a1a1a; direction: rtl; padding: 15mm 15mm 20mm 15mm; }
   .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #059669; padding-bottom: 12px; margin-bottom: 20px; }
   .header-right { text-align: right; }
   .header-left { text-align: left; font-size: 11px; color: #666; }

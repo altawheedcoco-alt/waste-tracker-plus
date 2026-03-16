@@ -115,7 +115,7 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
 <title>بيان شحنة - ${v(form.shipment_number)}</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap');
-  @page { size: A4; margin: 10mm 12mm; }
+  @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
     font-family: 'Amiri', 'Cairo', 'Times New Roman', serif;
@@ -127,7 +127,7 @@ function generateFullHTML(form: ManualShipmentData, options: PdfOptions = {}): s
     -webkit-print-color-adjust: exact;
     print-color-adjust: exact;
   }
-  .page { padding: 8mm 10mm; page-break-after: always; }
+  .page { padding: 15mm 15mm 20mm 15mm; page-break-after: always; }
   .page:last-child { page-break-after: auto; }
 
   /* Classic Header */

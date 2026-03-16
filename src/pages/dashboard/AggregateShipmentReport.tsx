@@ -1077,7 +1077,7 @@ const AggregateShipmentReport = () => {
           }
           @page {
             size: A4 landscape;
-            margin: 1cm;
+            margin: 15mm 15mm 20mm 15mm;
           }
         }
       `}</style>

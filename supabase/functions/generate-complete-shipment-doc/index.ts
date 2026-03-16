@@ -239,10 +239,10 @@ function generateCompleteDocHTML(shipment: any, logs: any[], receipts: any[], en
 <head>
 <meta charset="UTF-8">
 <style>
-  @page { size: A4; margin: 0; }
+  @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
   * { box-sizing: border-box; }
   body { font-family: 'Segoe UI', Tahoma, Arial, sans-serif; font-size: 10px; color: #1a1a1a; direction: rtl; margin: 0; padding: 0; }
-  .page { width: 794px; min-height: 1123px; max-height: 1123px; overflow: hidden; padding: 20px 24px; page-break-after: always; position: relative; }
+  .page { width: 794px; min-height: 1123px; max-height: 1123px; overflow: hidden; padding: 15mm 15mm 20mm 15mm; page-break-after: always; position: relative; }
   .page:last-child { page-break-after: auto; }
   .header { text-align: center; border-bottom: 3px double #0f766e; padding-bottom: 6px; margin-bottom: 8px; }
   .header h1 { font-size: 18px; color: #0f766e; margin: 3px 0; }
