@@ -158,7 +158,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     fitSinglePage: true,
   });
 
-  const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
+  const qrData = useMemo(() => shipment ? generateShipmentQRData(shipment) : null, [shipment]);
+  const shipmentUrl = qrData?.url || '';
 
   useEffect(() => {
     if (qrRef.current && shipment) {
