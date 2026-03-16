@@ -402,7 +402,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
   ${MICR_FONT_FACE_CSS}
-  @page { size: A4 portrait; margin: 0.5mm; }
+  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
 
   * {
     -webkit-print-color-adjust: exact !important;
