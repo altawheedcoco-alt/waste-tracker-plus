@@ -319,6 +319,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   <td style={{ width: '18%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
                     {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '28px', width: '100%' }} />}
                     <div style={{ fontSize: '5.5pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                    {qrData?.docHash && <div style={{ fontSize: '4pt', color: '#6b7280', fontFamily: 'monospace' }}>H:{qrData.docHash}</div>}
                   </td>
                   <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
                     <div style={{ fontSize: '10pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '0px' }}>نموذج تتبع نقل المخلفات</div>
@@ -333,11 +334,12 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                     </div>
                     <div style={{ fontSize: '5pt', color: '#6b7280' }}>
                       الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
+                      {qrData?.docHash && <> | بصمة الوثيقة: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#b45309' }}>{qrData.docHash}</span></>}
                     </div>
                   </td>
                   <td style={{ width: '13%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '45px', height: '45px' }} />}
-                    <div style={{ fontSize: '4.5pt', color: '#6b7280' }}>امسح للتتبع</div>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '50px', height: '50px' }} />}
+                    <div style={{ fontSize: '4pt', color: '#6b7280' }}>امسح للتحقق والتتبع</div>
                   </td>
                 </tr>
               </tbody>
