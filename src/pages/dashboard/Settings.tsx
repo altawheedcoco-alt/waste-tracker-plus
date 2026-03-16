@@ -47,6 +47,7 @@ import LanguageSettings from '@/components/settings/LanguageSettings';
 import { useLanguage } from '@/contexts/LanguageContext';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 import ProfileCustomization from '@/components/settings/ProfileCustomization';
+import MovementSupervisorSettings from '@/components/settings/MovementSupervisorSettings';
 
 const Settings = () => {
   const { t } = useLanguage();
