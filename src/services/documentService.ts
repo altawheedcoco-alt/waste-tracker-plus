@@ -737,7 +737,7 @@ export const PrintService = {
   <div class="page-wrapper">
     ${guillocheLayer}
     ${guillocheTextFiller}
-    ${generateMICRLineHTML()}
+    ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
