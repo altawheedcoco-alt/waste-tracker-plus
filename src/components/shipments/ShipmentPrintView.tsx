@@ -150,7 +150,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [signingLoading, setSigningLoading] = useState(false);
   const theme = getThemeById(themeId);
   
-  const { printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
+  const { printContent: printContentFn, printWithTheme, exportToPDF, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,
     orientation: 'portrait',
     format: 'a4',
@@ -242,7 +242,9 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   ].join('-');
 
   const handleExportPDF = () => {
-    handlePrint();
+    if (printRef.current) {
+      exportToPDF(printRef.current, pdfFileName);
+    }
   };
 
   const formatDate = (date: string | null) => {
@@ -620,9 +622,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <PenTool className="w-4 h-4" />
             توقيع وختم
           </Button>
+          <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
+            <Download className="w-4 h-4" />
+            تنزيل PDF
+          </Button>
           <Button onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
-            طباعة / حفظ PDF
+            طباعة
           </Button>
         </DialogFooter>
 
