@@ -113,7 +113,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
         <tr>
           <td colSpan={8} style={sectionHeader(bgColor, textColor, title)}>
             {title}: {org?.name || '-'}
-            {org?.client_code && <span style={{ marginRight: '8px', background: lightBg, color: textColor, padding: '1px 6px', borderRadius: '3px', fontSize: compact ? '5.5pt' : '7pt' }}>{org.client_code}</span>}
+            {org?.client_code && <span style={{ marginRight: '8px', background: lightBg, color: textColor, padding: '1px 6px', borderRadius: '3px', fontSize: compact ? '7pt' : '8pt' }}>{org.client_code}</span>}
           </td>
         </tr>
         <tr>
