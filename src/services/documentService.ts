@@ -778,7 +778,7 @@ export const PrintService = {
 </head>
 <body>
   <div class="print-toolbar">
-    <span>معاينة الطباعة — صفحة A4 بنسبة 175%</span>
+    <span>معاينة الطباعة — صفحة A4 بحجم طبيعي 100%</span>
     <button onclick="window.print()">🖨️ طباعة</button>
     <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
   </div>
