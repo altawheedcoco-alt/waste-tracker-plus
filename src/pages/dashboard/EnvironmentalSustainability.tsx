@@ -58,7 +58,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import { PDFService } from '@/services/documentService';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 // معاملات الاستدامة البيئية
 const SUSTAINABILITY_METRICS = {
