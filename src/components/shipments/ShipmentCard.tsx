@@ -45,6 +45,7 @@ import {
   Send,
   ClipboardCheck,
   EyeOff,
+  Download,
 } from 'lucide-react';
 import {
   getStatusConfig,
@@ -130,6 +131,7 @@ const ShipmentCard = ({
   const [isStatusDialogOpen, setIsStatusDialogOpen] = useState(false);
   const [isReportDialogOpen, setIsReportDialogOpen] = useState(false);
   const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
+  const [printAutoAction, setPrintAutoAction] = useState<'print' | 'pdf' | null>(null);
   const [isMapDialogOpen, setIsMapDialogOpen] = useState(false);
   const [isLiveTrackingOpen, setIsLiveTrackingOpen] = useState(false);
   const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
@@ -243,6 +245,19 @@ const ShipmentCard = ({
 
   const handlePrintButtonClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setPrintAutoAction(null);
+    setIsPrintDialogOpen(true);
+  };
+
+  const handleDirectPrint = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPrintAutoAction('print');
+    setIsPrintDialogOpen(true);
+  };
+
+  const handleDirectPDF = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setPrintAutoAction('pdf');
     setIsPrintDialogOpen(true);
   };
 
@@ -307,11 +322,20 @@ const ShipmentCard = ({
                   <Button
                     size="sm"
                     variant="ghost"
-                    onClick={handlePrintButtonClick}
+                    onClick={handleDirectPrint}
                     className="gap-1 text-xs"
-                    title="طباعة نموذج التتبع"
+                    title="طباعة مباشرة"
                   >
                     <Printer className="w-3 h-3" />
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={handleDirectPDF}
+                    className="gap-1 text-xs"
+                    title="تحميل PDF"
+                  >
+                    <Download className="w-3 h-3" />
                   </Button>
                   {/* Show recycling certificate button for recycler (to issue) or transporter (to view) */}
                   {(isRecycler || isTransporter) && (
@@ -511,8 +535,9 @@ const ShipmentCard = ({
 
         <ShipmentQuickPrint
           isOpen={isPrintDialogOpen}
-          onClose={() => setIsPrintDialogOpen(false)}
+          onClose={() => { setIsPrintDialogOpen(false); setPrintAutoAction(null); }}
           shipmentId={shipment.id}
+          autoAction={printAutoAction}
         />
 
         <ShipmentRouteMap
@@ -722,12 +747,22 @@ const ShipmentCard = ({
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={handlePrintButtonClick}
+                      onClick={handleDirectPrint}
                       className="gap-2"
-                      title="طباعة نموذج التتبع"
+                      title="طباعة مباشرة"
                     >
                       <Printer className="w-4 h-4" />
                       طباعة
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleDirectPDF}
+                      className="gap-2"
+                      title="تحميل PDF"
+                    >
+                      <Download className="w-4 h-4" />
+                      PDF
                     </Button>
                     {/* Show recycling certificate button for recycler (to issue) or transporter/admin (to view) */}
                     {(isRecycler || isTransporter || shipment.has_report) && (
@@ -1097,8 +1132,9 @@ const ShipmentCard = ({
 
       <ShipmentQuickPrint
         isOpen={isPrintDialogOpen}
-        onClose={() => setIsPrintDialogOpen(false)}
+        onClose={() => { setIsPrintDialogOpen(false); setPrintAutoAction(null); }}
         shipmentId={shipment.id}
+        autoAction={printAutoAction}
       />
 
       <ShipmentRouteMap

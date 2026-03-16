@@ -19,6 +19,7 @@ interface ShipmentQuickPrintProps {
   isOpen: boolean;
   onClose: () => void;
   shipmentId: string;
+  autoAction?: 'print' | 'pdf' | null;
 }
 
 interface ShipmentLogEntry {
@@ -135,7 +136,7 @@ const statusLabels: Record<string, string> = {
   confirmed: 'مكتمل',
 };
 
-const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintProps) => {
+const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: ShipmentQuickPrintProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
@@ -271,6 +272,35 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
       }
     }
   }, [shipment?.id, loading]);
+
+  // Auto-action: trigger print or PDF download automatically when data is ready
+  const autoActionDone = useRef(false);
+  useEffect(() => {
+    if (!autoAction || !shipment || loading || autoActionDone.current) return;
+    if (!qrDataUrl || !barcodeDataUrl) return;
+    // Wait for refs to be ready
+    const timer = setTimeout(() => {
+      if (autoAction === 'print' && printRef.current) {
+        autoActionDone.current = true;
+        printWithTheme(printRef.current, themeId as any);
+      } else if (autoAction === 'pdf' && printRef.current) {
+        autoActionDone.current = true;
+        const name = [
+          shipment.transporter?.name || 'الناقل',
+          `شحنة-${shipment.shipment_number}`,
+          shipment.generator?.name || 'المولد',
+          wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
+        ].join('-');
+        exportToPDF(printRef.current, name);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [autoAction, shipment, loading, qrDataUrl, barcodeDataUrl]);
+
+  // Reset autoActionDone when dialog closes
+  useEffect(() => {
+    if (!isOpen) autoActionDone.current = false;
+  }, [isOpen]);
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
