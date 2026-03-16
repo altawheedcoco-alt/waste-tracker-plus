@@ -281,7 +281,7 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
         </div>
 
         {/* Print Preview */}
-        <div ref={printRef} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '7pt', color: '#000000' }}>
+        <div ref={printRef} className="bg-white p-4 rounded-lg border" style={{ direction: 'rtl', fontSize: '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.4' }}>
           <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '4px', border: 'none' }}>
