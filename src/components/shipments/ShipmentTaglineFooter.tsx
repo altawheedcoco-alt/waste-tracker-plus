@@ -40,8 +40,8 @@ const ShipmentTaglineFooter: React.FC<ShipmentTaglineFooterProps> = ({ shipmentN
       <div style={{ display: 'table', width: '100%', borderCollapse: 'separate', borderSpacing: '3px 1px' }}>
         <div style={{ display: 'table-row' }}>
           <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🏭 رسالة للمولّد</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5.5pt' }}>{taglines.generator}</div>
+            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🏭 رسالة للمولّد</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.generator}</div>
           </div>
           <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
             <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
