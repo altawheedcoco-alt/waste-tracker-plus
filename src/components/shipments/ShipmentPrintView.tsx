@@ -519,14 +519,14 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             </table>
 
             {/* Legal Declarations Section */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td>
+                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.generatorLight || '#eff6ff', fontWeight: '600', width: '15%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
+                  <td style={{ background: theme.colors.generatorLight || '#eff6ff', fontWeight: '600', width: '15%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
                 </tr>
                 <tr>
                   <td style={{ background: theme.colors.transporterLight || '#fffbeb', fontWeight: '600', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
