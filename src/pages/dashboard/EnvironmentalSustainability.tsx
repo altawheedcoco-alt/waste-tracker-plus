@@ -313,26 +313,8 @@ const EnvironmentalSustainability = () => {
   const sustainabilityLevel = getSustainabilityLevel(metrics.overallScore);
   const LevelIcon = sustainabilityLevel.icon;
 
-  // تصدير PDF
-  const exportToPdf = async () => {
-    if (!reportRef.current) return;
-    setExportingPdf(true);
-    toast({ title: "جاري إنشاء التقرير...", description: "يرجى الانتظار" });
-
-    try {
-      await PDFService.download(reportRef.current, {
-        filename: `تقرير-الاستدامة-البيئية`,
-        orientation: 'portrait',
-        format: 'a4',
-        scale: 2,
-      });
-      toast({ title: "تم التصدير بنجاح", description: "تم حفظ تقرير PDF" });
-    } catch (error) {
-      toast({ title: "خطأ في التصدير", description: "حدث خطأ أثناء إنشاء التقرير", variant: "destructive" });
-    } finally {
-      setExportingPdf(false);
-    }
-  };
+  // معاينة وطباعة
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const handleTypeToggle = (type: string) => {
     setSelectedTypes(prev => 
