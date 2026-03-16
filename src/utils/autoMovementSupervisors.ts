@@ -30,6 +30,7 @@ function createDefaultAISupervisor(role: string): Partial<MovementSupervisorEntr
 /**
  * Auto-assign movement supervisors after shipment creation.
  * Priority: explicit entries > org defaults > auto-generated AI digital identity.
+ * When a human supervisor is assigned, they replace the AI supervisor and inherit its duties.
  * Shipments are NEVER blocked by the absence of a supervisor.
  */
 export async function autoAssignMovementSupervisors(
