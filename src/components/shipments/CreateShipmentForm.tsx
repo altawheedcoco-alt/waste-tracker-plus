@@ -138,6 +138,14 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
     setComplianceResults(prev => ({ ...prev, [party]: result }));
   }, []);
 
+  // Movement Supervisors state
+  const [movementSupervisors, setMovementSupervisors] = useState<Record<string, MovementSupervisorEntry[]>>({
+    generator: [],
+    transporter: [],
+    recycler: [],
+    disposal: [],
+  });
+
   const handleWeightTicketUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
