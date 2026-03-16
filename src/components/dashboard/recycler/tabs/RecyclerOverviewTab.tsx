@@ -29,6 +29,8 @@ import TabFallback from '@/components/dashboard/shared/TabFallback';
 const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
 const RecyclerBulkStatusDropdown = lazy(() => import('@/components/shipments/RecyclerBulkStatusDropdown'));
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const VehicleComplianceManager = lazy(() => import('@/components/compliance/VehicleComplianceManager'));
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
