@@ -372,11 +372,11 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tbody>
                 <tr>
                   <td colSpan={2} style={{ background: '#7c3aed', color: 'white', fontWeight: 'bold', textAlign: 'center', fontSize: compact ? '6pt' : '8pt', padding: compact ? '2px' : '4px', border: '1px solid #6d28d9' }}>
-                    📋 إقرار تسليم الشحنة
-                  </td>
-                </tr>
-                <tr>
-                  <td style={{ width: '70%', padding: compact ? '2px' : '6px', border: '1px solid #d1d5db', fontSize: compact ? '5pt' : '7pt', verticalAlign: 'top' }}>
+                     📋 إقرار تسليم الشحنة
+                   </td>
+                 </tr>
+                 <tr>
+                   <td style={{ width: '70%', padding: compact ? '3px' : '6px', border: '1px solid #d1d5db', fontSize: compact ? '7pt' : '8pt', verticalAlign: 'top' }}>
                     <div><span style={{ color: '#6b7280' }}>المُقِر: </span><strong>{declaration.driver_name || '-'}</strong></div>
                     <div><span style={{ color: '#6b7280' }}>تاريخ: </span><strong>{declaration.declared_at ? format(new Date(declaration.declared_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'}</strong></div>
                     <div style={{ marginTop: '2px', fontSize: '5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع إلكترونياً</div>
