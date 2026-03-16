@@ -761,6 +761,18 @@ const EnvironmentalSustainability = () => {
           metrics={metrics}
           level={sustainabilityLevel}
         />
+
+        {/* Unified Print Preview */}
+        <UnifiedDocumentPreview
+          isOpen={showPrintPreview}
+          onClose={() => setShowPrintPreview(false)}
+          title="تقرير الاستدامة البيئية"
+          filename="تقرير-الاستدامة-البيئية"
+        >
+          {reportRef.current && (
+            <div dangerouslySetInnerHTML={{ __html: reportRef.current.innerHTML }} />
+          )}
+        </UnifiedDocumentPreview>
       </div>
     </DashboardLayout>
   );
