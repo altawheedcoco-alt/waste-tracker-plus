@@ -162,12 +162,10 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
       <div ref={ref} className="print-transparent-tables bg-white p-3 rounded-lg border"
         style={{ direction: 'rtl', fontSize: compact ? '7pt' : '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3', WebkitFontSmoothing: 'antialiased' }}>
         <style>{`
-          .print-transparent-tables table, .print-transparent-tables tr,
-          .print-transparent-tables th, .print-transparent-tables td,
-          .print-transparent-tables thead, .print-transparent-tables tbody {
-            background-color: transparent !important; background: transparent !important;
-          }
           .print-transparent-tables table { margin-bottom: 0 !important; }
+          @media print {
+            .print-transparent-tables { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+          }
         `}</style>
 
         <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
