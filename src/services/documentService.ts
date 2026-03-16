@@ -474,7 +474,7 @@ export const PrintService = {
    * This is the centralized method — ALL components should use this
    * instead of manual window.open() + window.print().
    */
-  printHTML(htmlContent: string, opts: { title?: string; windowFeatures?: string; customCSS?: string } = {}): void {
+  printHTML(htmlContent: string, opts: { title?: string; windowFeatures?: string; customCSS?: string; orgClientCode?: string | null; orgVerificationCode?: string | null } = {}): void {
     const win = window.open('', '_blank', opts.windowFeatures);
     if (!win) { toast.error('فشل فتح نافذة الطباعة. يرجى السماح بالنوافذ المنبثقة.'); return; }
 
