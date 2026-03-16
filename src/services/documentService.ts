@@ -746,9 +746,7 @@ export const PrintService = {
           margin: 16px auto;
           flex-shrink: 0;
           overflow: hidden;
-          transform: scale(1.75);
-          transform-origin: top center;
-          margin-bottom: calc(297mm * 0.75 + 16px);
+          /* Natural 100% scale */
         }
       }
 
@@ -780,7 +778,7 @@ export const PrintService = {
 </head>
 <body>
   <div class="print-toolbar">
-    <span>معاينة الطباعة — صفحة A4 بنسبة 175%</span>
+    <span>معاينة الطباعة — صفحة A4 بحجم طبيعي 100%</span>
     <button onclick="window.print()">🖨️ طباعة</button>
     <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
   </div>
