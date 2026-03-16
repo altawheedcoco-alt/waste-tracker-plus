@@ -125,9 +125,10 @@ const HazardousWasteRegister = () => {
     filename: 'سجل-المخلفات-الخطرة',
     orientation: 'landscape',
   });
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, 'سجل-المخلفات-الخطرة');
+    setShowPrintPreview(true);
   };
   
   // Filter states
