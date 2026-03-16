@@ -136,7 +136,7 @@ const statusLabels: Record<string, string> = {
   confirmed: 'مكتمل',
 };
 
-const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintProps) => {
+const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: ShipmentQuickPrintProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const pdfRef = useRef<HTMLDivElement>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
