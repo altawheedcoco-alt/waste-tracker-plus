@@ -746,9 +746,7 @@ export const PrintService = {
           margin: 16px auto;
           flex-shrink: 0;
           overflow: hidden;
-          transform: scale(1.75);
-          transform-origin: top center;
-          margin-bottom: calc(297mm * 0.75 + 16px);
+          /* Natural 100% scale */
         }
       }
 
