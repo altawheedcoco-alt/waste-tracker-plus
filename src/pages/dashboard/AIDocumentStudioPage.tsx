@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, lazy, Suspense, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -10,7 +10,7 @@ import {
   Send, StopCircle, Trash2, Download, Printer, Eye, Save,
   FileText, Sparkles, Bot, User, Loader2, Copy, X, Share2,
   MessageSquare, Archive, LayoutTemplate, Users, Building2,
-  BookmarkPlus, MessageCircle, Edit3
+  BookmarkPlus, MessageCircle, Edit3, Code
 } from 'lucide-react';
 import { useAIDocumentChat } from '@/hooks/useAIDocumentChat';
 import { useAuth } from '@/contexts/auth/AuthContext';
@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import BackButton from '@/components/ui/back-button';
 
 const DocumentArchiveTab = lazy(() => import('@/components/ai-studio/DocumentArchiveTab'));
 const DocumentTemplatesTab = lazy(() => import('@/components/ai-studio/DocumentTemplatesTab'));
