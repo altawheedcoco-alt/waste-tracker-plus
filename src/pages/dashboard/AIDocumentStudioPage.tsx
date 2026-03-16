@@ -40,21 +40,54 @@ const TabFallback = () => (
 );
 
 const SUGGESTIONS = [
-  { icon: '💰', label: 'عرض سعر', prompt: 'أريد إنشاء عرض سعر احترافي لخدمات نقل المخلفات' },
-  { icon: '📄', label: 'خطاب رسمي', prompt: 'أريد كتابة خطاب رسمي' },
-  { icon: '📋', label: 'عقد خدمات', prompt: 'أريد إنشاء عقد خدمات إدارة مخلفات' },
-  { icon: '📊', label: 'تقرير', prompt: 'أريد إنشاء تقرير احترافي' },
-  { icon: '📢', label: 'إعلان', prompt: 'أريد تصميم إعلان احترافي لخدماتنا' },
-  { icon: '🧾', label: 'فاتورة أولية', prompt: 'أريد إنشاء فاتورة أولية (Proforma)' },
+  // عروض الأسعار والمالية
+  { icon: '💰', label: 'عرض سعر نقل', prompt: 'أريد إنشاء عرض سعر احترافي لخدمات نقل المخلفات يتضمن جدول أسعار مفصل حسب نوع المخلف والمسافة والوزن' },
+  { icon: '🧾', label: 'فاتورة أولية', prompt: 'أريد إنشاء فاتورة أولية (Proforma Invoice) لخدمات النقل تتضمن تفاصيل الشحنات والأسعار والضرائب' },
+  { icon: '📑', label: 'كشف حساب', prompt: 'أريد إنشاء كشف حساب شهري للعميل يتضمن ملخص الشحنات والمبالغ المستحقة والمدفوعة والرصيد' },
+  // العقود والاتفاقيات
+  { icon: '📋', label: 'عقد نقل مخلفات', prompt: 'أريد إنشاء عقد خدمات نقل مخلفات شامل يتضمن بنود الالتزامات والمسؤوليات والتعويضات والشروط الجزائية' },
+  { icon: '🤝', label: 'اتفاقية مستوى خدمة', prompt: 'أريد إنشاء اتفاقية مستوى خدمة (SLA) لنقل المخلفات تتضمن مؤشرات الأداء وأوقات الاستجابة والغرامات' },
+  { icon: '📝', label: 'ملحق عقد', prompt: 'أريد إنشاء ملحق عقد لتعديل أو إضافة بنود على عقد نقل مخلفات قائم' },
+  // الخطابات الرسمية
+  { icon: '📄', label: 'خطاب رسمي', prompt: 'أريد كتابة خطاب رسمي موجه لجهاز تنظيم إدارة المخلفات' },
+  { icon: '✉️', label: 'خطاب تعاون', prompt: 'أريد كتابة خطاب طلب تعاون أو شراكة مع شركة لإدارة المخلفات' },
+  { icon: '📨', label: 'خطاب ضمان', prompt: 'أريد إنشاء خطاب ضمان لتنفيذ خدمات نقل المخلفات وفق المعايير البيئية' },
+  // التقارير والتوثيق
+  { icon: '📊', label: 'تقرير شهري', prompt: 'أريد إنشاء تقرير شهري عن عمليات النقل يتضمن إحصائيات الشحنات والأوزان والمسارات ومؤشرات الأداء' },
+  { icon: '🔒', label: 'تقرير سلامة', prompt: 'أريد إنشاء تقرير السلامة والصحة المهنية لعمليات نقل المخلفات يتضمن تقييم المخاطر وإجراءات الوقاية' },
+  { icon: '🌿', label: 'تقرير بيئي', prompt: 'أريد إنشاء تقرير الأثر البيئي لعمليات النقل يتضمن البصمة الكربونية ونسب إعادة التدوير والامتثال البيئي' },
+  // مستندات تشغيلية
+  { icon: '🚛', label: 'أمر تشغيل', prompt: 'أريد إنشاء أمر تشغيل لمهمة نقل مخلفات يتضمن بيانات السائق والمركبة والمسار والتعليمات' },
+  { icon: '📦', label: 'بوليصة شحن', prompt: 'أريد إنشاء بوليصة شحن (Bill of Lading) لنقل مخلفات تتضمن بيانات المرسل والمستلم والحمولة' },
+  { icon: '⚠️', label: 'تصريح نقل خطر', prompt: 'أريد إنشاء تصريح نقل مواد خطرة يتضمن تصنيف المادة وإجراءات السلامة وخطة الطوارئ' },
+  { icon: '🔧', label: 'جدول صيانة', prompt: 'أريد إنشاء جدول صيانة دورية لأسطول نقل المخلفات يتضمن المواعيد والبنود والتكاليف المتوقعة' },
+  // مستندات إدارية
+  { icon: '📢', label: 'إعلان خدمات', prompt: 'أريد تصميم إعلان احترافي لخدمات نقل المخلفات يبرز المزايا التنافسية والتراخيص' },
+  { icon: '📃', label: 'سياسة داخلية', prompt: 'أريد إنشاء سياسة داخلية لإدارة عمليات نقل المخلفات تتضمن الإجراءات والمسؤوليات والمعايير' },
+  { icon: '🏅', label: 'شهادة إتمام', prompt: 'أريد إنشاء شهادة إتمام خدمة نقل وتسليم مخلفات بنجاح وفق المعايير البيئية' },
+  { icon: '📑', label: 'مذكرة داخلية', prompt: 'أريد كتابة مذكرة داخلية للموظفين بخصوص تعليمات السلامة أثناء نقل المخلفات' },
 ];
 
 const DOC_TYPES = [
   { value: 'quotation', label: 'عرض سعر' },
-  { value: 'letter', label: 'خطاب رسمي' },
+  { value: 'proforma', label: 'فاتورة أولية' },
+  { value: 'statement', label: 'كشف حساب' },
   { value: 'contract', label: 'عقد' },
+  { value: 'sla', label: 'اتفاقية مستوى خدمة' },
+  { value: 'addendum', label: 'ملحق عقد' },
+  { value: 'letter', label: 'خطاب رسمي' },
+  { value: 'guarantee', label: 'خطاب ضمان' },
   { value: 'report', label: 'تقرير' },
+  { value: 'safety_report', label: 'تقرير سلامة' },
+  { value: 'environmental', label: 'تقرير بيئي' },
+  { value: 'work_order', label: 'أمر تشغيل' },
+  { value: 'bill_of_lading', label: 'بوليصة شحن' },
+  { value: 'hazmat_permit', label: 'تصريح نقل خطر' },
+  { value: 'maintenance', label: 'جدول صيانة' },
   { value: 'announcement', label: 'إعلان' },
-  { value: 'invoice', label: 'فاتورة' },
+  { value: 'policy', label: 'سياسة داخلية' },
+  { value: 'certificate', label: 'شهادة إتمام' },
+  { value: 'memo', label: 'مذكرة داخلية' },
   { value: 'general', label: 'عام' },
 ];
 
@@ -295,23 +328,37 @@ export default function AIDocumentStudioPage() {
           <ScrollArea className="flex-1 px-4" ref={scrollRef as any}>
             <div className="max-w-3xl mx-auto py-4 space-y-4">
               {!hasMessages && (
-                <div className="flex flex-col items-center justify-center py-8 space-y-4">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-emerald-500/20 to-teal-600/20 flex items-center justify-center">
-                    <FileText className="w-8 h-8 text-emerald-600" />
+                <div className="flex flex-col items-center justify-center py-6 space-y-4">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center">
+                    <FileText className="w-7 h-7 text-primary" />
                   </div>
                   <div className="text-center space-y-1">
-                    <h2 className="text-lg font-bold text-foreground">مرحباً! أنا مساعدك لإنشاء المستندات</h2>
+                    <h2 className="text-lg font-bold text-foreground">مساعد المستندات للجهة الناقلة</h2>
                     <p className="text-xs text-muted-foreground max-w-md">
-                      أخبرني بما تريد إنشاءه وسأقوم بتجهيز مستند احترافي بتنسيق A4
+                      أنشئ عروض أسعار، عقود، بوالص شحن، تقارير، وكل ما تحتاجه لإدارة عمليات النقل
                     </p>
                   </div>
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 w-full max-w-lg">
-                    {SUGGESTIONS.map((s, i) => (
-                      <button key={i} onClick={() => { setInput(s.prompt); inputRef.current?.focus(); }}
-                        className="flex items-center gap-2 px-3 py-2.5 rounded-xl border bg-card hover:bg-accent/50 transition-colors text-sm text-start">
-                        <span className="text-lg">{s.icon}</span>
-                        <span className="text-foreground font-medium">{s.label}</span>
-                      </button>
+                  <div className="w-full max-w-2xl space-y-3">
+                    {[
+                      { title: '💼 المالية', items: SUGGESTIONS.slice(0, 3) },
+                      { title: '📋 العقود', items: SUGGESTIONS.slice(3, 6) },
+                      { title: '✉️ الخطابات', items: SUGGESTIONS.slice(6, 9) },
+                      { title: '📊 التقارير', items: SUGGESTIONS.slice(9, 12) },
+                      { title: '🚛 التشغيل', items: SUGGESTIONS.slice(12, 16) },
+                      { title: '📃 الإدارية', items: SUGGESTIONS.slice(16) },
+                    ].map((group, gi) => (
+                      <div key={gi}>
+                        <p className="text-xs font-semibold text-muted-foreground mb-1.5">{group.title}</p>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-1.5">
+                          {group.items.map((s, i) => (
+                            <button key={i} onClick={() => { setInput(s.prompt); inputRef.current?.focus(); }}
+                              className="flex items-center gap-1.5 px-2.5 py-2 rounded-lg border bg-card hover:bg-accent/50 transition-colors text-xs text-start">
+                              <span className="text-sm">{s.icon}</span>
+                              <span className="text-foreground font-medium truncate">{s.label}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
                     ))}
                   </div>
                 </div>
