@@ -390,184 +390,184 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
                   <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '10%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>
-                  <td style={{ width: '15%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '8%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الكمية</td>
-                  <td style={{ width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>مستوى الخطورة</td>
-                  <td style={{ width: '8%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.hazard_level || 'low'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>تاريخ الاستلام</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{formatDate(shipment.pickup_date)}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '10%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>نوع المخلفات</td>
+                  <td style={{ width: '15%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '8%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الكمية</td>
+                  <td style={{ width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>مستوى الخطورة</td>
+                  <td style={{ width: '8%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.hazard_level || 'low'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تاريخ الاستلام</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{formatDate(shipment.pickup_date)}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>طريقة التعبئة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.packaging_method || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>طريقة التخلص</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.disposal_method || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>وصف المخلفات</td>
-                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.waste_description || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>طريقة التعبئة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.packaging_method || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>طريقة التخلص</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.disposal_method || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>وصف المخلفات</td>
+                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.waste_description || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>موقع الاستلام</td>
-                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.pickup_address}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>موقع التسليم</td>
-                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.delivery_address}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>موقع الاستلام</td>
+                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.pickup_address}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>موقع التسليم</td>
+                  <td colSpan={3} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.delivery_address}</td>
                 </tr>
               </tbody>
             </table>
 
             {/* Generator Section - Blue Header */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#dbeafe', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #93c5fd' }}>
+                  <td colSpan={8} style={{ background: '#dbeafe', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #93c5fd' }}>
                     بيانات الجهة المولدة: {shipment.generator?.name || '-'}
-                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#bfdbfe', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.generator.client_code}</span>}
+                    {shipment.generator?.client_code && <span style={{ marginRight: '8px', background: '#bfdbfe', color: '#000000', padding: '1px 4px', borderRadius: '3px', fontSize: '5.5pt' }}>{shipment.generator.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.commercial_register || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البطاقة الضريبية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.tax_card || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.environmental_approval_number || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رخصة إدارة المخلفات</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.wmra_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السجل التجاري</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.commercial_register || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البطاقة الضريبية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.tax_card || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رقم الموافقة البيئية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.environmental_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة إدارة المخلفات</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.wmra_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>تسجيل المنشأة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.establishment_registration || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط المسجل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.registered_activity || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.address || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.representative_name || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تسجيل المنشأة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.establishment_registration || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.address || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.representative_name || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.phone || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
-                  <td colSpan={5} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.generator?.email || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.phone || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
+                  <td colSpan={5} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.generator?.email || '-'}</td>
                 </tr>
               </tbody>
             </table>
 
             {/* Transporter Section - Yellow/Orange Header */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#fef3c7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #fde68a' }}>
+                  <td colSpan={8} style={{ background: '#fef3c7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #fde68a' }}>
                     بيانات الجهة الناقلة: {shipment.transporter?.name || '-'}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.commercial_register || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البطاقة الضريبية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.tax_card || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.environmental_approval_number || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رخصة النقل البري</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.land_transport_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السجل التجاري</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.commercial_register || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البطاقة الضريبية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.tax_card || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رقم الموافقة البيئية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.environmental_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة النقل البري</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.land_transport_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رخصة إدارة المخلفات</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.wmra_license || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>تسجيل المنشأة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.establishment_registration || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط المسجل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.registered_activity || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.representative_name || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة إدارة المخلفات</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.wmra_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تسجيل المنشأة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.establishment_registration || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.representative_name || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.address || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.phone || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.transporter?.email || '-'}</td>
-                  <td colSpan={2} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}></td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.address || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.phone || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.transporter?.email || '-'}</td>
+                  <td colSpan={2} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}></td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السائق</td>
-                  <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{driverName}</td>
-                  <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>لوحة المركبة</td>
-                  <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{vehiclePlate}</td>
-                  <td colSpan={4} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}></td>
+                  <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السائق</td>
+                  <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{driverName}</td>
+                  <td style={{ background: '#fef3c7', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>لوحة المركبة</td>
+                  <td style={{ background: '#fefce8', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{vehiclePlate}</td>
+                  <td colSpan={4} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}></td>
                 </tr>
               </tbody>
             </table>
 
             {/* Recycler Section - Green Header */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={8} style={{ background: '#dcfce7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #86efac' }}>
+                  <td colSpan={8} style={{ background: '#dcfce7', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #86efac' }}>
                     بيانات جهة التدوير: {shipment.recycler?.name || '-'}
-                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#bbf7d0', color: '#000000', padding: '1px 6px', borderRadius: '3px', fontSize: '7pt' }}>{shipment.recycler.client_code}</span>}
+                    {shipment.recycler?.client_code && <span style={{ marginRight: '8px', background: '#bbf7d0', color: '#000000', padding: '1px 4px', borderRadius: '3px', fontSize: '5.5pt' }}>{shipment.recycler.client_code}</span>}
                   </td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل التجاري</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.commercial_register || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البطاقة الضريبية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.tax_card || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الموافقة البيئية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.environmental_approval_number || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رخصة التنمية الصناعية</td>
-                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.ida_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السجل التجاري</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.commercial_register || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البطاقة الضريبية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.tax_card || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رقم الموافقة البيئية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.environmental_approval_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', width: '12%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة التنمية الصناعية</td>
+                  <td style={{ width: '13%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.ida_license || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>السجل الصناعي</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.industrial_registry || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رقم الترخيص</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.license_number || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>رخصة إدارة المخلفات</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.wmra_license || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>تسجيل المنشأة</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.establishment_registration || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>السجل الصناعي</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.industrial_registry || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رقم الترخيص</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.license_number || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>رخصة إدارة المخلفات</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.wmra_license || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>تسجيل المنشأة</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.establishment_registration || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>النشاط المسجل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.registered_activity || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>العنوان</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.address || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>الهاتف</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.phone || '-'}</td>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>البريد</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.email || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>النشاط المسجل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.registered_activity || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>العنوان</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.address || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>الهاتف</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.phone || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>البريد</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.email || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>ممثل الجهة</td>
-                  <td colSpan={7} style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt' }}>{shipment.recycler?.representative_name || '-'}</td>
+                  <td style={{ background: '#f9fafb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>ممثل الجهة</td>
+                  <td colSpan={7} style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt' }}>{shipment.recycler?.representative_name || '-'}</td>
                 </tr>
               </tbody>
             </table>
 
             {/* Legal Declarations Section */}
-            <table style={{ borderCollapse: 'collapse', marginBottom: '2px' }}>
+            <table style={{ borderCollapse: 'collapse', marginBottom: '0px' }}>
               <tbody>
                 <tr>
-                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '8pt', padding: '4px', border: '1px solid #cbd5e1' }}>الإقرارات القانونية والبيئية</td>
+                  <td colSpan={2} style={{ background: '#e2e8f0', color: '#000000', fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: '1px solid #cbd5e1' }}>الإقرارات القانونية والبيئية</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#eff6ff', fontWeight: '600', width: '15%', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
+                  <td style={{ background: '#eff6ff', fontWeight: '600', width: '15%', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المولّد</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المولّد بأن المخلفات المذكورة ناتجة عن نشاطه وأنه المسؤول الأول عن صحة ودقة جميع البيانات، وأنه ملتزم بيئياً وفقاً للقانون رقم 202 لسنة 2020 والقانون رقم 4 لسنة 1994 ولوائحهما التنفيذية.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fffbeb', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
+                  <td style={{ background: '#fffbeb', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار الناقل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر الناقل بتطبيق جميع المعايير القانونية والبيئية والتزامه بكافة اشتراطات وزارة البيئة وجهاز تنظيم إدارة المخلفات (WMRA)، ويتحمل كامل المسؤولية عن سلامة المخلفات خلال النقل.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#f0fdf4', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
+                  <td style={{ background: '#f0fdf4', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#000' }}>إقرار المستقبل</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>يُقر المستقبل بأنه استلم المخلفات وسيطبق كافة المعايير البيئية والتنظيمية في عمليات إعادة التدوير وفقاً لترخيصه ومعايير WMRA.</td>
                 </tr>
                 <tr>
-                  <td style={{ background: '#fef2f2', fontWeight: '600', border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '7pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
-                  <td style={{ border: '1px solid #d1d5db', padding: '3px 5px', fontSize: '6.5pt', lineHeight: '1.5', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
+                  <td style={{ background: '#fef2f2', fontWeight: '600', border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '6pt', verticalAlign: 'top', color: '#991b1b' }}>إخلاء مسؤولية</td>
+                  <td style={{ border: '1px solid #d1d5db', padding: '2px 4px', fontSize: '5.5pt', lineHeight: '1.4', color: '#000' }}>منصة iRecycle أداة رقمية للتوثيق والتتبع فقط، ولا تتحمل أي مسؤولية قانونية عن محتوى البيانات أو العمليات. المسؤولية الكاملة على الأطراف الموقّعة.</td>
                 </tr>
               </tbody>
             </table>
