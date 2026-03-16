@@ -577,7 +577,7 @@ export const useCreateShipment = () => {
     return labels[state] || state;
   };
 
-  const handleSubmit = async (e: React.FormEvent, onSuccess?: () => void, onClose?: () => void) => {
+  const handleSubmit = async (e: React.FormEvent, onSuccess?: () => void, onClose?: () => void, afterCreate?: (shipmentId: string) => void) => {
     e.preventDefault();
 
     // === SUBSCRIPTION CHECK: Block if not paid ===
