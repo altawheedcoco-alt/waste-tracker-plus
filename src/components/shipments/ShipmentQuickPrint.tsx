@@ -148,11 +148,10 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   const [barcodeDataUrl, setBarcodeDataUrl] = useState<string>('');
   const [themeId, setThemeId] = useState('eco-green');
   const theme = getThemeById(themeId);
-  const { exportToPDF, printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
+  const { printContent: printContentFn, printWithTheme, isExporting } = usePDFExport({
     filename: `tracking-form-${shipmentId}`,
     orientation: 'portrait',
     format: 'a4',
-    scale: 2,
     fitSinglePage: true,
   });
 
