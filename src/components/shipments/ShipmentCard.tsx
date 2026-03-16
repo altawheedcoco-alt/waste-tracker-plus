@@ -66,6 +66,7 @@ import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup
 import QuickReceiptButton from '@/components/receipts/QuickReceiptButton';
 import GeneratorDeliveryCertificateDialog from '@/components/receipts/GeneratorDeliveryCertificateDialog';
 import QuickCertificateButton from '@/components/reports/QuickCertificateButton';
+import ManifestPDFButton from './ManifestPDFButton';
 import ShipmentApprovalBadge from './ShipmentApprovalBadge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
