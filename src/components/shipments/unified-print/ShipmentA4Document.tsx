@@ -289,7 +289,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           {/* ═══ LEGAL DECLARATIONS ═══ */}
           <table style={{ borderCollapse: 'collapse', marginBottom: '0px', width: '100%' }}>
             <tbody>
-              <tr><td colSpan={2} style={{ background: '#e2e8f0', color: '#000', fontWeight: 'bold', textAlign: 'center', fontSize: '5.5pt', padding: '1px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td></tr>
+              <tr><td colSpan={2} style={{ background: '#e2e8f0', color: '#000', fontWeight: 'bold', textAlign: 'center', fontSize: '7pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>الإقرارات القانونية والبيئية</td></tr>
               {[
                 { bg: theme.colors.generatorLight || '#eff6ff', label: 'إقرار المولّد', text: 'يُقر المولّد بأن المخلفات ناتجة عن نشاطه وملتزم بيئياً وفقاً للقانون 202/2020 والقانون 4/1994 ولوائحهما.' },
                 { bg: theme.colors.transporterLight || '#fffbeb', label: 'إقرار الناقل', text: 'يُقر الناقل بتطبيق المعايير البيئية واشتراطات WMRA ويتحمل المسؤولية عن سلامة المخلفات خلال النقل.' },
