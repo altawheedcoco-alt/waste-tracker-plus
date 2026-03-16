@@ -25,9 +25,9 @@ import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_C
 export const A4 = {
   width: 210,        // mm
   height: 297,       // mm
-  margin: 20,        // mm
-  contentWidth: 170,  // 210 - 2×20
-  contentHeight: 257, // 297 - 2×20
+  margin: 0.2,       // mm — minimal margins, content fills page
+  contentWidth: 209.6,  // 210 - 2×0.2
+  contentHeight: 296.6, // 297 - 2×0.2
 } as const;
 
 export const A4_PX = {
@@ -123,7 +123,7 @@ export const PDFService = {
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '5mm 5mm 10mm 22mm';
+    element.style.padding = '0.2mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
@@ -516,7 +516,7 @@ export const PrintService = {
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
     ${MICR_FONT_FACE_CSS}
-    @page { size: A4 portrait; margin: 12mm; }
+    @page { size: A4 portrait; margin: 0.2mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
     .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -571,7 +571,7 @@ export const PrintService = {
         window.addEventListener('load', function() {
           var c = document.querySelector('.print-container');
           if (!c) return;
-          var maxH = 257 * 3.7795;
+          var maxH = 296.6 * 3.7795;
           var h = c.scrollHeight;
           if (h > maxH) {
             var s = maxH / h;
@@ -587,7 +587,7 @@ export const PrintService = {
       ${MICR_FONT_FACE_CSS}
       @page {
         size: A4 portrait;
-        margin: 3mm;
+        margin: 0.2mm;
       }
 
       * {
@@ -642,7 +642,7 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 5mm 5mm 10mm 22mm;
+        padding: 0.2mm;
         box-sizing: border-box;
         overflow: visible !important;
         break-inside: auto;
