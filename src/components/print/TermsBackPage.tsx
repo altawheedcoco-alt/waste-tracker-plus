@@ -116,7 +116,7 @@ const TermsBackPage = () => {
         width: '100%',
         minHeight: '297mm',
         boxSizing: 'border-box',
-        padding: '8mm 10mm',
+        padding: '15mm 15mm 20mm 15mm',
         display: 'flex',
         flexDirection: 'column',
         fontFamily: "'Cairo', sans-serif",

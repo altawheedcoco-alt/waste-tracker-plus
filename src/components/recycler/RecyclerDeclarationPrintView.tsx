@@ -31,8 +31,8 @@ export default function RecyclerDeclarationPrintView({ declaration, organization
     win.document.write(`
       <html dir="rtl"><head><title>إقرار استلام ${declaration.declaration_number}</title>
       <style>
-        @media print { body { margin: 0; } }
-        body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; padding: 20px; font-size: 11px; line-height: 1.6; color: #1a1a1a; }
+        @media print { body { margin: 0; } @page { size: A4; margin: 15mm 15mm 20mm 15mm; } }
+        body { font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif; direction: rtl; padding: 15mm 15mm 20mm 15mm; font-size: 11px; line-height: 1.6; color: #1a1a1a; }
         h1 { font-size: 18px; text-align: center; margin-bottom: 4px; }
         h2 { font-size: 14px; border-bottom: 2px solid #333; padding-bottom: 4px; margin-top: 16px; }
         h3 { font-size: 12px; background: #f0f0f0; padding: 4px 8px; margin-top: 12px; }

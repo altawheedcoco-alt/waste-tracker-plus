@@ -284,7 +284,7 @@ const RecyclingCertificatePrint = ({
           maxWidth: '210mm', 
           width: '100%',
           margin: '0 auto',
-          padding: '12px 15px',
+          padding: '15mm 15mm 20mm 15mm',
           fontFamily: 'Cairo, sans-serif',
           fontSize: '9pt',
           overflow: 'hidden',
