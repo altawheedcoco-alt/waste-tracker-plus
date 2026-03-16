@@ -37,6 +37,7 @@ const UnifiedShipmentPrint = ({
   autoAction, mode = 'dialog',
 }: UnifiedShipmentPrintProps) => {
   const printRef = useRef<HTMLDivElement>(null);
+  const a4PrintRef = useRef<HTMLDivElement>(null);
   const [themeId, setThemeId] = useState('eco-green');
   const [showA4Preview, setShowA4Preview] = useState(false);
   const theme = getThemeById(themeId);
@@ -78,12 +79,16 @@ const UnifiedShipmentPrint = ({
     if (!isOpen) autoActionDone.current = false;
   }, [isOpen]);
 
+  const getActiveRef = () => showA4Preview ? a4PrintRef.current : printRef.current;
+
   const handlePrint = () => {
-    if (printRef.current) printWithTheme(printRef.current, themeId as any);
+    const el = getActiveRef();
+    if (el) printWithTheme(el, themeId as any);
   };
 
   const handleDownloadPDF = () => {
-    if (printRef.current) exportToPDF(printRef.current, pdfFileName);
+    const el = getActiveRef();
+    if (el) exportToPDF(el, pdfFileName);
   };
 
   const handleShareWhatsApp = () => {
@@ -160,6 +165,7 @@ const UnifiedShipmentPrint = ({
         title={`نموذج تتبع - ${shipment.shipment_number}`}
       >
         <ShipmentA4Document
+          ref={a4PrintRef}
           shipment={shipment}
           theme={theme}
           qrData={qrData}
