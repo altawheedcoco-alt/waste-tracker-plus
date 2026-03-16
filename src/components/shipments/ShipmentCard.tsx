@@ -59,7 +59,7 @@ import {
 } from '@/lib/shipmentStatusConfig';
 import StatusChangeDialog from './StatusChangeDialog';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
-import ShipmentQuickPrint from './ShipmentQuickPrint';
+import ShipmentQuickPrint from './unified-print/UnifiedShipmentPrint';
 import ShipmentRouteMap from '@/components/maps/RouteMapDialog';
 import CancelShipmentDialog from './CancelShipmentDialog';
 import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
