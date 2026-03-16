@@ -302,28 +302,28 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <table style={{ marginBottom: '0px', border: 'none' }}>
               <tbody>
                 <tr>
-                  <td style={{ width: '20%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '4px' }}>
-                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '35px', width: '100%' }} />}
-                    <div style={{ fontSize: '6pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
+                  <td style={{ width: '18%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {barcodeDataUrl && <img src={barcodeDataUrl} alt="Barcode" style={{ maxHeight: '28px', width: '100%' }} />}
+                    <div style={{ fontSize: '5.5pt', color: '#000000', fontFamily: 'monospace' }}>{shipment.shipment_number}</div>
                   </td>
-                  <td style={{ width: '60%', textAlign: 'center', border: 'none', padding: '4px' }}>
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '1px' }}>نموذج تتبع نقل المخلفات</div>
-                    <div style={{ fontSize: '7.5pt', color: '#6b7280', marginBottom: '2px' }}>Waste Transport Tracking Form</div>
-                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', marginBottom: '2px' }}>
-                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '2px 8px', borderRadius: theme.borderRadius, fontSize: '6.5pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
+                  <td style={{ width: '64%', textAlign: 'center', border: 'none', padding: '2px' }}>
+                    <div style={{ fontSize: '10pt', fontWeight: 'bold', color: theme.colors.primary, marginBottom: '0px' }}>نموذج تتبع نقل المخلفات</div>
+                    <div style={{ fontSize: '6pt', color: '#6b7280', marginBottom: '1px' }}>Waste Transport Tracking Form</div>
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '1px' }}>
+                      <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '1px 6px', borderRadius: theme.borderRadius, fontSize: '5.5pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
                         {statusLabels[shipment.status] || shipment.status}
                       </span>
-                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '2px 8px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '7.5pt', border: '1px solid #d1d5db' }}>
+                      <span style={{ background: '#f3f4f6', color: '#000000', padding: '1px 6px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: '6pt', border: '1px solid #d1d5db' }}>
                         {shipment.shipment_number}
                       </span>
                     </div>
-                    <div style={{ fontSize: '5.5pt', color: '#6b7280' }}>
+                    <div style={{ fontSize: '5pt', color: '#6b7280' }}>
                       الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#000000' }}>{`DOC-${shipment.shipment_number.replace('SHP-', '')}`}</span>
                     </div>
                   </td>
-                  <td style={{ width: '15%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
-                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '55px', height: '55px' }} />}
-                    <div style={{ fontSize: '5pt', color: '#6b7280' }}>امسح للتتبع</div>
+                  <td style={{ width: '13%', textAlign: 'center', border: 'none', verticalAlign: 'top', padding: '2px' }}>
+                    {qrDataUrl && <img src={qrDataUrl} alt="QR" style={{ width: '45px', height: '45px' }} />}
+                    <div style={{ fontSize: '4.5pt', color: '#6b7280' }}>امسح للتتبع</div>
                   </td>
                 </tr>
               </tbody>
