@@ -91,10 +91,6 @@ const UnifiedShipmentPrint = ({
     if (el) exportToPDF(el, pdfFileName);
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `📄 نموذج تتبع نقل المخلفات\n📦 شحنة: ${shipment?.shipment_number}\n🏢 ${shipment?.generator?.name || ''} ← ${shipment?.recycler?.name || ''}\n🔗 ${window.location.origin}/verify?type=shipment&code=${shipment?.shipment_number}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
 
   if (loading || !shipment) {
     return (
