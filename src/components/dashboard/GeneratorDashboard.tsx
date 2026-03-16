@@ -62,6 +62,8 @@ const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/Corre
 const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
