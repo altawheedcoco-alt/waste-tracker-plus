@@ -357,13 +357,9 @@ const EnvironmentalSustainability = () => {
                 إصدار شهادة
               </Button>
             )}
-            <Button onClick={exportToPdf} disabled={exportingPdf} className="gradient-eco">
-              {exportingPdf ? (
-                <Loader2 className="h-4 w-4 animate-spin ml-2" />
-              ) : (
-                <Download className="h-4 w-4 ml-2" />
-              )}
-              تصدير PDF
+            <Button onClick={() => setShowPrintPreview(true)} className="gradient-eco">
+              <Eye className="h-4 w-4 ml-2" />
+              معاينة وطباعة
             </Button>
           </div>
         </div>
