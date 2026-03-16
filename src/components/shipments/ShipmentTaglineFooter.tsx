@@ -27,14 +27,16 @@ const ShipmentTaglineFooter: React.FC<ShipmentTaglineFooterProps> = ({ shipmentN
   return (
     <div style={{
       marginTop: '4px',
-      padding: '4px 6px',
+      marginBottom: '2px',
+      padding: '3px 6px',
       border: '1px solid #d1d5db',
       borderRadius: '4px',
       background: 'rgba(240,253,244,0.4)',
-      fontSize: '6.5pt',
-      lineHeight: 1.5,
+      fontSize: '6pt',
+      lineHeight: 1.4,
       color: '#374151',
       textAlign: 'center',
+      overflow: 'hidden',
     }}>
       <div style={{ display: 'table', width: '100%', borderCollapse: 'separate', borderSpacing: '3px 1px' }}>
         <div style={{ display: 'table-row' }}>
