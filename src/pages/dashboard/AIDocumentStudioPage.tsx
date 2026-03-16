@@ -80,6 +80,8 @@ export default function AIDocumentStudioPage() {
 
   // Edit mode
   const [editHtml, setEditHtml] = useState<string | null>(null);
+  const [editMode, setEditMode] = useState<'visual' | 'code'>('visual');
+  const editableRef = useRef<HTMLDivElement>(null);
 
   const orgData = organization ? {
     name: organization.name,
