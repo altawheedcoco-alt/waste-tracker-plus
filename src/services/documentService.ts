@@ -136,7 +136,7 @@ export const PDFService = {
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
     element.style.fontFamily = "'Cairo', 'Segoe UI', sans-serif";
-    element.style.webkitFontSmoothing = 'antialiased';
+    (element.style as any).webkitFontSmoothing = 'antialiased';
     element.style.textRendering = 'optimizeLegibility';
     
     // For fitSinglePage: use moderate font sizes (not too small)
