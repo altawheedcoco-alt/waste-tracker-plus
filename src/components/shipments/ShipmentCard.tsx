@@ -766,6 +766,12 @@ const ShipmentCard = ({
                       <Download className="w-4 h-4" />
                       PDF
                     </Button>
+                    <ManifestPDFButton
+                      shipmentId={shipment.id}
+                      shipmentNumber={shipment.shipment_number || ''}
+                      variant="ghost"
+                      size="sm"
+                    />
                     {/* Show recycling certificate button for recycler (to issue) or transporter/admin (to view) */}
                     {(isRecycler || isTransporter || shipment.has_report) && (
                       <QuickCertificateButton

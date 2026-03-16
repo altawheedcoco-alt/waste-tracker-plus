@@ -224,6 +224,9 @@ const ShipmentDetailsPage = () => {
               <Printer className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.printPdf')}
             </Button>
             <Suspense fallback={null}>
+              <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
+            </Suspense>
+            <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />
             </Suspense>
           </div>
