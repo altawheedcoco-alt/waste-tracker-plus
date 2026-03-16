@@ -340,8 +340,8 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-4 rounded-lg border" style={{ direction: 'rtl', fontSize: '8pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.4' }}>
-          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', maxHeight: '277mm', boxSizing: 'border-box', overflow: 'hidden', paddingBottom: '8px' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '6.5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3' }}>
+          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '277mm', boxSizing: 'border-box', paddingBottom: '6px' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '6px', border: 'none' }}>
               <tbody>

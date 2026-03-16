@@ -26,31 +26,30 @@ const ShipmentTaglineFooter: React.FC<ShipmentTaglineFooterProps> = ({ shipmentN
 
   return (
     <div style={{
-      marginTop: '4px',
+      marginTop: '3px',
       marginBottom: '2px',
-      padding: '3px 6px',
+      padding: '2px 4px',
       border: '1px solid #d1d5db',
-      borderRadius: '4px',
+      borderRadius: '3px',
       background: 'rgba(240,253,244,0.4)',
-      fontSize: '6pt',
-      lineHeight: 1.4,
+      fontSize: '5pt',
+      lineHeight: 1.3,
       color: '#374151',
       textAlign: 'center',
-      overflow: 'hidden',
     }}>
       <div style={{ display: 'table', width: '100%', borderCollapse: 'separate', borderSpacing: '3px 1px' }}>
         <div style={{ display: 'table-row' }}>
           <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🏭 رسالة للمولّد</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5.5pt' }}>{taglines.generator}</div>
+            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🏭 رسالة للمولّد</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.generator}</div>
           </div>
           <div style={{ display: 'table-cell', width: '33%', verticalAlign: 'top', padding: '2px 3px', borderLeft: '1px solid #e5e7eb' }}>
-            <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5.5pt' }}>{taglines.transporter}</div>
+            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>🚛 رسالة للناقل</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.transporter}</div>
           </div>
           <div style={{ display: 'table-cell', width: '34%', verticalAlign: 'top', padding: '2px 3px' }}>
-            <div style={{ fontSize: '5.5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>{taglines.destLabel}</div>
-            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5.5pt' }}>{taglines.destination}</div>
+            <div style={{ fontSize: '5pt', color: '#059669', fontWeight: 700, marginBottom: '1px' }}>{taglines.destLabel}</div>
+            <div style={{ fontStyle: 'italic', color: '#1f2937', fontSize: '5pt' }}>{taglines.destination}</div>
           </div>
         </div>
       </div>
