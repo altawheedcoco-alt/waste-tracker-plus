@@ -339,7 +339,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '6.5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.3' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '5.5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.2' }}>
           <style>{`
             .print-transparent-tables table,
             .print-transparent-tables tr,
