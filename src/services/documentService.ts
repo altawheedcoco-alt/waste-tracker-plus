@@ -25,9 +25,9 @@ import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_C
 export const A4 = {
   width: 210,        // mm
   height: 297,       // mm
-  margin: 20,        // mm
-  contentWidth: 170,  // 210 - 2×20
-  contentHeight: 257, // 297 - 2×20
+  margin: 0.2,       // mm — minimal margins, content fills page
+  contentWidth: 209.6,  // 210 - 2×0.2
+  contentHeight: 296.6, // 297 - 2×0.2
 } as const;
 
 export const A4_PX = {
