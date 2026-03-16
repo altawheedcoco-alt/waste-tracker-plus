@@ -75,10 +75,11 @@ import CompleteShipmentDocButton from './CompleteShipmentDocButton';
 const ShipmentEndorsementButton = lazy(() => import('./ShipmentEndorsementButton'));
 import DocumentChainStrip from './DocumentChainStrip';
 
-// Lazy load the live tracking map dialog and inline map
+// Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
 const ShipmentInlineTrackingMap = lazy(() => import('./ShipmentInlineTrackingMap'));
 const GPSTrackingStatusWidget = lazy(() => import('@/components/tracking/GPSTrackingStatusWidget'));
+const SupervisorComplianceDashboard = lazy(() => import('@/components/supervisors/SupervisorComplianceDashboard'));
 
 interface ShipmentCardProps {
   shipment: {
@@ -1077,6 +1078,13 @@ const ShipmentCard = ({
                   />
                 </Suspense>
               </div>
+            </div>
+
+            {/* Supervisor Compliance Dashboard */}
+            <div className="border-t px-4 py-2.5" onClick={(e) => e.stopPropagation()}>
+              <Suspense fallback={<div className="h-8 flex items-center justify-center text-xs text-muted-foreground">جاري تحميل لوحة الامتثال...</div>}>
+                <SupervisorComplianceDashboard shipment={shipment} compact />
+              </Suspense>
             </div>
 
             {/* Simplified Progress Steps — 5 key milestones only */}
