@@ -48,8 +48,6 @@ const SustainabilityCertificate = ({
 }: SustainabilityCertificateProps) => {
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = useState(false);
-  const { printContent } = usePDFExport({ filename: 'شهادة-الاستدامة' });
 
   const certificateNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const issueDate = new Date().toLocaleDateString("en-US", {
