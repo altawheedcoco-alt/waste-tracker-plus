@@ -61,8 +61,8 @@ export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string
   }
 
   // Vertical digital watermark — left side, bottom third, rotated 90°
-  const verticalStamp = `<div style="position:fixed;left:6px;top:66%;transform:rotate(-90deg);transform-origin:left center;z-index:2;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:10px;letter-spacing:3px;color:rgba(0,0,0,0.7);font-weight:800;direction:rtl;">
-    <span style="background:rgba(${hexToRgb(accentColor)},0.04);padding:5px 20px;border:1.5px solid rgba(0,0,0,0.2);border-radius:3px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية ◂</span>
+  const verticalStamp = `<div style="position:fixed;left:2px;top:68%;transform:rotate(-90deg);transform-origin:left center;z-index:3;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:6.5px;letter-spacing:2px;color:rgba(0,0,0,0.6);font-weight:600;direction:rtl;">
+    <span style="padding:2px 10px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية ◂</span>
   </div>`;
 
   return `<div class="guilloche-text-filler" style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
