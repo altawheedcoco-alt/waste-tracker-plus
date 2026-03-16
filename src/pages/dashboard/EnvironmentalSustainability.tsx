@@ -32,7 +32,8 @@ import {
   AlertTriangle,
   Info,
   Loader2,
-  Medal
+  Medal,
+  Eye
 } from "lucide-react";
 import {
   ChartContainer,
