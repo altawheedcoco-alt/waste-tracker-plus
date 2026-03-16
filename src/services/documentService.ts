@@ -690,7 +690,7 @@ export const PrintService = {
       @media screen {
         html, body {
           width: auto;
-          min-width: 210mm;
+          min-width: auto;
           min-height: auto;
           overflow: auto;
         }
@@ -707,7 +707,6 @@ export const PrintService = {
           top: 0;
           z-index: 9999;
           width: 100%;
-          min-width: 210mm;
           background: #323639;
           color: #e2e8f0;
           display: flex;
@@ -747,6 +746,9 @@ export const PrintService = {
           margin: 16px auto;
           flex-shrink: 0;
           overflow: hidden;
+          transform: scale(1.75);
+          transform-origin: top center;
+          margin-bottom: calc(297mm * 0.75 + 16px);
         }
       }
 
@@ -778,7 +780,7 @@ export const PrintService = {
 </head>
 <body>
   <div class="print-toolbar">
-    <span>معاينة الطباعة — صفحة A4 بنسبة 100%</span>
+    <span>معاينة الطباعة — صفحة A4 بنسبة 175%</span>
     <button onclick="window.print()">🖨️ طباعة</button>
     <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
   </div>
