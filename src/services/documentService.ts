@@ -454,10 +454,10 @@ const DEFAULT_PRINT_CSS = `
   tr { page-break-inside: avoid; page-break-after: auto; }
   th, td { padding: 4px 6px; border: 1px solid #ddd; text-align: right; font-size: 9pt; line-height: 1.4; }
 
-  h1 { font-size: 16pt; margin: 4px 0; }
-  h2 { font-size: 13pt; margin: 3px 0; }
-  h3 { font-size: 11pt; margin: 2px 0; }
-  p { font-size: 10pt; margin: 2px 0; line-height: 1.45; }
+  h1 { font-size: 16pt; margin: 6px 0; line-height: 1.3; }
+  h2 { font-size: 13pt; margin: 5px 0; line-height: 1.3; }
+  h3 { font-size: 11pt; margin: 4px 0; line-height: 1.3; }
+  p { font-size: 10pt; margin: 3px 0; line-height: 1.5; }
 
   @media print {
     body { margin: 0; padding: 0; }
