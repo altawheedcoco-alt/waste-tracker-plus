@@ -215,7 +215,7 @@ export const PRINT_THEMES: PrintTheme[] = [
     entityType: 'transporter',
     fonts: { heading: "'Cairo', sans-serif", body: "'Tajawal', sans-serif", googleImport: 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&family=Tajawal:wght@400;500;700&display=swap' },
     colors: { primary: '#1e3a5f', secondary: '#1e40af', accent: '#3b82f6', headerBg: 'linear-gradient(135deg, #1e3a5f, #1d4ed8, #60a5fa)', headerText: '#ffffff', tableBorder: '#bfdbfe', tableHeaderBg: '#1e3a5f', tableHeaderText: '#eff6ff', tableStripeBg: '#eff6ff', bodyText: '#172554', mutedText: '#2563eb', borderColor: '#bfdbfe', pageBg: '#f8fbff' },
-    spacing: { pageMargin: '18mm', sectionGap: '22px', headerPadding: '24px' },
+    spacing: { pageMargin: '15mm 15mm 20mm 15mm', sectionGap: '22px', headerPadding: '24px' },
     borders: { headerBorder: '4px solid #3b82f6', sectionBorder: '1px solid #bfdbfe', tableBorder: '1px solid #bfdbfe', radius: '8px' },
     decorations: { headerStyle: 'gradient', watermark: true, ornaments: true },
   },
