@@ -341,7 +341,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         </div>
 
         {/* Print Preview */}
-        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-3 rounded-lg border" style={{ direction: 'rtl', fontSize: '5.5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.2' }}>
+        <div ref={(el) => { printRef.current = el; pdfRef.current = el; }} className="print-transparent-tables bg-white p-2 rounded-lg border" style={{ direction: 'rtl', fontSize: '5pt', color: '#000000', fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif", lineHeight: '1.15' }}>
           <style>{`
             .print-transparent-tables table,
             .print-transparent-tables tr,
@@ -356,7 +356,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
               margin-bottom: 0 !important;
             }
           `}</style>
-          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '4px' }}>
+          <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '279mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
             {/* Header Table - Barcode left, QR right */}
             <table style={{ marginBottom: '0px', border: 'none' }}>
               <tbody>
