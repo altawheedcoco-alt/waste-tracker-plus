@@ -107,7 +107,7 @@ const UnifiedShipmentPrint = ({
   return (
     <>
       <Dialog open={isOpen && !showA4Preview} onOpenChange={onClose}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto" dir="rtl">
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2 justify-between flex-wrap">
               <div className="flex items-center gap-2">

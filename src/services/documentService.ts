@@ -110,8 +110,8 @@ export const PDFService = {
     const {
       orientation = 'portrait',
       format = 'a4',
-      scale = 1.5,
-      quality = 0.85,
+      scale = 3,
+      quality = 1,
       fitSinglePage = false,
     } = opts;
 
@@ -181,8 +181,8 @@ export const PDFService = {
               currentY = 0;
             }
 
-            const imgData = sectionCanvas.toDataURL('image/jpeg', quality);
-            pdf.addImage(imgData, 'JPEG', 0, currentY, imgW, imgH);
+            const imgData = sectionCanvas.toDataURL('image/png');
+            pdf.addImage(imgData, 'PNG', 0, currentY, imgW, imgH);
             currentY += imgH + 2;
           }
 
@@ -198,16 +198,17 @@ export const PDFService = {
         logging: false,
         width: A4_PX.fullWidth,
         windowWidth: A4_PX.fullWidth,
+        imageTimeout: 3000,
       });
 
       // Use full page width since padding is already inside the element
       const imgW = pageW;
 
       if (fitSinglePage) {
-        const imgData = canvas.toDataURL('image/jpeg', quality);
+        const imgData = canvas.toDataURL('image/png');
         const imgH = (canvas.height * imgW) / canvas.width;
         const fitScale = Math.min(1, pageH / imgH);
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW * fitScale, imgH * fitScale);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW * fitScale, imgH * fitScale);
         return pdf;
       }
 
@@ -228,11 +229,11 @@ export const PDFService = {
         pageCtx.clearRect(0, 0, canvas.width, sliceHeight);
         pageCtx.drawImage(canvas, 0, offsetY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
 
-        const imgData = pageCanvas.toDataURL('image/jpeg', quality);
+        const imgData = pageCanvas.toDataURL('image/png');
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
