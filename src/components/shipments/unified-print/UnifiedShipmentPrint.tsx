@@ -142,9 +142,9 @@ const UnifiedShipmentPrint = ({
               onPrint={handlePrint}
               onDownloadPDF={handleDownloadPDF}
               onPreviewA4={() => setShowA4Preview(true)}
-              onShareWhatsApp={handleShareWhatsApp}
               isPDFExporting={isExporting}
               pdfFileName={pdfFileName}
+              shipment={shipment}
             />
           </DialogFooter>
         </DialogContent>
