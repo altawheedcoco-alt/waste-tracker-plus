@@ -43,7 +43,7 @@ const MovementSupervisorSelector = ({ label, organizationId, partyRole, value, o
     if (!organizationId || organizationId.startsWith('manual:')) return;
     supabase
       .from('profiles')
-      .select('id, full_name, phone, email, role')
+      .select('id, full_name, phone, email')
       .eq('organization_id', organizationId)
       .then(({ data }) => {
         if (data) setMembers(data as OrgMember[]);
