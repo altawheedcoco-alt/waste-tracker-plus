@@ -679,6 +679,12 @@ export const PrintService = {
           height: 297mm;
           page-break-after: always;
         }
+        .layer-guilloche,
+        .guilloche-text-filler,
+        .watermark-layer,
+        .micr-line {
+          position: fixed;
+        }
       }
 
       @media screen {
