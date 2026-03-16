@@ -637,9 +637,9 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 10mm 12mm;
+        padding: 10mm 12mm 14mm 12mm;
         box-sizing: border-box;
-        overflow: visible !important;
+        overflow: hidden !important;
         break-inside: auto;
       }
 
