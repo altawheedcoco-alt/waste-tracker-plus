@@ -239,7 +239,7 @@ export const PRINT_THEMES: PrintTheme[] = [
     entityType: 'disposal',
     fonts: { heading: "'Amiri', serif", body: "'Cairo', sans-serif", googleImport: 'https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Cairo:wght@400;600;700&display=swap' },
     colors: { primary: '#713f12', secondary: '#854d0e', accent: '#eab308', headerBg: 'linear-gradient(135deg, #713f12, #a16207, #eab308)', headerText: '#ffffff', tableBorder: '#fef08a', tableHeaderBg: '#713f12', tableHeaderText: '#fefce8', tableStripeBg: '#fefce8', bodyText: '#422006', mutedText: '#ca8a04', borderColor: '#fef08a', pageBg: '#fffef5' },
-    spacing: { pageMargin: '20mm', sectionGap: '24px', headerPadding: '26px' },
+    spacing: { pageMargin: '15mm 15mm 20mm 15mm', sectionGap: '24px', headerPadding: '26px' },
     borders: { headerBorder: '4px solid #eab308', sectionBorder: '1px dashed #fef08a', tableBorder: '1px solid #fef08a', radius: '6px' },
     decorations: { headerStyle: 'gradient', watermark: true, ornaments: true },
   },
