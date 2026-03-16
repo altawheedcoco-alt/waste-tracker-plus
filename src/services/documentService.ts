@@ -520,8 +520,8 @@ export const PrintService = {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
     .guilloche-text-filler { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-    table { background: transparent !important; }
-    tr, th, td { background: transparent !important; }
+    table { border-collapse: collapse; }
+    th, td { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     ${opts.customCSS || ''}
   </style>
 </head>
