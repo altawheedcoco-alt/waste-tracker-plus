@@ -184,12 +184,12 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                    <div style={{ fontSize: compact ? '12pt' : '14pt', fontWeight: 'bold', color: theme.colors.primary }}>نموذج تتبع نقل المخلفات</div>
                    <div style={{ fontSize: compact ? '8pt' : '9pt', color: '#6b7280', marginBottom: '1px' }}>Waste Transport Tracking Form</div>
                   <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '6px', marginBottom: '1px' }}>
-                    <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '1px 6px', borderRadius: theme.borderRadius, fontSize: compact ? '5.5pt' : '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
-                      {statusLabels[shipment.status] || shipment.status}
-                    </span>
-                    <span style={{ background: '#f3f4f6', color: '#000', padding: '1px 6px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: compact ? '6pt' : '9pt', border: '1px solid #d1d5db' }}>
-                      {shipment.shipment_number}
-                    </span>
+                     <span style={{ background: theme.colors.statusBg, color: theme.colors.statusText, padding: '2px 8px', borderRadius: theme.borderRadius, fontSize: compact ? '7pt' : '8pt', fontWeight: '600', border: `1px solid ${theme.colors.statusBorder}` }}>
+                       {statusLabels[shipment.status] || shipment.status}
+                     </span>
+                     <span style={{ background: '#f3f4f6', color: '#000', padding: '2px 8px', borderRadius: theme.borderRadius, fontFamily: 'monospace', fontWeight: 'bold', fontSize: compact ? '8pt' : '9pt', border: '1px solid #d1d5db' }}>
+                       {shipment.shipment_number}
+                     </span>
                   </div>
                   <div style={{ fontSize: compact ? '5pt' : '7pt', color: '#6b7280' }}>
                     الرقم التسلسلي: <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: theme.colors.primary }}>{documentSerial}</span>
