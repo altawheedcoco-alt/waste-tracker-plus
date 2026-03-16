@@ -733,6 +733,7 @@ export const PrintService = {
   <div class="page-wrapper">
     ${guillocheLayer}
     ${guillocheTextFiller}
+    ${generateMICRLineHTML()}
     <div class="print-container">${contentClone.innerHTML}</div>
   </div>
   <script>
