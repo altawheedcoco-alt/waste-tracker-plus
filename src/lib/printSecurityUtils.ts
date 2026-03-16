@@ -129,26 +129,37 @@ export function generatePrintWatermarkHTML(
 }
 
 /**
+ * MICR E-13B @font-face CSS — must be injected into print <style>
+ */
+export const MICR_FONT_FACE_CSS = `
+@font-face {
+  font-family: 'MICR E13B';
+  src: url('/fonts/micr-e13b.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+`;
+
+/**
  * Generate MICR (Magnetic Ink Character Recognition) line — bottom-left of document
- * Shows the printing/exporting organization's unique identifier code
+ * Uses authentic E-13B banking font with MICR special symbols:
+ *   A = ⑆ Transit   B = ⑇ On-Us   C = ⑈ Amount   D = ⑉ Dash
+ * In the MICR E13B font, characters A B C D map to the 4 MICR symbols.
  */
 export function generateMICRLineHTML(
   orgClientCode?: string | null,
   orgVerificationCode?: string | null,
-  orgName?: string,
 ): string {
   const code = orgClientCode || orgVerificationCode || '000000';
   const now = new Date();
   const dateStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
   const timeStamp = `${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
-  // MICR E-13B style: ⑆ (transit) ⑇ (on-us) ⑈ (amount) ⑉ (dash)
-  const micrLine = `⑆${code}⑆ ⑇${dateStamp}⑉${timeStamp}⑇ ⑈iRCYL⑈`;
+  // MICR E-13B special chars: A=Transit(⑆) B=On-Us(⑇) C=Amount(⑈) D=Dash(⑉)
+  const micrLine = `A${code}A B${dateStamp}D${timeStamp}B C0000C`;
 
-  return `<div class="micr-line" style="position:fixed;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B','OCR B','Courier New',monospace;font-size:8px;letter-spacing:1.5px;color:rgba(0,0,0,0.45);line-height:1;">
-    <div style="display:flex;align-items:center;gap:6px;">
-      <span style="font-size:7px;color:rgba(0,0,0,0.3);">MICR</span>
-      <span>${micrLine}</span>
-    </div>
+  return `<div class="micr-line" style="position:fixed;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B',monospace;font-size:11px;letter-spacing:1px;color:rgba(0,0,0,0.5);line-height:1;">
+    <span>${micrLine}</span>
   </div>`;
 }
 

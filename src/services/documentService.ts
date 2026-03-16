@@ -19,7 +19,7 @@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createWorkbook, aoaToSheet, jsonToSheet, writeFile } from '@/lib/excelExport';
-import { generateGuillocheTextFillerHTML, generateMICRLineHTML } from '@/lib/printSecurityUtils';
+import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_CSS } from '@/lib/printSecurityUtils';
 
 // ─── A4 Constants ────────────────────────────────────────────
 export const A4 = {
@@ -398,7 +398,7 @@ export const ExcelService = {
 // ═══════════════════════════════════════════════════════════════
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
-
+  ${MICR_FONT_FACE_CSS}
   @page { size: A4 portrait; margin: 12mm; }
 
   * {
@@ -512,6 +512,7 @@ export const PrintService = {
   <title>${opts.title || 'طباعة الوثيقة'}</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap">
   <style>
+    ${MICR_FONT_FACE_CSS}
     @page { size: A4 portrait; margin: 12mm; }
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; box-sizing: border-box; }
     html, body { margin: 0; padding: 0; font-family: 'Cairo', sans-serif; direction: rtl; background: white; position: relative; }
@@ -580,7 +581,7 @@ export const PrintService = {
     ` : '';
 
     const printCSS = `
-
+      ${MICR_FONT_FACE_CSS}
       @page {
         size: A4 portrait;
         margin: 0;
