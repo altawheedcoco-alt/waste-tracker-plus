@@ -298,7 +298,7 @@ export const PDFService = {
   async preview(element: HTMLElement, opts: PDFOptions = {}): Promise<void> {
     const toastId = toast.loading('جاري إنشاء المعاينة...');
     try {
-      const pdf = await this.generate(element, { ...opts, scale: 1.5, quality: 0.8 });
+      const pdf = await this.generate(element, { ...opts, scale: 3, quality: 1.0 });
       const blob = pdf.output('blob');
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
