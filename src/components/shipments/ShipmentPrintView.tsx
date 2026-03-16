@@ -372,28 +372,28 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
                   <td colSpan={8} style={{ background: theme.colors.shipmentBg, color: theme.colors.shipmentText, fontWeight: 'bold', textAlign: 'center', fontSize: '6.5pt', padding: '2px', border: `1px solid ${theme.colors.border}` }}>بيانات الشحنة</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '10%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>نوع المخلفات</td>
-                  <td style={{ width: '15%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '8%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>الكمية</td>
-                  <td style={{ width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>مستوى الخطورة</td>
-                  <td style={{ width: '8%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.hazard_level || 'low'}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>تاريخ الاستلام</td>
-                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{formatDate(shipment.pickup_date)}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '10%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>نوع المخلفات</td>
+                  <td style={{ width: '15%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '8%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>الكمية</td>
+                  <td style={{ width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.quantity} {shipment.unit || 'كجم'}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>مستوى الخطورة</td>
+                  <td style={{ width: '8%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.hazard_level || 'low'}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, width: '12%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>تاريخ الاستلام</td>
+                  <td style={{ width: '13%', border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{formatDate(shipment.pickup_date)}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>طريقة التعبئة</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.packaging_method || '-'}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>طريقة التخلص</td>
-                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.disposal_method || '-'}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>وصف المخلفات</td>
-                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.waste_description || '-'}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>طريقة التعبئة</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.packaging_method || '-'}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>طريقة التخلص</td>
+                  <td style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.disposal_method || '-'}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>وصف المخلفات</td>
+                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.waste_description || '-'}</td>
                 </tr>
                 <tr>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>موقع الاستلام</td>
-                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.pickup_address}</td>
-                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>موقع التسليم</td>
-                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '3px 5px', fontSize: '7pt' }}>{shipment.delivery_address}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>موقع الاستلام</td>
+                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.pickup_address}</td>
+                  <td style={{ background: theme.colors.labelBg, fontWeight: '600', color: theme.colors.labelText, border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>موقع التسليم</td>
+                  <td colSpan={3} style={{ border: `1px solid ${theme.colors.border}`, padding: '2px 4px', fontSize: '6pt' }}>{shipment.delivery_address}</td>
                 </tr>
               </tbody>
             </table>
