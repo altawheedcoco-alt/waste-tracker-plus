@@ -6,9 +6,31 @@ interface PartyInfo {
   organizationId: string | null;
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  generator: 'المولدة',
+  transporter: 'الناقلة',
+  recycler: 'المدورة',
+  disposal: 'التخلص',
+};
+
+/**
+ * Generate a default AI digital-identity supervisor entry
+ * when no explicit or org-default supervisor exists.
+ */
+function createDefaultAISupervisor(role: string): Partial<MovementSupervisorEntry> {
+  return {
+    supervisor_type: 'ai',
+    supervisor_name: `مراقب رقمي - ${ROLE_LABELS[role] || role}`,
+    supervisor_phone: null,
+    supervisor_email: null,
+    supervisor_position: 'مراقب حركة تلقائي',
+  };
+}
+
 /**
  * Auto-assign movement supervisors after shipment creation.
- * First checks if explicit entries were provided, then falls back to org defaults.
+ * Priority: explicit entries > org defaults > auto-generated AI digital identity.
+ * Shipments are NEVER blocked by the absence of a supervisor.
  */
 export async function autoAssignMovementSupervisors(
   shipmentId: string,
@@ -18,7 +40,8 @@ export async function autoAssignMovementSupervisors(
   const inserts: any[] = [];
 
   for (const party of parties) {
-    if (!party.organizationId || party.organizationId.startsWith('manual:')) continue;
+    if (!party.organizationId) continue;
+    const isManual = party.organizationId.startsWith('manual:');
 
     const explicit = explicitEntries?.[party.role];
     if (explicit?.length) {
@@ -26,7 +49,7 @@ export async function autoAssignMovementSupervisors(
       for (const entry of explicit) {
         inserts.push({
           shipment_id: shipmentId,
-          organization_id: party.organizationId,
+          organization_id: isManual ? null : party.organizationId,
           party_role: party.role,
           supervisor_type: entry.supervisor_type,
           user_id: entry.user_id || null,
@@ -36,8 +59,8 @@ export async function autoAssignMovementSupervisors(
           supervisor_position: entry.supervisor_position || null,
         });
       }
-    } else {
-      // Fall back to org defaults
+    } else if (!isManual) {
+      // Try org defaults
       const { data: defaults } = await supabase
         .from('organization_movement_supervisors')
         .select('*')
@@ -58,7 +81,35 @@ export async function autoAssignMovementSupervisors(
             supervisor_position: d.supervisor_position || null,
           });
         }
+      } else {
+        // Fallback: auto-create AI digital identity supervisor
+        const ai = createDefaultAISupervisor(party.role);
+        inserts.push({
+          shipment_id: shipmentId,
+          organization_id: party.organizationId,
+          party_role: party.role,
+          supervisor_type: ai.supervisor_type,
+          user_id: null,
+          supervisor_name: ai.supervisor_name,
+          supervisor_phone: null,
+          supervisor_email: null,
+          supervisor_position: ai.supervisor_position,
+        });
       }
+    } else {
+      // Manual party — still assign AI digital identity
+      const ai = createDefaultAISupervisor(party.role);
+      inserts.push({
+        shipment_id: shipmentId,
+        organization_id: null,
+        party_role: party.role,
+        supervisor_type: ai.supervisor_type,
+        user_id: null,
+        supervisor_name: ai.supervisor_name,
+        supervisor_phone: null,
+        supervisor_email: null,
+        supervisor_position: ai.supervisor_position,
+      });
     }
   }
 
