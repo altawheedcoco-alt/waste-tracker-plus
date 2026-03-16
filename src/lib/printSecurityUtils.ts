@@ -61,7 +61,7 @@ export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string
   }
 
   // Vertical digital watermark — left side, bottom third, rotated 90°
-  const verticalStamp = `<div style="position:fixed;left:2px;top:68%;transform:rotate(-90deg);transform-origin:left center;z-index:3;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:6.5px;letter-spacing:2px;color:rgba(0,0,0,0.6);font-weight:600;direction:rtl;">
+  const verticalStamp = `<div style="position:fixed;left:18px;top:68%;transform:rotate(-90deg);transform-origin:left center;z-index:1;pointer-events:none;user-select:none;white-space:nowrap;font-family:'Courier New','Cairo',monospace;font-size:6.5px;letter-spacing:2px;color:rgba(0,0,0,0.6);font-weight:600;direction:rtl;">
     <span style="background:rgba(255,255,255,0.85);padding:3px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:2px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية ◂</span>
   </div>`;
 
