@@ -222,6 +222,7 @@ const SystemArchitectureGuide = lazy(() => import("@/pages/dashboard/SystemArchi
 const ActionChainsPage = lazy(() => import("@/pages/dashboard/ActionChainsPage"));
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
+const PlatformFeaturesDoc = lazy(() => import("@/pages/dashboard/PlatformFeaturesDoc"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
@@ -294,6 +295,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/auto-actions" element={<AutoActions />} />
     <Route path="/dashboard/pride-certificates" element={<PrideCertificates />} />
     <Route path="/dashboard/about-platform" element={<AboutPlatform />} />
+    <Route path="/dashboard/platform-features" element={<PlatformFeaturesDoc />} />
     <Route path="/dashboard/offline-mode" element={<OfflineMode />} />
     <Route path="/dashboard/reports-guide" element={<ReportsGuide />} />
     <Route path="/dashboard/driver-profile" element={<DriverProfile />} />
