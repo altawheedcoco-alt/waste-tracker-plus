@@ -1,20 +1,15 @@
 import { useRef, useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Award, 
   Leaf, 
-  Download, 
-  Printer, 
   CheckCircle2, 
   Star,
   Shield,
-  Loader2
 } from "lucide-react";
-// jsPDF & html2canvas loaded dynamically
-import { usePDFExport } from '@/hooks/usePDFExport';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 interface Organization {
   id: string;
@@ -53,8 +48,6 @@ const SustainabilityCertificate = ({
 }: SustainabilityCertificateProps) => {
   const { toast } = useToast();
   const certificateRef = useRef<HTMLDivElement>(null);
-  const [exporting, setExporting] = useState(false);
-  const { printContent } = usePDFExport({ filename: 'شهادة-الاستدامة' });
 
   const certificateNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
   const issueDate = new Date().toLocaleDateString("en-US", {
@@ -87,68 +80,22 @@ const SustainabilityCertificate = ({
 
   const stars = getStarRating(metrics.overallScore);
 
-  const exportToPdf = async () => {
-    if (!certificateRef.current) return;
-    
-    setExporting(true);
-    toast({ title: "جاري إنشاء الشهادة...", description: "يرجى الانتظار" });
-
-    try {
-      const { PDFService } = await import('@/services/documentService');
-      await PDFService.download(certificateRef.current, {
-        filename: `شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}`,
-        orientation: 'landscape',
-        format: 'a4',
-        scale: 3,
-      });
-      
-      toast({ title: "تم التصدير بنجاح", description: "تم حفظ شهادة PDF" });
-    } catch (error) {
-      toast({ title: "خطأ في التصدير", description: "حدث خطأ أثناء إنشاء الشهادة", variant: "destructive" });
-    } finally {
-      setExporting(false);
-    }
-  };
-
-  const handlePrint = () => {
-    if (certificateRef.current) {
-      printContent(certificateRef.current);
-    }
-  };
-
   if (!organization) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[95vh] overflow-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Award className="h-5 w-5 text-green-600" />
-            شهادة الاستدامة البيئية
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex gap-2 mb-4">
-          <Button onClick={exportToPdf} disabled={exporting} className="gradient-eco">
-            {exporting ? (
-              <Loader2 className="h-4 w-4 animate-spin ml-2" />
-            ) : (
-              <Download className="h-4 w-4 ml-2" />
-            )}
-            تحميل PDF
-          </Button>
-          <Button variant="outline" onClick={handlePrint}>
-            <Printer className="h-4 w-4 ml-2" />
-            طباعة
-          </Button>
-        </div>
-
-        {/* Certificate */}
-        <div 
-          ref={certificateRef} 
-          className="bg-white p-8 rounded-lg border-8 border-double border-green-600 relative overflow-hidden print:border-green-700"
-          style={{ minHeight: "500px" }}
-        >
+    <UnifiedDocumentPreview
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title="شهادة الاستدامة البيئية"
+      filename={`شهادة-الاستدامة-${organization?.name || "الجهة"}-${certificateNumber}`}
+      orientation="landscape"
+    >
+      {/* Certificate */}
+      <div 
+        ref={certificateRef} 
+        className="bg-white p-8 rounded-lg border-8 border-double border-green-600 relative overflow-hidden print:border-green-700"
+        style={{ minHeight: "500px" }}
+      >
           {/* Background Pattern */}
           <div className="absolute inset-0 opacity-5">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
@@ -272,8 +219,8 @@ const SustainabilityCertificate = ({
             </div>
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </UnifiedDocumentPreview>
   );
 };
 

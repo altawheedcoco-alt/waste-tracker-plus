@@ -21,6 +21,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { toast } from 'sonner';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 import { 
   Printer,
   FileText,
@@ -128,6 +129,7 @@ const OperationalPlans = () => {
   const [includeSignatures, setIncludeSignatures] = useState(true);
   const [isPrinting, setIsPrinting] = useState(false);
   const [isExportingPDF, setIsExportingPDF] = useState(false);
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
   const [excludedShipments, setExcludedShipments] = useState<Set<string>>(new Set());
   const [selectedShipment, setSelectedShipment] = useState<ShipmentData | null>(null);
   const [showDetailsDialog, setShowDetailsDialog] = useState(false);
@@ -424,30 +426,11 @@ const OperationalPlans = () => {
   }, {} as Record<string, { count: number; quantity: number; clientCode?: string | null; city?: string; phone?: string }>);
 
   const handlePrint = () => {
-    if (printRef.current) {
-      setIsPrinting(true);
-      printContent(printRef.current);
-      setTimeout(() => setIsPrinting(false), 500);
-    }
+    setShowPrintPreview(true);
   };
 
   const handleExportPDF = async () => {
-    if (!printRef.current) return;
-    
-    setIsExportingPDF(true);
-    try {
-      await PDFService.download(printRef.current, {
-        filename: `operational-plan-${format(new Date(), 'yyyy-MM-dd')}`,
-        orientation: 'portrait',
-        format: 'a4',
-        scale: 2,
-      });
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast.error('حدث خطأ أثناء تصدير PDF');
-    } finally {
-      setIsExportingPDF(false);
-    }
+    setShowPrintPreview(true);
   };
 
   const formatDate = (dateStr: string | null) => {
@@ -1326,6 +1309,18 @@ const OperationalPlans = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Unified Print Preview */}
+      <UnifiedDocumentPreview
+        isOpen={showPrintPreview}
+        onClose={() => setShowPrintPreview(false)}
+        title="خطة التشغيل"
+        filename={`operational-plan-${format(new Date(), 'yyyy-MM-dd')}`}
+      >
+        {printRef.current && (
+          <div dangerouslySetInnerHTML={{ __html: printRef.current.innerHTML }} />
+        )}
+      </UnifiedDocumentPreview>
     </DashboardLayout>
   );
 };

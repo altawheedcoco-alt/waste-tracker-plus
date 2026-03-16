@@ -32,7 +32,8 @@ import {
   AlertTriangle,
   Info,
   Loader2,
-  Medal
+  Medal,
+  Eye
 } from "lucide-react";
 import {
   ChartContainer,
@@ -58,7 +59,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from "recharts";
-import { PDFService } from '@/services/documentService';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 // معاملات الاستدامة البيئية
 const SUSTAINABILITY_METRICS = {
@@ -313,26 +314,8 @@ const EnvironmentalSustainability = () => {
   const sustainabilityLevel = getSustainabilityLevel(metrics.overallScore);
   const LevelIcon = sustainabilityLevel.icon;
 
-  // تصدير PDF
-  const exportToPdf = async () => {
-    if (!reportRef.current) return;
-    setExportingPdf(true);
-    toast({ title: "جاري إنشاء التقرير...", description: "يرجى الانتظار" });
-
-    try {
-      await PDFService.download(reportRef.current, {
-        filename: `تقرير-الاستدامة-البيئية`,
-        orientation: 'portrait',
-        format: 'a4',
-        scale: 2,
-      });
-      toast({ title: "تم التصدير بنجاح", description: "تم حفظ تقرير PDF" });
-    } catch (error) {
-      toast({ title: "خطأ في التصدير", description: "حدث خطأ أثناء إنشاء التقرير", variant: "destructive" });
-    } finally {
-      setExportingPdf(false);
-    }
-  };
+  // معاينة وطباعة
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const handleTypeToggle = (type: string) => {
     setSelectedTypes(prev => 
@@ -375,13 +358,9 @@ const EnvironmentalSustainability = () => {
                 إصدار شهادة
               </Button>
             )}
-            <Button onClick={exportToPdf} disabled={exportingPdf} className="gradient-eco">
-              {exportingPdf ? (
-                <Loader2 className="h-4 w-4 animate-spin ml-2" />
-              ) : (
-                <Download className="h-4 w-4 ml-2" />
-              )}
-              تصدير PDF
+            <Button onClick={() => setShowPrintPreview(true)} className="gradient-eco">
+              <Eye className="h-4 w-4 ml-2" />
+              معاينة وطباعة
             </Button>
           </div>
         </div>
@@ -782,6 +761,18 @@ const EnvironmentalSustainability = () => {
           metrics={metrics}
           level={sustainabilityLevel}
         />
+
+        {/* Unified Print Preview */}
+        <UnifiedDocumentPreview
+          isOpen={showPrintPreview}
+          onClose={() => setShowPrintPreview(false)}
+          title="تقرير الاستدامة البيئية"
+          filename="تقرير-الاستدامة-البيئية"
+        >
+          {reportRef.current && (
+            <div dangerouslySetInnerHTML={{ __html: reportRef.current.innerHTML }} />
+          )}
+        </UnifiedDocumentPreview>
       </div>
     </DashboardLayout>
   );

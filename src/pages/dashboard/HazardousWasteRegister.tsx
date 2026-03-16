@@ -50,6 +50,7 @@ import {
   Timer,
 } from 'lucide-react';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import UnifiedDocumentPreview from '@/components/shared/UnifiedDocumentPreview';
 
 // Import from unified waste classification
 import { 
@@ -124,9 +125,10 @@ const HazardousWasteRegister = () => {
     filename: 'سجل-المخلفات-الخطرة',
     orientation: 'landscape',
   });
+  const [showPrintPreview, setShowPrintPreview] = useState(false);
 
   const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, 'سجل-المخلفات-الخطرة');
+    setShowPrintPreview(true);
   };
   
   // Filter states
@@ -387,9 +389,7 @@ const HazardousWasteRegister = () => {
 
   // Print register
   const handlePrint = () => {
-    if (printRef.current) {
-      printContent(printRef.current);
-    }
+    setShowPrintPreview(true);
   };
 
   // Clear filters
@@ -1050,6 +1050,19 @@ const HazardousWasteRegister = () => {
           }
         }
       `}</style>
+
+      {/* Unified Print Preview */}
+      <UnifiedDocumentPreview
+        isOpen={showPrintPreview}
+        onClose={() => setShowPrintPreview(false)}
+        title="سجل المخلفات الخطرة"
+        filename="سجل-المخلفات-الخطرة"
+        orientation="landscape"
+      >
+        {printRef.current && (
+          <div dangerouslySetInnerHTML={{ __html: printRef.current.innerHTML }} />
+        )}
+      </UnifiedDocumentPreview>
     </DashboardLayout>
   );
 };
