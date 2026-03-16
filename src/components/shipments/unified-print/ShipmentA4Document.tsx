@@ -379,7 +379,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                    <td style={{ width: '70%', padding: compact ? '3px' : '6px', border: '1px solid #d1d5db', fontSize: compact ? '7pt' : '8pt', verticalAlign: 'top' }}>
                     <div><span style={{ color: '#6b7280' }}>المُقِر: </span><strong>{declaration.driver_name || '-'}</strong></div>
                     <div><span style={{ color: '#6b7280' }}>تاريخ: </span><strong>{declaration.declared_at ? format(new Date(declaration.declared_at), 'dd/MM/yyyy hh:mm a', { locale: ar }) : '-'}</strong></div>
-                    <div style={{ marginTop: '2px', fontSize: '5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع إلكترونياً</div>
+                    <div style={{ marginTop: '2px', fontSize: '6.5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع إلكترونياً</div>
                   </td>
                   <td style={{ width: '30%', textAlign: 'center', padding: compact ? '2px' : '6px', border: '1px solid #d1d5db' }}>
                     <QRCodeSVG value={`${window.location.origin}/qr-verify?type=declaration&code=DEC-${declaration.id?.slice(0, 8).toUpperCase()}`} size={35} level="M" />
