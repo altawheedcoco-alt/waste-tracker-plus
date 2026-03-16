@@ -242,8 +242,8 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
   ].join('-');
 
-  const handleExportPDF = async () => {
-    await exportToPDF(printRef.current, pdfFileName);
+  const handleExportPDF = () => {
+    handlePrint();
   };
 
   const formatDate = (date: string | null) => {
