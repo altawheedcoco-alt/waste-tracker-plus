@@ -91,10 +91,6 @@ const UnifiedShipmentPrint = ({
     if (el) exportToPDF(el, pdfFileName);
   };
 
-  const handleShareWhatsApp = () => {
-    const text = `📄 نموذج تتبع نقل المخلفات\n📦 شحنة: ${shipment?.shipment_number}\n🏢 ${shipment?.generator?.name || ''} ← ${shipment?.recycler?.name || ''}\n🔗 ${window.location.origin}/verify?type=shipment&code=${shipment?.shipment_number}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-  };
 
   if (loading || !shipment) {
     return (
@@ -146,9 +142,9 @@ const UnifiedShipmentPrint = ({
               onPrint={handlePrint}
               onDownloadPDF={handleDownloadPDF}
               onPreviewA4={() => setShowA4Preview(true)}
-              onShareWhatsApp={handleShareWhatsApp}
               isPDFExporting={isExporting}
               pdfFileName={pdfFileName}
+              shipment={shipment}
             />
           </DialogFooter>
         </DialogContent>
@@ -160,9 +156,9 @@ const UnifiedShipmentPrint = ({
         onClose={() => setShowA4Preview(false)}
         onPrint={handlePrint}
         onDownloadPDF={handleDownloadPDF}
-        onShareWhatsApp={handleShareWhatsApp}
         isPDFExporting={isExporting}
         title={`نموذج تتبع - ${shipment.shipment_number}`}
+        shipment={shipment}
       >
         <ShipmentA4Document
           ref={a4PrintRef}

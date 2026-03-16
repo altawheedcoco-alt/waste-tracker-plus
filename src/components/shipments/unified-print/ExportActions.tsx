@@ -6,33 +6,25 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Printer, Download, Share2, Eye, ChevronDown, Loader2, FileText, MessageCircle } from 'lucide-react';
-import { toast } from 'sonner';
+import { Printer, Download, Eye, ChevronDown, Loader2, FileText } from 'lucide-react';
+import SendToPartiesPopover from './SendToPartiesPopover';
+import type { ShipmentPrintData } from './types';
 
 interface ExportActionsProps {
   onPrint: () => void;
   onDownloadPDF: () => void;
   onPreviewA4: () => void;
-  onShareWhatsApp?: () => void;
   onExportWord?: () => void;
   isPDFExporting?: boolean;
   compact?: boolean;
   pdfFileName?: string;
+  shipment?: ShipmentPrintData | null;
 }
 
 const ExportActions = ({
-  onPrint, onDownloadPDF, onPreviewA4, onShareWhatsApp, onExportWord,
-  isPDFExporting, compact, pdfFileName,
+  onPrint, onDownloadPDF, onPreviewA4, onExportWord,
+  isPDFExporting, compact, pdfFileName, shipment,
 }: ExportActionsProps) => {
-  const handleWhatsApp = () => {
-    if (onShareWhatsApp) {
-      onShareWhatsApp();
-    } else {
-      // Default: share via WhatsApp Web with document info
-      const text = `📄 مستند الشحنة: ${pdfFileName || 'نموذج تتبع'}`;
-      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-    }
-  };
 
   if (compact) {
     return (
@@ -58,12 +50,9 @@ const ExportActions = ({
                 <FileText className="w-4 h-4" /> تنزيل Word
               </DropdownMenuItem>
             )}
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleWhatsApp} className="gap-2">
-              <MessageCircle className="w-4 h-4" /> مشاركة واتساب
-            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {shipment && <SendToPartiesPopover shipment={shipment} compact />}
         <Button variant="eco" size="sm" onClick={onPrint} className="gap-1.5 h-8">
           <Printer className="w-3.5 h-3.5" />
           طباعة
@@ -88,10 +77,7 @@ const ExportActions = ({
           تنزيل Word
         </Button>
       )}
-      <Button variant="outline" onClick={handleWhatsApp} className="gap-2">
-        <MessageCircle className="w-4 h-4" />
-        واتساب
-      </Button>
+      {shipment && <SendToPartiesPopover shipment={shipment} />}
       <Button variant="eco" onClick={onPrint} className="gap-2">
         <Printer className="w-4 h-4" />
         طباعة
