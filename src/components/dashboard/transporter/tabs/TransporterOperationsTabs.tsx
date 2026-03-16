@@ -31,6 +31,8 @@ const TransporterDriverTracking = lazy(() => import('@/components/dashboard/tran
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPriorityQueue'));
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
