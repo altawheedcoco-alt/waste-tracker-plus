@@ -123,7 +123,7 @@ export const PDFService = {
     const origCSS = element.style.cssText;
     element.style.width = `${A4_PX.fullWidth}px`;
     element.style.maxWidth = `${A4_PX.fullWidth}px`;
-    element.style.padding = '8mm';
+    element.style.padding = '5mm';
     element.style.boxSizing = 'border-box';
     element.style.backgroundColor = '#ffffff';
     element.style.overflow = 'visible';
@@ -401,7 +401,7 @@ export const ExcelService = {
 const DEFAULT_PRINT_CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Aref+Ruqaa+Ink:wght@400;700&family=Reem+Kufi+Ink&display=swap');
   ${MICR_FONT_FACE_CSS}
-  @page { size: A4 portrait; margin: 12mm; }
+  @page { size: A4 portrait; margin: 3mm; }
 
   * {
     -webkit-print-color-adjust: exact !important;
@@ -586,7 +586,7 @@ export const PrintService = {
       ${MICR_FONT_FACE_CSS}
       @page {
         size: A4 portrait;
-        margin: 0;
+        margin: 3mm;
       }
 
       * {
@@ -641,7 +641,7 @@ export const PrintService = {
         position: relative;
         z-index: 2;
         width: 100%;
-        padding: 8mm 10mm 12mm 10mm;
+        padding: 5mm;
         box-sizing: border-box;
         overflow: visible !important;
         break-inside: auto;
