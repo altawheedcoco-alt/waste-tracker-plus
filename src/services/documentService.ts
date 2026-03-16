@@ -229,11 +229,11 @@ export const PDFService = {
         pageCtx.clearRect(0, 0, canvas.width, sliceHeight);
         pageCtx.drawImage(canvas, 0, offsetY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
 
-        const imgData = pageCanvas.toDataURL('image/jpeg', quality);
+        const imgData = pageCanvas.toDataURL('image/png');
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
