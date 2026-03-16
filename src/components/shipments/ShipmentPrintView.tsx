@@ -622,9 +622,13 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
             <PenTool className="w-4 h-4" />
             توقيع وختم
           </Button>
+          <Button variant="outline" onClick={handleExportPDF} disabled={isExporting} className="gap-2">
+            <Download className="w-4 h-4" />
+            تنزيل PDF
+          </Button>
           <Button onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
-            طباعة / حفظ PDF
+            طباعة
           </Button>
         </DialogFooter>
 

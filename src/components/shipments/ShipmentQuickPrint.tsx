@@ -639,9 +639,13 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
         <DialogFooter className="gap-2 sm:gap-0 flex-wrap">
           <Button variant="outline" onClick={onClose}>إغلاق</Button>
+          <Button variant="outline" onClick={handleDownloadPDF} disabled={isExporting} className="gap-2">
+            <Download className="w-4 h-4" />
+            تنزيل PDF
+          </Button>
           <Button variant="eco" onClick={handlePrint} className="gap-2">
             <Printer className="w-4 h-4" />
-            طباعة / حفظ PDF
+            طباعة
           </Button>
         </DialogFooter>
       </DialogContent>
