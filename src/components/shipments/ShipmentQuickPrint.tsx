@@ -282,7 +282,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
   ].join('-') : 'tracking-form';
 
   const handleDownloadPDF = () => {
-    handlePrint();
+    if (printRef.current) {
+      exportToPDF(printRef.current, pdfFileName);
+    }
   };
 
   const handlePrint = () => {
