@@ -61,6 +61,8 @@ export interface ExcelSheetDef {
 export interface PrintOptions {
   customCSS?: string;
   fitSinglePage?: boolean;
+  orgClientCode?: string | null;
+  orgVerificationCode?: string | null;
 }
 
 export interface UploadOptions {
