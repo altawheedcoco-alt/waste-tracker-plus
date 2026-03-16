@@ -8,7 +8,6 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
-import { normalizeShipment } from '@/lib/supabaseHelpers';
 import { usePDFExport } from '@/hooks/usePDFExport';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
@@ -228,8 +227,7 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
         .eq('shipment_id', shipmentResult.data.id)
         .order('created_at', { ascending: true });
 
-      const normalized = normalizeShipment(shipmentResult.data);
-      setShipment(normalized as unknown as ShipmentData);
+      setShipment(shipmentResult.data as unknown as ShipmentData);
       
       if (!logsResult.error && logsResult.data) {
         setShipmentLogs(logsResult.data as unknown as ShipmentLogEntry[]);
@@ -278,12 +276,12 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId }: ShipmentQuickPrintP
 
   const shipmentUrl = shipment ? `${window.location.origin}/verify?type=shipment&code=${shipment.shipment_number}` : '';
 
-  const pdfFileName = shipment ? [
+  const pdfFileName = [
     shipment.transporter?.name || 'الناقل',
     `شحنة-${shipment.shipment_number}`,
     shipment.generator?.name || 'المولد',
     wasteTypeLabels[shipment.waste_type] || shipment.waste_type,
-  ].join('-') : 'shipment';
+  ].join('-');
 
   const handleDownloadPDF = async () => {
     if (!pdfRef.current || !shipment) return;
