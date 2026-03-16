@@ -88,13 +88,14 @@ export async function autoAssignMovementSupervisors(
         }
       } else {
         // Fallback: try to assign org head (manager) as supervisor
-        const { data: orgHead } = await supabase
+        // @ts-ignore - deep type instantiation workaround
+        const result = await supabase
           .from('profiles')
           .select('id, full_name, phone, email')
           .eq('organization_id', party.organizationId)
-          .eq('role', 'org_head')
-          .limit(1)
-          .maybeSingle();
+          .eq('role', 'org_head' as any)
+          .limit(1);
+        const orgHead = result.data?.[0] as { id: string; full_name: string; phone: string | null; email: string | null } | undefined;
 
         if (orgHead) {
           inserts.push({
