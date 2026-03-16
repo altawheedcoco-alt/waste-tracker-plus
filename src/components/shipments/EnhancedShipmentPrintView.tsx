@@ -162,12 +162,23 @@ const packagingLabels: Record<string, string> = {
   unpackaged: 'غير معبأ',
 };
 
-const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment }: EnhancedShipmentPrintViewProps) => {
+const EnhancedShipmentPrintView = ({ isOpen, onClose, shipment: rawShipment }: EnhancedShipmentPrintViewProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState('preview');
   const [stampConfig, setStampConfig] = useState<StampSignatureConfig>(defaultConfig);
   const [isOptimizing, setIsOptimizing] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [shipment, setShipment] = useState(rawShipment);
+
+  // Resolve private storage URLs for stamps and signatures
+  useEffect(() => {
+    if (!rawShipment) { setShipment(null); return; }
+    let cancelled = false;
+    resolveShipmentOrgUrls(rawShipment).then(resolved => {
+      if (!cancelled) setShipment(resolved);
+    });
+    return () => { cancelled = true; };
+  }, [rawShipment]);
   
   const { exportToPDF, printContent: printContentFn, isExporting: isPDFExporting } = usePDFExport({
     filename: `شحنة-${shipment?.shipment_number || 'document'}`,
