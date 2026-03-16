@@ -17,6 +17,7 @@ import { getThemeById } from './printThemes';
 import { generateRoleTagline } from '@/lib/roleTaglineEngine';
 import ShipmentTaglineFooter from './ShipmentTaglineFooter';
 import { generateShipmentQRData } from '@/lib/shipmentQRData';
+import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 
 interface ShipmentData {
   id: string;
@@ -139,7 +140,7 @@ const statusLabels: Record<string, string> = {
   confirmed: 'مكتمل',
 };
 
-const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps) => {
+const ShipmentPrintView = ({ isOpen, onClose, shipment: rawShipment }: ShipmentPrintViewProps) => {
   const printRef = useRef<HTMLDivElement>(null);
   const qrRef = useRef<HTMLCanvasElement>(null);
   const barcodeRef = useRef<HTMLDivElement>(null);
@@ -149,7 +150,18 @@ const ShipmentPrintView = ({ isOpen, onClose, shipment }: ShipmentPrintViewProps
   const [signDialogOpen, setSignDialogOpen] = useState(false);
   const [signatures, setSignatures] = useState<any[]>([]);
   const [signingLoading, setSigningLoading] = useState(false);
+  const [shipment, setShipment] = useState(rawShipment);
   const theme = getThemeById(themeId);
+
+  // Resolve private storage URLs for stamps and signatures
+  useEffect(() => {
+    if (!rawShipment) { setShipment(null); return; }
+    let cancelled = false;
+    resolveShipmentOrgUrls(rawShipment).then(resolved => {
+      if (!cancelled) setShipment(resolved);
+    });
+    return () => { cancelled = true; };
+  }, [rawShipment]);
   
   const { printContent: printContentFn, printWithTheme, exportToPDF, isExporting } = usePDFExport({
     filename: `tracking-form-${shipment?.shipment_number || 'document'}`,

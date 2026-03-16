@@ -9,6 +9,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { supabase } from '@/integrations/supabase/client';
 import { usePDFExport } from '@/hooks/usePDFExport';
+import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 import PrintThemeSelector from './PrintThemeSelector';
 import { getThemeById } from './printThemes';
 import { wasteTypeLabels } from '@/lib/shipmentStatusConfig';
@@ -226,7 +227,9 @@ const ShipmentQuickPrint = ({ isOpen, onClose, shipmentId, autoAction }: Shipmen
         .eq('shipment_id', shipmentResult.data.id)
         .order('created_at', { ascending: true });
 
-      setShipment(shipmentResult.data as unknown as ShipmentData);
+      // Resolve private storage URLs for stamps and signatures
+      const resolvedData = await resolveShipmentOrgUrls(shipmentResult.data as any);
+      setShipment(resolvedData as unknown as ShipmentData);
       
       if (!logsResult.error && logsResult.data) {
         setShipmentLogs(logsResult.data as unknown as ShipmentLogEntry[]);
