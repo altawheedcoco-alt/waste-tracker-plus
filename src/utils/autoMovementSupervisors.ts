@@ -87,21 +87,46 @@ export async function autoAssignMovementSupervisors(
           });
         }
       } else {
-        // Fallback: auto-create AI digital identity supervisor
-        const ai = createDefaultAISupervisor(party.role);
-        inserts.push({
-          shipment_id: shipmentId,
-          organization_id: party.organizationId,
-          party_role: party.role,
-          supervisor_type: ai.supervisor_type,
-          user_id: null,
-          supervisor_name: ai.supervisor_name,
-          supervisor_phone: null,
-          supervisor_email: null,
-          supervisor_position: ai.supervisor_position,
-          auto_sign_enabled: ai.auto_sign_enabled,
-          auto_sign_method: ai.auto_sign_method,
-        });
+        // Fallback: try to assign org head (manager) as supervisor
+        const { data: orgHead } = await supabase
+          .from('profiles')
+          .select('id, full_name, phone, email')
+          .eq('organization_id', party.organizationId)
+          .eq('role', 'org_head')
+          .limit(1)
+          .maybeSingle();
+
+        if (orgHead) {
+          inserts.push({
+            shipment_id: shipmentId,
+            organization_id: party.organizationId,
+            party_role: party.role,
+            supervisor_type: 'human',
+            user_id: orgHead.id,
+            supervisor_name: orgHead.full_name,
+            supervisor_phone: orgHead.phone || null,
+            supervisor_email: orgHead.email || null,
+            supervisor_position: 'مدير الجهة (تلقائي)',
+            auto_sign_enabled: true,
+            auto_sign_method: 'full_auto',
+          });
+        } else {
+          // Final fallback: AI digital identity
+          const ai = createDefaultAISupervisor(party.role);
+          inserts.push({
+            shipment_id: shipmentId,
+            organization_id: party.organizationId,
+            party_role: party.role,
+            supervisor_type: ai.supervisor_type,
+            user_id: null,
+            supervisor_name: ai.supervisor_name,
+            supervisor_phone: null,
+            supervisor_email: null,
+            supervisor_position: ai.supervisor_position,
+            auto_sign_enabled: ai.auto_sign_enabled,
+            auto_sign_method: ai.auto_sign_method,
+          });
+        }
       }
     } else {
       // Manual party — still assign AI digital identity
