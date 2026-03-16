@@ -19,7 +19,7 @@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createWorkbook, aoaToSheet, jsonToSheet, writeFile } from '@/lib/excelExport';
-import { generateGuillocheTextFillerHTML, generateMICRLineHTML } from '@/lib/printSecurityUtils';
+import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_CSS } from '@/lib/printSecurityUtils';
 
 // ─── A4 Constants ────────────────────────────────────────────
 export const A4 = {
