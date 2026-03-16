@@ -389,9 +389,7 @@ const HazardousWasteRegister = () => {
 
   // Print register
   const handlePrint = () => {
-    if (printRef.current) {
-      printContent(printRef.current);
-    }
+    setShowPrintPreview(true);
   };
 
   // Clear filters
