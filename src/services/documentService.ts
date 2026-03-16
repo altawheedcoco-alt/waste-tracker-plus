@@ -263,7 +263,7 @@ export const PDFService = {
         const imgH = (sliceHeight * imgW) / canvas.width;
 
         if (pageIndex > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, 0, imgW, imgH);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgW, imgH);
 
         offsetY += sliceHeight;
         pageIndex += 1;
