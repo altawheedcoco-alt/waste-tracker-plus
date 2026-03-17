@@ -1,4 +1,5 @@
 import { useState, useMemo, lazy, Suspense } from 'react';
+import { useRealWeather } from '@/hooks/useRealWeather';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
