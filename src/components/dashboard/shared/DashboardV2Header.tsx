@@ -8,8 +8,10 @@ import {
   MapPin, Navigation, Truck, CloudLightning, Snowflake, Cloud, BellRing,
   ShieldAlert, CircleAlert, Info, XCircle, ChevronLeft, ChevronRight,
   Radar, Waves, Fingerprint, ScanLine, MonitorCheck, ServerCrash, BatteryCharging,
-  CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse
+  CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
+  CloudFog, Sunrise, Sunset, Clock, ThermometerSun
 } from 'lucide-react';
+import type { RealWeatherData, HourlyForecast } from '@/hooks/useRealWeather';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatNumber } from '@/lib/numberFormat';
