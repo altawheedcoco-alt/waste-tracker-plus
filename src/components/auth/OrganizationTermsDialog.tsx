@@ -409,7 +409,8 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       if (businessDocUrls.length > 0 && organization.id) {
         const docTypeLabelsMap: Record<string, string> = { tax_card: 'البطاقة الضريبية', commercial_register: 'السجل التجاري', data_statement: 'وثيقة البيانات', other: 'مستند آخر' };
         const docTypeLabel = docTypeLabelsMap[businessDocData.documentType] || businessDocData.documentType;
-        const docCategoryMap: Record<string, string> = { tax_card: 'رخصة', commercial_register: 'رخصة', data_statement: 'شهادة', other: 'أخرى' };
+        // Map to valid DB values (document_type: license/registration/certificate, document_category: legal/documents/other)
+        const docTypeMap: Record<string, string> = { tax_card: 'license', commercial_register: 'registration', data_statement: 'certificate', other: 'other' };
         const archivePromises = businessDocUrls.map((url, i) =>
           supabase.from('entity_documents').insert({
             organization_id: organization.id,
@@ -417,10 +418,8 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
             title: `${docTypeLabel} - صفحة ${i + 1}`,
             file_name: `${businessDocData.documentType}-page-${i + 1}.jpg`,
             file_url: url,
-            document_type: businessDocData.documentType === 'tax_card' ? 'license'
-              : businessDocData.documentType === 'commercial_register' ? 'license'
-              : 'certificate',
-            document_category: docCategoryMap[businessDocData.documentType] || 'أخرى',
+            document_type: docTypeMap[businessDocData.documentType] || 'other',
+            document_category: 'legal',
             tags: [businessDocData.documentType, 'onboarding', 'business_doc'],
             description: JSON.stringify({
               source: 'terms_acceptance',
