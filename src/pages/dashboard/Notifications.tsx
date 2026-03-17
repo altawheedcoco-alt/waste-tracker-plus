@@ -462,6 +462,13 @@ const Notifications = () => {
 
   useEffect(() => { setSoundEnabled(isNotificationSoundEnabled()); }, []);
 
+  // Auto-mark all as read when viewing notifications page
+  useEffect(() => {
+    if (unreadCount > 0 && !loading) {
+      markAllAsRead();
+    }
+  }, [loading]); // Only on initial load
+
   // Stats
   const stats = useMemo(() => {
     const urgent = notifications.filter(n => getPriorityLevel(n) === 'urgent' && !n.is_read).length;
