@@ -36,6 +36,7 @@ const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPrio
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
 const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
 const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
+const TransporterSectionsSummary = lazy(() => import('@/components/dashboard/transporter/TransporterSectionsSummary'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
