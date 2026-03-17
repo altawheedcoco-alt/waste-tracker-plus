@@ -109,7 +109,7 @@ const TransporterDashboard = () => {
   });
 
   useTransporterRealtime();
-
+  const realWeather = useRealWeather();
   const handleRefresh = () => refetchShipments();
 
   return (
