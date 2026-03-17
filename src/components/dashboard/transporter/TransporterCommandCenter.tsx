@@ -153,7 +153,7 @@ const TransporterCommandCenter = () => {
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['new'] as any),
         supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled","completed")'),
         supabase.from('shipments').select('id, status, quantity').eq('transporter_id', organization!.id).gte('created_at', monthAgo.toISOString()),
-        supabase.from('organization_bindings').select('id').or(`source_organization_id.eq.${organization!.id},target_organization_id.eq.${organization!.id}`),
+        supabase.from('external_partners').select('id').eq('organization_id', organization!.id),
       ]);
 
       const todayData = todayR.data || [];
