@@ -292,7 +292,6 @@ const WeatherWidget = memo(({ weather }: { weather: WeatherData }) => {
           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
           onClick={() => hasForecast && setShowForecast(p => !p)}
         >
-      >
         <motion.div animate={weather.condition === 'stormy' ? { rotate: [0, -10, 10, 0] } : weather.condition === 'windy' ? { x: [-1, 1, -1] } : {}}
           transition={{ duration: 2, repeat: Infinity }}>
           <WIcon className={cn("w-4 h-4", hasRoadWarning ? "text-amber-500" : "text-primary")} />
