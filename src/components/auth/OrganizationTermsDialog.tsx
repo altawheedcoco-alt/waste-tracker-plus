@@ -42,6 +42,7 @@ interface OrganizationTermsDialogProps {
 }
 
 type Step = 'identity' | 'selfie' | 'terms';
+type IDInputMode = 'scanner' | 'upload';
 
 const OrganizationTermsDialog = ({ open, onAccept, organizationType }: OrganizationTermsDialogProps) => {
   const { user, profile, organization } = useAuth();
