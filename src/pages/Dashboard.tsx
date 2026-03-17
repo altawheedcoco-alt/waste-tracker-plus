@@ -145,6 +145,15 @@ const Dashboard = () => {
   };
 
   return (
+    <>
+      {/* Terms acceptance gate */}
+      {requiresAcceptance && organizationType && (
+        <OrganizationTermsDialog
+          open={true}
+          onAccept={markAsAccepted}
+          organizationType={organizationType}
+        />
+      )}
     <SubscriptionGuard>
         <PinVerificationGate>
           <>
