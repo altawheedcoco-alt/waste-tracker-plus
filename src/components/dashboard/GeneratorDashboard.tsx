@@ -11,7 +11,7 @@ import { GENERATOR_TAB_BINDINGS } from '@/config/generator/generatorBindings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer, MapPin } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer, MapPin, Building2, Route, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
