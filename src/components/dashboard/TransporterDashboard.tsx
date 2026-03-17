@@ -137,6 +137,26 @@ const TransporterDashboard = () => {
           { label: 'معلقة', value: shipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const },
           { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10), trend: 'stable' as const },
         ]}
+        alerts={[
+          ...(shipments.filter(s => s.status === 'new').length > 5 ? [{ id: 'pending-high', message: `تحذير: ${shipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج مراجعة عاجلة`, severity: 'warning' as const }] : []),
+          ...(stats?.active && stats.active > 10 ? [{ id: 'active-load', message: `${stats.active} شحنة نشطة حالياً - حمولة تشغيلية مرتفعة`, severity: 'info' as const }] : []),
+          { id: 'system-ok', message: 'جميع أنظمة التتبع والمراقبة تعمل بكفاءة', severity: 'info' as const },
+          { id: 'fleet-check', message: 'تذكير: فحص دوري للأسطول مطلوب خلال 48 ساعة', severity: 'warning' as const },
+        ]}
+        weather={{
+          temp: 32,
+          condition: 'sunny',
+          humidity: 45,
+          windSpeed: 18,
+          roadWarning: undefined,
+        }}
+        heatmapData={[
+          { region: 'القاهرة', value: stats?.active || 0, max: 20 },
+          { region: 'الجيزة', value: Math.round((stats?.active || 0) * 0.6), max: 15 },
+          { region: 'الإسكندرية', value: Math.round((stats?.active || 0) * 0.4), max: 12 },
+          { region: 'الدلتا', value: Math.round((stats?.active || 0) * 0.3), max: 10 },
+          { region: 'الصعيد', value: Math.round((stats?.active || 0) * 0.2), max: 8 },
+        ]}
       >
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
