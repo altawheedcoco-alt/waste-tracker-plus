@@ -7,14 +7,23 @@ import {
   Factory, Truck, Recycle, Trash2, Shield, Award,
   MapPin, Calendar, Weight, FileCheck, Leaf, CheckCircle2,
 } from 'lucide-react';
+import {
+  generateGuillocheTextFillerHTML,
+  generatePrintWatermarkHTML,
+  generateMICRLineHTML,
+  generateVerticalStampHTML,
+  getSecurePrintCSS,
+  MICR_FONT_FACE_CSS,
+} from '@/lib/printSecurityUtils';
+import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 
 export type CertificateType = 
-  | 'waste-generation'       // شهادة توليد مخلفات
-  | 'transport-manifest'     // بيان شحن / نقل
-  | 'recycling-certificate'  // شهادة إعادة تدوير
-  | 'disposal-certificate'   // شهادة تخلص نهائي
-  | 'environmental-compliance' // شهادة امتثال بيئي
-  | 'chain-of-custody';      // شهادة سلسلة الحيازة
+  | 'waste-generation'
+  | 'transport-manifest'
+  | 'recycling-certificate'
+  | 'disposal-certificate'
+  | 'environmental-compliance'
+  | 'chain-of-custody';
 
 interface CertificateData {
   certificateNumber: string;
@@ -120,6 +129,19 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
     const issueDate = data.issueDate || format(now, 'PPP', { locale: ar });
     const qrValue = `${window.location.origin}/qr-verify?type=entity_certificate&code=${encodeURIComponent(data.certificateNumber)}`;
 
+    // Security layers
+    const guillocheHTML = generateGuillocheTextFillerHTML(config.accentColor);
+    const watermarkHTML = generatePrintWatermarkHTML(data.entityName, '', null, data.verificationCode);
+    const micrHTML = generateMICRLineHTML(data.certificateNumber, data.verificationCode);
+    const verticalStampHTML = generateVerticalStampHTML();
+    const digitalStampHTML = generateDigitalVerificationStamp({
+      referenceNumber: data.certificateNumber,
+      documentType: 'certificate',
+      entityName: data.entityName,
+      accentColor: config.accentColor,
+      verificationCode: data.verificationCode,
+    });
+
     const borderStyle = designVariant === 'bordered'
       ? { border: `6px double ${config.accentColor}`, padding: '15mm 15mm 20mm 15mm' }
       : designVariant === 'ornate'
@@ -138,200 +160,207 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
           padding: '15mm 15mm 20mm 15mm',
           fontFamily: "'Cairo', 'Amiri', sans-serif",
           position: 'relative',
+          boxSizing: 'border-box',
+          WebkitPrintColorAdjust: 'exact' as any,
           ...borderStyle,
         }}
       >
-        {/* Watermark */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%) rotate(-45deg)',
-          fontSize: '72px', opacity: 0.03, pointerEvents: 'none',
-          fontFamily: "'Amiri', serif", whiteSpace: 'nowrap',
-          color: config.accentColor,
-        }}>
-          {config.title}
-        </div>
+        {/* Security Layer 1: Guilloche Text Filler */}
+        <div dangerouslySetInnerHTML={{ __html: guillocheHTML }} />
+
+        {/* Security Layer 2: Dynamic Watermark */}
+        <div dangerouslySetInnerHTML={{ __html: watermarkHTML }} />
 
         {/* Corner ornaments for ornate variant */}
         {designVariant === 'ornate' && (
           <>
-            <div style={{ position: 'absolute', top: '15mm', right: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor }}>✦</div>
-            <div style={{ position: 'absolute', top: '15mm', left: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor }}>✦</div>
-            <div style={{ position: 'absolute', bottom: '15mm', right: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor }}>✦</div>
-            <div style={{ position: 'absolute', bottom: '15mm', left: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor }}>✦</div>
+            <div style={{ position: 'absolute', top: '15mm', right: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor, zIndex: 3 }}>✦</div>
+            <div style={{ position: 'absolute', top: '15mm', left: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor, zIndex: 3 }}>✦</div>
+            <div style={{ position: 'absolute', bottom: '15mm', right: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor, zIndex: 3 }}>✦</div>
+            <div style={{ position: 'absolute', bottom: '15mm', left: '15mm', fontSize: '24px', opacity: 0.15, color: config.accentColor, zIndex: 3 }}>✦</div>
           </>
         )}
 
-        {/* Header */}
-        <div style={{
-          background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})`,
-          color: '#ffffff',
-          padding: '24px 32px',
-          borderRadius: designVariant === 'minimal' ? '0' : '12px',
-          textAlign: 'center',
-          marginBottom: '24px',
-          position: 'relative',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <QRCodeSVG value={qrValue} size={60} level="M" bgColor="transparent" fgColor="#ffffff" />
-            <div style={{ flex: 1, padding: '0 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
-                <Award style={{ width: '28px', height: '28px' }} />
-                <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>{config.title}</h1>
-              </div>
-              <p style={{ fontSize: '13px', opacity: 0.85, margin: '4px 0 0' }}>{config.subtitle}</p>
-            </div>
-            {data.entityLogo ? (
-              <img src={data.entityLogo} alt="" style={{ height: '50px', objectFit: 'contain' }} crossOrigin="anonymous" />
-            ) : (
-              <Barcode value={data.certificateNumber} width={1} height={35} fontSize={0} displayValue={false} />
-            )}
-          </div>
-        </div>
-
-        {/* Certificate Number Badge */}
-        <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-          <span style={{
-            display: 'inline-block',
-            background: `${config.accentColor}15`,
-            border: `2px solid ${config.accentColor}`,
-            borderRadius: '8px',
-            padding: '8px 24px',
-            fontSize: '14px',
-            fontWeight: 700,
-            color: config.accentColor,
+        {/* Document Content — Layer 3 */}
+        <div style={{ position: 'relative', zIndex: 2 }}>
+          {/* Header */}
+          <div style={{
+            background: `linear-gradient(135deg, ${config.gradientFrom}, ${config.gradientTo})`,
+            color: '#ffffff',
+            padding: '24px 32px',
+            borderRadius: designVariant === 'minimal' ? '0' : '12px',
+            textAlign: 'center',
+            marginBottom: '24px',
+            position: 'relative',
           }}>
-            رقم الشهادة: <span style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>{data.certificateNumber}</span>
-          </span>
-        </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <QRCodeSVG value={qrValue} size={60} level="M" bgColor="transparent" fgColor="#ffffff" />
+              <div style={{ flex: 1, padding: '0 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <Award style={{ width: '28px', height: '28px' }} />
+                  <h1 style={{ fontSize: '24px', fontWeight: 800, margin: 0 }}>{config.title}</h1>
+                </div>
+                <p style={{ fontSize: '13px', opacity: 0.85, margin: '4px 0 0' }}>{config.subtitle}</p>
+              </div>
+              {data.entityLogo ? (
+                <img src={data.entityLogo} alt="" style={{ height: '50px', objectFit: 'contain' }} crossOrigin="anonymous" />
+              ) : (
+                <Barcode value={data.certificateNumber} width={1} height={35} fontSize={0} displayValue={false} />
+              )}
+            </div>
+          </div>
 
-        {/* Entity Info */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '12px',
-          marginBottom: '24px',
-        }}>
-          <InfoBox label="الجهة المصدرة" value={data.entityName} accent={config.accentColor} icon="🏢" />
-          {data.partnerName && <InfoBox label="الجهة المستفيدة" value={data.partnerName} accent={config.accentColor} icon="🤝" />}
-          <InfoBox label="تاريخ الإصدار" value={issueDate} accent={config.accentColor} icon="📅" />
-          <InfoBox label="الحالة" value={config.badgeText} accent={config.accentColor} icon="✅" />
-        </div>
-
-        {/* Waste Details */}
-        {(data.wasteType || data.weight) && (
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{
-              fontSize: '16px', fontWeight: 700, color: config.accentColor,
-              borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
-              marginBottom: '12px',
+          {/* Certificate Number Badge */}
+          <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+            <span style={{
+              display: 'inline-block',
+              background: `${config.accentColor}15`,
+              border: `2px solid ${config.accentColor}`,
+              borderRadius: '8px',
+              padding: '8px 24px',
+              fontSize: '14px',
+              fontWeight: 700,
+              color: config.accentColor,
             }}>
-              تفاصيل المخلفات
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              {data.wasteType && <InfoBox label="نوع المخلفات" value={data.wasteType} accent={config.accentColor} />}
-              {data.weight && <InfoBox label="الوزن" value={`${data.weight.toLocaleString()} ${data.weightUnit || 'كجم'}`} accent={config.accentColor} />}
-              {data.origin && <InfoBox label="المصدر" value={data.origin} accent={config.accentColor} />}
-            </div>
+              رقم الشهادة: <span style={{ fontFamily: 'monospace', letterSpacing: '2px' }}>{data.certificateNumber}</span>
+            </span>
           </div>
-        )}
 
-        {/* Transport Details */}
-        {(data.vehiclePlate || data.driverName || data.destination) && (
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{
-              fontSize: '16px', fontWeight: 700, color: config.accentColor,
-              borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
-              marginBottom: '12px',
-            }}>
-              تفاصيل النقل
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              {data.vehiclePlate && <InfoBox label="لوحة المركبة" value={data.vehiclePlate} accent={config.accentColor} />}
-              {data.driverName && <InfoBox label="السائق" value={data.driverName} accent={config.accentColor} />}
-              {data.destination && <InfoBox label="الوجهة" value={data.destination} accent={config.accentColor} />}
-            </div>
+          {/* Entity Info */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+            <InfoBox label="الجهة المصدرة" value={data.entityName} accent={config.accentColor} icon="🏢" />
+            {data.partnerName && <InfoBox label="الجهة المستفيدة" value={data.partnerName} accent={config.accentColor} icon="🤝" />}
+            <InfoBox label="تاريخ الإصدار" value={issueDate} accent={config.accentColor} icon="📅" />
+            <InfoBox label="الحالة" value={config.badgeText} accent={config.accentColor} icon="✅" />
           </div>
-        )}
 
-        {/* Custom Fields */}
-        {data.customFields && data.customFields.length > 0 && (
-          <div style={{ marginBottom: '24px' }}>
-            <h2 style={{
-              fontSize: '16px', fontWeight: 700, color: config.accentColor,
-              borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
-              marginBottom: '12px',
-            }}>
-              بيانات إضافية
-            </h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {data.customFields.map((f, i) => (
-                <InfoBox key={i} label={f.label} value={f.value} accent={config.accentColor} />
-              ))}
+          {/* Waste Details */}
+          {(data.wasteType || data.weight) && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{
+                fontSize: '16px', fontWeight: 700, color: config.accentColor,
+                borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
+                marginBottom: '12px',
+              }}>
+                تفاصيل المخلفات
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                {data.wasteType && <InfoBox label="نوع المخلفات" value={data.wasteType} accent={config.accentColor} />}
+                {data.weight && <InfoBox label="الوزن" value={`${data.weight.toLocaleString()} ${data.weightUnit || 'كجم'}`} accent={config.accentColor} />}
+                {data.origin && <InfoBox label="المصدر" value={data.origin} accent={config.accentColor} />}
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Declaration */}
-        <div style={{
-          background: `${config.accentColor}08`,
-          border: `1px solid ${config.borderColor}`,
-          borderRadius: '8px',
-          padding: '16px',
-          marginBottom: '24px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-            <CheckCircle2 style={{ width: '20px', height: '20px', color: config.accentColor }} />
-            <h3 style={{ fontSize: '14px', fontWeight: 700, color: config.accentColor, margin: 0 }}>
-              إقرار رسمي
-            </h3>
+          {/* Transport Details */}
+          {(data.vehiclePlate || data.driverName || data.destination) && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{
+                fontSize: '16px', fontWeight: 700, color: config.accentColor,
+                borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
+                marginBottom: '12px',
+              }}>
+                تفاصيل النقل
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
+                {data.vehiclePlate && <InfoBox label="لوحة المركبة" value={data.vehiclePlate} accent={config.accentColor} />}
+                {data.driverName && <InfoBox label="السائق" value={data.driverName} accent={config.accentColor} />}
+                {data.destination && <InfoBox label="الوجهة" value={data.destination} accent={config.accentColor} />}
+              </div>
+            </div>
+          )}
+
+          {/* Custom Fields */}
+          {data.customFields && data.customFields.length > 0 && (
+            <div style={{ marginBottom: '24px' }}>
+              <h2 style={{
+                fontSize: '16px', fontWeight: 700, color: config.accentColor,
+                borderRight: `4px solid ${config.accentColor}`, paddingRight: '12px',
+                marginBottom: '12px',
+              }}>
+                بيانات إضافية
+              </h2>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                {data.customFields.map((f, i) => (
+                  <InfoBox key={i} label={f.label} value={f.value} accent={config.accentColor} />
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Declaration */}
+          <div style={{
+            background: `${config.accentColor}08`,
+            border: `1px solid ${config.borderColor}`,
+            borderRadius: '8px',
+            padding: '16px',
+            marginBottom: '24px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+              <CheckCircle2 style={{ width: '20px', height: '20px', color: config.accentColor }} />
+              <h3 style={{ fontSize: '14px', fontWeight: 700, color: config.accentColor, margin: 0 }}>
+                إقرار رسمي
+              </h3>
+            </div>
+            <p style={{ fontSize: '12px', lineHeight: 1.8, color: '#374151' }}>
+              نقر بأن البيانات الواردة في هذه الشهادة صحيحة ودقيقة وتمثل الواقع الفعلي للعملية.
+              هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير وتعتبر صالحة بدون حاجة لتوقيع يدوي
+              في حالة التحقق الإلكتروني عبر رمز QR المرفق.
+            </p>
           </div>
-          <p style={{ fontSize: '12px', lineHeight: 1.8, color: '#374151' }}>
-            نقر بأن البيانات الواردة في هذه الشهادة صحيحة ودقيقة وتمثل الواقع الفعلي للعملية.
-            هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير وتعتبر صالحة بدون حاجة لتوقيع يدوي
-            في حالة التحقق الإلكتروني عبر رمز QR المرفق.
-          </p>
+
+          {/* Notes */}
+          {data.notes && (
+            <div style={{ marginBottom: '24px', padding: '12px', background: 'rgba(249,250,251,0.7)', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
+              <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '4px' }}>ملاحظات:</p>
+              <p style={{ fontSize: '12px', color: '#374151' }}>{data.notes}</p>
+            </div>
+          )}
+
+          {/* Signature Section */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '24px',
+            marginTop: '20px',
+            paddingTop: '20px',
+            borderTop: `2px solid ${config.borderColor}`,
+          }}>
+            {['المسؤول المختص', 'المدير المعتمد', 'ختم المؤسسة'].map((label) => (
+              <div key={label} style={{ textAlign: 'center' }}>
+                <div style={{ borderBottom: `1px solid ${config.accentColor}`, width: '70%', margin: '30px auto 8px' }} />
+                <p style={{ fontSize: '11px', color: '#6b7280' }}>{label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Digital Verification Stamp */}
+          <div style={{ marginTop: '16px' }} dangerouslySetInnerHTML={{ __html: digitalStampHTML }} />
+
+          {/* Vertical Security Stamp */}
+          <div style={{ marginTop: '8px' }} dangerouslySetInnerHTML={{ __html: verticalStampHTML }} />
+
+          {/* MICR Line */}
+          <div style={{ marginTop: '6px' }} dangerouslySetInnerHTML={{ __html: micrHTML }} />
+
+          {/* System Footer */}
+          <div style={{
+            marginTop: '10px',
+            paddingTop: '8px',
+            borderTop: `1px solid ${config.borderColor}`,
+            textAlign: 'center',
+            fontSize: '9px',
+            color: '#9ca3af',
+          }}>
+            <p>هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير — آي ريسايكل — مؤمنة بختم رقمي وعلامة مائية</p>
+            <p style={{ marginTop: '2px' }}>
+              تاريخ الإصدار: {issueDate} | رقم المرجع: {data.certificateNumber} | رمز التحقق: {data.verificationCode || data.certificateNumber}
+            </p>
+          </div>
         </div>
 
-        {/* Notes */}
-        {data.notes && (
-          <div style={{ marginBottom: '24px', padding: '12px', background: '#f9fafb', borderRadius: '8px', border: '1px solid #e5e7eb' }}>
-            <p style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '4px' }}>ملاحظات:</p>
-            <p style={{ fontSize: '12px', color: '#374151' }}>{data.notes}</p>
-          </div>
-        )}
-
-        {/* Signature Section */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr 1fr',
-          gap: '24px',
-          marginTop: '40px',
-          paddingTop: '20px',
-          borderTop: `2px solid ${config.borderColor}`,
-        }}>
-          {['المسؤول المختص', 'المدير المعتمد', 'ختم المؤسسة'].map((label) => (
-            <div key={label} style={{ textAlign: 'center' }}>
-              <div style={{ borderBottom: `1px solid ${config.accentColor}`, width: '70%', margin: '30px auto 8px' }} />
-              <p style={{ fontSize: '11px', color: '#6b7280' }}>{label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Footer */}
-        <div style={{
-          marginTop: '30px',
-          paddingTop: '12px',
-          borderTop: `1px solid ${config.borderColor}`,
-          textAlign: 'center',
-          fontSize: '10px',
-          color: '#9ca3af',
-        }}>
-          <p>هذه الوثيقة صادرة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير - آي ريسايكل</p>
-          <p style={{ marginTop: '4px' }}>
-            تاريخ الإصدار: {issueDate} | رقم المرجع: {data.certificateNumber} | رمز التحقق: {data.verificationCode || data.certificateNumber}
-          </p>
-        </div>
+        {/* Inject MICR font + secure print CSS */}
+        <style dangerouslySetInnerHTML={{ __html: `${MICR_FONT_FACE_CSS}\n${getSecurePrintCSS()}` }} />
       </div>
     );
   }
