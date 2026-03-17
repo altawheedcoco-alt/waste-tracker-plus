@@ -192,6 +192,7 @@ const Dashboard = () => {
           </>
         </PinVerificationGate>
     </SubscriptionGuard>
+    </>
   );
 };
 
