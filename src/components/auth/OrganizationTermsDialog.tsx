@@ -405,6 +405,33 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         ).then(urls => urls.filter(Boolean) as string[]);
       }
 
+      // Archive business documents to entity_documents for sync
+      if (businessDocUrls.length > 0 && organization.id) {
+        const docTypeLabelsMap: Record<string, string> = { tax_card: 'البطاقة الضريبية', commercial_register: 'السجل التجاري', data_statement: 'وثيقة البيانات', other: 'مستند آخر' };
+        const docTypeLabel = docTypeLabelsMap[businessDocData.documentType] || businessDocData.documentType;
+        const archivePromises = businessDocUrls.map((url, i) =>
+          supabase.from('entity_documents').insert({
+            organization_id: organization.id,
+            uploaded_by: user.id,
+            title: `${docTypeLabel} - صفحة ${i + 1}`,
+            file_url: url,
+            document_type: businessDocData.documentType === 'tax_card' ? 'license'
+              : businessDocData.documentType === 'commercial_register' ? 'license'
+              : 'certificate',
+            status: 'active',
+            tags: [businessDocData.documentType, 'onboarding', 'business_doc'],
+            metadata: {
+              source: 'terms_acceptance',
+              extracted_data: businessDocData.extractedData || {},
+              page_number: i + 1,
+              total_pages: businessDocUrls.length,
+              document_category: businessDocData.documentType,
+            },
+          } as any)
+        );
+        await Promise.allSettled(archivePromises);
+      }
+
       // Upload delegation documents if applicable
       let delegationUrls: string[] = [];
       let partyDocUrls: { partyName: string; role: string; front: string | null; back: string | null }[] = [];
