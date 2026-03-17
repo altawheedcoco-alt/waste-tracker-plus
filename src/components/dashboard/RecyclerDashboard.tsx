@@ -198,8 +198,8 @@ const RecyclerDashboard = () => {
           { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-emerald-500', max: 1, trend: 'stable' as const },
         ]}
         alerts={[
-          ...(stats.incoming > 0 ? [{ id: 'incoming-shipments', message: `🚛 ${stats.incoming} شحنة واردة تحتاج استقبال وفحص`, severity: (stats.incoming > 5 ? 'critical' : 'warning') as const, icon: Truck }] : []),
-          ...(stats.processing > 0 ? [{ id: 'processing-active', message: `⚙️ ${stats.processing} شحنة قيد المعالجة والتدوير حالياً`, severity: (stats.processing > 8 ? 'warning' : 'info') as const, icon: Clock }] : []),
+          ...(stats.incoming > 0 ? [{ id: 'incoming-shipments', message: `🚛 ${stats.incoming} شحنة واردة تحتاج استقبال وفحص`, severity: stats.incoming > 5 ? 'critical' as const : 'warning' as const, icon: Truck }] : []),
+          ...(stats.processing > 0 ? [{ id: 'processing-active', message: `⚙️ ${stats.processing} شحنة قيد المعالجة والتدوير حالياً`, severity: stats.processing > 8 ? 'warning' as const : 'info' as const, icon: Clock }] : []),
           ...(stats.completed > 0 && stats.total > 0 ? [{ id: 'completion-rate', message: `📈 معدل الإنجاز: ${Math.round((stats.completed / stats.total) * 100)}% — ${stats.completed} شحنة مؤكدة من ${stats.total}`, severity: 'info' as const, icon: CheckCircle2 }] : []),
           ...(recentShipments.filter(s => !s.has_report && s.status === 'delivered').length > 0 ? [{ id: 'pending-reports', message: `📋 ${recentShipments.filter(s => !s.has_report && s.status === 'delivered').length} شحنة مسلَّمة بدون تقرير تدوير — يجب إصدار التقارير`, severity: 'warning' as const, icon: FileText }] : []),
           ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-incoming', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة واردة — بروتوكول سلامة مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
