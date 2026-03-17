@@ -49,6 +49,8 @@ export interface WeatherData {
   locationName?: string;
   hourlyForecast?: HourlyForecast[];
   isLoading?: boolean;
+  refreshFromGPS?: () => void;
+  isLocating?: boolean;
 }
 
 export interface HeatmapCell {
