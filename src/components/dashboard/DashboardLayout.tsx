@@ -719,7 +719,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 50, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.15 }}
               className="fixed right-0 top-1/2 -translate-y-1/2 z-50"
             >
               <Tooltip>
@@ -728,13 +728,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsSidebarOpen(true)}
-                    className="rounded-r-none rounded-l-lg h-16 w-7 flex flex-col items-center justify-center gap-0.5 shadow-md bg-card hover:bg-muted border-border transition-all duration-150"
+                    className="rounded-r-none rounded-l-lg h-20 w-8 flex flex-col items-center justify-center gap-0.5 shadow-lg bg-card/95 backdrop-blur-sm hover:bg-primary/10 hover:border-primary/30 border-border transition-all duration-200 group"
                   >
-                    <ChevronDown className="w-4 h-4 rotate-90 text-muted-foreground" />
+                    <Menu className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs">
-                  <p>{t('nav.dashboard')}</p>
+                  <p>{language === 'ar' ? 'فتح القائمة' : 'Open Menu'}</p>
                 </TooltipContent>
               </Tooltip>
             </motion.div>
