@@ -5,6 +5,9 @@ import SharedResourceLayout from '@/components/sharing/SharedResourceLayout';
 import SharedPinGate from '@/components/sharing/SharedPinGate';
 import SharedShipmentView from '@/components/sharing/renderers/SharedShipmentView';
 import SharedBlogView from '@/components/sharing/renderers/SharedBlogView';
+import SharedCertificateView from '@/components/sharing/renderers/SharedCertificateView';
+import SharedInvoiceView from '@/components/sharing/renderers/SharedInvoiceView';
+import SharedOrganizationView from '@/components/sharing/renderers/SharedOrganizationView';
 import { Loader2, AlertTriangle, Lock, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
