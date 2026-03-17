@@ -38,7 +38,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
@@ -129,6 +129,14 @@ const TransporterDashboard = () => {
         orgLabel={t('dashboard.orgTypes.certifiedTransporter')}
         icon={Truck}
         gradient="from-primary to-primary/70"
+        radarStats={[
+          { label: 'إجمالي الشحنات', value: stats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(stats?.total || 1, 50) },
+          { label: 'نشطة', value: stats?.active || 0, icon: Route, color: 'text-amber-500', max: Math.max(stats?.total || 1, 20) },
+          { label: 'السائقون', value: stats?.drivers || 0, icon: Users, color: 'text-violet-500', max: Math.max(stats?.drivers || 1, 20) },
+          { label: 'مكتملة', value: (stats?.total || 0) - (stats?.active || 0), icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats?.total || 1, 50) },
+          { label: 'معلقة', value: shipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20 },
+          { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10) },
+        ]}
       >
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
