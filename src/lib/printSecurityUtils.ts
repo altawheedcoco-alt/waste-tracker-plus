@@ -65,7 +65,7 @@ export function generateGuillocheTextFillerHTML(accentColor = '#059669'): string
     <span style="background:rgba(255,255,255,0.85);padding:3px 12px;border:1px solid rgba(0,0,0,0.15);border-radius:2px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية | iRecycle Platform — This Document is Secured &amp; Smart | 𓇋𓂋𓇌𓋴𓇌𓎡𓃭 — 𓅓𓋴𓏏𓈖𓂧 𓅓𓀀𓅓𓈖 𓅱𓇌𓎡𓇌 ◂</span>
   </div>`;
 
-  return `<div class="guilloche-text-filler" style="position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
+  return `<div class="guilloche-text-filler" style="position:absolute;inset:15mm;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>${verticalStamp}`;
 }
 
 /** Helper: hex color to r,g,b string */
