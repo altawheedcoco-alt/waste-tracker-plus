@@ -74,6 +74,9 @@ const TransporterOperationsTabs = ({
 }: OperationsTabsProps) => (
   <>
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
+      {/* ═══ الإجراءات السريعة ═══ */}
+      <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
+
       {/* ═══ القسم 1: الإحصائيات والأرقام الأساسية ═══ */}
       <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
       <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
