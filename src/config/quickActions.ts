@@ -79,7 +79,20 @@ export const transporterQuickActions: QuickActionConfig[] = [
   { id: 'navigation-demo', title: 'نظام الملاحة', subtitle: 'محاكاة رحلة نقل كاملة', icon: Navigation, path: '/dashboard/navigation-demo', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'secondary' },
   { id: 'partners', title: 'الجهات المرتبطة', subtitle: 'الجهات المولدة والمدورة', icon: Factory, path: '/dashboard/partners', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'secondary' },
 
-  // 3️⃣ أدوات وتقارير
+  // 3️⃣ الأسطول والصيانة
+  { id: 'tracking-center', title: 'مركز التتبع المباشر', subtitle: 'مراقبة لحظية لجميع الشحنات', icon: MapPin, path: '/dashboard/tracking-center', iconBgClass: 'bg-gradient-to-br from-cyan-500 to-blue-600', category: 'secondary' },
+  { id: 'shipment-routes', title: 'خريطة المسارات', subtitle: 'تتبع مسارات الشحنات', icon: Map, path: '/dashboard/shipment-routes', iconBgClass: 'bg-gradient-to-br from-teal-500 to-emerald-600', category: 'secondary' },
+  { id: 'preventive-maintenance', title: 'الصيانة الوقائية', subtitle: 'جدولة صيانة المركبات', icon: Wrench, path: '/dashboard/preventive-maintenance', iconBgClass: 'bg-gradient-to-br from-orange-500 to-red-600', category: 'secondary' },
+  { id: 'driver-permits', title: 'تصاريح السائقين', subtitle: 'إدارة تصاريح وتراخيص السائقين', icon: Shield, path: '/dashboard/driver-permits', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-purple-600', category: 'secondary' },
+  { id: 'driver-academy', title: 'أكاديمية السائقين', subtitle: 'برامج تدريبية وشهادات', icon: GraduationCap, path: '/dashboard/driver-academy', iconBgClass: 'bg-gradient-to-br from-violet-500 to-indigo-600', category: 'secondary' },
+  { id: 'driver-rewards', title: 'مكافآت السائقين', subtitle: 'نظام المكافآت والحوافز', icon: Trophy, path: '/dashboard/driver-rewards', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'secondary' },
+
+  // 4️⃣ المركز التنظيمي
+  { id: 'delivery-declarations', title: 'إقرارات التسليم', subtitle: 'إدارة إقرارات تسليم الشحنات', icon: FileCheck, path: '/dashboard/delivery-declarations', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'secondary' },
+  { id: 'recycling-certificates', title: 'شهادات التدوير', subtitle: 'شهادات إعادة التدوير', icon: FolderCheck, path: '/dashboard/recycling-certificates', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'secondary' },
+  { id: 'safety', title: 'السلامة المهنية', subtitle: 'إدارة السلامة والصحة المهنية', icon: HardHat, path: '/dashboard/safety', iconBgClass: 'bg-gradient-to-br from-red-500 to-rose-600', category: 'secondary' },
+
+  // 5️⃣ أدوات وتقارير
   { id: 'reports', title: 'التقارير', subtitle: 'تقارير الشحنات والأداء', icon: BarChart3, path: '/dashboard/reports', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
   { id: 'transporter-ai-tools', title: 'تحليلات الذكاء الاصطناعي', subtitle: 'إحصائيات وتحليلات متقدمة', icon: Bot, path: '/dashboard/transporter-ai-tools', iconBgClass: 'bg-gradient-to-br from-fuchsia-500 to-pink-600', category: 'utility' },
   { id: 'environmental-sustainability', title: 'تقارير الاستدامة', subtitle: 'تحليل الأداء البيئي', icon: Leaf, path: '/dashboard/environmental-sustainability', iconBgClass: 'bg-gradient-to-br from-green-600 to-teal-600', category: 'utility' },
@@ -89,6 +102,30 @@ export const transporterQuickActions: QuickActionConfig[] = [
   { id: 'activity-log', title: 'سجل النشاطات', subtitle: 'تتبع جميع العمليات', icon: Activity, path: '/dashboard/activity-log', iconBgClass: 'bg-gradient-to-br from-rose-500 to-red-600', category: 'utility' },
   { id: 'qr-scanner', title: 'ماسح QR', subtitle: 'التحقق من صحة المستندات', icon: ScanLine, path: '/scan', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-teal-600', category: 'utility' },
   { id: 'pride-certificates', title: 'شهادات الفخر', subtitle: 'شهادات التقدير والإنجازات البيئية', icon: Trophy, path: '/dashboard/pride-certificates', iconBgClass: 'bg-gradient-to-br from-yellow-500 to-amber-600', category: 'utility' },
+
+  // 6️⃣ مركز المستندات
+  { id: 'ai-document-studio', title: 'استوديو المستندات الذكي', subtitle: 'إنشاء مستندات بالذكاء الاصطناعي', icon: Sparkles, path: '/dashboard/ai-document-studio', iconBgClass: 'bg-gradient-to-br from-purple-500 to-pink-600', category: 'utility' },
+  { id: 'document-center', title: 'مركز المستندات', subtitle: 'إدارة جميع المستندات والملفات', icon: FolderOpen, path: '/dashboard/document-center', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'utility' },
+  { id: 'regulatory-documents', title: 'المستندات التنظيمية', subtitle: 'الوثائق الرسمية والتراخيص', icon: Scale, path: '/dashboard/regulatory-documents', iconBgClass: 'bg-gradient-to-br from-amber-500 to-orange-600', category: 'utility' },
+  { id: 'my-data', title: 'بياناتي', subtitle: 'إدارة البيانات الشخصية والمؤسسية', icon: Database, path: '/dashboard/my-data', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
+
+  // 7️⃣ المالية
+  { id: 'accounting', title: 'المحاسبة', subtitle: 'النظام المحاسبي المتكامل', icon: Calculator, path: '/dashboard/erp/accounting', iconBgClass: 'bg-gradient-to-br from-emerald-500 to-green-600', category: 'utility' },
+  { id: 'financial-dashboard', title: 'التقارير المالية', subtitle: 'لوحة مالية شاملة', icon: BarChart3, path: '/dashboard/erp/financial-dashboard', iconBgClass: 'bg-gradient-to-br from-teal-500 to-cyan-600', category: 'utility' },
+  { id: 'smart-insurance', title: 'التأمين الذكي', subtitle: 'إدارة وثائق التأمين', icon: Umbrella, path: '/dashboard/smart-insurance', iconBgClass: 'bg-gradient-to-br from-blue-500 to-indigo-600', category: 'utility' },
+  { id: 'digital-wallet', title: 'المحفظة الرقمية', subtitle: 'المعاملات المالية الرقمية', icon: Wallet, path: '/dashboard/digital-wallet', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'utility' },
+
+  // 8️⃣ التواصل والتبادل
+  { id: 'chat', title: 'الرسائل', subtitle: 'التواصل مع الشركاء', icon: MessageCircle, path: '/dashboard/chat', iconBgClass: 'bg-gradient-to-br from-pink-500 to-rose-600', category: 'utility' },
+  { id: 'waste-exchange', title: 'بورصة المخلفات', subtitle: 'عرض وشراء المخلفات', icon: Store, path: '/dashboard/waste-exchange', iconBgClass: 'bg-gradient-to-br from-cyan-500 to-sky-600', category: 'utility' },
+  { id: 'b2b-marketplace', title: 'سوق B2B', subtitle: 'السوق التجاري بين الجهات', icon: ShoppingCart, path: '/dashboard/b2b-marketplace', iconBgClass: 'bg-gradient-to-br from-orange-500 to-amber-600', category: 'utility' },
+  { id: 'bulk-weight-entries', title: 'الوزنات الجماعية', subtitle: 'تسجيل وزنات متعددة دفعة واحدة', icon: Scale, path: '/dashboard/bulk-weight-entries', iconBgClass: 'bg-gradient-to-br from-slate-500 to-gray-600', category: 'utility' },
+  { id: 'manual-shipment', title: 'شحنة يدوية', subtitle: 'إنشاء شحنة بإدخال يدوي', icon: FileText, path: '/dashboard/manual-shipment', iconBgClass: 'bg-gradient-to-br from-amber-500 to-yellow-600', category: 'utility' },
+  { id: 'print-center', title: 'مركز الطباعة', subtitle: 'طباعة المستندات والتقارير', icon: Printer, path: '/dashboard/print-center', iconBgClass: 'bg-gradient-to-br from-gray-500 to-slate-600', category: 'utility' },
+  { id: 'map-explorer', title: 'مستكشف الخريطة', subtitle: 'استكشاف المواقع على الخريطة', icon: Search, path: '/dashboard/map-explorer', iconBgClass: 'bg-gradient-to-br from-teal-500 to-emerald-600', category: 'utility' },
+  { id: 'quotations', title: 'عروض الأسعار', subtitle: 'إدارة عروض الأسعار', icon: FileText, path: '/dashboard/quotations', iconBgClass: 'bg-gradient-to-br from-violet-500 to-purple-600', category: 'utility' },
+  { id: 'hr-payroll', title: 'مسيّر الرواتب', subtitle: 'إدارة رواتب الموظفين', icon: Banknote, path: '/dashboard/hr/payroll', iconBgClass: 'bg-gradient-to-br from-green-500 to-emerald-600', category: 'utility' },
+  { id: 'laws-regulations', title: 'القوانين واللوائح', subtitle: 'مرجع القوانين البيئية', icon: BookOpen, path: '/dashboard/laws-regulations', iconBgClass: 'bg-gradient-to-br from-indigo-500 to-blue-600', category: 'utility' },
 ];
 
 // ============= ADMIN QUICK ACTIONS =============
