@@ -185,7 +185,8 @@ export default {
   			'float-delayed': 'float-delayed 5s ease-in-out 1s infinite',
   			'hero-zoom': 'hero-zoom 8s ease-out forwards',
   			ticker: 'ticker 120s linear infinite',
-  			'pulse-glow': 'pulse-glow 2s ease-in-out infinite'
+			'pulse-glow': 'pulse-glow 2s ease-in-out infinite',
+			'bell-shake': 'bell-shake 0.5s ease-in-out'
   		},
   		boxShadow: {
   			'2xs': 'var(--shadow-2xs)',
