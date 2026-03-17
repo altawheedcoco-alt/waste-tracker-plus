@@ -969,14 +969,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {filteredMenuItems.length > 0 ? (
                       filteredMenuItems.map((item: SidebarMenuItem) => (
-                        <div key={item.key} onClick={(e) => {
-                          if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
-                        }}>
-                          <SidebarNavGroup
-                            item={item}
-                            isCollapsed={false}
-                          />
-                        </div>
+                        <SidebarNavGroup
+                          key={item.key}
+                          item={item}
+                          isCollapsed={false}
+                        />
                       ))
                     ) : (
                       <div className="text-center py-4 text-sm text-muted-foreground">
