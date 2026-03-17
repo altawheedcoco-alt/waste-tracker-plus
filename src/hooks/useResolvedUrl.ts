@@ -5,7 +5,13 @@ import { useState, useEffect } from 'react';
 import { refreshStorageUrl } from '@/utils/storageUrl';
 
 export const useResolvedUrl = (url: string | null | undefined): string | null => {
-  const [resolved, setResolved] = useState<string | null>(null);
+  const getInitial = (u: string | null | undefined) => {
+    if (!u) return null;
+    if (!u.includes('/storage/v1/')) return u;
+    if (u.includes('/object/public/')) return u;
+    return null;
+  };
+  const [resolved, setResolved] = useState<string | null>(() => getInitial(url));
 
   useEffect(() => {
     if (!url) {
