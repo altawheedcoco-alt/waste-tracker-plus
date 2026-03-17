@@ -80,7 +80,7 @@ const CVBuilder = () => {
         .contact { color: #666; font-size: 14px; } .summary { background: #f0f4ff; padding: 12px; border-radius: 8px; margin: 16px 0; }
         .exp-item { margin-bottom: 16px; } .exp-title { font-weight: bold; } .exp-company { color: #666; }
         .skills { display: flex; flex-wrap: wrap; gap: 8px; } .skill-tag { background: #e0e7ff; color: #3b52c4; padding: 4px 12px; border-radius: 16px; font-size: 13px; }
-        .cert-item { padding: 4px 0; } @media print { body { padding: 20px; } }
+        .cert-item { padding: 4px 0; } @media print { @page { size: A4; margin: 15mm 15mm 20mm 15mm; } body { padding: 15mm 15mm 20mm 15mm; margin: 0; } }
       </style></head><body>
         <h1>${personalInfo.fullName || 'الاسم'}</h1>
         <div class="contact">
