@@ -35940,6 +35940,7 @@ export type Database = {
           ai_review_score: number | null
           ai_review_status: string | null
           ai_review_summary: string | null
+          business_doc_extracted_data: Json | null
           business_doc_type: string | null
           business_doc_urls: Json | null
           created_at: string
@@ -35971,6 +35972,7 @@ export type Database = {
           ai_review_score?: number | null
           ai_review_status?: string | null
           ai_review_summary?: string | null
+          business_doc_extracted_data?: Json | null
           business_doc_type?: string | null
           business_doc_urls?: Json | null
           created_at?: string
@@ -36002,6 +36004,7 @@ export type Database = {
           ai_review_score?: number | null
           ai_review_status?: string | null
           ai_review_summary?: string | null
+          business_doc_extracted_data?: Json | null
           business_doc_type?: string | null
           business_doc_urls?: Json | null
           created_at?: string
