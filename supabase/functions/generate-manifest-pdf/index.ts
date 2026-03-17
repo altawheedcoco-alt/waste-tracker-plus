@@ -179,7 +179,7 @@ function generateWatermarkHTML(orgName: string): string {
       `<div style="position:absolute;top:${top}%;left:-20%;right:-20%;text-align:center;font-size:${size}px;font-family:'Cairo','Segoe UI',sans-serif;color:rgba(6,95,70,${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:1.8px;font-weight:600;line-height:1.5;pointer-events:none;user-select:none;">${watermarkText}    ${watermarkText}    ${watermarkText}</div>`
     );
   }
-  return `<div style="position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:multiply;">${rows.join('')}</div>`;
+  return `<div style="position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:multiply;">${rows.join('')}</div>`;
 }
 
 function generateVerticalStampHTML(): string {
