@@ -45,6 +45,18 @@ import {
   ScanLine,
   Trophy,
   Network,
+  Wrench,
+  GraduationCap,
+  HardHat,
+  FolderOpen,
+  Database,
+  Calculator,
+  Umbrella,
+  Wallet,
+  Store,
+  ShoppingCart,
+  Printer,
+  BookOpen,
 } from 'lucide-react';
 
 export interface QuickActionConfig {
