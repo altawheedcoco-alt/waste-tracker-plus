@@ -17,6 +17,7 @@ import {
   Users, ChevronLeft, ExternalLink, Globe,
 } from 'lucide-react';
 import PartnerNotesDialog from '@/components/partners/PartnerNotesDialog';
+import MemberNameLink from '@/components/org-structure/MemberNameLink';
 import PartnerLinkingCard from '@/components/partners/PartnerLinkingCard';
 import PartnerRestrictionManager from '@/components/partners/PartnerRestrictionManager';
 import usePartners from '@/hooks/usePartners';
@@ -530,7 +531,7 @@ const PartnerDetailPanel = ({
               الممثل القانوني <User className="w-4 h-4" />
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-muted-foreground">الاسم:</span> {org.representative_name}</p>
+              <p><span className="text-muted-foreground">الاسم:</span> <MemberNameLink name={org.representative_name!} email={org.representative_email} showIcon className="font-semibold" /></p>
               {org.representative_position && <p><span className="text-muted-foreground">المنصب:</span> {org.representative_position}</p>}
               {org.representative_phone && <p><span className="text-muted-foreground">الهاتف:</span> <span dir="ltr">{org.representative_phone}</span></p>}
               {org.representative_email && <p><span className="text-muted-foreground">البريد:</span> {org.representative_email}</p>}
@@ -544,7 +545,7 @@ const PartnerDetailPanel = ({
               المفوض <User className="w-4 h-4" />
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-muted-foreground">الاسم:</span> {org.delegate_name}</p>
+              <p><span className="text-muted-foreground">الاسم:</span> <MemberNameLink name={org.delegate_name!} email={org.delegate_email} showIcon className="font-semibold" /></p>
               {org.delegate_phone && <p><span className="text-muted-foreground">الهاتف:</span> <span dir="ltr">{org.delegate_phone}</span></p>}
               {org.delegate_email && <p><span className="text-muted-foreground">البريد:</span> {org.delegate_email}</p>}
             </div>

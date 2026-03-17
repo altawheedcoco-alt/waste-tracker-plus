@@ -44,27 +44,34 @@ export default function MemberNameLink({
     queryFn: async (): Promise<OrgMember | null> => {
       if (!orgId) return null;
 
-      // Build query to find the member
-      let query = supabase
-        .from('organization_members' as any)
-        .select('*')
-        .eq('organization_id', orgId);
+      // Try own org first, then any org (for partner members)
+      const tryLookup = async (filterOrgId?: string) => {
+        let query = supabase
+          .from('organization_members' as any)
+          .select('*');
 
-      if (profileId) {
-        query = query.eq('profile_id', profileId);
-      } else if (userId) {
-        query = query.eq('user_id', userId);
-      } else if (email) {
-        // Try invitation_email
-        query = query.eq('invitation_email', email);
-      } else {
-        return null;
-      }
+        if (filterOrgId) query = query.eq('organization_id', filterOrgId);
 
-      const { data, error } = await query.limit(1).single();
-      if (error || !data) return null;
+        if (profileId) {
+          query = query.eq('profile_id', profileId);
+        } else if (userId) {
+          query = query.eq('user_id', userId);
+        } else if (email) {
+          query = query.eq('invitation_email', email);
+        } else {
+          return null;
+        }
 
-      const m = data as any;
+        const { data, error } = await query.limit(1).single();
+        if (error || !data) return null;
+        return data as any;
+      };
+
+      // Try own org first
+      let m = await tryLookup(orgId);
+      // If not found, try without org filter (partner members)
+      if (!m) m = await tryLookup();
+      if (!m) return null;
 
       // Enrich with profile, position, department
       const [profileRes, posRes, deptRes] = await Promise.all([
