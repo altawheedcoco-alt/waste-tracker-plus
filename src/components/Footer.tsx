@@ -25,6 +25,7 @@ const Footer = () => {
   const legalLinks = [
     { label: t('footerExtra.termsOfUse'), href: '/terms' },
     { label: t('footerExtra.privacyPolicy'), href: '/privacy' },
+    { label: language === 'ar' ? 'سياسات المنصة' : 'Platform Policies', href: '/policies' },
     { label: t('footerExtra.licensesLegislation'), href: '/legislation' },
     { label: t('footerExtra.faq'), href: '/help' },
     { label: t('footerExtra.contactUsLink'), href: '/help' },
@@ -122,6 +123,8 @@ const Footer = () => {
             <button onClick={() => handleNavigate('/terms')} className="hover:text-primary transition-colors">{t('footerExtra.terms')}</button>
             <span>·</span>
             <button onClick={() => handleNavigate('/privacy')} className="hover:text-primary transition-colors">{t('footerExtra.privacy')}</button>
+            <span>·</span>
+            <button onClick={() => handleNavigate('/policies')} className="hover:text-primary transition-colors">{language === 'ar' ? 'السياسات' : 'Policies'}</button>
             <span>·</span>
             <button onClick={() => handleNavigate('/help')} className="hover:text-primary transition-colors">{t('footerExtra.help')}</button>
           </div>

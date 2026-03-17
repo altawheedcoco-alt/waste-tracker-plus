@@ -13,6 +13,7 @@ import { useSecurityHardening } from '@/hooks/useSecurityHardening';
 import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
 import { Loader2 } from 'lucide-react';
 
 // Lazy load heavy dashboard components - only one renders per user role
@@ -144,6 +145,15 @@ const Dashboard = () => {
   };
 
   return (
+    <>
+      {/* Terms acceptance gate */}
+      {requiresAcceptance && organizationType && (
+        <OrganizationTermsDialog
+          open={true}
+          onAccept={markAsAccepted}
+          organizationType={organizationType}
+        />
+      )}
     <SubscriptionGuard>
         <PinVerificationGate>
           <>
@@ -182,6 +192,7 @@ const Dashboard = () => {
           </>
         </PinVerificationGate>
     </SubscriptionGuard>
+    </>
   );
 };
 
