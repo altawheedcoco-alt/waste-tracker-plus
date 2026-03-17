@@ -752,6 +752,23 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Top header — v4.0 clean, minimal */}
           <header className={`sticky top-0 z-40 ${headerHeight} bg-card border-b border-border flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`}>
             <div className="flex items-center gap-2 shrink-0">
+              {/* Desktop: show menu button when sidebar is hidden */}
+              {!isMobile && !isSidebarOpen && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setIsSidebarOpen(true)}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
+                      aria-label="فتح القائمة"
+                    >
+                      <Menu size={18} className="text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p>{language === 'ar' ? 'فتح القائمة الجانبية' : 'Open sidebar'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               {isMobile && (
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
