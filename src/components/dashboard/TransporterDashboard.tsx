@@ -145,11 +145,19 @@ const TransporterDashboard = () => {
           { id: 'fleet-check', message: 'تذكير: فحص دوري للأسطول مطلوب خلال 48 ساعة', severity: 'warning' as const },
         ]}
         weather={{
-          temp: 32,
-          condition: 'sunny',
-          humidity: 45,
-          windSpeed: 18,
-          roadWarning: undefined,
+          temp: realWeather.temp,
+          condition: realWeather.condition,
+          conditionLabel: realWeather.conditionLabel,
+          humidity: realWeather.humidity,
+          windSpeed: realWeather.windSpeed,
+          roadWarning: realWeather.roadWarning,
+          feelsLike: realWeather.feelsLike,
+          uvIndex: realWeather.uvIndex,
+          precipProb: realWeather.precipProb,
+          pressure: realWeather.pressure,
+          locationName: realWeather.locationName,
+          hourlyForecast: realWeather.hourlyForecast,
+          isLoading: realWeather.isLoading,
         }}
         heatmapData={[
           { region: 'القاهرة', value: stats?.active || 0, max: 20 },
