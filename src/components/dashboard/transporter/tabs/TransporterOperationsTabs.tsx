@@ -137,8 +137,8 @@ const TransporterOperationsTabs = ({
       </ErrorBoundary>
       <TransporterPartnerSummary />
 
-      {/* ═══ القسم 6: الإجراءات السريعة ═══ */}
-      <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
+
+
 
       {/* ═══ القسم 7: قائمة الشحنات والتقرير التجميعي ═══ */}
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
