@@ -19,7 +19,7 @@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { createWorkbook, aoaToSheet, jsonToSheet, writeFile } from '@/lib/excelExport';
-import { generateGuillocheTextFillerHTML, generateMICRLineHTML, MICR_FONT_FACE_CSS } from '@/lib/printSecurityUtils';
+import { generateGuillocheTextFillerHTML, generateMICRLineHTML, generateVerticalStampHTML, MICR_FONT_FACE_CSS } from '@/lib/printSecurityUtils';
 
 // ─── A4 Constants ────────────────────────────────────────────
 export const A4 = {
@@ -528,8 +528,11 @@ export const PrintService = {
 </head>
 <body>
   ${textFillerHTML}
-  ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
   <div style="position:relative;z-index:2;">${htmlContent}</div>
+  <div style="position:relative;z-index:3;margin-top:4px;padding:2px 8mm;">
+    ${generateVerticalStampHTML()}
+    ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
+  </div>
   <script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>
 </body>
 </html>`);
@@ -784,8 +787,11 @@ export const PrintService = {
   <div class="page-wrapper">
     ${guillocheLayer}
     ${guillocheTextFiller}
-    ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
     <div class="print-container">${contentClone.innerHTML}</div>
+    <div style="margin-top:4px;padding:2px 8mm;">
+      ${generateVerticalStampHTML()}
+      ${generateMICRLineHTML(opts.orgClientCode, opts.orgVerificationCode)}
+    </div>
   </div>
 </body>
 </html>`);
