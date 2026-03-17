@@ -204,7 +204,7 @@ const RecyclerDashboard = () => {
           ...(recentShipments.filter(s => !s.has_report && s.status === 'delivered').length > 0 ? [{ id: 'pending-reports', message: `📋 ${recentShipments.filter(s => !s.has_report && s.status === 'delivered').length} شحنة مسلَّمة بدون تقرير تدوير — يجب إصدار التقارير`, severity: 'warning' as const, icon: FileText }] : []),
           ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-incoming', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة واردة — بروتوكول سلامة مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
           ...(!facility ? [{ id: 'no-facility', message: '🏭 لم يتم تسجيل منشأة التدوير — أضف بيانات المنشأة لتفعيل المراقبة', severity: 'critical' as const, icon: Factory }] : []),
-          ...(facility ? [{ id: 'facility-active', message: `🏭 المنشأة "${facility.facility_name || 'الرئيسية'}" — نشطة وتعمل`, severity: 'info' as const, icon: Factory }] : []),
+          ...(facility ? [{ id: 'facility-active', message: `🏭 المنشأة "${(facility as any).facility_name || 'الرئيسية'}" — نشطة وتعمل`, severity: 'info' as const, icon: Factory }] : []),
           { id: 'quality-inspection', message: '🔬 تذكير: فحص جودة المخرجات الدوري وتحديث شهادات التدوير', severity: 'warning' as const, icon: Beaker },
           { id: 'esg-report', message: '🌿 تذكير: إعداد تقرير الاستدامة ESG الشهري', severity: 'info' as const, icon: Leaf },
           { id: 'system-ok', message: '✅ أنظمة المصنع والتتبع والجودة تعمل بكفاءة', severity: 'info' as const },

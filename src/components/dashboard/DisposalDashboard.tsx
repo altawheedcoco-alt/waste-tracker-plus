@@ -231,7 +231,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           ...(operationsStats?.totalQuantity && operationsStats.totalQuantity > 100 ? [{ id: 'high-volume', message: `📊 حجم معالجة مرتفع: ${operationsStats.totalQuantity.toFixed(1)} طن — مراقبة السعة مطلوبة`, severity: 'warning' as const, icon: Scale }] : []),
           ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-disposal', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة — بروتوكول التخلص الآمن مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
           ...(!facility ? [{ id: 'no-facility', message: '🏭 لم يتم تسجيل منشأة التخلص — سجل بيانات المنشأة لتفعيل التشغيل', severity: 'critical' as const, icon: Factory }] : []),
-          ...(facility ? [{ id: 'facility-status', message: `🏭 المنشأة "${facility.facility_name || 'الرئيسية'}" — تعمل بكفاءة`, severity: 'info' as const, icon: Factory }] : []),
+          ...(facility ? [{ id: 'facility-status', message: `🏭 المنشأة "${(facility as any).facility_name || 'الرئيسية'}" — تعمل بكفاءة`, severity: 'info' as const, icon: Factory }] : []),
           { id: 'env-compliance', message: '🌍 تذكير: فحص الامتثال البيئي وتحديث تراخيص التخلص', severity: 'warning' as const, icon: Shield },
           { id: 'safety-protocol', message: '🦺 تذكير: مراجعة بروتوكولات السلامة المهنية للعاملين', severity: 'warning' as const, icon: HardHat },
           { id: 'annual-plan', message: '📅 تذكير: تحديث الخطة السنوية للتخلص من المخلفات', severity: 'info' as const, icon: ClipboardList },
