@@ -267,9 +267,9 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
     }
   }
 
-  /* Vertical rotated text on left side */
+  /* Vertical rotated text on left side — inside 15mm text margin */
   .vertical-text {
-    position: fixed; left: 0; top: 0; bottom: 0; width: 5mm;
+    position: fixed; left: 16mm; top: 15mm; bottom: 20mm; width: 5mm;
     writing-mode: vertical-rl; text-orientation: mixed;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Cairo', 'Courier New', monospace; font-size: ${FS}; font-weight: 900;

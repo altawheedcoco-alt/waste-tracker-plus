@@ -282,7 +282,7 @@ export function generateGuillocheBackgroundHTML(patterns: SavedPatternRef[]): st
     `;
   }).join('');
 
-  return `<div style="position:absolute;inset:0;pointer-events:none;background-color:${bgColor};">${layers}</div>`;
+  return `<div style="position:absolute;inset:10mm;pointer-events:none;background-color:${bgColor};border-radius:2px;overflow:hidden;">${layers}</div>`;
 }
 
 /**
