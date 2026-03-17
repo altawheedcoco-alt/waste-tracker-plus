@@ -19,8 +19,9 @@ import {
   FileText, Shield, Scale, CheckCircle, AlertTriangle, Loader2,
   Factory, Truck, Recycle, Upload, CreditCard, User, Phone,
   Briefcase, PenTool, ChevronLeft, ChevronRight, Lock, Camera,
-  Check, ScanLine, Sparkles, Eye, UserCheck, ImagePlus
+  Check, ScanLine, Sparkles, Eye, UserCheck, ImagePlus, FlipHorizontal
 } from 'lucide-react';
+import IDCardScanner from '@/components/id-scanner/IDCardScanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
