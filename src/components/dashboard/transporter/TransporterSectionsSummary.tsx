@@ -15,12 +15,11 @@ import {
   Users, Shield, CalendarClock, GraduationCap, Trophy,
   FileCheck, FolderCheck, ClipboardList, HardHat,
   Sparkles, Database, FolderOpen, Upload, PenTool, CircleDot,
-  Calculator, Banknote, Award, Activity, Network, UserPlus, ShoppingCart, BarChart3, Umbrella, TrendingUp, Wallet,
+  Calculator, Banknote, Award, Activity, Network, ShoppingCart, BarChart3, Umbrella, TrendingUp, Wallet,
   MessageCircle, Video, Send, BookOpen,
   Store, Globe, Search, Bookmark, Link2, Zap,
-  Bot, Leaf, Bell, Headphones,
-  MapIcon, Eye, Receipt, FileSignature,
-  LucideIcon, ChevronLeft, ExternalLink,
+  Receipt, FileSignature,
+  LucideIcon,
 } from 'lucide-react';
 
 interface SectionItem {
