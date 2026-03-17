@@ -407,7 +407,8 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
       // Archive business documents to entity_documents for sync
       if (businessDocUrls.length > 0 && organization.id) {
-        const docTypeLabel = DOCUMENT_TYPES_MAP[businessDocData.documentType] || businessDocData.documentType;
+        const docTypeLabelsMap: Record<string, string> = { tax_card: 'البطاقة الضريبية', commercial_register: 'السجل التجاري', data_statement: 'وثيقة البيانات', other: 'مستند آخر' };
+        const docTypeLabel = docTypeLabelsMap[businessDocData.documentType] || businessDocData.documentType;
         const archivePromises = businessDocUrls.map((url, i) =>
           supabase.from('entity_documents').insert({
             organization_id: organization.id,
