@@ -650,6 +650,7 @@ ${custodyChain.length > 0 ? `
     رقم التتبع: ${shipment.shipment_number} | ${documentSerial} | ${securityCode} | ${new Date().toLocaleString("ar-EG")}
   </div>
 </div>
+</div><!-- /manifest-page -->
 
 </body>
 </html>`;
