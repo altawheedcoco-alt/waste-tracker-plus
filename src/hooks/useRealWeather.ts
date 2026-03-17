@@ -175,5 +175,22 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
     return () => clearTimeout(fallbackTimer);
   }, [fetchWeather, refreshIntervalMs]);
 
-  return data;
+  const refreshFromGPS = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    setData(prev => ({ ...prev, isLoading: true }));
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        fetchWeather(pos.coords.latitude, pos.coords.longitude);
+      },
+      () => {
+        setIsLocating(false);
+        fetchWeather(DEFAULT_LAT, DEFAULT_LNG);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }, [fetchWeather]);
+
+  return { ...data, refreshFromGPS, isLocating };
 }
