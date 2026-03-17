@@ -88,6 +88,8 @@ const ShareDialog = ({ open, onOpenChange, resourceType, resourceId, resourceTit
     certificate: isAr ? 'شهادة' : 'Certificate',
     invoice: isAr ? 'فاتورة' : 'Invoice',
     organization: isAr ? 'منظمة' : 'Organization',
+    document: isAr ? 'مستند' : 'Document',
+    safety_report: isAr ? 'تقرير سلامة' : 'Safety Report',
   };
 
   return (

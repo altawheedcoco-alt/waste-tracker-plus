@@ -97,6 +97,12 @@ const SharedResourcePage = () => {
         return <SharedShipmentView data={data.data} accessLevel={data.access_level} />;
       case 'blog':
         return <SharedBlogView data={data.data} />;
+      case 'certificate':
+        return <SharedCertificateView data={data.data} />;
+      case 'invoice':
+        return <SharedInvoiceView data={data.data} accessLevel={data.access_level} />;
+      case 'organization':
+        return <SharedOrganizationView data={data.data} accessLevel={data.access_level} />;
       default:
         return (
           <div className="bg-card rounded-xl border p-6 text-center">
