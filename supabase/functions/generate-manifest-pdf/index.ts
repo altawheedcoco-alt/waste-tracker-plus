@@ -250,17 +250,27 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
   @font-face { font-family: 'MICR E13B'; src: url('/fonts/micr-e13b.ttf') format('truetype'); font-weight: normal; font-style: normal; }
-  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
+  @page { size: A4 portrait; margin: 0; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  body, .manifest-page { 
+  body { 
     font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
     font-size: ${FS}; color: #1a1a1a; direction: rtl; 
-    width: 210mm; min-height: 297mm; position: relative;
+    width: 210mm; height: 297mm; position: relative;
+    margin: 0; padding: 0;
+    background: #fff;
+    overflow: hidden;
+  }
+  .manifest-page {
+    font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
+    font-size: ${FS}; color: #1a1a1a; direction: rtl; 
+    width: 210mm; height: 297mm; position: relative;
     padding: 15mm 15mm 20mm 15mm;
     background: #fff;
+    overflow: hidden;
   }
   @media print {
-    body { background: #fff !important; }
+    html, body { width: 210mm; height: 297mm; margin: 0; padding: 0; overflow: hidden; }
+    .manifest-page { width: 210mm; height: 297mm; padding: 15mm 15mm 20mm 15mm; overflow: hidden; }
     svg, path, rect, div, span {
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
