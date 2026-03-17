@@ -36,23 +36,23 @@ const FloatingActionsStack = memo(({
   if (visibleActions.length === 0) return null;
 
   // Responsive sizing - smaller on mobile
-  const buttonSize = isMobile ? 'w-10 h-10' : 'w-14 h-14';
-  const iconSize = isMobile ? 16 : 22;
+  const buttonSize = isMobile ? 'w-11 h-11' : 'w-12 h-12';
   const gap = isMobile ? 'gap-2' : 'gap-3';
   
-  // Position classes based on device and position prop - moved higher on mobile to avoid overlap
+  // Position classes — consistent layering above bottom nav (mobile) or at bottom (desktop)
+  // Mobile bottom nav = 60px + safe-area. We sit above it with clear spacing.
   const getPositionClasses = () => {
     if (position === 'bottom-right') {
       return isMobile 
-        ? 'bottom-[calc(5rem+env(safe-area-inset-bottom))] right-3' 
-        : 'bottom-6 right-6';
+        ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-16' // Right side but clear of UnifiedFloatingMenu
+        : 'bottom-6 right-24'; // Clear of UnifiedFloatingMenu on desktop
     }
-    // bottom-left (default) - stacked above other widgets with more spacing
+    // bottom-left (default)
     return isMobile 
-      ? 'bottom-[calc(8rem+env(safe-area-inset-bottom))] left-3' // Higher on mobile to avoid bottom nav overlap
+      ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-3'
       : isTablet 
-        ? 'bottom-6 left-20' // Clear of sidebar
-        : 'bottom-6 left-24'; // Desktop with sidebar
+        ? 'bottom-6 left-6'
+        : 'bottom-6 left-6';
   };
 
   const getVariantClasses = (variant: FloatingAction['variant']) => {
