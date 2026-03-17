@@ -349,7 +349,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 </style>
 </head>
 <body>
-
+<div class="manifest-page">
 <!-- ═══ Layer 0: Guilloche Text Filler — trilingual threads + sine waves ═══ -->
 ${generateGuillocheTextFillerHTML('#059669')}
 
