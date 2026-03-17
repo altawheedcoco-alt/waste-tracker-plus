@@ -19,8 +19,9 @@ import {
   FileText, Shield, Scale, CheckCircle, AlertTriangle, Loader2,
   Factory, Truck, Recycle, Upload, CreditCard, User, Phone,
   Briefcase, PenTool, ChevronLeft, ChevronRight, Lock, Camera,
-  Check, ScanLine, Sparkles, Eye, UserCheck, ImagePlus
+  Check, ScanLine, Sparkles, Eye, UserCheck, ImagePlus, FlipHorizontal
 } from 'lucide-react';
+import IDCardScanner from '@/components/id-scanner/IDCardScanner';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { 
@@ -41,6 +42,7 @@ interface OrganizationTermsDialogProps {
 }
 
 type Step = 'identity' | 'selfie' | 'terms';
+type IDInputMode = 'scanner' | 'upload';
 
 const OrganizationTermsDialog = ({ open, onAccept, organizationType }: OrganizationTermsDialogProps) => {
   const { user, profile, organization } = useAuth();
@@ -83,6 +85,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [idInputMode, setIdInputMode] = useState<IDInputMode>('scanner');
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string | null>(null);
   const [signatureMode, setSignatureMode] = useState<'electronic' | 'upload'>('electronic');
@@ -220,6 +223,31 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   };
 
   const validateNationalId = (id: string) => /^\d{14}$/.test(id);
+
+  // Handle scanner capture
+  const handleScannerCapture = async (imageDataUrl: string, side: 'front' | 'back') => {
+    // Convert dataUrl to File
+    const blob = await fetch(imageDataUrl).then(r => r.blob());
+    const file = new File([blob], `id-${side}.jpg`, { type: 'image/jpeg' });
+
+    if (side === 'front') {
+      setIdFrontFile(file);
+      setIdFrontPreview(imageDataUrl);
+      setIdFrontEnhanced(imageDataUrl); // Already enhanced by scanner
+      setVerifyingFront(true);
+      const result = await verifyDocument(imageDataUrl, 'front');
+      setVerifyingFront(false);
+      if (result?.extracted_data) autoFillFromExtraction(result.extracted_data);
+    } else {
+      setIdBackFile(file);
+      setIdBackPreview(imageDataUrl);
+      setIdBackEnhanced(imageDataUrl);
+      setVerifyingBack(true);
+      const result = await verifyDocument(imageDataUrl, 'back');
+      setVerifyingBack(false);
+      if (result?.extracted_data) autoFillFromExtraction(result.extracted_data);
+    }
+  };
 
   // Camera for selfie
   const startCamera = async () => {
@@ -573,114 +601,157 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
                     <div>
                       <p className="font-semibold text-sm text-blue-800 dark:text-blue-200">مسح ذكي للبطاقة الشخصية</p>
                       <p className="text-xs text-blue-600 dark:text-blue-400 mt-0.5">
-                        ارفع صور البطاقة وسيتم التحقق واستخراج البيانات تلقائياً بتقنية الذكاء الاصطناعي مع تحسين جودة الصور
+                        {idInputMode === 'scanner' 
+                          ? 'وجّه الكاميرا نحو البطاقة وسيتم التقاطها تلقائياً عند دخولها الإطار مع تحسين الجودة'
+                          : 'ارفع صور البطاقة وسيتم التحقق واستخراج البيانات تلقائياً'}
                       </p>
                     </div>
                   </div>
 
-                  {/* ID Card Upload with AI Verification */}
+                  {/* Mode toggle: Scanner vs Upload */}
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => setIdInputMode('scanner')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                        idInputMode === 'scanner'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-muted-foreground/20 text-muted-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      <Camera className="w-3.5 h-3.5" />
+                      مسح بالكاميرا
+                    </button>
+                    <button
+                      onClick={() => setIdInputMode('upload')}
+                      className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium border transition-all ${
+                        idInputMode === 'upload'
+                          ? 'border-primary bg-primary/10 text-primary'
+                          : 'border-muted-foreground/20 text-muted-foreground hover:bg-accent/50'
+                      }`}
+                    >
+                      <Upload className="w-3.5 h-3.5" />
+                      رفع صورة
+                    </button>
+                  </div>
+
+                  {/* ID Card Section */}
                   <div>
                     <Label className="text-xs font-medium flex items-center gap-1.5 mb-3">
-                      <Camera className="w-3.5 h-3.5 text-muted-foreground" />
+                      <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
                       صور البطاقة الشخصية / جواز السفر
                     </Label>
-                    <div className="grid grid-cols-2 gap-3">
-                      {/* Front */}
-                      <div>
-                        <input ref={idFrontInputRef} type="file" accept="image/*" capture="environment" className="hidden"
-                          onChange={(e) => handleFileChange('front', e.target.files?.[0] || null)} />
-                        <div
-                          onClick={() => !verifyingFront && !enhancingFront && idFrontInputRef.current?.click()}
-                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
-                            frontResult?.is_valid_document 
-                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
-                              : idFrontPreview 
-                                ? 'border-amber-400 bg-amber-50/50' 
-                                : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
-                          }`}
-                        >
-                          {idFrontPreview ? (
-                            <div className="relative">
-                              <img src={idFrontEnhanced || idFrontPreview} alt="وجه البطاقة" className="w-full h-32 object-cover" />
-                              {(enhancingFront || verifyingFront) && (
-                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
-                                  <Loader2 className="w-5 h-5 text-white animate-spin" />
-                                  <span className="text-[10px] text-white font-medium">
-                                    {enhancingFront ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
-                                  </span>
-                                </div>
-                              )}
-                              {frontResult?.is_valid_document && !verifyingFront && !enhancingFront && (
-                                <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
-                                  <Check className="w-2.5 h-2.5" /> تم التحقق
-                                </div>
-                              )}
-                              {idFrontEnhanced && !enhancingFront && (
-                                <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
-                                  <Sparkles className="w-2.5 h-2.5" /> محسّنة
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-7 gap-2">
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                <Upload className="w-5 h-5 text-muted-foreground/50" />
-                              </div>
-                              <p className="text-[11px] text-muted-foreground font-medium">وجه البطاقة</p>
-                              <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
 
-                      {/* Back */}
-                      <div>
-                        <input ref={idBackInputRef} type="file" accept="image/*" capture="environment" className="hidden"
-                          onChange={(e) => handleFileChange('back', e.target.files?.[0] || null)} />
-                        <div
-                          onClick={() => !verifyingBack && !enhancingBack && idBackInputRef.current?.click()}
-                          className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
-                            backResult?.is_valid_document 
-                              ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
-                              : idBackPreview 
-                                ? 'border-amber-400 bg-amber-50/50' 
-                                : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
-                          }`}
-                        >
-                          {idBackPreview ? (
-                            <div className="relative">
-                              <img src={idBackEnhanced || idBackPreview} alt="ظهر البطاقة" className="w-full h-32 object-cover" />
-                              {(enhancingBack || verifyingBack) && (
-                                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
-                                  <Loader2 className="w-5 h-5 text-white animate-spin" />
-                                  <span className="text-[10px] text-white font-medium">
-                                    {enhancingBack ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
-                                  </span>
-                                </div>
-                              )}
-                              {backResult?.is_valid_document && !verifyingBack && !enhancingBack && (
-                                <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
-                                  <Check className="w-2.5 h-2.5" /> تم التحقق
-                                </div>
-                              )}
-                              {idBackEnhanced && !enhancingBack && (
-                                <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
-                                  <Sparkles className="w-2.5 h-2.5" /> محسّنة
-                                </div>
-                              )}
-                            </div>
-                          ) : (
-                            <div className="flex flex-col items-center justify-center py-7 gap-2">
-                              <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
-                                <Upload className="w-5 h-5 text-muted-foreground/50" />
+                    {idInputMode === 'scanner' ? (
+                      /* Camera Scanner Mode */
+                      <IDCardScanner
+                        onCapture={handleScannerCapture}
+                        onComplete={() => {}}
+                        isVerifying={verifyingFront || verifyingBack}
+                        frontCaptured={!!idFrontFile}
+                        backCaptured={!!idBackFile}
+                        frontVerified={!!frontResult?.is_valid_document}
+                        backVerified={!!backResult?.is_valid_document}
+                      />
+                    ) : (
+                      /* Upload Mode (original) */
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Front */}
+                        <div>
+                          <input ref={idFrontInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+                            onChange={(e) => handleFileChange('front', e.target.files?.[0] || null)} />
+                          <div
+                            onClick={() => !verifyingFront && !enhancingFront && idFrontInputRef.current?.click()}
+                            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
+                              frontResult?.is_valid_document 
+                                ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
+                                : idFrontPreview 
+                                  ? 'border-amber-400 bg-amber-50/50' 
+                                  : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
+                            }`}
+                          >
+                            {idFrontPreview ? (
+                              <div className="relative">
+                                <img src={idFrontEnhanced || idFrontPreview} alt="وجه البطاقة" className="w-full h-32 object-cover" />
+                                {(enhancingFront || verifyingFront) && (
+                                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                    <span className="text-[10px] text-white font-medium">
+                                      {enhancingFront ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
+                                    </span>
+                                  </div>
+                                )}
+                                {frontResult?.is_valid_document && !verifyingFront && !enhancingFront && (
+                                  <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                    <Check className="w-2.5 h-2.5" /> تم التحقق
+                                  </div>
+                                )}
+                                {idFrontEnhanced && !enhancingFront && (
+                                  <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                    <Sparkles className="w-2.5 h-2.5" /> محسّنة
+                                  </div>
+                                )}
                               </div>
-                              <p className="text-[11px] text-muted-foreground font-medium">ظهر البطاقة</p>
-                              <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
-                            </div>
-                          )}
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-7 gap-2">
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Upload className="w-5 h-5 text-muted-foreground/50" />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground font-medium">وجه البطاقة</p>
+                                <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Back */}
+                        <div>
+                          <input ref={idBackInputRef} type="file" accept="image/*" capture="environment" className="hidden"
+                            onChange={(e) => handleFileChange('back', e.target.files?.[0] || null)} />
+                          <div
+                            onClick={() => !verifyingBack && !enhancingBack && idBackInputRef.current?.click()}
+                            className={`relative border-2 border-dashed rounded-xl overflow-hidden cursor-pointer transition-all duration-200 ${
+                              backResult?.is_valid_document 
+                                ? 'border-green-400 bg-green-50/50 dark:bg-green-950/20' 
+                                : idBackPreview 
+                                  ? 'border-amber-400 bg-amber-50/50' 
+                                  : 'border-muted-foreground/20 hover:border-primary/50 hover:bg-accent/50'
+                            }`}
+                          >
+                            {idBackPreview ? (
+                              <div className="relative">
+                                <img src={idBackEnhanced || idBackPreview} alt="ظهر البطاقة" className="w-full h-32 object-cover" />
+                                {(enhancingBack || verifyingBack) && (
+                                  <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-1">
+                                    <Loader2 className="w-5 h-5 text-white animate-spin" />
+                                    <span className="text-[10px] text-white font-medium">
+                                      {enhancingBack ? 'تحسين الصورة...' : 'التحقق بالذكاء الاصطناعي...'}
+                                    </span>
+                                  </div>
+                                )}
+                                {backResult?.is_valid_document && !verifyingBack && !enhancingBack && (
+                                  <div className="absolute top-1.5 left-1.5 flex items-center gap-1 bg-green-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                    <Check className="w-2.5 h-2.5" /> تم التحقق
+                                  </div>
+                                )}
+                                {idBackEnhanced && !enhancingBack && (
+                                  <div className="absolute bottom-1.5 right-1.5 flex items-center gap-1 bg-blue-500 text-white text-[9px] px-1.5 py-0.5 rounded-full">
+                                    <Sparkles className="w-2.5 h-2.5" /> محسّنة
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="flex flex-col items-center justify-center py-7 gap-2">
+                                <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center">
+                                  <Upload className="w-5 h-5 text-muted-foreground/50" />
+                                </div>
+                                <p className="text-[11px] text-muted-foreground font-medium">ظهر البطاقة</p>
+                                <p className="text-[9px] text-muted-foreground/60">صوّر أو ارفع</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </div>
+                    )}
                     
                     {/* AI verification warnings */}
                     {frontResult && frontResult.warnings?.length > 0 && (
