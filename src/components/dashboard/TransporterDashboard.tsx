@@ -38,7 +38,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
