@@ -585,12 +585,14 @@ const DashboardV2Header = memo(({
 
             {/* ── ROW 2: Alert Ticker + Weather ── */}
             {(alerts.length > 0 || weather) && (
-              <div className="flex flex-col sm:flex-row gap-1.5 mb-2">
-                {alerts.length > 0 && (
-                  <div className="flex-1 min-w-0">
-                    <AlertTicker alerts={alerts} />
-                  </div>
-                )}
+              <div className="flex flex-col gap-1.5 mb-2">
+                <div className="flex flex-col sm:flex-row gap-1.5">
+                  {alerts.length > 0 && (
+                    <div className="flex-1 min-w-0">
+                      <AlertTicker alerts={alerts} />
+                    </div>
+                  )}
+                </div>
                 {weather && <WeatherWidget weather={weather} />}
               </div>
             )}
