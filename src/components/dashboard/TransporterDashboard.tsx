@@ -135,6 +135,7 @@ const TransporterDashboard = () => {
       <DashboardWidgetCustomizer orgType="transporter" />
 
       <TransporterCommandCenter />
+      <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
       <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
         <TransporterDailyPulse />
