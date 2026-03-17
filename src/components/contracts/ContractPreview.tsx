@@ -61,7 +61,7 @@ const ContractPreview = ({
   const today = format(new Date(), 'dd MMMM yyyy', { locale: ar });
 
   const printStyles = `
-    @page { size: A4; margin: 15mm; }
+    @page { size: A4; margin: 15mm 15mm 20mm 15mm; }
     body { font-family: 'Cairo', 'Tajawal', sans-serif; direction: rtl; }
     .contract-content { max-width: 100%; }
     .section-title { font-weight: bold; margin-top: 20px; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
