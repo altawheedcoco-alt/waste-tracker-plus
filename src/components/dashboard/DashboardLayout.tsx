@@ -1001,14 +1001,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                         </div>
                         <div className="space-y-1">
                           {filteredQuickActions.map((item) => (
-                            <div key={item.key} onClick={() => setIsMobileMenuOpen(false)}>
                               <SidebarNavItem
+                                key={item.key}
                                 icon={item.icon}
                                 label={item.label}
                                 path={item.path}
                                 isCollapsed={false}
                               />
-                            </div>
                           ))}
                         </div>
                       </div>
