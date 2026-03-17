@@ -28,7 +28,7 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const orgFields = `name, name_en, address, address_details, city, region, phone, secondary_phone, email, business_email, commercial_register, tax_card, license_number, environmental_license, environmental_approval_number, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, eeaa_license_issue_date, eeaa_license_expiry_date, ida_license, ida_license_issue_date, ida_license_expiry_date, land_transport_license, land_transport_license_issue_date, land_transport_license_expiry_date, industrial_registry, establishment_registration, organization_type, partner_code, client_code, representative_name, representative_phone, representative_email, representative_position, representative_national_id, agent_name, agent_phone, agent_email, agent_national_id, delegate_name, delegate_phone, delegate_email, delegate_national_id, activity_type, field_of_work, hazardous_certified, headquarters, logo_url, digital_declaration_number, certifications_approvals`;
+    const orgFields = `name, name_en, address, address_details, city, region, phone, secondary_phone, email, business_email, commercial_register, tax_card, license_number, environmental_license, environmental_approval_number, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, eeaa_license_issue_date, eeaa_license_expiry_date, ida_license, ida_license_issue_date, ida_license_expiry_date, land_transport_license, land_transport_license_issue_date, land_transport_license_expiry_date, industrial_registry, establishment_registration, organization_type, partner_code, client_code, representative_name, representative_phone, representative_email, representative_position, representative_national_id, agent_name, agent_phone, agent_email, agent_national_id, delegate_name, delegate_phone, delegate_email, delegate_national_id, activity_type, field_of_work, hazardous_certified, headquarters, logo_url, digital_declaration_number, certifications_approvals, stamp_url, signature_url`;
     const { data: shipment, error } = await supabase
       .from("shipments")
       .select(`*, generator:organizations!shipments_generator_id_fkey(${orgFields}), transporter:organizations!shipments_transporter_id_fkey(${orgFields}), recycler:organizations!shipments_recycler_id_fkey(${orgFields})`)
@@ -82,6 +82,14 @@ function generateBarcodeSvg(text: string, width = 180, height = 30): string {
   return `<svg width="${width}" height="${height + 12}" viewBox="0 0 ${width} ${height + 12}" xmlns="http://www.w3.org/2000/svg">${bars}<text x="${width/2}" y="${height + 10}" text-anchor="middle" font-family="monospace" font-size="7" fill="#333">${text}</text></svg>`;
 }
 
+function hexToRgb(hex: string): string {
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0, 2), 16);
+  const g = parseInt(h.substring(2, 4), 16);
+  const b = parseInt(h.substring(4, 6), 16);
+  return `${r},${g},${b}`;
+}
+
 function getLicenseStatusHTML(expiryDate: string | null | undefined): string {
   if (!expiryDate) return '<span style="color:#9ca3af;font-size:5.5px">⚪ غير محدد</span>';
   const now = new Date();
@@ -106,6 +114,81 @@ function renderLicensesBlock(org: any): string {
   html += `</div>`;
   return html;
 }
+
+// ═══════════════════════════════════════════════════════════════
+// SECURITY LAYERS — ported from ShipmentA4Document & printSecurityUtils
+// ═══════════════════════════════════════════════════════════════
+
+const GUILLOCHE_TEXT_EN = 'iRecycle Waste Management System';
+const GUILLOCHE_TEXT_AR = 'آي ريسايكل لإدارة المخلفات';
+const GUILLOCHE_TEXT_HIERO = '𓇋𓂋𓇌𓋴𓇌𓎡𓃭 𓅱𓇌𓋴𓏏 𓅓𓈖𓇌𓆓𓅓𓈖𓏏 𓋴𓇌𓋴𓏏𓅓';
+
+function generateGuillocheTextFillerHTML(accentColor = '#059669'): string {
+  const textLine = `${GUILLOCHE_TEXT_EN}  ✦  ${GUILLOCHE_TEXT_AR}  ✦  ${GUILLOCHE_TEXT_HIERO}`;
+  const rows: string[] = [];
+
+  for (let i = 0; i < 28; i++) {
+    const top = 2 + i * 3.5;
+    const alpha = i % 3 === 0 ? 0.045 : i % 3 === 1 ? 0.035 : 0.028;
+    const fontSize = i % 2 === 0 ? 7.5 : 6.5;
+    const angle = i % 4 === 0 ? -18 : i % 4 === 1 ? 12 : i % 4 === 2 ? -8 : 15;
+    const offsetX = (i % 5) * -60;
+    rows.push(
+      `<div style="position:absolute;top:${top}%;left:${offsetX}px;right:-200px;text-align:center;font-size:${fontSize}px;font-family:'Noto Sans Egyptian Hieroglyphs','Cairo','Aref Ruqaa Ink',serif;color:rgba(${hexToRgb(accentColor)},${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:3px;font-weight:400;line-height:1;pointer-events:none;user-select:none;">${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}&nbsp;&nbsp;◈&nbsp;&nbsp;${textLine}</div>`
+    );
+  }
+
+  const waveSVGs: string[] = [];
+  for (let w = 0; w < 14; w++) {
+    const y = 5 + w * 7;
+    const amp = 8 + (w % 3) * 4;
+    const freq = 0.008 + (w % 4) * 0.002;
+    const alpha = 0.04 + (w % 3) * 0.01;
+    const sw = 0.3 + (w % 2) * 0.2;
+    let d = `M 0 ${amp}`;
+    for (let x = 0; x <= 900; x += 3) {
+      const yp = amp * Math.sin(freq * x * Math.PI * 2 + w * 0.7);
+      d += ` L ${x} ${amp + yp}`;
+    }
+    waveSVGs.push(
+      `<div style="position:absolute;top:${y}%;left:0;right:0;height:${amp * 2 + 4}px;pointer-events:none;opacity:${alpha};overflow:hidden;">` +
+      `<svg width="100%" height="${amp * 2 + 4}" viewBox="0 0 900 ${amp * 2 + 4}" preserveAspectRatio="none" style="display:block;">` +
+      `<path d="${d}" fill="none" stroke="${accentColor}" stroke-width="${sw}" stroke-linecap="round"/>` +
+      `</svg></div>`
+    );
+  }
+
+  return `<div style="position:absolute;inset:10mm;z-index:0;pointer-events:none;overflow:hidden;">${rows.join('')}${waveSVGs.join('')}</div>`;
+}
+
+function generateWatermarkHTML(orgName: string): string {
+  const now = new Date();
+  const dateAr = now.toLocaleDateString('ar-EG', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeAr = now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const dateEn = now.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const timeEn = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+  const watermarkText = `${orgName} | ${dateAr} ${timeAr} | ${dateEn} ${timeEn}`;
+  const rows: string[] = [];
+  for (let i = 0; i < 12; i++) {
+    const top = 1 + i * 8.5;
+    const angle = i % 2 === 0 ? -33 : -28;
+    const size = i % 2 === 0 ? 13 : 11;
+    const alpha = i % 2 === 0 ? 0.08 : 0.055;
+    rows.push(
+      `<div style="position:absolute;top:${top}%;left:-20%;right:-20%;text-align:center;font-size:${size}px;font-family:'Cairo','Segoe UI',sans-serif;color:rgba(6,95,70,${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:1.8px;font-weight:600;line-height:1.5;pointer-events:none;user-select:none;">${watermarkText}    ${watermarkText}    ${watermarkText}</div>`
+    );
+  }
+  return `<div style="position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:multiply;">${rows.join('')}</div>`;
+}
+
+function generateVerticalStampHTML(): string {
+  return `<div style="font-family:'Courier New','Cairo',monospace;font-size:7px;letter-spacing:1px;color:#000;font-weight:900;direction:rtl;text-align:center;pointer-events:none;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+    <span style="background:rgba(255,255,255,0.85);padding:2px 8px;border:1px solid rgba(0,0,0,0.15);border-radius:2px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية | iRecycle Platform — This Document is Secured &amp; Smart | 𓇋𓂋𓇌𓋴𓇌𓎡𓃭 — 𓅓𓋴𓏏𓈖𓂧 𓅓𓀀𓅓𓈖 𓅱𓇌𓎡𓇌 ◂</span>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
 
 function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[]) {
   const wasteTypeLabels: Record<string, string> = {
@@ -133,6 +216,10 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   const transHash = Math.abs(hash * 37).toString(16).padStart(8, '0').toUpperCase();
   const recHash = Math.abs(hash * 41).toString(16).padStart(8, '0').toUpperCase();
 
+  // Document serial & security code
+  const securityCode = `SEC-${integrityHash.slice(0, 4)}-${integrityHash.slice(4, 8)}`;
+  const documentSerial = `DOC-${shipment.shipment_number?.replace('SHP-', '') || '000000'}`;
+
   const isHazardous = shipment.hazard_level && shipment.hazard_level !== "low";
   const verifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}`;
   const genVerifyUrl = `https://irecycle.app/qr-verify?ref=${shipment.shipment_number}&party=generator&h=${genHash}`;
@@ -150,6 +237,12 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   const orgCode = shipment.transporter?.client_code || shipment.generator?.client_code || '000000';
   const micrLine = `A${orgCode}A B${dateStamp}D${timeStamp}B C${shipment.shipment_number}C`;
 
+  // Org name for watermark
+  const primaryOrgName = shipment.transporter?.name || shipment.generator?.name || 'iRecycle';
+
+  // Unified font size — matches ShipmentA4Document
+  const FS = '6.5px';
+
   return `<!DOCTYPE html>
 <html dir="rtl" lang="ar">
 <head>
@@ -157,22 +250,29 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
   @font-face { font-family: 'MICR E13B'; src: url('/fonts/micr-e13b.ttf') format('truetype'); font-weight: normal; font-style: normal; }
-  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
-  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+  @page { size: A4 portrait; margin: 12mm 12mm 14mm 12mm; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
   body { 
     font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
-    font-size: 7px; color: #1a1a1a; direction: rtl; 
-    width: 210mm; min-height: 297mm; position: relative;
-    padding: 15mm 15mm 20mm 15mm;
+    font-size: ${FS}; color: #1a1a1a; direction: rtl; 
+    width: 210mm; min-height: 269mm; position: relative;
+    padding: 12mm 12mm 14mm 12mm;
     background: #fff;
   }
-  
+  @media print {
+    body { background: #fff !important; }
+    svg, path, rect, div, span {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+  }
+
   /* Vertical rotated text on left side */
   .vertical-text {
     position: fixed; left: 0; top: 0; bottom: 0; width: 5mm;
     writing-mode: vertical-rl; text-orientation: mixed;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Cairo', 'Courier New', monospace; font-size: 6.5px; font-weight: 900;
+    font-family: 'Cairo', 'Courier New', monospace; font-size: ${FS}; font-weight: 900;
     letter-spacing: 1px; color: #000; z-index: 10; direction: ltr;
     background: rgba(240,253,244,0.6); border-left: 1px solid #16a34a;
   }
@@ -184,88 +284,82 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 
   /* MICR line at bottom inside content area */
   .micr-line {
-    position: absolute; bottom: 1mm; left: 6mm; right: 6mm;
     direction: ltr; text-align: center;
     font-family: 'MICR E13B', 'Courier New', monospace;
     font-size: 10px; letter-spacing: 1.5px; color: #000;
     z-index: 5; pointer-events: none; user-select: none;
-    border-top: 1px solid #e5e7eb; padding-top: 1mm;
+    border-top: 1px solid #e5e7eb; padding-top: 1mm; margin-top: 2px;
   }
 
-  /* Watermark */
-  body::before {
-    content: "iRecycle"; position: fixed; top: 50%; left: 50%;
-    transform: translate(-50%, -50%) rotate(-35deg);
-    font-size: 100px; font-weight: 900; color: rgba(22,163,74,0.06);
-    pointer-events: none; z-index: 0; letter-spacing: 15px;
-  }
-  
-  .hdr { text-align: center; border-bottom: 2.5px solid #16a34a; padding-bottom: 4px; margin-bottom: 4px; position: relative; z-index: 2; }
-  .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-  .hdr-logo { font-size: 13px; font-weight: 900; color: #16a34a; }
-  .hdr h1 { font-size: 11px; color: #16a34a; margin: 2px 0; }
-  .hdr-sub { font-size: 6.5px; color: #666; }
-  .hdr-num { font-size: 9px; font-weight: bold; margin-top: 2px; background: #f0fdf4; padding: 2px 8px; display: inline-block; border-radius: 3px; border: 1px solid #bbf7d0; }
-  .hdr-codes { display: flex; justify-content: center; gap: 12px; align-items: center; margin-top: 4px; }
-  .hdr-codes .qr-box { border: 1px solid #d1d5db; border-radius: 3px; padding: 2px; background: #fff; }
+  .hdr { text-align: center; border-bottom: 2.5px solid #16a34a; padding-bottom: 3px; margin-bottom: 3px; position: relative; z-index: 2; }
+  .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+  .hdr-logo { font-size: 11px; font-weight: 900; color: #16a34a; }
+  .hdr h1 { font-size: 9px; color: #16a34a; margin: 1px 0; }
+  .hdr-sub { font-size: ${FS}; color: #666; }
+  .hdr-num { font-size: 8px; font-weight: bold; margin-top: 2px; background: transparent; padding: 1px 6px; display: inline-block; border-radius: 3px; border: 1px solid #bbf7d0; }
+  .hdr-codes { display: flex; justify-content: center; gap: 8px; align-items: center; margin-top: 3px; }
+  .hdr-codes .qr-box { border: 1px solid #d1d5db; border-radius: 3px; padding: 1px; background: #fff; }
   .hdr-codes .barcode-box { text-align: center; }
 
-  .sec { margin-bottom: 3px; position: relative; z-index: 2; }
-  .sec-t { background: linear-gradient(90deg, #f0fdf4, #fff); border-right: 3px solid #16a34a; padding: 1.5px 6px; font-weight: bold; font-size: 7.5px; margin-bottom: 2px; color: #15803d; }
+  .sec { margin-bottom: 2px; position: relative; z-index: 2; }
+  .sec-t { background: transparent; border-right: 3px solid #16a34a; padding: 1px 5px; font-weight: bold; font-size: 7px; margin-bottom: 1px; color: #15803d; }
   
   table { width: 100%; border-collapse: collapse; }
-  td, th { border: 1px solid #d1d5db; padding: 1.5px 3px; text-align: right; font-size: 6.5px; line-height: 1.25; }
-  th { background: #f0fdf4; font-weight: bold; color: #15803d; font-size: 6px; }
+  td, th { border: 1px solid #d1d5db; padding: 1.5px 3px; text-align: right; font-size: ${FS}; line-height: 1.25; background: transparent; }
+  th { font-weight: bold; color: #15803d; font-size: ${FS}; }
   
-  .parties { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin-bottom: 3px; }
-  .party { border: 1px solid #d1d5db; border-radius: 3px; padding: 3px 4px; background: #fafafa; }
-  .party h4 { font-size: 7px; color: #16a34a; margin-bottom: 1px; border-bottom: 1px solid #e5e7eb; padding-bottom: 1px; }
-  .party p { font-size: 6px; margin: 0.5px 0; line-height: 1.25; }
+  .parties { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; margin-bottom: 2px; }
+  .party { border: 1px solid #d1d5db; border-radius: 3px; padding: 2px 3px; background: transparent; }
+  .party h4 { font-size: ${FS}; color: #16a34a; margin-bottom: 1px; border-bottom: 1px solid #e5e7eb; padding-bottom: 1px; }
+  .party p { font-size: ${FS}; margin: 0.5px 0; line-height: 1.25; }
   .lbl { color: #6b7280; }
   .val { font-weight: 600; }
   
-  .chain-row td { font-size: 6px; padding: 1px 2px; }
+  .chain-row td { font-size: ${FS}; padding: 1px 2px; }
   
-  .sigs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 4px; margin: 4px 0; }
-  .sig-box { border: 1px solid #d1d5db; border-radius: 3px; padding: 3px; text-align: center; min-height: 55px; background: #fafafa; }
-  .sig-box h5 { font-size: 6.5px; color: #15803d; margin-bottom: 1px; }
-  .sig-line { border-bottom: 1px dotted #9ca3af; margin: 6px 6px 1px; }
+  .sigs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 3px; margin: 3px 0; }
+  .sig-box { border: 1px solid #d1d5db; border-radius: 3px; padding: 2px; text-align: center; min-height: 45px; background: transparent; }
+  .sig-box h5 { font-size: ${FS}; color: #15803d; margin-bottom: 1px; }
+  .sig-line { border-bottom: 1px dotted #9ca3af; margin: 4px 4px 1px; }
   .sig-label { font-size: 5px; color: #9ca3af; }
-  .sig-qr { margin: 2px auto; }
-  .sig-hash { font-family: monospace; font-size: 4.5px; color: #16a34a; background: #f0fdf4; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 1px; }
+  .sig-qr { margin: 1px auto; }
+  .sig-hash { font-family: monospace; font-size: 4.5px; color: #16a34a; background: transparent; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 1px; border: 1px solid #bbf7d0; }
   .sig-status { font-size: 5px; padding: 1px 3px; border-radius: 2px; display: inline-block; margin-top: 1px; }
-  .sig-signed { background: #dcfce7; color: #166534; }
-  .sig-pending { background: #fef3c7; color: #92400e; }
+  .sig-signed { background: rgba(220,252,231,0.7); color: #166534; }
+  .sig-pending { background: rgba(254,243,199,0.7); color: #92400e; }
   
-  .decl { background: #fffbeb; border: 1px solid #fde68a; border-radius: 3px; padding: 3px 4px; margin: 3px 0; }
-  .decl h4 { font-size: 7px; color: #92400e; margin-bottom: 2px; }
-  .decl p { font-size: 5.5px; color: #78350f; line-height: 1.4; }
-  .decl-party { background: #fef9c3; border: 1px solid #fde047; border-radius: 2px; padding: 2px 4px; margin: 2px 0; }
-  .decl-party strong { font-size: 6px; color: #854d0e; }
+  .decl { background: transparent; border: 1px solid #fde68a; border-radius: 3px; padding: 2px 3px; margin: 2px 0; }
+  .decl h4 { font-size: ${FS}; color: #92400e; margin-bottom: 1px; }
+  .decl p { font-size: 5.5px; color: #78350f; line-height: 1.35; }
+  .decl-party { background: transparent; border: 1px solid #fde047; border-radius: 2px; padding: 1px 3px; margin: 1px 0; }
+  .decl-party strong { font-size: ${FS}; color: #854d0e; }
   .decl-party p { font-size: 5px; color: #713f12; margin: 0.5px 0; }
   
-  .terms { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3px; padding: 3px 5px; margin: 3px 0; }
-  .terms h4 { font-size: 6.5px; color: #334155; margin-bottom: 1px; }
-  .terms ol { font-size: 5px; color: #475569; padding-right: 10px; line-height: 1.4; columns: 2; column-gap: 10px; }
+  .terms { background: transparent; border: 1px solid #e2e8f0; border-radius: 3px; padding: 2px 4px; margin: 2px 0; }
+  .terms h4 { font-size: ${FS}; color: #334155; margin-bottom: 1px; }
+  .terms ol { font-size: 5px; color: #475569; padding-right: 10px; line-height: 1.35; columns: 2; column-gap: 10px; }
   .terms li { break-inside: avoid; margin-bottom: 0.5px; }
   
-  .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2.5px solid #16a34a; padding-top: 4px; margin-top: 4px; }
+  .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2.5px solid #16a34a; padding-top: 3px; margin-top: 3px; position: relative; z-index: 2; }
   .sec-footer .left { font-size: 5px; color: #6b7280; }
   .sec-footer .center { text-align: center; }
   .sec-footer .right { text-align: left; direction: ltr; }
-  .qr-main { border: 1px solid #d1d5db; border-radius: 3px; padding: 2px; background: #fff; display: inline-block; }
-  .hash-badge { font-family: monospace; font-size: 5px; color: #16a34a; background: #f0fdf4; padding: 1px 3px; border-radius: 2px; border: 1px solid #bbf7d0; }
+  .qr-main { border: 1px solid #d1d5db; border-radius: 3px; padding: 1px; background: #fff; display: inline-block; }
+  .hash-badge { font-family: monospace; font-size: 5px; color: #16a34a; background: transparent; padding: 1px 3px; border-radius: 2px; border: 1px solid #bbf7d0; }
 </style>
 </head>
 <body>
+
+<!-- ═══ Layer 0: Guilloche Text Filler — trilingual threads + sine waves ═══ -->
+${generateGuillocheTextFillerHTML('#059669')}
+
+<!-- ═══ Layer 1: Dynamic Watermark — org + date/time ═══ -->
+${generateWatermarkHTML(primaryOrgName)}
 
 <!-- Vertical Rotated Text on Left Side -->
 <div class="vertical-text">
   <span>▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية | iRecycle Platform — This Document is Secured &amp; Smart | 𓇋𓂋𓇌𓋴𓇌𓎡𓃭 — 𓅓𓋴𓏏𓈖𓂧 𓅓𓀀𓅓𓈖 𓅱𓇌𓎡𓇌 ◂</span>
 </div>
-
-<!-- MICR Line at Bottom -->
-<div class="micr-line">${micrLine}</div>
 
 <!-- Header with QR & Barcode -->
 <div class="hdr">
@@ -280,18 +374,27 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   </div>
   <h1>مانيفست نقل المخلفات | Waste Transport Manifest</h1>
   <div class="hdr-sub">نموذج موحد وفقاً لقانون تنظيم إدارة المخلفات رقم 202 لسنة 2020 ولائحته التنفيذية</div>
-  <div class="hdr-num">رقم المانيفست: ${shipment.shipment_number} &nbsp;|&nbsp; تاريخ الإصدار: ${formatDate(shipment.created_at)}</div>
-  ${isHazardous ? `<div style="background:#fef2f2;color:#dc2626;padding:2px 6px;border-radius:3px;font-weight:bold;font-size:7px;border:1px solid #fecaca;display:inline-block;margin-top:2px;">⚠️ مخلفات خطرة - مستوى الخطورة: ${hazardLabels[shipment.hazard_level] || shipment.hazard_level}</div>` : ''}
+  <div class="hdr-num">رقم المانيفست: ${shipment.shipment_number} &nbsp;|&nbsp; ${documentSerial} &nbsp;|&nbsp; ${securityCode} &nbsp;|&nbsp; ${formatDate(shipment.created_at)}</div>
+  ${isHazardous ? `<div style="background:rgba(254,242,242,0.8);color:#dc2626;padding:1px 5px;border-radius:3px;font-weight:bold;font-size:${FS};border:1px solid #fecaca;display:inline-block;margin-top:1px;">⚠️ مخلفات خطرة - مستوى: ${hazardLabels[shipment.hazard_level] || shipment.hazard_level}</div>` : ''}
   
-  <!-- QR Code & Barcode in Header -->
   <div class="hdr-codes">
-    <div class="qr-box">${generateQRSvg(verifyUrl, 45)}</div>
-    <div class="barcode-box">${generateBarcodeSvg(shipment.shipment_number, 160, 22)}</div>
+    <div class="qr-box">${generateQRSvg(verifyUrl, 40)}</div>
+    <div class="barcode-box">${generateBarcodeSvg(shipment.shipment_number, 150, 20)}</div>
     <div style="font-size:5px;color:#6b7280;">
       <div>امسح للتحقق من صحة الوثيقة</div>
-      <div class="hash-badge" style="margin-top:2px;">SHA: ${integrityHash}</div>
+      <div class="hash-badge" style="margin-top:1px;">SHA: ${integrityHash}</div>
     </div>
   </div>
+</div>
+
+<!-- Org Logos Row -->
+<div style="display:flex;justify-content:center;gap:8px;align-items:center;margin-bottom:2px;position:relative;z-index:2;">
+  ${[shipment.generator, shipment.transporter, shipment.recycler].filter(Boolean).map((org: any) => 
+    `<div style="text-align:center;">
+      ${org.logo_url ? `<img src="${org.logo_url}" style="max-height:18px;max-width:55px;object-fit:contain;" alt="" crossorigin="anonymous"/>` : ''}
+      <div style="font-size:5px;color:#6b7280;">${org.client_code || org.partner_code || ''}</div>
+    </div>`
+  ).join('')}
 </div>
 
 <!-- 1. الأطراف -->
@@ -304,10 +407,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.generator?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.generator.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.generator?.partner_code || "—"} ${shipment.generator?.client_code ? `| ${shipment.generator.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.generator?.address || "—"}${shipment.generator?.city ? ` - ${shipment.generator.city}` : ''}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.generator?.phone || "—"}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.generator?.phone || "—"}${shipment.generator?.secondary_phone ? ` / ${shipment.generator.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.generator?.email || "—"}${shipment.generator?.business_email ? ` / ${shipment.generator.business_email}` : ''}</p>
       <p><span class="lbl">سجل:</span> ${shipment.generator?.commercial_register || "—"} ${shipment.generator?.tax_card ? `| ض: ${shipment.generator.tax_card}` : ''}</p>
       ${shipment.generator?.environmental_approval_number ? `<p><span class="lbl">موافقة بيئية:</span> ${shipment.generator.environmental_approval_number}</p>` : ''}
-      ${shipment.generator?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.generator.representative_name}</p>` : ''}
+      ${shipment.generator?.activity_type ? `<p><span class="lbl">النشاط:</span> ${shipment.generator.activity_type}</p>` : ''}
+      ${shipment.generator?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.generator.representative_name} ${shipment.generator.representative_position ? `(${shipment.generator.representative_position})` : ''}</p>` : ''}
+      ${shipment.generator?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.generator.representative_phone}</p>` : ''}
       ${renderLicensesBlock(shipment.generator)}
     </div>
     <div class="party">
@@ -316,11 +422,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| ${shipment.transporter.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.transporter?.address || "—"}${shipment.transporter?.city ? ` - ${shipment.transporter.city}` : ''}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.transporter?.phone || "—"}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.transporter?.phone || "—"}${shipment.transporter?.secondary_phone ? ` / ${shipment.transporter.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.transporter?.email || "—"}</p>
       <p><span class="lbl">سجل:</span> ${shipment.transporter?.commercial_register || "—"}</p>
       <p><span class="lbl">رخصة نقل:</span> ${shipment.transporter?.license_number || "—"}</p>
-      ${shipment.transporter?.hazardous_certified ? `<p><span class="lbl">مخلفات خطرة:</span> ✅</p>` : ''}
-      ${shipment.transporter?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.transporter.representative_name}</p>` : ''}
+      ${shipment.transporter?.hazardous_certified ? `<p><span class="lbl">مخلفات خطرة:</span> ✅ معتمد</p>` : ''}
+      ${shipment.transporter?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.transporter.representative_name} ${shipment.transporter.representative_position ? `(${shipment.transporter.representative_position})` : ''}</p>` : ''}
+      ${shipment.transporter?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.transporter.representative_phone}</p>` : ''}
       ${renderLicensesBlock(shipment.transporter)}
     </div>
     <div class="party">
@@ -329,10 +437,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       ${shipment.recycler?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.recycler.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.recycler?.partner_code || "—"} ${shipment.recycler?.client_code ? `| ${shipment.recycler.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.recycler?.address || "—"}${shipment.recycler?.city ? ` - ${shipment.recycler.city}` : ''}</p>
-      <p><span class="lbl">هاتف:</span> ${shipment.recycler?.phone || "—"}</p>
+      <p><span class="lbl">هاتف:</span> ${shipment.recycler?.phone || "—"}${shipment.recycler?.secondary_phone ? ` / ${shipment.recycler.secondary_phone}` : ''}</p>
+      <p><span class="lbl">بريد:</span> ${shipment.recycler?.email || "—"}</p>
       <p><span class="lbl">سجل:</span> ${shipment.recycler?.commercial_register || "—"}</p>
       ${shipment.recycler?.environmental_approval_number ? `<p><span class="lbl">موافقة بيئية:</span> ${shipment.recycler.environmental_approval_number}</p>` : ''}
-      ${shipment.recycler?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.recycler.representative_name}</p>` : ''}
+      ${shipment.recycler?.activity_type ? `<p><span class="lbl">النشاط:</span> ${shipment.recycler.activity_type}</p>` : ''}
+      ${shipment.recycler?.representative_name ? `<p><span class="lbl">المفوض:</span> ${shipment.recycler.representative_name} ${shipment.recycler.representative_position ? `(${shipment.recycler.representative_position})` : ''}</p>` : ''}
+      ${shipment.recycler?.representative_phone ? `<p><span class="lbl">هاتف المفوض:</span> ${shipment.recycler.representative_phone}</p>` : ''}
       ${renderLicensesBlock(shipment.recycler)}
     </div>
   </div>
@@ -407,7 +518,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
       <td style="font-family:monospace;font-size:5px;">${shipment.gps_delivery_lat ? `${Number(shipment.gps_delivery_lat).toFixed(4)},${Number(shipment.gps_delivery_lng).toFixed(4)}` : "—"}</td>
     </tr>
   </table>
-  <table style="margin-top:2px;">
+  <table style="margin-top:1px;">
     <tr><th>الإنشاء</th><th>الاستلام</th><th>بدء النقل</th><th>التسليم المتوقع</th><th>التسليم</th><th>الاعتماد</th></tr>
     <tr>
       <td>${formatDateTime(shipment.created_at)}</td>
@@ -444,7 +555,7 @@ ${custodyChain.length > 0 ? `
 <!-- 7. الإقرارات -->
 <div class="decl">
   <h4>📜 الإقرارات والتعهدات القانونية</h4>
-  <p style="margin-bottom:2px;font-size:5px;">
+  <p style="margin-bottom:1px;font-size:5px;">
     يقر كل طرف بصحة البيانات الواردة ويتحمل المسئولية المدنية والجنائية عن أي مخالفة وفقاً لقانون 202/2020 ولائحته التنفيذية وقانون البيئة 4/1994 واتفاقية بازل.
   </p>
   <div class="decl-party">
@@ -459,38 +570,41 @@ ${custodyChain.length > 0 ? `
     <strong>♻️ المستلم: ${shipment.recycler?.name || "—"}</strong>
     <p>أقر باستلام المخلفات وتحققي من مطابقتها للمانيفست. (المادة 31 — ق202/2020)</p>
   </div>
-  <p style="margin-top:2px;font-weight:bold;font-size:5px;color:#991b1b;">
+  <p style="margin-top:1px;font-weight:bold;font-size:5px;color:#991b1b;">
     ⚠️ تحذير: التوقيع بمثابة موافقة نهائية. المخالفة تعرض للعقوبات (المواد 68-82 — ق202/2020).
   </p>
 </div>
 
-<!-- 8. التوقيعات -->
+<!-- 8. التوقيعات والأختام -->
 <div class="sigs">
   <div class="sig-box">
     <h5>🏭 المولّد</h5>
-    ${genSig?.signature_url ? `<img src="${genSig.signature_url}" style="max-width:50px;max-height:20px;margin:2px auto;display:block;" alt="توقيع"/>` : `<div class="sig-line"></div>`}
-    <div class="sig-label">${genSig?.signer?.full_name || shipment.generator?.name || ".................."}</div>
+    ${genSig?.signature_url ? `<img src="${genSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.generator?.signature_url ? `<img src="${shipment.generator.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
+    ${shipment.generator?.stamp_url ? `<img src="${shipment.generator.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
+    <div class="sig-label">${genSig?.signer?.full_name || shipment.generator?.representative_name || shipment.generator?.name || ".................."}</div>
     <div class="sig-label">${genSig?.signed_at ? formatDate(genSig.signed_at) : formatDate(shipment.pickup_date)}</div>
     <span class="sig-status ${genSig ? 'sig-signed' : 'sig-pending'}">${genSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(genVerifyUrl, 30)}</div>
+    <div class="sig-qr">${generateQRSvg(genVerifyUrl, 22)}</div>
     <div class="sig-hash">VRF-G: ${genHash}</div>
   </div>
   <div class="sig-box">
     <h5>🚛 الناقل</h5>
-    ${transSig?.signature_url ? `<img src="${transSig.signature_url}" style="max-width:50px;max-height:20px;margin:2px auto;display:block;" alt="توقيع"/>` : `<div class="sig-line"></div>`}
-    <div class="sig-label">${transSig?.signer?.full_name || shipment.transporter?.name || ".................."}</div>
+    ${transSig?.signature_url ? `<img src="${transSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.transporter?.signature_url ? `<img src="${shipment.transporter.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
+    ${shipment.transporter?.stamp_url ? `<img src="${shipment.transporter.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
+    <div class="sig-label">${transSig?.signer?.full_name || shipment.transporter?.representative_name || shipment.transporter?.name || ".................."}</div>
     <div class="sig-label">${transSig?.signed_at ? formatDate(transSig.signed_at) : formatDate(shipment.in_transit_at)}</div>
     <span class="sig-status ${transSig ? 'sig-signed' : 'sig-pending'}">${transSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(transVerifyUrl, 30)}</div>
+    <div class="sig-qr">${generateQRSvg(transVerifyUrl, 22)}</div>
     <div class="sig-hash">VRF-T: ${transHash}</div>
   </div>
   <div class="sig-box">
     <h5>♻️ المستلم</h5>
-    ${recSig?.signature_url ? `<img src="${recSig.signature_url}" style="max-width:50px;max-height:20px;margin:2px auto;display:block;" alt="توقيع"/>` : `<div class="sig-line"></div>`}
-    <div class="sig-label">${recSig?.signer?.full_name || shipment.recycler?.name || ".................."}</div>
+    ${recSig?.signature_url ? `<img src="${recSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.recycler?.signature_url ? `<img src="${shipment.recycler.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
+    ${shipment.recycler?.stamp_url ? `<img src="${shipment.recycler.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
+    <div class="sig-label">${recSig?.signer?.full_name || shipment.recycler?.representative_name || shipment.recycler?.name || ".................."}</div>
     <div class="sig-label">${recSig?.signed_at ? formatDate(recSig.signed_at) : formatDate(shipment.delivered_at)}</div>
     <span class="sig-status ${recSig ? 'sig-signed' : 'sig-pending'}">${recSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(recVerifyUrl, 30)}</div>
+    <div class="sig-qr">${generateQRSvg(recVerifyUrl, 22)}</div>
     <div class="sig-hash">VRF-R: ${recHash}</div>
   </div>
 </div>
@@ -519,12 +633,21 @@ ${custodyChain.length > 0 ? `
     <div class="hash-badge">SHA-256: ${integrityHash}</div>
   </div>
   <div class="center">
-    <div class="qr-main">${generateQRSvg(verifyUrl, 50)}</div>
+    <div class="qr-main">${generateQRSvg(verifyUrl, 40)}</div>
     <div style="font-size:4.5px;color:#6b7280;margin-top:1px;">امسح للتحقق</div>
   </div>
   <div class="right">
-    ${generateBarcodeSvg(shipment.shipment_number, 130, 22)}
+    ${generateBarcodeSvg(shipment.shipment_number, 120, 18)}
     <div style="font-size:4.5px;color:#9ca3af;text-align:center;">Barcode: ${shipment.shipment_number}</div>
+  </div>
+</div>
+
+<!-- ═══ Vertical Stamp + MICR in Footer ═══ -->
+<div style="margin-top:2px;position:relative;z-index:2;">
+  ${generateVerticalStampHTML()}
+  <div class="micr-line">${micrLine}</div>
+  <div style="font-family:monospace;font-size:5px;color:#6b7280;text-align:center;margin-top:1px;direction:ltr;">
+    رقم التتبع: ${shipment.shipment_number} | ${documentSerial} | ${securityCode} | ${new Date().toLocaleString("ar-EG")}
   </div>
 </div>
 
