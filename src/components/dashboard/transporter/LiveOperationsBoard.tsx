@@ -35,17 +35,19 @@ const LiveOperationsBoard = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['live-operations-board', organization?.id],
     queryFn: async () => {
-      // Fetch active shipments with driver and location info
-      const { data: shipments } = await supabase
+      // Fetch active shipments
+      const result = await supabase
         .from('shipments')
-        .select('id, shipment_number, status, waste_type, quantity, unit, pickup_location, delivery_location, driver_id, created_at, expected_delivery_date, updated_at')
+        .select('id, shipment_number, status, waste_type, quantity, unit, driver_id, created_at, expected_delivery_date, updated_at')
         .eq('transporter_id', organization!.id)
-        .not('status', 'in', '("cancelled","completed")')
+        .not('status', 'in', '("cancelled","completed")' as any)
         .order('updated_at', { ascending: false })
         .limit(12);
 
+      const shipments = (result.data || []) as any[];
+
       // Fetch driver names
-      const driverIds = [...new Set((shipments || []).filter(s => s.driver_id).map(s => s.driver_id!))];
+      const driverIds = [...new Set(shipments.filter(s => s.driver_id).map(s => s.driver_id!))];
       let driverMap: Record<string, string> = {};
       if (driverIds.length > 0) {
         const { data: drivers } = await supabase
@@ -60,12 +62,12 @@ const LiveOperationsBoard = () => {
 
       // Status distribution
       const statusCounts: Record<string, number> = {};
-      (shipments || []).forEach(s => {
+      shipments.forEach(s => {
         statusCounts[s.status] = (statusCounts[s.status] || 0) + 1;
       });
 
       return {
-        shipments: (shipments || []).map(s => ({
+        shipments: shipments.map(s => ({
           ...s,
           driverName: s.driver_id ? driverMap[s.driver_id] : null,
         })),

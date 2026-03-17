@@ -90,11 +90,11 @@ const TransporterCommandCenter = () => {
       const [todayResult, yesterdayResult, activeResult, driversResult, weekResult, ledgerResult, pendingResult, overdueResult] = await Promise.all([
         supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', today.toISOString()).lt('created_at', tomorrow.toISOString()),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
-        supabase.from('shipments').select('id, status').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'picked_up', 'loading']),
+        supabase.from('shipments').select('id, status').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
         supabase.from('drivers').select('id, is_available').eq('organization_id', organization!.id),
         supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', weekAgo.toISOString()),
         supabase.from('accounting_ledger').select('amount, entry_type, entry_category').eq('organization_id', organization!.id),
-        supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['pending', 'new']),
+        supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['new'] as any),
         supabase.from('shipments').select('id, expected_delivery_date').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled","completed")'),
       ]);
 
