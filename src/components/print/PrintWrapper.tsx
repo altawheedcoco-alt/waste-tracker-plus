@@ -126,7 +126,7 @@ const PrintWrapper = forwardRef<HTMLDivElement, PrintWrapperProps>(({
         width: '210mm', 
         minHeight: '297mm', 
         margin: '0 auto', 
-        padding: '10mm 12mm',
+        padding: '15mm',
         boxSizing: 'border-box',
         fontFamily: "'Cairo', 'Segoe UI', Tahoma, sans-serif",
         display: 'flex',
