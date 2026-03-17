@@ -224,6 +224,31 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
 
   const validateNationalId = (id: string) => /^\d{14}$/.test(id);
 
+  // Handle scanner capture
+  const handleScannerCapture = async (imageDataUrl: string, side: 'front' | 'back') => {
+    // Convert dataUrl to File
+    const blob = await fetch(imageDataUrl).then(r => r.blob());
+    const file = new File([blob], `id-${side}.jpg`, { type: 'image/jpeg' });
+
+    if (side === 'front') {
+      setIdFrontFile(file);
+      setIdFrontPreview(imageDataUrl);
+      setIdFrontEnhanced(imageDataUrl); // Already enhanced by scanner
+      setVerifyingFront(true);
+      const result = await verifyDocument(imageDataUrl, 'front');
+      setVerifyingFront(false);
+      if (result?.extracted_data) autoFillFromExtraction(result.extracted_data);
+    } else {
+      setIdBackFile(file);
+      setIdBackPreview(imageDataUrl);
+      setIdBackEnhanced(imageDataUrl);
+      setVerifyingBack(true);
+      const result = await verifyDocument(imageDataUrl, 'back');
+      setVerifyingBack(false);
+      if (result?.extracted_data) autoFillFromExtraction(result.extracted_data);
+    }
+  };
+
   // Camera for selfie
   const startCamera = async () => {
     try {
