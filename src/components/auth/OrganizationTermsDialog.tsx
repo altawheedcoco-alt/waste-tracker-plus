@@ -409,25 +409,26 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
       if (businessDocUrls.length > 0 && organization.id) {
         const docTypeLabelsMap: Record<string, string> = { tax_card: 'البطاقة الضريبية', commercial_register: 'السجل التجاري', data_statement: 'وثيقة البيانات', other: 'مستند آخر' };
         const docTypeLabel = docTypeLabelsMap[businessDocData.documentType] || businessDocData.documentType;
+        const docCategoryMap: Record<string, string> = { tax_card: 'رخصة', commercial_register: 'رخصة', data_statement: 'شهادة', other: 'أخرى' };
         const archivePromises = businessDocUrls.map((url, i) =>
           supabase.from('entity_documents').insert({
             organization_id: organization.id,
             uploaded_by: user.id,
             title: `${docTypeLabel} - صفحة ${i + 1}`,
+            file_name: `${businessDocData.documentType}-page-${i + 1}.jpg`,
             file_url: url,
             document_type: businessDocData.documentType === 'tax_card' ? 'license'
               : businessDocData.documentType === 'commercial_register' ? 'license'
               : 'certificate',
-            status: 'active',
+            document_category: docCategoryMap[businessDocData.documentType] || 'أخرى',
             tags: [businessDocData.documentType, 'onboarding', 'business_doc'],
-            metadata: {
+            description: JSON.stringify({
               source: 'terms_acceptance',
               extracted_data: businessDocData.extractedData || {},
               page_number: i + 1,
               total_pages: businessDocUrls.length,
-              document_category: businessDocData.documentType,
-            },
-          } as any)
+            }),
+          })
         );
         await Promise.allSettled(archivePromises);
       }
