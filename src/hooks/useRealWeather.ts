@@ -64,7 +64,8 @@ const DEFAULT_LAT = 30.0444; // Cairo
 const DEFAULT_LNG = 31.2357;
 
 export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
-  const [data, setData] = useState<RealWeatherData>({
+  const [isLocating, setIsLocating] = useState(false);
+  const [data, setData] = useState<Omit<RealWeatherData, 'refreshFromGPS' | 'isLocating'>>({
     temp: 0, feelsLike: 0, condition: 'sunny', conditionLabel: 'جاري التحميل...',
     humidity: 0, windSpeed: 0, windDirection: 0, visibility: 10, uvIndex: 0,
     pressure: 1013, precipProb: 0, hourlyForecast: [], locationName: '',
