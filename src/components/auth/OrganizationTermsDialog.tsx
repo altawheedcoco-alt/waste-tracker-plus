@@ -460,6 +460,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
         selfie_url: selfiePreview ? await uploadDataUrl(selfiePreview, `${basePath}/selfie-${timestamp}`) : null,
         business_doc_urls: businessDocUrls,
         business_doc_type: businessDocData.documentType || null,
+        business_doc_extracted_data: businessDocData.extractedData || null,
         delegation_data: delegationData.isDelegate ? {
           type: delegationData.delegationType,
           delegation_urls: delegationUrls,
