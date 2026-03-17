@@ -5,6 +5,9 @@ import SharedResourceLayout from '@/components/sharing/SharedResourceLayout';
 import SharedPinGate from '@/components/sharing/SharedPinGate';
 import SharedShipmentView from '@/components/sharing/renderers/SharedShipmentView';
 import SharedBlogView from '@/components/sharing/renderers/SharedBlogView';
+import SharedCertificateView from '@/components/sharing/renderers/SharedCertificateView';
+import SharedInvoiceView from '@/components/sharing/renderers/SharedInvoiceView';
+import SharedOrganizationView from '@/components/sharing/renderers/SharedOrganizationView';
 import { Loader2, AlertTriangle, Lock, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -94,6 +97,12 @@ const SharedResourcePage = () => {
         return <SharedShipmentView data={data.data} accessLevel={data.access_level} />;
       case 'blog':
         return <SharedBlogView data={data.data} />;
+      case 'certificate':
+        return <SharedCertificateView data={data.data} />;
+      case 'invoice':
+        return <SharedInvoiceView data={data.data} accessLevel={data.access_level} />;
+      case 'organization':
+        return <SharedOrganizationView data={data.data} accessLevel={data.access_level} />;
       default:
         return (
           <div className="bg-card rounded-xl border p-6 text-center">
