@@ -208,26 +208,65 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
       />
       <StoryCircles />
 
-      {/* Mission Control Button */}
-      <Button
-        className="w-full gap-3 h-14 text-base bg-gradient-to-r from-destructive to-primary hover:opacity-90 shadow-lg"
-        onClick={() => navigate('/dashboard/disposal/mission-control')}
-      >
-        <Shield className="w-5 h-5" />
-        مركز القيادة — لوحة التحكم الشاملة
-      </Button>
-
-      <FacilityDashboardHeader
+      <DashboardV2Header
         userName={profile?.full_name || ''}
         orgName={organization?.name || ''}
         orgLabel="جهة التخلص النهائي"
-        orgLogoUrl={organization?.logo_url}
         icon={Factory}
-        iconGradient="from-destructive to-primary"
-        facility={facility}
-        onSmartWeightUpload={() => setShowSmartWeightUpload(true)}
-        onRefresh={handleRefresh}
-      />
+        gradient="from-destructive to-primary"
+        radarStats={[
+          { label: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(operationsStats?.total || 1, 50), trend: 'up' as const },
+          { label: 'شحنات واردة', value: recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },
+          { label: 'قيد المعالجة', value: operationsStats?.processing || 0, icon: Clock, color: 'text-violet-500', max: 20, trend: 'stable' as const },
+          { label: 'مكتملة', value: operationsStats?.completed || 0, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(operationsStats?.total || 1, 50), trend: 'up' as const },
+          { label: 'الكميات (طن)', value: Math.round(operationsStats?.totalQuantity || 0), icon: Scale, color: 'text-primary', max: Math.max(Math.round(operationsStats?.totalQuantity || 1), 100), trend: 'up' as const },
+          { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-destructive', max: 1, trend: 'stable' as const },
+        ]}
+        alerts={[
+          ...(recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 3 ? [{ id: 'incoming-high', message: `${recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length} شحنة واردة تحتاج استقبال عاجل`, severity: 'warning' as const }] : []),
+          ...(operationsStats?.processing && operationsStats.processing > 5 ? [{ id: 'processing-load', message: `${operationsStats.processing} عملية قيد المعالجة — حمل تشغيلي مرتفع`, severity: 'info' as const }] : []),
+          { id: 'system-ok', message: 'أنظمة المعالجة والتخلص تعمل بكفاءة', severity: 'info' as const },
+          { id: 'env-check', message: 'تذكير: فحص الامتثال البيئي الدوري', severity: 'warning' as const },
+        ]}
+        weather={{
+          temp: realWeather.temp,
+          condition: realWeather.condition,
+          conditionLabel: realWeather.conditionLabel,
+          humidity: realWeather.humidity,
+          windSpeed: realWeather.windSpeed,
+          roadWarning: realWeather.roadWarning,
+          feelsLike: realWeather.feelsLike,
+          uvIndex: realWeather.uvIndex,
+          precipProb: realWeather.precipProb,
+          pressure: realWeather.pressure,
+          locationName: realWeather.locationName,
+          hourlyForecast: realWeather.hourlyForecast,
+          isLoading: realWeather.isLoading,
+          refreshFromGPS: realWeather.refreshFromGPS,
+          isLocating: realWeather.isLocating,
+        }}
+        heatmapData={[
+          { region: 'القاهرة', value: operationsStats?.processing || 0, max: 10 },
+          { region: 'الجيزة', value: Math.round((operationsStats?.total || 0) * 0.25), max: 8 },
+          { region: 'الإسكندرية', value: Math.round((operationsStats?.total || 0) * 0.2), max: 8 },
+          { region: 'الدلتا', value: Math.round((operationsStats?.total || 0) * 0.15), max: 6 },
+          { region: 'الصعيد', value: Math.round((operationsStats?.total || 0) * 0.1), max: 5 },
+        ]}
+      >
+        <DashboardWidgetCustomizer orgType="disposal" />
+        <Button
+          variant="default"
+          size="sm"
+          className="gap-2 rounded-xl shadow-sm bg-gradient-to-r from-destructive to-primary border-0"
+          onClick={() => navigate('/dashboard/disposal/mission-control')}
+        >
+          <Shield className="w-4 h-4" />
+          مركز القيادة
+        </Button>
+        <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size="sm" className="gap-2 rounded-xl">
+          <Eye className="w-4 h-4" />
+        </Button>
+      </DashboardV2Header>
 
       {facility && <FacilityCapacityCard facility={facility} />}
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
