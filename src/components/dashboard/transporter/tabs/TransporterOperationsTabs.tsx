@@ -15,6 +15,9 @@ import FleetUtilizationWidget from '@/components/dashboard/operations/FleetUtili
 import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import type { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
+const LiveOperationsBoard = lazy(() => import('@/components/dashboard/transporter/LiveOperationsBoard'));
+const FleetStatusMini = lazy(() => import('@/components/dashboard/transporter/FleetStatusMini'));
+const RevenueSnapshotMini = lazy(() => import('@/components/dashboard/transporter/RevenueSnapshotMini'));
 const DriverPerformancePanel = lazy(() => import('@/components/dashboard/transporter/DriverPerformancePanel'));
 const TripCostManagement = lazy(() => import('@/components/dashboard/transporter/TripCostManagement'));
 const MaintenanceScheduler = lazy(() => import('@/components/dashboard/transporter/MaintenanceScheduler'));
@@ -69,8 +72,35 @@ const TransporterOperationsTabs = ({
   shipmentStatusFilter,
 }: OperationsTabsProps) => (
   <>
-    <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-      {/* Environmental KPIs & License Alerts */}
+    <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
+      {/* ═══ القسم 1: الإحصائيات والأرقام الأساسية ═══ */}
+      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
+      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
+
+      {/* ═══ القسم 2: لوحة العمليات الحية + حالة الأسطول + الإيرادات ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
+            <ErrorBoundary fallbackTitle="خطأ في لوحة العمليات">
+              <LiveOperationsBoard />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
+        <div className="space-y-4">
+          <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
+            <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول">
+              <FleetStatusMini />
+            </ErrorBoundary>
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
+            <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
+              <RevenueSnapshotMini />
+            </ErrorBoundary>
+          </Suspense>
+        </div>
+      </div>
+
+      {/* ═══ القسم 3: مؤشرات البيئة والتراخيص ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Suspense fallback={<Skeleton className="h-[280px]" />}>
           <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
@@ -83,12 +113,16 @@ const TransporterOperationsTabs = ({
           </ErrorBoundary>
         </Suspense>
       </div>
+
+      {/* ═══ القسم 4: استخدام الأسطول والأداء ═══ */}
       <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
         <FleetUtilizationWidget />
       </ErrorBoundary>
       <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
         <TransporterPerformanceCharts />
       </ErrorBoundary>
+
+      {/* ═══ القسم 5: الأولويات والشركاء ═══ */}
       <Suspense fallback={<TabFallback />}>
         <SmartPriorityQueue shipments={shipments} />
       </Suspense>
@@ -97,10 +131,12 @@ const TransporterOperationsTabs = ({
           <OrgPerformanceRadar />
         </Suspense>
       </ErrorBoundary>
-      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
-      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
       <TransporterPartnerSummary />
+
+      {/* ═══ القسم 6: الإجراءات السريعة ═══ */}
       <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
+
+      {/* ═══ القسم 7: قائمة الشحنات والتقرير التجميعي ═══ */}
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
         <TransporterShipmentsList
           shipments={shipments}

@@ -186,14 +186,6 @@ const LiveOperationsBoard = () => {
                         </>
                       )}
                     </div>
-                    {(s.pickup_location || s.delivery_location) && (
-                      <div className="flex items-center gap-1 text-[9px] text-muted-foreground/60 mt-0.5 justify-end">
-                        <span className="truncate max-w-[100px]">{s.delivery_location || '—'}</span>
-                        <ArrowRight className="w-2.5 h-2.5 shrink-0 rotate-180" />
-                        <span className="truncate max-w-[100px]">{s.pickup_location || '—'}</span>
-                        <MapPin className="w-2.5 h-2.5 shrink-0" />
-                      </div>
-                    )}
                   </div>
 
                   {/* Status + time */}
