@@ -158,6 +158,8 @@ const TransporterDashboard = () => {
           locationName: realWeather.locationName,
           hourlyForecast: realWeather.hourlyForecast,
           isLoading: realWeather.isLoading,
+          refreshFromGPS: realWeather.refreshFromGPS,
+          isLocating: realWeather.isLocating,
         }}
         heatmapData={[
           { region: 'القاهرة', value: stats?.active || 0, max: 20 },
