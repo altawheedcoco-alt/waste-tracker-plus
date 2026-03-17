@@ -169,7 +169,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           .print-transparent-tables table { margin-bottom: 0 !important; }
           @media print {
             .print-transparent-tables { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-            @page { margin: 15mm 15mm 20mm 15mm; }
+            @page { margin: 12mm 12mm 14mm 12mm; }
           }
         `}</style>
 
