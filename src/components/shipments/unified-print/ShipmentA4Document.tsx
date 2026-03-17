@@ -9,6 +9,7 @@ import { QRCodeCanvas, QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import { PrintTheme, getThemeById } from '../printThemes';
 import ShipmentTaglineFooter from '../ShipmentTaglineFooter';
+import { generateMICRLineHTML, generateVerticalStampHTML } from '@/lib/printSecurityUtils';
 import type {
   ShipmentPrintData, MovementSupervisor,
   WASTE_TYPE_LABELS, STATUS_LABELS, HAZARD_LABELS, DISPOSAL_LABELS, PACKAGING_LABELS,
@@ -398,6 +399,8 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
              <div style={{ fontFamily: 'monospace', fontSize: '6pt' }}>
               رقم التتبع: {shipment.shipment_number} | {documentSerial} | {verificationCode} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
             </div>
+            <div style={{ marginTop: '3px' }} dangerouslySetInnerHTML={{ __html: generateVerticalStampHTML() }} />
+            <div style={{ marginTop: '2px' }} dangerouslySetInnerHTML={{ __html: generateMICRLineHTML(shipment.generator?.client_code, verificationCode) }} />
           </div>
         </div>
       </div>
