@@ -240,16 +240,16 @@ const DriverPermits = () => {
     }
   };
 
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!hasAccess) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [hasAccess, navigate]);
+
   if (!hasAccess) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]" dir="rtl">
-        <Card><CardContent className="py-12 text-center">
-          <Shield className="h-16 w-16 mx-auto mb-4 text-muted-foreground opacity-30" />
-          <p className="text-lg font-semibold">غير مصرح بالوصول</p>
-          <p className="text-muted-foreground">هذه الصفحة متاحة فقط للجهات الناقلة ومديري النظام</p>
-        </CardContent></Card>
-      </div>
-    );
+    return null;
   }
 
   return (
