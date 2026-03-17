@@ -17,6 +17,7 @@ import {
   Users, ChevronLeft, ExternalLink, Globe,
 } from 'lucide-react';
 import PartnerNotesDialog from '@/components/partners/PartnerNotesDialog';
+import MemberNameLink from '@/components/org-structure/MemberNameLink';
 import PartnerLinkingCard from '@/components/partners/PartnerLinkingCard';
 import PartnerRestrictionManager from '@/components/partners/PartnerRestrictionManager';
 import usePartners from '@/hooks/usePartners';
