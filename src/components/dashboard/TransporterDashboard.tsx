@@ -1,4 +1,5 @@
 import { useState, Suspense, lazy } from 'react';
+import QuickActionsGrid from './QuickActionsGrid';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
