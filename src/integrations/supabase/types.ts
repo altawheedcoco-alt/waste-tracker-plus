@@ -41280,6 +41280,10 @@ export type Database = {
           total_transported_shipments: number
         }[]
       }
+      get_partner_org_user_id: {
+        Args: { _partner_org_id: string }
+        Returns: string
+      }
       get_pending_drivers: {
         Args: never
         Returns: {
