@@ -24,7 +24,6 @@ Deno.serve(async (req) => {
     const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const anonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-    // Service client for reading shared_links (bypasses RLS)
     const adminClient = createClient(supabaseUrl, serviceKey);
 
     // Check if user is authenticated
@@ -40,7 +39,6 @@ Deno.serve(async (req) => {
       );
       if (claimsData?.claims?.sub) {
         userId = claimsData.claims.sub as string;
-        // Get user's org
         const { data: profile } = await adminClient
           .from("profiles")
           .select("organization_id")
@@ -89,7 +87,6 @@ Deno.serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      // Simple PIN comparison (stored as plain for now, can upgrade to bcrypt)
       if (pin !== link.pin_hash) {
         return new Response(
           JSON.stringify({ error: "invalid_pin" }),
@@ -102,7 +99,6 @@ Deno.serve(async (req) => {
     let accessLevel: "public" | "authenticated" | "linked" = "public";
     if (userId) {
       accessLevel = "authenticated";
-      // Check if user is linked to resource (same org or partner)
       if (userOrgId === link.organization_id) {
         accessLevel = "linked";
       }
@@ -140,7 +136,6 @@ Deno.serve(async (req) => {
           .eq("id", resourceId)
           .single();
         if (data) {
-          // For public: limited fields
           if (accessLevel === "public") {
             resourceData = {
               tracking_number: data.tracking_number,
@@ -153,7 +148,6 @@ Deno.serve(async (req) => {
           } else {
             resourceData = data;
           }
-          // Get timeline
           const { data: timeline } = await adminClient
             .from("shipment_timeline")
             .select("*")
@@ -163,6 +157,7 @@ Deno.serve(async (req) => {
         }
         break;
       }
+
       case "blog": {
         const { data } = await adminClient
           .from("blog_posts")
@@ -173,8 +168,78 @@ Deno.serve(async (req) => {
         resourceData = data;
         break;
       }
+
+      case "certificate": {
+        const { data } = await adminClient
+          .from("compliance_certificates")
+          .select("id, certificate_number, certificate_level, overall_score, operations_score, training_score, documentation_score, licenses_score, safety_environment_score, iso_standards, is_valid, issued_at, expires_at, verification_code, revoked_at, revocation_reason, organization_id")
+          .eq("id", resourceId)
+          .single();
+        if (data) {
+          // Get org name
+          const { data: org } = await adminClient
+            .from("organizations")
+            .select("name, logo_url, city, organization_type")
+            .eq("id", data.organization_id)
+            .single();
+          resourceData = { ...data, organization_name: org?.name, organization_logo: org?.logo_url, organization_city: org?.city, organization_type: org?.organization_type };
+        }
+        break;
+      }
+
+      case "invoice": {
+        const { data } = await adminClient
+          .from("invoices")
+          .select("id, invoice_number, invoice_type, invoice_category, status, issue_date, due_date, total_amount, subtotal, tax_amount, tax_rate, discount_amount, paid_amount, remaining_amount, currency, partner_name, notes")
+          .eq("id", resourceId)
+          .single();
+        if (data) {
+          if (accessLevel === "public") {
+            resourceData = {
+              invoice_number: data.invoice_number,
+              status: data.status,
+              issue_date: data.issue_date,
+              due_date: data.due_date,
+              total_amount: data.total_amount,
+              currency: data.currency,
+              partner_name: data.partner_name,
+            };
+          } else {
+            resourceData = data;
+          }
+        }
+        break;
+      }
+
+      case "organization": {
+        const { data } = await adminClient
+          .from("organizations")
+          .select("id, name, organization_type, bio, logo_url, cover_url, city, address, phone, email, website, is_verified, founded_year, license_number, commercial_register, environmental_license, field_of_work, activity_type")
+          .eq("id", resourceId)
+          .single();
+        if (data) {
+          if (accessLevel === "public") {
+            resourceData = {
+              name: data.name,
+              organization_type: data.organization_type,
+              bio: data.bio,
+              logo_url: data.logo_url,
+              cover_url: data.cover_url,
+              city: data.city,
+              is_verified: data.is_verified,
+              field_of_work: data.field_of_work,
+              phone: data.phone,
+              email: data.email,
+              website: data.website,
+            };
+          } else {
+            resourceData = data;
+          }
+        }
+        break;
+      }
+
       default: {
-        // Generic: just return metadata
         resourceData = {
           resource_type: resourceType,
           resource_id: resourceId,
