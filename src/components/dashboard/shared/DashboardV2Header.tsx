@@ -361,7 +361,8 @@ const WeatherWidget = memo(({ weather }: { weather: WeatherData }) => {
             <span className="text-[7px] font-mono text-primary/60">{showForecast ? 'إخفاء' : 'التنبؤ'}</span>
           </motion.div>
         )}
-      </motion.div>
+        </motion.div>
+      </div>
 
       {/* Hourly forecast panel */}
       <AnimatePresence>
