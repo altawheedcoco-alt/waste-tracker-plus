@@ -158,10 +158,20 @@ export default {
   				from: { transform: 'translateX(0%)' },
   				to: { transform: 'translateX(50%)' }
   			},
-  			'pulse-glow': {
-  				'0%, 100%': { boxShadow: '0 0 20px hsl(142, 71%, 45%, 0.3)' },
-  				'50%': { boxShadow: '0 0 40px hsl(142, 71%, 45%, 0.5)' }
-  			}
+			'pulse-glow': {
+				'0%, 100%': { boxShadow: '0 0 20px hsl(142, 71%, 45%, 0.3)' },
+				'50%': { boxShadow: '0 0 40px hsl(142, 71%, 45%, 0.5)' }
+			},
+			'bell-shake': {
+				'0%': { transform: 'rotate(0deg)' },
+				'15%': { transform: 'rotate(14deg)' },
+				'30%': { transform: 'rotate(-12deg)' },
+				'45%': { transform: 'rotate(10deg)' },
+				'60%': { transform: 'rotate(-8deg)' },
+				'75%': { transform: 'rotate(4deg)' },
+				'90%': { transform: 'rotate(-2deg)' },
+				'100%': { transform: 'rotate(0deg)' }
+			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
