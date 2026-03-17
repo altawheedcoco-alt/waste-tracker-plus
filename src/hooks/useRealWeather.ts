@@ -83,13 +83,6 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
     lastCoordsRef.current = { lat, lng };
 
     try {
-      const { data: funcData, error: funcError } = await supabase.functions.invoke('weather-proxy', {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-        body: undefined,
-      });
-
-      // supabase.functions.invoke doesn't support query params, so use fetch directly
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
