@@ -46,16 +46,19 @@ const NotificationDropdown = () => {
           <motion.span
             initial={{ scale: 0, opacity: 0 }}
             animate={{ 
-              scale: isPulsing ? [1, 1.4, 1] : 1, 
-              opacity: 1 
+              scale: isPulsing ? [1, 1.3, 1] : 1, 
+              opacity: 1,
+              boxShadow: isPulsing 
+                ? ['0 0 0px rgba(239,68,68,0)', '0 0 10px rgba(239,68,68,0.7)', '0 0 0px rgba(239,68,68,0)']
+                : '0 4px 6px -1px rgba(239,68,68,0.3)',
             }}
             exit={{ scale: 0, opacity: 0 }}
             transition={isPulsing 
-              ? { duration: 0.4, ease: 'easeInOut' }
+              ? { duration: 0.3, ease: 'easeInOut' }
               : { type: 'spring', stiffness: 500, damping: 25 }
             }
             className={cn(
-              "absolute flex items-center justify-center font-bold text-primary-foreground bg-destructive rounded-full shadow-lg shadow-destructive/30 pointer-events-none",
+              "absolute flex items-center justify-center font-bold text-primary-foreground bg-destructive rounded-full pointer-events-none",
               unreadCount > 99
                 ? "-top-2 -right-3 h-6 min-w-[1.5rem] px-1 text-[10px]"
                 : unreadCount > 9
