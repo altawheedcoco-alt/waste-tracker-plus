@@ -507,27 +507,37 @@ const GuillocheTemplateSVG = ({ template, width = 200, height = 283 }: {
 };
 
 // ─── Generate HTML for printing ───
+// margin: 1cm safe margin on all sides to avoid print clipping
+const GUILLOCHE_MARGIN_CM = 1; // cm
+const GUILLOCHE_MARGIN_PT = GUILLOCHE_MARGIN_CM * 28.35; // ~28.35pt per cm
+
 function generateTemplateHTML(template: GuillocheTemplate, w: number, h: number): string {
   const { colorScheme, innerPattern, innerScale, innerDensity, innerOpacity,
     borderStyle, borderThickness, borderDensity, cornerStyle,
     hasDoubleBorder, hasTopOrnament, hasBottomOrnament, hasCenterSeal, seed } = template;
 
+  const mg = GUILLOCHE_MARGIN_PT; // margin in viewBox units
+  const innerW = w - mg * 2;
+  const innerH = h - mg * 2;
   const cx = w / 2;
   const cy = h / 2;
-  const maxR = Math.min(w, h) * 0.38;
+  const maxR = Math.min(innerW, innerH) * 0.38;
 
   const innerPaths = generateInnerPatternPaths(innerPattern, cx, cy, maxR, innerDensity, innerScale, seed);
   const borderPaths = generateBorderFramePaths(borderStyle, w, h, borderThickness, borderDensity, seed, hasDoubleBorder);
   const bandW = 3 + borderThickness * 1.5;
-  const m = 2;
+  const m = mg; // corners inset by the margin
   const corners = [
     { cx: m, cy: m, q: 0 }, { cx: w - m, cy: m, q: 3 },
     { cx: w - m, cy: h - m, q: 2 }, { cx: m, cy: h - m, q: 1 },
   ];
   const cornerPs = corners.flatMap(c => generateCornerPaths(cornerStyle, c.cx, c.cy, c.q, bandW * 1.5, seed));
   const ornamentPs: { d: string; opacity: number }[] = [];
-  if (hasTopOrnament) ornamentPs.push(...generateOrnamentPaths(cx, 12, w, seed, false));
-  if (hasBottomOrnament) ornamentPs.push(...generateOrnamentPaths(cx, h - 12, w, seed, true));
+  if (hasTopOrnament) ornamentPs.push(...generateOrnamentPaths(cx, mg + 12, innerW, seed, false));
+  if (hasBottomOrnament) ornamentPs.push(...generateOrnamentPaths(cx, h - mg - 12, innerW, seed, true));
+
+  // Clip rect to enforce margin boundary
+  const clipId = `clip-margin-${template.id.replace(/[^a-zA-Z0-9]/g, '')}`;
 
   const allPaths = [
     ...innerPaths.map(p => `<path d="${p.d}" fill="none" stroke="url(#g2)" stroke-width="0.5" stroke-linecap="round" opacity="${p.opacity * innerOpacity * 10}" />`),
@@ -536,8 +546,8 @@ function generateTemplateHTML(template: GuillocheTemplate, w: number, h: number)
     ...ornamentPs.map(p => `<path d="${p.d}" fill="none" stroke="${colorScheme.rosette}" stroke-width="0.5" stroke-linecap="round" opacity="${p.opacity}" />`),
   ];
 
-  return `<div style="position:absolute;inset:0;pointer-events:none;background-color:${colorScheme.bg};">
-    <svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice">
+  return `<div style="position:absolute;inset:${GUILLOCHE_MARGIN_CM}cm;pointer-events:none;background-color:${colorScheme.bg};overflow:hidden;">
+    <svg width="100%" height="100%" viewBox="${mg} ${mg} ${innerW} ${innerH}" preserveAspectRatio="xMidYMid slice">
       <defs>
         <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stop-color="${colorScheme.border}" />
