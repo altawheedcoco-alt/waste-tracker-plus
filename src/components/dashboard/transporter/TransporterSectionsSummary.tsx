@@ -16,7 +16,7 @@ import {
   FileCheck, FolderCheck, ClipboardList, HardHat,
   Sparkles, Database, FolderOpen, Upload, PenTool, CircleDot,
   Calculator, Banknote, Award, Activity, Network, ShoppingCart, BarChart3, Umbrella, TrendingUp, Wallet,
-  MessageCircle, Video, Send, BookOpen,
+  MessageCircle, Video, Send, BookOpen, Leaf,
   Store, Globe, Search, Bookmark, Link2, Zap,
   Receipt, FileSignature,
   LucideIcon,
