@@ -190,15 +190,27 @@ const ShipmentDocumentsTimeline = ({ shipment, onRefresh }: ShipmentDocumentsTim
     staleTime: 1000 * 60 * 2,
   });
 
-  // Fetch invoices linked to this shipment
+  // Fetch invoices linked to this shipment via aggregate_invoices
   const { data: invoices = [] } = useQuery({
     queryKey: ['shipment-invoices', shipment.id],
     queryFn: async () => {
       if (!organization?.id) return [] as any[];
-      const { data, error } = await (supabase
+      // First get invoice IDs from aggregate_invoices junction table
+      const { data: links, error: linksErr } = await supabase
+        .from('aggregate_invoices')
+        .select('invoice_id')
+        .eq('shipment_id', shipment.id);
+
+      if (linksErr || !links || links.length === 0) {
+        if (linksErr) console.error('Error fetching invoice links:', linksErr);
+        return [] as any[];
+      }
+
+      const invoiceIds = links.map((l: any) => l.invoice_id);
+      const { data, error } = await supabase
         .from('invoices')
-        .select('id, invoice_number, status, total_amount, created_at') as any)
-        .eq('shipment_id', shipment.id)
+        .select('id, invoice_number, status, total_amount, created_at')
+        .in('id', invoiceIds)
         .eq('organization_id', organization.id)
         .order('created_at', { ascending: true });
 
