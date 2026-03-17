@@ -173,7 +173,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           }
         `}</style>
 
-        <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '257mm', boxSizing: 'border-box', paddingBottom: '2px' }}>
+        <div className="page" style={{ display: 'flex', flexDirection: 'column', minHeight: '269mm', boxSizing: 'border-box', paddingBottom: '1px' }}>
           {/* ═══ HEADER ═══ */}
           <table style={{ marginBottom: '0px', border: 'none', width: '100%' }}>
             <tbody>
