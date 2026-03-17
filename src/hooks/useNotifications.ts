@@ -165,7 +165,7 @@ export const useNotifications = () => {
 
     fetchNotifications();
 
-    // Subscribe to new notifications
+    // Subscribe to ALL notification changes (INSERT, UPDATE, DELETE)
     const channel = supabase
       .channel(getTabChannelName('notifications-realtime'))
       .on(
@@ -192,6 +192,43 @@ export const useNotifications = () => {
           // Add to notifications list
           setNotifications(prev => [newNotification, ...prev]);
           setUnreadCount(prev => prev + 1);
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const updated = payload.new as Notification;
+          setNotifications(prev =>
+            prev.map(n => n.id === updated.id ? { ...n, ...updated } : n)
+          );
+          // Recalculate unread count
+          setNotifications(prev => {
+            setUnreadCount(prev.filter(n => !n.is_read).length);
+            return prev;
+          });
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'notifications',
+          filter: `user_id=eq.${user.id}`,
+        },
+        (payload) => {
+          const deleted = payload.old as Notification;
+          setNotifications(prev => {
+            const next = prev.filter(n => n.id !== deleted.id);
+            setUnreadCount(next.filter(n => !n.is_read).length);
+            return next;
+          });
         }
       )
       .subscribe();
