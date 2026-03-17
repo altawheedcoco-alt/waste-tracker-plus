@@ -89,17 +89,20 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
 
   const formatDate = (date: string | null) => date ? format(new Date(date), 'dd/MM/yyyy', { locale: ar }) : '-';
 
+  const FS = '6.5pt'; // unified font size for all content
+  const HP = '2px 4px'; // unified cell padding
+
   const cellStyle = (isLabel = false, bg?: string): React.CSSProperties => ({
     border: `1px solid ${theme.colors.border}`,
-    padding: compact ? '3px 5px' : '4px 6px',
-    fontSize: compact ? '7.5pt' : '8.5pt',
-    lineHeight: '1.3',
+    padding: HP,
+    fontSize: FS,
+    lineHeight: '1.25',
     ...(isLabel ? { background: bg || theme.colors.labelBg, fontWeight: '700', color: theme.colors.labelText } : {}),
   });
 
   const sectionHeader = (bg: string, color: string, text: string, extra?: string): React.CSSProperties => ({
     background: bg, color, fontWeight: 'bold', textAlign: 'center' as const,
-    fontSize: compact ? '8pt' : '9pt', padding: compact ? '3px' : '5px',
+    fontSize: FS, padding: '2px',
     border: `1px solid ${theme.colors.border}`,
   });
 
