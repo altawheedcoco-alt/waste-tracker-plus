@@ -120,7 +120,7 @@ const QuickLocationButton = ({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                   >
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </motion.div>
                 ) : (
                   <motion.div
