@@ -487,7 +487,7 @@ export const PrintService = {
 
     if (isFullDoc) {
       // For full HTML docs: inject guilloche per-page (skip pages with .no-guilloche)
-      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}window.addEventListener('load',function(){setTimeout(doPrint,200);});setTimeout(doPrint,1200);</script>`;
+      const dedupScript = `<script>var printed=false;function doPrint(){if(printed)return;printed=true;window.print();}function waitForImages(){var imgs=document.querySelectorAll('img');var promises=[];imgs.forEach(function(img){if(!img.complete){promises.push(new Promise(function(r){img.onload=r;img.onerror=r;}));}});if(promises.length>0){Promise.all(promises).then(function(){setTimeout(doPrint,100);});}else{setTimeout(doPrint,200);}}window.addEventListener('load',function(){waitForImages();});setTimeout(doPrint,3000);</script>`;
       // Inject a script that adds guilloche filler to each .page that doesn't have .no-guilloche
       const guillocheInjectorScript = `<script>
         window.addEventListener('DOMContentLoaded', function() {
