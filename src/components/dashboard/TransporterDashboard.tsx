@@ -1,4 +1,5 @@
-import { useState, Suspense, lazy } from 'react';
+import { useState, Suspense, lazy, useMemo } from 'react';
+import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
