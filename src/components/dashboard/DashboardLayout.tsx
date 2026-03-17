@@ -188,6 +188,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [shouldCollapseSidebar]);
 
+  // Auto-close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   // Unlock notification audio on first user gesture (required by browser autoplay policies)
   // Also ensure all sounds are enabled by default
   useEffect(() => {
