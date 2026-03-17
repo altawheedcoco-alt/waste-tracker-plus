@@ -545,7 +545,7 @@ const PartnerDetailPanel = ({
               المفوض <User className="w-4 h-4" />
             </h3>
             <div className="grid grid-cols-2 gap-2 text-sm">
-              <p><span className="text-muted-foreground">الاسم:</span> {org.delegate_name}</p>
+              <p><span className="text-muted-foreground">الاسم:</span> <MemberNameLink name={org.delegate_name!} email={org.delegate_email} showIcon className="font-semibold" /></p>
               {org.delegate_phone && <p><span className="text-muted-foreground">الهاتف:</span> <span dir="ltr">{org.delegate_phone}</span></p>}
               {org.delegate_email && <p><span className="text-muted-foreground">البريد:</span> {org.delegate_email}</p>}
             </div>
