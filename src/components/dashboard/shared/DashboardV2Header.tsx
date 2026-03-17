@@ -259,14 +259,39 @@ const WeatherWidget = memo(({ weather }: { weather: WeatherData }) => {
   return (
     <div className="flex flex-col gap-1">
       {/* Main weather bar */}
-      <motion.div
-        className={cn(
-          "flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[10px] cursor-pointer transition-all",
-          hasRoadWarning ? "bg-amber-500/5 border-amber-500/20" : "bg-muted/30 border-border/30",
-          hasForecast && "hover:border-primary/30"
-        )}
-        initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
-        onClick={() => hasForecast && setShowForecast(p => !p)}
+      <div className="flex items-center gap-1">
+        {/* GPS Locate Button */}
+        <motion.button
+          onClick={(e) => { e.stopPropagation(); weather.refreshFromGPS?.(); }}
+          disabled={weather.isLocating}
+          className={cn(
+            "flex items-center justify-center w-8 h-8 rounded-lg border transition-all shrink-0",
+            weather.isLocating
+              ? "bg-primary/10 border-primary/30 cursor-wait"
+              : "bg-muted/30 border-border/30 hover:bg-primary/10 hover:border-primary/30 active:scale-95"
+          )}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.9 }}
+          title="تحديد الموقع وتحديث الطقس"
+        >
+          {weather.isLocating ? (
+            <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}>
+              <LocateFixed className="w-4 h-4 text-primary" />
+            </motion.div>
+          ) : (
+            <LocateFixed className="w-4 h-4 text-primary" />
+          )}
+        </motion.button>
+
+        <motion.div
+          className={cn(
+            "flex items-center gap-1.5 px-2 py-1.5 rounded-lg border text-[10px] cursor-pointer transition-all flex-1",
+            hasRoadWarning ? "bg-amber-500/5 border-amber-500/20" : "bg-muted/30 border-border/30",
+            hasForecast && "hover:border-primary/30"
+          )}
+          initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.6 }}
+          onClick={() => hasForecast && setShowForecast(p => !p)}
+        >
       >
         <motion.div animate={weather.condition === 'stormy' ? { rotate: [0, -10, 10, 0] } : weather.condition === 'windy' ? { x: [-1, 1, -1] } : {}}
           transition={{ duration: 2, repeat: Infinity }}>
