@@ -37,10 +37,18 @@ export interface AlertItem {
 
 export interface WeatherData {
   temp: number;
-  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'windy' | 'snowy';
+  condition: 'sunny' | 'cloudy' | 'rainy' | 'stormy' | 'windy' | 'snowy' | 'partly_cloudy' | 'foggy';
+  conditionLabel?: string;
   humidity: number;
   windSpeed: number;
   roadWarning?: string;
+  feelsLike?: number;
+  uvIndex?: number;
+  precipProb?: number;
+  pressure?: number;
+  locationName?: string;
+  hourlyForecast?: HourlyForecast[];
+  isLoading?: boolean;
 }
 
 export interface HeatmapCell {
