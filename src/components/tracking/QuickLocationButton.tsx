@@ -111,7 +111,7 @@ const QuickLocationButton = ({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                   >
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    <Loader2 className="h-5 w-5 text-white animate-spin" />
                   </motion.div>
                 ) : success ? (
                   <motion.div
