@@ -224,10 +224,18 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-destructive', max: 1, trend: 'stable' as const },
         ]}
         alerts={[
-          ...(recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 3 ? [{ id: 'incoming-high', message: `${recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length} شحنة واردة تحتاج استقبال عاجل`, severity: 'warning' as const }] : []),
-          ...(operationsStats?.processing && operationsStats.processing > 5 ? [{ id: 'processing-load', message: `${operationsStats.processing} عملية قيد المعالجة — حمل تشغيلي مرتفع`, severity: 'info' as const }] : []),
-          { id: 'system-ok', message: 'أنظمة المعالجة والتخلص تعمل بكفاءة', severity: 'info' as const },
-          { id: 'env-check', message: 'تذكير: فحص الامتثال البيئي الدوري', severity: 'warning' as const },
+          ...(recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 0 ? [{ id: 'incoming-urgent', message: `🚛 ${recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length} شحنة واردة تحتاج استقبال ومعالجة`, severity: (recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 5 ? 'critical' : 'warning') as const, icon: Truck }] : []),
+          ...(operationsStats?.processing && operationsStats.processing > 0 ? [{ id: 'processing-ops', message: `⚙️ ${operationsStats.processing} عملية تخلص قيد التنفيذ حالياً`, severity: (operationsStats.processing > 8 ? 'warning' : 'info') as const, icon: Clock }] : []),
+          ...(operationsStats?.pending && operationsStats.pending > 0 ? [{ id: 'pending-ops', message: `⏳ ${operationsStats.pending} عملية معلقة بانتظار بدء المعالجة`, severity: 'warning' as const, icon: Package }] : []),
+          ...(operationsStats?.completed && operationsStats.total ? [{ id: 'disposal-rate', message: `📈 معدل التخلص: ${Math.round((operationsStats.completed / operationsStats.total) * 100)}% — ${operationsStats.completed} عملية مكتملة`, severity: 'info' as const, icon: CheckCircle }] : []),
+          ...(operationsStats?.totalQuantity && operationsStats.totalQuantity > 100 ? [{ id: 'high-volume', message: `📊 حجم معالجة مرتفع: ${operationsStats.totalQuantity.toFixed(1)} طن — مراقبة السعة مطلوبة`, severity: 'warning' as const, icon: Scale }] : []),
+          ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-disposal', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة — بروتوكول التخلص الآمن مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
+          ...(!facility ? [{ id: 'no-facility', message: '🏭 لم يتم تسجيل منشأة التخلص — سجل بيانات المنشأة لتفعيل التشغيل', severity: 'critical' as const, icon: Factory }] : []),
+          ...(facility ? [{ id: 'facility-status', message: `🏭 المنشأة "${facility.facility_name || 'الرئيسية'}" — تعمل بكفاءة`, severity: 'info' as const, icon: Factory }] : []),
+          { id: 'env-compliance', message: '🌍 تذكير: فحص الامتثال البيئي وتحديث تراخيص التخلص', severity: 'warning' as const, icon: Shield },
+          { id: 'safety-protocol', message: '🦺 تذكير: مراجعة بروتوكولات السلامة المهنية للعاملين', severity: 'warning' as const, icon: HardHat },
+          { id: 'annual-plan', message: '📅 تذكير: تحديث الخطة السنوية للتخلص من المخلفات', severity: 'info' as const, icon: ClipboardList },
+          { id: 'system-ok', message: '✅ أنظمة المعالجة والرصد البيئي تعمل بكفاءة', severity: 'info' as const },
         ]}
         weather={{
           temp: realWeather.temp,
