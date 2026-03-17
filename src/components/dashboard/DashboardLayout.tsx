@@ -494,8 +494,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         {/* Desktop Sidebar — v4.0 Modern Elegant */}
         {!isMobile && (
             <aside
-              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
-                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
+              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+1px)] opacity-0 pointer-events-none'
               }`}
               style={{ width: sidebarWidth }}
             >
