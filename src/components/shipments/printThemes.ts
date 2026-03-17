@@ -692,5 +692,21 @@ export const PRINT_THEMES: PrintTheme[] = [
 ];
 
 export const getThemeById = (id: string): PrintTheme => {
-  return PRINT_THEMES.find(t => t.id === id) || PRINT_THEMES[0];
+  const theme = PRINT_THEMES.find(t => t.id === id) || PRINT_THEMES[0];
+  // Override table cell backgrounds to transparent
+  return {
+    ...theme,
+    colors: {
+      ...theme.colors,
+      labelBg: 'transparent',
+      generatorBg: 'transparent',
+      generatorLight: 'transparent',
+      transporterBg: 'transparent',
+      transporterLight: 'transparent',
+      recyclerBg: 'transparent',
+      recyclerLight: 'transparent',
+      shipmentBg: 'transparent',
+      stampBg: 'transparent',
+    },
+  };
 };
