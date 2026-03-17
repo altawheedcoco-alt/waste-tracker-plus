@@ -85,6 +85,7 @@ const OrganizationTermsDialog = ({ open, onAccept, organizationType }: Organizat
   const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
   
   const [uploadingImages, setUploadingImages] = useState(false);
+  const [idInputMode, setIdInputMode] = useState<IDInputMode>('scanner');
   const [signatureDataUrl, setSignatureDataUrl] = useState<string | null>(null);
   const [uploadedSignaturePreview, setUploadedSignaturePreview] = useState<string | null>(null);
   const [signatureMode, setSignatureMode] = useState<'electronic' | 'upload'>('electronic');
