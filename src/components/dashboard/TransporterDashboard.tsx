@@ -1,4 +1,5 @@
 import { useState, Suspense, lazy } from 'react';
+import QuickActionsGrid from './QuickActionsGrid';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
@@ -134,6 +135,7 @@ const TransporterDashboard = () => {
       <DashboardWidgetCustomizer orgType="transporter" />
 
       <TransporterCommandCenter />
+      <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
       <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
         <TransporterDailyPulse />
