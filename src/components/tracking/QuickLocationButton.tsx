@@ -92,8 +92,8 @@ const QuickLocationButton = ({
               whileTap={{ scale: 0.95 }}
               whileHover={{ scale: 1.05 }}
               className={`
-                fixed bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-20 left-3 sm:left-4 z-40
-                w-10 h-10 sm:w-14 sm:h-14 rounded-full shadow-lg
+                fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-[4rem] sm:left-[4.5rem] z-40
+                w-11 h-11 sm:w-12 sm:h-12 rounded-full shadow-lg
                 flex items-center justify-center
                 transition-colors duration-200 touch-manipulation
                 ${success 
@@ -111,7 +111,7 @@ const QuickLocationButton = ({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                   >
-                    <Loader2 className="h-6 w-6 text-white animate-spin" />
+                    <Loader2 className="h-5 w-5 text-white animate-spin" />
                   </motion.div>
                 ) : success ? (
                   <motion.div
@@ -120,7 +120,7 @@ const QuickLocationButton = ({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                   >
-                    <CheckCircle2 className="h-6 w-6 text-white" />
+                    <CheckCircle2 className="h-5 w-5 text-white" />
                   </motion.div>
                 ) : (
                   <motion.div
@@ -129,7 +129,7 @@ const QuickLocationButton = ({
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.5 }}
                   >
-                    <Navigation className="h-6 w-6 text-white" />
+                    <Navigation className="h-5 w-5 text-white" />
                   </motion.div>
                 )}
               </AnimatePresence>

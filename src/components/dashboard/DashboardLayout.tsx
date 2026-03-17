@@ -1072,21 +1072,20 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             actions={[
               {
                 id: 'quick-sign',
-                icon: <PenTool size={isMobile ? 16 : 22} />,
+                icon: <PenTool size={isMobile ? 18 : 20} />,
                 onClick: () => navigate('/dashboard/signing-inbox'),
                 label: t('dashboard.quickSign'),
                 variant: 'accent',
               },
               {
                 id: 'permits',
-                icon: <FileText size={isMobile ? 16 : 22} />,
+                icon: <FileText size={isMobile ? 18 : 20} />,
                 onClick: () => navigate('/dashboard/driver-permits'),
                 label: t('dashboard.generalPermits'),
                 variant: 'primary',
               },
             ]}
             position="bottom-left"
-            className={isMobile ? 'bottom-[5rem]' : ''}
           />
 
           {/* Mobile Bottom Navigation */}
