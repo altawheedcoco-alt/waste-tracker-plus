@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { useRealWeather } from '@/hooks/useRealWeather';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText, Building2, Route, Scale } from 'lucide-react';
 import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
 import { Button } from '@/components/ui/button';
 import { Tabs } from '@/components/ui/tabs';
