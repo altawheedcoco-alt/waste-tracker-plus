@@ -114,6 +114,7 @@ const GeneratorDashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isMobile } = useDisplayMode();
+  const realWeather = useRealWeather();
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);

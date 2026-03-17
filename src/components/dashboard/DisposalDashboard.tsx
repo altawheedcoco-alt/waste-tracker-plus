@@ -92,6 +92,7 @@ interface RecentShipment {
 
 const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const { profile, organization } = useAuth();
+  const realWeather = useRealWeather();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const queryClient = useQueryClient();

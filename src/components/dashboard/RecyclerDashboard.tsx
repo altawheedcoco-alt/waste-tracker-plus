@@ -68,6 +68,7 @@ const RecyclerDashboard = () => {
   const { t } = useLanguage();
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
+  const realWeather = useRealWeather();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
