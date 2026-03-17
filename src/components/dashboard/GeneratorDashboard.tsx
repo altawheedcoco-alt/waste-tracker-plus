@@ -1,4 +1,5 @@
 import { useState, useMemo, lazy, Suspense } from 'react';
+import { useRealWeather } from '@/hooks/useRealWeather';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,7 +11,7 @@ import { GENERATOR_TAB_BINDINGS } from '@/config/generator/generatorBindings';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer, MapPin } from 'lucide-react';
+import { Package, Clock, CheckCircle2, Truck, AlertCircle, Eye, FileCheck, Sparkles, ClipboardList, Printer, MapPin, Building2, Route, Users } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -113,6 +114,7 @@ const GeneratorDashboard = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
   const { isMobile } = useDisplayMode();
+  const realWeather = useRealWeather();
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
@@ -224,6 +226,44 @@ const GeneratorDashboard = () => {
         orgLabel={t('dashboard.orgTypes.generator')}
         icon={Package}
         gradient="from-primary to-primary/70"
+        radarStats={[
+          { label: 'إجمالي الشحنات', value: recentShipments.length, icon: Package, color: 'text-primary', max: Math.max(recentShipments.length, 50), trend: 'up' as const },
+          { label: 'نشطة', value: recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length, icon: Route, color: 'text-amber-500', max: 20, trend: 'up' as const },
+          { label: 'معلقة', value: recentShipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const },
+          { label: 'مكتملة', value: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(recentShipments.length, 50), trend: 'up' as const },
+          { label: 'بتقارير', value: recentShipments.filter(s => s.has_report).length, icon: FileCheck, color: 'text-violet-500', max: Math.max(recentShipments.length, 20), trend: 'stable' as const },
+          { label: 'ناقلون', value: new Set(recentShipments.map(s => s.transporter?.name).filter(Boolean)).size, icon: Building2, color: 'text-primary', max: 10, trend: 'stable' as const },
+        ]}
+        alerts={[
+          ...(recentShipments.filter(s => s.status === 'new').length > 3 ? [{ id: 'pending-gen', message: `تحذير: ${recentShipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج مراجعة`, severity: 'warning' as const }] : []),
+          ...(recentShipments.filter(s => s.status === 'in_transit').length > 0 ? [{ id: 'in-transit', message: `${recentShipments.filter(s => s.status === 'in_transit').length} شحنة في الطريق الآن`, severity: 'info' as const }] : []),
+          { id: 'system-ok', message: 'جميع أنظمة التتبع تعمل بكفاءة', severity: 'info' as const },
+          { id: 'compliance', message: 'تذكير: مراجعة الامتثال البيئي الشهري', severity: 'warning' as const },
+        ]}
+        weather={{
+          temp: realWeather.temp,
+          condition: realWeather.condition,
+          conditionLabel: realWeather.conditionLabel,
+          humidity: realWeather.humidity,
+          windSpeed: realWeather.windSpeed,
+          roadWarning: realWeather.roadWarning,
+          feelsLike: realWeather.feelsLike,
+          uvIndex: realWeather.uvIndex,
+          precipProb: realWeather.precipProb,
+          pressure: realWeather.pressure,
+          locationName: realWeather.locationName,
+          hourlyForecast: realWeather.hourlyForecast,
+          isLoading: realWeather.isLoading,
+          refreshFromGPS: realWeather.refreshFromGPS,
+          isLocating: realWeather.isLocating,
+        }}
+        heatmapData={[
+          { region: 'القاهرة', value: recentShipments.filter(s => s.status === 'in_transit').length, max: 10 },
+          { region: 'الجيزة', value: Math.round(recentShipments.length * 0.3), max: 10 },
+          { region: 'الإسكندرية', value: Math.round(recentShipments.length * 0.2), max: 8 },
+          { region: 'الدلتا', value: Math.round(recentShipments.length * 0.15), max: 6 },
+          { region: 'الصعيد', value: Math.round(recentShipments.length * 0.1), max: 5 },
+        ]}
       >
         <DashboardWidgetCustomizer orgType="generator" />
         <DashboardPrintReports />

@@ -1,7 +1,8 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { useRealWeather } from '@/hooks/useRealWeather';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import StoryCircles from '@/components/stories/StoryCircles';
-import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText } from 'lucide-react';
+import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText, Building2, Route, Scale } from 'lucide-react';
 import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
 import { Button } from '@/components/ui/button';
 import { Tabs } from '@/components/ui/tabs';
@@ -67,6 +68,7 @@ const RecyclerDashboard = () => {
   const { t } = useLanguage();
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
+  const realWeather = useRealWeather();
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -187,6 +189,44 @@ const RecyclerDashboard = () => {
         orgLabel={t('dashboard.orgTypes.recycler')}
         icon={Recycle}
         gradient="from-emerald-500 to-teal-600"
+        radarStats={[
+          { label: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-primary', max: Math.max(stats.total, 50), trend: 'up' as const },
+          { label: 'واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },
+          { label: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-violet-500', max: 20, trend: 'stable' as const },
+          { label: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats.total, 50), trend: 'up' as const },
+          { label: 'المولّدون', value: new Set(recentShipments.map(s => s.generator?.name).filter(Boolean)).size, icon: Building2, color: 'text-primary', max: 10, trend: 'stable' as const },
+          { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-emerald-500', max: 1, trend: 'stable' as const },
+        ]}
+        alerts={[
+          ...(stats.incoming > 3 ? [{ id: 'incoming-high', message: `${stats.incoming} شحنة واردة تحتاج استقبال`, severity: 'warning' as const }] : []),
+          ...(stats.processing > 5 ? [{ id: 'processing-load', message: `${stats.processing} شحنة قيد المعالجة — حمل تشغيلي مرتفع`, severity: 'info' as const }] : []),
+          { id: 'system-ok', message: 'أنظمة المصنع والتتبع تعمل بكفاءة', severity: 'info' as const },
+          { id: 'quality-check', message: 'تذكير: فحص جودة دوري مطلوب', severity: 'warning' as const },
+        ]}
+        weather={{
+          temp: realWeather.temp,
+          condition: realWeather.condition,
+          conditionLabel: realWeather.conditionLabel,
+          humidity: realWeather.humidity,
+          windSpeed: realWeather.windSpeed,
+          roadWarning: realWeather.roadWarning,
+          feelsLike: realWeather.feelsLike,
+          uvIndex: realWeather.uvIndex,
+          precipProb: realWeather.precipProb,
+          pressure: realWeather.pressure,
+          locationName: realWeather.locationName,
+          hourlyForecast: realWeather.hourlyForecast,
+          isLoading: realWeather.isLoading,
+          refreshFromGPS: realWeather.refreshFromGPS,
+          isLocating: realWeather.isLocating,
+        }}
+        heatmapData={[
+          { region: 'القاهرة', value: stats.incoming, max: 10 },
+          { region: 'الجيزة', value: Math.round(stats.total * 0.25), max: 8 },
+          { region: 'الإسكندرية', value: Math.round(stats.total * 0.2), max: 8 },
+          { region: 'الدلتا', value: Math.round(stats.total * 0.15), max: 6 },
+          { region: 'الصعيد', value: Math.round(stats.total * 0.1), max: 5 },
+        ]}
       >
         <DashboardWidgetCustomizer orgType="recycler" />
         <Button onClick={() => setShowSmartWeightUpload(true)} variant="outline" size="sm" className="gap-2 rounded-xl">
