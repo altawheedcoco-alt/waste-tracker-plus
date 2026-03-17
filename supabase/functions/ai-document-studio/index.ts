@@ -238,7 +238,7 @@ ${knowledge}
     min-height: 297mm;
     margin: 0 auto;
     background: #ffffff;
-    padding: 12mm 15mm 18mm 15mm;
+    padding: 15mm 15mm 20mm 15mm;
     position: relative;
     overflow: hidden;
     box-shadow: 0 0 30px rgba(0,0,0,0.1);

@@ -62,7 +62,7 @@ const DisposalAccountStatementPrint = ({
         direction: 'rtl',
         fontSize: '9pt',
         lineHeight: '1.4',
-        padding: '10mm 10mm',
+        padding: '15mm 15mm 20mm 15mm',
       }}
     >
       {/* Header */}

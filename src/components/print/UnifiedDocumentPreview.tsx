@@ -262,7 +262,7 @@ const LiveA4Preview = ({
           />
 
           {/* Layer 3: Content */}
-          <div style={{ position: 'relative', zIndex: 2, padding: '10mm 12mm' }}>
+          <div style={{ position: 'relative', zIndex: 2, padding: '15mm 15mm 20mm 15mm' }}>
             {/* Header */}
             <motion.div
               initial={{ opacity: 0, y: -8 }}

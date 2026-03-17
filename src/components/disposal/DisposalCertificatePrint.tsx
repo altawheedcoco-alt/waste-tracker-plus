@@ -57,7 +57,7 @@ const DisposalCertificatePrint = ({ data, includeStamp = true, includeSignature 
         direction: 'rtl',
         fontSize: '9pt',
         lineHeight: '1.5',
-        padding: '12mm 10mm',
+        padding: '15mm 15mm 20mm 15mm',
         pageBreakAfter: 'always',
       }}
     >

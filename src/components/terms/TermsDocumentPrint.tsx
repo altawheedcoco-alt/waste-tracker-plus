@@ -94,7 +94,7 @@ const TermsDocumentPrint = forwardRef<HTMLDivElement, TermsDocumentPrintProps>(
           fontFamily: 'Cairo, sans-serif',
           width: '210mm',
           minHeight: '297mm',
-          padding: '10mm 12mm',
+          padding: '15mm 15mm 20mm 15mm',
           boxSizing: 'border-box'
         }}
       >
