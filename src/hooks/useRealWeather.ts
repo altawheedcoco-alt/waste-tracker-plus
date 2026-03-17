@@ -30,6 +30,8 @@ export interface RealWeatherData {
   isLoading: boolean;
   error: string | null;
   roadWarning?: string;
+  refreshFromGPS: () => void;
+  isLocating: boolean;
 }
 
 // WMO weather interpretation codes → condition
@@ -62,7 +64,8 @@ const DEFAULT_LAT = 30.0444; // Cairo
 const DEFAULT_LNG = 31.2357;
 
 export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
-  const [data, setData] = useState<RealWeatherData>({
+  const [isLocating, setIsLocating] = useState(false);
+  const [data, setData] = useState<Omit<RealWeatherData, 'refreshFromGPS' | 'isLocating'>>({
     temp: 0, feelsLike: 0, condition: 'sunny', conditionLabel: 'جاري التحميل...',
     humidity: 0, windSpeed: 0, windDirection: 0, visibility: 10, uvIndex: 0,
     pressure: 1013, precipProb: 0, hourlyForecast: [], locationName: '',
@@ -172,5 +175,22 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
     return () => clearTimeout(fallbackTimer);
   }, [fetchWeather, refreshIntervalMs]);
 
-  return data;
+  const refreshFromGPS = useCallback(() => {
+    if (!navigator.geolocation) return;
+    setIsLocating(true);
+    setData(prev => ({ ...prev, isLoading: true }));
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setIsLocating(false);
+        fetchWeather(pos.coords.latitude, pos.coords.longitude);
+      },
+      () => {
+        setIsLocating(false);
+        fetchWeather(DEFAULT_LAT, DEFAULT_LNG);
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }, [fetchWeather]);
+
+  return { ...data, refreshFromGPS, isLocating };
 }
