@@ -150,11 +150,19 @@ export function generateMICRLineHTML(
   const now = new Date();
   const dateStamp = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
   const timeStamp = `${String(now.getHours()).padStart(2,'0')}${String(now.getMinutes()).padStart(2,'0')}`;
-  // MICR E-13B special chars: A=Transit(⑆) B=On-Us(⑇) C=Amount(⑈) D=Dash(⑉)
   const micrLine = `A${code}A B${dateStamp}D${timeStamp}B C0000C`;
 
-  return `<div class="micr-line" style="position:absolute;bottom:4mm;left:8mm;z-index:3;pointer-events:none;user-select:none;direction:ltr;font-family:'MICR E13B',monospace;font-size:11px;letter-spacing:1px;color:#000000;line-height:1;">
+  return `<div class="micr-line" style="direction:ltr;font-family:'MICR E13B',monospace;font-size:11px;letter-spacing:1px;color:#000000;line-height:1;pointer-events:none;user-select:none;">
     <span>${micrLine}</span>
+  </div>`;
+}
+
+/**
+ * Generate the vertical security stamp text — now rendered horizontally in footer
+ */
+export function generateVerticalStampHTML(): string {
+  return `<div style="font-family:'Courier New','Cairo',monospace;font-size:7px;letter-spacing:1px;color:#000000;font-weight:900;direction:rtl;text-align:center;pointer-events:none;user-select:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+    <span style="background:rgba(255,255,255,0.85);padding:2px 8px;border:1px solid rgba(0,0,0,0.15);border-radius:2px;">▸ منصة اي ريسايكل — هذه الوثيقة مؤمنة وذكية | iRecycle Platform — This Document is Secured &amp; Smart | 𓇋𓂋𓇌𓋴𓇌𓎡𓃭 — 𓅓𓋴𓏏𓈖𓂧 𓅓𓀀𓅓𓈖 𓅱𓇌𓎡𓇌 ◂</span>
   </div>`;
 }
 
