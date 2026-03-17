@@ -179,7 +179,7 @@ function generateWatermarkHTML(orgName: string): string {
       `<div style="position:absolute;top:${top}%;left:-20%;right:-20%;text-align:center;font-size:${size}px;font-family:'Cairo','Segoe UI',sans-serif;color:rgba(6,95,70,${alpha});transform:rotate(${angle}deg);white-space:nowrap;letter-spacing:1.8px;font-weight:600;line-height:1.5;pointer-events:none;user-select:none;">${watermarkText}    ${watermarkText}    ${watermarkText}</div>`
     );
   }
-  return `<div style="position:fixed;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:multiply;">${rows.join('')}</div>`;
+  return `<div style="position:absolute;inset:0;z-index:1;pointer-events:none;overflow:hidden;mix-blend-mode:multiply;">${rows.join('')}</div>`;
 }
 
 function generateVerticalStampHTML(): string {
@@ -252,10 +252,10 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   @font-face { font-family: 'MICR E13B'; src: url('/fonts/micr-e13b.ttf') format('truetype'); font-weight: normal; font-style: normal; }
   @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  body { 
+  body, .manifest-page { 
     font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
     font-size: ${FS}; color: #1a1a1a; direction: rtl; 
-    width: 210mm; min-height: 267mm; position: relative;
+    width: 210mm; min-height: 297mm; position: relative;
     padding: 15mm 15mm 20mm 15mm;
     background: #fff;
   }
@@ -269,7 +269,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 
   /* Vertical rotated text on left side — inside 15mm text margin */
   .vertical-text {
-    position: fixed; left: 16mm; top: 15mm; bottom: 20mm; width: 5mm;
+    position: absolute; left: 0; top: 0; bottom: 0; width: 5mm;
     writing-mode: vertical-rl; text-orientation: mixed;
     display: flex; align-items: center; justify-content: center;
     font-family: 'Cairo', 'Courier New', monospace; font-size: ${FS}; font-weight: 900;
@@ -349,7 +349,7 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 </style>
 </head>
 <body>
-
+<div class="manifest-page">
 <!-- ═══ Layer 0: Guilloche Text Filler — trilingual threads + sine waves ═══ -->
 ${generateGuillocheTextFillerHTML('#059669')}
 
@@ -650,6 +650,7 @@ ${custodyChain.length > 0 ? `
     رقم التتبع: ${shipment.shipment_number} | ${documentSerial} | ${securityCode} | ${new Date().toLocaleString("ar-EG")}
   </div>
 </div>
+</div><!-- /manifest-page -->
 
 </body>
 </html>`;
