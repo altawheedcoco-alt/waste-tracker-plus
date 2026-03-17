@@ -33,7 +33,7 @@ serve(async (req) => {
       });
     }
 
-    const { documentUrl, documentName, scanType = "general" } = await req.json();
+    const { documentUrl, documentName, scanType = "general", extractFields, documentCategory } = await req.json();
     if (!documentUrl) {
       return new Response(JSON.stringify({ error: "documentUrl is required" }), {
         status: 400,
@@ -44,7 +44,63 @@ serve(async (req) => {
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
-    const systemPrompt = `أنت محلل مستندات ذكي متخصص في استخراج البيانات من الوثائق العربية والإنجليزية.
+    // Build system prompt based on scan type
+    let systemPrompt: string;
+
+    if (scanType === 'business_document' && extractFields) {
+      const fieldPrompts: Record<string, string> = {
+        tax_card: `استخرج من البطاقة الضريبية المصرية كل الحقول التالية:
+- اسم الشركة/المنشأة (عربي وإنجليزي)
+- رقم التسجيل الضريبي
+- رقم الملف الضريبي
+- نوع النشاط
+- العنوان والمحافظة
+- اسم صاحب الشأن/المالك
+- الرقم القومي للمالك
+- تاريخ الإصدار وتاريخ الانتهاء`,
+        commercial_register: `استخرج من السجل التجاري المصري كل الحقول التالية:
+- اسم الشركة (عربي وإنجليزي)
+- رقم السجل التجاري
+- الشكل القانوني (شركة ذات مسؤولية محدودة، فردية، مساهمة...)
+- نوع النشاط
+- رأس المال
+- العنوان ومكتب التسجيل
+- اسم المدير المسؤول/صاحب الشأن
+- الرقم القومي
+- عدد الفروع
+- تاريخ القيد وتاريخ الانتهاء`,
+        data_statement: `استخرج من وثيقة البيانات كل الحقول التالية:
+- اسم الشركة (عربي وإنجليزي)
+- رقم السجل التجاري
+- رقم التسجيل الضريبي
+- الشكل القانوني
+- نوع النشاط
+- العنوان
+- اسم صاحب الشأن
+- تاريخ الإصدار`,
+      };
+
+      systemPrompt = `أنت محلل مستندات تجارية مصرية متخصص. مهمتك استخراج كل البيانات بدقة عالية.
+
+${fieldPrompts[documentCategory || ''] || fieldPrompts.data_statement}
+
+أجب بصيغة JSON فقط بالهيكل التالي:
+{
+  "classification": "نوع المستند",
+  "summary": "ملخص قصير",
+  "entities": [{"type": "نوع الحقل بالعربي", "value": "القيمة المستخرجة", "confidence": 0.95}],
+  "key_dates": [{"label": "وصف التاريخ", "date": "YYYY-MM-DD"}],
+  "amounts": [{"label": "وصف", "amount": 0, "currency": "EGP"}],
+  "risks": [],
+  "confidence_score": 0.90
+}
+
+ملاحظات:
+- اكتب أنواع الكيانات (type) بالعربي بشكل واضح مثل: "اسم الشركة"، "رقم التسجيل الضريبي"، "رقم السجل التجاري"، "نوع النشاط"، "العنوان"، "المحافظة"، "صاحب الشأن"، "الرقم القومي"، "رأس المال"، "عدد الفروع"، "مكتب التسجيل"، "الشكل القانوني"، "رقم الملف الضريبي"
+- إذا لم تستطع قراءة حقل، لا تضفه
+- اكتب التواريخ بصيغة YYYY-MM-DD`;
+    } else {
+      systemPrompt = `أنت محلل مستندات ذكي متخصص في استخراج البيانات من الوثائق العربية والإنجليزية.
 مهمتك:
 1. تصنيف نوع المستند (عقد، فاتورة، تصريح، رخصة، شهادة، تقرير، خطاب، إقرار، أخرى)
 2. استخراج الكيانات: الأسماء، التواريخ، المبالغ، أرقام الهوية، أرقام السجلات، العناوين
@@ -61,6 +117,7 @@ serve(async (req) => {
   "risks": ["مخاطرة 1"],
   "confidence_score": 0.90
 }`;
+    }
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
