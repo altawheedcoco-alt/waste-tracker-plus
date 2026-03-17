@@ -30,6 +30,8 @@ export interface RealWeatherData {
   isLoading: boolean;
   error: string | null;
   roadWarning?: string;
+  refreshFromGPS: () => void;
+  isLocating: boolean;
 }
 
 // WMO weather interpretation codes → condition
