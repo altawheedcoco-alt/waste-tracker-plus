@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 export interface HourlyForecast {
   time: string;
@@ -50,7 +50,7 @@ function wmoToCondition(code: number): { condition: WeatherCondition; label: str
   return { condition: 'cloudy', label: 'غائم' };
 }
 
-function getRoadWarning(weatherCode: number, windSpeed: number, visibility?: number): string | undefined {
+function getRoadWarning(weatherCode: number, windSpeed: number): string | undefined {
   if ([95, 96, 99].includes(weatherCode)) return '⚠️ عاصفة رعدية - قيادة خطرة';
   if ([65, 67, 82].includes(weatherCode)) return '⚠️ أمطار غزيرة - انزلاق الطرق';
   if ([45, 48].includes(weatherCode)) return '⚠️ ضباب كثيف - رؤية محدودة';
@@ -60,11 +60,15 @@ function getRoadWarning(weatherCode: number, windSpeed: number, visibility?: num
   return undefined;
 }
 
-const DEFAULT_LAT = 30.0444; // Cairo
+const DEFAULT_LAT = 30.0444;
 const DEFAULT_LNG = 31.2357;
 
 export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
   const [isLocating, setIsLocating] = useState(false);
+  const fetchingRef = useRef(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastCoordsRef = useRef({ lat: DEFAULT_LAT, lng: DEFAULT_LNG });
+
   const [data, setData] = useState<Omit<RealWeatherData, 'refreshFromGPS' | 'isLocating'>>({
     temp: 0, feelsLike: 0, condition: 'sunny', conditionLabel: 'جاري التحميل...',
     humidity: 0, windSpeed: 0, windDirection: 0, visibility: 10, uvIndex: 0,
@@ -73,51 +77,44 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
   });
 
   const fetchWeather = useCallback(async (lat: number, lng: number) => {
-    try {
-      const params = new URLSearchParams({
-        latitude: lat.toString(),
-        longitude: lng.toString(),
-        current: 'temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure,uv_index,precipitation_probability',
-        hourly: 'temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m,precipitation_probability',
-        forecast_hours: '12',
-        timezone: 'auto',
-      });
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
+    lastCoordsRef.current = { lat, lng };
 
-      const res = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
-      if (!res.ok) throw new Error(`Weather API error: ${res.status}`);
+    try {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      const supabaseKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
+
+      const res = await fetch(
+        `${supabaseUrl}/functions/v1/weather-proxy?lat=${lat}&lng=${lng}`,
+        {
+          headers: {
+            'Authorization': `Bearer ${supabaseKey}`,
+            'apikey': supabaseKey,
+          },
+        }
+      );
+
+      if (!res.ok) throw new Error(`Weather proxy error: ${res.status}`);
       const json = await res.json();
 
-      const current = json.current;
+      const current = json.weather.current;
       const { condition, label } = wmoToCondition(current.weather_code);
       const roadWarning = getRoadWarning(current.weather_code, current.wind_speed_10m);
 
-      // Parse hourly
-      const hourly: HourlyForecast[] = (json.hourly?.time || []).map((t: string, i: number) => {
+      const hourly: HourlyForecast[] = (json.weather.hourly?.time || []).map((t: string, i: number) => {
         const date = new Date(t);
-        const hCode = json.hourly.weather_code?.[i] ?? 0;
+        const hCode = json.weather.hourly.weather_code?.[i] ?? 0;
         return {
           time: t,
           hour: date.getHours(),
-          temp: Math.round(json.hourly.temperature_2m?.[i] ?? 0),
+          temp: Math.round(json.weather.hourly.temperature_2m?.[i] ?? 0),
           condition: wmoToCondition(hCode).condition,
-          humidity: json.hourly.relative_humidity_2m?.[i] ?? 0,
-          windSpeed: Math.round(json.hourly.wind_speed_10m?.[i] ?? 0),
-          precipProb: json.hourly.precipitation_probability?.[i] ?? 0,
+          humidity: json.weather.hourly.relative_humidity_2m?.[i] ?? 0,
+          windSpeed: Math.round(json.weather.hourly.wind_speed_10m?.[i] ?? 0),
+          precipProb: json.weather.hourly.precipitation_probability?.[i] ?? 0,
         };
       });
-
-      // Reverse geocode for location name
-      let locationName = 'الموقع الحالي';
-      try {
-        const geoRes = await fetch(
-          `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&accept-language=ar&zoom=10`,
-          { headers: { 'User-Agent': 'iRecycle-App/1.0' } }
-        );
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
-          locationName = geoData.address?.city || geoData.address?.town || geoData.address?.state || 'الموقع الحالي';
-        }
-      } catch {}
 
       setData({
         temp: Math.round(current.temperature_2m),
@@ -132,7 +129,7 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
         pressure: Math.round(current.surface_pressure ?? 1013),
         precipProb: current.precipitation_probability ?? 0,
         hourlyForecast: hourly,
-        locationName,
+        locationName: json.locationName || 'الموقع الحالي',
         lastUpdated: new Date(),
         isLoading: false,
         error: null,
@@ -141,38 +138,35 @@ export function useRealWeather(refreshIntervalMs = 15 * 60 * 1000) {
     } catch (err: any) {
       console.error('Weather fetch error:', err);
       setData(prev => ({ ...prev, isLoading: false, error: err.message }));
+    } finally {
+      fetchingRef.current = false;
     }
   }, []);
 
+  // Initial load + interval
   useEffect(() => {
-    let lat = DEFAULT_LAT;
-    let lng = DEFAULT_LNG;
+    let cancelled = false;
 
-    const doFetch = (la: number, ln: number) => {
-      fetchWeather(la, ln);
-      const interval = setInterval(() => fetchWeather(la, ln), refreshIntervalMs);
-      return () => clearInterval(interval);
+    const startWeather = (lat: number, lng: number) => {
+      if (cancelled) return;
+      fetchWeather(lat, lng);
+      intervalRef.current = setInterval(() => fetchWeather(lat, lng), refreshIntervalMs);
     };
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
-          lat = pos.coords.latitude;
-          lng = pos.coords.longitude;
-          doFetch(lat, lng);
-        },
-        () => doFetch(lat, lng),
+        (pos) => startWeather(pos.coords.latitude, pos.coords.longitude),
+        () => startWeather(DEFAULT_LAT, DEFAULT_LNG),
         { timeout: 5000, enableHighAccuracy: false }
       );
     } else {
-      doFetch(lat, lng);
+      startWeather(DEFAULT_LAT, DEFAULT_LNG);
     }
 
-    // Also schedule a refresh regardless
-    const fallbackTimer = setTimeout(() => fetchWeather(lat, lng), 3000);
-    fetchWeather(lat, lng);
-
-    return () => clearTimeout(fallbackTimer);
+    return () => {
+      cancelled = true;
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
   }, [fetchWeather, refreshIntervalMs]);
 
   const refreshFromGPS = useCallback(() => {
