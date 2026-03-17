@@ -188,6 +188,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
   }, [shouldCollapseSidebar]);
 
+  // Auto-close mobile menu on route change
+  useEffect(() => {
+    setIsMobileMenuOpen(false);
+  }, [location.pathname]);
+
   // Unlock notification audio on first user gesture (required by browser autoplay policies)
   // Also ensure all sounds are enabled by default
   useEffect(() => {
@@ -489,8 +494,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         {/* Desktop Sidebar — v4.0 Modern Elegant */}
         {!isMobile && (
             <aside
-              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-in-out ${
-                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'
+              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
+                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+1px)] opacity-0 pointer-events-none'
               }`}
               style={{ width: sidebarWidth }}
             >
@@ -714,7 +719,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               initial={{ x: 50, opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: 50, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+              transition={{ type: 'spring', stiffness: 300, damping: 25, delay: 0.15 }}
               className="fixed right-0 top-1/2 -translate-y-1/2 z-50"
             >
               <Tooltip>
@@ -723,13 +728,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     variant="outline"
                     size="sm"
                     onClick={() => setIsSidebarOpen(true)}
-                    className="rounded-r-none rounded-l-lg h-16 w-7 flex flex-col items-center justify-center gap-0.5 shadow-md bg-card hover:bg-muted border-border transition-all duration-150"
+                    className="rounded-r-none rounded-l-lg h-20 w-8 flex flex-col items-center justify-center gap-0.5 shadow-lg bg-card/95 backdrop-blur-sm hover:bg-primary/10 hover:border-primary/30 border-border transition-all duration-200 group"
                   >
-                    <ChevronDown className="w-4 h-4 rotate-90 text-muted-foreground" />
+                    <Menu className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="left" className="text-xs">
-                  <p>{t('nav.dashboard')}</p>
+                  <p>{language === 'ar' ? 'فتح القائمة' : 'Open Menu'}</p>
                 </TooltipContent>
               </Tooltip>
             </motion.div>
@@ -747,6 +752,23 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Top header — v4.0 clean, minimal */}
           <header className={`sticky top-0 z-40 ${headerHeight} bg-card border-b border-border flex items-center justify-between gap-1.5 sm:gap-2 px-3 sm:px-4 lg:px-6`}>
             <div className="flex items-center gap-2 shrink-0">
+              {/* Desktop: show menu button when sidebar is hidden */}
+              {!isMobile && !isSidebarOpen && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      onClick={() => setIsSidebarOpen(true)}
+                      className="p-2 hover:bg-muted rounded-lg transition-colors"
+                      aria-label="فتح القائمة"
+                    >
+                      <Menu size={18} className="text-muted-foreground" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom" className="text-xs">
+                    <p>{language === 'ar' ? 'فتح القائمة الجانبية' : 'Open sidebar'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               {isMobile && (
                 <button
                   onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -964,14 +986,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <nav className="flex-1 overflow-y-auto px-3 py-3 space-y-1 pb-safe overscroll-contain" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {filteredMenuItems.length > 0 ? (
                       filteredMenuItems.map((item: SidebarMenuItem) => (
-                        <div key={item.key} onClick={(e) => {
-                          if ((e.target as HTMLElement).closest('a')) setIsMobileMenuOpen(false);
-                        }}>
-                          <SidebarNavGroup
-                            item={item}
-                            isCollapsed={false}
-                          />
-                        </div>
+                        <SidebarNavGroup
+                          key={item.key}
+                          item={item}
+                          isCollapsed={false}
+                        />
                       ))
                     ) : (
                       <div className="text-center py-4 text-sm text-muted-foreground">
@@ -999,14 +1018,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                         </div>
                         <div className="space-y-1">
                           {filteredQuickActions.map((item) => (
-                            <div key={item.key} onClick={() => setIsMobileMenuOpen(false)}>
                               <SidebarNavItem
+                                key={item.key}
                                 icon={item.icon}
                                 label={item.label}
                                 path={item.path}
                                 isCollapsed={false}
                               />
-                            </div>
                           ))}
                         </div>
                       </div>
