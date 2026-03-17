@@ -6,6 +6,7 @@ import SmartDailyBrief from './shared/SmartDailyBrief';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
+import DashboardV2Header from './shared/DashboardV2Header';
 
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
