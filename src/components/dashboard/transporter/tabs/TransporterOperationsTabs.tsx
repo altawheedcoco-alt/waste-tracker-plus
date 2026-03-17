@@ -148,7 +148,16 @@ const TransporterOperationsTabs = ({
           onChangeStatus={onChangeStatus}
         />
       </ErrorBoundary>
-      <TransporterAggregateReport shipments={shipments} />
+      <ErrorBoundary fallbackTitle="خطأ في التقرير التجميعي">
+        <TransporterAggregateReport shipments={shipments} />
+      </ErrorBoundary>
+
+      {/* ═══ القسم 8: دليل الأقسام الشامل — جميع عناصر القائمة الجانبية ═══ */}
+      <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في دليل الأقسام">
+          <TransporterSectionsSummary />
+        </ErrorBoundary>
+      </Suspense>
     </TabsContent>
 
     <TabsContent value="performance" className="space-y-4 mt-6">
