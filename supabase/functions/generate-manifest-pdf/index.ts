@@ -250,13 +250,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
   @font-face { font-family: 'MICR E13B'; src: url('/fonts/micr-e13b.ttf') format('truetype'); font-weight: normal; font-style: normal; }
-  @page { size: A4 portrait; margin: 12mm 12mm 14mm 12mm; }
+  @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
   body { 
     font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
     font-size: ${FS}; color: #1a1a1a; direction: rtl; 
-    width: 210mm; min-height: 269mm; position: relative;
-    padding: 12mm 12mm 14mm 12mm;
+    width: 210mm; min-height: 267mm; position: relative;
+    padding: 15mm 15mm 20mm 15mm;
     background: #fff;
   }
   @media print {
