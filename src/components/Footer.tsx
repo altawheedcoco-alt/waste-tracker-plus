@@ -25,7 +25,7 @@ const Footer = () => {
   const legalLinks = [
     { label: t('footerExtra.termsOfUse'), href: '/terms' },
     { label: t('footerExtra.privacyPolicy'), href: '/privacy' },
-    { label: isAr ? 'سياسات المنصة' : 'Platform Policies', href: '/policies' },
+    { label: language === 'ar' ? 'سياسات المنصة' : 'Platform Policies', href: '/policies' },
     { label: t('footerExtra.licensesLegislation'), href: '/legislation' },
     { label: t('footerExtra.faq'), href: '/help' },
     { label: t('footerExtra.contactUsLink'), href: '/help' },
