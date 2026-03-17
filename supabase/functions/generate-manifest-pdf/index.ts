@@ -252,10 +252,10 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   @font-face { font-family: 'MICR E13B'; src: url('/fonts/micr-e13b.ttf') format('truetype'); font-weight: normal; font-style: normal; }
   @page { size: A4 portrait; margin: 15mm 15mm 20mm 15mm; }
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-  body { 
+  body, .manifest-page { 
     font-family: 'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif; 
     font-size: ${FS}; color: #1a1a1a; direction: rtl; 
-    width: 210mm; min-height: 267mm; position: relative;
+    width: 210mm; min-height: 297mm; position: relative;
     padding: 15mm 15mm 20mm 15mm;
     background: #fff;
   }
