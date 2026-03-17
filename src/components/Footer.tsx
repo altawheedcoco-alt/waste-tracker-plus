@@ -124,6 +124,8 @@ const Footer = () => {
             <span>·</span>
             <button onClick={() => handleNavigate('/privacy')} className="hover:text-primary transition-colors">{t('footerExtra.privacy')}</button>
             <span>·</span>
+            <button onClick={() => handleNavigate('/policies')} className="hover:text-primary transition-colors">{language === 'ar' ? 'السياسات' : 'Policies'}</button>
+            <span>·</span>
             <button onClick={() => handleNavigate('/help')} className="hover:text-primary transition-colors">{t('footerExtra.help')}</button>
           </div>
         </div>
