@@ -305,7 +305,7 @@ const ReportCoverPage = ({
         height: '297mm', 
         width: '210mm', 
         margin: '0 auto',
-        padding: '12mm 15mm',
+        padding: '15mm 15mm 20mm 15mm',
         fontFamily: 'Cairo, sans-serif',
         fontSize: '10pt',
         boxSizing: 'border-box',
