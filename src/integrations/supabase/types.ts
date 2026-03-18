@@ -21707,6 +21707,164 @@ export type Database = {
           },
         ]
       }
+      member_post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_post_likes_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "member_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_posts: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string | null
+          id: string
+          is_pinned: boolean | null
+          likes_count: number | null
+          media_urls: string[] | null
+          organization_id: string
+          post_type: string | null
+          updated_at: string | null
+          visibility: string | null
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          media_urls?: string[] | null
+          organization_id: string
+          post_type?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          likes_count?: number | null
+          media_urls?: string[] | null
+          organization_id?: string
+          post_type?: string | null
+          updated_at?: string | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "member_posts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      member_reviews: {
+        Row: {
+          created_at: string | null
+          id: string
+          member_id: string
+          rating: number
+          review_category: string | null
+          review_text: string | null
+          reviewer_id: string
+          reviewer_organization_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          member_id: string
+          rating: number
+          review_category?: string | null
+          review_text?: string | null
+          reviewer_id: string
+          reviewer_organization_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          member_id?: string
+          rating?: number
+          review_category?: string | null
+          review_text?: string | null
+          reviewer_id?: string
+          reviewer_organization_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_reviews_member_id_fkey"
+            columns: ["member_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_reviews_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "member_reviews_reviewer_organization_id_fkey"
+            columns: ["reviewer_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       message_read_receipts: {
         Row: {
           id: string
@@ -28629,7 +28787,9 @@ export type Database = {
           active_organization_id: string | null
           avatar_preset: string | null
           avatar_url: string | null
+          bio: string | null
           can_sign_documents: boolean | null
+          cover_url: string | null
           created_at: string | null
           department: string | null
           email: string
@@ -28644,9 +28804,12 @@ export type Database = {
           position: string | null
           preferred_language: string | null
           profile_color_theme: string | null
+          profile_visibility: string | null
           signature_authority_level: string | null
+          social_links: Json | null
           updated_at: string | null
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
           access_all_partners?: boolean | null
@@ -28654,7 +28817,9 @@ export type Database = {
           active_organization_id?: string | null
           avatar_preset?: string | null
           avatar_url?: string | null
+          bio?: string | null
           can_sign_documents?: boolean | null
+          cover_url?: string | null
           created_at?: string | null
           department?: string | null
           email: string
@@ -28669,9 +28834,12 @@ export type Database = {
           position?: string | null
           preferred_language?: string | null
           profile_color_theme?: string | null
+          profile_visibility?: string | null
           signature_authority_level?: string | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
           access_all_partners?: boolean | null
@@ -28679,7 +28847,9 @@ export type Database = {
           active_organization_id?: string | null
           avatar_preset?: string | null
           avatar_url?: string | null
+          bio?: string | null
           can_sign_documents?: boolean | null
+          cover_url?: string | null
           created_at?: string | null
           department?: string | null
           email?: string
@@ -28694,9 +28864,12 @@ export type Database = {
           position?: string | null
           preferred_language?: string | null
           profile_color_theme?: string | null
+          profile_visibility?: string | null
           signature_authority_level?: string | null
+          social_links?: Json | null
           updated_at?: string | null
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: [
           {
