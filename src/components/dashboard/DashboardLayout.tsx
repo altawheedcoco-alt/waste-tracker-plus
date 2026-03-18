@@ -654,7 +654,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <div className="pt-4 mt-4 border-t border-border">
                 {/* Section Header with Customize Button */}
                 <AnimatePresence>
-                  {isSidebarOpen && (
+            {isExpandedSidebar && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
