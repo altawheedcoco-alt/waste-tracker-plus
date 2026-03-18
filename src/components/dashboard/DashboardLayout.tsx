@@ -629,7 +629,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             {/* Admin: dedicated org switcher button */}
             {isAdmin && (
               <div className="pt-3 mt-3 border-t border-border/30 px-1">
-                <AdminOrgSwitcherButton collapsed={isMiniSidebar} />
+                <AdminOrgSwitcherButton collapsed={false} />
               </div>
             )}
 
