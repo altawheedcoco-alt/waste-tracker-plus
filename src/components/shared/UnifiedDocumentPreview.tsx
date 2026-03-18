@@ -3,7 +3,7 @@
  * 
  * يدعم وضعين:
  * 1. children: محتوى React مباشر (للمكونات الموجودة)
- * 2. htmlContent: محتوى HTML خام (لمستندات Edge Functions)
+ * 2. htmlContent: محتوى HTML خام (لمستندات Edge Functions) — يُعرض في iframe معزول
  * 
  * يوفر: معاينة A4 تفاعلية + طباعة + تحميل PDF
  */
@@ -11,32 +11,20 @@ import { useRef, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Loader2 } from 'lucide-react';
 import { useDocumentService } from '@/hooks/useDocumentService';
-import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface UnifiedDocumentPreviewProps {
   isOpen: boolean;
   onClose: () => void;
-  /** Document title shown in toolbar */
   title?: string;
-  /** PDF filename (without extension) */
   filename?: string;
-  /** PDF orientation */
   orientation?: 'portrait' | 'landscape';
-  /** React content to preview */
   children?: ReactNode;
-  /** Raw HTML content (from edge functions) */
   htmlContent?: string;
-  /** Whether data is still loading */
   loading?: boolean;
-  /** Additional toolbar actions */
   toolbarActions?: ReactNode;
-  /** Fit content to single page */
   fitSinglePage?: boolean;
-  /** Auto-trigger action when opened */
   autoAction?: 'print' | 'pdf' | null;
 }
-
-const ZOOM_LEVELS = [0.5, 0.75, 1, 1.25, 1.5];
 
 const UnifiedDocumentPreview = ({
   isOpen,
@@ -53,7 +41,7 @@ const UnifiedDocumentPreview = ({
 }: UnifiedDocumentPreviewProps) => {
   const [zoom, setZoom] = useState(0.75);
   const contentRef = useRef<HTMLDivElement>(null);
-  const htmlRef = useRef<HTMLDivElement>(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const autoActionDone = useRef(false);
 
   const { downloadPDF, print, isProcessing } = useDocumentService({
@@ -63,7 +51,6 @@ const UnifiedDocumentPreview = ({
     fitSinglePage,
   });
 
-  // Responsive zoom on open
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -76,7 +63,6 @@ const UnifiedDocumentPreview = ({
     return () => { document.body.style.overflow = ''; };
   }, [isOpen]);
 
-  // Keyboard shortcuts
   useEffect(() => {
     if (!isOpen) return;
     const handler = (e: KeyboardEvent) => {
@@ -89,33 +75,34 @@ const UnifiedDocumentPreview = ({
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const getActiveRef = useCallback(() => {
-    if (htmlContent && htmlRef.current) return htmlRef.current;
-    return contentRef.current;
-  }, [htmlContent]);
-
   const handlePrint = useCallback(() => {
-    const el = getActiveRef();
-    if (el) print(el);
-  }, [getActiveRef, print]);
+    if (htmlContent && iframeRef.current?.contentWindow) {
+      iframeRef.current.contentWindow.print();
+    } else {
+      const el = contentRef.current;
+      if (el) print(el);
+    }
+  }, [htmlContent, print]);
 
   const handleDownloadPDF = useCallback(async () => {
-    const el = getActiveRef();
-    if (el) await downloadPDF(el);
-  }, [getActiveRef, downloadPDF]);
+    if (htmlContent && iframeRef.current?.contentDocument) {
+      const el = iframeRef.current.contentDocument.querySelector('.manifest-page') as HTMLElement
+        || iframeRef.current.contentDocument.body;
+      if (el) await downloadPDF(el);
+    } else if (contentRef.current) {
+      await downloadPDF(contentRef.current);
+    }
+  }, [htmlContent, downloadPDF]);
 
-  // Auto-action
   useEffect(() => {
     if (!autoAction || loading || autoActionDone.current || !isOpen) return;
     const timer = setTimeout(() => {
-      const el = getActiveRef();
-      if (!el) return;
       autoActionDone.current = true;
       if (autoAction === 'print') handlePrint();
       else if (autoAction === 'pdf') handleDownloadPDF();
     }, 500);
     return () => clearTimeout(timer);
-  }, [autoAction, loading, isOpen, getActiveRef]);
+  }, [autoAction, loading, isOpen]);
 
   if (!isOpen) return null;
 
@@ -127,9 +114,7 @@ const UnifiedDocumentPreview = ({
           <FileText className="w-5 h-5 text-primary" />
           <span className="font-semibold text-sm">{title}</span>
         </div>
-
         <div className="flex items-center gap-1">
-          {/* Zoom controls */}
           <Button variant="ghost" size="icon" className="h-8 w-8"
             onClick={() => setZoom(z => Math.max(z - 0.25, 0.5))} disabled={zoom <= 0.5}>
             <ZoomOut className="w-4 h-4" />
@@ -139,17 +124,11 @@ const UnifiedDocumentPreview = ({
             onClick={() => setZoom(z => Math.min(z + 0.25, 1.5))} disabled={zoom >= 1.5}>
             <ZoomIn className="w-4 h-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8"
-            onClick={() => setZoom(1)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setZoom(1)}>
             <Maximize2 className="w-4 h-4" />
           </Button>
-
           <div className="w-px h-6 bg-border mx-1" />
-
-          {/* Additional toolbar actions */}
           {toolbarActions}
-
-          {/* Standard actions */}
           <Button variant="outline" size="sm" className="gap-1.5 h-8" onClick={handleDownloadPDF} disabled={isProcessing || loading}>
             {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Download className="w-3.5 h-3.5" />}
             <span className="hidden sm:inline text-xs">PDF</span>
@@ -158,9 +137,7 @@ const UnifiedDocumentPreview = ({
             <Printer className="w-3.5 h-3.5" />
             <span className="hidden sm:inline text-xs">طباعة</span>
           </Button>
-
           <div className="w-px h-6 bg-border mx-1" />
-
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onClose}>
             <X className="w-4 h-4" />
           </Button>
@@ -174,6 +151,31 @@ const UnifiedDocumentPreview = ({
             <Loader2 className="w-8 h-8 animate-spin" />
             <span>جاري تحميل المستند...</span>
           </div>
+        ) : htmlContent ? (
+          <div
+            className="shadow-2xl"
+            style={{
+              width: `${210 * zoom}mm`,
+              height: `${297 * zoom}mm`,
+              overflow: 'hidden',
+            }}
+          >
+            <iframe
+              ref={iframeRef}
+              srcDoc={htmlContent}
+              style={{
+                width: '210mm',
+                height: '297mm',
+                border: 'none',
+                transform: `scale(${zoom})`,
+                transformOrigin: 'top right',
+                display: 'block',
+                background: '#fff',
+              }}
+              title={title}
+              sandbox="allow-same-origin allow-popups"
+            />
+          </div>
         ) : (
           <div
             className="bg-white shadow-2xl origin-top"
@@ -184,20 +186,9 @@ const UnifiedDocumentPreview = ({
               transformOrigin: 'top center',
             }}
           >
-            {htmlContent ? (
-              <div
-                ref={htmlRef}
-                dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
-                style={{ width: '210mm', minHeight: '297mm' }}
-              />
-            ) : (
-              <div
-                ref={contentRef}
-                style={{ width: '210mm', minHeight: '297mm' }}
-              >
-                {children}
-              </div>
-            )}
+            <div ref={contentRef} style={{ width: '210mm', minHeight: '297mm' }}>
+              {children}
+            </div>
           </div>
         )}
       </div>
