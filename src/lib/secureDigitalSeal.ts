@@ -280,7 +280,7 @@ export function generateDigitalSealHTML(data: DigitalSealData & { label?: string
   return `
   <div style="display:inline-block;text-align:center;direction:rtl;font-family:'Cairo','Segoe UI',sans-serif;">
     ${svg}
-    ${data.label !== false ? `
+    ${data.label ? `
     <div style="font-size:6pt;color:#6b7280;margin-top:4px;">
       <div style="font-family:monospace;font-weight:bold;color:#059669;font-size:7pt;">${sealNumber}</div>
       <div>ختم رقمي مؤمّن • ${data.entityType === 'member' ? 'عضو' : 'جهة'}</div>
