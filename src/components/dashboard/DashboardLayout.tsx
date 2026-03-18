@@ -624,7 +624,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
             
             {/* Binding Legend */}
-            <BindingLegend isCollapsed={isMiniSidebar} />
+            <BindingLegend isCollapsed={false} />
 
             {/* Admin: dedicated org switcher button */}
             {isAdmin && (
