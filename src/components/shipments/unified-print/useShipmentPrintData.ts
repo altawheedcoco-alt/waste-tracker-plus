@@ -178,7 +178,7 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
   ].join('-') : 'tracking-form';
 
   return {
-    shipment, loading, logs, supervisors, declaration,
+    shipment, loading, logs, supervisors, signatures, declaration,
     qrData, driverName, vehiclePlate, documentSerial,
     verificationCode, pdfFileName,
   };
