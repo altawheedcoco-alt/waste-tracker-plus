@@ -3,6 +3,7 @@ import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import TermsBackPage from '@/components/print/TermsBackPage';
+import { generateMICRLineHTML, generateVerticalStampHTML } from '@/lib/printSecurityUtils';
 import {
   Building2,
   Truck,
