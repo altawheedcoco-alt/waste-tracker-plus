@@ -355,15 +355,16 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tr><td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: FS, padding: '1px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td></tr>
               <tr>
                 {[
-                  { org: shipment.generator, label: 'المولّد', role: 'generator', bg: theme.colors.generatorLight || '#eff6ff' },
-                  { org: shipment.transporter, label: 'الناقل', role: 'transporter', bg: theme.colors.transporterLight || '#fffbeb' },
-                  { org: shipment.recycler, label: 'المستقبل', role: 'recycler', bg: theme.colors.recyclerLight || '#f0fdf4' },
+                  { org: shipment.generator, orgId: shipment.generator_id, label: 'المولّد', role: 'generator', bg: theme.colors.generatorLight || '#eff6ff' },
+                  { org: shipment.transporter, orgId: shipment.transporter_id, label: 'الناقل', role: 'transporter', bg: theme.colors.transporterLight || '#fffbeb' },
+                  { org: shipment.recycler, orgId: shipment.recycler_id, label: 'المستقبل', role: 'recycler', bg: theme.colors.recyclerLight || '#f0fdf4' },
                 ].map((item, i) => {
                   const roleSigs = signatures.filter(s => s.signer_role === item.role);
                   return (
                     <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '1px', border: `1px solid ${theme.colors.border}`, background: item.bg }}>
                        <div style={{ fontSize: FS, fontWeight: '700', color: '#000' }}>{item.label}</div>
-                       <div style={{ fontSize: FS, color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
+                       <div style={{ fontSize: FS }}>{profileLink(item.org?.name || '-', orgProfileUrl(item.orgId), '#1d4ed8')}</div>
+                       <div style={{ fontSize: '5pt', color: '#374151' }}>{item.org?.representative_name || '-'}</div>
                        {roleSigs.length > 0 && (
                          <div style={{ fontSize: '5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع ({roleSigs.length})</div>
                        )}
