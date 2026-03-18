@@ -61,7 +61,7 @@ const RestrictionsMonitor = () => {
         .select('id', { count: 'exact', head: true })
         .eq('transporter_id', organization.id)
         .in('generator_id', blockedOrgIds)
-        .in('status', ['pending', 'in_transit', 'picked_up']);
+        .in('status', ['new', 'in_transit', 'collecting']);
       return count || 0;
     },
     enabled: !!organization?.id,
