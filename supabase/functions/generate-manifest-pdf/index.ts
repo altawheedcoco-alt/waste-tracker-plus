@@ -772,6 +772,29 @@ ${custodyChain.length > 0 ? `
   </ol>
 </div>
 
+<!-- 10. الأختام الرقمية المؤمّنة | Secure Digital Seals -->
+<div class="sec" style="margin-top:3px;">
+  <div class="sec-t">القسم العاشر: الأختام الرقمية المؤمّنة | Secure Digital Seals</div>
+  <div style="display:flex;justify-content:space-around;align-items:flex-start;gap:4px;padding:3px 0;">
+    ${generatePartySealBlock(shipment.generator, shipment.generator_id, '🏭 المولّد', shipment.shipment_number)}
+    ${generatePartySealBlock(shipment.transporter, shipment.transporter_id, '🚛 الناقل', shipment.shipment_number)}
+    ${generatePartySealBlock(shipment.recycler, shipment.recycler_id, '♻️ المدوّر', shipment.shipment_number)}
+  </div>
+  <div style="text-align:center;margin-top:2px;">
+    <div style="background:rgba(240,253,244,0.8);border:1px solid #bbf7d0;border-radius:4px;padding:2px 6px;display:inline-block;">
+      <div style="font-size:5.5px;font-weight:bold;color:#059669;">🛡️ هوية التحقق الرقمي — Digital Verification Identity</div>
+      <div style="font-size:5px;color:#6b7280;">الأختام الرقمية أعلاه مؤمّنة ببصمة تشفيرية فريدة لكل جهة ولكل مستند — لا يمكن تزويرها أو تكرارها</div>
+    </div>
+  </div>
+  <div style="border:1px solid #fde68a;border-radius:3px;padding:2px 4px;background:rgba(255,251,235,0.6);text-align:center;margin-top:2px;">
+    <div style="font-size:5px;font-weight:bold;color:#92400e;">📜 إقرار بالحجية الرقمية</div>
+    <div style="font-size:4.5px;color:#78716c;line-height:1.4;">
+      رمز الاستجابة السريعة (QR) والباركود والختم الرقمي المؤمّن المُدرجة يقومون مقام التوقيع والختم الحي.
+      لا يحتاج المستند لإمضاء أو ختم يدوي إضافي وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004.
+    </div>
+  </div>
+</div>
+
 <!-- Security Footer -->
 <div class="sec-footer">
   <div class="left">
