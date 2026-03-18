@@ -331,7 +331,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
 
       // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation, autoCreateTransporterDeliveryDeclaration, autoCreateDriverDeliveryDeclaration } = await import('@/utils/autoDeclarationCreator');
         
         // Generator declaration when shipment is approved/registered
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) {
@@ -347,6 +347,12 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
         if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
           await autoCreateTransporterDeclaration(shipment.id, organization.id, profile?.id || '');
           await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        }
+
+        // Transporter & Driver delivery declarations when delivered
+        if (['delivered', 'confirmed'].includes(dbStatus) && organization?.organization_type === 'transporter') {
+          await autoCreateTransporterDeliveryDeclaration(shipment.id, organization.id, profile?.id || '');
+          await autoCreateDriverDeliveryDeclaration(shipment.id, organization.id, profile?.id || '', profile?.full_name);
         }
         
         // Recycler declaration when shipment is delivered/confirmed
@@ -842,12 +848,16 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
 
       // Auto documents (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation, autoCreateTransporterDeliveryDeclaration, autoCreateDriverDeliveryDeclaration } = await import('@/utils/autoDeclarationCreator');
         if (['approved', 'registered'].includes(dbStatus) && shipment.generator_id) await autoCreateGeneratorDeclaration(shipment.id, shipment.generator_id, profile?.id || '');
         if (['picked_up', 'loading'].includes(dbStatus) && organization?.organization_type === 'transporter') await autoCreateDriverConfirmation(shipment.id, organization.id, profile?.id || '', profile?.full_name);
         if (dbStatus === 'in_transit' && organization?.organization_type === 'transporter') {
           await autoCreateTransporterDeclaration(shipment.id, organization.id, profile?.id || '');
           await autoCreateReceipt(shipment.id, organization.id, profile?.id);
+        }
+        if (['delivered', 'confirmed'].includes(dbStatus) && organization?.organization_type === 'transporter') {
+          await autoCreateTransporterDeliveryDeclaration(shipment.id, organization.id, profile?.id || '');
+          await autoCreateDriverDeliveryDeclaration(shipment.id, organization.id, profile?.id || '', profile?.full_name);
         }
         if (['delivered', 'confirmed'].includes(dbStatus)) {
           const { data: fs } = await supabase.from('shipments').select('recycler_id, transporter_id').eq('id', shipment.id).single();

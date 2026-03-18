@@ -657,10 +657,16 @@ const ShipmentStatusTimeline = ({
         const meaningfulLogs = logEntries.filter(l => !l.notes?.includes('تقدم تلقائي'));
 
         const documentChain = [
-          { key: 'generator_handover', label: 'إقرار المولّد', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
-          { key: 'generator_delivery', label: 'إقرار المولّد', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
-          { key: 'transporter_delivery', label: 'إقرار الناقل', icon: FileText, roles: ['transporter', 'driver', 'admin'] },
-          { key: 'recycler_receipt', label: 'إقرار المدوّر', icon: FileText, roles: ['recycler', 'disposal', 'admin'] },
+          { key: 'generator_handover', label: 'إقرار المولّد (تسليم)', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
+          { key: 'generator_delivery', label: 'إقرار المولّد (تسليم)', icon: FileText, roles: ['generator', 'transporter', 'driver', 'admin'] },
+          { key: 'transporter_transport', label: 'إقرار الناقل (استلام)', icon: FileText, roles: ['transporter', 'driver', 'generator', 'admin'] },
+          { key: 'driver_confirmation', label: 'إقرار السائق (استلام)', icon: FileText, roles: ['driver', 'transporter', 'admin'] },
+          { key: 'transporter_delivery', label: 'إقرار الناقل (تسليم)', icon: FileText, roles: ['transporter', 'driver', 'recycler', 'disposal', 'admin'] },
+          { key: 'driver_delivery', label: 'إقرار السائق (تسليم)', icon: FileText, roles: ['driver', 'transporter', 'recycler', 'disposal', 'admin'] },
+          { key: 'recycler_receipt', label: 'إقرار المدوّر (استلام)', icon: FileText, roles: ['recycler', 'disposal', 'admin'] },
+          { key: 'disposal_receipt', label: 'إقرار التخلص (استلام)', icon: FileText, roles: ['disposal', 'admin'] },
+          { key: 'recycling_certificate', label: 'شهادة التدوير', icon: FileText, roles: ['recycler', 'generator', 'transporter', 'admin'] },
+          { key: 'disposal_certificate', label: 'شهادة التخلص', icon: FileText, roles: ['disposal', 'generator', 'transporter', 'admin'] },
         ];
         // Only show unique types that exist AND are relevant to the viewer
         const viewerRole = orgType || 'admin';
