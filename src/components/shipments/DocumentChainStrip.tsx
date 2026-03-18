@@ -56,34 +56,40 @@ const DocumentChainStrip = ({ shipmentId, variant = 'compact', orgType, classNam
   const totalDocs = declarations.length + receipts.length + reports.length;
   if (totalDocs === 0 && variant === 'minimal') return null;
 
-  const genDecl = declarations.filter((d: any) => d.declaration_type === 'generator_handover' || d.declaration_type === 'generator');
-  const recDecl = declarations.filter((d: any) => d.declaration_type === 'recycler_receipt' || d.declaration_type === 'recycler');
-  const receiptDocs = receipts.filter((r: any) => r.receipt_type === 'receipt' || !r.receipt_type);
-  const deliveryDocs = receipts.filter((r: any) => r.receipt_type === 'delivery');
+  // All 7 declaration types
+  const genDecl = declarations.filter((d: any) => ['generator_handover', 'generator_delivery', 'generator'].includes(d.declaration_type));
+  const transporterReceipt = declarations.filter((d: any) => d.declaration_type === 'transporter_transport');
+  const driverPickup = declarations.filter((d: any) => d.declaration_type === 'driver_confirmation');
+  const transporterDelivery = declarations.filter((d: any) => d.declaration_type === 'transporter_delivery');
+  const driverDelivery = declarations.filter((d: any) => d.declaration_type === 'driver_delivery');
+  const recDecl = declarations.filter((d: any) => ['recycler_receipt', 'disposal_receipt', 'recycler'].includes(d.declaration_type));
+  const certDecl = declarations.filter((d: any) => ['recycling_certificate', 'disposal_certificate'].includes(d.declaration_type));
 
   const getStatus = (items: any[]): ChainStep['status'] => {
     if (items.length === 0) return 'none';
     if (items.some((i: any) => i.status === 'rejected')) return 'rejected';
-    if (items.every((i: any) => ['signed', 'confirmed', 'approved'].includes(i.status))) return 'completed';
+    if (items.every((i: any) => ['signed', 'confirmed', 'approved', 'active'].includes(i.status))) return 'completed';
     return 'pending';
   };
 
   const allSteps: ChainStep[] = [
-    { key: 'gen_decl', label: 'إقرار المولد', icon: FileSignature, status: getStatus(genDecl), count: genDecl.length },
-    { key: 'delivery', label: 'شهادة تسليم', icon: Receipt, status: getStatus(deliveryDocs), count: deliveryDocs.length },
-    { key: 'receipt', label: 'شهادة استلام', icon: FileCheck, status: getStatus(receiptDocs), count: receiptDocs.length },
-    { key: 'rec_decl', label: 'إقرار المدور', icon: FileSignature, status: getStatus(recDecl), count: recDecl.length },
-    { key: 'report', label: 'شهادة تدوير', icon: Recycle, status: getStatus(reports), count: reports.length },
+    { key: 'gen_decl', label: 'إقرار المولد (تسليم)', icon: FileSignature, status: getStatus(genDecl), count: genDecl.length },
+    { key: 'transporter_receipt', label: 'إقرار الناقل (استلام)', icon: FileCheck, status: getStatus(transporterReceipt), count: transporterReceipt.length },
+    { key: 'driver_pickup', label: 'إقرار السائق (استلام)', icon: FileSignature, status: getStatus(driverPickup), count: driverPickup.length },
+    { key: 'transporter_delivery', label: 'إقرار الناقل (تسليم)', icon: Receipt, status: getStatus(transporterDelivery), count: transporterDelivery.length },
+    { key: 'driver_delivery', label: 'إقرار السائق (تسليم)', icon: Receipt, status: getStatus(driverDelivery), count: driverDelivery.length },
+    { key: 'rec_decl', label: 'إقرار المدوّر (استلام)', icon: FileSignature, status: getStatus(recDecl), count: recDecl.length },
+    { key: 'certificate', label: 'شهادة تدوير/تخلص', icon: Recycle, status: getStatus([...certDecl, ...reports.map((r: any) => ({ status: r.status }))]), count: certDecl.length + reports.length },
   ];
 
-  // Filter steps based on org type — each role sees only relevant documents
+  // Filter steps based on org type
   const roleStepKeys: Record<string, string[]> = {
-    generator: ['gen_decl', 'delivery', 'receipt'],
-    transporter: ['gen_decl', 'delivery', 'receipt'],
-    driver: ['gen_decl', 'delivery', 'receipt'],
-    recycler: ['receipt', 'rec_decl', 'report'],
-    disposal: ['receipt', 'rec_decl', 'report'],
-    admin: ['gen_decl', 'delivery', 'receipt', 'rec_decl', 'report'],
+    generator: ['gen_decl', 'transporter_receipt', 'driver_pickup', 'certificate'],
+    transporter: ['gen_decl', 'transporter_receipt', 'driver_pickup', 'transporter_delivery', 'driver_delivery', 'rec_decl'],
+    driver: ['gen_decl', 'driver_pickup', 'driver_delivery', 'rec_decl'],
+    recycler: ['transporter_delivery', 'driver_delivery', 'rec_decl', 'certificate'],
+    disposal: ['transporter_delivery', 'driver_delivery', 'rec_decl', 'certificate'],
+    admin: ['gen_decl', 'transporter_receipt', 'driver_pickup', 'transporter_delivery', 'driver_delivery', 'rec_decl', 'certificate'],
   };
 
   const allowedKeys = orgType ? roleStepKeys[orgType] || roleStepKeys.admin : roleStepKeys.admin;
