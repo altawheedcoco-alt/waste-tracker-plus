@@ -15,7 +15,7 @@ import {
 export type VerificationDocType = 
   | 'shipment' | 'certificate' | 'contract' | 'receipt' 
   | 'report' | 'invoice' | 'disposal' | 'statement' 
-  | 'award_letter' | 'entity_certificate' | 'lms_certificate' | 'signer' | 'attestation' | 'unknown';
+  | 'award_letter' | 'entity_certificate' | 'lms_certificate' | 'signer' | 'attestation' | 'seal' | 'unknown';
 
 export interface SignatureInfo {
   id: string;
