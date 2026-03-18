@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FocusMusicProvider } from '@/contexts/FocusMusicContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useViewMode } from '@/contexts/ViewModeContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
@@ -135,6 +136,7 @@ import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
 import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg } from '@/config/sidebarConfig';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
+import ViewModeToolbar from './ViewModeToolbar';
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 
 interface DashboardLayoutProps {
@@ -148,9 +150,18 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
   
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { sidebarMode, setSidebarMode, cycleSidebarMode, fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  const [sidebarHovered, setSidebarHovered] = useState(false);
+
+  // Derived sidebar state for backward compatibility
+  const isSidebarOpen = sidebarMode !== 'hidden';
+  const isMiniSidebar = sidebarMode === 'mini' && !sidebarHovered;
+  const isExpandedSidebar = sidebarMode === 'full' || (sidebarMode === 'mini' && sidebarHovered);
+  const setIsSidebarOpen = useCallback((open: boolean) => {
+    setSidebarMode(open ? 'full' : 'hidden');
+  }, [setSidebarMode]);
   const { profile, organization, signOut, roles, user, loading } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
@@ -182,11 +193,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Auto-collapse sidebar on mobile/tablet
   useEffect(() => {
     if (shouldCollapseSidebar) {
-      setIsSidebarOpen(false);
-    } else {
-      setIsSidebarOpen(true);
+      setSidebarMode('hidden');
     }
-  }, [shouldCollapseSidebar]);
+  }, [shouldCollapseSidebar, setSidebarMode]);
 
   // Auto-close mobile menu on route change
   useEffect(() => {
@@ -467,9 +476,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   }, [quickActionsSidebarItems, sidebarSearch]);
 
   // Get responsive values
-  const sidebarWidth = isSidebarOpen ? (isMobile ? 260 : isTablet ? 270 : 280) : 80;
-  const headerHeight = isMobile ? 'h-[52px]' : 'h-16';
-  const mainPadding = getResponsiveClass({
+  const MINI_WIDTH = 64;
+  const FULL_WIDTH = isMobile ? 260 : isTablet ? 270 : 280;
+  const sidebarWidth = sidebarMode === 'hidden' ? 0 : (isMiniSidebar ? MINI_WIDTH : FULL_WIDTH);
+  const headerHeight = isMobile ? 'h-[52px]' : 'h-14';
+  const mainPadding = fullWidth ? 'px-3 py-3' : getResponsiveClass({
     mobile: 'px-3 pt-3 pb-0',
     tablet: 'p-4',
     desktop: 'p-6',
@@ -492,25 +503,25 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
         {/* Desktop Sidebar — v4.0 Modern Elegant */}
-        {!isMobile && (
+        {!isMobile && sidebarMode !== 'hidden' && (
             <aside
-              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-[transform,opacity] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)] ${
-                isSidebarOpen ? 'translate-x-0 opacity-100' : 'translate-x-[calc(100%+1px)] opacity-0 pointer-events-none'
-              }`}
-              style={{ width: sidebarWidth }}
+              onMouseEnter={() => sidebarMode === 'mini' && setSidebarHovered(true)}
+              onMouseLeave={() => sidebarMode === 'mini' && setSidebarHovered(false)}
+              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]`}
+              style={{ width: isMiniSidebar ? MINI_WIDTH : FULL_WIDTH }}
             >
               {/* Top: Logo + Close */}
               <div className="px-4 py-3.5 border-b border-sidebar-border">
                 <div className="flex items-center justify-between gap-2">
                   <Link to="/dashboard" className="flex items-center gap-3 flex-1">
-                    <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isSidebarOpen} />
+                    <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isExpandedSidebar} />
                   </Link>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setIsSidebarOpen(false)}
+                        onClick={() => cycleSidebarMode()}
                         className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
                       >
                         <X className="w-3.5 h-3.5" />
@@ -525,12 +536,12 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Account Switcher / Organization info */}
           <div className="border-b border-sidebar-border">
-            <AccountSwitcher collapsed={!isSidebarOpen} />
+            <AccountSwitcher collapsed={isMiniSidebar} />
           </div>
 
           {/* Search Box */}
           <AnimatePresence>
-            {isSidebarOpen && (
+            {isExpandedSidebar && (
               <motion.div
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
@@ -574,7 +585,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Navigation */}
           <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
             {/* Return to Admin Banner (when viewing as org) */}
-            {adminViewingOrg && isSidebarOpen && (
+            {adminViewingOrg && isExpandedSidebar && (
               <motion.button
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -598,7 +609,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               filteredMenuItems.map((item: SidebarMenuItem) => {
                 // Render admin separator
                 if (item.key === '__admin-separator__') {
-                  return isSidebarOpen ? (
+                  return isExpandedSidebar ? (
                     <div key={item.key} className="flex items-center gap-2 pt-4 pb-2 px-2">
                       <div className="flex-1 h-px bg-primary/20" />
                       <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
@@ -613,7 +624,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <SidebarNavGroup
                     key={item.key}
                     item={item}
-                    isCollapsed={!isSidebarOpen}
+                    isCollapsed={isMiniSidebar}
                   />
                 );
               })
@@ -624,18 +635,18 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
             
             {/* Binding Legend */}
-            <BindingLegend isCollapsed={!isSidebarOpen} />
+            <BindingLegend isCollapsed={isMiniSidebar} />
 
             {/* Admin: dedicated org switcher button */}
             {isAdmin && (
               <div className="pt-3 mt-3 border-t border-border/30 px-1">
-                <AdminOrgSwitcherButton collapsed={!isSidebarOpen} />
+                <AdminOrgSwitcherButton collapsed={isMiniSidebar} />
               </div>
             )}
 
             {/* Action Chains Button */}
             <div className="pt-3 mt-3 border-t border-border/30">
-              <ActionChainsButton isCollapsed={!isSidebarOpen} />
+              <ActionChainsButton isCollapsed={isMiniSidebar} />
             </div>
 
             {/* Quick Actions Section */}
@@ -643,7 +654,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <div className="pt-4 mt-4 border-t border-border">
                 {/* Section Header with Customize Button */}
                 <AnimatePresence>
-                  {isSidebarOpen && (
+            {isExpandedSidebar && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: 'auto' }}
@@ -675,7 +686,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       icon={item.icon}
                       label={item.label}
                       path={item.path}
-                      isCollapsed={!isSidebarOpen}
+                    isCollapsed={isMiniSidebar}
                     />
                   ))}
                 </div>
@@ -683,7 +694,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
             
             {/* Deposit Button in Sidebar */}
-            {isSidebarOpen && !isDriver && (
+            {isExpandedSidebar && !isDriver && (
               <div className="pt-3 mt-3 border-t border-border">
                 <DepositButton 
                   variant="outline" 
@@ -701,7 +712,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               className="w-full flex items-center justify-center gap-2 h-9 text-destructive/80 hover:bg-destructive/8 hover:text-destructive transition-all duration-150 rounded-lg text-[13px]"
             >
               <LogOut className="w-4 h-4" />
-              {isSidebarOpen && (
+              {isExpandedSidebar && (
                 <span className="font-medium whitespace-nowrap">
                   {t('nav.logout')}
                 </span>
@@ -789,7 +800,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Right side - Responsive spacing */}
-            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2'}`}>
+              {/* View Mode Toolbar - Desktop only */}
+              {!isMobile && !isTablet && <ViewModeToolbar />}
               <LiveClock />
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
@@ -1053,13 +1066,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
           <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[5.5rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
             <DashboardBreadcrumb />
-            <div className="w-full max-w-full">
+            <div className={`w-full ${fullWidth ? 'max-w-full' : 'max-w-[1600px] mx-auto'}`}>
               <OnboardingGuard>
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0.6 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.15 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                   >
                     {children}
                   </motion.div>
