@@ -3,7 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const fromFollows = () => (supabase as any).from('member_follows');
+// Helper to bypass strict TypeScript types for new table
+const db = () => supabase as any;
 
 interface FollowCounts {
   followersCount: number;
@@ -15,12 +16,11 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
   const queryClient = useQueryClient();
   const userId = user?.id;
 
-  // Check if current user follows this target
   const { data: isFollowing = false } = useQuery({
     queryKey: ['is-following', userId, targetProfileId, targetOrgId],
     queryFn: async () => {
       if (!userId) return false;
-      let query = (supabase.from('member_follows') as any)
+      let query = db().from('member_follows')
         .select('id', { count: 'exact', head: true })
         .eq('follower_id', userId);
 
@@ -34,13 +34,11 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
     enabled: !!userId && !!(targetProfileId || targetOrgId),
   });
 
-  // Get follower/following counts for a profile
   const { data: profileCounts } = useQuery({
     queryKey: ['follow-counts-profile', targetProfileId],
     queryFn: async (): Promise<FollowCounts> => {
       if (!targetProfileId) return { followersCount: 0, followingCount: 0 };
 
-      // Get the user_id for this profile to count their followings
       const { data: prof } = await supabase
         .from('profiles')
         .select('user_id')
@@ -48,11 +46,11 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
         .single();
 
       const [followersRes, followingRes] = await Promise.all([
-        (supabase.from('member_follows') as any)
+        db().from('member_follows')
           .select('id', { count: 'exact', head: true })
           .eq('followed_profile_id', targetProfileId),
         prof?.user_id
-          ? (supabase.from('member_follows') as any)
+          ? db().from('member_follows')
               .select('id', { count: 'exact', head: true })
               .eq('follower_id', prof.user_id)
           : Promise.resolve({ count: 0 }),
@@ -66,12 +64,11 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
     enabled: !!targetProfileId,
   });
 
-  // Get follower count for an org
   const { data: orgFollowersCount = 0 } = useQuery({
     queryKey: ['follow-counts-org', targetOrgId],
     queryFn: async () => {
       if (!targetOrgId) return 0;
-      const { count } = await (supabase.from('member_follows') as any)
+      const { count } = await db().from('member_follows')
         .select('id', { count: 'exact', head: true })
         .eq('followed_organization_id', targetOrgId);
       return count || 0;
@@ -84,7 +81,7 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
       if (!userId) throw new Error('غير مسجل');
 
       if (isFollowing) {
-        let query = (supabase.from('member_follows') as any)
+        let query = db().from('member_follows')
           .delete()
           .eq('follower_id', userId);
         if (targetProfileId) query = query.eq('followed_profile_id', targetProfileId);
@@ -95,7 +92,7 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
         const row: any = { follower_id: userId };
         if (targetProfileId) row.followed_profile_id = targetProfileId;
         else if (targetOrgId) row.followed_organization_id = targetOrgId;
-        const { error } = await (supabase.from('member_follows') as any).insert(row);
+        const { error } = await db().from('member_follows').insert(row);
         if (error) throw error;
       }
     },
@@ -129,8 +126,7 @@ export const useFollowFeed = () => {
     queryFn: async () => {
       if (!user?.id) return [];
 
-      // Get who I follow
-      const { data: follows } = await (supabase.from('member_follows') as any)
+      const { data: follows } = await db().from('member_follows')
         .select('followed_profile_id, followed_organization_id')
         .eq('follower_id', user.id);
 
@@ -143,7 +139,6 @@ export const useFollowFeed = () => {
         .filter((f: any) => f.followed_organization_id)
         .map((f: any) => f.followed_organization_id);
 
-      // Fetch member posts from followed profiles
       const memberPostsPromise = profileIds.length > 0
         ? (supabase.from('member_posts') as any)
             .select('*, author:profiles!member_posts_author_id_fkey(id, full_name, avatar_url, position, organization_id)')
@@ -152,7 +147,6 @@ export const useFollowFeed = () => {
             .limit(30)
         : Promise.resolve({ data: [] });
 
-      // Fetch org posts from followed organizations
       const orgPostsPromise = orgIds.length > 0
         ? (supabase.from('organization_posts') as any)
             .select('*, organization:organizations!organization_posts_organization_id_fkey(id, name, logo_url, organization_type)')
@@ -163,15 +157,12 @@ export const useFollowFeed = () => {
 
       const [memberRes, orgRes] = await Promise.all([memberPostsPromise, orgPostsPromise]);
 
-      // Merge and sort by date
       const memberPosts = (memberRes.data || []).map((p: any) => ({ ...p, _source: 'member' as const }));
       const orgPosts = (orgRes.data || []).map((p: any) => ({ ...p, _source: 'org' as const }));
 
-      const allPosts = [...memberPosts, ...orgPosts]
+      return [...memberPosts, ...orgPosts]
         .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 50);
-
-      return allPosts;
     },
     enabled: !!user?.id,
     staleTime: 30000,
