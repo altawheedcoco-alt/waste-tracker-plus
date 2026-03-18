@@ -223,6 +223,7 @@ const ActionChainsPage = lazy(() => import("@/pages/dashboard/ActionChainsPage")
 const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBrandingSettings"));
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const PlatformFeaturesDoc = lazy(() => import("@/pages/dashboard/PlatformFeaturesDoc"));
+const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMonitor"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 
 /**
