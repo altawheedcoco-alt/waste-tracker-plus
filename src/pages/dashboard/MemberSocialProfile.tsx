@@ -661,7 +661,7 @@ export default function MemberSocialProfile() {
             </div>
 
             {/* Quick stats */}
-            <div className="flex items-center gap-4 mt-3">
+            <div className="flex items-center gap-4 mt-3 flex-wrap">
               <div className="text-center">
                 <p className="text-lg font-bold">{posts.length}</p>
                 <p className="text-[10px] text-muted-foreground">منشور</p>
@@ -671,15 +671,11 @@ export default function MemberSocialProfile() {
                 <p className="text-lg font-bold">{reviews.length}</p>
                 <p className="text-[10px] text-muted-foreground">تقييم</p>
               </div>
+              <FollowStats targetProfileId={targetProfileId} />
               <Separator orientation="vertical" className="h-8" />
               <div className="text-center">
                 <p className="text-lg font-bold">{activityStats?.total || 0}</p>
                 <p className="text-[10px] text-muted-foreground">نشاط</p>
-              </div>
-              <Separator orientation="vertical" className="h-8" />
-              <div className="text-center">
-                <p className="text-lg font-bold">{activityStats?.thisMonth || 0}</p>
-                <p className="text-[10px] text-muted-foreground">هذا الشهر</p>
               </div>
             </div>
           </div>
