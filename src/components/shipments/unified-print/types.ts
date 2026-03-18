@@ -107,6 +107,23 @@ export interface MovementSupervisor {
   supervisor_phone?: string | null;
 }
 
+export interface DocumentSignatureData {
+  id: string;
+  document_type: string;
+  signer_name: string;
+  signer_role: string | null;
+  signer_title: string | null;
+  signature_image_url: string | null;
+  stamp_image_url: string | null;
+  stamp_applied: boolean;
+  signature_method: string;
+  signature_hash: string | null;
+  platform_seal_number: string | null;
+  status: string | null;
+  timestamp_signed: string;
+  organization_id: string | null;
+}
+
 export type PrintMode = 'dialog' | 'quick' | 'enhanced';
 export type ExportFormat = 'pdf' | 'print' | 'whatsapp' | 'word';
 export type DocumentPage = 'summary' | 'details' | 'attachments';
