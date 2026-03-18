@@ -9,7 +9,9 @@ import {
   Package, Timer, Fuel, DollarSign, AlertTriangle, Shield, Clock, MapPin, Wallet,
   BarChart3, ArrowUpRight, ArrowDownRight, Target, Sparkles, FileCheck, Eye,
   Signal, Radio, Milestone, ShieldCheck, CircleDot, ChevronDown, ChevronUp,
-  Boxes, Navigation, Compass, Workflow, HeartPulse
+  Boxes, Navigation, Compass, Workflow, HeartPulse, Receipt, FileText,
+  Building2, Scale, Leaf, CreditCard, UserCheck, Wrench, Star, Globe,
+  BookOpen, BadgeCheck, Handshake, TrendingUp as TUp
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -41,25 +43,21 @@ const ArcGauge = ({ value, max = 100, size = 100, label, color, icon: Icon }: {
 }) => {
   const pct = Math.min(value / max, 1) * 100;
   const radius = (size - 12) / 2;
-  const circumference = radius * Math.PI; // semi-circle
+  const circumference = radius * Math.PI;
   const offset = circumference - (pct / 100) * circumference;
   const statusColor = pct >= 80 ? 'text-emerald-500' : pct >= 50 ? 'text-amber-500' : 'text-destructive';
 
   return (
     <div className="flex flex-col items-center gap-1">
       <svg width={size} height={size / 2 + 10} className="overflow-visible">
-        <path
-          d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
-          fill="none" stroke="hsl(var(--muted))" strokeWidth="8" strokeLinecap="round"
-        />
-        <motion.path
-          d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
+        <path d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
+          fill="none" stroke="hsl(var(--muted))" strokeWidth="8" strokeLinecap="round" />
+        <motion.path d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
           fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.8, ease: 'easeOut', delay: 0.4 }}
-        />
+          transition={{ duration: 1.8, ease: 'easeOut', delay: 0.4 }} />
         <text x={size / 2} y={size / 2 - 8} textAnchor="middle" className="fill-foreground text-xl font-black">{Math.round(pct)}%</text>
       </svg>
       <div className="flex items-center gap-1 -mt-1">
@@ -106,7 +104,7 @@ const StatusDot = ({ status }: { status: 'healthy' | 'warning' | 'critical' }) =
   );
 };
 
-// ─── Operational Health Calculator ───
+// ─── Health Calculator ───
 const calcHealthScore = (stats: any): { score: number; status: 'healthy' | 'warning' | 'critical'; factors: string[] } => {
   if (!stats) return { score: 0, status: 'critical', factors: [] };
   let score = 100;
@@ -117,17 +115,39 @@ const calcHealthScore = (stats: any): { score: number; status: 'healthy' | 'warn
   if (stats.totalDrivers > 0 && stats.availableDrivers === 0) { score -= 20; factors.push('لا يوجد سائقين متاحين'); }
   if (stats.completionRate < 50 && stats.todayTrips > 0) { score -= 15; factors.push('معدل إنجاز منخفض'); }
   if (stats.todayTrips === 0) { score -= 5; factors.push('لا توجد رحلات اليوم بعد'); }
+  if (stats.unpaidInvoices > 3) { score -= 10; factors.push(`${stats.unpaidInvoices} فاتورة غير مسددة`); }
+  if (stats.expiringDocs > 0) { score -= stats.expiringDocs * 5; factors.push(`${stats.expiringDocs} مستند يحتاج تجديد`); }
 
   score = Math.max(0, Math.min(100, score));
   const status = score >= 75 ? 'healthy' : score >= 45 ? 'warning' : 'critical';
   return { score, status, factors };
 };
 
+// ─── Stat Micro Card ───
+const StatMicro = ({ icon: Icon, label, value, color, alert, onClick, sub }: {
+  icon: any; label: string; value: string | number; color: string; alert?: boolean; onClick?: () => void; sub?: string;
+}) => (
+  <motion.div
+    whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}
+    onClick={onClick}
+    className={`flex items-center gap-2 rounded-xl py-2 px-2.5 border relative overflow-hidden transition-all ${onClick ? 'cursor-pointer hover:shadow-md' : ''} ${
+      alert ? 'bg-destructive/8 border-destructive/15' : 'bg-muted/20 border-border/30'
+    }`}
+  >
+    {alert && <motion.div className="absolute inset-0 bg-destructive/5" animate={{ opacity: [0, 0.4, 0] }} transition={{ duration: 2, repeat: Infinity }} />}
+    <Icon className={`w-4 h-4 ${color} shrink-0`} />
+    <div className="flex-1 min-w-0 text-right">
+      <p className={`text-sm font-bold ${color} tabular-nums`}>{value}</p>
+      <p className="text-[9px] text-muted-foreground truncate">{label}</p>
+      {sub && <p className="text-[8px] text-muted-foreground/60 truncate">{sub}</p>}
+    </div>
+  </motion.div>
+);
+
 const TransporterCommandCenter = () => {
   const { organization } = useAuth();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
-  const [expandedSection, setExpandedSection] = useState<string | null>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
@@ -135,7 +155,7 @@ const TransporterCommandCenter = () => {
   }, []);
 
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['transporter-command-center-v3', organization?.id],
+    queryKey: ['transporter-command-center-v4', organization?.id],
     queryFn: async () => {
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
@@ -143,7 +163,10 @@ const TransporterCommandCenter = () => {
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
-      const [todayR, yesterdayR, activeR, driversR, weekR, ledgerR, pendingR, overdueR, monthR, partnersR] = await Promise.all([
+      const [
+        todayR, yesterdayR, activeR, driversR, weekR, ledgerR, pendingR, overdueR, monthR, partnersR,
+        invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR
+      ] = await Promise.all([
         supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', today.toISOString()).lt('created_at', tomorrow.toISOString()),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
         supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
@@ -154,6 +177,14 @@ const TransporterCommandCenter = () => {
         supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled","completed")'),
         supabase.from('shipments').select('id, status, quantity').eq('transporter_id', organization!.id).gte('created_at', monthAgo.toISOString()),
         supabase.from('external_partners').select('id').eq('organization_id', organization!.id),
+        // NEW: Full org data
+        supabase.from('invoices').select('id, status, total_amount').eq('organization_id', organization!.id),
+        supabase.from('shipment_receipts').select('id, status, created_at').eq('transporter_id', organization!.id),
+        supabase.from('organization_members').select('id, status').eq('organization_id', organization!.id),
+        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', organization!.id),
+        supabase.from('entity_documents').select('id, document_category, created_at').eq('organization_id', organization!.id),
+        supabase.from('contracts').select('id, status').eq('organization_id', organization!.id),
+        supabase.from('deposits').select('id, amount').eq('organization_id', organization!.id),
       ]);
 
       const todayData = todayR.data || [];
@@ -164,14 +195,11 @@ const TransporterCommandCenter = () => {
       const totalRevenue = ledgerEntries.filter(e => e.entry_type === 'credit' || e.entry_category === 'shipment_income').reduce((sum, e) => sum + Math.abs(e.amount), 0);
       const pendingPayments = ledgerEntries.filter(e => e.entry_type === 'debit').reduce((sum, e) => sum + Math.abs(e.amount), 0);
 
-      // Monthly revenue sparkline
       const monthlyRevenue: number[] = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(today); d.setDate(d.getDate() - i);
         const next = new Date(d); next.setDate(next.getDate() + 1);
-        const dayRev = ledgerEntries
-          .filter(e => (e.entry_type === 'credit') && new Date(e.created_at) >= d && new Date(e.created_at) < next)
-          .reduce((sum, e) => sum + Math.abs(e.amount), 0);
+        const dayRev = ledgerEntries.filter(e => (e.entry_type === 'credit') && new Date(e.created_at) >= d && new Date(e.created_at) < next).reduce((sum, e) => sum + Math.abs(e.amount), 0);
         monthlyRevenue.push(dayRev);
       }
 
@@ -195,9 +223,32 @@ const TransporterCommandCenter = () => {
       const monthDelivered = monthData.filter(s => ['delivered', 'confirmed'].includes(s.status)).length;
       const monthTotal = monthData.length;
       const monthQuantity = monthData.reduce((a, s) => a + (Number(s.quantity) || 0), 0);
-
-      // Unique active drivers
       const activeDriverIds = new Set((activeR.data || []).map(s => s.driver_id).filter(Boolean));
+
+      // NEW calculated stats
+      const allInvoices = invoicesR.data || [];
+      const unpaidInvoices = allInvoices.filter(i => i.status === 'unpaid' || i.status === 'pending' || i.status === 'draft').length;
+      const invoicesTotal = allInvoices.reduce((sum, i) => sum + (Number(i.total_amount) || 0), 0);
+
+      const allReceipts = receiptsR.data || [];
+      const todayReceipts = allReceipts.filter(r => new Date(r.created_at) >= today).length;
+
+      const members = employeesR.data || [];
+      const activeMembers = members.filter(m => m.status === 'active').length;
+
+      const vehicles = vehiclesR.data || [];
+      const activeVehicles = vehicles.filter(v => v.status === 'active').length;
+
+      const docs = docsR.data || [];
+      const expiringDocs = 0; // entity_documents doesn't have expires_at
+      const expiredDocs = 0;
+
+      const contracts = contractsR.data || [];
+      const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
+
+      const deposits = depositsR.data || [];
+      const totalDeposits = deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+      const pendingDeposits = 0;
 
       return {
         todayTrips: todayData.length,
@@ -225,6 +276,23 @@ const TransporterCommandCenter = () => {
         monthQuantity,
         partnersCount: partnersR.data?.length || 0,
         driverUtilization: allDrivers.length > 0 ? Math.round((activeDriverIds.size / allDrivers.length) * 100) : 0,
+        // NEW
+        totalInvoices: allInvoices.length,
+        unpaidInvoices,
+        invoicesTotal,
+        totalReceipts: allReceipts.length,
+        todayReceipts,
+        totalMembers: members.length,
+        activeMembers,
+        totalVehicles: vehicles.length,
+        activeVehicles,
+        totalDocs: docs.length,
+        expiringDocs,
+        expiredDocs,
+        totalContracts: contracts.length,
+        activeContracts,
+        totalDeposits,
+        pendingDeposits,
       };
     },
     enabled: !!organization?.id,
@@ -233,23 +301,28 @@ const TransporterCommandCenter = () => {
 
   const health = useMemo(() => calcHealthScore(stats), [stats]);
 
-  const animatedTrips = useAnimatedNumber(stats?.todayTrips || 0);
-  const animatedInTransit = useAnimatedNumber(stats?.inTransit || 0);
-  const animatedDelivered = useAnimatedNumber(stats?.todayDelivered || 0);
-  const animatedDrivers = useAnimatedNumber(stats?.totalDrivers || 0);
-  const animatedRevenue = useAnimatedNumber(Math.round((stats?.totalRevenue || 0) / 1000));
-  const animatedPending = useAnimatedNumber(stats?.pendingShipments || 0);
-  const animatedOverdue = useAnimatedNumber(stats?.overdueCount || 0);
-  const animatedActive = useAnimatedNumber(stats?.activeShipments || 0);
-  const animatedMonthTotal = useAnimatedNumber(stats?.monthTotal || 0);
-  const animatedPartners = useAnimatedNumber(stats?.partnersCount || 0);
+  // Animated numbers
+  const a = {
+    trips: useAnimatedNumber(stats?.todayTrips || 0),
+    inTransit: useAnimatedNumber(stats?.inTransit || 0),
+    delivered: useAnimatedNumber(stats?.todayDelivered || 0),
+    drivers: useAnimatedNumber(stats?.totalDrivers || 0),
+    revenue: useAnimatedNumber(Math.round((stats?.totalRevenue || 0) / 1000)),
+    pending: useAnimatedNumber(stats?.pendingShipments || 0),
+    overdue: useAnimatedNumber(stats?.overdueCount || 0),
+    active: useAnimatedNumber(stats?.activeShipments || 0),
+    monthTotal: useAnimatedNumber(stats?.monthTotal || 0),
+    partners: useAnimatedNumber(stats?.partnersCount || 0),
+    invoices: useAnimatedNumber(stats?.totalInvoices || 0),
+    receipts: useAnimatedNumber(stats?.totalReceipts || 0),
+    members: useAnimatedNumber(stats?.totalMembers || 0),
+    vehicles: useAnimatedNumber(stats?.totalVehicles || 0),
+    contracts: useAnimatedNumber(stats?.totalContracts || 0),
+    docs: useAnimatedNumber(stats?.totalDocs || 0),
+  };
 
   const trend = stats ? stats.todayTrips - stats.yesterdayTrips : 0;
   const trendPercent = stats?.yesterdayTrips ? Math.round((trend / stats.yesterdayTrips) * 100) : 0;
-
-  const toggleSection = useCallback((id: string) => {
-    setExpandedSection(prev => prev === id ? null : id);
-  }, []);
 
   if (isLoading) {
     return (
@@ -261,7 +334,7 @@ const TransporterCommandCenter = () => {
               {[1, 2, 3, 4].map(i => <div key={i} className="h-32 bg-muted/50 rounded-2xl" />)}
             </div>
             <div className="grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map(i => <div key={i} className="h-16 bg-muted/30 rounded-xl" />)}
+              {[1, 2, 3, 4, 5, 6, 7, 8].map(i => <div key={i} className="h-16 bg-muted/30 rounded-xl" />)}
             </div>
           </div>
         </CardContent>
@@ -273,7 +346,7 @@ const TransporterCommandCenter = () => {
     <TooltipProvider>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
         <Card className="overflow-hidden border border-border/40 shadow-2xl bg-card relative">
-          {/* ─── Animated Background ─── */}
+          {/* Background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <motion.div className="absolute -top-40 -right-40 w-96 h-96 bg-primary/[0.04] rounded-full blur-[120px]"
               animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 10, repeat: Infinity }} />
@@ -288,7 +361,6 @@ const TransporterCommandCenter = () => {
             {/* ═══════════ HEADER ═══════════ */}
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-2.5 flex-wrap">
-                {/* Health Score Badge */}
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <motion.div
@@ -307,14 +379,11 @@ const TransporterCommandCenter = () => {
                   <TooltipContent side="bottom" className="max-w-[260px] text-right">
                     <p className="font-bold mb-1">صحة العمليات: {health.score}%</p>
                     {health.factors.length > 0 ? (
-                      <ul className="text-[11px] space-y-0.5">
-                        {health.factors.map((f, i) => <li key={i}>⚠ {f}</li>)}
-                      </ul>
+                      <ul className="text-[11px] space-y-0.5">{health.factors.map((f, i) => <li key={i}>⚠ {f}</li>)}</ul>
                     ) : <p className="text-[11px]">كل الأنظمة تعمل بكفاءة</p>}
                   </TooltipContent>
                 </Tooltip>
 
-                {/* Trend Badge */}
                 {trend >= 0 ? (
                   <Badge className="gap-1 bg-primary/10 text-primary border-primary/20 text-xs">
                     <TrendingUp className="w-3 h-3" /> {trendPercent > 0 ? `+${trendPercent}%` : 'مستقر'}
@@ -333,15 +402,23 @@ const TransporterCommandCenter = () => {
                   </motion.div>
                 )}
 
-                <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                  {stats?.weekTotal || 0} شحنة هذا الأسبوع • {stats?.partnersCount || 0} شريك
-                </span>
+                {(stats?.expiredDocs || 0) > 0 && (
+                  <Badge className="gap-1 bg-destructive/10 text-destructive border-destructive/20 text-[10px]">
+                    <Shield className="w-3 h-3" /> {stats?.expiredDocs} مستند منتهي
+                  </Badge>
+                )}
+
+                {(stats?.unpaidInvoices || 0) > 0 && (
+                  <Badge className="gap-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 text-[10px]">
+                    <CreditCard className="w-3 h-3" /> {stats?.unpaidInvoices} فاتورة معلقة
+                  </Badge>
+                )}
               </div>
 
               <div className="flex items-center gap-3">
                 <div className="text-right">
                   <h2 className="text-sm sm:text-base font-black text-foreground flex items-center gap-2 justify-end">
-                    مركز القيادة والسيطرة
+                    مركز القيادة الشامل
                     <motion.div animate={{ rotate: [0, 360] }} transition={{ duration: 20, repeat: Infinity, ease: 'linear' }}>
                       <Gauge className="w-5 h-5 text-primary" />
                     </motion.div>
@@ -356,55 +433,49 @@ const TransporterCommandCenter = () => {
                   whileHover={{ scale: 1.1, rotate: 5 }} whileTap={{ scale: 0.95 }}
                 >
                   <Activity className="w-5 h-5 text-primary-foreground" />
-                  <motion.div
-                    className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card"
-                    animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }}
-                  />
+                  <motion.div className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-500 border-2 border-card"
+                    animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 2, repeat: Infinity }} />
                 </motion.div>
               </div>
             </div>
 
-            {/* ═══════════ PRIMARY METRICS (4 Heroic Cards) ═══════════ */}
+            {/* ═══════════ PRIMARY METRICS (4 Hero Cards) ═══════════ */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {[
                 {
-                  label: 'رحلات اليوم', value: animatedTrips, raw: stats?.todayTrips || 0,
+                  label: 'رحلات اليوم', value: a.trips, raw: stats?.todayTrips || 0,
                   icon: Truck, gradient: 'from-blue-500 to-cyan-400', color: '#3B82F6',
                   sub: `${stats?.yesterdayTrips || 0} أمس`, sparkData: stats?.weeklySparkline,
                   onClick: () => navigate('/dashboard/transporter-shipments'),
                 },
                 {
-                  label: 'على الطريق', value: animatedInTransit, raw: stats?.inTransit || 0,
+                  label: 'على الطريق', value: a.inTransit, raw: stats?.inTransit || 0,
                   icon: Route, gradient: 'from-amber-500 to-orange-400', color: '#F59E0B',
                   sub: `${stats?.collecting || 0} قيد الجمع`, sparkData: null,
                   onClick: () => navigate('/dashboard/tracking-center'),
                 },
                 {
-                  label: 'تم التسليم', value: animatedDelivered, raw: stats?.todayDelivered || 0,
+                  label: 'تم التسليم', value: a.delivered, raw: stats?.todayDelivered || 0,
                   icon: CheckCircle2, gradient: 'from-emerald-500 to-teal-400', color: '#10B981',
                   sub: `إنجاز ${stats?.completionRate || 0}%`, sparkData: null,
                   onClick: () => navigate('/dashboard/transporter-shipments'),
                 },
                 {
-                  label: 'السائقون', value: animatedDrivers, raw: stats?.totalDrivers || 0,
+                  label: 'السائقون', value: a.drivers, raw: stats?.totalDrivers || 0,
                   icon: Users, gradient: 'from-violet-500 to-purple-400', color: '#8B5CF6',
                   sub: `${stats?.availableDrivers || 0} متاح · ${stats?.activeDrivers || 0} نشط`,
                   sparkData: null, onClick: () => navigate('/dashboard/drivers'),
                 },
               ].map((m, index) => (
-                <motion.div
-                  key={m.label}
+                <motion.div key={m.label}
                   initial={{ opacity: 0, y: 24, scale: 0.9 }}
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   transition={{ delay: 0.1 + index * 0.07, duration: 0.5, type: 'spring', stiffness: 200 }}
-                  whileHover={{ y: -3, scale: 1.015 }}
-                  whileTap={{ scale: 0.98 }}
+                  whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }}
                   onClick={m.onClick}
                   className="relative group rounded-xl sm:rounded-2xl border border-border/30 bg-card/80 backdrop-blur-md p-3 sm:p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-border/60 overflow-hidden"
                 >
-                  {/* Hover gradient overlay */}
                   <div className={`absolute inset-0 bg-gradient-to-br ${m.gradient} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-
                   <div className="flex items-start justify-between mb-2 relative z-10">
                     {m.sparkData && <MiniSparkline data={m.sparkData} color={m.color} height={24} width={60} />}
                     {!m.sparkData && <div className="w-[60px]" />}
@@ -412,173 +483,160 @@ const TransporterCommandCenter = () => {
                       <m.icon className="w-5 h-5 text-white" />
                     </div>
                   </div>
-
                   <div className="text-right relative z-10">
                     <p className="text-2xl sm:text-3xl font-black text-foreground tracking-tight tabular-nums leading-none">{m.value}</p>
                     <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-semibold">{m.label}</p>
                     <p className="text-[9px] text-muted-foreground/60 mt-0.5">{m.sub}</p>
                   </div>
-
                   {m.raw > 0 && (
-                    <motion.div
-                      className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full"
+                    <motion.div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full"
                       style={{ backgroundColor: m.color }}
                       animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.25 }}
-                    />
+                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.25 }} />
                   )}
                 </motion.div>
               ))}
             </div>
 
-            {/* ═══════════ OPERATIONAL MATRIX (Expandable) ═══════════ */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}
-              className="mt-3"
-            >
-              {/* Status strip */}
+            {/* ═══════════ FULL ORG DASHBOARD GRID — Always Visible ═══════════ */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mt-3">
+              
+              {/* Row 1: Operations */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
+                <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-emerald-500"
+                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/accounting')} />
+                <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5} />
+                <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
+                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-emerald-500'} alert={(stats?.overdueCount || 0) > 0} />
+                <StatMicro icon={Activity} label="شحنات نشطة" value={a.active} color="text-primary"
+                  onClick={() => navigate('/dashboard/tracking-center')} />
+              </div>
+
+              {/* Row 2: Organization Resources */}
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
+                <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-blue-500"
+                  sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
+                  onClick={() => navigate('/dashboard/accounting')} />
+                <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
+                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined} />
+                <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-violet-500"
+                  sub={`${stats?.activeMembers || 0} نشط`}
+                  onClick={() => navigate('/dashboard/employees')} />
+                <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
+                  sub={`${stats?.activeVehicles || 0} فعّال`} />
+                <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-indigo-500"
+                  sub={`${stats?.activeContracts || 0} سارٍ`} />
+                <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
+                  sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
+                  alert={(stats?.expiringDocs || 0) > 0}
+                  onClick={() => navigate('/dashboard/documents')} />
+              </div>
+
+              {/* Row 3: Financial & Compliance Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                {[
-                  { label: 'الإيرادات', value: `${animatedRevenue}K`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-500/8', border: 'border-emerald-500/15', sparkData: stats?.revenueSparkline, sparkColor: '#10B981' },
-                  { label: 'بانتظار الموافقة', value: animatedPending, icon: Clock, color: 'text-amber-500', bg: 'bg-amber-500/8', border: 'border-amber-500/15', alert: (stats?.pendingShipments || 0) > 5 },
-                  { label: 'متأخرة', value: animatedOverdue, icon: AlertTriangle, color: (stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-emerald-500', bg: (stats?.overdueCount || 0) > 0 ? 'bg-destructive/8' : 'bg-emerald-500/8', border: (stats?.overdueCount || 0) > 0 ? 'border-destructive/15' : 'border-emerald-500/15', alert: (stats?.overdueCount || 0) > 0 },
-                  { label: 'نشطة', value: animatedActive, icon: Activity, color: 'text-primary', bg: 'bg-primary/8', border: 'border-primary/15' },
-                ].map((m, i) => (
-                  <motion.div
-                    key={m.label}
-                    initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.6 + i * 0.06 }}
-                    className={`flex items-center gap-2 ${m.bg} rounded-xl py-2 px-3 border ${m.border} relative overflow-hidden`}
-                  >
-                    {m.alert && <motion.div className="absolute inset-0 bg-destructive/5" animate={{ opacity: [0, 0.4, 0] }} transition={{ duration: 2, repeat: Infinity }} />}
-                    <m.icon className={`w-4 h-4 ${m.color} shrink-0`} />
-                    <div className="flex-1 min-w-0 text-right">
-                      <p className={`text-sm font-bold ${m.color} tabular-nums`}>{m.value}</p>
-                      <p className="text-[9px] text-muted-foreground truncate">{m.label}</p>
-                    </div>
-                    {m.sparkData && <MiniSparkline data={m.sparkData} color={m.sparkColor!} height={20} width={50} />}
-                  </motion.div>
-                ))}
+                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
+                <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
+                  sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined} />
+                <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
+                  onClick={() => navigate('/dashboard/partners')} />
+                <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
+                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`} />
               </div>
             </motion.div>
 
-            {/* ═══════════ EXPANDABLE INSIGHTS PANEL ═══════════ */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }} className="mt-3">
-              <button
-                onClick={() => toggleSection('insights')}
-                className="w-full flex items-center justify-between px-3 py-2 rounded-xl bg-muted/20 border border-border/30 hover:bg-muted/40 transition-colors group"
-              >
-                <div className="flex items-center gap-2">
-                  <motion.div animate={{ rotate: expandedSection === 'insights' ? 180 : 0 }} transition={{ duration: 0.3 }}>
-                    <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                  </motion.div>
-                  <span className="text-[10px] text-muted-foreground group-hover:text-foreground transition-colors">
-                    {expandedSection === 'insights' ? 'إخفاء التفاصيل' : 'عرض المزيد من المؤشرات'}
-                  </span>
+            {/* ═══════════ GAUGES + MONTHLY SUMMARY ═══════════ */}
+            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-3">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* Gauges */}
+                <div className="flex items-center justify-around p-3 rounded-xl bg-muted/20 border border-border/30">
+                  <ArcGauge value={stats?.completionRate || 0} label="الإنجاز" color="hsl(var(--primary))" icon={Target} size={80} />
+                  <ArcGauge value={stats?.driverUtilization || 0} label="استخدام الأسطول" color="#F59E0B" icon={Truck} size={80} />
                 </div>
-                <div className="flex items-center gap-3">
-                  {stats && stats.todayQuantity > 0 && (
-                    <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                      <Package className="w-3 h-3 text-primary" />
-                      {stats.todayQuantity.toLocaleString('ar-SA')} طن اليوم
-                    </span>
-                  )}
-                  <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                    <MapPin className="w-3 h-3 text-primary" />
-                    {stats?.awaitingPickup || 0} بانتظار الاستلام
-                  </span>
-                  {stats?.weeklySparkline && (
-                    <div className="hidden sm:flex items-center gap-1">
-                      <BarChart3 className="w-3 h-3 text-primary" />
-                      <MiniSparkline data={stats.weeklySparkline} color="hsl(var(--primary))" height={16} width={60} />
-                    </div>
-                  )}
-                  <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-                    <Fuel className="w-3 h-3 text-primary" />
-                    <span>مباشر</span>
-                    <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+
+                {/* Monthly Summary */}
+                <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
+                  <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
+                    ملخص الشهر <Compass className="w-3.5 h-3.5 text-primary" />
+                  </p>
+                  <div className="grid grid-cols-2 gap-2">
+                    {[
+                      { v: a.monthTotal, l: 'شحنة' },
+                      { v: (stats?.monthQuantity || 0).toLocaleString('ar-SA'), l: 'طن' },
+                      { v: stats?.monthDelivered || 0, l: 'تم التسليم', c: 'text-emerald-500' },
+                      { v: a.partners, l: 'شريك' },
+                    ].map((item, i) => (
+                      <div key={i} className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
+                        <p className={`text-lg font-black tabular-nums ${item.c || 'text-foreground'}`}>{item.v}</p>
+                        <p className="text-[9px] text-muted-foreground">{item.l}</p>
+                      </div>
+                    ))}
                   </div>
                 </div>
-              </button>
 
-              <AnimatePresence>
-                {expandedSection === 'insights' && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: 'easeInOut' }}
-                    className="overflow-hidden"
-                  >
-                    <div className="pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-                      {/* Gauges */}
-                      <div className="flex items-center justify-around p-3 rounded-xl bg-muted/20 border border-border/30">
-                        <ArcGauge value={stats?.completionRate || 0} label="الإنجاز" color="hsl(var(--primary))" icon={Target} size={80} />
-                        <ArcGauge value={stats?.driverUtilization || 0} label="استخدام الأسطول" color="#F59E0B" icon={Truck} size={80} />
-                      </div>
+                {/* Weekly Quantity Bars */}
+                <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
+                  <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
+                    اتجاه الكميات (أسبوعي) <BarChart3 className="w-3.5 h-3.5 text-primary" />
+                  </p>
+                  <div className="flex items-end gap-1 h-16 justify-center">
+                    {(stats?.weeklyQuantitySparkline || []).map((qty, i) => {
+                      const max = Math.max(...(stats?.weeklyQuantitySparkline || [1]), 1);
+                      const pct = Math.max((qty / max) * 100, 4);
+                      const isToday = i === (stats?.weeklyQuantitySparkline?.length || 0) - 1;
+                      return (
+                        <Tooltip key={i}>
+                          <TooltipTrigger asChild>
+                            <motion.div className={`w-6 sm:w-8 rounded-t-md ${isToday ? 'bg-primary' : 'bg-primary/30'}`}
+                              initial={{ height: 0 }} animate={{ height: `${pct}%` }}
+                              transition={{ delay: 0.7 + i * 0.05, duration: 0.5, ease: 'easeOut' }} />
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="text-xs">{qty.toLocaleString('ar-SA')} طن</TooltipContent>
+                        </Tooltip>
+                      );
+                    })}
+                  </div>
+                  <div className="flex justify-between text-[8px] text-muted-foreground/50 px-1">
+                    <span>اليوم</span>
+                    <span>قبل ٧ أيام</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
 
-                      {/* Monthly summary */}
-                      <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
-                        <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
-                          ملخص الشهر
-                          <Compass className="w-3.5 h-3.5 text-primary" />
-                        </p>
-                        <div className="grid grid-cols-2 gap-2">
-                          <div className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
-                            <p className="text-lg font-black text-foreground tabular-nums">{animatedMonthTotal}</p>
-                            <p className="text-[9px] text-muted-foreground">شحنة</p>
-                          </div>
-                          <div className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
-                            <p className="text-lg font-black text-foreground tabular-nums">{(stats?.monthQuantity || 0).toLocaleString('ar-SA')}</p>
-                            <p className="text-[9px] text-muted-foreground">طن</p>
-                          </div>
-                          <div className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
-                            <p className="text-lg font-black text-emerald-500 tabular-nums">{stats?.monthDelivered || 0}</p>
-                            <p className="text-[9px] text-muted-foreground">تم التسليم</p>
-                          </div>
-                          <div className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
-                            <p className="text-lg font-black text-foreground tabular-nums">{animatedPartners}</p>
-                            <p className="text-[9px] text-muted-foreground">شريك</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Weekly Quantity Trend */}
-                      <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
-                        <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
-                          اتجاه الكميات (أسبوعي)
-                          <BarChart3 className="w-3.5 h-3.5 text-primary" />
-                        </p>
-                        <div className="flex items-end gap-1 h-16 justify-center">
-                          {(stats?.weeklyQuantitySparkline || []).map((qty, i) => {
-                            const max = Math.max(...(stats?.weeklyQuantitySparkline || [1]), 1);
-                            const pct = Math.max((qty / max) * 100, 4);
-                            const isToday = i === (stats?.weeklyQuantitySparkline?.length || 0) - 1;
-                            return (
-                              <Tooltip key={i}>
-                                <TooltipTrigger asChild>
-                                  <motion.div
-                                    className={`w-6 sm:w-8 rounded-t-md ${isToday ? 'bg-primary' : 'bg-primary/30'}`}
-                                    initial={{ height: 0 }}
-                                    animate={{ height: `${pct}%` }}
-                                    transition={{ delay: 0.9 + i * 0.05, duration: 0.5, ease: 'easeOut' }}
-                                  />
-                                </TooltipTrigger>
-                                <TooltipContent side="top" className="text-xs">
-                                  {qty.toLocaleString('ar-SA')} طن
-                                </TooltipContent>
-                              </Tooltip>
-                            );
-                          })}
-                        </div>
-                        <div className="flex justify-between text-[8px] text-muted-foreground/50 px-1">
-                          <span>اليوم</span>
-                          <span>قبل ٧ أيام</span>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
+            {/* ═══════════ LIVE PULSE FOOTER ═══════════ */}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+              className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-xl bg-muted/10 border border-border/20 flex-wrap"
+            >
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <span className="font-bold text-foreground">{stats?.weekTotal || 0}</span> شحنة الأسبوع
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Package className="w-3 h-3 text-primary" />
+                  <span className="font-bold text-foreground">{stats?.todayQuantity?.toLocaleString('ar-SA') || 0}</span> طن اليوم
+                </div>
+                {stats?.weeklySparkline && (
+                  <div className="hidden sm:flex items-center gap-1">
+                    <BarChart3 className="w-3 h-3 text-primary" />
+                    <MiniSparkline data={stats.weeklySparkline} color="hsl(var(--primary))" height={16} width={60} />
+                  </div>
                 )}
-              </AnimatePresence>
+              </div>
+              <div className="flex items-center gap-3 flex-wrap">
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Building2 className="w-3 h-3 text-primary" />
+                  <span className="font-bold">{stats?.totalMembers || 0}</span> عضو
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Truck className="w-3 h-3 text-primary" />
+                  <span className="font-bold">{stats?.totalVehicles || 0}</span> مركبة
+                </div>
+                <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+                  <Fuel className="w-3 h-3 text-primary" />
+                  <span>مباشر</span>
+                  <motion.div className="w-1.5 h-1.5 rounded-full bg-primary" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                </div>
+              </div>
             </motion.div>
 
           </CardContent>
