@@ -639,7 +639,7 @@ export default function AIDocumentStudioPage() {
                   suppressContentEditableWarning
                   className="bg-white shadow-2xl outline-none"
                   style={{ width: '794px', minHeight: '1123px', direction: 'rtl' }}
-                  dangerouslySetInnerHTML={{ __html: editHtml }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }}
                   onBlur={() => {
                     if (editableRef.current) {
                       setEditHtml(editableRef.current.innerHTML);
