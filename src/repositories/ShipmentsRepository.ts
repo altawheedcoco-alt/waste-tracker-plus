@@ -128,7 +128,7 @@ export const ShipmentsRepository = {
 
       // Auto-create declarations based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation, autoCreateTransporterDeliveryDeclaration, autoCreateDriverDeliveryDeclaration } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         
         if (['approved', 'registered'].includes(status) && shipment.generator_id) {
@@ -140,6 +140,10 @@ export const ShipmentsRepository = {
         if (status === 'in_transit' && shipment.transporter_id) {
           await autoCreateTransporterDeclaration(id, shipment.transporter_id, userId);
           await autoCreateReceipt(id, shipment.transporter_id, userId);
+        }
+        if (['delivered', 'confirmed'].includes(status) && shipment.transporter_id) {
+          await autoCreateTransporterDeliveryDeclaration(id, shipment.transporter_id, userId);
+          await autoCreateDriverDeliveryDeclaration(id, shipment.transporter_id, userId);
         }
         if (['delivered', 'confirmed'].includes(status) && shipment.recycler_id) {
           await autoCreateRecyclerDeclaration(id, shipment.recycler_id, userId);

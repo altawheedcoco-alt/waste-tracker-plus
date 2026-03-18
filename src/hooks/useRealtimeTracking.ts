@@ -121,7 +121,7 @@ export const useRealtimeTracking = ({
 
       // Auto-create declarations and receipts based on status (all parties)
       try {
-        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation } = await import('@/utils/autoDeclarationCreator');
+        const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation, autoCreateTransporterDeliveryDeclaration, autoCreateDriverDeliveryDeclaration } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         const { withTagline, SHIPMENT_STATUS_LABELS } = await import('@/utils/platformTaglines');
 
@@ -179,6 +179,12 @@ export const useRealtimeTracking = ({
           if (newStatus === 'in_transit' && shipmentData.transporter_id) {
             await autoCreateTransporterDeclaration(shipmentId, shipmentData.transporter_id, user.id);
             await autoCreateReceipt(shipmentId, shipmentData.transporter_id, user.id);
+          }
+
+          // Transporter & Driver delivery declarations on delivered
+          if (['delivered', 'confirmed'].includes(newStatus) && shipmentData.transporter_id) {
+            await autoCreateTransporterDeliveryDeclaration(shipmentId, shipmentData.transporter_id, user.id);
+            await autoCreateDriverDeliveryDeclaration(shipmentId, shipmentData.transporter_id, user.id);
           }
 
           // Recycler declaration on delivered/confirmed
