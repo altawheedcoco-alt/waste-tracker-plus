@@ -691,7 +691,130 @@ export async function autoCreateDisposalCertificate(
 }
 
 /**
- * Checks if driver declaration should be visible to generator.
+ * Transporter delivery declaration — triggered at: delivered (transporter delivers to recycler/disposal)
+ */
+export async function autoCreateTransporterDeliveryDeclaration(
+  shipmentId: string,
+  transporterOrgId: string,
+  userId: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(transporterOrgId, 'auto_manifest_generation'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'transporter_delivery').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `DCL-TDL-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('transporter_delivery', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.transporter_id),
+  });
+
+  const { visibleTo, notifyOrgIds } = await resolveAndNotify(
+    transporterOrgId, 'transporter_delivery', shipment, transporterOrgId,
+  );
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: transporterOrgId,
+    declaration_type: 'transporter_delivery',
+    declaration_text: TRANSPORTER_DELIVERY_DECLARATION_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    generator_name: getOrgName(shipment.generator_id),
+    transporter_name: getOrgName(shipment.transporter_id),
+    recycler_name: getOrgName(shipment.recycler_id),
+    visible_to: visibleTo,
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto transporter delivery declaration error:', error);
+    return;
+  }
+
+  await notifyOrgUsers(
+    notifyOrgIds,
+    '📦 إقرار تسليم — الناقل سلّم الشحنة',
+    `أصدر الناقل "${getOrgName(shipment.transporter_id)}" إقرار تسليم للشحنة ${shipment.shipment_number} لجهة التدوير/التخلص.`,
+    shipmentId,
+  );
+}
+
+/**
+ * Driver delivery declaration — triggered at: delivered (driver delivers to recycler/disposal)
+ */
+export async function autoCreateDriverDeliveryDeclaration(
+  shipmentId: string,
+  transporterOrgId: string,
+  userId: string,
+  driverName?: string
+): Promise<void> {
+  if (!(await isAutoActionEnabled(transporterOrgId, 'auto_tracking_form'))) return;
+
+  const { data: existing } = await (supabase.from('delivery_declarations') as any)
+    .select('id').eq('shipment_id', shipmentId)
+    .eq('declaration_type', 'driver_delivery').eq('status', 'active').maybeSingle();
+  if (existing) return;
+
+  const shipment = await fetchShipmentWithParties(shipmentId);
+  if (!shipment) return;
+
+  const getOrgName = await fetchOrgNames([shipment.generator_id, shipment.transporter_id, shipment.recycler_id]);
+
+  const declarationNumber = `DCL-DDL-${Date.now().toString(36).toUpperCase()}`;
+  const identity = generateDocumentIdentity('driver_delivery', declarationNumber, {
+    shipmentNumber: shipment.shipment_number,
+    organizationName: getOrgName(shipment.transporter_id),
+  });
+
+  const insertData: Record<string, any> = {
+    shipment_id: shipmentId,
+    declared_by_user_id: userId,
+    declared_by_organization_id: transporterOrgId,
+    declaration_type: 'driver_delivery',
+    declaration_text: DRIVER_DELIVERY_DECLARATION_TEXT,
+    auto_generated: true,
+    status: 'active',
+    shipment_number: shipment.shipment_number,
+    waste_type: shipment.waste_type,
+    quantity: shipment.quantity,
+    unit: shipment.unit,
+    generator_name: getOrgName(shipment.generator_id),
+    transporter_name: getOrgName(shipment.transporter_id),
+    recycler_name: getOrgName(shipment.recycler_id),
+    driver_name: driverName || null,
+    ...identity,
+  };
+
+  const { error } = await (supabase.from('delivery_declarations') as any).insert(insertData);
+  if (error) {
+    console.error('Auto driver delivery declaration error:', error);
+    return;
+  }
+
+  const notifyIds: (string | null | undefined)[] = [shipment.transporter_id, shipment.recycler_id];
+  await notifyOrgUsers(
+    notifyIds,
+    '🚗 إقرار تسليم — السائق سلّم الشحنة',
+    `أكد السائق ${driverName || ''} تسليم الشحنة ${shipment.shipment_number} لجهة التدوير/التخلص.`,
+    shipmentId,
+  );
+}
+
+
  * Priority: per-driver setting > org-level setting > default (true)
  */
 async function isDriverDeclarationVisibleToGenerator(
