@@ -166,6 +166,29 @@ ${DECLARATION_TEXT}`;
     }
     setIsSubmitting(true);
     try {
+      // Check for existing receipt to prevent duplicates
+      const { data: existingReceipt } = await supabase
+        .from('shipment_receipts')
+        .select('id')
+        .eq('shipment_id', shipment.id)
+        .eq('generator_id', organization?.id || '')
+        .maybeSingle();
+
+      // Check for existing declaration to prevent duplicates
+      const { data: existingDecl } = await (supabase.from('delivery_declarations') as any)
+        .select('id')
+        .eq('shipment_id', shipment.id)
+        .eq('declaration_type', 'generator_delivery')
+        .eq('status', 'active')
+        .maybeSingle();
+
+      if (existingReceipt || existingDecl) {
+        toast.info('تم إصدار إقرار تسليم لهذه الشحنة مسبقاً');
+        setIsIssued(true);
+        setIsSubmitting(false);
+        return;
+      }
+
       // Create receipt
       const identity = generateDocumentIdentity('shipment_receipt', certNumber, {
         shipmentNumber: shipment.shipment_number,
