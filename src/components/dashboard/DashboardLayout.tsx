@@ -493,13 +493,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     <TooltipProvider>
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
         <LiveEventToast />
-        {/* Desktop Sidebar — v4.0 Modern Elegant */}
-        {!isMobile && sidebarMode !== 'hidden' && (
+        {/* Desktop Sidebar */}
+        {!isMobile && isSidebarOpen && (
             <aside
-              onMouseEnter={() => sidebarMode === 'mini' && setSidebarHovered(true)}
-              onMouseLeave={() => sidebarMode === 'mini' && setSidebarHovered(false)}
-              className={`flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]`}
-              style={{ width: isMiniSidebar ? MINI_WIDTH : FULL_WIDTH }}
+              className="flex flex-col bg-sidebar-background border-l border-sidebar-border fixed right-0 top-0 h-screen z-50 overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
+              style={{ width: SIDEBAR_WIDTH }}
             >
               {/* Top: Logo + Close */}
               <div className="px-4 py-3.5 border-b border-sidebar-border">
