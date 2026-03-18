@@ -695,11 +695,177 @@ const ShipmentCard = ({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 sm:gap-4 mt-2 text-xs sm:text-sm text-muted-foreground justify-end flex-wrap">
-                    <span>{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</span>
-                    <span className="font-semibold">{shipment.quantity} {shipment.unit || 'كجم'}</span>
-                    <span>{format(new Date(shipment.created_at), 'PP', { locale: ar })}</span>
+                  {/* Comprehensive Data Grid */}
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-x-4 gap-y-1.5 mt-3 text-xs border-t border-border/30 pt-3">
+                    {/* Waste Info */}
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <span className="text-foreground font-medium">{wasteTypeLabels[shipment.waste_type] || shipment.waste_type}</span>
+                      <span className="text-muted-foreground">النوع:</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <span className="text-foreground font-semibold">{shipment.quantity} {shipment.unit || 'كجم'}</span>
+                      <span className="text-muted-foreground">الكمية:</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 justify-end">
+                      <span className="text-foreground">{format(new Date(shipment.created_at), 'PP', { locale: ar })}</span>
+                      <span className="text-muted-foreground">الإنشاء:</span>
+                    </div>
+                    {shipment.expected_delivery_date && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.expected_delivery_date), 'PP', { locale: ar })}</span>
+                        <span className="text-muted-foreground">التسليم المتوقع:</span>
+                      </div>
+                    )}
+
+                    {/* Addresses */}
+                    {shipment.pickup_address && (
+                      <div className="flex items-center gap-1.5 justify-end col-span-2">
+                        <span className="text-foreground truncate max-w-[200px]">{shipment.pickup_address}</span>
+                        <MapPin className="w-3 h-3 text-muted-foreground shrink-0" />
+                        <span className="text-muted-foreground shrink-0">الاستلام:</span>
+                      </div>
+                    )}
+                    {shipment.delivery_address && (
+                      <div className="flex items-center gap-1.5 justify-end col-span-2">
+                        <span className="text-foreground truncate max-w-[200px]">{shipment.delivery_address}</span>
+                        <MapPin className="w-3 h-3 text-primary shrink-0" />
+                        <span className="text-muted-foreground shrink-0">التسليم:</span>
+                      </div>
+                    )}
+
+                    {/* Driver Info */}
+                    {(shipment.driver?.profile?.full_name || shipment.manual_driver_name) && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.driver?.profile?.full_name || shipment.manual_driver_name}</span>
+                        <span className="text-muted-foreground">السائق:</span>
+                      </div>
+                    )}
+                    {(shipment.driver?.vehicle_plate || shipment.manual_vehicle_plate) && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-mono">{shipment.driver?.vehicle_plate || shipment.manual_vehicle_plate}</Badge>
+                        <span className="text-muted-foreground">اللوحة:</span>
+                      </div>
+                    )}
+                    {shipment.driver?.vehicle_type && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.driver.vehicle_type}</span>
+                        <Truck className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">المركبة:</span>
+                      </div>
+                    )}
+
+                    {/* Hazard & Packaging */}
+                    {shipment.hazard_level && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <Badge className={cn("text-[10px] h-5 px-1.5", 
+                          shipment.hazard_level === 'high' ? 'bg-destructive/20 text-destructive border-destructive/30' :
+                          shipment.hazard_level === 'medium' ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700' :
+                          'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-700'
+                        )}>
+                          {shipment.hazard_level === 'high' ? 'عالي' : shipment.hazard_level === 'medium' ? 'متوسط' : 'منخفض'}
+                        </Badge>
+                        <AlertCircle className="w-3 h-3 text-muted-foreground" />
+                        <span className="text-muted-foreground">الخطورة:</span>
+                      </div>
+                    )}
+                    {shipment.packaging_method && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.packaging_method}</span>
+                        <span className="text-muted-foreground">التغليف:</span>
+                      </div>
+                    )}
+                    {shipment.disposal_method && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.disposal_method}</span>
+                        <span className="text-muted-foreground">طريقة التخلص:</span>
+                      </div>
+                    )}
+
+                    {/* Key Timestamps */}
+                    {shipment.pickup_date && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.pickup_date), 'PP', { locale: ar })}</span>
+                        <span className="text-muted-foreground">موعد الاستلام:</span>
+                      </div>
+                    )}
+                    {shipment.approved_at && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.approved_at), 'Pp', { locale: ar })}</span>
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                        <span className="text-muted-foreground">الاعتماد:</span>
+                      </div>
+                    )}
+                    {shipment.in_transit_at && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.in_transit_at), 'Pp', { locale: ar })}</span>
+                        <Truck className="w-3 h-3 text-blue-600" />
+                        <span className="text-muted-foreground">بدء النقل:</span>
+                      </div>
+                    )}
+                    {shipment.delivered_at && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.delivered_at), 'Pp', { locale: ar })}</span>
+                        <span className="text-muted-foreground">التسليم:</span>
+                      </div>
+                    )}
+                    {shipment.confirmed_at && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{format(new Date(shipment.confirmed_at), 'Pp', { locale: ar })}</span>
+                        <BadgeCheck className="w-3 h-3 text-emerald-600" />
+                        <span className="text-muted-foreground">التأكيد:</span>
+                      </div>
+                    )}
+
+                    {/* Contact Info */}
+                    {shipment.generator?.phone && visibility.canViewGeneratorInfo && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground font-mono text-[10px]" dir="ltr">{shipment.generator.phone}</span>
+                        <span className="text-muted-foreground">هاتف المولّد:</span>
+                      </div>
+                    )}
+                    {shipment.recycler?.phone && visibility.canViewRecyclerInfo && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground font-mono text-[10px]" dir="ltr">{shipment.recycler.phone}</span>
+                        <span className="text-muted-foreground">هاتف المدوّر:</span>
+                      </div>
+                    )}
+                    {shipment.generator?.representative_name && visibility.canViewGeneratorInfo && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.generator.representative_name}</span>
+                        <span className="text-muted-foreground">ممثل المولّد:</span>
+                      </div>
+                    )}
+                    {shipment.recycler?.representative_name && visibility.canViewRecyclerInfo && (
+                      <div className="flex items-center gap-1.5 justify-end">
+                        <span className="text-foreground">{shipment.recycler.representative_name}</span>
+                        <span className="text-muted-foreground">ممثل المدوّر:</span>
+                      </div>
+                    )}
                   </div>
+
+                  {/* Notes Section */}
+                  {(shipment.notes || shipment.waste_description || shipment.generator_notes) && (
+                    <div className="mt-2 space-y-1 text-xs border-t border-border/30 pt-2">
+                      {shipment.waste_description && (
+                        <div className="flex items-start gap-1.5 justify-end text-muted-foreground">
+                          <span className="text-foreground">{shipment.waste_description}</span>
+                          <span className="shrink-0">وصف المخلفات:</span>
+                        </div>
+                      )}
+                      {shipment.notes && (
+                        <div className="flex items-start gap-1.5 justify-end text-muted-foreground">
+                          <span className="text-foreground">{shipment.notes}</span>
+                          <span className="shrink-0">ملاحظات:</span>
+                        </div>
+                      )}
+                      {shipment.generator_notes && visibility.canViewGeneratorInfo && (
+                        <div className="flex items-start gap-1.5 justify-end text-muted-foreground">
+                          <span className="text-foreground">{shipment.generator_notes}</span>
+                          <span className="shrink-0">ملاحظات المولّد:</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
 
                 {/* Action Buttons */}
