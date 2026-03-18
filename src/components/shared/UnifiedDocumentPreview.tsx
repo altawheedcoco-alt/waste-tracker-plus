@@ -173,7 +173,6 @@ const UnifiedDocumentPreview = ({
                 background: '#fff',
               }}
               title={title}
-              sandbox="allow-same-origin allow-popups"
             />
           </div>
         ) : (
