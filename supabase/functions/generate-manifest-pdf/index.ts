@@ -724,7 +724,7 @@ ${custodyChain.length > 0 ? `
     <p>أقر باستلام المخلفات والتزامي بالمسار المحدد وعدم التفريغ في غير الجهة المستلمة. (المادة 29 — ق202/2020)</p>
   </div>
   <div class="decl-party">
-    <strong>♻️ المستلم: ${shipment.recycler?.name || "—"}</strong>
+    <strong>♻️ المستلم: ${orgLink(shipment.recycler?.name || "—", shipment.recycler_id)}</strong>
     <p>أقر باستلام المخلفات وتحققي من مطابقتها للمانيفست. (المادة 31 — ق202/2020)</p>
   </div>
   <p style="margin-top:1px;font-weight:bold;font-size:5px;color:#991b1b;">
