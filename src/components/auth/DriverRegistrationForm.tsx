@@ -1,11 +1,13 @@
 /**
  * DriverRegistrationForm — نموذج تسجيل السائق
+ * يدعم التسجيل بالبريد الإلكتروني أو رقم الهاتف
  */
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ArrowLeft, ArrowRight, Eye, EyeOff, Car, User, Mail, Phone, KeyRound, CreditCard, Truck, Calendar } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
@@ -17,10 +19,8 @@ import PasswordStrengthMeter from './PasswordStrengthMeter';
 import RegistrationTermsAcceptance from './RegistrationTermsAcceptance';
 
 const driverSchema = z.object({
-  email: z.string().email('البريد الإلكتروني غير صالح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
   fullName: z.string().min(2, 'الاسم يجب أن يكون حرفين على الأقل'),
-  phone: z.string().min(10, 'رقم الهاتف غير صالح'),
   licenseNumber: z.string().min(5, 'رقم الرخصة مطلوب'),
   vehicleType: z.string().min(2, 'نوع المركبة مطلوب'),
   vehiclePlate: z.string().min(3, 'لوحة المركبة مطلوبة'),
@@ -29,6 +29,8 @@ const driverSchema = z.object({
 interface DriverRegistrationFormProps {
   onBack: () => void;
 }
+
+type RegMethod = 'email' | 'phone';
 
 const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
   const { signIn } = useAuth();
@@ -39,6 +41,7 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [regMethod, setRegMethod] = useState<RegMethod>('email');
   const [data, setData] = useState({
     email: '', password: '', fullName: '', phone: '',
     licenseNumber: '', vehicleType: '', vehiclePlate: '', licenseExpiry: '',
@@ -54,8 +57,9 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
     const errs: Record<string, string> = {};
     if (s === 1) {
       if (!data.fullName) errs.fullName = t('auth.nameRequired');
-      if (!data.email) errs.email = t('auth.emailRequired');
-      if (!data.phone) errs.phone = t('auth.phoneRequired');
+      if (regMethod === 'email' && !data.email) errs.email = t('auth.emailRequired');
+      if (regMethod === 'phone' && (!data.phone || data.phone.trim().length < 8)) errs.phone = 'رقم الهاتف مطلوب (8 أرقام على الأقل)';
+      if (regMethod === 'email' && !data.phone) errs.phone = t('auth.phoneRequired');
       if (!data.password || data.password.length < 6) errs.password = t('auth.passwordMinLength');
     } else {
       if (!data.licenseNumber) errs.licenseNumber = t('auth.licenseRequired');
@@ -77,16 +81,22 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
       driverSchema.parse(data);
       const response = await supabase.functions.invoke('register-driver-external', {
         body: {
-          email: data.email, password: data.password,
-          full_name: data.fullName, phone: data.phone,
-          license_number: data.licenseNumber, vehicle_type: data.vehicleType,
-          vehicle_plate: data.vehiclePlate, license_expiry: data.licenseExpiry || null,
+          email: regMethod === 'email' ? data.email : null,
+          password: data.password,
+          full_name: data.fullName,
+          phone: data.phone,
+          license_number: data.licenseNumber,
+          vehicle_type: data.vehicleType,
+          vehicle_plate: data.vehiclePlate,
+          license_expiry: data.licenseExpiry || null,
+          registration_method: regMethod,
         },
       });
       if (response.error) throw new Error(response.data?.error || response.error?.message || 'حدث خطأ');
       if (!response.data?.success) throw new Error(response.data?.error || 'فشل التسجيل');
 
-      const { error: signInError } = await signIn(data.email, data.password);
+      const authEmail = response.data.auth_email || data.email;
+      const { error: signInError } = await signIn(authEmail, data.password);
       if (signInError) {
         toast({ title: t('auth.registerSuccess'), description: t('auth.reviewPending') });
       } else {
@@ -127,21 +137,51 @@ const DriverRegistrationForm = ({ onBack }: DriverRegistrationFormProps) => {
 
       {step === 1 && (
         <div className="space-y-3.5">
+          {/* Registration method toggle */}
+          <Tabs value={regMethod} onValueChange={(v) => { setRegMethod(v as RegMethod); setErrors({}); }} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-10 rounded-xl">
+              <TabsTrigger value="email" className="rounded-lg gap-1.5 text-xs">
+                <Mail className="w-3.5 h-3.5" /> البريد الإلكتروني
+              </TabsTrigger>
+              <TabsTrigger value="phone" className="rounded-lg gap-1.5 text-xs">
+                <Phone className="w-3.5 h-3.5" /> رقم الهاتف
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
+
           <div className="space-y-1.5">
             <Label className="text-sm flex items-center gap-2"><User className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.fullName')}</Label>
             <Input placeholder="أحمد محمد" value={data.fullName} onChange={e => handleChange('fullName', e.target.value)} className={inputClass('fullName')} />
             {errors.fullName && <p className="text-xs text-destructive">{errors.fullName}</p>}
           </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.email')}</Label>
-            <Input type="email" placeholder="ahmed@example.com" value={data.email} onChange={e => handleChange('email', e.target.value)} className={inputClass('email')} dir="ltr" />
-            {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
-          </div>
-          <div className="space-y-1.5">
-            <Label className="text-sm flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.phone')}</Label>
-            <Input placeholder="01xxxxxxxxx" value={data.phone} onChange={e => handleChange('phone', e.target.value)} className={inputClass('phone')} dir="ltr" inputMode="tel" maxLength={20} />
-            {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
-          </div>
+
+          {regMethod === 'email' ? (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-sm flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.email')}</Label>
+                <Input type="email" placeholder="ahmed@example.com" value={data.email} onChange={e => handleChange('email', e.target.value)} className={inputClass('email')} dir="ltr" />
+                {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.phone')}</Label>
+                <Input placeholder="01xxxxxxxxx" value={data.phone} onChange={e => handleChange('phone', e.target.value)} className={inputClass('phone')} dir="ltr" inputMode="tel" maxLength={20} />
+                {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="space-y-1.5">
+                <Label className="text-sm flex items-center gap-2"><Phone className="w-3.5 h-3.5 text-muted-foreground" /> رقم الهاتف</Label>
+                <Input placeholder="01xxxxxxxxx" value={data.phone} onChange={e => handleChange('phone', e.target.value)} className={inputClass('phone')} dir="ltr" inputMode="tel" maxLength={20} />
+                {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <Label className="text-sm flex items-center gap-2"><Mail className="w-3.5 h-3.5 text-muted-foreground" /> البريد الإلكتروني (اختياري)</Label>
+                <Input type="email" placeholder="ahmed@example.com" value={data.email} onChange={e => handleChange('email', e.target.value)} className="h-11 rounded-xl bg-muted/30 border-border/50" dir="ltr" />
+              </div>
+            </>
+          )}
+
           <div className="space-y-1.5">
             <Label className="text-sm flex items-center gap-2"><KeyRound className="w-3.5 h-3.5 text-muted-foreground" />{t('auth.password')}</Label>
             <div className="relative">
