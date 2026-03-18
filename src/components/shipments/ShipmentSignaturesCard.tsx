@@ -126,7 +126,7 @@ const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => 
                   </Badge>
                   <span>{METHOD_LABELS[sig.signature_method] || sig.signature_method}</span>
                   {sig.stamp_applied && (
-                    <span className="flex items-center gap-0.5 text-amber-600">
+                    <span className="flex items-center gap-0.5 text-accent-foreground">
                       <Stamp className="w-3 h-3" /> مختوم
                     </span>
                   )}
