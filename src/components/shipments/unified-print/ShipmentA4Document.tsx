@@ -115,8 +115,15 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
     border: `1px solid ${theme.colors.border}`,
   });
 
+  const orgProfileUrl = (orgId?: string | null) => orgId ? `${window.location.origin}/dashboard/organization/${orgId}` : '';
+  const memberProfileUrl = (profileId?: string | null) => profileId ? `${window.location.origin}/dashboard/profile/${profileId}` : '';
+
+  const profileLink = (name: string, url: string, color = '#1d4ed8') => 
+    url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ color, textDecoration: 'underline', fontWeight: 'bold', cursor: 'pointer' }}>{name}</a> : <>{name}</>;
+
   const renderOrgSection = (
     org: ShipmentPrintData['generator'],
+    orgId: string | null | undefined,
     title: string,
     bgColor: string, textColor: string, lightBg: string,
     extraFields?: { label: string; value: string }[]
@@ -125,7 +132,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
       <tbody>
         <tr>
           <td colSpan={8} style={sectionHeader(bgColor, textColor, title)}>
-            {title}: {org?.name || '-'}
+            {title}: {profileLink(org?.name || '-', orgProfileUrl(orgId), textColor)}
             {org?.client_code && <span style={{ marginRight: '8px', background: lightBg, color: textColor, padding: '0px 4px', borderRadius: '3px', fontSize: FS }}>{org.client_code}</span>}
           </td>
         </tr>
@@ -270,7 +277,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           </table>
 
           {/* ═══ GENERATOR ═══ */}
-          {renderOrgSection(shipment.generator, 'بيانات الجهة المولدة',
+          {renderOrgSection(shipment.generator, shipment.generator_id, 'بيانات الجهة المولدة',
             theme.colors.generatorBg, theme.colors.generatorText, theme.colors.generatorLight || '#dbeafe',
             [
               { label: 'تسجيل المنشأة', value: shipment.generator?.establishment_registration || '-' },
@@ -279,7 +286,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           )}
 
           {/* ═══ TRANSPORTER ═══ */}
-          {renderOrgSection(shipment.transporter, 'بيانات الجهة الناقلة',
+          {renderOrgSection(shipment.transporter, shipment.transporter_id, 'بيانات الجهة الناقلة',
             theme.colors.transporterBg, theme.colors.transporterText, theme.colors.transporterLight || '#fef3c7',
             [
               { label: 'رخصة النقل البري', value: shipment.transporter?.land_transport_license || '-' },
@@ -289,7 +296,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           )}
 
           {/* ═══ RECYCLER ═══ */}
-          {renderOrgSection(shipment.recycler, 'بيانات جهة التدوير',
+          {renderOrgSection(shipment.recycler, shipment.recycler_id, 'بيانات جهة التدوير',
             theme.colors.recyclerBg, theme.colors.recyclerText, theme.colors.recyclerLight || '#dcfce7',
             [
               { label: 'رخصة التنمية الصناعية', value: shipment.recycler?.ida_license || '-' },
@@ -348,15 +355,16 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tr><td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: FS, padding: '1px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td></tr>
               <tr>
                 {[
-                  { org: shipment.generator, label: 'المولّد', role: 'generator', bg: theme.colors.generatorLight || '#eff6ff' },
-                  { org: shipment.transporter, label: 'الناقل', role: 'transporter', bg: theme.colors.transporterLight || '#fffbeb' },
-                  { org: shipment.recycler, label: 'المستقبل', role: 'recycler', bg: theme.colors.recyclerLight || '#f0fdf4' },
+                  { org: shipment.generator, orgId: shipment.generator_id, label: 'المولّد', role: 'generator', bg: theme.colors.generatorLight || '#eff6ff' },
+                  { org: shipment.transporter, orgId: shipment.transporter_id, label: 'الناقل', role: 'transporter', bg: theme.colors.transporterLight || '#fffbeb' },
+                  { org: shipment.recycler, orgId: shipment.recycler_id, label: 'المستقبل', role: 'recycler', bg: theme.colors.recyclerLight || '#f0fdf4' },
                 ].map((item, i) => {
                   const roleSigs = signatures.filter(s => s.signer_role === item.role);
                   return (
                     <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '1px', border: `1px solid ${theme.colors.border}`, background: item.bg }}>
                        <div style={{ fontSize: FS, fontWeight: '700', color: '#000' }}>{item.label}</div>
-                       <div style={{ fontSize: FS, color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
+                       <div style={{ fontSize: FS }}>{profileLink(item.org?.name || '-', orgProfileUrl(item.orgId), '#1d4ed8')}</div>
+                       <div style={{ fontSize: '5pt', color: '#374151' }}>{item.org?.representative_name || '-'}</div>
                        {roleSigs.length > 0 && (
                          <div style={{ fontSize: '5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع ({roleSigs.length})</div>
                        )}
@@ -366,9 +374,9 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               </tr>
               <tr>
                 {[
-                  { org: shipment.generator, role: 'generator' },
-                  { org: shipment.transporter, role: 'transporter' },
-                  { org: shipment.recycler, role: 'recycler' },
+                  { org: shipment.generator, orgId: shipment.generator_id, role: 'generator' },
+                  { org: shipment.transporter, orgId: shipment.transporter_id, role: 'transporter' },
+                  { org: shipment.recycler, orgId: shipment.recycler_id, role: 'recycler' },
                 ].map((item, i) => {
                   const roleSigs = signatures.filter(s => s.signer_role === item.role);
                   const latestSig = roleSigs[roleSigs.length - 1];

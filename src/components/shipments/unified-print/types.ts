@@ -84,6 +84,9 @@ export interface ShipmentPrintData {
   manual_driver_name: string | null;
   manual_vehicle_plate: string | null;
   weighbridge_net_weight?: number | null;
+  generator_id?: string | null;
+  transporter_id?: string | null;
+  recycler_id?: string | null;
   generator: OrganizationPrintData | null;
   transporter: OrganizationPrintData | null;
   recycler: OrganizationPrintData | null;

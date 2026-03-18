@@ -380,6 +380,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   // Org name for watermark
   const primaryOrgName = shipment.transporter?.name || shipment.generator?.name || 'iRecycle';
 
+  // Profile link helpers
+  const baseUrl = 'https://irecycle21.lovable.app';
+  const orgLink = (name: string, orgId: string | null) => 
+    orgId ? `<a href="${baseUrl}/dashboard/organization/${orgId}" target="_blank" rel="noopener" style="color:#1d4ed8;text-decoration:underline;font-weight:bold;">${name}</a>` : name;
+  const memberLink = (name: string, profileId: string | null) =>
+    profileId ? `<a href="${baseUrl}/dashboard/profile/${profileId}" target="_blank" rel="noopener" style="color:#1d4ed8;text-decoration:underline;">${name}</a>` : name;
+
   // Unified font size — matches ShipmentA4Document
   const FS = '6.5px';
 
@@ -489,7 +496,10 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   .terms h4 { font-size: ${FS}; color: #334155; margin-bottom: 1px; }
   .terms ol { font-size: 5px; color: #475569; padding-right: 10px; line-height: 1.35; columns: 2; column-gap: 10px; }
   .terms li { break-inside: avoid; margin-bottom: 0.5px; }
-  
+  a { color: #1d4ed8; text-decoration: underline; }
+  a:hover { color: #1e40af; }
+  @media print { a { color: #1d4ed8 !important; text-decoration: underline !important; } }
+
   .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2.5px solid #16a34a; padding-top: 3px; margin-top: 3px; position: relative; z-index: 2; }
   .sec-footer .left { font-size: 5px; color: #6b7280; }
   .sec-footer .center { text-align: center; }
@@ -553,7 +563,7 @@ ${generateWatermarkHTML(primaryOrgName)}
   <div class="parties">
     <div class="party">
       <h4>🏭 المولّد | Generator</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.generator?.name || shipment.manual_generator_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.generator?.name || shipment.manual_generator_name || "—", shipment.generator_id)}</span></p>
       ${shipment.generator?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.generator.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.generator?.partner_code || "—"} ${shipment.generator?.client_code ? `| ${shipment.generator.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.generator?.address || "—"}${shipment.generator?.city ? ` - ${shipment.generator.city}` : ''}</p>
@@ -568,7 +578,7 @@ ${generateWatermarkHTML(primaryOrgName)}
     </div>
     <div class="party">
       <h4>🚛 الناقل | Transporter</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.transporter?.name || shipment.manual_transporter_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.transporter?.name || shipment.manual_transporter_name || "—", shipment.transporter_id)}</span></p>
       ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| ${shipment.transporter.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.transporter?.address || "—"}${shipment.transporter?.city ? ` - ${shipment.transporter.city}` : ''}</p>
@@ -583,7 +593,7 @@ ${generateWatermarkHTML(primaryOrgName)}
     </div>
     <div class="party">
       <h4>♻️ المدوّر | Recycler</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.recycler?.name || shipment.manual_recycler_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.recycler?.name || shipment.manual_recycler_name || "—", shipment.recycler_id)}</span></p>
       ${shipment.recycler?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.recycler.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.recycler?.partner_code || "—"} ${shipment.recycler?.client_code ? `| ${shipment.recycler.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.recycler?.address || "—"}${shipment.recycler?.city ? ` - ${shipment.recycler.city}` : ''}</p>
@@ -709,15 +719,15 @@ ${custodyChain.length > 0 ? `
     يقر كل طرف بصحة البيانات الواردة ويتحمل المسئولية المدنية والجنائية عن أي مخالفة وفقاً لقانون 202/2020 ولائحته التنفيذية وقانون البيئة 4/1994 واتفاقية بازل.
   </p>
   <div class="decl-party">
-    <strong>🏭 المولّد: ${shipment.generator?.name || "—"}</strong>
+    <strong>🏭 المولّد: ${orgLink(shipment.generator?.name || "—", shipment.generator_id)}</strong>
     <p>أقر بتصنيف المخلفات بدقة وفقاً للكود المصري وأن الكميات والأوصاف صحيحة. (المادة 27 — ق202/2020)</p>
   </div>
   <div class="decl-party">
-    <strong>🚛 الناقل: ${shipment.transporter?.name || "—"}</strong>
+    <strong>🚛 الناقل: ${orgLink(shipment.transporter?.name || "—", shipment.transporter_id)}</strong>
     <p>أقر باستلام المخلفات والتزامي بالمسار المحدد وعدم التفريغ في غير الجهة المستلمة. (المادة 29 — ق202/2020)</p>
   </div>
   <div class="decl-party">
-    <strong>♻️ المستلم: ${shipment.recycler?.name || "—"}</strong>
+    <strong>♻️ المستلم: ${orgLink(shipment.recycler?.name || "—", shipment.recycler_id)}</strong>
     <p>أقر باستلام المخلفات وتحققي من مطابقتها للمانيفست. (المادة 31 — ق202/2020)</p>
   </div>
   <p style="margin-top:1px;font-weight:bold;font-size:5px;color:#991b1b;">
@@ -728,22 +738,24 @@ ${custodyChain.length > 0 ? `
 <!-- 8. التوقيعات والأختام -->
 <div class="sigs">
   ${[
-    { label: '🏭 المولّد', sig: genSig, org: shipment.generator, hash: genHash, prefix: 'G', verifyUrl: genVerifyUrl, fallbackDate: shipment.pickup_date },
-    { label: '🚛 الناقل', sig: transSig, org: shipment.transporter, hash: transHash, prefix: 'T', verifyUrl: transVerifyUrl, fallbackDate: shipment.in_transit_at },
-    { label: '♻️ المستلم', sig: recSig, org: shipment.recycler, hash: recHash, prefix: 'R', verifyUrl: recVerifyUrl, fallbackDate: shipment.delivered_at },
+    { label: '🏭 المولّد', sig: genSig, org: shipment.generator, orgId: shipment.generator_id, hash: genHash, prefix: 'G', verifyUrl: genVerifyUrl, fallbackDate: shipment.pickup_date },
+    { label: '🚛 الناقل', sig: transSig, org: shipment.transporter, orgId: shipment.transporter_id, hash: transHash, prefix: 'T', verifyUrl: transVerifyUrl, fallbackDate: shipment.in_transit_at },
+    { label: '♻️ المستلم', sig: recSig, org: shipment.recycler, orgId: shipment.recycler_id, hash: recHash, prefix: 'R', verifyUrl: recVerifyUrl, fallbackDate: shipment.delivered_at },
   ].map((item: any) => {
     const sigImgUrl = item.sig?.signature_image_url || item.sig?.signature_url || item.org?.signature_url;
     const stampImgUrl = item.sig?.stamp_image_url || item.org?.stamp_url;
     const signerName = item.sig?.signer_name || item.sig?.signer?.full_name || item.org?.representative_name || item.org?.name || '..................';
+    const signerProfileId = item.sig?.signer_id;
     const sigMethod = item.sig?.signature_method;
     const methodLabels: Record<string, string> = { digital: 'رقمي', drawn: 'مرسوم', drawn_biometric: 'بيومتري', biometric: 'بيومتري', uploaded: 'مرفوع' };
     return `<div class="sig-box">
       <h5>${item.label}</h5>
+      <div style="font-size:5px;margin-bottom:1px;">${orgLink(item.org?.name || '—', item.orgId)}</div>
       <div style="display:flex;justify-content:center;gap:2px;align-items:flex-end;min-height:18px;">
         ${stampImgUrl ? `<img src="${stampImgUrl}" style="max-width:25px;max-height:16px;object-fit:contain;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
         ${sigImgUrl ? `<img src="${sigImgUrl}" style="max-width:40px;max-height:16px;object-fit:contain;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
       </div>
-      <div class="sig-label">${signerName}</div>
+      <div class="sig-label">${memberLink(signerName, signerProfileId)}</div>
       ${sigMethod ? `<div style="font-size:4.5px;color:#6b7280;">${methodLabels[sigMethod] || sigMethod}</div>` : ''}
       ${item.sig?.platform_seal_number ? `<div style="font-family:monospace;font-size:4px;color:#4b5563;">${item.sig.platform_seal_number}</div>` : ''}
       <div class="sig-label">${item.sig?.signed_at || item.sig?.timestamp_signed ? formatDate(item.sig.signed_at || item.sig.timestamp_signed) : formatDate(item.fallbackDate)}</div>
