@@ -120,10 +120,16 @@ const ShipmentDetailsPage = () => {
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showLiveTracking, setShowLiveTracking] = useState(false);
+  const [showMapDialog, setShowMapDialog] = useState(false);
+  const [isDeliveryCertOpen, setIsDeliveryCertOpen] = useState(false);
+  const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
+  const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
   const [generatorLocation, setGeneratorLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recyclerLocation, setRecyclerLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const visibility = useShipmentVisibility(shipment?.id);
+  const { data: declarationData } = useDeliveryDeclaration(shipment?.id || '');
+  const { data: allDeclarations = [] } = useShipmentDeclarations(shipment?.id || '', organization?.id);
   const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'overview');
   const isDriver = roles.includes('driver');
 
