@@ -976,7 +976,7 @@ const ShipmentCard = ({
                           driver_id: shipment.driver_id || null,
                           driver: shipment.driver ? { profile: shipment.driver.profile || null } : null,
                           has_receipt: shipment.has_receipt,
-                        }}
+                        } as any}
                         onSuccess={onStatusChange}
                         variant="outline"
                         size="sm"
