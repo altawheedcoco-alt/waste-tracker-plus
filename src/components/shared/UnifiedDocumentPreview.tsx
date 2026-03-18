@@ -180,7 +180,7 @@ const UnifiedDocumentPreview = ({
             style={{
               width: `${210 * zoom}mm`,
               minHeight: `${297 * zoom}mm`,
-              transformOrigin: 'top center',
+              overflow: 'hidden',
             }}
           >
             {htmlContent ? (
@@ -190,7 +190,10 @@ const UnifiedDocumentPreview = ({
                 style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
               />
             ) : (
-              <div ref={contentRef}>
+              <div
+                ref={contentRef}
+                style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
+              >
                 {children}
               </div>
             )}
