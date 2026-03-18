@@ -198,17 +198,32 @@ export default function MemberSocialProfile() {
     finally { setUploading(false); }
   };
 
-  // Update bio
-  const saveBio = useMutation({
+  // Update profile info
+  const saveProfile = useMutation({
     mutationFn: async () => {
       if (!targetProfile) throw new Error('No profile');
-      await supabase.from('profiles').update({ bio: editBio, whatsapp: editWhatsapp } as any).eq('id', targetProfile.id);
+      // Update profile fields
+      const updates: Record<string, any> = { bio: editBio, whatsapp: editWhatsapp };
+      if (editName.trim()) updates.full_name = editName.trim();
+      if (editPhone.trim()) updates.phone = editPhone.trim();
+      
+      await supabase.from('profiles').update(updates as any).eq('id', targetProfile.id);
+
+      // If email changed, use edge function
+      if (editEmail.trim() && editEmail.trim() !== targetProfile.email) {
+        const res = await supabase.functions.invoke('update-member-credentials', {
+          body: { mode: 'self', new_email: editEmail.trim() },
+        });
+        if (res.error) throw new Error(res.error.message);
+        if (res.data?.error) throw new Error(res.data.error);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       setEditBioOpen(false);
       toast.success('تم تحديث البيانات');
     },
+    onError: (err: any) => toast.error(err.message || 'فشل التحديث'),
   });
 
   // Create post
