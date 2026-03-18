@@ -3,6 +3,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
+const fromFollows = () => (supabase as any).from('member_follows');
+
 interface FollowCounts {
   followersCount: number;
   followingCount: number;
