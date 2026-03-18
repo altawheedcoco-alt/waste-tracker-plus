@@ -347,32 +347,58 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               <tr><td colSpan={3} style={{ background: theme.colors.stampBg, color: theme.colors.stampText, fontWeight: 'bold', textAlign: 'center', fontSize: FS, padding: '1px', border: `1px solid ${theme.colors.border}` }}>التوقيعات والأختام</td></tr>
               <tr>
                 {[
-                  { org: shipment.generator, label: 'المولّد', bg: theme.colors.generatorLight || '#eff6ff' },
-                  { org: shipment.transporter, label: 'الناقل', bg: theme.colors.transporterLight || '#fffbeb' },
-                  { org: shipment.recycler, label: 'المستقبل', bg: theme.colors.recyclerLight || '#f0fdf4' },
-                ].map((item, i) => (
-                  <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '1px', border: `1px solid ${theme.colors.border}`, background: item.bg }}>
-                     <div style={{ fontSize: FS, fontWeight: '700', color: '#000' }}>{item.label}</div>
-                     <div style={{ fontSize: FS, color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
-                  </td>
-                ))}
+                  { org: shipment.generator, label: 'المولّد', role: 'generator', bg: theme.colors.generatorLight || '#eff6ff' },
+                  { org: shipment.transporter, label: 'الناقل', role: 'transporter', bg: theme.colors.transporterLight || '#fffbeb' },
+                  { org: shipment.recycler, label: 'المستقبل', role: 'recycler', bg: theme.colors.recyclerLight || '#f0fdf4' },
+                ].map((item, i) => {
+                  const roleSigs = signatures.filter(s => s.signer_role === item.role);
+                  return (
+                    <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '1px', border: `1px solid ${theme.colors.border}`, background: item.bg }}>
+                       <div style={{ fontSize: FS, fontWeight: '700', color: '#000' }}>{item.label}</div>
+                       <div style={{ fontSize: FS, color: '#000' }}>{item.org?.representative_name || item.org?.name || '-'}</div>
+                       {roleSigs.length > 0 && (
+                         <div style={{ fontSize: '5pt', color: '#16a34a', fontWeight: '600' }}>✅ تم التوقيع ({roleSigs.length})</div>
+                       )}
+                    </td>
+                  );
+                })}
               </tr>
               <tr>
-                {[shipment.generator, shipment.transporter, shipment.recycler].map((org, i) => (
-                  <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '2px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '35px' }}>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: '3px', alignItems: 'flex-end', minHeight: '18px' }}>
-                      {org?.stamp_url && <img src={org.stamp_url} alt="ختم" style={{ maxHeight: '18px', maxWidth: '18px', objectFit: 'contain' }} crossOrigin="anonymous" />}
-                      {org?.signature_url && <img src={org.signature_url} alt="توقيع" style={{ maxHeight: '16px', maxWidth: '35px', objectFit: 'contain' }} crossOrigin="anonymous" />}
-                    </div>
-                    <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '1px', paddingTop: '1px', fontSize: '5pt', color: '#000' }}>الاسم / التوقيع / الختم</div>
-                    <div style={{ marginTop: '1px', display: 'flex', justifyContent: 'center' }}>
-                      <QRCodeSVG
-                        value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(org?.commercial_register || org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`}
-                        size={22} level="M"
-                      />
-                    </div>
-                  </td>
-                ))}
+                {[
+                  { org: shipment.generator, role: 'generator' },
+                  { org: shipment.transporter, role: 'transporter' },
+                  { org: shipment.recycler, role: 'recycler' },
+                ].map((item, i) => {
+                  const roleSigs = signatures.filter(s => s.signer_role === item.role);
+                  const latestSig = roleSigs[roleSigs.length - 1];
+                  return (
+                    <td key={i} style={{ width: '33.33%', textAlign: 'center', padding: '2px', verticalAlign: 'top', border: `1px solid ${theme.colors.border}`, minHeight: '35px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'center', gap: '3px', alignItems: 'flex-end', minHeight: '18px' }}>
+                        {/* Show digital signature image if exists, fallback to org stamp/signature */}
+                        {(latestSig?.stamp_image_url || item.org?.stamp_url) && (
+                          <img src={latestSig?.stamp_image_url || item.org?.stamp_url || ''} alt="ختم" style={{ maxHeight: '18px', maxWidth: '18px', objectFit: 'contain' }} crossOrigin="anonymous" />
+                        )}
+                        {(latestSig?.signature_image_url || item.org?.signature_url) && (
+                          <img src={latestSig?.signature_image_url || item.org?.signature_url || ''} alt="توقيع" style={{ maxHeight: '16px', maxWidth: '35px', objectFit: 'contain' }} crossOrigin="anonymous" />
+                        )}
+                      </div>
+                      {latestSig ? (
+                        <div style={{ borderTop: '1px dashed #16a34a', marginTop: '1px', paddingTop: '1px', fontSize: '5pt', color: '#16a34a' }}>
+                          {latestSig.signer_name} | {METHOD_LABELS[latestSig.signature_method] || latestSig.signature_method}
+                          {latestSig.platform_seal_number && <div style={{ fontFamily: 'monospace', fontSize: '4.5pt', color: '#4b5563' }}>{latestSig.platform_seal_number}</div>}
+                        </div>
+                      ) : (
+                        <div style={{ borderTop: '1px dashed #9ca3af', marginTop: '1px', paddingTop: '1px', fontSize: '5pt', color: '#9ca3af' }}>لم يتم التوقيع بعد</div>
+                      )}
+                      <div style={{ marginTop: '1px', display: 'flex', justifyContent: 'center' }}>
+                        <QRCodeSVG
+                          value={`${window.location.origin}/qr-verify?type=signer&code=${encodeURIComponent(item.org?.commercial_register || item.org?.name || '')}&doc=${encodeURIComponent(shipment.shipment_number)}`}
+                          size={22} level="M"
+                        />
+                      </div>
+                    </td>
+                  );
+                })}
               </tr>
             </tbody>
           </table>
