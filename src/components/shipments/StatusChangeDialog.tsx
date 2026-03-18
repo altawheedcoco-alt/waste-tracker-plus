@@ -198,6 +198,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   const rolePhases: Record<string, string[]> = {
     generator: ['transporter'],
     transporter: ['transporter'],
+    driver: ['transporter'],
     recycler: ['recycler'],
     disposal: ['disposal'],
     admin: ['transporter', 'recycler', 'disposal'],
