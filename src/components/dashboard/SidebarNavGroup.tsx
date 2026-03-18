@@ -135,10 +135,10 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
     <motion.button
       whileTap={{ scale: 0.97 }}
       onClick={toggleOpen}
-      className={`w-full relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 touch-manipulation ${
+      className={`w-full relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 touch-manipulation ${
         isChildActive
-          ? 'bg-primary/8 text-primary font-semibold'
-          : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+          ? 'bg-accent text-accent-foreground font-bold border border-accent-foreground/15'
+          : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground font-semibold'
       }`}
     >
       <div className="relative">
