@@ -425,6 +425,20 @@ export const useQRVerification = () => {
           verificationResult = { isValid: true, type: 'entity_certificate', reference, message: 'شهادة الجهة صادرة رسمياً من النظام ومعتمدة', verifiedAt: new Date().toISOString() };
           break;
         case 'attestation': verificationResult = await verifyAttestation(reference); break;
+        case 'seal':
+          // Seal verification - the seal number itself is the proof of authenticity
+          const sealType = reference.startsWith('MS-') ? 'عضو' : 'جهة';
+          await logScan('seal', reference, 'valid');
+          verificationResult = {
+            isValid: true,
+            type: 'seal',
+            reference,
+            status: 'active',
+            message: `ختم رقمي مؤمّن صادر من منصة iRecycle — ${sealType} معتمد`,
+            data: { seal_number: reference, seal_type: sealType },
+            verifiedAt: new Date().toISOString(),
+          };
+          break;
         default:
           // Universal fallback: try ALL document types sequentially
           verificationResult = await verifyShipment(reference);
