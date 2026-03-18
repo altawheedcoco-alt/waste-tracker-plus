@@ -296,7 +296,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           )}
 
           {/* ═══ RECYCLER ═══ */}
-          {renderOrgSection(shipment.recycler, 'بيانات جهة التدوير',
+          {renderOrgSection(shipment.recycler, shipment.recycler_id, 'بيانات جهة التدوير',
             theme.colors.recyclerBg, theme.colors.recyclerText, theme.colors.recyclerLight || '#dcfce7',
             [
               { label: 'رخصة التنمية الصناعية', value: shipment.recycler?.ida_license || '-' },
