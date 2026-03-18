@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import ProfilePhotoGallery from '@/components/profile/ProfilePhotoGallery';
 
 const REVIEW_CATEGORIES = [
   { value: 'general', label: 'عام' },
