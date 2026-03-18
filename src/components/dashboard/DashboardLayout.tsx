@@ -536,7 +536,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Account Switcher / Organization info */}
           <div className="border-b border-sidebar-border">
-            <AccountSwitcher collapsed={!isSidebarOpen} />
+            <AccountSwitcher collapsed={isMiniSidebar} />
           </div>
 
           {/* Search Box */}
