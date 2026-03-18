@@ -324,7 +324,7 @@ export const useQRVerification = () => {
     const { data: signer, error } = await supabase
       .from('authorized_signatories')
       .select(`*, organization:organizations!authorized_signatories_organization_id_fkey(name, city), profile:profiles!authorized_signatories_user_id_fkey(full_name, email)`)
-      .or(`verification_code.eq.${cleanRef},id.eq.${cleanRef}`)
+      .or(`signatory_code.eq.${cleanRef},signatory_code.eq.${reference},id.eq.${cleanRef}`)
       .eq('is_active', true)
       .maybeSingle();
 
