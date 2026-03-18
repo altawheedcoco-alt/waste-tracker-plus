@@ -35,6 +35,8 @@ import {
   CheckCheck,
   Ban,
   Sparkles,
+  ArrowLeftRight,
+  ThumbsUp,
 } from 'lucide-react';
 import { format, formatDistanceToNow, differenceInMinutes, differenceInSeconds } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -71,7 +73,7 @@ interface EnrichedReceipt {
   generator_name: string;
 }
 
-// Auto-hide tracking: stores receipt IDs with the timestamp they were "seen" as approved
+// Auto-hide tracking
 const SEEN_APPROVED_KEY = 'seen_approved_certificates';
 const AUTO_HIDE_MINUTES = 5;
 
@@ -141,12 +143,13 @@ const CountdownTimer = ({ deadline }: { deadline: string }) => {
   );
 };
 
-// ── Certificate Card ──
+// ── Certificate Card (Enhanced with instant actions) ──
 const CertificateCard = ({
   receipt,
   onApprove,
   onReject,
   isSubmitting,
+  approvingId,
   showActions = true,
   variant = 'pending',
 }: {
@@ -154,9 +157,12 @@ const CertificateCard = ({
   onApprove: (r: EnrichedReceipt) => void;
   onReject: (r: EnrichedReceipt) => void;
   isSubmitting: boolean;
+  approvingId?: string | null;
   showActions?: boolean;
   variant?: 'pending' | 'approved' | 'auto_approved' | 'rejected';
 }) => {
+  const isThisApproving = approvingId === receipt.id;
+  
   const borderColors: Record<string, string> = {
     pending: 'border-amber-300 dark:border-amber-700',
     approved: 'border-emerald-300 dark:border-emerald-700',
@@ -182,21 +188,43 @@ const CertificateCard = ({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -10, height: 0 }}
-      transition={{ duration: 0.25 }}
+      layout
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
+      animate={{ 
+        opacity: isThisApproving ? 0.6 : 1, 
+        y: 0, 
+        scale: isThisApproving ? 0.97 : 1,
+        borderColor: isThisApproving ? 'hsl(var(--primary))' : undefined,
+      }}
+      exit={{ opacity: 0, x: 100, height: 0, marginBottom: 0 }}
+      transition={{ duration: 0.3, type: 'spring', stiffness: 300, damping: 25 }}
     >
-      <Card className={`${borderColors[variant]} ${bgColors[variant]} transition-all`}>
+      <Card className={`${borderColors[variant]} ${bgColors[variant]} transition-all ${isThisApproving ? 'ring-2 ring-primary/30' : ''}`}>
         <CardContent className="p-4">
           <div className="flex items-start justify-between gap-3">
-            {/* Actions */}
+            {/* Quick Actions - Enhanced for speed */}
             {showActions && (
               <div className="flex flex-col items-center gap-2 shrink-0">
-                <Button size="sm" onClick={() => onApprove(receipt)} disabled={isSubmitting} className="gap-1 w-full">
-                  <CheckCircle2 className="w-4 h-4" /> قبول
+                <Button 
+                  size="sm" 
+                  onClick={() => onApprove(receipt)} 
+                  disabled={isSubmitting} 
+                  className="gap-1.5 w-full bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95"
+                >
+                  {isThisApproving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <ThumbsUp className="w-4 h-4" />
+                  )}
+                  {isThisApproving ? 'جاري...' : 'قبول فوري'}
                 </Button>
-                <Button size="sm" variant="destructive" onClick={() => onReject(receipt)} disabled={isSubmitting} className="gap-1 w-full">
+                <Button 
+                  size="sm" 
+                  variant="destructive" 
+                  onClick={() => onReject(receipt)} 
+                  disabled={isSubmitting} 
+                  className="gap-1 w-full transition-all hover:scale-105 active:scale-95"
+                >
                   <XCircle className="w-4 h-4" /> رفض
                 </Button>
               </div>
@@ -271,6 +299,8 @@ const TransporterDeliveryApproval = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('pending');
   const [hiddenIds, setHiddenIds] = useState<Set<string>>(new Set());
+  const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [recentlyApproved, setRecentlyApproved] = useState<Set<string>>(new Set());
 
   // Cleanup old seen entries
   useEffect(() => { cleanupSeen(); }, []);
@@ -288,7 +318,7 @@ const TransporterDeliveryApproval = () => {
     return () => clearInterval(interval);
   }, []);
 
-  // ── Fetch ALL receipts (pending + recent approved/rejected) ──
+  // ── Fetch ALL receipts ──
   const { data: allReceipts = [], isLoading } = useQuery({
     queryKey: ['delivery-approvals-all', organization?.id],
     queryFn: async () => {
@@ -302,7 +332,6 @@ const TransporterDeliveryApproval = () => {
       if (!shipments?.length) return [];
       const shipmentIds = shipments.map(s => s.id);
 
-      // Fetch all statuses
       const { data, error } = await supabase
         .from('shipment_receipts')
         .select('*')
@@ -338,7 +367,7 @@ const TransporterDeliveryApproval = () => {
       return enriched;
     },
     enabled: !!organization?.id,
-    staleTime: 1000 * 30,
+    staleTime: 1000 * 15, // Faster refresh
   });
 
   // ── Realtime subscription ──
@@ -411,9 +440,9 @@ const TransporterDeliveryApproval = () => {
     }).length,
   }), [categorized, allReceipts]);
 
-  // ── Handlers ──
+  // ── Fast Approve Handler (optimistic + instant tab switch) ──
   const handleApprove = async (receipt: EnrichedReceipt) => {
-    setIsSubmitting(true);
+    setApprovingId(receipt.id);
     try {
       const { error } = await supabase
         .from('shipment_receipts')
@@ -425,13 +454,37 @@ const TransporterDeliveryApproval = () => {
         .eq('id', receipt.id);
 
       if (error) throw error;
-      toast.success('تم قبول شهادة التسليم بنجاح');
+      
+      // Add to recently approved for visual feedback
+      setRecentlyApproved(prev => new Set(prev).add(receipt.id));
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+          <div>
+            <p className="font-medium">تم القبول بنجاح ✓</p>
+            <p className="text-xs text-muted-foreground">شهادة {receipt.receipt_number} — انتقلت للمقبول</p>
+          </div>
+        </div>,
+        { duration: 3000 }
+      );
+      
+      // Invalidate and switch tab after short delay for animation
       queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
+      
+      // Auto-switch to approved tab if this was the last pending
+      setTimeout(() => {
+        const remainingPending = categorized.pending.filter(r => r.id !== receipt.id);
+        if (remainingPending.length === 0) {
+          setActiveTab('approved');
+        }
+      }, 600);
+      
     } catch (error) {
       console.error('Error approving:', error);
       toast.error('حدث خطأ أثناء القبول');
     } finally {
-      setIsSubmitting(false);
+      setApprovingId(null);
     }
   };
 
@@ -450,8 +503,22 @@ const TransporterDeliveryApproval = () => {
         .in('id', ids);
 
       if (error) throw error;
-      toast.success(`تم قبول ${ids.length} شهادة تسليم دفعة واحدة`);
+      
+      toast.success(
+        <div className="flex items-center gap-2">
+          <CheckCheck className="w-5 h-5 text-emerald-500" />
+          <div>
+            <p className="font-bold">تم قبول {ids.length} شهادة دفعة واحدة ⚡</p>
+            <p className="text-xs text-muted-foreground">جميع الشهادات انتقلت للمقبول</p>
+          </div>
+        </div>,
+        { duration: 4000 }
+      );
+      
       queryClient.invalidateQueries({ queryKey: ['delivery-approvals-all'] });
+      
+      // Switch to approved tab
+      setTimeout(() => setActiveTab('approved'), 500);
     } catch (error) {
       console.error('Error bulk approving:', error);
       toast.error('حدث خطأ أثناء الموافقة الجماعية');
@@ -523,7 +590,7 @@ const TransporterDeliveryApproval = () => {
 
   const tabItems = [
     { value: 'pending', label: 'بانتظار الموافقة', count: stats.pending, icon: Clock, color: 'text-amber-600' },
-    { value: 'approved', label: 'تمت الموافقة', count: stats.approved, icon: CheckCircle2, color: 'text-emerald-600' },
+    { value: 'approved', label: 'مقبول ✓', count: stats.approved, icon: CheckCircle2, color: 'text-emerald-600' },
     { value: 'auto_approved', label: 'موافقة تلقائية', count: stats.autoApproved, icon: Zap, color: 'text-blue-600' },
     { value: 'rejected', label: 'مرفوض', count: stats.rejected, icon: Ban, color: 'text-destructive' },
   ];
@@ -556,9 +623,18 @@ const TransporterDeliveryApproval = () => {
                 </Tooltip>
               </TooltipProvider>
               {stats.pending > 1 && activeTab === 'pending' && (
-                <Button size="sm" variant="outline" className="gap-1 text-xs" onClick={handleBulkApprove} disabled={isSubmitting}>
-                  <CheckCheck className="w-3 h-3" />
-                  قبول الكل ({stats.pending})
+                <Button 
+                  size="sm" 
+                  className="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95" 
+                  onClick={handleBulkApprove} 
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="w-3 h-3 animate-spin" />
+                  ) : (
+                    <CheckCheck className="w-3.5 h-3.5" />
+                  )}
+                  قبول الكل فوراً ({stats.pending}) ⚡
                 </Button>
               )}
             </div>
@@ -566,7 +642,9 @@ const TransporterDeliveryApproval = () => {
               <CardTitle className="text-base flex items-center gap-2 justify-end">
                 <Shield className="w-5 h-5 text-primary" />
                 مركز موافقات شهادات التسليم
-                {stats.pending > 0 && <Badge variant="destructive">{stats.pending}</Badge>}
+                {stats.pending > 0 && (
+                  <Badge variant="destructive" className="animate-pulse">{stats.pending}</Badge>
+                )}
                 {stats.urgentCount > 0 && (
                   <Badge className="bg-red-600 text-white animate-pulse gap-1 text-[10px]">
                     <AlertTriangle className="w-3 h-3" />
@@ -575,7 +653,7 @@ const TransporterDeliveryApproval = () => {
                 )}
               </CardTitle>
               <CardDescription className="text-right">
-                إدارة ومتابعة شهادات التسليم الصادرة من المولدين • تحديث لحظي • موافقة تلقائية بعد 15 دقيقة
+                استجابة فورية • قبول سريع بضغطة واحدة • انتقال تلقائي للمقبول • موافقة تلقائية بعد 15 دقيقة
               </CardDescription>
             </div>
           </div>
@@ -584,16 +662,21 @@ const TransporterDeliveryApproval = () => {
           <div className="grid grid-cols-4 gap-2 mt-3">
             {tabItems.map(tab => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.value;
+              const hasNewItems = tab.value === 'approved' && recentlyApproved.size > 0;
               return (
                 <button
                   key={tab.value}
                   onClick={() => setActiveTab(tab.value)}
-                  className={`rounded-lg p-2.5 text-center transition-all border ${
-                    activeTab === tab.value
-                      ? 'bg-primary/10 border-primary/30 shadow-sm'
+                  className={`rounded-lg p-2.5 text-center transition-all border relative ${
+                    isActive
+                      ? 'bg-primary/10 border-primary/30 shadow-sm scale-[1.02]'
                       : 'bg-muted/30 border-transparent hover:bg-muted/50'
                   }`}
                 >
+                  {hasNewItems && (
+                    <span className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-500 rounded-full animate-ping" />
+                  )}
                   <Icon className={`w-4 h-4 mx-auto mb-1 ${tab.color}`} />
                   <div className="text-lg font-bold">{tab.count}</div>
                   <div className="text-[10px] text-muted-foreground leading-tight">{tab.label}</div>
@@ -601,6 +684,19 @@ const TransporterDeliveryApproval = () => {
               );
             })}
           </div>
+
+          {/* Quick action hint when pending */}
+          {stats.pending > 0 && activeTab === 'pending' && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="mt-2 flex items-center gap-2 p-2 rounded-lg bg-emerald-50 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-800 text-xs text-emerald-700 dark:text-emerald-300"
+            >
+              <Zap className="w-3.5 h-3.5 shrink-0" />
+              <span>اضغط <strong>"قبول فوري"</strong> لقبول الشهادة بضغطة واحدة — تنتقل تلقائياً لتبويب المقبول</span>
+              <ArrowLeftRight className="w-3.5 h-3.5 shrink-0" />
+            </motion.div>
+          )}
         </CardHeader>
 
         <CardContent>
@@ -638,7 +734,13 @@ const TransporterDeliveryApproval = () => {
                             <p className="text-xs">سيتم إعلامك فوراً عند وصول شهادة جديدة</p>
                           </div>
                         )}
-                        {tabValue === 'approved' && <p className="text-sm">لا توجد شهادات تمت الموافقة عليها يدوياً حديثاً</p>}
+                        {tabValue === 'approved' && (
+                          <div className="space-y-2">
+                            <CheckCircle2 className="w-8 h-8 mx-auto text-emerald-500 opacity-50" />
+                            <p className="text-sm">لا توجد شهادات مقبولة حديثاً</p>
+                            <p className="text-xs">الشهادات المقبولة تظهر هنا فور قبولها</p>
+                          </div>
+                        )}
                         {tabValue === 'auto_approved' && (
                           <div className="space-y-2">
                             <Zap className="w-8 h-8 mx-auto text-blue-500" />
@@ -656,7 +758,8 @@ const TransporterDeliveryApproval = () => {
                             receipt={receipt}
                             onApprove={handleApprove}
                             onReject={openReject}
-                            isSubmitting={isSubmitting}
+                            isSubmitting={isSubmitting || !!approvingId}
+                            approvingId={approvingId}
                             showActions={tabValue === 'pending'}
                             variant={tabValue as any}
                           />
