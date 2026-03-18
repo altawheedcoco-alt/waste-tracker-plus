@@ -502,6 +502,9 @@ function PublicPostCard({ post, orgName, orgLogo }: { post: any; orgName: string
               })}
             </div>
           )}
+
+          {/* Facebook-style Interactions */}
+          <PostInteractions postId={post.id} likesCount={post.likes_count || 0} />
         </CardContent>
       </Card>
     </motion.div>
