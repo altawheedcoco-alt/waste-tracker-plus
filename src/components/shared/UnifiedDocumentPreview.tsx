@@ -186,7 +186,7 @@ const UnifiedDocumentPreview = ({
             {htmlContent ? (
               <div
                 ref={htmlRef}
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
                 style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
               />
             ) : (

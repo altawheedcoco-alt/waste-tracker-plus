@@ -25,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BackButton from '@/components/ui/back-button';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 const DocumentArchiveTab = lazy(() => import('@/components/ai-studio/DocumentArchiveTab'));
 const DocumentTemplatesTab = lazy(() => import('@/components/ai-studio/DocumentTemplatesTab'));

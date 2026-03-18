@@ -109,7 +109,7 @@ export default function DocumentTemplatesTab({ onPreview, onUseTemplate }: Props
                     left: '50%',
                     marginLeft: '-397px',
                   }}
-                  dangerouslySetInnerHTML={{ __html: tmpl.html_content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(tmpl.html_content) }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80" />
               </div>
