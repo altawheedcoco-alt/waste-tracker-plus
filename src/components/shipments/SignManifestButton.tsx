@@ -100,7 +100,7 @@ const SignManifestButton = ({
           signed_by: user.id,
           signer_name: profile?.full_name || user.email || 'غير معروف',
           signer_role: signerRole,
-          signer_title: profile?.job_title || null,
+          signer_title: (profile as any)?.job_title || null,
           organization_id: organization.id,
           signature_method: 'digital',
           signature_image_url: sigResult?.data?.signature_url || null,
