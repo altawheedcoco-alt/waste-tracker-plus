@@ -150,9 +150,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
   
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const { sidebarMode, setSidebarMode, fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  const [sidebarHovered, setSidebarHovered] = useState(false);
   const { profile, organization, signOut, roles, user, loading } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
