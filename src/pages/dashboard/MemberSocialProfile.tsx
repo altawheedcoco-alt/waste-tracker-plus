@@ -34,6 +34,8 @@ import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import ProfilePhotoGallery from '@/components/profile/ProfilePhotoGallery';
 import PostInteractions from '@/components/organization/PostInteractions';
+import FollowButton from '@/components/social/FollowButton';
+import FollowStats from '@/components/social/FollowStats';
 import { cn } from '@/lib/utils';
 
 const REVIEW_CATEGORIES = [
