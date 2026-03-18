@@ -32299,6 +32299,90 @@ export type Database = {
           },
         ]
       }
+      security_reports: {
+        Row: {
+          created_at: string
+          critical_threats: number
+          findings: Json
+          generated_at: string
+          high_threats: number
+          id: string
+          low_threats: number
+          medium_threats: number
+          organization_id: string | null
+          period_end: string
+          period_start: string
+          recommendations: Json
+          report_period: string
+          report_type: string
+          security_score: number
+          status: string
+          summary: string
+          threats_mitigated: number
+          threats_pending: number
+          total_threats: number
+        }
+        Insert: {
+          created_at?: string
+          critical_threats?: number
+          findings?: Json
+          generated_at?: string
+          high_threats?: number
+          id?: string
+          low_threats?: number
+          medium_threats?: number
+          organization_id?: string | null
+          period_end: string
+          period_start: string
+          recommendations?: Json
+          report_period?: string
+          report_type?: string
+          security_score?: number
+          status?: string
+          summary: string
+          threats_mitigated?: number
+          threats_pending?: number
+          total_threats?: number
+        }
+        Update: {
+          created_at?: string
+          critical_threats?: number
+          findings?: Json
+          generated_at?: string
+          high_threats?: number
+          id?: string
+          low_threats?: number
+          medium_threats?: number
+          organization_id?: string | null
+          period_end?: string
+          period_start?: string
+          recommendations?: Json
+          report_period?: string
+          report_type?: string
+          security_score?: number
+          status?: string
+          summary?: string
+          threats_mitigated?: number
+          threats_pending?: number
+          total_threats?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "security_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "security_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_documents: {
         Row: {
           created_at: string
