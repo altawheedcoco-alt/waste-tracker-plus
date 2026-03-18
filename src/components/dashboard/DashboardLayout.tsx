@@ -150,7 +150,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
   
-  const { sidebarMode, setSidebarMode, fullWidth, spacing, density } = useViewMode();
+  const { sidebarMode, setSidebarMode, cycleSidebarMode, fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [sidebarHovered, setSidebarHovered] = useState(false);
