@@ -1029,41 +1029,51 @@ const ShipmentCard = ({
                         </DropdownMenuTrigger>
                         <DropdownMenuContent 
                           align="start" 
-                          className="w-56 bg-popover z-50"
+                          className="w-60 bg-popover z-50 max-h-80 overflow-y-auto"
                           onClick={(e) => e.stopPropagation()}
                         >
-                          {availableNextStatuses.slice(0, 5).map((status) => {
-                            const StatusIcon = status.icon;
+                          {/* Current status */}
+                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground">الحالة الحالية</div>
+                          {currentStatusConfig && (() => {
+                            const CurIcon = currentStatusConfig.icon;
                             return (
-                              <DropdownMenuItem
-                                key={status.key}
-                                onClick={() => handleQuickStatusChange(status.key)}
-                                className="gap-3 cursor-pointer py-2"
-                              >
-                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", status.bgClass)}>
-                                  <StatusIcon className="w-4 h-4" />
+                              <DropdownMenuItem disabled className="gap-3 opacity-100 bg-primary/10 border border-primary/20 rounded-md mx-1 mb-1 py-2">
+                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", currentStatusConfig.bgClass)}>
+                                  <CurIcon className="w-4 h-4" />
                                 </div>
                                 <div className="flex flex-col">
-                                  <span className="font-medium">{status.labelAr}</span>
+                                  <span className="font-bold text-primary">{currentStatusConfig.labelAr} ✓</span>
                                   <span className="text-xs text-muted-foreground">
-                                    {status.phase === 'transporter' ? 'مرحلة النقل' : 'مرحلة التدوير'}
+                                    {currentStatusConfig.phase === 'transporter' ? 'مرحلة النقل' : currentStatusConfig.phase === 'recycler' ? 'مرحلة التدوير' : 'مرحلة التخلص'}
                                   </span>
                                 </div>
                               </DropdownMenuItem>
                             );
-                          })}
-                          {availableNextStatuses.length > 5 && (
-                            <>
-                              <DropdownMenuSeparator />
+                          })()}
+                          <DropdownMenuSeparator />
+                          <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground">تغيير إلى</div>
+                          {allStatusesForDropdown.map((status) => {
+                            const StatusIcon = status.icon;
+                            const isRecommended = availableNextStatuses.some(s => s.key === status.key);
+                            return (
                               <DropdownMenuItem
-                                onClick={handleStatusButtonClick}
-                                className="gap-2 cursor-pointer"
+                                key={status.key}
+                                onClick={() => handleQuickStatusChange(status.key)}
+                                className={cn("gap-3 cursor-pointer py-2", isRecommended && "font-medium")}
                               >
-                                <Settings2 className="w-4 h-4" />
-                                <span>عرض جميع الخيارات ({availableNextStatuses.length})</span>
+                                <div className={cn("w-8 h-8 rounded-full flex items-center justify-center shrink-0", status.bgClass)}>
+                                  <StatusIcon className="w-4 h-4" />
+                                </div>
+                                <div className="flex flex-col flex-1">
+                                  <span className="font-medium">{status.labelAr}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {status.phase === 'transporter' ? 'مرحلة النقل' : status.phase === 'recycler' ? 'مرحلة التدوير' : 'مرحلة التخلص'}
+                                  </span>
+                                </div>
+                                {isRecommended && <Badge variant="secondary" className="text-[9px] px-1.5 py-0">مقترح</Badge>}
                               </DropdownMenuItem>
-                            </>
-                          )}
+                            );
+                          })}
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={handleStatusButtonClick}
