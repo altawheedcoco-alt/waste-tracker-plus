@@ -126,7 +126,7 @@ const SignManifestButton = ({
 
       if (error) throw error;
 
-      toast.success('تم التوقيع على المانيفست بنجاح', {
+      toast.success(`تم التوقيع على ${DOC_TYPE_LABELS[documentType]} بنجاح`, {
         description: `كود التوقيع: ${signatureHash}`,
       });
       setAlreadySigned(true);
