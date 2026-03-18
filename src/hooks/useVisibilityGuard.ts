@@ -90,6 +90,12 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
         return { permissions: DEFAULT_PERMISSIONS, isOwner: true };
       }
 
+      // Check if the transporter has block_visibility or block_all restriction on us
+      const transporterBlocksUs = await checkRestrictionInDb(shipment.transporter_id, organization.id);
+      if (transporterBlocksUs) {
+        return { permissions: BLOCKED_PERMISSIONS, isOwner: false };
+      }
+
       const isParty = 
         shipment.generator_id === organization.id || 
         shipment.recycler_id === organization.id;

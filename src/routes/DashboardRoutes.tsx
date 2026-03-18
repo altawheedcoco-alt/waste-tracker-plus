@@ -285,6 +285,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/chat" element={<Chat />} />
     <Route path="/dashboard/team-credentials" element={<Navigate to="/dashboard/org-structure" replace />} />
     <Route path="/dashboard/partners-timeline" element={<PartnersTimeline />} />
+    <Route path="/dashboard/restrictions-monitor" element={<RestrictionsMonitor />} />
     <Route path="/dashboard/add-organization" element={<AddOrganization />} />
     <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
     <Route path="/dashboard/admin-drivers-map" element={<AdminDriversMap />} />
