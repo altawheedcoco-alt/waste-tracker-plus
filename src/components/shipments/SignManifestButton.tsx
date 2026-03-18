@@ -148,7 +148,7 @@ const SignManifestButton = ({
         onClick={handleOpen}
       >
         <PenTool className="w-4 h-4" />
-        {size !== 'icon' && 'توقيع'}
+        {size !== 'icon' && (label || 'توقيع')}
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
