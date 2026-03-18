@@ -81,6 +81,11 @@ const ComplianceCertificateView = ({ certificate, open, onClose }: ComplianceCer
           entityName: certificate.organization_name || 'iRecycle',
           accentColor: '#059669',
           compact: true,
+          seal: certificate.organization_id ? {
+            entityId: certificate.organization_id,
+            entityType: 'organization',
+            entityDisplayName: certificate.organization_name || 'iRecycle',
+          } : undefined,
         })}
         <div class="footer">
           <p>هذه الشهادة صادرة آلياً من منصة iRecycle وتعكس مستوى الامتثال بناءً على البيانات التشغيلية الفعلية</p>

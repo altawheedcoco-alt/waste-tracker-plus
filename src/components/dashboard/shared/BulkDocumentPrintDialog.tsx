@@ -453,6 +453,11 @@ ${generateDigitalVerificationStamp({
   documentType: 'report',
   entityName: selectedPartnerName,
   accentColor: '#059669',
+  seal: orgId ? {
+    entityId: orgId,
+    entityType: 'organization',
+    entityDisplayName: organization?.name || 'iRecycle',
+  } : undefined,
 })}
 
 <div class="footer">

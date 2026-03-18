@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 interface A4Data {
   orgName: string;
+  orgId?: string;
   dateStr: string;
   timeStr: string;
   userName: string;
@@ -16,7 +17,7 @@ interface A4Data {
 }
 
 export const generateA4Template = (data: A4Data): string => {
-  const { orgName, dateStr, timeStr, userName, shipments, ledger, notifications, totalWeight, totalRevenue, totalExpenses, statusLabel, wasteTypeLabel } = data;
+  const { orgName, orgId, dateStr, timeStr, userName, shipments, ledger, notifications, totalWeight, totalRevenue, totalExpenses, statusLabel, wasteTypeLabel } = data;
 
   return `
 <!DOCTYPE html>
@@ -128,6 +129,11 @@ ${generateDigitalVerificationStamp({
   documentType: 'report',
   entityName: orgName,
   accentColor: '#059669',
+  seal: orgId ? {
+    entityId: orgId,
+    entityType: 'organization',
+    entityDisplayName: orgName,
+  } : undefined,
 })}
 
 <div class="footer">

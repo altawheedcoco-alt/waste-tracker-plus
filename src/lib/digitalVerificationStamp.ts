@@ -11,11 +11,25 @@
  * - Document Reference Number
  * - Legal disclaimer
  * - Entity name (org/user)
+ * - Secure Digital Seal (optional, auto-generated from entity data)
  * 
  * Usage in raw HTML print contexts:
  *   const stampHTML = generateDigitalVerificationStamp({ ... });
  *   printWindow.document.write(`...${stampHTML}...`);
  */
+
+import { generateDigitalSealSVG, generateSealNumber, generateDocumentSealProof } from './secureDigitalSeal';
+
+interface StampEntitySeal {
+  /** Entity ID for seal generation */
+  entityId: string;
+  /** Entity type */
+  entityType: 'member' | 'organization';
+  /** Entity display name */
+  entityDisplayName: string;
+  /** Optional title/position */
+  title?: string;
+}
 
 interface StampOptions {
   /** Reference number (shipment, invoice, document number) */
@@ -34,6 +48,8 @@ interface StampOptions {
   compact?: boolean;
   /** Base URL for QR verification */
   baseUrl?: string;
+  /** Secure digital seal data — when provided, the cryptographic seal is included */
+  seal?: StampEntitySeal;
 }
 
 /** Generate a simple SVG QR code (7-segment grid-based) */
@@ -142,6 +158,7 @@ export function generateDigitalVerificationStamp(options: StampOptions): string 
     accentColor = '#059669',
     compact = false,
     baseUrl,
+    seal,
   } = options;
 
   const vCode = verificationCode || generateVRFCode(referenceNumber);
@@ -151,9 +168,35 @@ export function generateDigitalVerificationStamp(options: StampOptions): string 
   const qrSVG = generateQRSVG(qrValue, compact ? 40 : 60);
   const barcodeSVG = generateBarcodeSVG(referenceNumber, compact ? 90 : 130, compact ? 22 : 30);
 
+  // Generate secure digital seal if entity data provided
+  let sealHTML = '';
+  if (seal) {
+    const sealSVG = generateDigitalSealSVG({
+      entityId: seal.entityId,
+      entityType: seal.entityType,
+      entityName: seal.entityDisplayName,
+      title: seal.title,
+      documentRef: referenceNumber,
+      timestamp: new Date().toISOString(),
+      size: compact ? 70 : 100,
+    });
+    const sealNum = generateSealNumber(seal.entityId, seal.entityType, seal.entityDisplayName);
+    const docProof = generateDocumentSealProof(sealNum, referenceNumber, new Date().toISOString());
+    
+    sealHTML = `
+    <div style="text-align:center;flex-shrink:0;">
+      ${sealSVG}
+      <div style="font-size:5pt;color:#6b7280;margin-top:2px;font-family:monospace;">
+        <div style="font-weight:bold;color:${accentColor};font-size:6pt;">${sealNum}</div>
+        <div>DOC:${docProof}</div>
+      </div>
+    </div>`;
+  }
+
   if (compact) {
     return `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#f9fafb;font-size:7pt;direction:rtl;font-family:'Cairo','Segoe UI',sans-serif;page-break-inside:avoid;">
+      ${sealHTML}
       ${qrSVG}
       <div style="flex:1;text-align:center;">
         <div style="font-family:monospace;font-weight:bold;color:${accentColor};">${referenceNumber}</div>
@@ -168,6 +211,9 @@ export function generateDigitalVerificationStamp(options: StampOptions): string 
     <!-- Verification Identity Strip -->
     <div style="border:2px solid ${accentColor}22;border-radius:10px;padding:12px;background:linear-gradient(135deg,${accentColor}06,${accentColor}03);margin-bottom:8px;">
       <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+        <!-- Secure Digital Seal -->
+        ${sealHTML}
+
         <!-- QR Code -->
         <div style="text-align:center;flex-shrink:0;">
           ${qrSVG}
@@ -214,13 +260,13 @@ export function generateDigitalVerificationStamp(options: StampOptions): string 
         إقرار بالحجية الرقمية
       </div>
       <div style="font-size:6pt;color:#78716c;line-height:1.5;">
-        رمز الاستجابة السريعة (QR) والباركود المُدرجان يقومان مقام التوقيع والختم الحي.
+        رمز الاستجابة السريعة (QR) والباركود والختم الرقمي المؤمّن المُدرجة يقومون مقام التوقيع والختم الحي.
         لا يحتاج المستند لإمضاء أو ختم يدوي إضافي وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004.
         يُعد هذا المستند الإلكتروني حجة قانونية كاملة في الإثبات.
       </div>
     </div>
     <div style="text-align:center;font-size:6pt;color:#9ca3af;">
-      للتحقق من صحة المستند امسح رمز QR أو أدخل كود التحقق في بوابة التحقق الإلكترونية
+      للتحقق من صحة المستند امسح رمز QR أو أدخل كود التحقق أو رقم الختم الرقمي في بوابة التحقق الإلكترونية
     </div>
   </div>`;
 }

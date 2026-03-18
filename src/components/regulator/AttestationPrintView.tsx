@@ -43,6 +43,11 @@ const AttestationPrintView = ({ attestation, onClose }: AttestationPrintViewProp
     documentType: 'attestation',
     entityName: orgName,
     accentColor,
+    seal: organization?.id ? {
+      entityId: organization.id,
+      entityType: 'organization',
+      entityDisplayName: orgName,
+    } : undefined,
   });
 
   return (

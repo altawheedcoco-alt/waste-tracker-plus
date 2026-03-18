@@ -21766,6 +21766,52 @@ export type Database = {
           },
         ]
       }
+      member_follows: {
+        Row: {
+          created_at: string
+          followed_organization_id: string | null
+          followed_profile_id: string | null
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          followed_organization_id?: string | null
+          followed_profile_id?: string | null
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          followed_organization_id?: string | null
+          followed_profile_id?: string | null
+          follower_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "member_follows_followed_organization_id_fkey"
+            columns: ["followed_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "member_follows_followed_organization_id_fkey"
+            columns: ["followed_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "member_follows_followed_profile_id_fkey"
+            columns: ["followed_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       member_post_likes: {
         Row: {
           created_at: string | null
