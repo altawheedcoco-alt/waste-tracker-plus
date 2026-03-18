@@ -95,7 +95,7 @@ const RestrictionsMonitor = () => {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <ShieldAlert className="h-8 w-8 mx-auto text-amber-500 mb-2" />
+              <ShieldAlert className="h-8 w-8 mx-auto text-destructive/70 mb-2" />
               <div className="text-2xl font-bold">{stats.restrictedAgainstUs}</div>
               <div className="text-xs text-muted-foreground">مفروض علينا</div>
             </CardContent>
