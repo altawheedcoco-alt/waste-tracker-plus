@@ -521,7 +521,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setIsSidebarOpen(false)}
+                        onClick={() => cycleSidebarMode()}
                         className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
                       >
                         <X className="w-3.5 h-3.5" />
