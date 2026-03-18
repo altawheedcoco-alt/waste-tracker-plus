@@ -517,7 +517,7 @@ export const ar = {
   shipments: {
     title: 'الشحنات',
     management: 'إدارة الشحنات',
-    managementDesc: 'عرض وإدارة جميع شحنات النفايات',
+    managementDesc: 'عرض وإدارة جميع شحنات المخلفات',
     newShipment: 'شحنة جديدة',
     createFirst: 'إنشاء أول شحنة',
     shipmentNumber: 'رقم الشحنة',
