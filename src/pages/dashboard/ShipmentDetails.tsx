@@ -11,6 +11,7 @@ import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,17 +19,28 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import {
   Package, Printer, MapPin, Calendar, Truck, Building2, Recycle,
   User, Phone, Mail, FileText, AlertTriangle, Scale, Box, Loader2,
   Edit, Navigation, Lock, Route, Eye, Star, Shield, Users2,
+  RefreshCw, ChevronDown, Settings2, Download, FileCheck, CheckCircle2,
+  EyeOff, XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { canChangeStatus, getAvailableNextStatuses, mapLegacyStatus } from '@/lib/shipmentStatusConfig';
+import { cn } from '@/lib/utils';
+import { canChangeStatus, getAvailableNextStatuses, mapLegacyStatus, getStatusConfig, mapToDbStatus, type ShipmentStatus } from '@/lib/shipmentStatusConfig';
 
 // Lazy load heavy components
 const ShipmentDocumentsTimeline = lazy(() => import('@/components/shipments/ShipmentDocumentsTimeline'));
