@@ -85,13 +85,13 @@ const SignManifestButton = ({
       // Get organization signature/stamp if available
       const [sigResult, stampResult] = await Promise.all([
         (supabase.from('organization_signatures') as any)
-          .select('signature_url')
+          .select('signature_image_url')
           .eq('organization_id', organization.id)
           .eq('is_active', true)
           .limit(1)
           .maybeSingle(),
         (supabase.from('organization_stamps') as any)
-          .select('stamp_url')
+          .select('stamp_image_url')
           .eq('organization_id', organization.id)
           .eq('is_active', true)
           .limit(1)
@@ -114,8 +114,8 @@ const SignManifestButton = ({
           signer_title: (profile as any)?.job_title || null,
           organization_id: organization.id,
           signature_method: 'digital',
-          signature_image_url: sigResult?.data?.signature_url || null,
-          stamp_image_url: stampResult?.data?.stamp_url || null,
+          signature_image_url: sigResult?.data?.signature_image_url || null,
+          stamp_image_url: stampResult?.data?.stamp_image_url || null,
           stamp_applied: !!stampResult?.data?.stamp_url,
           document_hash: documentHash,
           signature_hash: signatureHash,
