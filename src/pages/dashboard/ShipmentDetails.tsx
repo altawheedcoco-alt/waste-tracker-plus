@@ -219,13 +219,17 @@ const ShipmentDetailsPage = () => {
     setIsQuickStatusChanging(true);
     try {
       const dbStatus = mapToDbStatus(newStatus);
+      console.log('[StatusChange] UI status:', newStatus, '→ DB status:', dbStatus, '| Shipment ID:', shipment.id);
       const { error } = await supabase.from('shipments').update({ status: dbStatus as any }).eq('id', shipment.id);
-      if (error) throw error;
+      if (error) {
+        console.error('[StatusChange] DB Error:', JSON.stringify(error));
+        throw error;
+      }
       toast.success(`تم تغيير الحالة إلى: ${getStatusConfig(newStatus)?.labelAr}`);
       fetchShipmentDetails();
-    } catch (err) {
-      console.error('Error changing status:', err);
-      toast.error('حدث خطأ أثناء تغيير الحالة');
+    } catch (err: any) {
+      console.error('[StatusChange] Error:', err?.message || err, err?.code, err?.details);
+      toast.error(`حدث خطأ أثناء تغيير الحالة: ${err?.message || 'خطأ غير معروف'}`);
     } finally {
       setIsQuickStatusChanging(false);
     }
