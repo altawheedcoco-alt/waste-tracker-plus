@@ -28690,6 +28690,56 @@ export type Database = {
           },
         ]
       }
+      profile_photos: {
+        Row: {
+          caption: string | null
+          created_at: string | null
+          id: string
+          is_current: boolean | null
+          is_hidden: boolean | null
+          photo_type: string
+          photo_url: string
+          profile_id: string
+          storage_path: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_current?: boolean | null
+          is_hidden?: boolean | null
+          photo_type: string
+          photo_url: string
+          profile_id: string
+          storage_path?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string | null
+          id?: string
+          is_current?: boolean | null
+          is_hidden?: boolean | null
+          photo_type?: string
+          photo_url?: string
+          profile_id?: string
+          storage_path?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profile_photos_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profile_posts: {
         Row: {
           content: string | null
