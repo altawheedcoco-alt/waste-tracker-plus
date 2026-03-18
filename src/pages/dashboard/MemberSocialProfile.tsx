@@ -36,6 +36,7 @@ import ProfilePhotoGallery from '@/components/profile/ProfilePhotoGallery';
 import PostInteractions from '@/components/organization/PostInteractions';
 import FollowButton from '@/components/social/FollowButton';
 import FollowStats from '@/components/social/FollowStats';
+import SecureDigitalSeal from '@/components/endorsement/SecureDigitalSeal';
 import { cn } from '@/lib/utils';
 
 const REVIEW_CATEGORIES = [
