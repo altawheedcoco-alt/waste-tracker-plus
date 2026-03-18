@@ -13,7 +13,7 @@ const SHIPMENT_SELECT = `
   notes, generator_notes, recycler_notes, waste_description, hazard_level,
   packaging_method, disposal_method, approved_at, collection_started_at,
   in_transit_at, delivered_at, confirmed_at, manual_driver_name, manual_vehicle_plate,
-  weighbridge_net_weight,
+  weighbridge_net_weight, generator_id, transporter_id, recycler_id,
   generator:organizations!shipments_generator_id_fkey(
     name, name_en, email, phone, secondary_phone, address, city, region,
     representative_name, representative_phone, representative_email,
