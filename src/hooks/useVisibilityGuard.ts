@@ -61,6 +61,21 @@ const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
 };
 
 /**
+ * Helper: check if org_id has block_visibility/block_all restriction on restricted_org_id
+ */
+async function checkRestrictionInDb(orgId: string, restrictedOrgId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('partner_restrictions')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('restricted_org_id', restrictedOrgId)
+    .eq('is_active', true)
+    .in('restriction_type', ['block_visibility', 'block_all', 'blacklist'])
+    .limit(1);
+  return (data?.length ?? 0) > 0;
+}
+
+/**
  * Hook للتحقق من صلاحيات الرؤية لشحنة معينة
  */
 export function useShipmentVisibility(shipmentId: string | undefined): VisibilityPermissions {
