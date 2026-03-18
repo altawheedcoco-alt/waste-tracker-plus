@@ -35,6 +35,7 @@ const REVIEW_CATEGORIES = [
 
 export default function MemberSocialProfile() {
   const { profileId } = useParams();
+  const navigate = useNavigate();
   const { profile: myProfile, organization, user } = useAuth();
   const queryClient = useQueryClient();
   const coverInputRef = useRef<HTMLInputElement>(null);
