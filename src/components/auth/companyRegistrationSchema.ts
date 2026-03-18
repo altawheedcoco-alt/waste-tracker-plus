@@ -30,7 +30,7 @@ export const companyRegistrationSchema = z.object({
   agentPhone: z.string().trim().regex(phoneRegex, 'رقم هاتف غير صالح').optional().or(z.literal('')),
   agentEmail: z.string().trim().regex(emailRegex, 'بريد إلكتروني غير صالح').optional().or(z.literal('')),
   agentNationalId: z.string().trim().max(20).optional().or(z.literal('')),
-  email: z.string().trim().regex(emailRegex, 'بريد إلكتروني غير صالح للدخول').max(255),
+  email: z.string().trim().regex(emailRegex, 'بريد إلكتروني غير صالح للدخول').max(255).optional().or(z.literal('')),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل').max(128),
   fullName: z.string().trim().min(2, 'الاسم مطلوب').max(100),
   phone: z.string().trim().regex(phoneRegex, 'رقم هاتف غير صالح').optional().or(z.literal('')),
