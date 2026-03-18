@@ -107,7 +107,7 @@ const SignManifestButton = ({
         .from('document_signatures')
         .insert({
           document_id: shipmentId,
-          document_type: 'manifest',
+          document_type: documentType,
           signed_by: user.id,
           signer_name: profile?.full_name || user.email || 'غير معروف',
           signer_role: signerRole,
