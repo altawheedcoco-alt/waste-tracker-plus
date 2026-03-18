@@ -93,7 +93,10 @@ const ExportActions = ({
         <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" />
       )}
       {shipment && (
-        <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" />
+        <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="manifest" label="توقيع المانيفست" variant="outline" />
+      )}
+      {shipment && (
+        <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="shipment_tracking" label="توقيع التتبع" variant="outline" />
       )}
       <Button variant="eco" onClick={onPrint} className="gap-2">
         <Printer className="w-4 h-4" />
