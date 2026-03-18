@@ -29,6 +29,7 @@ const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondar
 };
 
 const Quotations = () => {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const orgType = (organization as any)?.type || 'generator';
   const { quotations, receivedQuotations, isLoading, createQuotation, updateStatus, deleteQuotation, getQuotationItems } = useQuotations(organization?.id);
