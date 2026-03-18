@@ -43,7 +43,7 @@ const UnifiedShipmentPrint = ({
   const theme = getThemeById(themeId);
 
   const {
-    shipment, loading, logs, supervisors, declaration,
+    shipment, loading, logs, supervisors, signatures, declaration,
     qrData, driverName, vehiclePlate, documentSerial,
     verificationCode, pdfFileName,
   } = useShipmentPrintData({
