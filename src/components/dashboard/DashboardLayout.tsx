@@ -635,7 +635,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {/* Action Chains Button */}
             <div className="pt-3 mt-3 border-t border-border/30">
-              <ActionChainsButton isCollapsed={isMiniSidebar} />
+              <ActionChainsButton isCollapsed={false} />
             </div>
 
             {/* Quick Actions Section */}
