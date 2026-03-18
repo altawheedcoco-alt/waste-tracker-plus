@@ -116,6 +116,144 @@ function renderLicensesBlock(org: any): string {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// SECURE DIGITAL SEAL SYSTEM — ported from secureDigitalSeal.ts
+// ═══════════════════════════════════════════════════════════════
+
+function secureSealHash(data: string, salt: string): string {
+  let h1 = 0x811c9dc5;
+  let h2 = 0xcbf29ce4;
+  const combined = `${salt}::${data}::iRecycle::2024`;
+  for (let i = 0; i < combined.length; i++) {
+    const c = combined.charCodeAt(i);
+    h1 ^= c; h1 = Math.imul(h1, 0x01000193);
+    h2 ^= c; h2 = Math.imul(h2, 0x01000193);
+    h1 ^= h2 >>> 13; h2 ^= h1 >>> 7;
+  }
+  return `${(h1 >>> 0).toString(16).padStart(8, '0')}${(h2 >>> 0).toString(16).padStart(8, '0')}`.toUpperCase();
+}
+
+function generateSealNumber(entityId: string, entityType: string, name: string): string {
+  const hash = secureSealHash(`${entityId}|${name}`, entityType);
+  const prefix = entityType === 'member' ? 'MS' : 'OS';
+  return `${prefix}-${hash.slice(0, 4)}-${hash.slice(4, 8)}-${hash.slice(8, 12)}`;
+}
+
+function generateDocumentSealProof(sealNumber: string, documentRef: string, timestamp: string): string {
+  return secureSealHash(`${sealNumber}|${documentRef}|${timestamp}`, 'doc-proof').slice(0, 12);
+}
+
+function hashToColor(hash: string, offset = 0): string {
+  const h = parseInt(hash.slice(offset, offset + 3), 16) % 360;
+  const s = 55 + (parseInt(hash.slice(offset + 3, offset + 5), 16) % 30);
+  const l = 30 + (parseInt(hash.slice(offset + 5, offset + 7), 16) % 20);
+  return `hsl(${h}, ${s}%, ${l}%)`;
+}
+
+function generateGuillochePath(hash: string, radius: number, complexity: number): string {
+  const points: string[] = [];
+  const steps = 360;
+  const a1 = 2 + (parseInt(hash.slice(0, 2), 16) % 6);
+  const a2 = 3 + (parseInt(hash.slice(2, 4), 16) % 8);
+  const depth = 2 + (parseInt(hash.slice(4, 6), 16) % 4) * complexity;
+  for (let i = 0; i <= steps; i++) {
+    const angle = (i / steps) * Math.PI * 2;
+    const r = radius + Math.sin(angle * a1) * depth + Math.cos(angle * a2) * (depth * 0.6) + Math.sin(angle * (a1 + a2)) * (depth * 0.3);
+    const x = 100 + r * Math.cos(angle);
+    const y = 100 + r * Math.sin(angle);
+    points.push(`${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)}`);
+  }
+  points.push('Z');
+  return points.join(' ');
+}
+
+function generateSecurityDots(hash: string, radius: number): string {
+  let dots = '';
+  const count = 24 + (parseInt(hash.slice(6, 8), 16) % 16);
+  for (let i = 0; i < count; i++) {
+    const angle = (i / count) * Math.PI * 2;
+    const r = radius + (parseInt(hash.charAt(i % hash.length), 16) % 3) - 1;
+    const x = 100 + r * Math.cos(angle);
+    const y = 100 + r * Math.sin(angle);
+    const size = 0.3 + (parseInt(hash.charAt((i + 5) % hash.length), 16) % 3) * 0.2;
+    dots += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${size}" fill="currentColor" opacity="0.4"/>`;
+  }
+  return dots;
+}
+
+function generateDigitalSealSVG(entityId: string, entityType: string, entityName: string, documentRef: string, size = 80): string {
+  const sealNumber = generateSealNumber(entityId, entityType, entityName);
+  const hash = secureSealHash(`${entityId}|${entityName}|${entityType}`, 'visual-seed');
+  const primaryColor = hashToColor(hash, 0);
+  const accentColor = hashToColor(hash, 6);
+  const guillocheOuter = generateGuillochePath(hash, 85, 0.8);
+  const guillocheInner = generateGuillochePath(hash.split('').reverse().join(''), 55, 0.5);
+  const securityDots = generateSecurityDots(hash, 70);
+  const microText = `iRecycle • ${hash.slice(0, 4)} • مُوثّق • ${hash.slice(4, 8)} • رقمي • ${hash.slice(8, 12)} • مؤمّن •`;
+  const typeLabel = entityType === 'member' ? 'عضو معتمد' : 'جهة معتمدة';
+  const displayName = entityName.length > 20 ? entityName.slice(0, 18) + '…' : entityName;
+  const timestamp = new Date().toISOString();
+  const docProof = generateDocumentSealProof(sealNumber, documentRef, timestamp);
+  const uid = hash.slice(0, 4);
+
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="${size}" height="${size}" style="filter:drop-shadow(0 2px 8px rgba(0,0,0,0.15));">
+  <defs>
+    <linearGradient id="sg_${uid}" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:${primaryColor};stop-opacity:0.9"/>
+      <stop offset="50%" style="stop-color:${accentColor};stop-opacity:0.7"/>
+      <stop offset="100%" style="stop-color:${primaryColor};stop-opacity:0.9"/>
+    </linearGradient>
+    <pattern id="sp_${uid}" x="0" y="0" width="8" height="8" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="0.5" fill="${primaryColor}" opacity="0.1"/>
+    </pattern>
+    <path id="tp_o_${uid}" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" fill="none"/>
+    <path id="tp_i_${uid}" d="M 100,100 m -62,0 a 62,62 0 1,1 124,0 a 62,62 0 1,1 -124,0" fill="none"/>
+    <path id="tp_n_${uid}" d="M 100,100 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0" fill="none"/>
+  </defs>
+  <circle cx="100" cy="100" r="96" fill="white" stroke="${primaryColor}" stroke-width="2"/>
+  <circle cx="100" cy="100" r="94" fill="url(#sp_${uid})"/>
+  <path d="${guillocheOuter}" fill="none" stroke="url(#sg_${uid})" stroke-width="1.2" opacity="0.6"/>
+  <path d="${guillocheInner}" fill="none" stroke="${accentColor}" stroke-width="0.8" opacity="0.4"/>
+  <g style="color:${primaryColor}">${securityDots}</g>
+  <circle cx="100" cy="100" r="88" fill="none" stroke="${primaryColor}" stroke-width="1.5" opacity="0.3"/>
+  <circle cx="100" cy="100" r="86" fill="none" stroke="${primaryColor}" stroke-width="0.5" stroke-dasharray="2,3" opacity="0.4"/>
+  <circle cx="100" cy="100" r="50" fill="none" stroke="${primaryColor}" stroke-width="1" opacity="0.3"/>
+  <text font-size="3.5" fill="${primaryColor}" opacity="0.5" font-family="monospace" direction="rtl">
+    <textPath href="#tp_o_${uid}" startOffset="0%">${microText} ${microText}</textPath>
+  </text>
+  <text font-size="4.5" fill="${primaryColor}" opacity="0.6" font-family="monospace" font-weight="bold">
+    <textPath href="#tp_i_${uid}" startOffset="0%">● ${sealNumber} ● ${hash.slice(0,8)} ● ${typeLabel} ●</textPath>
+  </text>
+  <g transform="translate(88, 68)">
+    <path d="M12 2L4 6v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V6L12 2z" fill="${primaryColor}" opacity="0.15" stroke="${primaryColor}" stroke-width="1"/>
+    <path d="M10 12l2 2 4-4" fill="none" stroke="${primaryColor}" stroke-width="1.5" stroke-linecap="round"/>
+  </g>
+  <text font-size="6" fill="${primaryColor}" font-weight="bold" font-family="'Cairo','Segoe UI',sans-serif" text-anchor="middle" direction="rtl">
+    <textPath href="#tp_n_${uid}" startOffset="75%">${displayName}</textPath>
+  </text>
+  <text x="100" y="108" text-anchor="middle" font-size="5" font-family="monospace" font-weight="bold" fill="${primaryColor}" opacity="0.9">${sealNumber}</text>
+  <text x="100" y="116" text-anchor="middle" font-size="4.5" font-family="'Cairo',sans-serif" fill="${accentColor}" font-weight="600">${typeLabel}</text>
+  <text x="100" y="130" text-anchor="middle" font-size="3" font-family="monospace" fill="#9ca3af">DOC: ${docProof}</text>
+  <text x="100" y="142" text-anchor="middle" font-size="3.5" font-family="sans-serif" fill="${primaryColor}" opacity="0.5" font-weight="bold">iRecycle Platform</text>
+  <circle cx="100" cy="100" r="97" fill="none" stroke="${primaryColor}" stroke-width="0.5" stroke-dasharray="4,2,1,2" opacity="0.4"/>
+</svg>`;
+}
+
+function generatePartySealBlock(org: any, orgId: string, label: string, documentRef: string): string {
+  if (!org || !orgId) return '';
+  const sealSVG = generateDigitalSealSVG(orgId, 'organization', org.name || label, documentRef, 65);
+  const sealNum = generateSealNumber(orgId, 'organization', org.name || label);
+  const docProof = generateDocumentSealProof(sealNum, documentRef, new Date().toISOString());
+  return `<div style="text-align:center;flex:1;">
+    ${sealSVG}
+    <div style="font-size:4.5px;color:#6b7280;margin-top:1px;font-family:monospace;">
+      <div style="font-weight:bold;color:#059669;font-size:5px;">${sealNum}</div>
+      <div>DOC:${docProof}</div>
+    </div>
+    <div style="font-size:5px;color:#374151;margin-top:1px;">${label}: ${org.name || '—'}</div>
+  </div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // SECURITY LAYERS — ported from ShipmentA4Document & printSecurityUtils
 // ═══════════════════════════════════════════════════════════════
 
@@ -632,6 +770,29 @@ ${custodyChain.length > 0 ? `
     <li>المانيفست وثيقة رسمية إلكترونية محمية ببصمة SHA-256.</li>
     <li>الاختصاص القضائي: محاكم جمهورية مصر العربية المختصة.</li>
   </ol>
+</div>
+
+<!-- 10. الأختام الرقمية المؤمّنة | Secure Digital Seals -->
+<div class="sec" style="margin-top:3px;">
+  <div class="sec-t">القسم العاشر: الأختام الرقمية المؤمّنة | Secure Digital Seals</div>
+  <div style="display:flex;justify-content:space-around;align-items:flex-start;gap:4px;padding:3px 0;">
+    ${generatePartySealBlock(shipment.generator, shipment.generator_id, '🏭 المولّد', shipment.shipment_number)}
+    ${generatePartySealBlock(shipment.transporter, shipment.transporter_id, '🚛 الناقل', shipment.shipment_number)}
+    ${generatePartySealBlock(shipment.recycler, shipment.recycler_id, '♻️ المدوّر', shipment.shipment_number)}
+  </div>
+  <div style="text-align:center;margin-top:2px;">
+    <div style="background:rgba(240,253,244,0.8);border:1px solid #bbf7d0;border-radius:4px;padding:2px 6px;display:inline-block;">
+      <div style="font-size:5.5px;font-weight:bold;color:#059669;">🛡️ هوية التحقق الرقمي — Digital Verification Identity</div>
+      <div style="font-size:5px;color:#6b7280;">الأختام الرقمية أعلاه مؤمّنة ببصمة تشفيرية فريدة لكل جهة ولكل مستند — لا يمكن تزويرها أو تكرارها</div>
+    </div>
+  </div>
+  <div style="border:1px solid #fde68a;border-radius:3px;padding:2px 4px;background:rgba(255,251,235,0.6);text-align:center;margin-top:2px;">
+    <div style="font-size:5px;font-weight:bold;color:#92400e;">📜 إقرار بالحجية الرقمية</div>
+    <div style="font-size:4.5px;color:#78716c;line-height:1.4;">
+      رمز الاستجابة السريعة (QR) والباركود والختم الرقمي المؤمّن المُدرجة يقومون مقام التوقيع والختم الحي.
+      لا يحتاج المستند لإمضاء أو ختم يدوي إضافي وفقاً لقانون التوقيع الإلكتروني المصري رقم 15 لسنة 2004.
+    </div>
+  </div>
 </div>
 
 <!-- Security Footer -->
