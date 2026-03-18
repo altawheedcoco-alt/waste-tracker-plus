@@ -71,7 +71,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
             />
           )}
           <div className="relative">
-            <Icon className={`w-[18px] h-[18px] shrink-0 transition-all duration-200 ${
+            <Icon className={`w-5 h-5 shrink-0 transition-all duration-200 ${
               isActive ? 'text-primary scale-110' : 'group-hover:scale-105'
             }`} />
             {item.badge != null && item.badge > 0 && isCollapsed && (
