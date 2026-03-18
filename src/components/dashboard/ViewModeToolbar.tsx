@@ -2,10 +2,8 @@ import { memo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   LayoutGrid, List, Minimize2, Maximize2, 
-  AlignJustify, AlignCenter, AlignLeft,
-  PanelLeftClose, PanelLeft, PanelLeftOpen
+  AlignJustify, AlignCenter, AlignLeft
 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useViewMode, ContentDensity } from '@/contexts/ViewModeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,7 +16,7 @@ const densityOptions: { value: ContentDensity; icon: typeof AlignJustify; labelA
 ];
 
 const ViewModeToolbar = memo(() => {
-  const { density, listStyle, fullWidth, sidebarMode, setDensity, setListStyle, toggleFullWidth, cycleSidebarMode } = useViewMode();
+  const { density, listStyle, fullWidth, setDensity, setListStyle, toggleFullWidth } = useViewMode();
   const { language } = useLanguage();
 
   return (
@@ -118,30 +116,6 @@ const ViewModeToolbar = memo(() => {
         </TooltipTrigger>
         <TooltipContent className="text-xs">
           {language === 'ar' ? (fullWidth ? 'عرض عادي' : 'عرض كامل') : (fullWidth ? 'Normal width' : 'Full width')}
-        </TooltipContent>
-      </Tooltip>
-
-      {/* Sidebar Mode Toggle */}
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            onClick={cycleSidebarMode}
-            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-all duration-150"
-          >
-            {sidebarMode === 'full' ? (
-              <PanelLeft className="w-3.5 h-3.5" />
-            ) : sidebarMode === 'mini' ? (
-              <PanelLeftClose className="w-3.5 h-3.5" />
-            ) : (
-              <PanelLeftOpen className="w-3.5 h-3.5" />
-            )}
-          </button>
-        </TooltipTrigger>
-        <TooltipContent className="text-xs">
-          {language === 'ar' 
-            ? (sidebarMode === 'full' ? 'تصغير القائمة' : sidebarMode === 'mini' ? 'إخفاء القائمة' : 'إظهار القائمة')
-            : (sidebarMode === 'full' ? 'Mini sidebar' : sidebarMode === 'mini' ? 'Hide sidebar' : 'Show sidebar')
-          }
         </TooltipContent>
       </Tooltip>
     </motion.div>
