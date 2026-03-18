@@ -37,19 +37,21 @@ Deno.serve(async (req) => {
 
     if (error || !shipment) throw new Error(`Shipment not found: ${error?.message || 'no data'}`);
 
-    const { data: custodyChain } = await supabase
-      .from("custody_chain_events")
-      .select("*, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)")
-      .eq("shipment_id", shipmentId)
-      .order("created_at", { ascending: true });
+    const [custodyRes, sigRes, supRes, declRes] = await Promise.all([
+      supabase.from("custody_chain_events")
+        .select("*, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)")
+        .eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
+      supabase.from("document_signatures")
+        .select("*, signer:profiles!document_signatures_signer_id_fkey(full_name), signer_organization:organizations!document_signatures_organization_id_fkey(name)")
+        .eq("document_id", shipmentId).order("signed_at", { ascending: true }),
+      supabase.from("shipment_movement_supervisors")
+        .select("*").eq("shipment_id", shipmentId),
+      supabase.from("delivery_declarations")
+        .select("*").eq("shipment_id", shipmentId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
 
-    const { data: signatures } = await supabase
-      .from("document_signatures")
-      .select("*, signer:profiles!document_signatures_signer_id_fkey(full_name), signer_organization:organizations!document_signatures_organization_id_fkey(name)")
-      .eq("document_id", shipmentId)
-      .order("signed_at", { ascending: true });
-
-    const html = generateManifestHTML(shipment, custodyChain || [], signatures || []);
+    const html = generateManifestHTML(shipment, custodyRes.data || [], sigRes.data || [], supRes.data || [], declRes.data || null);
 
     return new Response(
       JSON.stringify({ success: true, html, shipmentNumber: shipment.shipment_number }),
