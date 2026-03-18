@@ -177,6 +177,20 @@ const ReceiptFlowDialog = ({
 
     setLoading(true);
     try {
+      // Check for existing receipt first to prevent duplicates
+      const { data: existingReceipt } = await supabase
+        .from('shipment_receipts')
+        .select('id, receipt_number')
+        .eq('shipment_id', shipment.id)
+        .maybeSingle();
+
+      if (existingReceipt) {
+        toast.info('تم إصدار شهادة استلام لهذه الشحنة مسبقاً. يمكنك التعديل عليها.');
+        setLoading(false);
+        onOpenChange(false);
+        return;
+      }
+
       const receiptNum = `RCP-${Date.now().toString(36).toUpperCase()}`;
       const identity = generateDocumentIdentity('shipment_receipt', receiptNum, {
         shipmentNumber: shipment.shipment_number,
