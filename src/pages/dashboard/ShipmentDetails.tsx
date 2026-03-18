@@ -40,6 +40,7 @@ const ShipmentQuickPrint = lazy(() => import('@/components/shipments/unified-pri
 const ManifestPDFButton = lazy(() => import('@/components/shipments/ManifestPDFButton'));
 const SignManifestButton = lazy(() => import('@/components/shipments/SignManifestButton'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
+const EditShipmentDialog = lazy(() => import('@/components/shipments/EditShipmentDialog'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
 const CompletedRouteMap = lazy(() => import('@/components/shipments/CompletedRouteMap'));
@@ -202,6 +203,9 @@ const ShipmentDetailsPage = () => {
             </p>
           </div>
           <div className="flex gap-2 flex-wrap overflow-x-auto scrollbar-hide">
+            <Suspense fallback={null}>
+              <EditShipmentDialog shipment={shipment} onSuccess={fetchShipmentDetails} />
+            </Suspense>
             {shipment.driver_id && visibility.canViewTracking && (
               <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm" className="text-xs">
                 <Navigation className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.liveTracking')}
