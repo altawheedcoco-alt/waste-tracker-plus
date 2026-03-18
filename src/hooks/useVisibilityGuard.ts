@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePartnerRestrictions } from '@/hooks/usePartnerRestrictions';
 
 /**
  * نظام صلاحيات الرؤية المركزي
@@ -60,11 +61,27 @@ const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
 };
 
 /**
+ * Helper: check if org_id has block_visibility/block_all restriction on restricted_org_id
+ */
+async function checkRestrictionInDb(orgId: string, restrictedOrgId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('partner_restrictions')
+    .select('id')
+    .eq('organization_id', orgId)
+    .eq('restricted_org_id', restrictedOrgId)
+    .eq('is_active', true)
+    .in('restriction_type', ['block_visibility', 'block_all', 'blacklist'])
+    .limit(1);
+  return (data?.length ?? 0) > 0;
+}
+
+/**
  * Hook للتحقق من صلاحيات الرؤية لشحنة معينة
  */
 export function useShipmentVisibility(shipmentId: string | undefined): VisibilityPermissions {
   const { organization, roles } = useAuth();
   const isAdmin = roles.includes('admin');
+  const { isRestricted } = usePartnerRestrictions();
 
   const { data, isLoading } = useQuery({
     queryKey: ['shipment-visibility', shipmentId, organization?.id],
@@ -86,6 +103,12 @@ export function useShipmentVisibility(shipmentId: string | undefined): Visibilit
 
       if (shipment.transporter_id === organization.id) {
         return { permissions: DEFAULT_PERMISSIONS, isOwner: true };
+      }
+
+      // Check if the transporter has block_visibility or block_all restriction on us
+      const transporterBlocksUs = await checkRestrictionInDb(shipment.transporter_id, organization.id);
+      if (transporterBlocksUs) {
+        return { permissions: BLOCKED_PERMISSIONS, isOwner: false };
       }
 
       const isParty = 
