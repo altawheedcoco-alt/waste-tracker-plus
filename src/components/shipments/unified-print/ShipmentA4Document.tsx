@@ -11,7 +11,7 @@ import { PrintTheme, getThemeById } from '../printThemes';
 import ShipmentTaglineFooter from '../ShipmentTaglineFooter';
 import { generateMICRLineHTML, generateVerticalStampHTML } from '@/lib/printSecurityUtils';
 import type {
-  ShipmentPrintData, MovementSupervisor,
+  ShipmentPrintData, MovementSupervisor, DocumentSignatureData,
   WASTE_TYPE_LABELS, STATUS_LABELS, HAZARD_LABELS, DISPOSAL_LABELS, PACKAGING_LABELS,
 } from './types';
 import {
