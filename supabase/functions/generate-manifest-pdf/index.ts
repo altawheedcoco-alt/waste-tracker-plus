@@ -496,7 +496,10 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   .terms h4 { font-size: ${FS}; color: #334155; margin-bottom: 1px; }
   .terms ol { font-size: 5px; color: #475569; padding-right: 10px; line-height: 1.35; columns: 2; column-gap: 10px; }
   .terms li { break-inside: avoid; margin-bottom: 0.5px; }
-  
+  a { color: #1d4ed8; text-decoration: underline; }
+  a:hover { color: #1e40af; }
+  @media print { a { color: #1d4ed8 !important; text-decoration: underline !important; } }
+
   .sec-footer { display: flex; justify-content: space-between; align-items: center; border-top: 2.5px solid #16a34a; padding-top: 3px; margin-top: 3px; position: relative; z-index: 2; }
   .sec-footer .left { font-size: 5px; color: #6b7280; }
   .sec-footer .center { text-align: center; }
