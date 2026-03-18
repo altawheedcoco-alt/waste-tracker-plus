@@ -105,7 +105,7 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
     error: string | null;
   }>({ checking: false, isInside: null, distance: null, error: null });
 
-  const organizationType = (organization?.organization_type || 'generator') as ShipmentOrganizationType;
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
 
   // Get delivery coordinates from shipment
   const deliveryLat = shipment.gps_delivery_lat ?? shipment.delivery_latitude;
