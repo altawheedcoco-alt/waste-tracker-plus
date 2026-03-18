@@ -720,7 +720,7 @@ ${custodyChain.length > 0 ? `
     <p>أقر بتصنيف المخلفات بدقة وفقاً للكود المصري وأن الكميات والأوصاف صحيحة. (المادة 27 — ق202/2020)</p>
   </div>
   <div class="decl-party">
-    <strong>🚛 الناقل: ${shipment.transporter?.name || "—"}</strong>
+    <strong>🚛 الناقل: ${orgLink(shipment.transporter?.name || "—", shipment.transporter_id)}</strong>
     <p>أقر باستلام المخلفات والتزامي بالمسار المحدد وعدم التفريغ في غير الجهة المستلمة. (المادة 29 — ق202/2020)</p>
   </div>
   <div class="decl-party">
