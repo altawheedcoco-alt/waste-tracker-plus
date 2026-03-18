@@ -156,7 +156,7 @@ const SignManifestButton = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PenTool className="w-5 h-5 text-primary" />
-              التوقيع على المانيفست
+              التوقيع على {DOC_TYPE_LABELS[documentType]}
             </DialogTitle>
             <DialogDescription>
               مانيفست الشحنة {shipmentNumber}
