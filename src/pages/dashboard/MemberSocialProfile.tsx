@@ -2,7 +2,7 @@ import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -35,6 +35,7 @@ const REVIEW_CATEGORIES = [
 
 export default function MemberSocialProfile() {
   const { profileId } = useParams();
+  const navigate = useNavigate();
   const { profile: myProfile, organization, user } = useAuth();
   const queryClient = useQueryClient();
   const coverInputRef = useRef<HTMLInputElement>(null);
@@ -48,6 +49,9 @@ export default function MemberSocialProfile() {
   const [editBioOpen, setEditBioOpen] = useState(false);
   const [editBio, setEditBio] = useState('');
   const [editWhatsapp, setEditWhatsapp] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostMedia, setNewPostMedia] = useState<File[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -194,17 +198,32 @@ export default function MemberSocialProfile() {
     finally { setUploading(false); }
   };
 
-  // Update bio
-  const saveBio = useMutation({
+  // Update profile info
+  const saveProfile = useMutation({
     mutationFn: async () => {
       if (!targetProfile) throw new Error('No profile');
-      await supabase.from('profiles').update({ bio: editBio, whatsapp: editWhatsapp } as any).eq('id', targetProfile.id);
+      // Update profile fields
+      const updates: Record<string, any> = { bio: editBio, whatsapp: editWhatsapp };
+      if (editName.trim()) updates.full_name = editName.trim();
+      if (editPhone.trim()) updates.phone = editPhone.trim();
+      
+      await supabase.from('profiles').update(updates as any).eq('id', targetProfile.id);
+
+      // If email changed, use edge function
+      if (editEmail.trim() && editEmail.trim() !== targetProfile.email) {
+        const res = await supabase.functions.invoke('update-member-credentials', {
+          body: { mode: 'self', new_email: editEmail.trim() },
+        });
+        if (res.error) throw new Error(res.error.message);
+        if (res.data?.error) throw new Error(res.data.error);
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       setEditBioOpen(false);
       toast.success('تم تحديث البيانات');
     },
+    onError: (err: any) => toast.error(err.message || 'فشل التحديث'),
   });
 
   // Create post
@@ -395,10 +414,21 @@ export default function MemberSocialProfile() {
                     <Star className="w-4 h-4" /> تقييم
                   </Button>
                 )}
+                {!isOwnProfile && (
+                  <Button size="sm" variant="outline" onClick={() => {
+                    // Navigate to chat with this user
+                    navigate(`/dashboard/messages?to=${targetProfile.user_id}`);
+                  }} className="gap-1.5">
+                    <MessageCircle className="w-4 h-4" /> مراسلة
+                  </Button>
+                )}
                 {isOwnProfile && (
                   <Button size="sm" variant="outline" onClick={() => {
                     setEditBio((targetProfile as any).bio || '');
                     setEditWhatsapp((targetProfile as any).whatsapp || '');
+                    setEditName(targetProfile.full_name || '');
+                    setEditEmail(targetProfile.email || '');
+                    setEditPhone(targetProfile.phone || '');
                     setEditBioOpen(true);
                   }} className="gap-1.5">
                     <Edit3 className="w-4 h-4" /> تعديل
@@ -688,6 +718,18 @@ export default function MemberSocialProfile() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
+                <label className="text-sm font-medium mb-1 block">الاسم الكامل</label>
+                <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder="الاسم بالعربي أو الإنجليزي" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">البريد الإلكتروني</label>
+                <Input value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="example@mail.com" type="email" dir="ltr" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">رقم الهاتف</label>
+                <Input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr" />
+              </div>
+              <div>
                 <label className="text-sm font-medium mb-1 block">نبذة شخصية</label>
                 <Textarea value={editBio} onChange={e => setEditBio(e.target.value)} placeholder="اكتب نبذة عنك..." className="min-h-[80px]" />
               </div>
@@ -698,8 +740,8 @@ export default function MemberSocialProfile() {
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setEditBioOpen(false)}>إلغاء</Button>
-              <Button onClick={() => saveBio.mutate()} disabled={saveBio.isPending} className="gap-1.5">
-                {saveBio.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+              <Button onClick={() => saveProfile.mutate()} disabled={saveProfile.isPending} className="gap-1.5">
+                {saveProfile.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
                 حفظ
               </Button>
             </DialogFooter>
