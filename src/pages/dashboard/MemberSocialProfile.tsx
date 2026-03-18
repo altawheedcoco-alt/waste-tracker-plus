@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,17 +14,27 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Camera, Edit3, MapPin, Building2, Briefcase, Phone, Mail,
-  Calendar, Star, MessageCircle, Heart, ThumbsUp, Send, MoreHorizontal,
-  Globe, Shield, Award, Activity, TrendingUp, Pin, Trash2, Loader2,
-  Image as ImageIcon, X, UserCheck, Clock, Images,
+  Calendar, Star, MessageCircle, Heart, ThumbsUp, Send, MoreVertical,
+  Globe, Shield, Award, Activity, TrendingUp, Pin, PinOff, Trash2, Loader2,
+  Image as ImageIcon, X, UserCheck, Clock, Images, Video, Play, Share2, Link2,
+  Eye, BadgeCheck,
 } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import ProfilePhotoGallery from '@/components/profile/ProfilePhotoGallery';
+import PostInteractions from '@/components/organization/PostInteractions';
+import { cn } from '@/lib/utils';
 
 const REVIEW_CATEGORIES = [
   { value: 'general', label: 'عام' },
@@ -42,6 +52,7 @@ export default function MemberSocialProfile() {
   const coverInputRef = useRef<HTMLInputElement>(null);
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const postMediaRef = useRef<HTMLInputElement>(null);
+  const postVideoRef = useRef<HTMLInputElement>(null);
 
   const isOwnProfile = !profileId || profileId === myProfile?.id;
   const targetProfileId = profileId || myProfile?.id;
@@ -54,7 +65,8 @@ export default function MemberSocialProfile() {
   const [editEmail, setEditEmail] = useState('');
   const [editPhone, setEditPhone] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
-  const [newPostMedia, setNewPostMedia] = useState<File[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewText, setReviewText] = useState('');
@@ -62,6 +74,15 @@ export default function MemberSocialProfile() {
   const [uploading, setUploading] = useState(false);
   const [coverGalleryOpen, setCoverGalleryOpen] = useState(false);
   const [avatarGalleryOpen, setAvatarGalleryOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [postToDelete, setPostToDelete] = useState<string | null>(null);
+
+  // Clean up preview URLs
+  useEffect(() => {
+    const urls = selectedFiles.map(f => URL.createObjectURL(f));
+    setPreviewUrls(urls);
+    return () => urls.forEach(u => URL.revokeObjectURL(u));
+  }, [selectedFiles]);
 
   // Fetch target profile
   const { data: targetProfile, isLoading: profileLoading } = useQuery({
@@ -86,7 +107,7 @@ export default function MemberSocialProfile() {
       if (!targetProfile?.organization_id) return null;
       const { data } = await supabase
         .from('organizations')
-        .select('id, name, organization_type, logo_url, city')
+        .select('id, name, organization_type, logo_url, city, is_verified, region, activity_type, phone, email, website_url')
         .eq('id', targetProfile.organization_id)
         .single();
       return data;
@@ -176,15 +197,11 @@ export default function MemberSocialProfile() {
   // Save photo to history
   const savePhotoHistory = async (photoUrl: string, photoType: 'cover' | 'avatar', storagePath?: string) => {
     if (!targetProfile || !user?.id) return;
-    
-    // Mark old photos as not current
     await supabase
       .from('profile_photos')
       .update({ is_current: false, updated_at: new Date().toISOString() } as any)
       .eq('profile_id', targetProfile.id)
       .eq('photo_type', photoType);
-
-    // Insert new photo as current
     await supabase.from('profile_photos').insert({
       profile_id: targetProfile.id,
       user_id: user.id,
@@ -199,12 +216,10 @@ export default function MemberSocialProfile() {
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !targetProfile) return;
-    
     if (file.size > 5 * 1024 * 1024) {
       toast.error('حجم الصورة يجب أن لا يتجاوز 5 ميجابايت');
       return;
     }
-    
     setUploading(true);
     try {
       const url = await uploadFile(file, 'covers');
@@ -212,12 +227,8 @@ export default function MemberSocialProfile() {
         .from('profiles')
         .update({ cover_url: url } as any)
         .eq('id', targetProfile.id);
-      
       if (updateError) throw updateError;
-
-      // Save to history
       await savePhotoHistory(url, 'cover');
-      
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الغلاف');
@@ -238,10 +249,7 @@ export default function MemberSocialProfile() {
     try {
       const url = await uploadFile(file, 'avatars');
       await supabase.from('profiles').update({ avatar_url: url }).eq('id', targetProfile.id);
-      
-      // Save to history
       await savePhotoHistory(url, 'avatar');
-      
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الملف الشخصي');
@@ -253,14 +261,10 @@ export default function MemberSocialProfile() {
   const saveProfile = useMutation({
     mutationFn: async () => {
       if (!targetProfile) throw new Error('No profile');
-      // Update profile fields
       const updates: Record<string, any> = { bio: editBio, whatsapp: editWhatsapp };
       if (editName.trim()) updates.full_name = editName.trim();
       if (editPhone.trim()) updates.phone = editPhone.trim();
-      
       await supabase.from('profiles').update(updates as any).eq('id', targetProfile.id);
-
-      // If email changed, use edge function
       if (editEmail.trim() && editEmail.trim() !== targetProfile.email) {
         const res = await supabase.functions.invoke('update-member-credentials', {
           body: { mode: 'self', new_email: editEmail.trim() },
@@ -277,13 +281,39 @@ export default function MemberSocialProfile() {
     onError: (err: any) => toast.error(err.message || 'فشل التحديث'),
   });
 
+  // ── File selection for posts ──
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles = files.filter(file => {
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      const maxSize = isVideo ? 100 * 1024 * 1024 : 10 * 1024 * 1024;
+      if (!isImage && !isVideo) { toast.error(`${file.name}: نوع غير مدعوم`); return false; }
+      if (file.size > maxSize) { toast.error(`${file.name}: حجم كبير جداً`); return false; }
+      return true;
+    });
+    setSelectedFiles(prev => [...prev, ...validFiles].slice(0, 10));
+    if (e.target) e.target.value = '';
+  };
+
+  const removeFile = (index: number) => {
+    setSelectedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const determinePostType = (): string => {
+    if (selectedFiles.length === 0) return 'text';
+    if (selectedFiles.length > 1) return 'gallery';
+    if (selectedFiles[0].type.startsWith('video/')) return 'video';
+    return 'media';
+  };
+
   // Create post
   const createPost = useMutation({
     mutationFn: async () => {
       if (!myProfile || !organization) throw new Error('Not auth');
       let mediaUrls: string[] = [];
-      if (newPostMedia.length > 0) {
-        for (const file of newPostMedia) {
+      if (selectedFiles.length > 0) {
+        for (const file of selectedFiles) {
           const url = await uploadFile(file, 'posts');
           mediaUrls.push(url);
         }
@@ -291,39 +321,42 @@ export default function MemberSocialProfile() {
       const { error } = await (supabase.from('member_posts') as any).insert({
         author_id: myProfile.id,
         organization_id: organization.id,
-        content: newPostContent,
+        content: newPostContent.trim() || null,
         media_urls: mediaUrls,
-        post_type: mediaUrls.length > 0 ? 'media' : 'text',
+        post_type: determinePostType(),
       });
       if (error) throw error;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-profile-posts'] });
       setNewPostContent('');
-      setNewPostMedia([]);
+      setSelectedFiles([]);
       toast.success('تم نشر المنشور');
     },
     onError: () => toast.error('فشل نشر المنشور'),
   });
 
   // Delete post
-  const deletePost = useMutation({
-    mutationFn: async (postId: string) => {
-      const { error } = await (supabase.from('member_posts') as any).delete().eq('id', postId);
+  const handleDeletePost = async () => {
+    if (!postToDelete) return;
+    try {
+      const { error } = await (supabase.from('member_posts') as any).delete().eq('id', postToDelete);
       if (error) throw error;
-    },
-    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['social-profile-posts'] });
       toast.success('تم حذف المنشور');
-    },
-  });
+    } catch { toast.error('فشل حذف المنشور'); }
+    finally { setDeleteDialogOpen(false); setPostToDelete(null); }
+  };
 
   // Toggle pin
   const togglePin = useMutation({
     mutationFn: async ({ postId, pinned }: { postId: string; pinned: boolean }) => {
       await (supabase.from('member_posts') as any).update({ is_pinned: !pinned }).eq('id', postId);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['social-profile-posts'] }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['social-profile-posts'] });
+      toast.success('تم تحديث التثبيت');
+    },
   });
 
   // Submit review
@@ -348,6 +381,62 @@ export default function MemberSocialProfile() {
     },
     onError: () => toast.error('فشل إضافة التقييم'),
   });
+
+  // ── Render media for posts ──
+  const renderPostMedia = (post: any) => {
+    const urls = post.media_urls;
+    if (!urls || urls.length === 0) return null;
+
+    // Video
+    if (post.post_type === 'video' || (urls.length === 1 && (urls[0].includes('.mp4') || urls[0].includes('.webm') || urls[0].includes('.mov')))) {
+      return (
+        <div className="mt-3 rounded-lg overflow-hidden bg-black">
+          <video src={urls[0]} controls className="w-full max-h-[500px] object-contain" />
+        </div>
+      );
+    }
+
+    // Gallery
+    if (urls.length > 1) {
+      return (
+        <div className={cn(
+          "mt-3 grid gap-1.5 rounded-lg overflow-hidden",
+          urls.length === 2 && "grid-cols-2",
+          urls.length === 3 && "grid-cols-3",
+          urls.length >= 4 && "grid-cols-2",
+        )}>
+          {urls.slice(0, 4).map((url: string, i: number) => (
+            <div
+              key={i}
+              className={cn(
+                "relative overflow-hidden cursor-pointer",
+                urls.length === 3 && i === 0 && "col-span-3",
+              )}
+              onClick={() => window.open(url, '_blank')}
+            >
+              {url.includes('.mp4') || url.includes('.webm') ? (
+                <video src={url} className="w-full h-48 object-cover" />
+              ) : (
+                <img src={url} alt="" className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300" />
+              )}
+              {i === 3 && urls.length > 4 && (
+                <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                  <span className="text-white text-2xl font-bold">+{urls.length - 4}</span>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Single image
+    return (
+      <div className="mt-3 rounded-lg overflow-hidden cursor-pointer" onClick={() => window.open(urls[0], '_blank')}>
+        <img src={urls[0]} alt="" className="w-full max-h-[500px] object-cover hover:scale-[1.02] transition-transform duration-300" />
+      </div>
+    );
+  };
 
   if (profileLoading) {
     return (
@@ -436,7 +525,6 @@ export default function MemberSocialProfile() {
                   <AvatarImage src={targetProfile.avatar_url || undefined} />
                   <AvatarFallback className="bg-primary text-3xl font-bold text-primary-foreground">{initials}</AvatarFallback>
                 </Avatar>
-                {/* Avatar gallery button */}
                 <Button
                   size="icon" variant="secondary"
                   className="absolute -bottom-1 -left-1 h-7 w-7 rounded-full shadow opacity-0 transition-opacity group-hover/avatar:opacity-100"
@@ -461,7 +549,12 @@ export default function MemberSocialProfile() {
 
               {/* Name & Info */}
               <div className="min-w-0 flex-1 pb-1 text-center md:text-right">
-                <h1 className="text-xl font-bold md:text-2xl">{targetProfile.full_name}</h1>
+                <div className="flex items-center justify-center gap-2 md:justify-start">
+                  <h1 className="text-xl font-bold md:text-2xl">{targetProfile.full_name}</h1>
+                  {profileOrg?.is_verified && (
+                    <BadgeCheck className="w-5 h-5 text-primary shrink-0" />
+                  )}
+                </div>
                 <div className="mt-1 flex flex-wrap items-center justify-center gap-2 md:justify-start">
                   {memberPosition && (
                     <Badge variant="secondary" className="gap-1">
@@ -475,7 +568,11 @@ export default function MemberSocialProfile() {
                     </Badge>
                   )}
                   {profileOrg && (
-                    <Badge variant="outline" className="gap-1">
+                    <Badge
+                      variant="outline"
+                      className="gap-1 cursor-pointer hover:bg-accent"
+                      onClick={() => navigate(`/dashboard/org/${profileOrg.id}`)}
+                    >
                       <Building2 className="w-3 h-3" /> {profileOrg.name}
                     </Badge>
                   )}
@@ -485,12 +582,16 @@ export default function MemberSocialProfile() {
                     </Badge>
                   )}
                 </div>
+                {/* Bio inline */}
+                {(targetProfile as any).bio && (
+                  <p className="mt-2 text-sm text-muted-foreground leading-relaxed line-clamp-2">{(targetProfile as any).bio}</p>
+                )}
               </div>
 
               {/* Actions */}
               <div className="flex flex-wrap items-center justify-center gap-2 pb-1 md:justify-start">
                 {avgRating && (
-                  <Badge className="gap-1 bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200">
+                  <Badge className="gap-1 border-amber-200 bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
                     <Star className="w-3 h-3 fill-current" /> {avgRating}
                     <span className="text-[10px]">({reviews.length})</span>
                   </Badge>
@@ -502,10 +603,17 @@ export default function MemberSocialProfile() {
                 )}
                 {!isOwnProfile && (
                   <Button size="sm" variant="outline" onClick={() => {
-                    // Navigate to chat with this user
                     navigate(`/dashboard/messages?to=${targetProfile.user_id}`);
                   }} className="gap-1.5">
                     <MessageCircle className="w-4 h-4" /> مراسلة
+                  </Button>
+                )}
+                {!isOwnProfile && (
+                  <Button size="sm" variant="ghost" onClick={() => {
+                    navigator.clipboard.writeText(window.location.href);
+                    toast.success('تم نسخ رابط الملف الشخصي');
+                  }} className="gap-1.5">
+                    <Link2 className="w-4 h-4" />
                   </Button>
                 )}
                 {isOwnProfile && (
@@ -522,11 +630,6 @@ export default function MemberSocialProfile() {
                 )}
               </div>
             </div>
-
-            {/* Bio */}
-            {(targetProfile as any).bio && (
-              <p className="mt-3 text-sm text-muted-foreground leading-relaxed">{(targetProfile as any).bio}</p>
-            )}
 
             {/* Contact chips */}
             <div className="flex items-center gap-3 mt-3 text-xs text-muted-foreground flex-wrap">
@@ -585,49 +688,83 @@ export default function MemberSocialProfile() {
             <TabsTrigger value="about" className="gap-1.5"><Shield className="w-4 h-4" /> حول</TabsTrigger>
           </TabsList>
 
-          {/* Posts Tab */}
-          <TabsContent value="posts" className="space-y-3">
-            {/* New Post */}
+          {/* ═══ Posts Tab ═══ */}
+          <TabsContent value="posts" className="space-y-4">
+            {/* New Post Composer */}
             {isOwnProfile && (
               <Card>
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <Avatar className="w-10 h-10">
+                    <Avatar className="w-10 h-10 shrink-0">
                       <AvatarImage src={targetProfile.avatar_url || undefined} />
                       <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
                     </Avatar>
-                    <Textarea
-                      placeholder="شارك منشوراً أو تحديثاً..."
-                      className="flex-1 min-h-[60px] resize-none"
-                      value={newPostContent}
-                      onChange={e => setNewPostContent(e.target.value)}
-                    />
-                  </div>
-                  {newPostMedia.length > 0 && (
-                    <div className="flex gap-2 flex-wrap">
-                      {newPostMedia.map((f, i) => (
-                        <div key={i} className="relative w-16 h-16 rounded-lg overflow-hidden border">
-                          <img src={URL.createObjectURL(f)} alt="" className="w-full h-full object-cover" />
-                          <Button size="icon" variant="destructive" className="absolute top-0 right-0 w-5 h-5 rounded-full"
-                            onClick={() => setNewPostMedia(prev => prev.filter((_, j) => j !== i))}>
-                            <X className="w-3 h-3" />
-                          </Button>
+                    <div className="flex-1 space-y-3">
+                      <Textarea
+                        placeholder="شارك منشوراً أو تحديثاً..."
+                        className="min-h-[80px] resize-none"
+                        value={newPostContent}
+                        onChange={e => setNewPostContent(e.target.value)}
+                      />
+
+                      {/* File Previews */}
+                      {previewUrls.length > 0 && (
+                        <div className="flex gap-2 flex-wrap">
+                          {previewUrls.map((url, i) => (
+                            <div key={i} className="relative group">
+                              {selectedFiles[i]?.type.startsWith('video/') ? (
+                                <div className="w-20 h-20 bg-muted rounded-lg flex items-center justify-center">
+                                  <Play className="h-8 w-8 text-muted-foreground" />
+                                </div>
+                              ) : (
+                                <img src={url} alt="" className="w-20 h-20 object-cover rounded-lg" />
+                              )}
+                              <button
+                                onClick={() => removeFile(i)}
+                                className="absolute -top-2 -left-2 bg-destructive text-destructive-foreground rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ))}
                         </div>
-                      ))}
+                      )}
+
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-1">
+                          {/* Image upload */}
+                          <label className="cursor-pointer">
+                            <input ref={postMediaRef} type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+                            <Button type="button" variant="ghost" size="sm" asChild>
+                              <span><ImageIcon className="w-4 h-4 ml-1" /> صورة</span>
+                            </Button>
+                          </label>
+                          {/* Video upload */}
+                          <label className="cursor-pointer">
+                            <input ref={postVideoRef} type="file" accept="video/*" className="hidden" onChange={handleFileSelect} />
+                            <Button type="button" variant="ghost" size="sm" asChild>
+                              <span><Video className="w-4 h-4 ml-1" /> فيديو</span>
+                            </Button>
+                          </label>
+                          {/* Gallery */}
+                          <label className="cursor-pointer">
+                            <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileSelect} />
+                            <Button type="button" variant="ghost" size="sm" asChild>
+                              <span><Images className="w-4 h-4 ml-1" /> معرض</span>
+                            </Button>
+                          </label>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => createPost.mutate()}
+                          disabled={(!newPostContent.trim() && selectedFiles.length === 0) || createPost.isPending}
+                          className="gap-1.5"
+                        >
+                          {createPost.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                          نشر
+                        </Button>
+                      </div>
                     </div>
-                  )}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-1">
-                      <input ref={postMediaRef} type="file" accept="image/*" multiple className="hidden"
-                        onChange={e => { if (e.target.files) setNewPostMedia(prev => [...prev, ...Array.from(e.target.files!)]); }} />
-                      <Button size="sm" variant="ghost" onClick={() => postMediaRef.current?.click()} className="gap-1">
-                        <ImageIcon className="w-4 h-4" /> صور
-                      </Button>
-                    </div>
-                    <Button size="sm" onClick={() => createPost.mutate()} disabled={!newPostContent.trim() || createPost.isPending} className="gap-1.5">
-                      {createPost.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      نشر
-                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -637,53 +774,86 @@ export default function MemberSocialProfile() {
             {postsLoading ? (
               <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
             ) : posts.length === 0 ? (
-              <Card><CardContent className="py-12 text-center">
-                <Edit3 className="w-10 h-10 mx-auto text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">لا توجد منشورات بعد</p>
-              </CardContent></Card>
+              <Card>
+                <CardContent className="py-12 text-center">
+                  <ImageIcon className="w-12 h-12 mx-auto text-muted-foreground/50 mb-3" />
+                  <p className="text-sm text-muted-foreground">لا توجد منشورات بعد</p>
+                  {isOwnProfile && <p className="text-xs text-muted-foreground mt-1">كن أول من ينشر محتوى!</p>}
+                </CardContent>
+              </Card>
             ) : (
               posts.map((post: any) => (
                 <motion.div key={post.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
-                  <Card>
+                  <Card className={cn(post.is_pinned && "border-primary/50 bg-primary/5")}>
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <Avatar className="w-10 h-10">
+                        <Avatar className="w-10 h-10 shrink-0">
                           <AvatarImage src={targetProfile.avatar_url || undefined} />
                           <AvatarFallback className="bg-primary text-primary-foreground">{initials}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold text-sm">{targetProfile.full_name}</span>
-                            {post.is_pinned && <Pin className="w-3 h-3 text-primary" />}
-                            <span className="text-xs text-muted-foreground mr-auto">
-                              {format(new Date(post.created_at), 'dd MMM yyyy - hh:mm a', { locale: ar })}
-                            </span>
-                            {isOwnProfile && (
-                              <div className="flex items-center gap-0.5">
-                                <Button size="icon" variant="ghost" className="w-6 h-6"
-                                  onClick={() => togglePin.mutate({ postId: post.id, pinned: post.is_pinned })}>
-                                  <Pin className={`w-3 h-3 ${post.is_pinned ? 'text-primary fill-primary' : ''}`} />
-                                </Button>
-                                <Button size="icon" variant="ghost" className="w-6 h-6 text-destructive"
-                                  onClick={() => deletePost.mutate(post.id)}>
-                                  <Trash2 className="w-3 h-3" />
-                                </Button>
+                          {/* Post Header */}
+                          <div className="flex items-start justify-between gap-2">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-semibold text-sm">{targetProfile.full_name}</span>
+                                {post.is_pinned && (
+                                  <Badge variant="outline" className="text-xs gap-0.5 h-5">
+                                    <Pin className="w-3 h-3" /> مثبت
+                                  </Badge>
+                                )}
                               </div>
+                              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                {memberPosition && (
+                                  <>
+                                    <span>{memberPosition.title_ar || memberPosition.title}</span>
+                                    <span>•</span>
+                                  </>
+                                )}
+                                <span>
+                                  {formatDistanceToNow(new Date(post.created_at), { addSuffix: true, locale: ar })}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Post Actions Dropdown */}
+                            {isOwnProfile && (
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0">
+                                    <MoreVertical className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => togglePin.mutate({ postId: post.id, pinned: post.is_pinned })}>
+                                    {post.is_pinned ? (
+                                      <><PinOff className="h-4 w-4 ml-2" /> إلغاء التثبيت</>
+                                    ) : (
+                                      <><Pin className="h-4 w-4 ml-2" /> تثبيت المنشور</>
+                                    )}
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    className="text-destructive"
+                                    onClick={() => { setPostToDelete(post.id); setDeleteDialogOpen(true); }}
+                                  >
+                                    <Trash2 className="h-4 w-4 ml-2" /> حذف
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
                             )}
                           </div>
-                          <p className="text-sm mt-1.5 whitespace-pre-wrap">{post.content}</p>
-                          {post.media_urls?.length > 0 && (
-                            <div className="flex gap-2 mt-2 flex-wrap">
-                              {post.media_urls.map((url: string, i: number) => (
-                                <img key={i} src={url} alt="" className="rounded-lg max-h-60 object-cover cursor-pointer hover:opacity-90 transition"
-                                  onClick={() => window.open(url, '_blank')} />
-                              ))}
-                            </div>
+
+                          {/* Post Content */}
+                          {post.content && (
+                            <p className="mt-2 whitespace-pre-wrap text-sm">{post.content}</p>
                           )}
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <span className="flex items-center gap-1">
-                              <ThumbsUp className="w-3 h-3" /> {post.likes_count || 0}
-                            </span>
+
+                          {/* Post Media */}
+                          {renderPostMedia(post)}
+
+                          {/* Post Interactions (reactions, comments, share) */}
+                          <div className="mt-3">
+                            <PostInteractions postId={post.id} likesCount={post.likes_count || 0} />
                           </div>
                         </div>
                       </div>
@@ -694,7 +864,7 @@ export default function MemberSocialProfile() {
             )}
           </TabsContent>
 
-          {/* Reviews Tab */}
+          {/* ═══ Reviews Tab ═══ */}
           <TabsContent value="reviews" className="space-y-3">
             {/* Rating summary */}
             <Card>
@@ -718,7 +888,7 @@ export default function MemberSocialProfile() {
                         <span className="w-3">{star}</span>
                         <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
                         <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
-                          <div className="h-full bg-amber-500 rounded-full" style={{ width: `${pct}%` }} />
+                          <div className="h-full bg-amber-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
                         </div>
                         <span className="w-6 text-muted-foreground">{count}</span>
                       </div>
@@ -752,7 +922,7 @@ export default function MemberSocialProfile() {
                       </div>
                       {review.review_text && <p className="text-sm mt-1.5">{review.review_text}</p>}
                       <p className="text-[10px] text-muted-foreground mt-1">
-                        {format(new Date(review.created_at), 'dd MMM yyyy', { locale: ar })}
+                        {formatDistanceToNow(new Date(review.created_at), { addSuffix: true, locale: ar })}
                       </p>
                     </div>
                   </div>
@@ -767,8 +937,9 @@ export default function MemberSocialProfile() {
             )}
           </TabsContent>
 
-          {/* About Tab */}
-          <TabsContent value="about" className="space-y-3">
+          {/* ═══ About Tab ═══ */}
+          <TabsContent value="about" className="space-y-4">
+            {/* Personal Info */}
             <Card>
               <CardHeader className="py-3 px-4">
                 <CardTitle className="text-sm flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> معلومات عامة</CardTitle>
@@ -793,6 +964,84 @@ export default function MemberSocialProfile() {
                 ) : null)}
               </CardContent>
             </Card>
+
+            {/* Bio */}
+            {(targetProfile as any).bio && (
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2"><Edit3 className="w-4 h-4 text-primary" /> نبذة شخصية</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <p className="text-sm leading-relaxed whitespace-pre-wrap">{(targetProfile as any).bio}</p>
+                </CardContent>
+              </Card>
+            )}
+
+            {/* Organization Info Card */}
+            {profileOrg && (
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2"><Building2 className="w-4 h-4 text-primary" /> جهة العمل</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <Avatar className="h-12 w-12">
+                      <AvatarImage src={profileOrg.logo_url || undefined} />
+                      <AvatarFallback className="bg-primary/10 text-primary font-bold">{profileOrg.name?.[0]}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-semibold">{profileOrg.name}</span>
+                        {profileOrg.is_verified && <BadgeCheck className="w-4 h-4 text-primary shrink-0" />}
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                        {profileOrg.organization_type && (
+                          <Badge variant="secondary" className="text-[10px]">
+                            {orgTypeLabels[profileOrg.organization_type] || profileOrg.organization_type}
+                          </Badge>
+                        )}
+                        {profileOrg.activity_type && (
+                          <Badge variant="outline" className="text-[10px]">{profileOrg.activity_type}</Badge>
+                        )}
+                      </div>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="gap-1.5 shrink-0"
+                      onClick={() => navigate(`/dashboard/org/${profileOrg.id}`)}
+                    >
+                      <Eye className="w-3.5 h-3.5" /> عرض
+                    </Button>
+                  </div>
+                  <div className="space-y-2 text-sm">
+                    {profileOrg.city && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <MapPin className="w-3.5 h-3.5" /> {profileOrg.city}{profileOrg.region ? ` - ${profileOrg.region}` : ''}
+                      </div>
+                    )}
+                    {profileOrg.phone && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Phone className="w-3.5 h-3.5" /> <span dir="ltr">{profileOrg.phone}</span>
+                      </div>
+                    )}
+                    {profileOrg.email && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Mail className="w-3.5 h-3.5" /> {profileOrg.email}
+                      </div>
+                    )}
+                    {profileOrg.website_url && (
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <Globe className="w-3.5 h-3.5" />
+                        <a href={profileOrg.website_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">
+                          {profileOrg.website_url}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </TabsContent>
         </Tabs>
 
@@ -867,6 +1116,24 @@ export default function MemberSocialProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Delete Post Confirmation */}
+        <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+          <AlertDialogContent dir="rtl">
+            <AlertDialogHeader>
+              <AlertDialogTitle>حذف المنشور</AlertDialogTitle>
+              <AlertDialogDescription>
+                هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="gap-2">
+              <AlertDialogCancel>إلغاء</AlertDialogCancel>
+              <AlertDialogAction onClick={handleDeletePost} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                حذف
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Photo Galleries */}
         <ProfilePhotoGallery
