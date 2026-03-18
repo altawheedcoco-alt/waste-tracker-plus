@@ -143,6 +143,11 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
     supabase.from('delivery_declarations').select('*').eq('shipment_id', shipment.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle()
       .then(({ data }) => { if (data) setDeclaration(data); });
+    supabase.from('document_signatures')
+      .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id')
+      .eq('document_id', shipment.id)
+      .order('timestamp_signed', { ascending: true })
+      .then(({ data }) => { if (data) setSignatures(data as unknown as DocumentSignatureData[]); });
   }, [shipment?.id, isOpen]);
 
   const qrData = useMemo(() => shipment ? generateShipmentQRData(shipment) : null, [shipment]);
