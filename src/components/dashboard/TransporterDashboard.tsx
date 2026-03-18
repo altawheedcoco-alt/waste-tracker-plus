@@ -110,18 +110,27 @@ const TransporterDashboard = () => {
   const realWeather = useRealWeather();
   const handleRefresh = () => refetchShipments();
 
+  // Defer secondary sections for faster initial paint
+  const [showSecondary, setShowSecondary] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShowSecondary(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <div className="space-y-3 sm:space-y-6">
-      <SmartDailyBrief
-        role="transporter"
-        stats={{
-          pending: shipments.filter(s => s.status === 'new').length,
-          active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-          completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-          total: shipments.length,
-        }}
-      />
-      <StoryCircles />
+      <Suspense fallback={null}>
+        <SmartDailyBrief
+          role="transporter"
+          stats={{
+            pending: shipments.filter(s => s.status === 'new').length,
+            active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
+            completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
+            total: shipments.length,
+          }}
+        />
+      </Suspense>
+      <Suspense fallback={null}><StoryCircles /></Suspense>
       <DashboardV2Header
         userName={organization?.name || ''}
         orgName={organization?.name || ''}
@@ -169,74 +178,78 @@ const TransporterDashboard = () => {
       >
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
-      <DashboardWidgetCustomizer orgType="transporter" />
 
-      <TransporterCommandCenter />
+      <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
-      <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
-        <TransporterDailyPulse />
-      </ErrorBoundary>
+      {showSecondary && (
+        <>
+          <Suspense fallback={null}><DashboardWidgetCustomizer orgType="transporter" /></Suspense>
 
-      <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-        <DailyOperationsSummary />
-      </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
+            <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
+          </ErrorBoundary>
 
-      <AutomationSettingsDialog organizationType="transporter" />
+          <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+            <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
+          </ErrorBoundary>
 
-      <DashboardAlertsHub
-        orgType="transporter"
-        notificationsComponent={<TransporterNotifications notifications={notifications} />}
-        slaComponent={<TransporterSLAAlerts shipments={shipments} />}
-        incomingRequestsComponent={<TransporterIncomingRequests />}
-      />
+          <Suspense fallback={null}><AutomationSettingsDialog organizationType="transporter" /></Suspense>
 
-      <UnifiedDocumentSearch />
-      <DocumentVerificationWidget />
+          <Suspense fallback={null}>
+            <DashboardAlertsHub
+              orgType="transporter"
+              notificationsComponent={<TransporterNotifications notifications={notifications} />}
+              slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+              incomingRequestsComponent={<TransporterIncomingRequests />}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
+          <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
+        </>
+      )}
 
       {/* ★ Modular Tabs */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
+      <div>
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
           <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey), bindingType: TRANSPORTER_TAB_BINDINGS[tab.value]?.type }))} />
 
-          <TransporterOperationsTabs
-            shipments={shipments}
-            shipmentsLoading={shipmentsLoading}
-            stats={stats}
-            statsLoading={statsLoading}
-            financials={financials}
-            financialsLoading={financialsLoading}
-            kpis={kpis}
-            kpisLoading={kpisLoading}
-            driversSummary={driversSummary}
-            driversLoading={driversLoading}
-            quickActions={quickActions}
-            t={t}
-            onRefresh={handleRefresh}
-            onStatClick={(f) => {
-              setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
-              setShipmentPage(1);
-            }}
-            onPrintShipment={(s) => {
-              setSelectedShipment(s);
-              setShowPrintDialog(true);
-            }}
-            onChangeStatus={(s) => {
-              setStatusShipment(s);
-              setShowStatusDialog(true);
-            }}
-            shipmentStatusFilter={shipmentStatusFilter}
-          />
+          <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+            <TransporterOperationsTabs
+              shipments={shipments}
+              shipmentsLoading={shipmentsLoading}
+              stats={stats}
+              statsLoading={statsLoading}
+              financials={financials}
+              financialsLoading={financialsLoading}
+              kpis={kpis}
+              kpisLoading={kpisLoading}
+              driversSummary={driversSummary}
+              driversLoading={driversLoading}
+              quickActions={quickActions}
+              t={t}
+              onRefresh={handleRefresh}
+              onStatClick={(f) => {
+                setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
+                setShipmentPage(1);
+              }}
+              onPrintShipment={(s) => {
+                setSelectedShipment(s);
+                setShowPrintDialog(true);
+              }}
+              onChangeStatus={(s) => {
+                setStatusShipment(s);
+                setShowStatusDialog(true);
+              }}
+              shipmentStatusFilter={shipmentStatusFilter}
+            />
+          </Suspense>
 
-          <TransporterIntelligenceTabs />
-
-          <TransporterComplianceTabs organizationId={organization?.id} />
+          <Suspense fallback={null}><TransporterIntelligenceTabs /></Suspense>
+          <Suspense fallback={null}><TransporterComplianceTabs organizationId={organization?.id} /></Suspense>
         </Tabs>
-      </motion.div>
+      </div>
 
       {/* Dialogs */}
       <UnifiedShipmentPrint
