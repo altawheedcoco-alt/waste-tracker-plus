@@ -40,6 +40,7 @@ const ShipmentQuickPrint = lazy(() => import('@/components/shipments/unified-pri
 const ManifestPDFButton = lazy(() => import('@/components/shipments/ManifestPDFButton'));
 const SignManifestButton = lazy(() => import('@/components/shipments/SignManifestButton'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
+const EditShipmentDialog = lazy(() => import('@/components/shipments/EditShipmentDialog'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
 const CompletedRouteMap = lazy(() => import('@/components/shipments/CompletedRouteMap'));
