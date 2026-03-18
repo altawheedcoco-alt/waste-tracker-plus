@@ -433,19 +433,19 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
 
           {/* ═══ FOOTER ═══ */}
            {/* ═══ SECURE DIGITAL SEAL ═══ */}
-           {shipment.generator?.id && (
+           {shipment.generator && (
              <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '4px 0', alignItems: 'center' }}>
                <div dangerouslySetInnerHTML={{ __html: generateDigitalSealSVG({
-                 entityId: shipment.generator.id,
+                 entityId: shipment.generator.client_code || shipment.generator.name || 'generator',
                  entityType: 'organization',
                  entityName: shipment.generator.name || 'المولّد',
                  documentRef: shipment.shipment_number,
                  timestamp: new Date().toISOString(),
                  size: 60,
                }) }} />
-               {shipment.recycler?.id && (
+               {shipment.recycler && (
                  <div dangerouslySetInnerHTML={{ __html: generateDigitalSealSVG({
-                   entityId: shipment.recycler.id,
+                   entityId: shipment.recycler.client_code || shipment.recycler.name || 'recycler',
                    entityType: 'organization',
                    entityName: shipment.recycler.name || 'المستقبل',
                    documentRef: shipment.shipment_number,
