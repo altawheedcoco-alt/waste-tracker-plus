@@ -432,6 +432,30 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           <ShipmentTaglineFooter shipmentNumber={shipment.shipment_number} disposalMethod={shipment.disposal_method} />
 
           {/* ═══ FOOTER ═══ */}
+           {/* ═══ SECURE DIGITAL SEAL ═══ */}
+           {shipment.generator?.id && (
+             <div style={{ display: 'flex', justifyContent: 'center', gap: '12px', padding: '4px 0', alignItems: 'center' }}>
+               <div dangerouslySetInnerHTML={{ __html: generateDigitalSealSVG({
+                 entityId: shipment.generator.id,
+                 entityType: 'organization',
+                 entityName: shipment.generator.name || 'المولّد',
+                 documentRef: shipment.shipment_number,
+                 timestamp: new Date().toISOString(),
+                 size: 60,
+               }) }} />
+               {shipment.recycler?.id && (
+                 <div dangerouslySetInnerHTML={{ __html: generateDigitalSealSVG({
+                   entityId: shipment.recycler.id,
+                   entityType: 'organization',
+                   entityName: shipment.recycler.name || 'المستقبل',
+                   documentRef: shipment.shipment_number,
+                   timestamp: new Date().toISOString(),
+                   size: 60,
+                 }) }} />
+               )}
+             </div>
+           )}
+
            <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: FS, color: '#000', paddingTop: '2px', paddingBottom: '1px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
              <div style={{ fontWeight: '600' }}>تم إنشاء هذا النموذج بواسطة نظام إدارة المخلفات الذكي</div>
              <div style={{ fontFamily: 'monospace', fontSize: '5.5pt' }}>
