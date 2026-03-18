@@ -234,22 +234,21 @@ const TransporterCommandCenter = () => {
       const todayReceipts = allReceipts.filter(r => new Date(r.created_at) >= today).length;
 
       const members = employeesR.data || [];
-      const activeMembers = members.filter(m => m.is_active).length;
+      const activeMembers = members.filter(m => m.status === 'active').length;
 
       const vehicles = vehiclesR.data || [];
-      const activeVehicles = vehicles.filter(v => v.status === 'active' || !v.status).length;
+      const activeVehicles = vehicles.filter(v => v.status === 'active').length;
 
       const docs = docsR.data || [];
-      const thirtyDaysLater = new Date(); thirtyDaysLater.setDate(thirtyDaysLater.getDate() + 30);
-      const expiringDocs = docs.filter(d => d.expires_at && new Date(d.expires_at) <= thirtyDaysLater && new Date(d.expires_at) > nowDate).length;
-      const expiredDocs = docs.filter(d => d.expires_at && new Date(d.expires_at) <= nowDate).length;
+      const expiringDocs = 0; // entity_documents doesn't have expires_at
+      const expiredDocs = 0;
 
       const contracts = contractsR.data || [];
       const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
 
       const deposits = depositsR.data || [];
       const totalDeposits = deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
-      const pendingDeposits = deposits.filter(d => d.status === 'pending').length;
+      const pendingDeposits = 0;
 
       return {
         todayTrips: todayData.length,
