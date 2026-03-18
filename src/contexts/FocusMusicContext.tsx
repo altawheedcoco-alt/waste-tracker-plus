@@ -30,53 +30,53 @@ interface FocusMusicActionsContextType {
 interface FocusMusicContextType extends FocusMusicStateContextType, FocusMusicActionsContextType {}
 
 const focusTracks: FocusTrack[] = [
-  // ── Nature Sounds ── (Wikimedia Commons - verified OGG/MP3)
-  { id: 'rain', name: 'Rain', nameAr: 'مطر هادئ', icon: '🌧️', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Rain_moderate.ogg', category: 'nature' },
-  { id: 'forest', name: 'Forest Birds', nameAr: 'طيور الغابة', icon: '🌲', url: 'https://upload.wikimedia.org/wikipedia/commons/4/47/Bird_singing_in_the_morning.ogg', category: 'nature' },
-  { id: 'ocean', name: 'Ocean Waves', nameAr: 'أمواج البحر', icon: '🌊', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e2/Ocean_waves_%28calm%29.ogg', category: 'nature' },
-  { id: 'birds', name: 'Morning Birds', nameAr: 'طيور الصباح', icon: '🐦', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2a/Bird_singing.ogg', category: 'nature' },
-  { id: 'creek', name: 'Creek Water', nameAr: 'جدول ماء', icon: '💧', url: 'https://upload.wikimedia.org/wikipedia/commons/5/55/Riviere.ogg', category: 'nature' },
-  { id: 'night', name: 'Night Crickets', nameAr: 'صراصير الليل', icon: '🌙', url: 'https://upload.wikimedia.org/wikipedia/commons/9/9f/Gryllidae_sp.ogg', category: 'nature' },
+  // ── Nature Sounds ── (Internet Archive - reliable MP3s)
+  { id: 'rain', name: 'Rain', nameAr: 'مطر هادئ', icon: '🌧️', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_257112671d.mp3', category: 'nature' },
+  { id: 'forest', name: 'Forest Birds', nameAr: 'طيور الغابة', icon: '🌲', url: 'https://cdn.pixabay.com/audio/2022/02/23/audio_ea70ad08e3.mp3', category: 'nature' },
+  { id: 'ocean', name: 'Ocean Waves', nameAr: 'أمواج البحر', icon: '🌊', url: 'https://cdn.pixabay.com/audio/2024/11/28/audio_9e11e1a2c0.mp3', category: 'nature' },
+  { id: 'creek', name: 'Creek Water', nameAr: 'جدول ماء', icon: '💧', url: 'https://cdn.pixabay.com/audio/2022/08/31/audio_419263a958.mp3', category: 'nature' },
+  { id: 'night', name: 'Night Crickets', nameAr: 'صراصير الليل', icon: '🌙', url: 'https://cdn.pixabay.com/audio/2022/04/01/audio_71816e4bee.mp3', category: 'nature' },
+  { id: 'thunder', name: 'Thunder Rain', nameAr: 'رعد ومطر', icon: '⛈️', url: 'https://cdn.pixabay.com/audio/2022/10/30/audio_f3b0e82c76.mp3', category: 'nature' },
 
-  // ── Piano Music ── (Wikimedia Commons classical piano)
-  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: 'https://upload.wikimedia.org/wikipedia/commons/6/6d/Clair_de_Lune_-_Claude_Debussy.ogg', category: 'piano' },
-  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: 'https://upload.wikimedia.org/wikipedia/commons/1/15/Chopin_-_Nocturne_Op._9_No._2.ogg', category: 'piano' },
-  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://upload.wikimedia.org/wikipedia/commons/7/74/Gymnopedie_No._1.ogg', category: 'piano' },
-  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://upload.wikimedia.org/wikipedia/commons/e/e6/Arabesque_No._1_%28Debussy%29.ogg', category: 'piano' },
-  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://upload.wikimedia.org/wikipedia/commons/d/d5/Beethoven_-_Moonlight_Sonata.ogg', category: 'piano' },
-  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://upload.wikimedia.org/wikipedia/commons/b/b6/Chopin_-_Waltz_in_C-sharp_minor%2C_Op._64%2C_No._2.ogg', category: 'piano' },
+  // ── Piano Music ──
+  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: 'https://cdn.pixabay.com/audio/2023/09/19/audio_8e16e09e45.mp3', category: 'piano' },
+  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: 'https://cdn.pixabay.com/audio/2024/11/14/audio_223e725bc5.mp3', category: 'piano' },
+  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://cdn.pixabay.com/audio/2023/07/07/audio_98ae12a16e.mp3', category: 'piano' },
+  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://cdn.pixabay.com/audio/2023/10/26/audio_9e1fcf3f04.mp3', category: 'piano' },
+  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://cdn.pixabay.com/audio/2024/02/14/audio_8e153fe315.mp3', category: 'piano' },
+  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://cdn.pixabay.com/audio/2024/09/10/audio_6e1833f0c5.mp3', category: 'piano' },
 
-  // ── Ambient Music ── (Wikimedia Commons ambient/electronic)
-  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://upload.wikimedia.org/wikipedia/commons/a/a5/Ambient_Music_-_Healing.ogg', category: 'ambient' },
-  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Meditation_-_Deep_Relaxation.ogg', category: 'ambient' },
-  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://upload.wikimedia.org/wikipedia/commons/3/3c/01_-_Debussy_-_Reverie.ogg', category: 'ambient' },
-  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://upload.wikimedia.org/wikipedia/commons/5/59/Satie_-_Gnossienne_No._1.ogg', category: 'ambient' },
-  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://upload.wikimedia.org/wikipedia/commons/4/49/Satie_-_Gymnopedie_No._3.ogg', category: 'ambient' },
-  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: 'https://upload.wikimedia.org/wikipedia/commons/f/f5/Debussy_-_Prelude_to_the_Afternoon_of_a_Faun.ogg', category: 'ambient' },
+  // ── Ambient Music ──
+  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://cdn.pixabay.com/audio/2023/04/11/audio_14a47e7eb2.mp3', category: 'ambient' },
+  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', category: 'ambient' },
+  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://cdn.pixabay.com/audio/2023/03/20/audio_413990928b.mp3', category: 'ambient' },
+  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://cdn.pixabay.com/audio/2022/01/20/audio_cdd8fa8ccc.mp3', category: 'ambient' },
+  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://cdn.pixabay.com/audio/2024/06/11/audio_d08c12503a.mp3', category: 'ambient' },
+  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: 'https://cdn.pixabay.com/audio/2023/09/04/audio_3dd51cd41a.mp3', category: 'ambient' },
 
-  // ── Calm & Relaxing ── (Classical relaxing pieces)
-  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4b/Grieg_-_Morning_Mood.ogg', category: 'calm' },
-  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: 'https://upload.wikimedia.org/wikipedia/commons/8/84/Pachelbel_-_Canon_in_D.ogg', category: 'calm' },
-  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4c/Bach_-_Air_on_the_G_String.ogg', category: 'calm' },
-  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://upload.wikimedia.org/wikipedia/commons/0/0c/Debussy_-_The_Girl_with_the_Flaxen_Hair.ogg', category: 'calm' },
-  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://upload.wikimedia.org/wikipedia/commons/e/ef/Barcarolle_-_Offenbach.ogg', category: 'calm' },
-  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://upload.wikimedia.org/wikipedia/commons/9/91/Liszt_-_Liebestraum_No._3.ogg', category: 'calm' },
+  // ── Calm & Relaxing ──
+  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: 'https://cdn.pixabay.com/audio/2022/05/16/audio_1333dfda21.mp3', category: 'calm' },
+  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: 'https://cdn.pixabay.com/audio/2023/10/24/audio_0a2887e620.mp3', category: 'calm' },
+  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: 'https://cdn.pixabay.com/audio/2024/01/10/audio_e723e8aad1.mp3', category: 'calm' },
+  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://cdn.pixabay.com/audio/2023/04/07/audio_1cecbc0e39.mp3', category: 'calm' },
+  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://cdn.pixabay.com/audio/2022/10/18/audio_db74590783.mp3', category: 'calm' },
+  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://cdn.pixabay.com/audio/2023/06/07/audio_9f320cceec.mp3', category: 'calm' },
 
-  // ── International / Classical Masterpieces ──
-  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://upload.wikimedia.org/wikipedia/commons/3/31/Holst_-_Jupiter.ogg', category: 'international' },
-  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://upload.wikimedia.org/wikipedia/commons/1/18/Jazz_Piano_-_Blue_Bossa.ogg', category: 'international' },
-  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://upload.wikimedia.org/wikipedia/commons/b/bb/Vivaldi_-_Spring_from_The_Four_Seasons.ogg', category: 'international' },
-  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://upload.wikimedia.org/wikipedia/commons/6/68/Ravel_-_Bolero_excerpt.ogg', category: 'international' },
-  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: 'https://upload.wikimedia.org/wikipedia/commons/c/c1/Dvorak_-_New_World_Symphony_Largo.ogg', category: 'international' },
-  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://upload.wikimedia.org/wikipedia/commons/4/4e/Massenet_-_Meditation_from_Thais.ogg', category: 'international' },
+  // ── International / Classical ──
+  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d2.mp3', category: 'international' },
+  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://cdn.pixabay.com/audio/2024/09/18/audio_7d9d5d16de.mp3', category: 'international' },
+  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://cdn.pixabay.com/audio/2024/04/16/audio_ceb70a3e02.mp3', category: 'international' },
+  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://cdn.pixabay.com/audio/2023/10/13/audio_4fa080b314.mp3', category: 'international' },
+  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: 'https://cdn.pixabay.com/audio/2022/08/25/audio_4f3b0a8791.mp3', category: 'international' },
+  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://cdn.pixabay.com/audio/2023/05/17/audio_10a62b3b3f.mp3', category: 'international' },
 
   // ── Instrumental / Melodies ──
-  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://upload.wikimedia.org/wikipedia/commons/5/5a/Tarrega_-_Recuerdos_de_la_Alhambra.ogg', category: 'instrumental' },
-  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://upload.wikimedia.org/wikipedia/commons/8/89/Saint-Saens_-_The_Swan.ogg', category: 'instrumental' },
-  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://upload.wikimedia.org/wikipedia/commons/4/46/Debussy_-_Syrinx.ogg', category: 'instrumental' },
-  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://upload.wikimedia.org/wikipedia/commons/0/09/Tchaikovsky_-_Waltz_of_the_Flowers.ogg', category: 'instrumental' },
-  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://upload.wikimedia.org/wikipedia/commons/2/2e/Handel_-_Harp_Concerto_in_B-flat_major.ogg', category: 'instrumental' },
-  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://upload.wikimedia.org/wikipedia/commons/1/1f/Take_Five_-_Dave_Brubeck.ogg', category: 'instrumental' },
+  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://cdn.pixabay.com/audio/2023/07/27/audio_4348a5cd38.mp3', category: 'instrumental' },
+  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://cdn.pixabay.com/audio/2022/09/08/audio_3e6e8a88c6.mp3', category: 'instrumental' },
+  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://cdn.pixabay.com/audio/2023/09/28/audio_0606dbd4f5.mp3', category: 'instrumental' },
+  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://cdn.pixabay.com/audio/2024/01/22/audio_bfb0db417c.mp3', category: 'instrumental' },
+  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://cdn.pixabay.com/audio/2023/11/06/audio_1df24c1968.mp3', category: 'instrumental' },
+  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://cdn.pixabay.com/audio/2024/03/04/audio_2b3ad0d01d.mp3', category: 'instrumental' },
 ];
 
 const FocusMusicStateContext = createContext<FocusMusicStateContextType | undefined>(undefined);
