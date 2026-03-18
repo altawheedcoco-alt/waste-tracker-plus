@@ -380,6 +380,13 @@ function generateManifestHTML(shipment: any, custodyChain: any[], signatures: an
   // Org name for watermark
   const primaryOrgName = shipment.transporter?.name || shipment.generator?.name || 'iRecycle';
 
+  // Profile link helpers
+  const baseUrl = 'https://irecycle21.lovable.app';
+  const orgLink = (name: string, orgId: string | null) => 
+    orgId ? `<a href="${baseUrl}/dashboard/organization/${orgId}" target="_blank" rel="noopener" style="color:#1d4ed8;text-decoration:underline;font-weight:bold;">${name}</a>` : name;
+  const memberLink = (name: string, profileId: string | null) =>
+    profileId ? `<a href="${baseUrl}/dashboard/profile/${profileId}" target="_blank" rel="noopener" style="color:#1d4ed8;text-decoration:underline;">${name}</a>` : name;
+
   // Unified font size — matches ShipmentA4Document
   const FS = '6.5px';
 
