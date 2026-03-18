@@ -380,35 +380,62 @@ export default function MemberSocialProfile() {
         {/* Cover + Avatar Section */}
         <Card className="overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden">
+          <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden group/cover">
             {(targetProfile as any).cover_url && (
-              <img src={(targetProfile as any).cover_url} alt="غلاف" className="w-full h-full object-cover" />
+              <img
+                src={(targetProfile as any).cover_url}
+                alt="غلاف"
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setCoverGalleryOpen(true)}
+              />
             )}
-            {isOwnProfile && (
-              <>
-                <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-                <Button
-                  size="sm" variant="secondary"
-                  className="absolute bottom-3 left-3 gap-1.5 opacity-80 hover:opacity-100"
-                  onClick={() => coverInputRef.current?.click()}
-                  disabled={uploading}
-                >
-                  <Camera className="w-4 h-4" />
-                  {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
-                </Button>
-              </>
-            )}
+            {/* Cover action buttons */}
+            <div className="absolute bottom-3 left-3 flex gap-2">
+              {isOwnProfile && (
+                <>
+                  <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+                  <Button
+                    size="sm" variant="secondary"
+                    className="gap-1.5 opacity-80 hover:opacity-100"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                    {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
+                  </Button>
+                </>
+              )}
+              <Button
+                size="sm" variant="secondary"
+                className="gap-1.5 opacity-80 hover:opacity-100"
+                onClick={() => setCoverGalleryOpen(true)}
+              >
+                <Images className="w-4 h-4" />
+                صور الغلاف
+              </Button>
+            </div>
           </div>
 
           {/* Profile Info */}
           <div className="px-4 md:px-6 pb-4 -mt-16 relative">
             <div className="flex items-end gap-4">
               {/* Avatar */}
-              <div className="relative">
-                <Avatar className="w-28 h-28 border-4 border-background shadow-lg">
+              <div className="relative group/avatar">
+                <Avatar
+                  className="w-28 h-28 border-4 border-background shadow-lg cursor-pointer"
+                  onClick={() => setAvatarGalleryOpen(true)}
+                >
                   <AvatarImage src={targetProfile.avatar_url || undefined} />
                   <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">{initials}</AvatarFallback>
                 </Avatar>
+                {/* Avatar gallery button */}
+                <Button
+                  size="icon" variant="secondary"
+                  className="absolute -bottom-1 -left-1 w-7 h-7 rounded-full shadow opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                  onClick={() => setAvatarGalleryOpen(true)}
+                >
+                  <Images className="w-3.5 h-3.5" />
+                </Button>
                 {isOwnProfile && (
                   <>
                     <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
