@@ -11,10 +11,11 @@ type OrganizationType = "generator" | "transporter" | "recycler" | "disposal" | 
 
 interface RegisterCompanyPayload {
   // auth
-  email: string;
+  email?: string;
   password: string;
   fullName: string;
   phone: string;
+  registrationMethod?: "email" | "phone";
 
   // org
   organizationType: OrganizationType;
@@ -51,6 +52,11 @@ interface RegisterCompanyPayload {
   agentNationalId?: string;
 }
 
+function generatePhoneEmail(phone: string): string {
+  const cleaned = phone.replace(/[\s\-()+ ]/g, "");
+  return `phone_${cleaned}@phone.irecycle.local`;
+}
+
 function badRequest(message: string) {
   return new Response(JSON.stringify({ error: message }), {
     status: 400,
@@ -79,11 +85,21 @@ serve(async (req) => {
 
     const payload: RegisterCompanyPayload = await req.json();
 
-    // Basic server-side validation (keep it strict; avoid inserting junk)
-    requireNonEmpty(payload.email, "email");
+    // Determine registration method
+    const isPhoneRegistration = payload.registrationMethod === "phone" || (!payload.email && payload.phone);
+
+    // Basic server-side validation
     requireNonEmpty(payload.password, "password");
     requireNonEmpty(payload.fullName, "fullName");
     requireNonEmpty(payload.phone, "phone");
+
+    if (isPhoneRegistration) {
+      if (payload.phone.replace(/[\s\-()]/g, "").length < 8) {
+        return badRequest("رقم الهاتف غير صالح");
+      }
+    } else {
+      requireNonEmpty(payload.email, "email");
+    }
 
     requireNonEmpty(payload.organizationType, "organizationType");
     requireNonEmpty(payload.organizationName, "organizationName");
@@ -96,6 +112,8 @@ serve(async (req) => {
       return badRequest("Password must be at least 6 characters long");
     }
 
+    const authEmail = isPhoneRegistration ? generatePhoneEmail(payload.phone) : payload.email!;
+
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
@@ -103,6 +121,20 @@ serve(async (req) => {
         auth: { autoRefreshToken: false, persistSession: false },
       },
     );
+
+    // Check duplicates
+    if (isPhoneRegistration) {
+      const normalizedPhone = payload.phone.replace(/[\s\-()]/g, "");
+      const { data: existingProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .or(`phone.eq.${normalizedPhone},phone.eq.${normalizedPhone.replace(/^\+/, "")}`)
+        .limit(1)
+        .maybeSingle();
+      if (existingProfile) {
+        return badRequest("رقم الهاتف مسجل بالفعل");
+      }
+    }
 
     // 1) Create organization (pending approval)
     const { data: org, error: orgError } = await supabaseAdmin
@@ -145,27 +177,26 @@ serve(async (req) => {
       throw new Error(orgError?.message || "Failed to create organization");
     }
 
-    // 2) Create auth user (confirmed so they can login immediately)
+    // 2) Create auth user
     const { data: createdUser, error: createUserError } = await supabaseAdmin.auth.admin
       .createUser({
-        email: payload.email,
+        email: authEmail,
         password: payload.password,
         email_confirm: true,
         user_metadata: {
           full_name: payload.fullName,
           organization_id: org.id,
+          registration_method: isPhoneRegistration ? "phone" : "email",
         },
       });
 
     if (createUserError || !createdUser?.user) {
       console.error("register-company createUser error:", createUserError);
-      // roll back organization to avoid orphan records
       await supabaseAdmin.from("organizations").delete().eq("id", org.id);
       
-      // Handle specific error codes with Arabic messages
       const errorCode = (createUserError as any)?.code;
       if (errorCode === "email_exists") {
-        return new Response(JSON.stringify({ error: "هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد آخر أو تسجيل الدخول." }), {
+        return new Response(JSON.stringify({ error: isPhoneRegistration ? "رقم الهاتف مسجل بالفعل." : "هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد آخر أو تسجيل الدخول." }), {
           status: 422,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
@@ -180,14 +211,13 @@ serve(async (req) => {
       user_id: userId,
       organization_id: org.id,
       full_name: payload.fullName,
-      email: payload.email,
+      email: isPhoneRegistration ? null : payload.email,
       phone: payload.phone,
       is_active: false,
     });
 
     if (profileError) {
       console.error("register-company profile insert error:", profileError);
-      // best-effort rollback
       await supabaseAdmin.auth.admin.deleteUser(userId);
       await supabaseAdmin.from("organizations").delete().eq("id", org.id);
       throw new Error(profileError.message || "Failed to create profile");
@@ -201,13 +231,34 @@ serve(async (req) => {
 
     if (roleError) {
       console.error("register-company role insert error:", roleError);
-      // best-effort rollback
       await supabaseAdmin.auth.admin.deleteUser(userId);
       await supabaseAdmin.from("organizations").delete().eq("id", org.id);
       throw new Error(roleError.message || "Failed to assign role");
     }
 
-    return new Response(JSON.stringify({ success: true, organization_id: org.id }), {
+    // 5) Send notification to admins
+    try {
+      const { data: adminRoles } = await supabaseAdmin
+        .from("user_roles")
+        .select("user_id")
+        .in("role", ["admin", "super_admin"]);
+
+      if (adminRoles && adminRoles.length > 0) {
+        const identifier = isPhoneRegistration ? `برقم ${payload.phone}` : `بالبريد ${payload.email}`;
+        const notifications = adminRoles.map((r: any) => ({
+          user_id: r.user_id,
+          title: "تسجيل شركة جديدة",
+          message: `قام ${payload.fullName} بتسجيل ${payload.organizationName} (${payload.organizationType}) ${identifier}`,
+          type: "new_registration",
+          is_read: false,
+        }));
+        await supabaseAdmin.from("notifications").insert(notifications);
+      }
+    } catch (e) {
+      console.error("Notification error (non-critical):", e);
+    }
+
+    return new Response(JSON.stringify({ success: true, organization_id: org.id, auth_email: authEmail }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
