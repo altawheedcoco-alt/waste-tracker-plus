@@ -1,7 +1,6 @@
-import { useState, Suspense, lazy, useMemo } from 'react';
+import { useState, Suspense, lazy, useMemo, useEffect } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
-import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,32 +23,31 @@ import TransporterHeader from './transporter/TransporterHeader';
 import TransporterNotifications from './transporter/TransporterNotifications';
 import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
 import TransporterIncomingRequests from './transporter/TransporterIncomingRequests';
-import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
-import DocumentVerificationWidget from './DocumentVerificationWidget';
 import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
-import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import DashboardAlertsHub from './shared/DashboardAlertsHub';
-import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
-import TransporterCommandCenter from './transporter/TransporterCommandCenter';
-import SmartDailyBrief from './shared/SmartDailyBrief';
-import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
 
-// Modular tab groups
-import TransporterOperationsTabs from './transporter/tabs/TransporterOperationsTabs';
-import TransporterIntelligenceTabs from './transporter/tabs/TransporterIntelligenceTabs';
-import TransporterComplianceTabs from './transporter/tabs/TransporterComplianceTabs';
-
+// ★ Lazy-load ALL heavy secondary components
+const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
+const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
+const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
+const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
+const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
+const DashboardAlertsHub = lazy(() => import('./shared/DashboardAlertsHub'));
+const DashboardWidgetCustomizer = lazy(() => import('./DashboardWidgetCustomizer'));
+const DocumentVerificationWidget = lazy(() => import('./DocumentVerificationWidget'));
+const AutomationSettingsDialog = lazy(() => import('@/components/automation/AutomationSettingsDialog'));
+const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
+const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/TransporterOperationsTabs'));
+const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
+const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
@@ -112,18 +110,27 @@ const TransporterDashboard = () => {
   const realWeather = useRealWeather();
   const handleRefresh = () => refetchShipments();
 
+  // Defer secondary sections for faster initial paint
+  const [showSecondary, setShowSecondary] = useState(false);
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setShowSecondary(true));
+    return () => cancelAnimationFrame(id);
+  }, []);
+
   return (
     <div className="space-y-3 sm:space-y-6">
-      <SmartDailyBrief
-        role="transporter"
-        stats={{
-          pending: shipments.filter(s => s.status === 'new').length,
-          active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-          completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-          total: shipments.length,
-        }}
-      />
-      <StoryCircles />
+      <Suspense fallback={null}>
+        <SmartDailyBrief
+          role="transporter"
+          stats={{
+            pending: shipments.filter(s => s.status === 'new').length,
+            active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
+            completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
+            total: shipments.length,
+          }}
+        />
+      </Suspense>
+      <Suspense fallback={null}><StoryCircles /></Suspense>
       <DashboardV2Header
         userName={organization?.name || ''}
         orgName={organization?.name || ''}
@@ -171,74 +178,78 @@ const TransporterDashboard = () => {
       >
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
-      <DashboardWidgetCustomizer orgType="transporter" />
 
-      <TransporterCommandCenter />
+      <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
-      <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
-        <TransporterDailyPulse />
-      </ErrorBoundary>
+      {showSecondary && (
+        <>
+          <Suspense fallback={null}><DashboardWidgetCustomizer orgType="transporter" /></Suspense>
 
-      <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-        <DailyOperationsSummary />
-      </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
+            <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
+          </ErrorBoundary>
 
-      <AutomationSettingsDialog organizationType="transporter" />
+          <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+            <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
+          </ErrorBoundary>
 
-      <DashboardAlertsHub
-        orgType="transporter"
-        notificationsComponent={<TransporterNotifications notifications={notifications} />}
-        slaComponent={<TransporterSLAAlerts shipments={shipments} />}
-        incomingRequestsComponent={<TransporterIncomingRequests />}
-      />
+          <Suspense fallback={null}><AutomationSettingsDialog organizationType="transporter" /></Suspense>
 
-      <UnifiedDocumentSearch />
-      <DocumentVerificationWidget />
+          <Suspense fallback={null}>
+            <DashboardAlertsHub
+              orgType="transporter"
+              notificationsComponent={<TransporterNotifications notifications={notifications} />}
+              slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+              incomingRequestsComponent={<TransporterIncomingRequests />}
+            />
+          </Suspense>
+
+          <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
+          <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
+        </>
+      )}
 
       {/* ★ Modular Tabs */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2, duration: 0.5 }}
-      >
+      <div>
         <Tabs defaultValue="overview" className="w-full" dir="rtl">
           <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey), bindingType: TRANSPORTER_TAB_BINDINGS[tab.value]?.type }))} />
 
-          <TransporterOperationsTabs
-            shipments={shipments}
-            shipmentsLoading={shipmentsLoading}
-            stats={stats}
-            statsLoading={statsLoading}
-            financials={financials}
-            financialsLoading={financialsLoading}
-            kpis={kpis}
-            kpisLoading={kpisLoading}
-            driversSummary={driversSummary}
-            driversLoading={driversLoading}
-            quickActions={quickActions}
-            t={t}
-            onRefresh={handleRefresh}
-            onStatClick={(f) => {
-              setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
-              setShipmentPage(1);
-            }}
-            onPrintShipment={(s) => {
-              setSelectedShipment(s);
-              setShowPrintDialog(true);
-            }}
-            onChangeStatus={(s) => {
-              setStatusShipment(s);
-              setShowStatusDialog(true);
-            }}
-            shipmentStatusFilter={shipmentStatusFilter}
-          />
+          <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+            <TransporterOperationsTabs
+              shipments={shipments}
+              shipmentsLoading={shipmentsLoading}
+              stats={stats}
+              statsLoading={statsLoading}
+              financials={financials}
+              financialsLoading={financialsLoading}
+              kpis={kpis}
+              kpisLoading={kpisLoading}
+              driversSummary={driversSummary}
+              driversLoading={driversLoading}
+              quickActions={quickActions}
+              t={t}
+              onRefresh={handleRefresh}
+              onStatClick={(f) => {
+                setShipmentStatusFilter(f === 'active' ? 'in_transit' : f);
+                setShipmentPage(1);
+              }}
+              onPrintShipment={(s) => {
+                setSelectedShipment(s);
+                setShowPrintDialog(true);
+              }}
+              onChangeStatus={(s) => {
+                setStatusShipment(s);
+                setShowStatusDialog(true);
+              }}
+              shipmentStatusFilter={shipmentStatusFilter}
+            />
+          </Suspense>
 
-          <TransporterIntelligenceTabs />
-
-          <TransporterComplianceTabs organizationId={organization?.id} />
+          <Suspense fallback={null}><TransporterIntelligenceTabs /></Suspense>
+          <Suspense fallback={null}><TransporterComplianceTabs organizationId={organization?.id} /></Suspense>
         </Tabs>
-      </motion.div>
+      </div>
 
       {/* Dialogs */}
       <UnifiedShipmentPrint

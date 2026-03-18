@@ -296,7 +296,10 @@ const TransporterCommandCenter = () => {
       };
     },
     enabled: !!organization?.id,
-    refetchInterval: 30000,
+    staleTime: 2 * 60 * 1000,       // 2 minutes
+    gcTime: 10 * 60 * 1000,         // 10 minutes
+    refetchInterval: 60000,          // every 60s instead of 30s
+    refetchOnWindowFocus: false,
   });
 
   const health = useMemo(() => calcHealthScore(stats), [stats]);
