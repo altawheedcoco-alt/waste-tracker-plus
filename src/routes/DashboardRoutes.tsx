@@ -137,6 +137,7 @@ const AuthorizedSignatories = lazy(() => import("@/pages/dashboard/AuthorizedSig
 const Permits = lazy(() => import("@/pages/dashboard/Permits"));
 const EnvironmentalConsultants = lazy(() => import("@/pages/dashboard/EnvironmentalConsultants"));
 const SigningInbox = lazy(() => import("@/pages/dashboard/SigningInbox"));
+const BulkSigning = lazy(() => import("@/pages/dashboard/BulkSigning"));
 const AllNotes = lazy(() => import("@/pages/dashboard/AllNotes"));
 const SystemCommands = lazy(() => import("@/pages/dashboard/SystemCommands"));
 const CrossImpactDashboard = lazy(() => import("@/pages/dashboard/CrossImpactDashboard"));
@@ -390,6 +391,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/permits" element={<Permits />} />
     <Route path="/dashboard/environmental-consultants" element={<EnvironmentalConsultants />} />
     <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
+    <Route path="/dashboard/bulk-signing" element={<BulkSigning />} />
     <Route path="/dashboard/notes" element={<AllNotes />} />
     <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
     <Route path="/dashboard/regulator-wmra" element={<RegulatorWMRA />} />
