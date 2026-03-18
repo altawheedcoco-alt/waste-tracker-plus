@@ -55,6 +55,11 @@ const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShi
 const EditShipmentDialog = lazy(() => import('@/components/shipments/EditShipmentDialog'));
 const ShipmentSignaturesCard = lazy(() => import('@/components/shipments/ShipmentSignaturesCard'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
+const QuickCertificateButton = lazy(() => import('@/components/reports/QuickCertificateButton'));
+const GeneratorDeliveryCertificateDialog = lazy(() => import('@/components/receipts/GeneratorDeliveryCertificateDialog'));
+const DeliveryDeclarationViewDialog = lazy(() => import('@/components/shipments/DeliveryDeclarationViewDialog'));
+const ShipmentRouteMap = lazy(() => import('@/components/maps/RouteMapDialog'));
+const GPSTrackingStatusWidget = lazy(() => import('@/components/tracking/GPSTrackingStatusWidget'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
 const CompletedRouteMap = lazy(() => import('@/components/shipments/CompletedRouteMap'));
 const DriverAssignmentPanel = lazy(() => import('@/components/shipments/DriverAssignmentPanel'));
