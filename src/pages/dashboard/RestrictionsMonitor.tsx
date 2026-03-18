@@ -118,7 +118,7 @@ const RestrictionsMonitor = () => {
 
         {/* Expiring Soon Warning */}
         {expiring.length > 0 && (
-          <Card className="border-amber-500/50 bg-amber-500/5">
+          <Card className="border-destructive/30 bg-destructive/5">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm flex items-center gap-2 text-amber-600">
                 <AlertTriangle className="h-4 w-4" />
