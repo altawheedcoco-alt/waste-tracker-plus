@@ -174,14 +174,35 @@ export default function MemberSocialProfile() {
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !targetProfile) return;
+    
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('حجم الصورة يجب أن لا يتجاوز 5 ميجابايت');
+      return;
+    }
+    
     setUploading(true);
     try {
       const url = await uploadFile(file, 'covers');
-      await supabase.from('profiles').update({ cover_url: url } as any).eq('id', targetProfile.id);
+      console.log('Cover uploaded, URL:', url);
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ cover_url: url } as any)
+        .eq('id', targetProfile.id);
+      
+      if (updateError) {
+        console.error('Profile update error:', updateError);
+        throw updateError;
+      }
+      
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       toast.success('تم تحديث صورة الغلاف');
-    } catch { toast.error('فشل رفع الصورة'); }
-    finally { setUploading(false); }
+    } catch (err: any) {
+      console.error('Cover upload error:', err);
+      toast.error(err?.message || 'فشل رفع الصورة');
+    } finally {
+      setUploading(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   // Update avatar
