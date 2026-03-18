@@ -792,6 +792,29 @@ const ShipmentDetailsPage = () => {
         {showLiveTracking && shipment.driver_id && (
           <LiveTrackingMapDialog isOpen={showLiveTracking} onClose={() => setShowLiveTracking(false)} driverId={shipment.driver_id} shipmentNumber={shipment.shipment_number} pickupAddress={shipment.pickup_address} deliveryAddress={shipment.delivery_address} shipmentStatus={shipment.status} />
         )}
+
+        {showMapDialog && (
+          <ShipmentRouteMap
+            isOpen={showMapDialog} onClose={() => setShowMapDialog(false)}
+            pickupAddress={shipment.pickup_address || 'غير محدد'} deliveryAddress={shipment.delivery_address || 'غير محدد'}
+            shipmentNumber={shipment.shipment_number} driverId={shipment.driver_id} shipmentStatus={shipment.status}
+          />
+        )}
+
+        {isDeliveryCertOpen && isGenerator && (
+          <GeneratorDeliveryCertificateDialog
+            isOpen={isDeliveryCertOpen} onClose={() => setIsDeliveryCertOpen(false)}
+            shipment={{ ...shipment, unit: shipment.unit || 'كجم', pickup_address: shipment.pickup_address || '' }}
+            onSuccess={fetchShipmentDetails}
+          />
+        )}
+
+        {isDeclarationViewOpen && declarationData && (
+          <DeliveryDeclarationViewDialog
+            isOpen={isDeclarationViewOpen} onClose={() => setIsDeclarationViewOpen(false)}
+            declaration={declarationData}
+          />
+        )}
       </Suspense>
     </DashboardLayout>
   );
