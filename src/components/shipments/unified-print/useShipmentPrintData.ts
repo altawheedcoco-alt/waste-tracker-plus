@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 import { generateShipmentQRData } from '@/lib/shipmentQRData';
-import type { ShipmentPrintData, ShipmentLogEntry, MovementSupervisor } from './types';
+import type { ShipmentPrintData, ShipmentLogEntry, MovementSupervisor, DocumentSignatureData } from './types';
 
 const SHIPMENT_SELECT = `
   id, shipment_number, waste_type, quantity, unit, status, created_at,
