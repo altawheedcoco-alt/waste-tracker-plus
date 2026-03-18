@@ -382,12 +382,20 @@ export default function MemberSocialProfile() {
           {/* Cover Photo */}
           <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden group/cover">
             {(targetProfile as any).cover_url && (
-              <img
-                src={(targetProfile as any).cover_url}
-                alt="غلاف"
-                className="w-full h-full object-cover cursor-pointer"
-                onClick={() => setCoverGalleryOpen(true)}
-              />
+              <>
+                <img
+                  src={(targetProfile as any).cover_url}
+                  alt="غلاف"
+                  className="absolute inset-0 w-full h-full object-cover opacity-20 blur-sm scale-105"
+                  aria-hidden="true"
+                />
+                <img
+                  src={(targetProfile as any).cover_url}
+                  alt="غلاف"
+                  className="relative z-10 w-full h-full object-contain cursor-pointer"
+                  onClick={() => setCoverGalleryOpen(true)}
+                />
+              </>
             )}
             {/* Cover action buttons */}
             <div className="absolute bottom-3 left-3 flex gap-2 z-20">
