@@ -66,6 +66,7 @@ const BLOCKED_PERMISSIONS: Omit<VisibilityPermissions, 'isLoading' | 'isOwner'> 
 export function useShipmentVisibility(shipmentId: string | undefined): VisibilityPermissions {
   const { organization, roles } = useAuth();
   const isAdmin = roles.includes('admin');
+  const { isRestricted } = usePartnerRestrictions();
 
   const { data, isLoading } = useQuery({
     queryKey: ['shipment-visibility', shipmentId, organization?.id],
