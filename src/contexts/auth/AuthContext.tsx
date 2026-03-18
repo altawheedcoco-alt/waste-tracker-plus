@@ -323,9 +323,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const initializeAuth = async () => {
       try {
-        // Add timeout to prevent hanging forever
+        // Fast timeout — 3s max to prevent hanging
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
         
         const result = await Promise.race([sessionPromise, timeoutPromise]);
         
@@ -337,7 +337,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            // Don't await - let it load in background
+            // Fire immediately — don't await, loading=false fires right after
             fetchUserData(session.user.id).catch(console.error);
           }
           initialSessionHandled = true;

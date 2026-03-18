@@ -86,8 +86,8 @@ const Dashboard = () => {
   useEffect(() => {
     if (loading) return;
     const id = 'requestIdleCallback' in window
-      ? requestIdleCallback(() => setShowWidgets(true), { timeout: 3000 })
-      : setTimeout(() => setShowWidgets(true), 1500) as unknown as number;
+      ? requestIdleCallback(() => setShowWidgets(true), { timeout: 1500 })
+      : setTimeout(() => setShowWidgets(true), 800) as unknown as number;
     return () => {
       if ('cancelIdleCallback' in window) cancelIdleCallback(id);
       else clearTimeout(id);
