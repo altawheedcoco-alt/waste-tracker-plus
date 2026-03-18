@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQuotations, type QuotationItem, type Quotation } from '@/hooks/useQuotations';
 import { getTemplatesByEntity, getTemplateById, ENTITY_LABELS, DIRECTION_LABELS, DOCUMENT_TYPE_LABELS, type QuotationTemplate, type QuotationDirection, type DocumentType } from '@/lib/quotationTemplates';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, FileText, Send, Printer, Trash2, Check, X, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Plus, FileText, Send, Printer, Trash2, Check, X, Clock, ArrowUpRight, ArrowDownLeft, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useReactToPrint } from 'react-to-print';
@@ -28,6 +29,7 @@ const STATUS_MAP: Record<string, { label: string; variant: 'default' | 'secondar
 };
 
 const Quotations = () => {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const orgType = (organization as any)?.type || 'generator';
   const { quotations, receivedQuotations, isLoading, createQuotation, updateStatus, deleteQuotation, getQuotationItems } = useQuotations(organization?.id);
@@ -206,9 +208,19 @@ const Quotations = () => {
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4" dir="rtl">
       <div className="space-y-2">
-        <div className="min-w-0">
-          <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
-          <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
+        <div className="flex items-center gap-2 min-w-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0 h-8 w-8 rounded-lg"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
+          </div>
         </div>
         <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
           <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
