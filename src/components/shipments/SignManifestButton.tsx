@@ -175,7 +175,7 @@ const SignManifestButton = ({
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">الصفة:</span>
-                  <span className="font-medium">{profile?.job_title || organization?.organization_type}</span>
+                  <span className="font-medium">{(profile as any)?.job_title || organization?.organization_type}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">التاريخ:</span>
