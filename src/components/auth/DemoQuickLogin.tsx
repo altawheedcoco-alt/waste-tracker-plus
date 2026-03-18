@@ -33,6 +33,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
       { email: 'abdullah-transporter@irecycle.test', label: 'عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
       { email: 'abdullah-recycler@irecycle.test', label: 'عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
       { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
+      { email: 'abdullah.abdelnasser@irecycle.test', label: 'عبدالله عبدالناصر', desc: 'إدارة → جهة عبدالله الناقل', icon: Shield, color: 'from-indigo-500 to-violet-700' },
     ],
   },
   {
