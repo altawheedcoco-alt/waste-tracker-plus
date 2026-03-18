@@ -783,7 +783,7 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
 
   const currentStatusConfig = getStatusConfig(shipment.status);
   const rolePhases: Record<string, string[]> = {
-    generator: ['transporter'], transporter: ['transporter'],
+    generator: ['transporter'], transporter: ['transporter'], driver: ['transporter'],
     recycler: ['recycler'], disposal: ['disposal'],
     admin: ['transporter', 'recycler', 'disposal'],
   };
