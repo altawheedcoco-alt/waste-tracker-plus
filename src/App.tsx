@@ -82,6 +82,7 @@ const Providers = memo(() => (
   <ErrorBoundary fallbackTitle="حدث خطأ غير متوقع في التطبيق">
     <QueryClientProvider client={queryClient}>
       <ThemeSettingsProvider>
+        <ViewModeProvider>
         <LanguageProvider>
           <TooltipProvider delayDuration={300}>
             <Toaster />
