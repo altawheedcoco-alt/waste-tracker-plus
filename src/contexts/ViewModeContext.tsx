@@ -24,7 +24,6 @@ const defaults: ViewModeState = {
   density: 'comfortable',
   listStyle: 'grid',
   fullWidth: false,
-  sidebarMode: 'full',
 };
 
 const ViewModeContext = createContext<ViewModeContextType | undefined>(undefined);
