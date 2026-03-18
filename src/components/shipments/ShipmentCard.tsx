@@ -374,6 +374,16 @@ const ShipmentCard = ({
                         generator: shipment.generator,
                         recycler: shipment.recycler,
                         driver_id: shipment.driver_id || null,
+                        driver: shipment.driver ? { profile: shipment.driver.profile || null } : null,
+                        has_receipt: shipment.has_receipt,
+                      } as any}
+                        ...shipment,
+                        unit: shipment.unit || 'كجم',
+                        pickup_address: shipment.pickup_address || '',
+                        generator_id: shipment.generator_id || shipment.generator?.id || '',
+                        generator: shipment.generator,
+                        recycler: shipment.recycler,
+                        driver_id: shipment.driver_id || null,
                         has_receipt: shipment.has_receipt,
                       }}
                       onSuccess={onStatusChange}
