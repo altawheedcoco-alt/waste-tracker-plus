@@ -11,14 +11,25 @@ import { toast } from 'sonner';
 interface SignManifestButtonProps {
   shipmentId: string;
   shipmentNumber: string;
+  /** Document type to sign */
+  documentType?: 'manifest' | 'shipment_tracking';
+  /** Button label override */
+  label?: string;
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
 }
 
+const DOC_TYPE_LABELS: Record<string, string> = {
+  manifest: 'المانيفست',
+  shipment_tracking: 'نموذج تتبع نقل المخلفات',
+};
+
 const SignManifestButton = ({
   shipmentId,
   shipmentNumber,
+  documentType = 'manifest',
+  label,
   variant = 'outline',
   size = 'sm',
   className = '',
