@@ -48,7 +48,7 @@ const SignManifestButton = ({
         .from('document_signatures')
         .select('id')
         .eq('document_id', shipmentId)
-        .eq('document_type', 'manifest')
+        .eq('document_type', documentType)
         .eq('signed_by', user.id)
         .maybeSingle();
       setAlreadySigned(!!data);
