@@ -414,10 +414,21 @@ export default function MemberSocialProfile() {
                     <Star className="w-4 h-4" /> تقييم
                   </Button>
                 )}
+                {!isOwnProfile && (
+                  <Button size="sm" variant="outline" onClick={() => {
+                    // Navigate to chat with this user
+                    navigate(`/dashboard/messages?to=${targetProfile.user_id}`);
+                  }} className="gap-1.5">
+                    <MessageCircle className="w-4 h-4" /> مراسلة
+                  </Button>
+                )}
                 {isOwnProfile && (
                   <Button size="sm" variant="outline" onClick={() => {
                     setEditBio((targetProfile as any).bio || '');
                     setEditWhatsapp((targetProfile as any).whatsapp || '');
+                    setEditName(targetProfile.full_name || '');
+                    setEditEmail(targetProfile.email || '');
+                    setEditPhone(targetProfile.phone || '');
                     setEditBioOpen(true);
                   }} className="gap-1.5">
                     <Edit3 className="w-4 h-4" /> تعديل
