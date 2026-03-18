@@ -1066,13 +1066,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
           <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[5.5rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
             <DashboardBreadcrumb />
-            <div className="w-full max-w-full">
+            <div className={`w-full ${fullWidth ? 'max-w-full' : 'max-w-[1600px] mx-auto'}`}>
               <OnboardingGuard>
                   <motion.div
                     key={location.pathname}
-                    initial={{ opacity: 0.6 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.15 }}
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.2, ease: 'easeOut' }}
                   >
                     {children}
                   </motion.div>
