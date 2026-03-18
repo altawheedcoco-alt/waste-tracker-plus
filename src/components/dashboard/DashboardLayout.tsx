@@ -150,18 +150,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Global realtime sync — active on ALL dashboard pages
   useDashboardRealtime();
   
-  const { sidebarMode, setSidebarMode, cycleSidebarMode, fullWidth, spacing, density } = useViewMode();
+  const { fullWidth, spacing, density } = useViewMode();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
-  const [sidebarHovered, setSidebarHovered] = useState(false);
-
-  // Derived sidebar state for backward compatibility
-  const isSidebarOpen = sidebarMode !== 'hidden';
-  const isMiniSidebar = sidebarMode === 'mini' && !sidebarHovered;
-  const isExpandedSidebar = sidebarMode === 'full' || (sidebarMode === 'mini' && sidebarHovered);
-  const setIsSidebarOpen = useCallback((open: boolean) => {
-    setSidebarMode(open ? 'full' : 'hidden');
-  }, [setSidebarMode]);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const { profile, organization, signOut, roles, user, loading } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
