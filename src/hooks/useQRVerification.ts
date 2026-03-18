@@ -65,6 +65,7 @@ export const useQRVerification = () => {
     if (upperCode.startsWith('LMS-CERT-')) return { type: 'lms_certificate', reference: upperCode };
     if (upperCode.startsWith('SIG-') || upperCode.startsWith('SIGNER-')) return { type: 'signer', reference: upperCode };
     if (upperCode.startsWith('ATT-')) return { type: 'attestation', reference: upperCode };
+    if (upperCode.startsWith('MS-') || upperCode.startsWith('OS-')) return { type: 'seal', reference: upperCode };
 
     return { type: 'unknown', reference: code };
   };
