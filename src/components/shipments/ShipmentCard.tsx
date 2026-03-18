@@ -442,48 +442,49 @@ const ShipmentCard = ({
                       </DropdownMenuTrigger>
                       <DropdownMenuContent 
                         align="start" 
-                        className="w-48 bg-popover z-50"
+                        className="w-52 bg-popover z-50 max-h-72 overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                       >
-                        {availableNextStatuses.slice(0, 3).map((status) => {
+                        {/* Current status indicator */}
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground">الحالة الحالية</div>
+                        {currentStatusConfig && (() => {
+                          const CurIcon = currentStatusConfig.icon;
+                          return (
+                            <DropdownMenuItem disabled className="gap-2 opacity-100 bg-primary/10 border border-primary/20 rounded-md mx-1 mb-1">
+                              <div className={cn("w-6 h-6 rounded-full flex items-center justify-center", currentStatusConfig.bgClass)}>
+                                <CurIcon className="w-3 h-3" />
+                              </div>
+                              <span className="font-bold text-primary">{currentStatusConfig.labelAr} ✓</span>
+                            </DropdownMenuItem>
+                          );
+                        })()}
+                        <DropdownMenuSeparator />
+                        <div className="px-2 py-1.5 text-[10px] font-semibold text-muted-foreground">تغيير إلى</div>
+                        {allStatusesForDropdown.map((status) => {
                           const StatusIcon = status.icon;
+                          const isRecommended = availableNextStatuses.some(s => s.key === status.key);
                           return (
                             <DropdownMenuItem
                               key={status.key}
                               onClick={() => handleQuickStatusChange(status.key)}
-                              className="gap-2 cursor-pointer"
+                              className={cn("gap-2 cursor-pointer", isRecommended && "font-medium")}
                             >
                               <div className={cn("w-6 h-6 rounded-full flex items-center justify-center", status.bgClass)}>
                                 <StatusIcon className="w-3 h-3" />
                               </div>
                               <span>{status.labelAr}</span>
+                              {isRecommended && <span className="text-[9px] text-primary mr-auto">مقترح</span>}
                             </DropdownMenuItem>
                           );
                         })}
-                        {availableNextStatuses.length > 3 && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={handleStatusButtonClick}
-                              className="gap-2 cursor-pointer"
-                            >
-                              <Settings2 className="w-4 h-4" />
-                              <span>المزيد من الخيارات...</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
-                        {availableNextStatuses.length <= 3 && availableNextStatuses.length > 0 && (
-                          <>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={handleStatusButtonClick}
-                              className="gap-2 cursor-pointer text-muted-foreground"
-                            >
-                              <Settings2 className="w-4 h-4" />
-                              <span>تغيير متقدم...</span>
-                            </DropdownMenuItem>
-                          </>
-                        )}
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={handleStatusButtonClick}
+                          className="gap-2 cursor-pointer text-muted-foreground"
+                        >
+                          <Settings2 className="w-4 h-4" />
+                          <span>تغيير متقدم...</span>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   )}
