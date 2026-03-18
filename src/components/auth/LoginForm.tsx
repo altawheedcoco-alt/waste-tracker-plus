@@ -1,5 +1,5 @@
 /**
- * LoginForm — نموذج تسجيل الدخول المحسّن
+ * LoginForm — نموذج تسجيل الدخول المحسّن مع دعم الهاتف
  */
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -10,21 +10,29 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn } from 'lucide-react';
+import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn, Phone, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { lovable } from '@/integrations/lovable/index';
+import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import DemoQuickLogin from './DemoQuickLogin';
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
 
-const loginSchema = z.object({
+const emailLoginSchema = z.object({
   email: z.string().email('البريد الإلكتروني غير صالح'),
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
 });
+
+const phoneLoginSchema = z.object({
+  phone: z.string().min(8, 'رقم الهاتف غير صالح').regex(/^[\d\s+\-()]{8,20}$/, 'رقم هاتف غير صالح'),
+  password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
+});
+
+type LoginMethod = 'email' | 'phone';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -36,14 +44,17 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
+  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
   const [loginData, setLoginData] = useState({
     email: localStorage.getItem('rememberEmail') || '',
+    phone: localStorage.getItem('rememberPhone') || '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
+  const [lookingUpPhone, setLookingUpPhone] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('rememberEmail'));
+  const [rememberMe, setRememberMe] = useState(() => !!localStorage.getItem('rememberEmail') || !!localStorage.getItem('rememberPhone'));
   const [loginAttempts, setLoginAttempts] = useState(0);
   const [lockedUntil, setLockedUntil] = useState<number | null>(null);
 
@@ -85,8 +96,30 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     setErrors({});
 
     try {
-      loginSchema.parse(loginData);
-      const { error } = await signIn(loginData.email, loginData.password);
+      let emailToUse = loginData.email;
+
+      if (loginMethod === 'phone') {
+        phoneLoginSchema.parse({ phone: loginData.phone, password: loginData.password });
+        
+        // Look up email by phone number
+        setLookingUpPhone(true);
+        const { data: lookupData, error: lookupError } = await supabase.functions.invoke('lookup-email-by-phone', {
+          body: { phone: loginData.phone },
+        });
+        setLookingUpPhone(false);
+
+        if (lookupError || !lookupData?.email) {
+          const errorMsg = lookupData?.error || 'لا يوجد حساب مرتبط بهذا الرقم';
+          setErrors({ phone: errorMsg });
+          setLoading(false);
+          return;
+        }
+        emailToUse = lookupData.email;
+      } else {
+        emailLoginSchema.parse({ email: loginData.email, password: loginData.password });
+      }
+
+      const { error } = await signIn(emailToUse, loginData.password);
 
       if (error) {
         const newAttempts = loginAttempts + 1;
@@ -107,8 +140,18 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         setLoginAttempts(0);
         localStorage.removeItem('loginAttempts');
         localStorage.removeItem('loginLockout');
-        if (rememberMe) localStorage.setItem('rememberEmail', loginData.email);
-        else localStorage.removeItem('rememberEmail');
+        if (rememberMe) {
+          if (loginMethod === 'email') {
+            localStorage.setItem('rememberEmail', loginData.email);
+            localStorage.removeItem('rememberPhone');
+          } else {
+            localStorage.setItem('rememberPhone', loginData.phone);
+            localStorage.removeItem('rememberEmail');
+          }
+        } else {
+          localStorage.removeItem('rememberEmail');
+          localStorage.removeItem('rememberPhone');
+        }
         toast({ title: t('auth.loginSuccess'), description: t('auth.welcomeBack') });
         navigate('/dashboard');
       }
@@ -120,6 +163,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       }
     } finally {
       setLoading(false);
+      setLookingUpPhone(false);
     }
   };
 
@@ -151,24 +195,77 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         </Alert>
       )}
 
-      {/* Email */}
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
-          <Mail className="w-4 h-4 text-muted-foreground" />
-          {t('auth.email')}
-        </Label>
-        <Input
-          id="email"
-          type="email"
-          placeholder="example@company.com"
-          value={loginData.email}
-          onChange={e => handleChange('email', e.target.value)}
-          className={`h-11 rounded-xl bg-muted/30 border-border/50 focus:bg-background transition-colors ${errors.email ? 'border-destructive' : ''}`}
-          dir="ltr"
-          disabled={isLocked}
-        />
-        {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+      {/* Login Method Toggle */}
+      <div className="flex rounded-xl bg-muted/50 p-1 gap-1">
+        <button
+          type="button"
+          onClick={() => setLoginMethod('email')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            loginMethod === 'email'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Mail className="w-4 h-4" />
+          البريد الإلكتروني
+        </button>
+        <button
+          type="button"
+          onClick={() => setLoginMethod('phone')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+            loginMethod === 'phone'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Phone className="w-4 h-4" />
+          رقم الهاتف
+        </button>
       </div>
+
+      {/* Email Field */}
+      {loginMethod === 'email' && (
+        <div className="space-y-2">
+          <Label htmlFor="email" className="text-sm font-medium flex items-center gap-2">
+            <Mail className="w-4 h-4 text-muted-foreground" />
+            {t('auth.email')}
+          </Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="example@company.com"
+            value={loginData.email}
+            onChange={e => handleChange('email', e.target.value)}
+            className={`h-11 rounded-xl bg-muted/30 border-border/50 focus:bg-background transition-colors ${errors.email ? 'border-destructive' : ''}`}
+            dir="ltr"
+            disabled={isLocked}
+          />
+          {errors.email && <p className="text-xs text-destructive">{errors.email}</p>}
+        </div>
+      )}
+
+      {/* Phone Field */}
+      {loginMethod === 'phone' && (
+        <div className="space-y-2">
+          <Label htmlFor="phone" className="text-sm font-medium flex items-center gap-2">
+            <Phone className="w-4 h-4 text-muted-foreground" />
+            رقم الهاتف
+          </Label>
+          <Input
+            id="phone"
+            type="tel"
+            placeholder="01xxxxxxxxx"
+            value={loginData.phone}
+            onChange={e => handleChange('phone', e.target.value)}
+            className={`h-11 rounded-xl bg-muted/30 border-border/50 focus:bg-background transition-colors ${errors.phone ? 'border-destructive' : ''}`}
+            dir="ltr"
+            inputMode="tel"
+            maxLength={20}
+            disabled={isLocked}
+          />
+          {errors.phone && <p className="text-xs text-destructive">{errors.phone}</p>}
+        </div>
+      )}
 
       {/* Password */}
       <div className="space-y-2">
@@ -210,11 +307,15 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       {/* Submit */}
       <Button type="submit" variant="default" className="w-full h-11 rounded-xl text-base font-semibold gap-2" disabled={loading || isLocked}>
         {loading ? (
-          <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+          lookingUpPhone ? (
+            <Loader2 className="w-5 h-5 animate-spin" />
+          ) : (
+            <div className="w-5 h-5 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+          )
         ) : (
           <LogIn className="w-5 h-5" />
         )}
-        {loading ? t('auth.loggingIn') : t('auth.loginButton')}
+        {loading ? (lookingUpPhone ? 'جاري البحث...' : t('auth.loggingIn')) : t('auth.loginButton')}
       </Button>
 
       {/* Social Login */}
