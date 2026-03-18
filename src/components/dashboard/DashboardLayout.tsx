@@ -694,7 +694,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
             
             {/* Deposit Button in Sidebar */}
-            {isSidebarOpen && !isDriver && (
+            {isExpandedSidebar && !isDriver && (
               <div className="pt-3 mt-3 border-t border-border">
                 <DepositButton 
                   variant="outline" 
