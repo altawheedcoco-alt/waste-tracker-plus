@@ -613,7 +613,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <SidebarNavGroup
                     key={item.key}
                     item={item}
-                    isCollapsed={isMiniSidebar}
+                    isCollapsed={false}
                   />
                 );
               })
