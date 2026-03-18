@@ -106,6 +106,7 @@ const Providers = memo(() => (
             </BrowserRouter>
           </TooltipProvider>
         </LanguageProvider>
+        </ViewModeProvider>
       </ThemeSettingsProvider>
     </QueryClientProvider>
   </ErrorBoundary>
