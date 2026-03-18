@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 
 // All possible shipment statuses
+export type OrgTypeForStatus = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
+
 export type ShipmentStatus = 
   // Transporter statuses
   | 'pending'        // معلق
