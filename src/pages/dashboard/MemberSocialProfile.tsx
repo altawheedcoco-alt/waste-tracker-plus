@@ -599,6 +599,9 @@ export default function MemberSocialProfile() {
                   </Badge>
                 )}
                 {!isOwnProfile && (
+                  <FollowButton targetProfileId={targetProfileId} />
+                )}
+                {!isOwnProfile && (
                   <Button size="sm" variant="outline" onClick={() => setReviewOpen(true)} className="gap-1.5">
                     <Star className="w-4 h-4" /> تقييم
                   </Button>
