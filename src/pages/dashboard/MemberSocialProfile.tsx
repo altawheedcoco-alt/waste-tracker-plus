@@ -49,6 +49,9 @@ export default function MemberSocialProfile() {
   const [editBioOpen, setEditBioOpen] = useState(false);
   const [editBio, setEditBio] = useState('');
   const [editWhatsapp, setEditWhatsapp] = useState('');
+  const [editName, setEditName] = useState('');
+  const [editEmail, setEditEmail] = useState('');
+  const [editPhone, setEditPhone] = useState('');
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostMedia, setNewPostMedia] = useState<File[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
