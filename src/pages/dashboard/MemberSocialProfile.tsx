@@ -390,7 +390,7 @@ export default function MemberSocialProfile() {
               />
             )}
             {/* Cover action buttons */}
-            <div className="absolute bottom-3 left-3 flex gap-2">
+            <div className="absolute bottom-3 left-3 flex gap-2 z-20">
               {isOwnProfile && (
                 <>
                   <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
