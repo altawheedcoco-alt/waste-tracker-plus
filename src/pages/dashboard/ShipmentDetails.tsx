@@ -38,6 +38,7 @@ const ShipmentStatusDialog = lazy(() => import('@/components/shipments/StatusCha
 const InlineStatusChange = lazy(() => import('@/components/shipments/StatusChangeDialog').then(m => ({ default: m.InlineStatusChange })));
 const ShipmentQuickPrint = lazy(() => import('@/components/shipments/unified-print/UnifiedShipmentPrint'));
 const ManifestPDFButton = lazy(() => import('@/components/shipments/ManifestPDFButton'));
+const SignManifestButton = lazy(() => import('@/components/shipments/SignManifestButton'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
@@ -225,6 +226,9 @@ const ShipmentDetailsPage = () => {
             </Button>
             <Suspense fallback={null}>
               <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
+            </Suspense>
+            <Suspense fallback={null}>
+              <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
             </Suspense>
             <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />
