@@ -43,7 +43,7 @@ const UnifiedShipmentPrint = ({
   const theme = getThemeById(themeId);
 
   const {
-    shipment, loading, logs, supervisors, declaration,
+    shipment, loading, logs, supervisors, signatures, declaration,
     qrData, driverName, vehiclePlate, documentSerial,
     verificationCode, pdfFileName,
   } = useShipmentPrintData({
@@ -132,6 +132,7 @@ const UnifiedShipmentPrint = ({
             documentSerial={documentSerial}
             verificationCode={verificationCode}
             supervisors={supervisors}
+            signatures={signatures}
             declaration={declaration}
             compact={true}
           />
@@ -170,6 +171,7 @@ const UnifiedShipmentPrint = ({
           documentSerial={documentSerial}
           verificationCode={verificationCode}
           supervisors={supervisors}
+          signatures={signatures}
           declaration={declaration}
           compact={false}
         />

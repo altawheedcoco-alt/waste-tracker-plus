@@ -41,6 +41,7 @@ const ManifestPDFButton = lazy(() => import('@/components/shipments/ManifestPDFB
 const SignManifestButton = lazy(() => import('@/components/shipments/SignManifestButton'));
 const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShipmentDialog'));
 const EditShipmentDialog = lazy(() => import('@/components/shipments/EditShipmentDialog'));
+const ShipmentSignaturesCard = lazy(() => import('@/components/shipments/ShipmentSignaturesCard'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
 const CompletedRouteMap = lazy(() => import('@/components/shipments/CompletedRouteMap'));
@@ -248,6 +249,11 @@ const ShipmentDetailsPage = () => {
         <Card className="p-3">
           <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
         </Card>
+
+        {/* Digital Signatures */}
+        <Suspense fallback={null}>
+          <ShipmentSignaturesCard shipmentId={shipment.id} />
+        </Suspense>
 
         {/* Inline Status Change */}
         <Suspense fallback={null}>

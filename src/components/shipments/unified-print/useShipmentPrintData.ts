@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveShipmentOrgUrls } from '@/utils/resolveOrgStorageUrls';
 import { generateShipmentQRData } from '@/lib/shipmentQRData';
-import type { ShipmentPrintData, ShipmentLogEntry, MovementSupervisor } from './types';
+import type { ShipmentPrintData, ShipmentLogEntry, MovementSupervisor, DocumentSignatureData } from './types';
 
 const SHIPMENT_SELECT = `
   id, shipment_number, waste_type, quantity, unit, status, created_at,
@@ -55,6 +55,7 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
   const [shipment, setShipment] = useState<ShipmentPrintData | null>(null);
   const [logs, setLogs] = useState<ShipmentLogEntry[]>([]);
   const [supervisors, setSupervisors] = useState<MovementSupervisor[]>([]);
+  const [signatures, setSignatures] = useState<DocumentSignatureData[]>([]);
   const [loading, setLoading] = useState(false);
   const [declaration, setDeclaration] = useState<any>(null);
 
@@ -119,6 +120,14 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
         .maybeSingle();
       if (declData) setDeclaration(declData);
 
+      // Fetch digital signatures for this shipment
+      const { data: sigData } = await supabase
+        .from('document_signatures')
+        .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id')
+        .eq('document_id', data.id)
+        .order('timestamp_signed', { ascending: true });
+      if (sigData) setSignatures(sigData as unknown as DocumentSignatureData[]);
+
     } catch (e) {
       console.error('Error fetching shipment print data:', e);
     } finally {
@@ -134,6 +143,11 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
     supabase.from('delivery_declarations').select('*').eq('shipment_id', shipment.id)
       .order('created_at', { ascending: false }).limit(1).maybeSingle()
       .then(({ data }) => { if (data) setDeclaration(data); });
+    supabase.from('document_signatures')
+      .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id')
+      .eq('document_id', shipment.id)
+      .order('timestamp_signed', { ascending: true })
+      .then(({ data }) => { if (data) setSignatures(data as unknown as DocumentSignatureData[]); });
   }, [shipment?.id, isOpen]);
 
   const qrData = useMemo(() => shipment ? generateShipmentQRData(shipment) : null, [shipment]);
@@ -164,7 +178,7 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
   ].join('-') : 'tracking-form';
 
   return {
-    shipment, loading, logs, supervisors, declaration,
+    shipment, loading, logs, supervisors, signatures, declaration,
     qrData, driverName, vehiclePlate, documentSerial,
     verificationCode, pdfFileName,
   };
