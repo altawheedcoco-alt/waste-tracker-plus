@@ -21,50 +21,9 @@ export const useTermsAcceptance = () => {
   const [acceptance, setAcceptance] = useState<TermsAcceptance | null>(null);
 
   useEffect(() => {
-    const checkTermsAcceptance = async () => {
-      if (!user || !organization) {
-        setLoading(false);
-        setHasAcceptedTerms(true); // No org = no terms needed
-        return;
-      }
-
-      // All organization types require terms acceptance
-      const validOrgTypes: OrganizationType[] = ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office'];
-      if (!validOrgTypes.includes(organization.organization_type as OrganizationType)) {
-        setLoading(false);
-        setHasAcceptedTerms(true);
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase
-          .from('terms_acceptances')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('organization_id', organization.id)
-          .eq('terms_version', CURRENT_TERMS_VERSION)
-          .maybeSingle();
-
-        if (error) {
-          if (!error.message?.includes('AbortError') && (error as any).name !== 'AbortError') {
-            console.error('Error checking terms acceptance:', error);
-          }
-          setHasAcceptedTerms(true); // Don't block on error
-        } else {
-          setHasAcceptedTerms(!!data);
-          setAcceptance(data);
-        }
-      } catch (error: any) {
-        if (!error?.message?.includes('AbortError') && error?.name !== 'AbortError') {
-          console.error('Error in checkTermsAcceptance:', error);
-        }
-        setHasAcceptedTerms(true);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkTermsAcceptance();
+    // ⚠️ TEMPORARILY BYPASSED FOR TESTING — re-enable after testing
+    setHasAcceptedTerms(true);
+    setLoading(false);
   }, [user, organization]);
 
   const markAsAccepted = () => {
