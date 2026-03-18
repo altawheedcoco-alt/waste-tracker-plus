@@ -17,7 +17,7 @@ interface A4Data {
 }
 
 export const generateA4Template = (data: A4Data): string => {
-  const { orgName, dateStr, timeStr, userName, shipments, ledger, notifications, totalWeight, totalRevenue, totalExpenses, statusLabel, wasteTypeLabel } = data;
+  const { orgName, orgId, dateStr, timeStr, userName, shipments, ledger, notifications, totalWeight, totalRevenue, totalExpenses, statusLabel, wasteTypeLabel } = data;
 
   return `
 <!DOCTYPE html>
