@@ -8,6 +8,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, useLocation } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
+import { ViewModeProvider } from "@/contexts/ViewModeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 
 // Offline components (lightweight, keep global)
