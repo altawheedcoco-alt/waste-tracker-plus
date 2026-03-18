@@ -173,6 +173,28 @@ export default function MemberSocialProfile() {
     return urlData.publicUrl;
   };
 
+  // Save photo to history
+  const savePhotoHistory = async (photoUrl: string, photoType: 'cover' | 'avatar', storagePath?: string) => {
+    if (!targetProfile || !user?.id) return;
+    
+    // Mark old photos as not current
+    await supabase
+      .from('profile_photos')
+      .update({ is_current: false, updated_at: new Date().toISOString() } as any)
+      .eq('profile_id', targetProfile.id)
+      .eq('photo_type', photoType);
+
+    // Insert new photo as current
+    await supabase.from('profile_photos').insert({
+      profile_id: targetProfile.id,
+      user_id: user.id,
+      photo_type: photoType,
+      photo_url: photoUrl,
+      storage_path: storagePath || null,
+      is_current: true,
+    } as any);
+  };
+
   // Update cover photo
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -186,18 +208,18 @@ export default function MemberSocialProfile() {
     setUploading(true);
     try {
       const url = await uploadFile(file, 'covers');
-      console.log('Cover uploaded, URL:', url);
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ cover_url: url } as any)
         .eq('id', targetProfile.id);
       
-      if (updateError) {
-        console.error('Profile update error:', updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
+
+      // Save to history
+      await savePhotoHistory(url, 'cover');
       
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الغلاف');
     } catch (err: any) {
       console.error('Cover upload error:', err);
@@ -216,7 +238,12 @@ export default function MemberSocialProfile() {
     try {
       const url = await uploadFile(file, 'avatars');
       await supabase.from('profiles').update({ avatar_url: url }).eq('id', targetProfile.id);
+      
+      // Save to history
+      await savePhotoHistory(url, 'avatar');
+      
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الملف الشخصي');
     } catch { toast.error('فشل رفع الصورة'); }
     finally { setUploading(false); }
