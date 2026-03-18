@@ -131,8 +131,17 @@ export const ShipmentsRepository = {
         const { autoCreateGeneratorDeclaration, autoCreateRecyclerDeclaration, autoCreateTransporterDeclaration, autoCreateDisposalReceptionDeclaration, autoCreateDisposalCertificate, autoCreateRecyclingCertificate, autoCreateDriverConfirmation, autoCreateTransporterDeliveryDeclaration, autoCreateDriverDeliveryDeclaration } = await import('@/utils/autoDeclarationCreator');
         const { autoCreateReceipt } = await import('@/utils/autoReceiptCreator');
         
-        if (['approved', 'registered'].includes(status) && shipment.generator_id) {
-          await autoCreateGeneratorDeclaration(id, shipment.generator_id, userId);
+        if (['approved', 'registered'].includes(status)) {
+          // Generator declaration: "I handed over the waste"
+          if (shipment.generator_id) {
+            await autoCreateGeneratorDeclaration(id, shipment.generator_id, userId);
+          }
+          // Transporter declaration: "I received the waste from generator"
+          if (shipment.transporter_id) {
+            await autoCreateTransporterDeclaration(id, shipment.transporter_id, userId);
+            await autoCreateDriverConfirmation(id, shipment.transporter_id, userId);
+            await autoCreateReceipt(id, shipment.transporter_id, userId);
+          }
         }
         if (['picked_up', 'loading'].includes(status) && shipment.transporter_id) {
           await autoCreateDriverConfirmation(id, shipment.transporter_id, userId);
