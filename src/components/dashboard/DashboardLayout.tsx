@@ -607,7 +607,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       </span>
                       <div className="flex-1 h-px bg-primary/20" />
                     </div>
-                  ) : null;
+                  );
                 }
                 return (
                   <SidebarNavGroup
