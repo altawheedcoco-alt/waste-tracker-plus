@@ -193,11 +193,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Auto-collapse sidebar on mobile/tablet
   useEffect(() => {
     if (shouldCollapseSidebar) {
-      setIsSidebarOpen(false);
-    } else {
-      setIsSidebarOpen(true);
+      setSidebarMode('hidden');
     }
-  }, [shouldCollapseSidebar]);
+  }, [shouldCollapseSidebar, setSidebarMode]);
 
   // Auto-close mobile menu on route change
   useEffect(() => {
