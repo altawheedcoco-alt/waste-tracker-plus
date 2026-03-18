@@ -89,11 +89,9 @@ export const ViewModeProvider = ({ children }: { children: ReactNode }) => {
     setDensity,
     setListStyle,
     toggleFullWidth,
-    setSidebarMode,
-    cycleSidebarMode,
     spacing,
     gridCols,
-  }), [state, setDensity, setListStyle, toggleFullWidth, setSidebarMode, cycleSidebarMode, spacing, gridCols]);
+  }), [state, setDensity, setListStyle, toggleFullWidth, spacing, gridCols]);
 
   return (
     <ViewModeContext.Provider value={value}>
