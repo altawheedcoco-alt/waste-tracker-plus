@@ -38,7 +38,7 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge, statusCol
         )}
 
         <div className="relative">
-          <Icon className={`w-[18px] h-[18px] shrink-0 transition-all duration-200 ${
+          <Icon className={`w-5 h-5 shrink-0 transition-all duration-200 ${
             isActive ? 'text-primary scale-110' : 'group-hover:scale-105'
           }`} />
           {/* Live status dot */}
