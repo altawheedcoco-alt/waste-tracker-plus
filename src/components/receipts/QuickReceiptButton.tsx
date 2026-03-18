@@ -96,7 +96,7 @@ const QuickReceiptButton = ({
         onClick={(e) => e.stopPropagation()}
       >
         <CheckCircle2 className="w-4 h-4" />
-        {size !== 'sm' && <span>تم الاستلام</span>}
+        <span>تم إصدار شهادة استلام</span>
       </Button>
     );
   }
