@@ -817,6 +817,7 @@ const ShipmentCard = ({
                           generator: shipment.generator,
                           recycler: shipment.recycler,
                           driver_id: shipment.driver_id || null,
+                          driver: shipment.driver ? { profile: shipment.driver.profile || null } : null,
                           has_receipt: shipment.has_receipt,
                         }}
                         onSuccess={onStatusChange}
