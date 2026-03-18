@@ -343,7 +343,7 @@ const ShipmentDetailsPage = () => {
             {(isRecycler || isTransporter) && (
               <Suspense fallback={null}>
                 <QuickCertificateButton
-                  shipment={{ ...shipment, unit: shipment.unit || 'كجم', has_report: (shipment as any).has_report }}
+                  shipment={{ ...shipment, unit: shipment.unit || 'كجم', has_report: (shipment as any).has_report } as any}
                   onSuccess={fetchShipmentDetails}
                   variant="outline" size="sm" showLabel={true}
                 />
