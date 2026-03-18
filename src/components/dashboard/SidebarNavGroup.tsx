@@ -142,8 +142,8 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
       }`}
     >
       <div className="relative">
-        <Icon className={`w-[18px] h-[18px] shrink-0 transition-all duration-200 ${
-          isChildActive ? 'text-primary' : ''
+        <Icon className={`w-5 h-5 shrink-0 transition-all duration-200 ${
+          isChildActive ? 'text-accent-foreground' : ''
         }`} />
         {displayBadge > 0 && isCollapsed && (
           <motion.span
