@@ -162,7 +162,7 @@ const SidebarNavGroup = ({ item, isCollapsed }: SidebarNavGroupProps) => {
             animate={{ opacity: 1, width: 'auto' }}
             exit={{ opacity: 0, width: 0 }}
             transition={{ duration: 0.15 }}
-            className="overflow-hidden whitespace-nowrap text-[13px] flex-1 text-right tracking-tight leading-tight"
+            className="overflow-hidden whitespace-nowrap text-sm flex-1 text-right leading-tight"
           >
             {item.label}
           </motion.span>
