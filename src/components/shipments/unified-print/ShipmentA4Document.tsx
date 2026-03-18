@@ -277,7 +277,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           </table>
 
           {/* ═══ GENERATOR ═══ */}
-          {renderOrgSection(shipment.generator, 'بيانات الجهة المولدة',
+          {renderOrgSection(shipment.generator, shipment.generator_id, 'بيانات الجهة المولدة',
             theme.colors.generatorBg, theme.colors.generatorText, theme.colors.generatorLight || '#dbeafe',
             [
               { label: 'تسجيل المنشأة', value: shipment.generator?.establishment_registration || '-' },
