@@ -39,7 +39,7 @@ const Header = memo(() => {
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
   const handleGoToDashboard = () => navigate('/dashboard');
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await (supabase.auth as any).signOut();
     toast.success('تم تسجيل الخروج بنجاح');
     navigate('/');
   };
