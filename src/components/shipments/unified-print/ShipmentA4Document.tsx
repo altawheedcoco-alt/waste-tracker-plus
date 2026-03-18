@@ -286,7 +286,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
           )}
 
           {/* ═══ TRANSPORTER ═══ */}
-          {renderOrgSection(shipment.transporter, 'بيانات الجهة الناقلة',
+          {renderOrgSection(shipment.transporter, shipment.transporter_id, 'بيانات الجهة الناقلة',
             theme.colors.transporterBg, theme.colors.transporterText, theme.colors.transporterLight || '#fef3c7',
             [
               { label: 'رخصة النقل البري', value: shipment.transporter?.land_transport_license || '-' },
