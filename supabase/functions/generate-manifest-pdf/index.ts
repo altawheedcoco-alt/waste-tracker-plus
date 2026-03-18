@@ -37,19 +37,21 @@ Deno.serve(async (req) => {
 
     if (error || !shipment) throw new Error(`Shipment not found: ${error?.message || 'no data'}`);
 
-    const { data: custodyChain } = await supabase
-      .from("custody_chain_events")
-      .select("*, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)")
-      .eq("shipment_id", shipmentId)
-      .order("created_at", { ascending: true });
+    const [custodyRes, sigRes, supRes, declRes] = await Promise.all([
+      supabase.from("custody_chain_events")
+        .select("*, actor_organization:organizations!custody_chain_events_actor_organization_id_fkey(name)")
+        .eq("shipment_id", shipmentId).order("created_at", { ascending: true }),
+      supabase.from("document_signatures")
+        .select("*, signer:profiles!document_signatures_signer_id_fkey(full_name), signer_organization:organizations!document_signatures_organization_id_fkey(name)")
+        .eq("document_id", shipmentId).order("signed_at", { ascending: true }),
+      supabase.from("shipment_movement_supervisors")
+        .select("*").eq("shipment_id", shipmentId),
+      supabase.from("delivery_declarations")
+        .select("*").eq("shipment_id", shipmentId)
+        .order("created_at", { ascending: false }).limit(1).maybeSingle(),
+    ]);
 
-    const { data: signatures } = await supabase
-      .from("document_signatures")
-      .select("*, signer:profiles!document_signatures_signer_id_fkey(full_name), signer_organization:organizations!document_signatures_organization_id_fkey(name)")
-      .eq("document_id", shipmentId)
-      .order("signed_at", { ascending: true });
-
-    const html = generateManifestHTML(shipment, custodyChain || [], signatures || []);
+    const html = generateManifestHTML(shipment, custodyRes.data || [], sigRes.data || [], supRes.data || [], declRes.data || null);
 
     return new Response(
       JSON.stringify({ success: true, html, shipmentNumber: shipment.shipment_number }),
@@ -328,7 +330,7 @@ function generateVerticalStampHTML(): string {
 
 // ═══════════════════════════════════════════════════════════════
 
-function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[]) {
+function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[], supervisors: any[], declaration: any) {
   const wasteTypeLabels: Record<string, string> = {
     plastic: "بلاستيك", paper: "ورق وكرتون", metal: "معادن", glass: "زجاج",
     organic: "عضوي", electronic: "إلكتروني", textile: "منسوجات",
@@ -725,37 +727,64 @@ ${custodyChain.length > 0 ? `
 
 <!-- 8. التوقيعات والأختام -->
 <div class="sigs">
-  <div class="sig-box">
-    <h5>🏭 المولّد</h5>
-    ${genSig?.signature_url ? `<img src="${genSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.generator?.signature_url ? `<img src="${shipment.generator.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.generator?.stamp_url ? `<img src="${shipment.generator.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${genSig?.signer?.full_name || shipment.generator?.representative_name || shipment.generator?.name || ".................."}</div>
-    <div class="sig-label">${genSig?.signed_at ? formatDate(genSig.signed_at) : formatDate(shipment.pickup_date)}</div>
-    <span class="sig-status ${genSig ? 'sig-signed' : 'sig-pending'}">${genSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(genVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-G: ${genHash}</div>
-  </div>
-  <div class="sig-box">
-    <h5>🚛 الناقل</h5>
-    ${transSig?.signature_url ? `<img src="${transSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.transporter?.signature_url ? `<img src="${shipment.transporter.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.transporter?.stamp_url ? `<img src="${shipment.transporter.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${transSig?.signer?.full_name || shipment.transporter?.representative_name || shipment.transporter?.name || ".................."}</div>
-    <div class="sig-label">${transSig?.signed_at ? formatDate(transSig.signed_at) : formatDate(shipment.in_transit_at)}</div>
-    <span class="sig-status ${transSig ? 'sig-signed' : 'sig-pending'}">${transSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(transVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-T: ${transHash}</div>
-  </div>
-  <div class="sig-box">
-    <h5>♻️ المستلم</h5>
-    ${recSig?.signature_url ? `<img src="${recSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.recycler?.signature_url ? `<img src="${shipment.recycler.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.recycler?.stamp_url ? `<img src="${shipment.recycler.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${recSig?.signer?.full_name || shipment.recycler?.representative_name || shipment.recycler?.name || ".................."}</div>
-    <div class="sig-label">${recSig?.signed_at ? formatDate(recSig.signed_at) : formatDate(shipment.delivered_at)}</div>
-    <span class="sig-status ${recSig ? 'sig-signed' : 'sig-pending'}">${recSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(recVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-R: ${recHash}</div>
-  </div>
+  ${[
+    { label: '🏭 المولّد', sig: genSig, org: shipment.generator, hash: genHash, prefix: 'G', verifyUrl: genVerifyUrl, fallbackDate: shipment.pickup_date },
+    { label: '🚛 الناقل', sig: transSig, org: shipment.transporter, hash: transHash, prefix: 'T', verifyUrl: transVerifyUrl, fallbackDate: shipment.in_transit_at },
+    { label: '♻️ المستلم', sig: recSig, org: shipment.recycler, hash: recHash, prefix: 'R', verifyUrl: recVerifyUrl, fallbackDate: shipment.delivered_at },
+  ].map((item: any) => {
+    const sigImgUrl = item.sig?.signature_image_url || item.sig?.signature_url || item.org?.signature_url;
+    const stampImgUrl = item.sig?.stamp_image_url || item.org?.stamp_url;
+    const signerName = item.sig?.signer_name || item.sig?.signer?.full_name || item.org?.representative_name || item.org?.name || '..................';
+    const sigMethod = item.sig?.signature_method;
+    const methodLabels: Record<string, string> = { digital: 'رقمي', drawn: 'مرسوم', drawn_biometric: 'بيومتري', biometric: 'بيومتري', uploaded: 'مرفوع' };
+    return `<div class="sig-box">
+      <h5>${item.label}</h5>
+      <div style="display:flex;justify-content:center;gap:2px;align-items:flex-end;min-height:18px;">
+        ${stampImgUrl ? `<img src="${stampImgUrl}" style="max-width:25px;max-height:16px;object-fit:contain;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
+        ${sigImgUrl ? `<img src="${sigImgUrl}" style="max-width:40px;max-height:16px;object-fit:contain;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
+      </div>
+      <div class="sig-label">${signerName}</div>
+      ${sigMethod ? `<div style="font-size:4.5px;color:#6b7280;">${methodLabels[sigMethod] || sigMethod}</div>` : ''}
+      ${item.sig?.platform_seal_number ? `<div style="font-family:monospace;font-size:4px;color:#4b5563;">${item.sig.platform_seal_number}</div>` : ''}
+      <div class="sig-label">${item.sig?.signed_at || item.sig?.timestamp_signed ? formatDate(item.sig.signed_at || item.sig.timestamp_signed) : formatDate(item.fallbackDate)}</div>
+      <span class="sig-status ${item.sig ? 'sig-signed' : 'sig-pending'}">${item.sig ? '✓ موقّع' : '⏳ انتظار'}</span>
+      <div class="sig-qr">${generateQRSvg(item.verifyUrl, 22)}</div>
+      <div class="sig-hash">VRF-${item.prefix}: ${item.hash}</div>
+    </div>`;
+  }).join('')}
 </div>
+
+<!-- 8b. مسئولو الحركة والمتابعة -->
+${supervisors.length > 0 ? `
+<div class="sec">
+  <div class="sec-t">مسئولو الحركة والمتابعة | Movement Supervisors</div>
+  <table>
+    <tr><th>الجهة</th><th>المسئول</th><th>النوع</th><th>الهاتف</th><th>وضع التوقيع</th></tr>
+    ${supervisors.map((sup: any) => {
+      const roleLabels: Record<string, string> = { generator: 'المولّد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
+      const methodLabels: Record<string, string> = { manual: 'يدوي', otp: 'OTP', national_id: 'رقم قومي', digital_stamp: 'ختم رقمي', full_auto: 'تلقائي كامل' };
+      return `<tr>
+        <td>${roleLabels[sup.party_role] || sup.party_role}</td>
+        <td>${sup.supervisor_type === 'ai' ? '🤖 ' : '👤 '}${sup.supervisor_name || '—'}</td>
+        <td>${sup.supervisor_type === 'ai' ? 'هوية رقمية' : sup.supervisor_type === 'org_head' ? 'رئيس المنظمة' : 'معيّن'}</td>
+        <td style="font-family:monospace;">${sup.supervisor_phone || '—'}</td>
+        <td>${sup.auto_sign_enabled ? `✅ تلقائي (${methodLabels[sup.auto_sign_method] || sup.auto_sign_method || 'يدوي'})` : '📝 يدوي'}</td>
+      </tr>`;
+    }).join('')}
+  </table>
+</div>` : ''}
+
+<!-- 8c. إقرار تسليم الشحنة -->
+${declaration ? `
+<div class="sec">
+  <div class="sec-t" style="border-right-color:#7c3aed;color:#5b21b6;">📋 إقرار تسليم الشحنة | Delivery Declaration</div>
+  <table>
+    <tr>
+      <td style="width:75%;padding:2px 4px;"><span class="lbl">المُقِر:</span> <span class="val">${declaration.driver_name || '—'}</span> | <span class="lbl">التاريخ:</span> <span class="val">${declaration.declared_at ? formatDateTime(declaration.declared_at) : '—'}</span> <span style="color:#16a34a;font-weight:bold;">✅ تم التوقيع إلكترونياً</span></td>
+      <td style="width:25%;text-align:center;">${generateQRSvg(`https://irecycle.app/qr-verify?type=declaration&code=DEC-${(declaration.id || '').slice(0, 8).toUpperCase()}`, 22)}<div style="font-size:4.5px;color:#6b7280;">DEC-${(declaration.id || '').slice(0, 8).toUpperCase()}</div></td>
+    </tr>
+  </table>
+</div>` : ''}
 
 <!-- 9. الشروط -->
 <div class="terms">
