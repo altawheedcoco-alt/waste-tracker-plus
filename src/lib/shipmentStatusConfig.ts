@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 
 // All possible shipment statuses
+export type OrgTypeForStatus = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
+
 export type ShipmentStatus = 
   // Transporter statuses
   | 'pending'        // معلق
@@ -356,31 +358,44 @@ export const getStatusesByPhase = (phase: 'transporter' | 'recycler' | 'disposal
 // Get available next statuses based on current status and organization type
 export const getAvailableNextStatuses = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
+  organizationType: OrgTypeForStatus,
+  options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
 ): StatusConfig[] => {
   const currentConfig = getStatusConfig(currentStatus);
-  if (!currentConfig) return allStatuses; // If no current config, allow all statuses
+  if (!currentConfig) return allStatuses;
 
   // Admin can change to any status
   if (organizationType === 'admin') {
     return allStatuses.filter(s => s.key !== currentStatus);
   }
 
-  // Generator can only hand over the shipment (mark as picked_up = "تم التسليم" from generator perspective)
+  // Generator can only hand over (mark as picked_up)
   if (organizationType === 'generator') {
     const generatorAllowed = transporterStatuses
       .filter(s => ['picked_up'].includes(s.key))
-      .map(s => ({ ...s, labelAr: 'تم التسليم' })); // Override label for generator context
+      .map(s => ({ ...s, labelAr: 'تم التسليم' }));
     return generatorAllowed.filter(s => s.key !== currentStatus);
   }
 
-  // Transporter can change all transporter phase statuses (not just next ones)
+  // Driver: full freedom on all transporter phase statuses
+  if (organizationType === 'driver') {
+    return transporterStatuses.filter(s => s.key !== currentStatus);
+  }
+
+  // Transporter: can change transporter phase statuses
+  // Rule: allowed if no driver assigned OR driver belongs to this transporter
   if (organizationType === 'transporter') {
-    // If current status is in transporter phase, return all transporter statuses except current
+    const hasDriver = options?.hasAssignedDriver ?? false;
+    const driverIsOwn = options?.driverBelongsToTransporter ?? true;
+
+    // If there's an external driver (not belonging to transporter), transporter cannot change status
+    if (hasDriver && !driverIsOwn) {
+      return [];
+    }
+
     if (currentConfig.phase === 'transporter') {
       return transporterStatuses.filter(s => s.key !== currentStatus);
     }
-    // Transporter can also move back to transporter statuses from other phases
     return transporterStatuses;
   }
 
@@ -412,11 +427,11 @@ export const getAvailableNextStatuses = (
 // Check if organization can change status
 export const canChangeStatus = (
   currentStatus: string,
-  organizationType: 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin'
+  organizationType: OrgTypeForStatus,
+  options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
 ): boolean => {
-  // Admin can always change status
   if (organizationType === 'admin') return true;
-  return getAvailableNextStatuses(currentStatus, organizationType).length > 0;
+  return getAvailableNextStatuses(currentStatus, organizationType, options).length > 0;
 };
 
 // Get phase for a status

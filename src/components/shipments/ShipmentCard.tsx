@@ -189,7 +189,7 @@ const ShipmentCard = ({
   const mappedStatus = mapLegacyStatus(shipment.status);
   const currentStatusConfig = getStatusConfig(mappedStatus);
   
-  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin';
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
   const isAdmin = organizationType === 'admin';
   const canChange = canChangeStatus(mappedStatus, organizationType);
   const isRecycler = organizationType === 'recycler';
