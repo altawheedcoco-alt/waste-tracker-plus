@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { FocusMusicProvider } from '@/contexts/FocusMusicContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useViewMode } from '@/contexts/ViewModeContext';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
