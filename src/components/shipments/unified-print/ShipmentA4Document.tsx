@@ -31,12 +31,20 @@ interface ShipmentA4DocumentProps {
   documentSerial: string;
   verificationCode: string;
   supervisors?: MovementSupervisor[];
+  signatures?: DocumentSignatureData[];
   declaration?: any;
   /** Which pages to render */
   pages?: ('summary' | 'details')[];
   /** Whether to use compact single-page mode */
   compact?: boolean;
 }
+
+const ROLE_LABELS: Record<string, string> = {
+  generator: 'المولّد', transporter: 'الناقل', recycler: 'المستقبل', disposal: 'التخلص', other: 'أخرى',
+};
+const METHOD_LABELS: Record<string, string> = {
+  digital: 'رقمي', drawn: 'مرسوم', drawn_biometric: 'بيومتري', biometric: 'بيومتري', uploaded: 'مرفوع',
+};
 
 const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>(({
   shipment, theme, qrData, driverName, vehiclePlate,
