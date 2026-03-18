@@ -10,6 +10,7 @@ import Barcode from 'react-barcode';
 import { PrintTheme, getThemeById } from '../printThemes';
 import ShipmentTaglineFooter from '../ShipmentTaglineFooter';
 import { generateMICRLineHTML, generateVerticalStampHTML } from '@/lib/printSecurityUtils';
+import { generateDigitalSealSVG, generateSealNumber, generateDocumentSealProof } from '@/lib/secureDigitalSeal';
 import type {
   ShipmentPrintData, MovementSupervisor, DocumentSignatureData,
   WASTE_TYPE_LABELS, STATUS_LABELS, HAZARD_LABELS, DISPOSAL_LABELS, PACKAGING_LABELS,
