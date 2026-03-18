@@ -815,6 +815,8 @@ export async function autoCreateDriverDeliveryDeclaration(
 }
 
 
+/**
+ * Checks if driver declaration should be visible to generator.
  * Priority: per-driver setting > org-level setting > default (true)
  */
 async function isDriverDeclarationVisibleToGenerator(
