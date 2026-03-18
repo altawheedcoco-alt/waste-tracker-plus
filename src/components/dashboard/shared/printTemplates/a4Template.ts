@@ -129,6 +129,11 @@ ${generateDigitalVerificationStamp({
   documentType: 'report',
   entityName: orgName,
   accentColor: '#059669',
+  seal: orgId ? {
+    entityId: orgId,
+    entityType: 'organization',
+    entityDisplayName: orgName,
+  } : undefined,
 })}
 
 <div class="footer">
