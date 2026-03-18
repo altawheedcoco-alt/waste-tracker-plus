@@ -140,6 +140,11 @@ const EntityCertificateTemplate = forwardRef<HTMLDivElement, EntityCertificateTe
       entityName: data.entityName,
       accentColor: config.accentColor,
       verificationCode: data.verificationCode,
+      seal: {
+        entityId: data.certificateNumber,
+        entityType: 'organization',
+        entityDisplayName: data.entityName,
+      },
     });
 
     const borderStyle = designVariant === 'bordered'

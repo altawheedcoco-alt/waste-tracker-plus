@@ -2,6 +2,7 @@ import { format } from 'date-fns';
 import { generateDigitalVerificationStamp } from '@/lib/digitalVerificationStamp';
 interface A4Data {
   orgName: string;
+  orgId?: string;
   dateStr: string;
   timeStr: string;
   userName: string;

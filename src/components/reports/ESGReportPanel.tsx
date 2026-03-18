@@ -240,9 +240,14 @@ const ESGReportPanel = memo(({ organizationId, showPrint = true, embedded = fals
           ${generateDigitalVerificationStamp({
             referenceNumber: `ESG-${format(new Date(), 'yyyyMMdd')}`,
             documentType: 'report',
-            entityName: 'iRecycle',
+            entityName: organization?.name || 'iRecycle',
             accentColor: '#059669',
             compact: true,
+            seal: orgId ? {
+              entityId: orgId,
+              entityType: 'organization',
+              entityDisplayName: organization?.name || 'iRecycle',
+            } : undefined,
           })}
           <p style="margin-top:12px;text-align:center;color:#6b7280;font-size:12px">تم إنشاء هذا التقرير آلياً بواسطة منصة iRecycle | ${format(new Date(), 'PPP', { locale: ar })}</p>
           </body></html>`;
