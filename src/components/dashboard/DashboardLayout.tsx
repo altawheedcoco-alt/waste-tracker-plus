@@ -514,7 +514,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               <div className="px-4 py-3.5 border-b border-sidebar-border">
                 <div className="flex items-center justify-between gap-2">
                   <Link to="/dashboard" className="flex items-center gap-3 flex-1">
-                    <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isSidebarOpen} />
+                    <PlatformLogo size={isMobile ? 'sm' : 'md'} showText={false} showSubtitle={isExpandedSidebar} />
                   </Link>
                   <Tooltip>
                     <TooltipTrigger asChild>
