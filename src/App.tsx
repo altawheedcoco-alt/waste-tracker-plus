@@ -34,6 +34,9 @@ const queryClient = createSmartQueryClient();
 // Public routes only at startup; dashboard routes loaded on demand
 import { publicRoutes } from "@/routes/PublicRoutes";
 
+// Eagerly preload dashboard routes module on first script eval
+const dashboardRoutesPromise = import('@/routes/DashboardRoutes');
+
 const AppRoutes = memo(() => {
   const location = useLocation();
   const [dashboardRoutes, setDashboardRoutes] = useState<React.ReactNode>(null);
@@ -48,7 +51,8 @@ const AppRoutes = memo(() => {
       return;
     }
 
-    import('@/routes/DashboardRoutes')
+    // Use pre-fetched promise — resolves instantly if already loaded
+    dashboardRoutesPromise
       .then((mod) => {
         if (cancelled) return;
         setDashboardRoutes(mod.dashboardRoutes);
