@@ -701,7 +701,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               className="w-full flex items-center justify-center gap-2 h-9 text-destructive/80 hover:bg-destructive/8 hover:text-destructive transition-all duration-150 rounded-lg text-[13px]"
             >
               <LogOut className="w-4 h-4" />
-              {isExpandedSidebar && (
+              {isSidebarOpen && (
                 <span className="font-medium whitespace-nowrap">
                   {t('nav.logout')}
                 </span>
