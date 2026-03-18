@@ -398,7 +398,7 @@ export default function MemberSocialProfile() {
               </>
             )}
             {/* Cover action buttons */}
-            <div className="absolute bottom-3 left-3 flex gap-2 z-20">
+            <div className="absolute bottom-3 left-3 z-20 flex max-w-[calc(100%-1.5rem)] flex-wrap gap-2">
               {isOwnProfile && (
                 <>
                   <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
@@ -425,21 +425,21 @@ export default function MemberSocialProfile() {
           </div>
 
           {/* Profile Info */}
-          <div className="px-4 md:px-6 pb-4 -mt-16 relative">
-            <div className="flex items-end gap-4">
+          <div className="relative z-30 -mt-10 px-4 pb-4 pt-3 md:-mt-16 md:px-6 md:pt-0">
+            <div className="flex flex-col gap-4 md:flex-row md:items-end">
               {/* Avatar */}
-              <div className="relative group/avatar">
+              <div className="relative mx-auto group/avatar md:mx-0 md:shrink-0">
                 <Avatar
-                  className="w-28 h-28 border-4 border-background shadow-lg cursor-pointer"
+                  className="h-28 w-28 cursor-pointer border-4 border-background shadow-lg"
                   onClick={() => setAvatarGalleryOpen(true)}
                 >
                   <AvatarImage src={targetProfile.avatar_url || undefined} />
-                  <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">{initials}</AvatarFallback>
+                  <AvatarFallback className="bg-primary text-3xl font-bold text-primary-foreground">{initials}</AvatarFallback>
                 </Avatar>
                 {/* Avatar gallery button */}
                 <Button
                   size="icon" variant="secondary"
-                  className="absolute -bottom-1 -left-1 w-7 h-7 rounded-full shadow opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                  className="absolute -bottom-1 -left-1 h-7 w-7 rounded-full shadow opacity-0 transition-opacity group-hover/avatar:opacity-100"
                   onClick={() => setAvatarGalleryOpen(true)}
                 >
                   <Images className="w-3.5 h-3.5" />
@@ -449,7 +449,7 @@ export default function MemberSocialProfile() {
                     <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
                     <Button
                       size="icon" variant="secondary"
-                      className="absolute bottom-0 right-0 w-8 h-8 rounded-full shadow"
+                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full shadow"
                       onClick={() => avatarInputRef.current?.click()}
                       disabled={uploading}
                     >
@@ -460,9 +460,9 @@ export default function MemberSocialProfile() {
               </div>
 
               {/* Name & Info */}
-              <div className="flex-1 min-w-0 pb-1">
-                <h1 className="text-xl md:text-2xl font-bold">{targetProfile.full_name}</h1>
-                <div className="flex items-center gap-2 flex-wrap mt-1">
+              <div className="min-w-0 flex-1 pb-1 text-center md:text-right">
+                <h1 className="text-xl font-bold md:text-2xl">{targetProfile.full_name}</h1>
+                <div className="mt-1 flex flex-wrap items-center justify-center gap-2 md:justify-start">
                   {memberPosition && (
                     <Badge variant="secondary" className="gap-1">
                       <Briefcase className="w-3 h-3" />
@@ -488,7 +488,7 @@ export default function MemberSocialProfile() {
               </div>
 
               {/* Actions */}
-              <div className="flex items-center gap-2 pb-1">
+              <div className="flex flex-wrap items-center justify-center gap-2 pb-1 md:justify-start">
                 {avgRating && (
                   <Badge className="gap-1 bg-amber-100 text-amber-800 dark:bg-amber-950/30 dark:text-amber-300 border-amber-200">
                     <Star className="w-3 h-3 fill-current" /> {avgRating}
