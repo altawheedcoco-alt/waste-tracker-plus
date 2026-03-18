@@ -180,11 +180,11 @@ const TransporterCommandCenter = () => {
         // NEW: Full org data
         supabase.from('invoices').select('id, status, total_amount').eq('organization_id', organization!.id),
         supabase.from('shipment_receipts').select('id, status, created_at').eq('transporter_id', organization!.id),
-        supabase.from('organization_members').select('id, role, is_active').eq('organization_id', organization!.id),
-        supabase.from('vehicles').select('id, status').eq('organization_id', organization!.id),
-        supabase.from('entity_documents').select('id, status, expires_at').eq('organization_id', organization!.id),
+        supabase.from('organization_members').select('id, status').eq('organization_id', organization!.id),
+        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', organization!.id),
+        supabase.from('entity_documents').select('id, document_category, created_at').eq('organization_id', organization!.id),
         supabase.from('contracts').select('id, status').eq('organization_id', organization!.id),
-        supabase.from('deposits').select('id, amount, status').eq('organization_id', organization!.id),
+        supabase.from('deposits').select('id, amount').eq('organization_id', organization!.id),
       ]);
 
       const todayData = todayR.data || [];
