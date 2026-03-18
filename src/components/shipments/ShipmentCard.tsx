@@ -235,19 +235,23 @@ const ShipmentCard = ({
     setIsQuickStatusChanging(true);
     try {
       const dbStatus = mapToDbStatus(newStatus);
+      console.log('[StatusChange:Card] UI status:', newStatus, '→ DB status:', dbStatus, '| Shipment ID:', shipment.id);
       
       const { error } = await supabase
         .from('shipments')
         .update({ status: dbStatus as any })
         .eq('id', shipment.id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('[StatusChange:Card] DB Error:', JSON.stringify(error));
+        throw error;
+      }
 
       toast.success(`تم تغيير الحالة إلى: ${getStatusConfig(newStatus)?.labelAr}`);
       onStatusChange?.();
-    } catch (error) {
-      console.error('Error changing status:', error);
-      toast.error('حدث خطأ أثناء تغيير الحالة');
+    } catch (error: any) {
+      console.error('[StatusChange:Card] Error:', error?.message || error, error?.code);
+      toast.error(`حدث خطأ أثناء تغيير الحالة: ${error?.message || 'خطأ غير معروف'}`);
     } finally {
       setIsQuickStatusChanging(false);
     }
