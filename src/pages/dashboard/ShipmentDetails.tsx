@@ -228,7 +228,10 @@ const ShipmentDetailsPage = () => {
               <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
             </Suspense>
             <Suspense fallback={null}>
-              <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
+              <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="manifest" label="توقيع المانيفست" variant="outline" size="sm" />
+            </Suspense>
+            <Suspense fallback={null}>
+              <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="shipment_tracking" label="توقيع التتبع" variant="outline" size="sm" />
             </Suspense>
             <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />

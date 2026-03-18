@@ -9,6 +9,7 @@ import {
 import { Printer, Download, Eye, ChevronDown, Loader2, FileText } from 'lucide-react';
 import SendToPartiesPopover from './SendToPartiesPopover';
 import ManifestPDFButton from '../ManifestPDFButton';
+import SignManifestButton from '../SignManifestButton';
 import type { ShipmentPrintData } from './types';
 
 interface ExportActionsProps {
@@ -57,6 +58,12 @@ const ExportActions = ({
         {shipment && (
           <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
         )}
+        {shipment && (
+          <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="manifest" label="توقيع المانيفست" variant="outline" size="sm" />
+        )}
+        {shipment && (
+          <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="shipment_tracking" label="توقيع التتبع" variant="outline" size="sm" />
+        )}
         <Button variant="eco" size="sm" onClick={onPrint} className="gap-1.5 h-8">
           <Printer className="w-3.5 h-3.5" />
           طباعة
@@ -84,6 +91,12 @@ const ExportActions = ({
       {shipment && <SendToPartiesPopover shipment={shipment} />}
       {shipment && (
         <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" />
+      )}
+      {shipment && (
+        <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="manifest" label="توقيع المانيفست" variant="outline" />
+      )}
+      {shipment && (
+        <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="shipment_tracking" label="توقيع التتبع" variant="outline" />
       )}
       <Button variant="eco" onClick={onPrint} className="gap-2">
         <Printer className="w-4 h-4" />

@@ -11,14 +11,25 @@ import { toast } from 'sonner';
 interface SignManifestButtonProps {
   shipmentId: string;
   shipmentNumber: string;
+  /** Document type to sign */
+  documentType?: 'manifest' | 'shipment_tracking';
+  /** Button label override */
+  label?: string;
   variant?: 'default' | 'outline' | 'ghost' | 'secondary';
   size?: 'default' | 'sm' | 'lg' | 'icon';
   className?: string;
 }
 
+const DOC_TYPE_LABELS: Record<string, string> = {
+  manifest: 'المانيفست',
+  shipment_tracking: 'نموذج تتبع نقل المخلفات',
+};
+
 const SignManifestButton = ({
   shipmentId,
   shipmentNumber,
+  documentType = 'manifest',
+  label,
   variant = 'outline',
   size = 'sm',
   className = '',
@@ -37,7 +48,7 @@ const SignManifestButton = ({
         .from('document_signatures')
         .select('id')
         .eq('document_id', shipmentId)
-        .eq('document_type', 'manifest')
+        .eq('document_type', documentType)
         .eq('signed_by', user.id)
         .maybeSingle();
       setAlreadySigned(!!data);
@@ -96,7 +107,7 @@ const SignManifestButton = ({
         .from('document_signatures')
         .insert({
           document_id: shipmentId,
-          document_type: 'manifest',
+          document_type: documentType,
           signed_by: user.id,
           signer_name: profile?.full_name || user.email || 'غير معروف',
           signer_role: signerRole,
@@ -115,14 +126,14 @@ const SignManifestButton = ({
 
       if (error) throw error;
 
-      toast.success('تم التوقيع على المانيفست بنجاح', {
+      toast.success(`تم التوقيع على ${DOC_TYPE_LABELS[documentType]} بنجاح`, {
         description: `كود التوقيع: ${signatureHash}`,
       });
       setAlreadySigned(true);
       setShowDialog(false);
     } catch (error: any) {
       console.error('Signing error:', error);
-      toast.error('فشل في التوقيع على المانيفست');
+      toast.error(`فشل في التوقيع على ${DOC_TYPE_LABELS[documentType]}`);
     } finally {
       setSigning(false);
     }
@@ -137,7 +148,7 @@ const SignManifestButton = ({
         onClick={handleOpen}
       >
         <PenTool className="w-4 h-4" />
-        {size !== 'icon' && 'توقيع'}
+        {size !== 'icon' && (label || 'توقيع')}
       </Button>
 
       <Dialog open={showDialog} onOpenChange={setShowDialog}>
@@ -145,7 +156,7 @@ const SignManifestButton = ({
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <PenTool className="w-5 h-5 text-primary" />
-              التوقيع على المانيفست
+              التوقيع على {DOC_TYPE_LABELS[documentType]}
             </DialogTitle>
             <DialogDescription>
               مانيفست الشحنة {shipmentNumber}
