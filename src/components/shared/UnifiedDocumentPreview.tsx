@@ -176,23 +176,24 @@ const UnifiedDocumentPreview = ({
           </div>
         ) : (
           <div
-            className="bg-white shadow-2xl"
+            className="bg-white shadow-2xl origin-top"
             style={{
-              width: `${210 * zoom}mm`,
-              minHeight: `${297 * zoom}mm`,
-              overflow: 'hidden',
+              width: '210mm',
+              minHeight: '297mm',
+              transform: `scale(${zoom})`,
+              transformOrigin: 'top center',
             }}
           >
             {htmlContent ? (
               <div
                 ref={htmlRef}
                 dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
-                style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
+                style={{ width: '210mm', minHeight: '297mm' }}
               />
             ) : (
               <div
                 ref={contentRef}
-                style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
+                style={{ width: '210mm', minHeight: '297mm' }}
               >
                 {children}
               </div>
