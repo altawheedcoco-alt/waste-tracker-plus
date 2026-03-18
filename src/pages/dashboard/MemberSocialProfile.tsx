@@ -718,6 +718,18 @@ export default function MemberSocialProfile() {
             </DialogHeader>
             <div className="space-y-4">
               <div>
+                <label className="text-sm font-medium mb-1 block">الاسم الكامل</label>
+                <Input value={editName} onChange={e => setEditName(e.target.value)} placeholder="الاسم بالعربي أو الإنجليزي" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">البريد الإلكتروني</label>
+                <Input value={editEmail} onChange={e => setEditEmail(e.target.value)} placeholder="example@mail.com" type="email" dir="ltr" />
+              </div>
+              <div>
+                <label className="text-sm font-medium mb-1 block">رقم الهاتف</label>
+                <Input value={editPhone} onChange={e => setEditPhone(e.target.value)} placeholder="01xxxxxxxxx" dir="ltr" />
+              </div>
+              <div>
                 <label className="text-sm font-medium mb-1 block">نبذة شخصية</label>
                 <Textarea value={editBio} onChange={e => setEditBio(e.target.value)} placeholder="اكتب نبذة عنك..." className="min-h-[80px]" />
               </div>
@@ -728,8 +740,8 @@ export default function MemberSocialProfile() {
             </div>
             <DialogFooter className="gap-2">
               <Button variant="outline" onClick={() => setEditBioOpen(false)}>إلغاء</Button>
-              <Button onClick={() => saveBio.mutate()} disabled={saveBio.isPending} className="gap-1.5">
-                {saveBio.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
+              <Button onClick={() => saveProfile.mutate()} disabled={saveProfile.isPending} className="gap-1.5">
+                {saveProfile.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <UserCheck className="w-4 h-4" />}
                 حفظ
               </Button>
             </DialogFooter>
