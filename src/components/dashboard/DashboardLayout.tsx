@@ -468,9 +468,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   }, [quickActionsSidebarItems, sidebarSearch]);
 
   // Get responsive values
-  const MINI_WIDTH = 64;
-  const FULL_WIDTH = isMobile ? 260 : isTablet ? 270 : 280;
-  const sidebarWidth = sidebarMode === 'hidden' ? 0 : (isMiniSidebar ? MINI_WIDTH : FULL_WIDTH);
+  const SIDEBAR_WIDTH = isMobile ? 260 : isTablet ? 270 : 280;
+  const sidebarWidth = isSidebarOpen ? SIDEBAR_WIDTH : 0;
   const headerHeight = isMobile ? 'h-[52px]' : 'h-14';
   const mainPadding = fullWidth ? 'px-3 py-3' : getResponsiveClass({
     mobile: 'px-3 pt-3 pb-0',
