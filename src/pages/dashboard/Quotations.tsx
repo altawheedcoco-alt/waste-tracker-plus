@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { useQuotations, type QuotationItem, type Quotation } from '@/hooks/useQuotations';
 import { getTemplatesByEntity, getTemplateById, ENTITY_LABELS, DIRECTION_LABELS, DOCUMENT_TYPE_LABELS, type QuotationTemplate, type QuotationDirection, type DocumentType } from '@/lib/quotationTemplates';
@@ -11,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, FileText, Send, Printer, Trash2, Check, X, Clock, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
+import { Plus, FileText, Send, Printer, Trash2, Check, X, Clock, ArrowUpRight, ArrowDownLeft, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useReactToPrint } from 'react-to-print';
