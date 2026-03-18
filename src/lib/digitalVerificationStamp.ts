@@ -11,11 +11,25 @@
  * - Document Reference Number
  * - Legal disclaimer
  * - Entity name (org/user)
+ * - Secure Digital Seal (optional, auto-generated from entity data)
  * 
  * Usage in raw HTML print contexts:
  *   const stampHTML = generateDigitalVerificationStamp({ ... });
  *   printWindow.document.write(`...${stampHTML}...`);
  */
+
+import { generateDigitalSealSVG, generateSealNumber, generateDocumentSealProof } from './secureDigitalSeal';
+
+interface StampEntitySeal {
+  /** Entity ID for seal generation */
+  entityId: string;
+  /** Entity type */
+  entityType: 'member' | 'organization';
+  /** Entity display name */
+  entityDisplayName: string;
+  /** Optional title/position */
+  title?: string;
+}
 
 interface StampOptions {
   /** Reference number (shipment, invoice, document number) */
@@ -34,6 +48,8 @@ interface StampOptions {
   compact?: boolean;
   /** Base URL for QR verification */
   baseUrl?: string;
+  /** Secure digital seal data — when provided, the cryptographic seal is included */
+  seal?: StampEntitySeal;
 }
 
 /** Generate a simple SVG QR code (7-segment grid-based) */
