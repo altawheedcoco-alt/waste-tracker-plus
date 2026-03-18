@@ -60,6 +60,8 @@ export default function MemberSocialProfile() {
   const [reviewText, setReviewText] = useState('');
   const [reviewCategory, setReviewCategory] = useState('general');
   const [uploading, setUploading] = useState(false);
+  const [coverGalleryOpen, setCoverGalleryOpen] = useState(false);
+  const [avatarGalleryOpen, setAvatarGalleryOpen] = useState(false);
 
   // Fetch target profile
   const { data: targetProfile, isLoading: profileLoading } = useQuery({
