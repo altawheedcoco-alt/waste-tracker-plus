@@ -30,53 +30,53 @@ interface FocusMusicActionsContextType {
 interface FocusMusicContextType extends FocusMusicStateContextType, FocusMusicActionsContextType {}
 
 const focusTracks: FocusTrack[] = [
-  // ── Nature Sounds ── (Internet Archive - reliable MP3s)
-  { id: 'rain', name: 'Rain', nameAr: 'مطر هادئ', icon: '🌧️', url: 'https://cdn.pixabay.com/audio/2022/05/13/audio_257112671d.mp3', category: 'nature' },
-  { id: 'forest', name: 'Forest Birds', nameAr: 'طيور الغابة', icon: '🌲', url: 'https://cdn.pixabay.com/audio/2022/02/23/audio_ea70ad08e3.mp3', category: 'nature' },
-  { id: 'ocean', name: 'Ocean Waves', nameAr: 'أمواج البحر', icon: '🌊', url: 'https://cdn.pixabay.com/audio/2024/11/28/audio_9e11e1a2c0.mp3', category: 'nature' },
-  { id: 'creek', name: 'Creek Water', nameAr: 'جدول ماء', icon: '💧', url: 'https://cdn.pixabay.com/audio/2022/08/31/audio_419263a958.mp3', category: 'nature' },
-  { id: 'night', name: 'Night Crickets', nameAr: 'صراصير الليل', icon: '🌙', url: 'https://cdn.pixabay.com/audio/2022/04/01/audio_71816e4bee.mp3', category: 'nature' },
-  { id: 'thunder', name: 'Thunder Rain', nameAr: 'رعد ومطر', icon: '⛈️', url: 'https://cdn.pixabay.com/audio/2022/10/30/audio_f3b0e82c76.mp3', category: 'nature' },
+  // ── Nature Sounds ── (local files)
+  { id: 'rain', name: 'Rain', nameAr: 'مطر هادئ', icon: '🌧️', url: '/audio/track2.mp3', category: 'nature' },
+  { id: 'forest', name: 'Forest Birds', nameAr: 'طيور الغابة', icon: '🌲', url: '/audio/track3.mp3', category: 'nature' },
+  { id: 'ocean', name: 'Ocean Waves', nameAr: 'أمواج البحر', icon: '🌊', url: '/audio/track4.mp3', category: 'nature' },
+  { id: 'creek', name: 'Creek Water', nameAr: 'جدول ماء', icon: '💧', url: '/audio/track5.mp3', category: 'nature' },
+  { id: 'night', name: 'Night Crickets', nameAr: 'صراصير الليل', icon: '🌙', url: '/audio/track6.mp3', category: 'nature' },
+  { id: 'thunder', name: 'Thunder Rain', nameAr: 'رعد ومطر', icon: '⛈️', url: '/audio/track7.mp3', category: 'nature' },
 
   // ── Piano Music ──
-  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: 'https://cdn.pixabay.com/audio/2023/09/19/audio_8e16e09e45.mp3', category: 'piano' },
-  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: 'https://cdn.pixabay.com/audio/2024/11/14/audio_223e725bc5.mp3', category: 'piano' },
-  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://cdn.pixabay.com/audio/2023/07/07/audio_98ae12a16e.mp3', category: 'piano' },
-  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://cdn.pixabay.com/audio/2023/10/26/audio_9e1fcf3f04.mp3', category: 'piano' },
-  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://cdn.pixabay.com/audio/2024/02/14/audio_8e153fe315.mp3', category: 'piano' },
-  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://cdn.pixabay.com/audio/2024/09/10/audio_6e1833f0c5.mp3', category: 'piano' },
+  { id: 'piano1', name: 'Peaceful Piano', nameAr: 'بيانو هادئ', icon: '🎹', url: '/audio/track8.mp3', category: 'piano' },
+  { id: 'piano2', name: 'Soft Piano', nameAr: 'بيانو ناعم', icon: '🎶', url: '/audio/track9.mp3', category: 'piano' },
+  { id: 'piano3', name: 'Emotional Piano', nameAr: 'بيانو عاطفي', icon: '💫', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', category: 'piano' },
+  { id: 'piano4', name: 'Relaxing Piano', nameAr: 'بيانو مريح', icon: '✨', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', category: 'piano' },
+  { id: 'piano5', name: 'Dreamy Piano', nameAr: 'بيانو حالم', icon: '🌸', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', category: 'piano' },
+  { id: 'piano6', name: 'Study Piano', nameAr: 'بيانو للدراسة', icon: '📚', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', category: 'piano' },
 
   // ── Ambient Music ──
-  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://cdn.pixabay.com/audio/2023/04/11/audio_14a47e7eb2.mp3', category: 'ambient' },
-  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3', category: 'ambient' },
-  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://cdn.pixabay.com/audio/2023/03/20/audio_413990928b.mp3', category: 'ambient' },
-  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://cdn.pixabay.com/audio/2022/01/20/audio_cdd8fa8ccc.mp3', category: 'ambient' },
-  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://cdn.pixabay.com/audio/2024/06/11/audio_d08c12503a.mp3', category: 'ambient' },
-  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: 'https://cdn.pixabay.com/audio/2023/09/04/audio_3dd51cd41a.mp3', category: 'ambient' },
+  { id: 'lofi', name: 'Lo-Fi Beats', nameAr: 'لو-فاي', icon: '🎧', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', category: 'ambient' },
+  { id: 'meditation', name: 'Meditation', nameAr: 'تأمل', icon: '🧘', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', category: 'ambient' },
+  { id: 'ambient1', name: 'Deep Focus', nameAr: 'تركيز عميق', icon: '🧠', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', category: 'ambient' },
+  { id: 'ambient2', name: 'Calm Ambient', nameAr: 'أجواء هادئة', icon: '🎵', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', category: 'ambient' },
+  { id: 'ambient3', name: 'Chill Beats', nameAr: 'إيقاعات مريحة', icon: '🎼', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', category: 'ambient' },
+  { id: 'ambient4', name: 'Space Ambient', nameAr: 'أجواء فضائية', icon: '🌌', url: '/audio/track2.mp3', category: 'ambient' },
 
   // ── Calm & Relaxing ──
-  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: 'https://cdn.pixabay.com/audio/2022/05/16/audio_1333dfda21.mp3', category: 'calm' },
-  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: 'https://cdn.pixabay.com/audio/2023/10/24/audio_0a2887e620.mp3', category: 'calm' },
-  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: 'https://cdn.pixabay.com/audio/2024/01/10/audio_e723e8aad1.mp3', category: 'calm' },
-  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: 'https://cdn.pixabay.com/audio/2023/04/07/audio_1cecbc0e39.mp3', category: 'calm' },
-  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: 'https://cdn.pixabay.com/audio/2022/10/18/audio_db74590783.mp3', category: 'calm' },
-  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: 'https://cdn.pixabay.com/audio/2023/06/07/audio_9f320cceec.mp3', category: 'calm' },
+  { id: 'calm1', name: 'Morning Serenity', nameAr: 'صفاء الصباح', icon: '🌅', url: '/audio/track3.mp3', category: 'calm' },
+  { id: 'calm2', name: 'Gentle Breeze', nameAr: 'نسيم لطيف', icon: '🍃', url: '/audio/track4.mp3', category: 'calm' },
+  { id: 'calm3', name: 'Sunset Glow', nameAr: 'وهج الغروب', icon: '🌇', url: '/audio/track5.mp3', category: 'calm' },
+  { id: 'calm4', name: 'Floating Clouds', nameAr: 'سحب عائمة', icon: '☁️', url: '/audio/track6.mp3', category: 'calm' },
+  { id: 'calm5', name: 'Quiet River', nameAr: 'نهر هادئ', icon: '🏞️', url: '/audio/track7.mp3', category: 'calm' },
+  { id: 'calm6', name: 'Zen Garden', nameAr: 'حديقة زن', icon: '🪷', url: '/audio/track8.mp3', category: 'calm' },
 
   // ── International / Classical ──
-  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://cdn.pixabay.com/audio/2022/01/18/audio_d0a13f69d2.mp3', category: 'international' },
-  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://cdn.pixabay.com/audio/2024/09/18/audio_7d9d5d16de.mp3', category: 'international' },
-  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://cdn.pixabay.com/audio/2024/04/16/audio_ceb70a3e02.mp3', category: 'international' },
-  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://cdn.pixabay.com/audio/2023/10/13/audio_4fa080b314.mp3', category: 'international' },
-  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: 'https://cdn.pixabay.com/audio/2022/08/25/audio_4f3b0a8791.mp3', category: 'international' },
-  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://cdn.pixabay.com/audio/2023/05/17/audio_10a62b3b3f.mp3', category: 'international' },
+  { id: 'intl1', name: 'Cinematic Epic', nameAr: 'سينمائي ملحمي', icon: '🎬', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3', category: 'international' },
+  { id: 'intl2', name: 'Jazz Smooth', nameAr: 'جاز ناعم', icon: '🎤', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3', category: 'international' },
+  { id: 'intl3', name: 'Acoustic Vibes', nameAr: 'أكوستيك', icon: '🎸', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-5.mp3', category: 'international' },
+  { id: 'intl4', name: 'Jazz Café', nameAr: 'جاز كافيه', icon: '☕', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-7.mp3', category: 'international' },
+  { id: 'intl5', name: 'World Music', nameAr: 'موسيقى عالمية', icon: '🌍', url: '/audio/track9.mp3', category: 'international' },
+  { id: 'intl6', name: 'Indie Chill', nameAr: 'إندي هادئ', icon: '🪕', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-9.mp3', category: 'international' },
 
   // ── Instrumental / Melodies ──
-  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://cdn.pixabay.com/audio/2023/07/27/audio_4348a5cd38.mp3', category: 'instrumental' },
-  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://cdn.pixabay.com/audio/2022/09/08/audio_3e6e8a88c6.mp3', category: 'instrumental' },
-  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://cdn.pixabay.com/audio/2023/09/28/audio_0606dbd4f5.mp3', category: 'instrumental' },
-  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://cdn.pixabay.com/audio/2024/01/22/audio_bfb0db417c.mp3', category: 'instrumental' },
-  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: 'https://cdn.pixabay.com/audio/2023/11/06/audio_1df24c1968.mp3', category: 'instrumental' },
-  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: 'https://cdn.pixabay.com/audio/2024/03/04/audio_2b3ad0d01d.mp3', category: 'instrumental' },
+  { id: 'inst1', name: 'Guitar Melody', nameAr: 'جيتار عذب', icon: '🎸', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3', category: 'instrumental' },
+  { id: 'inst2', name: 'Violin Dreams', nameAr: 'كمان حالم', icon: '🎻', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3', category: 'instrumental' },
+  { id: 'inst3', name: 'Flute Serenity', nameAr: 'ناي هادئ', icon: '🪈', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-6.mp3', category: 'instrumental' },
+  { id: 'inst4', name: 'Orchestra Light', nameAr: 'أوركسترا خفيفة', icon: '🎼', url: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3', category: 'instrumental' },
+  { id: 'inst5', name: 'Harp Angels', nameAr: 'هارب ملائكي', icon: '🪽', url: '/audio/track2.mp3', category: 'instrumental' },
+  { id: 'inst6', name: 'Saxophone Smooth', nameAr: 'ساكسفون ناعم', icon: '🎷', url: '/audio/track9.mp3', category: 'instrumental' },
 ];
 
 const FocusMusicStateContext = createContext<FocusMusicStateContextType | undefined>(undefined);
