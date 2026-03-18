@@ -374,9 +374,9 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
               </tr>
               <tr>
                 {[
-                  { org: shipment.generator, role: 'generator' },
-                  { org: shipment.transporter, role: 'transporter' },
-                  { org: shipment.recycler, role: 'recycler' },
+                  { org: shipment.generator, orgId: shipment.generator_id, role: 'generator' },
+                  { org: shipment.transporter, orgId: shipment.transporter_id, role: 'transporter' },
+                  { org: shipment.recycler, orgId: shipment.recycler_id, role: 'recycler' },
                 ].map((item, i) => {
                   const roleSigs = signatures.filter(s => s.signer_role === item.role);
                   const latestSig = roleSigs[roleSigs.length - 1];
