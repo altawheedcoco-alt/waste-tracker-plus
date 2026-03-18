@@ -967,7 +967,24 @@ export default function MemberSocialProfile() {
               </CardContent>
             </Card>
 
-            {/* Bio */}
+            {/* Digital Seal */}
+            {targetProfile?.id && (
+              <Card>
+                <CardHeader className="py-3 px-4">
+                  <CardTitle className="text-sm flex items-center gap-2"><Shield className="w-4 h-4 text-primary" /> الختم الرقمي المؤمّن</CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4">
+                  <SecureDigitalSeal
+                    entityId={targetProfile.id}
+                    entityType="member"
+                    entityName={targetProfile.full_name || 'عضو'}
+                    title={memberPosition?.title_ar || memberPosition?.title || targetProfile.position || undefined}
+                    orgName={profileOrg?.name || undefined}
+                    size={180}
+                  />
+                </CardContent>
+              </Card>
+            )}
             {(targetProfile as any).bio && (
               <Card>
                 <CardHeader className="py-3 px-4">
