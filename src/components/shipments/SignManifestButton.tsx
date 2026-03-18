@@ -133,7 +133,7 @@ const SignManifestButton = ({
       setShowDialog(false);
     } catch (error: any) {
       console.error('Signing error:', error);
-      toast.error('فشل في التوقيع على المانيفست');
+      toast.error(`فشل في التوقيع على ${DOC_TYPE_LABELS[documentType]}`);
     } finally {
       setSigning(false);
     }
