@@ -560,7 +560,7 @@ ${generateWatermarkHTML(primaryOrgName)}
   <div class="parties">
     <div class="party">
       <h4>🏭 المولّد | Generator</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.generator?.name || shipment.manual_generator_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.generator?.name || shipment.manual_generator_name || "—", shipment.generator_id)}</span></p>
       ${shipment.generator?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.generator.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.generator?.partner_code || "—"} ${shipment.generator?.client_code ? `| ${shipment.generator.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.generator?.address || "—"}${shipment.generator?.city ? ` - ${shipment.generator.city}` : ''}</p>
