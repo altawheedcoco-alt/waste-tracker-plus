@@ -575,7 +575,7 @@ ${generateWatermarkHTML(primaryOrgName)}
     </div>
     <div class="party">
       <h4>🚛 الناقل | Transporter</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.transporter?.name || shipment.manual_transporter_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.transporter?.name || shipment.manual_transporter_name || "—", shipment.transporter_id)}</span></p>
       ${shipment.transporter?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.transporter.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.transporter?.partner_code || "—"} ${shipment.transporter?.client_code ? `| ${shipment.transporter.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.transporter?.address || "—"}${shipment.transporter?.city ? ` - ${shipment.transporter.city}` : ''}</p>
