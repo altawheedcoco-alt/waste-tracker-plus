@@ -21,6 +21,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import PostInteractions from '@/components/organization/PostInteractions';
 
 interface PublicProfile {
   id: string;
@@ -502,6 +503,9 @@ function PublicPostCard({ post, orgName, orgLogo }: { post: any; orgName: string
               })}
             </div>
           )}
+
+          {/* Facebook-style Interactions */}
+          <PostInteractions postId={post.id} likesCount={post.likes_count || 0} />
         </CardContent>
       </Card>
     </motion.div>
