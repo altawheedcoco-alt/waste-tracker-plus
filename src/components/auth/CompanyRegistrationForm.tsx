@@ -122,6 +122,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [regMethod, setRegMethod] = useState<'email' | 'phone'>('email');
   const [showRestoredBanner, setShowRestoredBanner] = useState(() => {
     try { return !!localStorage.getItem(`form_autosave_${autoSaveKey}`); } catch { return false; }
   });
