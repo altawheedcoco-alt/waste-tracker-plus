@@ -7,15 +7,12 @@ interface ViewModeState {
   density: ContentDensity;
   listStyle: ListStyle;
   fullWidth: boolean;
-  sidebarMode: 'full' | 'mini' | 'hidden';
 }
 
 interface ViewModeContextType extends ViewModeState {
   setDensity: (d: ContentDensity) => void;
   setListStyle: (s: ListStyle) => void;
   toggleFullWidth: () => void;
-  setSidebarMode: (m: 'full' | 'mini' | 'hidden') => void;
-  cycleSidebarMode: () => void;
   // Utility getters
   spacing: { card: string; gap: string; padding: string; text: string };
   gridCols: string;
@@ -27,7 +24,6 @@ const defaults: ViewModeState = {
   density: 'comfortable',
   listStyle: 'grid',
   fullWidth: false,
-  sidebarMode: 'full',
 };
 
 const ViewModeContext = createContext<ViewModeContextType | undefined>(undefined);
@@ -68,19 +64,6 @@ export const ViewModeProvider = ({ children }: { children: ReactNode }) => {
     persist({ ...state, fullWidth: !state.fullWidth });
   }, [state, persist]);
 
-  const setSidebarMode = useCallback((sidebarMode: 'full' | 'mini' | 'hidden') => {
-    persist({ ...state, sidebarMode });
-  }, [state, persist]);
-
-  const cycleSidebarMode = useCallback(() => {
-    const cycle: Record<string, 'full' | 'mini' | 'hidden'> = {
-      full: 'mini',
-      mini: 'hidden',
-      hidden: 'full',
-    };
-    persist({ ...state, sidebarMode: cycle[state.sidebarMode] });
-  }, [state, persist]);
-
   const spacing = useMemo(() => {
     switch (state.density) {
       case 'compact':
@@ -106,11 +89,9 @@ export const ViewModeProvider = ({ children }: { children: ReactNode }) => {
     setDensity,
     setListStyle,
     toggleFullWidth,
-    setSidebarMode,
-    cycleSidebarMode,
     spacing,
     gridCols,
-  }), [state, setDensity, setListStyle, toggleFullWidth, setSidebarMode, cycleSidebarMode, spacing, gridCols]);
+  }), [state, setDensity, setListStyle, toggleFullWidth, spacing, gridCols]);
 
   return (
     <ViewModeContext.Provider value={value}>
