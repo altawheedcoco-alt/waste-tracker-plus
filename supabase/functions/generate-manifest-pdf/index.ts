@@ -727,36 +727,31 @@ ${custodyChain.length > 0 ? `
 
 <!-- 8. التوقيعات والأختام -->
 <div class="sigs">
-  <div class="sig-box">
-    <h5>🏭 المولّد</h5>
-    ${genSig?.signature_url ? `<img src="${genSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.generator?.signature_url ? `<img src="${shipment.generator.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.generator?.stamp_url ? `<img src="${shipment.generator.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${genSig?.signer?.full_name || shipment.generator?.representative_name || shipment.generator?.name || ".................."}</div>
-    <div class="sig-label">${genSig?.signed_at ? formatDate(genSig.signed_at) : formatDate(shipment.pickup_date)}</div>
-    <span class="sig-status ${genSig ? 'sig-signed' : 'sig-pending'}">${genSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(genVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-G: ${genHash}</div>
-  </div>
-  <div class="sig-box">
-    <h5>🚛 الناقل</h5>
-    ${transSig?.signature_url ? `<img src="${transSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.transporter?.signature_url ? `<img src="${shipment.transporter.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.transporter?.stamp_url ? `<img src="${shipment.transporter.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${transSig?.signer?.full_name || shipment.transporter?.representative_name || shipment.transporter?.name || ".................."}</div>
-    <div class="sig-label">${transSig?.signed_at ? formatDate(transSig.signed_at) : formatDate(shipment.in_transit_at)}</div>
-    <span class="sig-status ${transSig ? 'sig-signed' : 'sig-pending'}">${transSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(transVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-T: ${transHash}</div>
-  </div>
-  <div class="sig-box">
-    <h5>♻️ المستلم</h5>
-    ${recSig?.signature_url ? `<img src="${recSig.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : shipment.recycler?.signature_url ? `<img src="${shipment.recycler.signature_url}" style="max-width:40px;max-height:16px;margin:1px auto;display:block;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
-    ${shipment.recycler?.stamp_url ? `<img src="${shipment.recycler.stamp_url}" style="max-width:30px;max-height:14px;margin:1px auto;display:block;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
-    <div class="sig-label">${recSig?.signer?.full_name || shipment.recycler?.representative_name || shipment.recycler?.name || ".................."}</div>
-    <div class="sig-label">${recSig?.signed_at ? formatDate(recSig.signed_at) : formatDate(shipment.delivered_at)}</div>
-    <span class="sig-status ${recSig ? 'sig-signed' : 'sig-pending'}">${recSig ? '✓ موقّع' : '⏳ انتظار'}</span>
-    <div class="sig-qr">${generateQRSvg(recVerifyUrl, 22)}</div>
-    <div class="sig-hash">VRF-R: ${recHash}</div>
-  </div>
+  ${[
+    { label: '🏭 المولّد', sig: genSig, org: shipment.generator, hash: genHash, prefix: 'G', verifyUrl: genVerifyUrl, fallbackDate: shipment.pickup_date },
+    { label: '🚛 الناقل', sig: transSig, org: shipment.transporter, hash: transHash, prefix: 'T', verifyUrl: transVerifyUrl, fallbackDate: shipment.in_transit_at },
+    { label: '♻️ المستلم', sig: recSig, org: shipment.recycler, hash: recHash, prefix: 'R', verifyUrl: recVerifyUrl, fallbackDate: shipment.delivered_at },
+  ].map((item: any) => {
+    const sigImgUrl = item.sig?.signature_image_url || item.sig?.signature_url || item.org?.signature_url;
+    const stampImgUrl = item.sig?.stamp_image_url || item.org?.stamp_url;
+    const signerName = item.sig?.signer_name || item.sig?.signer?.full_name || item.org?.representative_name || item.org?.name || '..................';
+    const sigMethod = item.sig?.signature_method;
+    const methodLabels: Record<string, string> = { digital: 'رقمي', drawn: 'مرسوم', drawn_biometric: 'بيومتري', biometric: 'بيومتري', uploaded: 'مرفوع' };
+    return `<div class="sig-box">
+      <h5>${item.label}</h5>
+      <div style="display:flex;justify-content:center;gap:2px;align-items:flex-end;min-height:18px;">
+        ${stampImgUrl ? `<img src="${stampImgUrl}" style="max-width:25px;max-height:16px;object-fit:contain;opacity:0.7;" alt="ختم" crossorigin="anonymous"/>` : ''}
+        ${sigImgUrl ? `<img src="${sigImgUrl}" style="max-width:40px;max-height:16px;object-fit:contain;" alt="توقيع" crossorigin="anonymous"/>` : `<div class="sig-line"></div>`}
+      </div>
+      <div class="sig-label">${signerName}</div>
+      ${sigMethod ? `<div style="font-size:4.5px;color:#6b7280;">${methodLabels[sigMethod] || sigMethod}</div>` : ''}
+      ${item.sig?.platform_seal_number ? `<div style="font-family:monospace;font-size:4px;color:#4b5563;">${item.sig.platform_seal_number}</div>` : ''}
+      <div class="sig-label">${item.sig?.signed_at || item.sig?.timestamp_signed ? formatDate(item.sig.signed_at || item.sig.timestamp_signed) : formatDate(item.fallbackDate)}</div>
+      <span class="sig-status ${item.sig ? 'sig-signed' : 'sig-pending'}">${item.sig ? '✓ موقّع' : '⏳ انتظار'}</span>
+      <div class="sig-qr">${generateQRSvg(item.verifyUrl, 22)}</div>
+      <div class="sig-hash">VRF-${item.prefix}: ${item.hash}</div>
+    </div>`;
+  }).join('')}
 </div>
 
 <!-- 8b. مسئولو الحركة والمتابعة -->
