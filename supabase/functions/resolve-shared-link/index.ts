@@ -121,6 +121,25 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Check partner restrictions - block shared links if restricted
+    if (userOrgId && userOrgId !== link.organization_id) {
+      const { data: restrictionCheck } = await adminClient
+        .from("partner_restrictions")
+        .select("id")
+        .eq("organization_id", link.organization_id)
+        .eq("restricted_org_id", userOrgId)
+        .eq("is_active", true)
+        .in("restriction_type", ["block_visibility", "block_all", "blacklist", "suspend_partnership"])
+        .limit(1);
+
+      if (restrictionCheck && restrictionCheck.length > 0) {
+        return new Response(
+          JSON.stringify({ error: "access_restricted", message: "تم تقييد الوصول لهذا المحتوى من قبل الجهة المالكة" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+    }
+
     // Fetch resource data based on type
     let resourceData: any = null;
     const resourceType = link.resource_type;
