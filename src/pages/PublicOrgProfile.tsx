@@ -21,6 +21,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import PostInteractions from '@/components/organization/PostInteractions';
 
 interface PublicProfile {
   id: string;
