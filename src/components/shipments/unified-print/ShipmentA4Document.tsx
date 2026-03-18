@@ -48,7 +48,7 @@ const METHOD_LABELS: Record<string, string> = {
 
 const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>(({
   shipment, theme, qrData, driverName, vehiclePlate,
-  documentSerial, verificationCode, supervisors = [], declaration,
+  documentSerial, verificationCode, supervisors = [], signatures = [], declaration,
   pages = ['summary'], compact = true,
 }, ref) => {
   const qrRef = useRef<HTMLCanvasElement>(null);
