@@ -229,6 +229,7 @@ const ShipmentDetailsPage = () => {
             </Suspense>
             <Suspense fallback={null}>
               <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
+            </Suspense>
             <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />
             </Suspense>
