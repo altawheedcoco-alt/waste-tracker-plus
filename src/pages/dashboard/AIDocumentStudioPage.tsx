@@ -660,7 +660,7 @@ export default function AIDocumentStudioPage() {
                 </div>
                 <div className="flex-1 bg-gray-600 overflow-auto hidden md:flex justify-center py-4">
                   <div className="bg-white shadow-xl" style={{ width: '794px', minHeight: '1123px', transform: 'scale(0.7)', transformOrigin: 'top center' }}
-                    dangerouslySetInnerHTML={{ __html: editHtml }} />
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }} />
                 </div>
               </div>
             )}
