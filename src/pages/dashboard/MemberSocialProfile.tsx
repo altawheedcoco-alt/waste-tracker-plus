@@ -859,6 +859,22 @@ export default function MemberSocialProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Photo Galleries */}
+        <ProfilePhotoGallery
+          profileId={targetProfile.id}
+          photoType="cover"
+          isOwner={isOwnProfile}
+          open={coverGalleryOpen}
+          onOpenChange={setCoverGalleryOpen}
+        />
+        <ProfilePhotoGallery
+          profileId={targetProfile.id}
+          photoType="avatar"
+          isOwner={isOwnProfile}
+          open={avatarGalleryOpen}
+          onOpenChange={setAvatarGalleryOpen}
+        />
       </div>
     </DashboardLayout>
   );
