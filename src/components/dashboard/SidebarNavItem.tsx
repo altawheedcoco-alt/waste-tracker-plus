@@ -21,10 +21,10 @@ const SidebarNavItem = ({ icon: Icon, label, path, isCollapsed, badge, statusCol
     <Link to={path} className="block group">
       <motion.div
         whileTap={{ scale: 0.97 }}
-        className={`relative flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 touch-manipulation ${
+        className={`relative flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 touch-manipulation ${
           isActive
-            ? 'bg-primary/12 text-primary font-semibold shadow-sm shadow-primary/5'
-            : 'text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground'
+            ? 'bg-primary/15 text-primary font-bold shadow-sm shadow-primary/10 border border-primary/20'
+            : 'text-sidebar-foreground hover:bg-sidebar-accent/60 hover:text-sidebar-foreground font-semibold'
         }`}
       >
         {/* Active indicator bar with glow */}
