@@ -11,6 +11,7 @@ import { useShipmentVisibility } from '@/hooks/useVisibilityGuard';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
+import { useDeliveryDeclaration, useShipmentDeclarations } from '@/hooks/useDeliveryDeclaration';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,17 +19,28 @@ import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import NavigationButtonGroup from '@/components/navigation/NavigationButtonGroup';
 import {
   Package, Printer, MapPin, Calendar, Truck, Building2, Recycle,
   User, Phone, Mail, FileText, AlertTriangle, Scale, Box, Loader2,
   Edit, Navigation, Lock, Route, Eye, Star, Shield, Users2,
+  RefreshCw, ChevronDown, Settings2, Download, FileCheck, CheckCircle2,
+  EyeOff, XCircle,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
 import { toast } from 'sonner';
-import { canChangeStatus, getAvailableNextStatuses, mapLegacyStatus } from '@/lib/shipmentStatusConfig';
+import { cn } from '@/lib/utils';
+import { canChangeStatus, getAvailableNextStatuses, mapLegacyStatus, getStatusConfig, mapToDbStatus, type ShipmentStatus } from '@/lib/shipmentStatusConfig';
 
 // Lazy load heavy components
 const ShipmentDocumentsTimeline = lazy(() => import('@/components/shipments/ShipmentDocumentsTimeline'));
@@ -43,6 +55,11 @@ const CancelShipmentDialog = lazy(() => import('@/components/shipments/CancelShi
 const EditShipmentDialog = lazy(() => import('@/components/shipments/EditShipmentDialog'));
 const ShipmentSignaturesCard = lazy(() => import('@/components/shipments/ShipmentSignaturesCard'));
 const QuickReceiptButton = lazy(() => import('@/components/receipts/QuickReceiptButton'));
+const QuickCertificateButton = lazy(() => import('@/components/reports/QuickCertificateButton'));
+const GeneratorDeliveryCertificateDialog = lazy(() => import('@/components/receipts/GeneratorDeliveryCertificateDialog'));
+const DeliveryDeclarationViewDialog = lazy(() => import('@/components/shipments/DeliveryDeclarationViewDialog'));
+const ShipmentRouteMap = lazy(() => import('@/components/maps/RouteMapDialog'));
+const GPSTrackingStatusWidget = lazy(() => import('@/components/tracking/GPSTrackingStatusWidget'));
 const GeneratorCompletionCard = lazy(() => import('@/components/shipments/GeneratorCompletionCard'));
 const CompletedRouteMap = lazy(() => import('@/components/shipments/CompletedRouteMap'));
 const DriverAssignmentPanel = lazy(() => import('@/components/shipments/DriverAssignmentPanel'));
@@ -103,10 +120,16 @@ const ShipmentDetailsPage = () => {
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showStatusDialog, setShowStatusDialog] = useState(false);
   const [showLiveTracking, setShowLiveTracking] = useState(false);
+  const [showMapDialog, setShowMapDialog] = useState(false);
+  const [isDeliveryCertOpen, setIsDeliveryCertOpen] = useState(false);
+  const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
+  const [isQuickStatusChanging, setIsQuickStatusChanging] = useState(false);
   const [generatorLocation, setGeneratorLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [recyclerLocation, setRecyclerLocation] = useState<{ lat: number; lng: number } | null>(null);
 
   const visibility = useShipmentVisibility(shipment?.id);
+  const { data: declarationData } = useDeliveryDeclaration(shipment?.id || '');
+  const { data: allDeclarations = [] } = useShipmentDeclarations(shipment?.id || '', organization?.id);
   const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'overview');
   const isDriver = roles.includes('driver');
 
@@ -183,7 +206,30 @@ const ShipmentDetailsPage = () => {
   const hazardConfig = hazardLevelLabels[shipment.hazard_level || 'low'];
   const isGenerator = organization?.organization_type === 'generator';
   const isTransporter = organization?.organization_type === 'transporter';
+  const isRecycler = organization?.organization_type === 'recycler';
   const isCompleted = ['delivered', 'confirmed'].includes(shipment.status);
+  const mappedStatus = mapLegacyStatus(shipment.status);
+  const currentStatusConfig = getStatusConfig(mappedStatus);
+  const organizationType = (organization?.organization_type || 'generator') as 'generator' | 'transporter' | 'recycler' | 'disposal' | 'admin' | 'driver';
+  const canChange = canChangeStatus(mappedStatus, organizationType);
+  const availableNextStatuses = getAvailableNextStatuses(mappedStatus, organizationType);
+  const hasGeneratorDeclaration = allDeclarations.some((d: any) => d.declaration_type === 'generator');
+
+  const handleQuickStatusChange = async (newStatus: ShipmentStatus) => {
+    setIsQuickStatusChanging(true);
+    try {
+      const dbStatus = mapToDbStatus(newStatus);
+      const { error } = await supabase.from('shipments').update({ status: dbStatus as any }).eq('id', shipment.id);
+      if (error) throw error;
+      toast.success(`تم تغيير الحالة إلى: ${getStatusConfig(newStatus)?.labelAr}`);
+      fetchShipmentDetails();
+    } catch (err) {
+      console.error('Error changing status:', err);
+      toast.error('حدث خطأ أثناء تغيير الحالة');
+    } finally {
+      setIsQuickStatusChanging(false);
+    }
+  };
 
   return (
     <DashboardLayout>
@@ -203,15 +249,81 @@ const ShipmentDetailsPage = () => {
               {shipment.quantity && <> • {shipment.quantity} {shipment.unit || 'كجم'}</>}
             </p>
           </div>
+
+          {/* ═══ Action Buttons (synced with ShipmentCard) ═══ */}
           <div className="flex gap-2 flex-wrap overflow-x-auto scrollbar-hide">
+            {/* Edit */}
             <Suspense fallback={null}>
               <EditShipmentDialog shipment={shipment} onSuccess={fetchShipmentDetails} />
             </Suspense>
+
+            {/* Live Tracking */}
             {shipment.driver_id && visibility.canViewTracking && (
-              <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm" className="text-xs">
-                <Navigation className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.liveTracking')}
+              <Button onClick={() => setShowLiveTracking(true)} variant="default" size="sm" className="text-xs gap-1.5">
+                <Navigation className="h-3.5 w-3.5" />{t('shipmentDetails.liveTracking')}
               </Button>
             )}
+
+            {/* GPS Tracking Status Widget */}
+            {shipment.driver_id && (
+              <Suspense fallback={null}>
+                <GPSTrackingStatusWidget
+                  shipmentId={shipment.id}
+                  driverId={shipment.driver_id}
+                  compact={true}
+                  onClick={() => setPref(PREF_KEY_ACTIVE_TAB, 'tracking')}
+                />
+              </Suspense>
+            )}
+
+            {/* Navigation (Google Maps & Waze) */}
+            {visibility.canViewMaps && (
+              <NavigationButtonGroup
+                pickupAddress={shipment.pickup_address}
+                deliveryAddress={shipment.delivery_address}
+                size="sm"
+              />
+            )}
+
+            {/* Map Route */}
+            {visibility.canViewMaps && (
+              <Button variant="outline" size="sm" className="text-xs gap-1.5" onClick={() => setShowMapDialog(true)}>
+                <MapPin className="h-3.5 w-3.5" />الخريطة
+              </Button>
+            )}
+
+            {/* Quick Status Change */}
+            {canChange && !isCompleted && availableNextStatuses.length > 0 && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="eco" size="sm" className="text-xs gap-1.5" disabled={isQuickStatusChanging}>
+                    {isQuickStatusChanging ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <RefreshCw className="h-3.5 w-3.5" />}
+                    تغيير الحالة
+                    <ChevronDown className="h-3 w-3" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56 bg-popover z-50">
+                  {availableNextStatuses.slice(0, 5).map((status) => {
+                    const StatusIcon = status.icon;
+                    return (
+                      <DropdownMenuItem key={status.key} onClick={() => handleQuickStatusChange(status.key)} className="gap-3 cursor-pointer py-2">
+                        <div className={cn("w-7 h-7 rounded-full flex items-center justify-center shrink-0", status.bgClass)}>
+                          <StatusIcon className="w-3.5 h-3.5" />
+                        </div>
+                        <span className="font-medium">{status.labelAr}</span>
+                      </DropdownMenuItem>
+                    );
+                  })}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => setShowStatusDialog(true)} className="gap-2 cursor-pointer text-muted-foreground">
+                    <Settings2 className="w-4 h-4" />
+                    <span>تغيير متقدم مع ملاحظات...</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Receipt Button - Transporter */}
             <Suspense fallback={null}>
               {isTransporter && (
                 <QuickReceiptButton
@@ -226,18 +338,87 @@ const ShipmentDetailsPage = () => {
                 />
               )}
             </Suspense>
-            <Button variant="eco" size="sm" className="text-xs" onClick={() => setShowPrintDialog(true)}>
-              <Printer className="ml-1 h-3.5 w-3.5" />{t('shipmentDetails.printPdf')}
+
+            {/* Recycling Certificate - Recycler/Transporter */}
+            {(isRecycler || isTransporter) && (
+              <Suspense fallback={null}>
+                <QuickCertificateButton
+                  shipment={{ ...shipment, unit: shipment.unit || 'كجم', has_report: (shipment as any).has_report } as any}
+                  onSuccess={fetchShipmentDetails}
+                  variant="outline" size="sm" showLabel={true}
+                />
+              </Suspense>
+            )}
+
+            {/* Generator Delivery Certificate */}
+            {isGenerator && (
+              hasGeneratorDeclaration ? (
+                <Button variant="outline" size="sm" onClick={() => setIsDeclarationViewOpen(true)}
+                  className="text-xs gap-1.5 text-emerald-700 border-emerald-300 bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700 dark:bg-emerald-900/30">
+                  <CheckCircle2 className="h-3.5 w-3.5" />تم إقرار التسليم ✓
+                </Button>
+              ) : (
+                <Button variant="outline" size="sm" onClick={() => setIsDeliveryCertOpen(true)}
+                  className="text-xs gap-1.5 text-emerald-700 border-emerald-300 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-700">
+                  <FileCheck className="h-3.5 w-3.5" />إقرار تسليم
+                </Button>
+              )
+            )}
+
+            {/* Declaration View */}
+            {declarationData && (
+              <Button size="sm" variant="outline" className="text-xs gap-1.5" onClick={() => setIsDeclarationViewOpen(true)}>
+                <FileText className="h-3.5 w-3.5" />إقرار التسليم
+              </Button>
+            )}
+
+            {/* Print / PDF */}
+            <Button variant="eco" size="sm" className="text-xs gap-1.5" onClick={() => setShowPrintDialog(true)}>
+              <Printer className="h-3.5 w-3.5" />{t('shipmentDetails.printPdf')}
             </Button>
+
+            {/* Manifest PDF */}
             <Suspense fallback={null}>
               <ManifestPDFButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} variant="outline" size="sm" />
             </Suspense>
+
+            {/* Sign Manifest */}
             <Suspense fallback={null}>
               <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="manifest" label="توقيع المانيفست" variant="outline" size="sm" />
             </Suspense>
             <Suspense fallback={null}>
               <SignManifestButton shipmentId={shipment.id} shipmentNumber={shipment.shipment_number || ''} documentType="shipment_tracking" label="توقيع التتبع" variant="outline" size="sm" />
             </Suspense>
+
+            {/* Hide Recycler/Generator toggles - Transporter only */}
+            {isTransporter && shipment.generator_id && (
+              <Button size="sm" variant="ghost" className="text-xs gap-1 text-muted-foreground"
+                title={(shipment as any).hide_recycler_from_generator ? 'المدوّر مخفي عن المولّد' : 'إخفاء المدوّر عن المولّد'}
+                onClick={async () => {
+                  const newVal = !(shipment as any).hide_recycler_from_generator;
+                  const { error } = await supabase.from('shipments').update({ hide_recycler_from_generator: newVal } as any).eq('id', shipment.id);
+                  if (error) toast.error('فشل تحديث الإعداد');
+                  else { toast.success(newVal ? 'تم إخفاء المدوّر عن المولّد' : 'تم إظهار المدوّر للمولّد'); fetchShipmentDetails(); }
+                }}>
+                <EyeOff className={cn("h-3.5 w-3.5", (shipment as any).hide_recycler_from_generator && "text-amber-600")} />
+                {(shipment as any).hide_recycler_from_generator ? 'مدوّر مخفي' : 'إخفاء مدوّر'}
+              </Button>
+            )}
+            {isTransporter && shipment.recycler_id && (
+              <Button size="sm" variant="ghost" className="text-xs gap-1 text-muted-foreground"
+                title={(shipment as any).hide_generator_from_recycler ? 'المولّد مخفي عن المدوّر' : 'إخفاء المولّد عن المدوّر'}
+                onClick={async () => {
+                  const newVal = !(shipment as any).hide_generator_from_recycler;
+                  const { error } = await supabase.from('shipments').update({ hide_generator_from_recycler: newVal } as any).eq('id', shipment.id);
+                  if (error) toast.error('فشل تحديث الإعداد');
+                  else { toast.success(newVal ? 'تم إخفاء المولّد عن المدوّر' : 'تم إظهار المولّد للمدوّر'); fetchShipmentDetails(); }
+                }}>
+                <EyeOff className={cn("h-3.5 w-3.5", (shipment as any).hide_generator_from_recycler && "text-amber-600")} />
+                {(shipment as any).hide_generator_from_recycler ? 'مولّد مخفي' : 'إخفاء مولّد'}
+              </Button>
+            )}
+
+            {/* Cancel Shipment */}
             <Suspense fallback={null}>
               <CancelShipmentDialog shipmentId={shipment.id} shipmentNumber={shipment.shipment_number} currentStatus={shipment.status} onSuccess={fetchShipmentDetails} />
             </Suspense>
@@ -610,6 +791,29 @@ const ShipmentDetailsPage = () => {
         
         {showLiveTracking && shipment.driver_id && (
           <LiveTrackingMapDialog isOpen={showLiveTracking} onClose={() => setShowLiveTracking(false)} driverId={shipment.driver_id} shipmentNumber={shipment.shipment_number} pickupAddress={shipment.pickup_address} deliveryAddress={shipment.delivery_address} shipmentStatus={shipment.status} />
+        )}
+
+        {showMapDialog && (
+          <ShipmentRouteMap
+            isOpen={showMapDialog} onClose={() => setShowMapDialog(false)}
+            pickupAddress={shipment.pickup_address || 'غير محدد'} deliveryAddress={shipment.delivery_address || 'غير محدد'}
+            shipmentNumber={shipment.shipment_number} driverId={shipment.driver_id} shipmentStatus={shipment.status}
+          />
+        )}
+
+        {isDeliveryCertOpen && isGenerator && (
+          <GeneratorDeliveryCertificateDialog
+            open={isDeliveryCertOpen} onOpenChange={setIsDeliveryCertOpen}
+            shipment={{ ...shipment, unit: shipment.unit || 'كجم', pickup_address: shipment.pickup_address || '' } as any}
+            onSuccess={fetchShipmentDetails}
+          />
+        )}
+
+        {isDeclarationViewOpen && declarationData && (
+          <DeliveryDeclarationViewDialog
+            open={isDeclarationViewOpen} onOpenChange={setIsDeclarationViewOpen}
+            declaration={declarationData}
+          />
         )}
       </Suspense>
     </DashboardLayout>
