@@ -154,6 +154,14 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
   const [sidebarHovered, setSidebarHovered] = useState(false);
+
+  // Derived sidebar state for backward compatibility
+  const isSidebarOpen = sidebarMode !== 'hidden';
+  const isMiniSidebar = sidebarMode === 'mini' && !sidebarHovered;
+  const isExpandedSidebar = sidebarMode === 'full' || (sidebarMode === 'mini' && sidebarHovered);
+  const setIsSidebarOpen = useCallback((open: boolean) => {
+    setSidebarMode(open ? 'full' : 'hidden');
+  }, [setSidebarMode]);
   const { profile, organization, signOut, roles, user, loading } = useAuth();
   const { count: partnersCount } = usePartnersCount();
   const { unreadCount: notificationCount } = useNotifications();
