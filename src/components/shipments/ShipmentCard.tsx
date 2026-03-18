@@ -1010,7 +1010,7 @@ const ShipmentCard = ({
                         </Button>
                       )
                     )}
-                    {canChange && availableNextStatuses.length > 0 ? (
+                    {canChange && allStatusesForDropdown.length > 0 ? (
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button
