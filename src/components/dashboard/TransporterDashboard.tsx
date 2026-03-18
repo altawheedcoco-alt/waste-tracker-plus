@@ -1,7 +1,6 @@
-import { useState, Suspense, lazy, useMemo } from 'react';
+import { useState, Suspense, lazy, useMemo, useEffect } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
-import StoryCircles from '@/components/stories/StoryCircles';
 import { Tabs } from '@/components/ui/tabs';
 import { useTransporterRealtime } from '@/hooks/useTransporterRealtime';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -24,32 +23,31 @@ import TransporterHeader from './transporter/TransporterHeader';
 import TransporterNotifications from './transporter/TransporterNotifications';
 import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
 import TransporterIncomingRequests from './transporter/TransporterIncomingRequests';
-import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
-import DocumentVerificationWidget from './DocumentVerificationWidget';
 import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
-import DailyOperationsSummary from './operations/DailyOperationsSummary';
-import DashboardAlertsHub from './shared/DashboardAlertsHub';
-import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
-import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSearch';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
-import TransporterCommandCenter from './transporter/TransporterCommandCenter';
-import SmartDailyBrief from './shared/SmartDailyBrief';
-import TransporterDailyPulse from './transporter/TransporterDailyPulse';
 import { Skeleton } from '@/components/ui/skeleton';
-import { motion } from 'framer-motion';
 import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
 
-// Modular tab groups
-import TransporterOperationsTabs from './transporter/tabs/TransporterOperationsTabs';
-import TransporterIntelligenceTabs from './transporter/tabs/TransporterIntelligenceTabs';
-import TransporterComplianceTabs from './transporter/tabs/TransporterComplianceTabs';
-
+// ★ Lazy-load ALL heavy secondary components
+const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
+const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
+const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
+const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
+const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
+const DashboardAlertsHub = lazy(() => import('./shared/DashboardAlertsHub'));
+const DashboardWidgetCustomizer = lazy(() => import('./DashboardWidgetCustomizer'));
+const DocumentVerificationWidget = lazy(() => import('./DocumentVerificationWidget'));
+const AutomationSettingsDialog = lazy(() => import('@/components/automation/AutomationSettingsDialog'));
+const UnifiedDocumentSearch = lazy(() => import('@/components/verification/UnifiedDocumentSearch'));
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
+const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/TransporterOperationsTabs'));
+const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
+const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
