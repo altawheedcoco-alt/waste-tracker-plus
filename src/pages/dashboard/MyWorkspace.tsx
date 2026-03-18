@@ -155,6 +155,15 @@ const MyWorkspace = () => {
                 size="sm"
                 variant="outline"
                 className="gap-1.5 text-xs h-8 hover:bg-primary/5 hover:border-primary/30"
+                onClick={() => navigate('/dashboard/my-profile')}
+              >
+                <User className="w-3.5 h-3.5" />
+                صفحتي الشخصية
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1.5 text-xs h-8 hover:bg-primary/5 hover:border-primary/30"
                 onClick={() => navigate('/dashboard')}
               >
                 <LayoutDashboard className="w-3.5 h-3.5" />
