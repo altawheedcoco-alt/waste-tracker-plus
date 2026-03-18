@@ -20,7 +20,7 @@ import {
   Camera, Edit3, MapPin, Building2, Briefcase, Phone, Mail,
   Calendar, Star, MessageCircle, Heart, ThumbsUp, Send, MoreHorizontal,
   Globe, Shield, Award, Activity, TrendingUp, Pin, Trash2, Loader2,
-  Image as ImageIcon, X, UserCheck, Clock,
+  Image as ImageIcon, X, UserCheck, Clock, Images,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
