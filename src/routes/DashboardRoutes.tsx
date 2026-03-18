@@ -391,6 +391,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/permits" element={<Permits />} />
     <Route path="/dashboard/environmental-consultants" element={<EnvironmentalConsultants />} />
     <Route path="/dashboard/signing-inbox" element={<SigningInbox />} />
+    <Route path="/dashboard/bulk-signing" element={<BulkSigning />} />
     <Route path="/dashboard/notes" element={<AllNotes />} />
     <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
     <Route path="/dashboard/regulator-wmra" element={<RegulatorWMRA />} />
