@@ -56,8 +56,9 @@ const Auth = () => {
     try {
       const response = await supabase.functions.invoke('register-company', {
         body: {
-          email: data.email, password: data.password, fullName: data.fullName,
+          email: data.email || null, password: data.password, fullName: data.fullName,
           phone: data.phone, organizationType: data.organizationType,
+          registrationMethod: data.email ? 'email' : 'phone',
           organizationName: data.organizationName, organizationNameEn: data.organizationNameEn,
           organizationEmail: data.organizationEmail, organizationPhone: data.organizationPhone,
           secondaryPhone: data.secondaryPhone, address: data.address, city: data.city,
@@ -76,7 +77,8 @@ const Auth = () => {
       if (response.error) throw new Error(response.data?.error || response.error?.message || 'حدث خطأ');
       if (!response.data?.success) throw new Error(response.data?.error || 'فشل إنشاء الشركة');
 
-      const { error: signInError } = await signIn(data.email, data.password);
+      const authEmail = response.data.auth_email || data.email;
+      const { error: signInError } = await signIn(authEmail, data.password);
       if (signInError) throw signInError;
       navigate('/dashboard');
       return { error: null };

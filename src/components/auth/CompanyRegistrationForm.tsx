@@ -2,6 +2,8 @@ import { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Mail, Phone } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -120,6 +122,7 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [regMethod, setRegMethod] = useState<'email' | 'phone'>('email');
   const [showRestoredBanner, setShowRestoredBanner] = useState(() => {
     try { return !!localStorage.getItem(`form_autosave_${autoSaveKey}`); } catch { return false; }
   });
@@ -457,21 +460,52 @@ export const CompanyRegistrationForm = ({ onSubmit, onBack, defaultOrgType }: Co
           />
         </div>
 
-        {/* اسم المستخدم */}
-        <div className="space-y-1">
-          <Label className="text-xs">اسم المستخدم (البريد الإلكتروني) *</Label>
-          <Input
-            type="email"
-            placeholder="البريد الإلكتروني للدخول"
-            value={formData.email}
-            onChange={(e) => handleChange('email', e.target.value)}
-            onBlur={() => handleBlur('email')}
-            className={`h-8 text-xs ${errors.email ? 'border-destructive' : ''}`}
-            dir="ltr"
-            maxLength={255}
-          />
-          {fieldError('email')}
+        {/* طريقة التسجيل */}
+        <div className="col-span-2 space-y-1">
+          <Label className="text-xs font-semibold">طريقة التسجيل *</Label>
+          <Tabs value={regMethod} onValueChange={(v) => setRegMethod(v as 'email' | 'phone')} className="w-full">
+            <TabsList className="grid w-full grid-cols-2 h-8 rounded-lg">
+              <TabsTrigger value="email" className="rounded-md gap-1 text-xs">
+                <Mail className="w-3 h-3" /> البريد الإلكتروني
+              </TabsTrigger>
+              <TabsTrigger value="phone" className="rounded-md gap-1 text-xs">
+                <Phone className="w-3 h-3" /> رقم الهاتف
+              </TabsTrigger>
+            </TabsList>
+          </Tabs>
         </div>
+
+        {/* اسم المستخدم */}
+        {regMethod === 'email' ? (
+          <div className="space-y-1">
+            <Label className="text-xs">البريد الإلكتروني للدخول *</Label>
+            <Input
+              type="email"
+              placeholder="البريد الإلكتروني للدخول"
+              value={formData.email}
+              onChange={(e) => handleChange('email', e.target.value)}
+              onBlur={() => handleBlur('email')}
+              className={`h-8 text-xs ${errors.email ? 'border-destructive' : ''}`}
+              dir="ltr"
+              maxLength={255}
+            />
+            {fieldError('email')}
+          </div>
+        ) : (
+          <div className="space-y-1">
+            <Label className="text-xs">رقم الهاتف للدخول *</Label>
+            <Input
+              placeholder="01xxxxxxxxx"
+              value={formData.phone}
+              onChange={(e) => handleChange('phone', e.target.value)}
+              className={`h-8 text-xs ${errors.phone ? 'border-destructive' : ''}`}
+              dir="ltr"
+              inputMode="tel"
+              maxLength={20}
+            />
+            {errors.phone && <p className="text-xs text-destructive mt-0.5">{errors.phone}</p>}
+          </div>
+        )}
 
         {/* كلمة المرور */}
         <div className="space-y-1">
