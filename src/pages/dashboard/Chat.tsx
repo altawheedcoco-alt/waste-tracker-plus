@@ -4,7 +4,8 @@ import {
   MessageCircle, Search, Loader2, ArrowRight, Shield,
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
-  ChevronDown, ChevronRight, Users, Plus, X, Hash
+  ChevronDown, ChevronRight, Users, Plus, X, Hash,
+  Reply, Forward, SmilePlus, Paintbrush
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -18,6 +19,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { usePrivateChat, type PrivateConversation, type DecryptedMessage } from '@/hooks/usePrivateChat';
+import { useChatReactions } from '@/hooks/useChatReactions';
+import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -28,6 +31,9 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, CheckCheck } from 'lucide-react';
+import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/MessageReactions';
+import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
+import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -42,6 +48,12 @@ interface ConversationNote {
   content: string;
   created_at: string;
   author_name?: string;
+}
+
+interface ReplyTo {
+  id: string;
+  content: string;
+  senderName: string;
 }
 
 // ─── Conversation List Item ─────────────────────────────
@@ -130,8 +142,18 @@ const OrgGroupHeader = memo(({ group, isExpanded, onToggle }: {
 ));
 OrgGroupHeader.displayName = 'OrgGroupHeader';
 
-// ─── Message Bubble ─────────────────────────────────────
-const MessageBubble = memo(({ message, isMine }: { message: DecryptedMessage; isMine: boolean }) => {
+// ─── Message Bubble with Reactions + Reply ──────────────
+const MessageBubble = memo(({ 
+  message, isMine, reactions, onReact, onReply, onForward, allMessages 
+}: { 
+  message: DecryptedMessage; 
+  isMine: boolean;
+  reactions: { emoji: string; count: number; users: string[]; reacted: boolean }[];
+  onReact: (emoji: string) => void;
+  onReply: () => void;
+  onForward: () => void;
+  allMessages: DecryptedMessage[];
+}) => {
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
@@ -140,6 +162,11 @@ const MessageBubble = memo(({ message, isMine }: { message: DecryptedMessage; is
       default: return <Check className="w-3.5 h-3.5 text-muted-foreground" />;
     }
   };
+
+  // Find replied message
+  const repliedMessage = message.reply_to_id
+    ? allMessages.find(m => m.id === message.reply_to_id)
+    : null;
 
   if (message.is_deleted) {
     return (
@@ -152,51 +179,81 @@ const MessageBubble = memo(({ message, isMine }: { message: DecryptedMessage; is
   }
 
   return (
-    <div className={cn("flex mb-1 group", isMine ? "justify-start" : "justify-end")}>
-      <div className={cn(
-        "max-w-[75%] rounded-2xl px-3 py-2 relative shadow-sm",
-        isMine
-          ? "bg-primary text-primary-foreground rounded-br-sm"
-          : "bg-card border border-border rounded-bl-sm"
-      )}>
-        {!isMine && message.sender && (
-          <p className="text-[10px] font-semibold text-primary mb-0.5">{message.sender.full_name}</p>
-        )}
-        
-        {message.file_url && (
-          <div className="mb-1">
-            {message.message_type === 'image' ? (
-              <img src={message.file_url} alt="" className="rounded-lg max-w-full max-h-60 object-cover" />
-            ) : (
-              <a href={message.file_url} target="_blank" rel="noopener noreferrer"
-                className="flex items-center gap-2 p-2 rounded-lg bg-background/20">
-                <FileText className="w-5 h-5" />
-                <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
-              </a>
-            )}
-          </div>
-        )}
-        
-        <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
-        
+    <div className={cn("flex mb-1 group relative", isMine ? "justify-start" : "justify-end")}>
+      <div className="max-w-[75%] relative">
+        {/* Quick action buttons on hover */}
         <div className={cn(
-          "flex items-center gap-1 mt-0.5",
-          isMine ? "justify-start" : "justify-end"
+          "absolute top-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10",
+          isMine ? "-left-20" : "-right-20"
         )}>
-          <span className={cn(
-            "text-[9px]",
-            isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onReply}>
+            <Reply className="w-3.5 h-3.5" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onForward}>
+            <Forward className="w-3.5 h-3.5" />
+          </Button>
+        </div>
+
+        <div className={cn(
+          "rounded-2xl px-3 py-2 relative shadow-sm",
+          isMine
+            ? "bg-primary text-primary-foreground rounded-br-sm"
+            : "bg-card border border-border rounded-bl-sm"
+        )}>
+          {!isMine && message.sender && (
+            <p className="text-[10px] font-semibold text-primary mb-0.5">{message.sender.full_name}</p>
+          )}
+
+          {/* Quoted Reply */}
+          {repliedMessage && (
+            <QuotedReply
+              senderName={repliedMessage.sender?.full_name || 'مستخدم'}
+              content={repliedMessage.content}
+              isOwn={isMine}
+            />
+          )}
+          
+          {message.file_url && (
+            <div className="mb-1">
+              {message.message_type === 'image' ? (
+                <img src={message.file_url} alt="" className="rounded-lg max-w-full max-h-60 object-cover" />
+              ) : (
+                <a href={message.file_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2 rounded-lg bg-background/20">
+                  <FileText className="w-5 h-5" />
+                  <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
+                </a>
+              )}
+            </div>
+          )}
+          
+          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+          
+          <div className={cn(
+            "flex items-center gap-1 mt-0.5",
+            isMine ? "justify-start" : "justify-end"
           )}>
-            {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
-          </span>
-          {message.is_edited && (
             <span className={cn(
               "text-[9px]",
               isMine ? "text-primary-foreground/60" : "text-muted-foreground"
-            )}>تم التعديل</span>
-          )}
-          {getStatusIcon()}
+            )}>
+              {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
+            </span>
+            {message.is_edited && (
+              <span className={cn(
+                "text-[9px]",
+                isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+              )}>تم التعديل</span>
+            )}
+            {getStatusIcon()}
+          </div>
         </div>
+
+        {/* Reactions Display */}
+        <MessageReactionsDisplay reactions={reactions} onReact={onReact} isOwn={isMine} />
+
+        {/* Reaction Picker */}
+        <ReactionPicker onReact={onReact} isOwn={isMine} />
       </div>
     </div>
   );
@@ -362,10 +419,18 @@ const EncryptedChat = () => {
   const [showNotes, setShowNotes] = useState(false);
   const [sidebarTab, setSidebarTab] = useState<'all' | 'orgs'>('orgs');
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
+  const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
+  
+  // Reactions
+  const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
+  const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
+
+  // Wallpaper
+  const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
 
   // Group conversations by organization
   const orgGroups = useMemo((): OrgGroup[] => {
@@ -432,6 +497,7 @@ const EncryptedChat = () => {
     let cancelled = false;
     
     setMessagesLoading(true);
+    setReplyTo(null);
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
         setMessages(msgs);
@@ -481,7 +547,8 @@ const EncryptedChat = () => {
     setInputText('');
     setSending(true);
     try {
-      await sendMessage(selectedConvoId, text);
+      await sendMessage(selectedConvoId, text, 'text', undefined, undefined, replyTo?.id);
+      setReplyTo(null);
       const updated = await fetchMessages(selectedConvoId);
       setMessages(updated);
     } catch {
@@ -497,6 +564,21 @@ const EncryptedChat = () => {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleReply = (msg: DecryptedMessage) => {
+    setReplyTo({
+      id: msg.id,
+      content: msg.content.substring(0, 100),
+      senderName: msg.sender?.full_name || (msg.sender_id === user?.id ? 'أنت' : 'مستخدم'),
+    });
+    inputRef.current?.focus();
+  };
+
+  const handleForward = (msg: DecryptedMessage) => {
+    // Copy message to clipboard for now, can be enhanced later
+    navigator.clipboard.writeText(msg.content);
+    toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
   };
 
   const handleExport = async () => {
@@ -626,7 +708,6 @@ const EncryptedChat = () => {
                     <Loader2 className="animate-spin text-primary" size={24} />
                   </div>
                 ) : sidebarTab === 'orgs' ? (
-                  // ── Grouped by Organization ──
                   filteredOrgGroups.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                       <Building2 className="w-10 h-10 mb-2 opacity-30" />
@@ -665,7 +746,6 @@ const EncryptedChat = () => {
                     ))
                   )
                 ) : (
-                  // ── All Conversations ──
                   filteredConversations.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
                       <MessageCircle className="w-10 h-10 mb-2 opacity-30" />
@@ -719,6 +799,7 @@ const EncryptedChat = () => {
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
+                      <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
                       <Button
                         variant={showNotes ? "default" : "ghost"}
                         size="icon"
@@ -749,8 +830,11 @@ const EncryptedChat = () => {
                     </div>
                   </div>
 
-                  {/* Messages */}
-                  <div className="flex-1 overflow-y-auto p-3 bg-muted/20">
+                  {/* Messages with wallpaper */}
+                  <div 
+                    className="flex-1 overflow-y-auto p-3 transition-colors duration-300"
+                    style={getWallpaperStyle()}
+                  >
                     {messagesLoading ? (
                       <div className="flex items-center justify-center h-full">
                         <Loader2 className="animate-spin text-primary" size={28} />
@@ -764,7 +848,7 @@ const EncryptedChat = () => {
                     ) : (
                       <>
                         <div className="flex justify-center mb-4">
-                          <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2 text-center max-w-md">
+                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2 text-center max-w-md backdrop-blur-sm">
                             <Lock className="w-4 h-4 text-amber-600 inline-block ml-1" />
                             <span className="text-[11px] text-amber-700 dark:text-amber-400">
                               الرسائل محمية بتشفير طرف لطرف. لا يمكن لأي طرف ثالث قراءتها.
@@ -780,6 +864,11 @@ const EncryptedChat = () => {
                                 key={msg.id}
                                 message={msg}
                                 isMine={msg.sender_id === user?.id}
+                                reactions={reactionsMap[msg.id] || []}
+                                onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                                onReply={() => handleReply(msg)}
+                                onForward={() => handleForward(msg)}
+                                allMessages={messages}
                               />
                             ))}
                           </div>
@@ -789,6 +878,11 @@ const EncryptedChat = () => {
                     )}
                   </div>
 
+                  {/* Reply Preview */}
+                  {replyTo && (
+                    <ReplyPreviewBar replyToMessage={replyTo} onCancel={() => setReplyTo(null)} />
+                  )}
+
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <div className="flex items-end gap-2">
@@ -797,7 +891,7 @@ const EncryptedChat = () => {
                         value={inputText}
                         onChange={(e) => setInputText(e.target.value)}
                         onKeyDown={handleKeyDown}
-                        placeholder="اكتب رسالة مشفرة..."
+                        placeholder={replyTo ? "اكتب رداً..." : "اكتب رسالة مشفرة..."}
                         rows={1}
                         className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
                       />

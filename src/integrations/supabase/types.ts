@@ -5363,6 +5363,36 @@ export type Database = {
           },
         ]
       }
+      chat_wallpapers: {
+        Row: {
+          conversation_id: string | null
+          created_at: string
+          id: string
+          updated_at: string
+          user_id: string
+          wallpaper_type: string
+          wallpaper_value: string
+        }
+        Insert: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id: string
+          wallpaper_type?: string
+          wallpaper_value?: string
+        }
+        Update: {
+          conversation_id?: string | null
+          created_at?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+          wallpaper_type?: string
+          wallpaper_value?: string
+        }
+        Relationships: []
+      }
       circularity_kpis: {
         Row: {
           carbon_avoided_tons: number | null
@@ -21864,6 +21894,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_reactions: {
+        Row: {
+          created_at: string
+          emoji: string
+          id: string
+          message_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji: string
+          id?: string
+          message_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji?: string
+          id?: string
+          message_id?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       message_read_receipts: {
         Row: {
