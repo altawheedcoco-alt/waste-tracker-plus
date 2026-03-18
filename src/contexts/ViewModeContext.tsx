@@ -64,19 +64,6 @@ export const ViewModeProvider = ({ children }: { children: ReactNode }) => {
     persist({ ...state, fullWidth: !state.fullWidth });
   }, [state, persist]);
 
-  const setSidebarMode = useCallback((sidebarMode: 'full' | 'mini' | 'hidden') => {
-    persist({ ...state, sidebarMode });
-  }, [state, persist]);
-
-  const cycleSidebarMode = useCallback(() => {
-    const cycle: Record<string, 'full' | 'mini' | 'hidden'> = {
-      full: 'mini',
-      mini: 'hidden',
-      hidden: 'full',
-    };
-    persist({ ...state, sidebarMode: cycle[state.sidebarMode] });
-  }, [state, persist]);
-
   const spacing = useMemo(() => {
     switch (state.density) {
       case 'compact':
