@@ -53,7 +53,6 @@ const MobileBottomNav = memo(() => {
       ? '/dashboard/transporter-shipments' 
       : '/dashboard/shipments';
 
-    // Consulting office gets specialized bottom nav
     if (orgType === 'consulting_office') {
       return [
         { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
@@ -79,7 +78,6 @@ const MobileBottomNav = memo(() => {
     ];
   }, [isDriver, isAdmin, orgType, unreadCount]);
 
-  // Only show on mobile
   if (!isMobile) return null;
 
   const isActive = (path: string) => {
@@ -89,10 +87,10 @@ const MobileBottomNav = memo(() => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/85 backdrop-blur-2xl border-t border-border/20 pb-[env(safe-area-inset-bottom)]"
-      style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)', boxShadow: '0 -2px 12px hsl(220 16% 12% / 0.06)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-2xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
+      style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)', boxShadow: '0 -1px 20px hsl(var(--foreground) / 0.04)' }}
     >
-      <div className="flex items-center justify-around h-[60px] px-1">
+      <div className="flex items-center justify-around h-[58px] px-1">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;
@@ -103,15 +101,15 @@ const MobileBottomNav = memo(() => {
               onClick={() => navigate(tab.path)}
               className={cn(
                 'flex flex-col items-center justify-center gap-0.5 flex-1 h-full relative',
-                'touch-manipulation spring-press',
-                active ? 'text-primary' : 'text-muted-foreground/70'
+                'touch-manipulation active:scale-95 transition-transform duration-100',
+                active ? 'text-primary' : 'text-muted-foreground/60'
               )}
             >
-              {/* Active background glow */}
+              {/* Active pill background */}
               {active && (
                 <motion.div
-                  layoutId="bottomNavBg"
-                  className="absolute inset-x-1.5 inset-y-1 rounded-2xl bg-primary/8"
+                  layoutId="bottomNavPill"
+                  className="absolute inset-x-2 inset-y-1.5 rounded-2xl bg-primary/8"
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
@@ -119,18 +117,19 @@ const MobileBottomNav = memo(() => {
               {/* Active top indicator */}
               {active && (
                 <motion.div
-                  layoutId="bottomNavIndicator"
-                  className="absolute -top-px left-1/4 right-1/4 h-[2.5px] bg-primary rounded-full"
+                  layoutId="bottomNavDot"
+                  className="absolute -top-px left-1/3 right-1/3 h-[2.5px] bg-primary rounded-full"
+                  style={{ boxShadow: '0 0 6px hsl(var(--primary) / 0.3)' }}
                   transition={{ type: 'spring', stiffness: 500, damping: 35 }}
                 />
               )}
 
               <div className="relative z-10">
                 <motion.div
-                  animate={active ? { scale: 1.12 } : { scale: 1 }}
+                  animate={active ? { scale: 1.15, y: -1 } : { scale: 1, y: 0 }}
                   transition={{ type: 'spring', stiffness: 400, damping: 20 }}
                 >
-                  <Icon className={cn('w-[22px] h-[22px]', active && 'stroke-[2.5]')} />
+                  <Icon className={cn('w-[21px] h-[21px]', active && 'stroke-[2.5]')} />
                 </motion.div>
                 
                 {/* Badge */}
@@ -138,7 +137,7 @@ const MobileBottomNav = memo(() => {
                   <motion.span 
                     initial={{ scale: 0 }}
                     animate={{ scale: 1 }}
-                    className="absolute -top-1.5 -right-2.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center shadow-sm"
+                    className="absolute -top-1.5 -right-2.5 min-w-[16px] h-[16px] px-1 rounded-full bg-destructive text-destructive-foreground text-[8px] font-bold flex items-center justify-center shadow-sm ring-2 ring-card"
                   >
                     {tab.badge > 99 ? '99+' : tab.badge}
                   </motion.span>
@@ -146,8 +145,8 @@ const MobileBottomNav = memo(() => {
               </div>
 
               <span className={cn(
-                'text-[10px] leading-tight relative z-10',
-                active ? 'font-bold' : 'font-medium'
+                'text-[10px] leading-tight relative z-10 transition-colors duration-150',
+                active ? 'font-bold text-primary' : 'font-medium'
               )}>
                 {tab.label}
               </span>
