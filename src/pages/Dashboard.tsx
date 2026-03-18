@@ -11,6 +11,7 @@ import { useTermsAcceptance } from '@/hooks/useTermsAcceptance';
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import { useSecurityHardening } from '@/hooks/useSecurityHardening';
 import { usePWARealtimeSync } from '@/hooks/usePWARealtimeSync';
+import { useMyPermissions } from '@/hooks/useMyPermissions';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import OrganizationTermsDialog from '@/components/auth/OrganizationTermsDialog';
@@ -52,6 +53,7 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { requiresAcceptance, loading: termsLoading, markAsAccepted, organizationType } = useTermsAcceptance();
   const { enabled: aiAssistantEnabled } = usePlatformSetting('ai_assistant_enabled');
+  const { isManagementMember, isCompanyAdmin: effectiveCompanyAdmin } = useMyPermissions();
   
   // Security hardening — session timeout, CSP, anti-XSS
   useSecurityHardening();
@@ -61,7 +63,8 @@ const Dashboard = () => {
 
   const isAdmin = roles.includes('admin');
   const isDriver = roles.includes('driver');
-  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin;
+  // Employee is someone with 'employee' role who is NOT a company_admin, admin, or management member
+  const isEmployee = roles.includes('employee') && !roles.includes('company_admin') && !isAdmin && !isManagementMember;
   const orgType = organization?.organization_type as string | undefined;
   const showAIAssistant = aiAssistantEnabled && (isAdmin || orgType === 'transporter' || orgType === 'recycler' || orgType === 'disposal' || orgType === 'transport_office');
 
