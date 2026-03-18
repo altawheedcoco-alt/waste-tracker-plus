@@ -530,7 +530,7 @@ export default function AIDocumentStudioPage() {
           </div>
           <div className="flex-1 overflow-auto flex justify-center py-8 bg-gray-700">
             <div ref={previewRef} className="bg-white shadow-2xl" style={{ width: '794px', minHeight: '1123px' }}
-              dangerouslySetInnerHTML={{ __html: previewHtml }} />
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }} />
           </div>
         </div>
       )}
