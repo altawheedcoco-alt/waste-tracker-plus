@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { FileCheck, Loader2, CheckCircle2 } from 'lucide-react';
+import { FileCheck, Loader2, CheckCircle2, Eye } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import ReceiptFlowDialog from './ReceiptFlowDialog';
+import { useNavigate } from 'react-router-dom';
 
 interface Shipment {
   id: string;
@@ -35,6 +36,7 @@ const QuickReceiptButton = ({
   size = 'sm'
 }: QuickReceiptButtonProps) => {
   const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
   // استخدام has_receipt من الـ props إذا كانت متوفرة
   const [hasReceipt, setHasReceipt] = useState(shipment.has_receipt ?? false);
   const [checkingReceipt, setCheckingReceipt] = useState(false);
@@ -73,30 +75,33 @@ const QuickReceiptButton = ({
   const handleOpenDialog = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
-    // إذا تم إصدار شهادة مسبقاً، لا تفتح الحوار
+    // إذا تم إصدار شهادة مسبقاً، انتقل لصفحة تفاصيل الشحنة لعرضها
     if (hasReceipt) {
+      navigate(`/dashboard/s/${shipment.shipment_number}?tab=documents`);
       return;
     }
     
     const exists = await checkExistingReceipt();
-    if (!exists) {
-      setOpen(true);
+    if (exists) {
+      navigate(`/dashboard/s/${shipment.shipment_number}?tab=documents`);
+      return;
     }
+    setOpen(true);
   };
 
-  // إذا تم إصدار شهادة، اعرض زر مختلف
+  // إذا تم إصدار شهادة، اعرض زر عرض بدلاً من disabled
   if (hasReceipt) {
     return (
       <Button
         variant="ghost"
         size={size}
-        disabled
-        className="gap-1 text-blue-600 dark:text-blue-400 cursor-not-allowed"
-        title="تم إصدار شهادة استلام لهذه الشحنة"
-        onClick={(e) => e.stopPropagation()}
+        className="gap-1 text-emerald-600 dark:text-emerald-400"
+        title="عرض شهادة الاستلام"
+        onClick={handleOpenDialog}
       >
         <CheckCircle2 className="w-4 h-4" />
         <span>تم إصدار شهادة استلام</span>
+        <Eye className="w-3 h-3" />
       </Button>
     );
   }
