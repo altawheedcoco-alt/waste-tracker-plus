@@ -759,6 +759,38 @@ ${custodyChain.length > 0 ? `
   </div>
 </div>
 
+<!-- 8b. مسئولو الحركة والمتابعة -->
+${supervisors.length > 0 ? `
+<div class="sec">
+  <div class="sec-t">مسئولو الحركة والمتابعة | Movement Supervisors</div>
+  <table>
+    <tr><th>الجهة</th><th>المسئول</th><th>النوع</th><th>الهاتف</th><th>وضع التوقيع</th></tr>
+    ${supervisors.map((sup: any) => {
+      const roleLabels: Record<string, string> = { generator: 'المولّد', transporter: 'الناقل', recycler: 'المدوّر', disposal: 'التخلص' };
+      const methodLabels: Record<string, string> = { manual: 'يدوي', otp: 'OTP', national_id: 'رقم قومي', digital_stamp: 'ختم رقمي', full_auto: 'تلقائي كامل' };
+      return `<tr>
+        <td>${roleLabels[sup.party_role] || sup.party_role}</td>
+        <td>${sup.supervisor_type === 'ai' ? '🤖 ' : '👤 '}${sup.supervisor_name || '—'}</td>
+        <td>${sup.supervisor_type === 'ai' ? 'هوية رقمية' : sup.supervisor_type === 'org_head' ? 'رئيس المنظمة' : 'معيّن'}</td>
+        <td style="font-family:monospace;">${sup.supervisor_phone || '—'}</td>
+        <td>${sup.auto_sign_enabled ? `✅ تلقائي (${methodLabels[sup.auto_sign_method] || sup.auto_sign_method || 'يدوي'})` : '📝 يدوي'}</td>
+      </tr>`;
+    }).join('')}
+  </table>
+</div>` : ''}
+
+<!-- 8c. إقرار تسليم الشحنة -->
+${declaration ? `
+<div class="sec">
+  <div class="sec-t" style="border-right-color:#7c3aed;color:#5b21b6;">📋 إقرار تسليم الشحنة | Delivery Declaration</div>
+  <table>
+    <tr>
+      <td style="width:75%;padding:2px 4px;"><span class="lbl">المُقِر:</span> <span class="val">${declaration.driver_name || '—'}</span> | <span class="lbl">التاريخ:</span> <span class="val">${declaration.declared_at ? formatDateTime(declaration.declared_at) : '—'}</span> <span style="color:#16a34a;font-weight:bold;">✅ تم التوقيع إلكترونياً</span></td>
+      <td style="width:25%;text-align:center;">${generateQRSvg(`https://irecycle.app/qr-verify?type=declaration&code=DEC-${(declaration.id || '').slice(0, 8).toUpperCase()}`, 22)}<div style="font-size:4.5px;color:#6b7280;">DEC-${(declaration.id || '').slice(0, 8).toUpperCase()}</div></td>
+    </tr>
+  </table>
+</div>` : ''}
+
 <!-- 9. الشروط -->
 <div class="terms">
   <h4>📋 الشروط والأحكام</h4>
