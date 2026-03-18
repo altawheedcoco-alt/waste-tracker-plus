@@ -208,9 +208,19 @@ const Quotations = () => {
   return (
     <div className="space-y-4 sm:space-y-6 p-2 sm:p-4" dir="rtl">
       <div className="space-y-2">
-        <div className="min-w-0">
-          <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
-          <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
+        <div className="flex items-center gap-2 min-w-0">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(-1)}
+            className="shrink-0 h-8 w-8 rounded-lg"
+          >
+            <ArrowRight className="w-4 h-4" />
+          </Button>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground truncate">عروض الأسعار</h1>
+            <p className="text-[11px] sm:text-sm text-muted-foreground truncate">إنشاء وإدارة عروض الأسعار - {ENTITY_LABELS[orgType] || orgType}</p>
+          </div>
         </div>
         <div className="flex gap-1.5 sm:gap-2 overflow-x-auto scrollbar-hide">
           <Button onClick={() => handleOpenCreate('outgoing')} className="gap-1 text-xs sm:text-sm h-8 sm:h-9 px-2.5 sm:px-4 shrink-0">
