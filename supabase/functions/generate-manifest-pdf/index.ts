@@ -330,7 +330,7 @@ function generateVerticalStampHTML(): string {
 
 // ═══════════════════════════════════════════════════════════════
 
-function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[]) {
+function generateManifestHTML(shipment: any, custodyChain: any[], signatures: any[], supervisors: any[], declaration: any) {
   const wasteTypeLabels: Record<string, string> = {
     plastic: "بلاستيك", paper: "ورق وكرتون", metal: "معادن", glass: "زجاج",
     organic: "عضوي", electronic: "إلكتروني", textile: "منسوجات",
