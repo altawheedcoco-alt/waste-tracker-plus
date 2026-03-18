@@ -592,6 +592,55 @@ export const useCreateShipment = () => {
       return;
     }
 
+    // === STAGE 0.5: Check partner restrictions (block_shipments) ===
+    const partiesToCheck = [
+      formData.generator_id,
+      formData.recycler_id,
+      formData.disposal_facility_id,
+    ].filter(id => id && !id.startsWith('manual:'));
+
+    if (organization?.id && partiesToCheck.length > 0) {
+      const { data: activeRestrictions } = await supabase
+        .from('partner_restrictions')
+        .select('restricted_org_id, restriction_type')
+        .eq('organization_id', organization.id)
+        .eq('is_active', true)
+        .in('restricted_org_id', partiesToCheck)
+        .in('restriction_type', ['block_shipments', 'block_all', 'suspend_partnership', 'blacklist']);
+
+      if (activeRestrictions && activeRestrictions.length > 0) {
+        const blockedOrgId = activeRestrictions[0].restricted_org_id;
+        // Get org name
+        const { data: blockedOrg } = await supabase
+          .from('organizations')
+          .select('name')
+          .eq('id', blockedOrgId)
+          .single();
+        toast.error(`🚫 لا يمكن إنشاء شحنة مع "${blockedOrg?.name || 'الجهة المحظورة'}" — يوجد تقييد نشط`);
+        return;
+      }
+
+      // Also check if any of them restricted us
+      const { data: restrictionsOnUs } = await supabase
+        .from('partner_restrictions')
+        .select('organization_id, restriction_type')
+        .eq('restricted_org_id', organization.id)
+        .eq('is_active', true)
+        .in('organization_id', partiesToCheck)
+        .in('restriction_type', ['block_shipments', 'block_all', 'suspend_partnership', 'blacklist']);
+
+      if (restrictionsOnUs && restrictionsOnUs.length > 0) {
+        const blockingOrgId = restrictionsOnUs[0].organization_id;
+        const { data: blockingOrg } = await supabase
+          .from('organizations')
+          .select('name')
+          .eq('id', blockingOrgId)
+          .single();
+        toast.error(`🚫 "${blockingOrg?.name || 'جهة'}" فرضت تقييداً عليك — لا يمكن إنشاء شحنة`);
+        return;
+      }
+    }
+
     // === STAGE 1: Verify generator license is not expired ===
     const isManualGen = formData.generator_id.startsWith('manual:');
     if (!isManualGen && formData.generator_id) {
