@@ -402,7 +402,7 @@ export default function AIDocumentStudioPage() {
                                 onClick={() => handlePreview(docHtml)}>
                                 <div style={{ transform: 'scale(0.28)', transformOrigin: 'top center', width: '794px',
                                   position: 'absolute', top: 0, left: '50%', marginLeft: '-397px' }}
-                                  dangerouslySetInnerHTML={{ __html: docHtml }} />
+                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(docHtml) }} />
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/90 flex items-end justify-center pb-3">
                                   <Badge variant="secondary" className="gap-1 text-xs">
                                     <Eye className="w-3 h-3" /> انقر للمعاينة
