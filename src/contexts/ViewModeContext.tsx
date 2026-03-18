@@ -7,15 +7,12 @@ interface ViewModeState {
   density: ContentDensity;
   listStyle: ListStyle;
   fullWidth: boolean;
-  sidebarMode: 'full' | 'mini' | 'hidden';
 }
 
 interface ViewModeContextType extends ViewModeState {
   setDensity: (d: ContentDensity) => void;
   setListStyle: (s: ListStyle) => void;
   toggleFullWidth: () => void;
-  setSidebarMode: (m: 'full' | 'mini' | 'hidden') => void;
-  cycleSidebarMode: () => void;
   // Utility getters
   spacing: { card: string; gap: string; padding: string; text: string };
   gridCols: string;
