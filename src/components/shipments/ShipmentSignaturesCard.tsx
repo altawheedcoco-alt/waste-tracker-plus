@@ -110,7 +110,7 @@ const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => 
                     <Badge variant="outline" className="text-[10px] h-4">{ROLE_LABELS[sig.signer_role] || sig.signer_role}</Badge>
                   )}
                   {sig.status === 'signed' && (
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                   )}
                 </div>
                 {sig.signer_title && (
