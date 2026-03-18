@@ -171,6 +171,7 @@ const UnifiedShipmentPrint = ({
           documentSerial={documentSerial}
           verificationCode={verificationCode}
           supervisors={supervisors}
+          signatures={signatures}
           declaration={declaration}
           compact={false}
         />
