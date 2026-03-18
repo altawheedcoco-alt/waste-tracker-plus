@@ -115,8 +115,15 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
     border: `1px solid ${theme.colors.border}`,
   });
 
+  const orgProfileUrl = (orgId?: string | null) => orgId ? `${window.location.origin}/dashboard/organization/${orgId}` : '';
+  const memberProfileUrl = (profileId?: string | null) => profileId ? `${window.location.origin}/dashboard/profile/${profileId}` : '';
+
+  const profileLink = (name: string, url: string, color = '#1d4ed8') => 
+    url ? <a href={url} target="_blank" rel="noopener noreferrer" style={{ color, textDecoration: 'underline', fontWeight: 'bold', cursor: 'pointer' }}>{name}</a> : <>{name}</>;
+
   const renderOrgSection = (
     org: ShipmentPrintData['generator'],
+    orgId: string | null | undefined,
     title: string,
     bgColor: string, textColor: string, lightBg: string,
     extraFields?: { label: string; value: string }[]
@@ -125,7 +132,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
       <tbody>
         <tr>
           <td colSpan={8} style={sectionHeader(bgColor, textColor, title)}>
-            {title}: {org?.name || '-'}
+            {title}: {profileLink(org?.name || '-', orgProfileUrl(orgId), textColor)}
             {org?.client_code && <span style={{ marginRight: '8px', background: lightBg, color: textColor, padding: '0px 4px', borderRadius: '3px', fontSize: FS }}>{org.client_code}</span>}
           </td>
         </tr>
