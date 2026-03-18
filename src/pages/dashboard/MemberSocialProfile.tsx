@@ -20,10 +20,11 @@ import {
   Camera, Edit3, MapPin, Building2, Briefcase, Phone, Mail,
   Calendar, Star, MessageCircle, Heart, ThumbsUp, Send, MoreHorizontal,
   Globe, Shield, Award, Activity, TrendingUp, Pin, Trash2, Loader2,
-  Image as ImageIcon, X, UserCheck, Clock,
+  Image as ImageIcon, X, UserCheck, Clock, Images,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import ProfilePhotoGallery from '@/components/profile/ProfilePhotoGallery';
 
 const REVIEW_CATEGORIES = [
   { value: 'general', label: 'عام' },
@@ -59,6 +60,8 @@ export default function MemberSocialProfile() {
   const [reviewText, setReviewText] = useState('');
   const [reviewCategory, setReviewCategory] = useState('general');
   const [uploading, setUploading] = useState(false);
+  const [coverGalleryOpen, setCoverGalleryOpen] = useState(false);
+  const [avatarGalleryOpen, setAvatarGalleryOpen] = useState(false);
 
   // Fetch target profile
   const { data: targetProfile, isLoading: profileLoading } = useQuery({
@@ -170,6 +173,28 @@ export default function MemberSocialProfile() {
     return urlData.publicUrl;
   };
 
+  // Save photo to history
+  const savePhotoHistory = async (photoUrl: string, photoType: 'cover' | 'avatar', storagePath?: string) => {
+    if (!targetProfile || !user?.id) return;
+    
+    // Mark old photos as not current
+    await supabase
+      .from('profile_photos')
+      .update({ is_current: false, updated_at: new Date().toISOString() } as any)
+      .eq('profile_id', targetProfile.id)
+      .eq('photo_type', photoType);
+
+    // Insert new photo as current
+    await supabase.from('profile_photos').insert({
+      profile_id: targetProfile.id,
+      user_id: user.id,
+      photo_type: photoType,
+      photo_url: photoUrl,
+      storage_path: storagePath || null,
+      is_current: true,
+    } as any);
+  };
+
   // Update cover photo
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -183,18 +208,18 @@ export default function MemberSocialProfile() {
     setUploading(true);
     try {
       const url = await uploadFile(file, 'covers');
-      console.log('Cover uploaded, URL:', url);
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ cover_url: url } as any)
         .eq('id', targetProfile.id);
       
-      if (updateError) {
-        console.error('Profile update error:', updateError);
-        throw updateError;
-      }
+      if (updateError) throw updateError;
+
+      // Save to history
+      await savePhotoHistory(url, 'cover');
       
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الغلاف');
     } catch (err: any) {
       console.error('Cover upload error:', err);
@@ -213,7 +238,12 @@ export default function MemberSocialProfile() {
     try {
       const url = await uploadFile(file, 'avatars');
       await supabase.from('profiles').update({ avatar_url: url }).eq('id', targetProfile.id);
+      
+      // Save to history
+      await savePhotoHistory(url, 'avatar');
+      
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
+      queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
       toast.success('تم تحديث صورة الملف الشخصي');
     } catch { toast.error('فشل رفع الصورة'); }
     finally { setUploading(false); }
@@ -350,35 +380,62 @@ export default function MemberSocialProfile() {
         {/* Cover + Avatar Section */}
         <Card className="overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden">
+          <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden group/cover">
             {(targetProfile as any).cover_url && (
-              <img src={(targetProfile as any).cover_url} alt="غلاف" className="w-full h-full object-cover" />
+              <img
+                src={(targetProfile as any).cover_url}
+                alt="غلاف"
+                className="w-full h-full object-cover cursor-pointer"
+                onClick={() => setCoverGalleryOpen(true)}
+              />
             )}
-            {isOwnProfile && (
-              <>
-                <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-                <Button
-                  size="sm" variant="secondary"
-                  className="absolute bottom-3 left-3 gap-1.5 opacity-80 hover:opacity-100"
-                  onClick={() => coverInputRef.current?.click()}
-                  disabled={uploading}
-                >
-                  <Camera className="w-4 h-4" />
-                  {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
-                </Button>
-              </>
-            )}
+            {/* Cover action buttons */}
+            <div className="absolute bottom-3 left-3 flex gap-2">
+              {isOwnProfile && (
+                <>
+                  <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+                  <Button
+                    size="sm" variant="secondary"
+                    className="gap-1.5 opacity-80 hover:opacity-100"
+                    onClick={() => coverInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                    {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
+                  </Button>
+                </>
+              )}
+              <Button
+                size="sm" variant="secondary"
+                className="gap-1.5 opacity-80 hover:opacity-100"
+                onClick={() => setCoverGalleryOpen(true)}
+              >
+                <Images className="w-4 h-4" />
+                صور الغلاف
+              </Button>
+            </div>
           </div>
 
           {/* Profile Info */}
           <div className="px-4 md:px-6 pb-4 -mt-16 relative">
             <div className="flex items-end gap-4">
               {/* Avatar */}
-              <div className="relative">
-                <Avatar className="w-28 h-28 border-4 border-background shadow-lg">
+              <div className="relative group/avatar">
+                <Avatar
+                  className="w-28 h-28 border-4 border-background shadow-lg cursor-pointer"
+                  onClick={() => setAvatarGalleryOpen(true)}
+                >
                   <AvatarImage src={targetProfile.avatar_url || undefined} />
                   <AvatarFallback className="text-3xl font-bold bg-primary text-primary-foreground">{initials}</AvatarFallback>
                 </Avatar>
+                {/* Avatar gallery button */}
+                <Button
+                  size="icon" variant="secondary"
+                  className="absolute -bottom-1 -left-1 w-7 h-7 rounded-full shadow opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                  onClick={() => setAvatarGalleryOpen(true)}
+                >
+                  <Images className="w-3.5 h-3.5" />
+                </Button>
                 {isOwnProfile && (
                   <>
                     <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
@@ -802,6 +859,22 @@ export default function MemberSocialProfile() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Photo Galleries */}
+        <ProfilePhotoGallery
+          profileId={targetProfile.id}
+          photoType="cover"
+          isOwner={isOwnProfile}
+          open={coverGalleryOpen}
+          onOpenChange={setCoverGalleryOpen}
+        />
+        <ProfilePhotoGallery
+          profileId={targetProfile.id}
+          photoType="avatar"
+          isOwner={isOwnProfile}
+          open={avatarGalleryOpen}
+          onOpenChange={setAvatarGalleryOpen}
+        />
       </div>
     </DashboardLayout>
   );
