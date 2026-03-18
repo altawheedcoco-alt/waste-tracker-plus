@@ -337,7 +337,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            // Don't await - let it load in background
+            // Fire immediately — don't await, loading=false fires right after
             fetchUserData(session.user.id).catch(console.error);
           }
           initialSessionHandled = true;
