@@ -250,6 +250,11 @@ const ShipmentDetailsPage = () => {
           <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
         </Card>
 
+        {/* Digital Signatures */}
+        <Suspense fallback={null}>
+          <ShipmentSignaturesCard shipmentId={shipment.id} />
+        </Suspense>
+
         {/* Inline Status Change */}
         <Suspense fallback={null}>
           <InlineStatusChange shipment={shipment} onStatusChanged={fetchShipmentDetails} />
