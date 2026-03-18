@@ -3,6 +3,7 @@ import { ar } from 'date-fns/locale';
 import { QRCodeSVG } from 'qrcode.react';
 import Barcode from 'react-barcode';
 import TermsBackPage from '@/components/print/TermsBackPage';
+import { generateMICRLineHTML, generateVerticalStampHTML } from '@/lib/printSecurityUtils';
 import {
   Building2,
   Truck,
@@ -636,16 +637,24 @@ const RecyclingCertificatePrint = ({
         </div>
       </div>
 
-      {/* Footer */}
-      <footer className="mt-2 pt-2 text-center" style={{ borderTop: '1px solid #e5e7eb', fontSize: '7pt', color: '#9ca3af' }}>
-        <p style={{ margin: 0 }}>تم إصدار هذه الشهادة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير | تاريخ الإصدار: {currentDate} | رقم المرجع: {shipment.shipment_number}</p>
-        <p style={{ margin: '2px 0 0 0', fontSize: '6pt' }}>
-          هذه الوثيقة صالحة بدون توقيع خطي في حالة التحقق الإلكتروني عبر رمز QR
-        </p>
-        <p style={{ margin: '4px 0 0 0', fontSize: '7pt', color: '#6b7280' }}>
-          📅 تاريخ وصول الشحنة (أول تسجيل على المنظومة): {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : deliveryDate}
-        </p>
-      </footer>
+      {/* Footer with Security Elements */}
+      <div style={{ marginTop: 'auto', textAlign: 'center', fontSize: '6.5pt', color: '#000', paddingTop: '2px', borderTop: '1px solid #e5e7eb', background: 'rgba(241,245,249,0.5)', borderRadius: '0 0 3px 3px' }}>
+        <div style={{ fontWeight: '600' }}>تم إصدار هذه الشهادة إلكترونياً من نظام إدارة المخلفات وإعادة التدوير</div>
+        <div style={{ fontSize: '6pt', color: '#6b7280', margin: '1px 0' }}>
+          تاريخ الإصدار: {currentDate} | رقم المرجع: {shipment.shipment_number} | هذه الوثيقة صالحة بدون توقيع خطي في حالة التحقق الإلكتروني عبر رمز QR
+        </div>
+        <div style={{ fontSize: '6pt', color: '#6b7280' }}>
+          📅 تاريخ وصول الشحنة: {shipment.confirmed_at ? format(new Date(shipment.confirmed_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : shipment.delivered_at ? format(new Date(shipment.delivered_at), 'dd/MM/yyyy - hh:mm a', { locale: ar }) : deliveryDate}
+        </div>
+        <div style={{ fontFamily: 'monospace', fontSize: '5.5pt', margin: '1px 0' }}>
+          رقم التتبع: {shipment.shipment_number} | {format(new Date(), 'dd/MM/yyyy hh:mm a', { locale: ar })}
+        </div>
+        <div style={{ marginTop: '2px' }} dangerouslySetInnerHTML={{ __html: generateVerticalStampHTML() }} />
+        <div style={{ marginTop: '1px' }} dangerouslySetInnerHTML={{ __html: generateMICRLineHTML(
+          recyclerOrg?.client_code || shipment.recycler?.client_code,
+          shipment.shipment_number
+        ) }} />
+      </div>
     </div>
     <TermsBackPage />
     </>
