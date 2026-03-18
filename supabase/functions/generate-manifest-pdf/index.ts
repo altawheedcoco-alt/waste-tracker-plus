@@ -590,7 +590,7 @@ ${generateWatermarkHTML(primaryOrgName)}
     </div>
     <div class="party">
       <h4>♻️ المدوّر | Recycler</h4>
-      <p><span class="lbl">الاسم:</span> <span class="val">${shipment.recycler?.name || shipment.manual_recycler_name || "—"}</span></p>
+      <p><span class="lbl">الاسم:</span> <span class="val">${orgLink(shipment.recycler?.name || shipment.manual_recycler_name || "—", shipment.recycler_id)}</span></p>
       ${shipment.recycler?.name_en ? `<p><span class="lbl">Name:</span> <span class="val">${shipment.recycler.name_en}</span></p>` : ''}
       <p><span class="lbl">كود:</span> ${shipment.recycler?.partner_code || "—"} ${shipment.recycler?.client_code ? `| ${shipment.recycler.client_code}` : ''}</p>
       <p><span class="lbl">العنوان:</span> ${shipment.recycler?.address || "—"}${shipment.recycler?.city ? ` - ${shipment.recycler.city}` : ''}</p>
