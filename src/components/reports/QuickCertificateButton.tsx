@@ -160,7 +160,7 @@ const QuickCertificateButton = ({
           ) : (
             <FileText className="w-4 h-4 text-emerald-600" />
           )}
-          {showLabel && size !== 'sm' && <span>شهادة التدوير</span>}
+          {showLabel && <span>عرض شهادة التدوير</span>}
         </Button>
 
         <RecyclingCertificateDialog
