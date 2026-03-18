@@ -800,7 +800,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Right side - Responsive spacing */}
-            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-3'}`}>
+            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2'}`}>
+              {/* View Mode Toolbar - Desktop only */}
+              {!isMobile && !isTablet && <ViewModeToolbar />}
               <LiveClock />
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
