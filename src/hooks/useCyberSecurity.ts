@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 
 export interface CyberThreat {
   id: string;
@@ -69,7 +69,6 @@ export function useCyberThreats() {
     },
   });
 
-  // Realtime subscription
   useEffect(() => {
     const channel = supabase
       .channel('cyber-threats-realtime')
@@ -154,6 +153,8 @@ export function useRunThreatScan() {
       }
       qc.invalidateQueries({ queryKey: ['cyber-threats'] });
       qc.invalidateQueries({ queryKey: ['threat-patterns'] });
+      qc.invalidateQueries({ queryKey: ['cyber-stats'] });
+      qc.invalidateQueries({ queryKey: ['cyber-advanced-stats'] });
     },
     onError: (err: Error) => {
       toast.error(err.message || 'فشل في الفحص الأمني');
@@ -176,6 +177,7 @@ export function useResolveThreat() {
     onSuccess: () => {
       toast.success('تم تحديث حالة التهديد');
       qc.invalidateQueries({ queryKey: ['cyber-threats'] });
+      qc.invalidateQueries({ queryKey: ['cyber-stats'] });
     },
   });
 }
@@ -198,4 +200,86 @@ export function useCyberStats() {
       };
     },
   });
+}
+
+// Advanced analytics hook
+export function useCyberAdvancedStats(threats: CyberThreat[]) {
+  return useMemo(() => {
+    if (!threats.length) return null;
+
+    // Distribution by type
+    const byType: Record<string, number> = {};
+    const bySeverity: Record<string, number> = {};
+    const byStatus: Record<string, number> = {};
+    const byHour: Record<number, number> = {};
+    const byDay: Record<string, number> = {};
+    const autoVsManual = { auto: 0, manual: 0, pending: 0 };
+    let totalResponseTimeMs = 0;
+    let responseCount = 0;
+
+    for (const t of threats) {
+      byType[t.threat_type] = (byType[t.threat_type] || 0) + 1;
+      bySeverity[t.severity] = (bySeverity[t.severity] || 0) + 1;
+      byStatus[t.status] = (byStatus[t.status] || 0) + 1;
+
+      const dt = new Date(t.detected_at);
+      byHour[dt.getHours()] = (byHour[dt.getHours()] || 0) + 1;
+      const dayKey = dt.toISOString().split('T')[0];
+      byDay[dayKey] = (byDay[dayKey] || 0) + 1;
+
+      if (t.auto_response_taken) {
+        autoVsManual.auto++;
+      } else if (t.status === 'resolved' || t.status === 'mitigated') {
+        autoVsManual.manual++;
+      } else {
+        autoVsManual.pending++;
+      }
+
+      if (t.auto_response_at && t.detected_at) {
+        const diff = new Date(t.auto_response_at).getTime() - new Date(t.detected_at).getTime();
+        if (diff > 0) { totalResponseTimeMs += diff; responseCount++; }
+      }
+    }
+
+    const avgResponseTimeSec = responseCount > 0 ? Math.round(totalResponseTimeMs / responseCount / 1000) : 0;
+
+    // Top attack sources (IPs)
+    const ipCounts: Record<string, number> = {};
+    for (const t of threats) {
+      if (t.source_ip) ipCounts[t.source_ip] = (ipCounts[t.source_ip] || 0) + 1;
+    }
+    const topIPs = Object.entries(ipCounts).sort((a, b) => b[1] - a[1]).slice(0, 10);
+
+    // Trend: last 30 days
+    const last30 = [];
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date();
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().split('T')[0];
+      last30.push({ date: key, count: byDay[key] || 0 });
+    }
+
+    // Peak attack hours
+    const peakHours = Object.entries(byHour).sort((a, b) => b[1] - a[1]).slice(0, 5);
+
+    // Security score (0-100)
+    const criticalRatio = (bySeverity['critical'] || 0) / Math.max(threats.length, 1);
+    const activeRatio = ((byStatus['detected'] || 0) + (byStatus['analyzing'] || 0)) / Math.max(threats.length, 1);
+    const autoRatio = autoVsManual.auto / Math.max(autoVsManual.auto + autoVsManual.manual + autoVsManual.pending, 1);
+    const securityScore = Math.round(
+      Math.max(0, Math.min(100, 100 - (criticalRatio * 40) - (activeRatio * 30) + (autoRatio * 20)))
+    );
+
+    return {
+      byType,
+      bySeverity,
+      byStatus,
+      autoVsManual,
+      avgResponseTimeSec,
+      topIPs,
+      last30,
+      peakHours,
+      securityScore,
+    };
+  }, [threats]);
 }
