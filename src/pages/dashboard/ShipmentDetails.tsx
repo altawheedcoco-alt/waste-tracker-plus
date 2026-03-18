@@ -803,15 +803,15 @@ const ShipmentDetailsPage = () => {
 
         {isDeliveryCertOpen && isGenerator && (
           <GeneratorDeliveryCertificateDialog
-            isOpen={isDeliveryCertOpen} onClose={() => setIsDeliveryCertOpen(false)}
-            shipment={{ ...shipment, unit: shipment.unit || 'كجم', pickup_address: shipment.pickup_address || '' }}
+            open={isDeliveryCertOpen} onOpenChange={setIsDeliveryCertOpen}
+            shipment={{ ...shipment, unit: shipment.unit || 'كجم', pickup_address: shipment.pickup_address || '' } as any}
             onSuccess={fetchShipmentDetails}
           />
         )}
 
         {isDeclarationViewOpen && declarationData && (
           <DeliveryDeclarationViewDialog
-            isOpen={isDeclarationViewOpen} onClose={() => setIsDeclarationViewOpen(false)}
+            open={isDeclarationViewOpen} onOpenChange={setIsDeclarationViewOpen}
             declaration={declarationData}
           />
         )}
