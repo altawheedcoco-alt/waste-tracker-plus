@@ -716,7 +716,7 @@ ${custodyChain.length > 0 ? `
     يقر كل طرف بصحة البيانات الواردة ويتحمل المسئولية المدنية والجنائية عن أي مخالفة وفقاً لقانون 202/2020 ولائحته التنفيذية وقانون البيئة 4/1994 واتفاقية بازل.
   </p>
   <div class="decl-party">
-    <strong>🏭 المولّد: ${shipment.generator?.name || "—"}</strong>
+    <strong>🏭 المولّد: ${orgLink(shipment.generator?.name || "—", shipment.generator_id)}</strong>
     <p>أقر بتصنيف المخلفات بدقة وفقاً للكود المصري وأن الكميات والأوصاف صحيحة. (المادة 27 — ق202/2020)</p>
   </div>
   <div class="decl-party">
