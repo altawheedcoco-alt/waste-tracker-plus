@@ -102,7 +102,7 @@ const RestrictionsMonitor = () => {
           </Card>
           <Card>
             <CardContent className="p-4 text-center">
-              <Clock className="h-8 w-8 mx-auto text-orange-500 mb-2" />
+              <Clock className="h-8 w-8 mx-auto text-accent-foreground mb-2" />
               <div className="text-2xl font-bold">{stats.expiringSoon}</div>
               <div className="text-xs text-muted-foreground">تنتهي قريباً</div>
             </CardContent>
