@@ -25,6 +25,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BackButton from '@/components/ui/back-button';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 const DocumentArchiveTab = lazy(() => import('@/components/ai-studio/DocumentArchiveTab'));
 const DocumentTemplatesTab = lazy(() => import('@/components/ai-studio/DocumentTemplatesTab'));
@@ -401,7 +402,7 @@ export default function AIDocumentStudioPage() {
                                 onClick={() => handlePreview(docHtml)}>
                                 <div style={{ transform: 'scale(0.28)', transformOrigin: 'top center', width: '794px',
                                   position: 'absolute', top: 0, left: '50%', marginLeft: '-397px' }}
-                                  dangerouslySetInnerHTML={{ __html: docHtml }} />
+                                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(docHtml) }} />
                                 <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/90 flex items-end justify-center pb-3">
                                   <Badge variant="secondary" className="gap-1 text-xs">
                                     <Eye className="w-3 h-3" /> انقر للمعاينة
@@ -529,7 +530,7 @@ export default function AIDocumentStudioPage() {
           </div>
           <div className="flex-1 overflow-auto flex justify-center py-8 bg-gray-700">
             <div ref={previewRef} className="bg-white shadow-2xl" style={{ width: '794px', minHeight: '1123px' }}
-              dangerouslySetInnerHTML={{ __html: previewHtml }} />
+              dangerouslySetInnerHTML={{ __html: sanitizeHtml(previewHtml) }} />
           </div>
         </div>
       )}
@@ -638,7 +639,7 @@ export default function AIDocumentStudioPage() {
                   suppressContentEditableWarning
                   className="bg-white shadow-2xl outline-none"
                   style={{ width: '794px', minHeight: '1123px', direction: 'rtl' }}
-                  dangerouslySetInnerHTML={{ __html: editHtml }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }}
                   onBlur={() => {
                     if (editableRef.current) {
                       setEditHtml(editableRef.current.innerHTML);
@@ -659,7 +660,7 @@ export default function AIDocumentStudioPage() {
                 </div>
                 <div className="flex-1 bg-gray-600 overflow-auto hidden md:flex justify-center py-4">
                   <div className="bg-white shadow-xl" style={{ width: '794px', minHeight: '1123px', transform: 'scale(0.7)', transformOrigin: 'top center' }}
-                    dangerouslySetInnerHTML={{ __html: editHtml }} />
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(editHtml) }} />
                 </div>
               </div>
             )}

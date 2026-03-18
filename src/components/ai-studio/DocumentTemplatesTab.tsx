@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Eye, Copy, Trash2, Loader2, LayoutTemplate } from 'lucide-react';
 import { toast } from 'sonner';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface Template {
   id: string;
@@ -108,7 +109,7 @@ export default function DocumentTemplatesTab({ onPreview, onUseTemplate }: Props
                     left: '50%',
                     marginLeft: '-397px',
                   }}
-                  dangerouslySetInnerHTML={{ __html: tmpl.html_content }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(tmpl.html_content) }}
                 />
                 <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/80" />
               </div>

@@ -11,6 +11,7 @@ import { useRef, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Loader2 } from 'lucide-react';
 import { useDocumentService } from '@/hooks/useDocumentService';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface UnifiedDocumentPreviewProps {
   isOpen: boolean;
@@ -185,7 +186,7 @@ const UnifiedDocumentPreview = ({
             {htmlContent ? (
               <div
                 ref={htmlRef}
-                dangerouslySetInnerHTML={{ __html: htmlContent }}
+                dangerouslySetInnerHTML={{ __html: sanitizeHtml(htmlContent) }}
                 style={{ width: '210mm', minHeight: '297mm', transform: `scale(${zoom})`, transformOrigin: 'top right' }}
               />
             ) : (
