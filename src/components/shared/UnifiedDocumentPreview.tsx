@@ -11,6 +11,7 @@ import { useRef, useState, useEffect, ReactNode, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Loader2 } from 'lucide-react';
 import { useDocumentService } from '@/hooks/useDocumentService';
+import { sanitizeHtml } from '@/lib/sanitizeHtml';
 
 interface UnifiedDocumentPreviewProps {
   isOpen: boolean;
