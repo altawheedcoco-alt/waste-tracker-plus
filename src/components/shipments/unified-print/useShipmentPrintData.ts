@@ -55,6 +55,7 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
   const [shipment, setShipment] = useState<ShipmentPrintData | null>(null);
   const [logs, setLogs] = useState<ShipmentLogEntry[]>([]);
   const [supervisors, setSupervisors] = useState<MovementSupervisor[]>([]);
+  const [signatures, setSignatures] = useState<DocumentSignatureData[]>([]);
   const [loading, setLoading] = useState(false);
   const [declaration, setDeclaration] = useState<any>(null);
 
