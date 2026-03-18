@@ -140,6 +140,7 @@ const SigningInbox = lazy(() => import("@/pages/dashboard/SigningInbox"));
 const BulkSigning = lazy(() => import("@/pages/dashboard/BulkSigning"));
 const AllNotes = lazy(() => import("@/pages/dashboard/AllNotes"));
 const MemberSocialProfile = lazy(() => import("@/pages/dashboard/MemberSocialProfile"));
+const SocialFeedPage = lazy(() => import("@/pages/dashboard/SocialFeedPage"));
 const SystemCommands = lazy(() => import("@/pages/dashboard/SystemCommands"));
 const CrossImpactDashboard = lazy(() => import("@/pages/dashboard/CrossImpactDashboard"));
 const RegulatorDashboard = lazy(() => import("@/pages/dashboard/RegulatorDashboardNew"));
@@ -396,6 +397,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/notes" element={<AllNotes />} />
     <Route path="/dashboard/profile/:profileId" element={<MemberSocialProfile />} />
     <Route path="/dashboard/my-profile" element={<MemberSocialProfile />} />
+    <Route path="/dashboard/feed" element={<SocialFeedPage />} />
     <Route path="/dashboard/regulator" element={<RegulatorDashboard />} />
     <Route path="/dashboard/regulator-wmra" element={<RegulatorWMRA />} />
     <Route path="/dashboard/regulator-eeaa" element={<RegulatorEEAA />} />
