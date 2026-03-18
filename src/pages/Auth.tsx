@@ -77,7 +77,8 @@ const Auth = () => {
       if (response.error) throw new Error(response.data?.error || response.error?.message || 'حدث خطأ');
       if (!response.data?.success) throw new Error(response.data?.error || 'فشل إنشاء الشركة');
 
-      const { error: signInError } = await signIn(data.email, data.password);
+      const authEmail = response.data.auth_email || data.email;
+      const { error: signInError } = await signIn(authEmail, data.password);
       if (signInError) throw signInError;
       navigate('/dashboard');
       return { error: null };
