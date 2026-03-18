@@ -675,7 +675,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                       icon={item.icon}
                       label={item.label}
                       path={item.path}
-                    isCollapsed={isMiniSidebar}
+                    isCollapsed={false}
                     />
                   ))}
                 </div>
