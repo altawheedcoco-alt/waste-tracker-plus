@@ -225,3 +225,39 @@
   .section-padding { @apply py-12 sm:py-16 lg:py-20; }
   .section-padding-sm { @apply py-8 sm:py-12 lg:py-14; }
 }
+
+/* ===== Dark Mode Global Text Contrast Fix ===== */
+/* Override hardcoded Tailwind gray/slate/stone text colors for dark mode readability */
+.dark .text-gray-500 { color: hsl(215 8% 62%) !important; }
+.dark .text-gray-600 { color: hsl(215 8% 68%) !important; }
+.dark .text-gray-700 { color: hsl(215 8% 75%) !important; }
+.dark .text-gray-800 { color: hsl(215 8% 82%) !important; }
+.dark .text-gray-900 { color: hsl(215 8% 90%) !important; }
+.dark .text-slate-400 { color: hsl(215 10% 60%) !important; }
+.dark .text-slate-500 { color: hsl(215 10% 65%) !important; }
+.dark .text-slate-600 { color: hsl(215 10% 72%) !important; }
+.dark .text-slate-700 { color: hsl(215 10% 78%) !important; }
+.dark .text-slate-800 { color: hsl(215 10% 85%) !important; }
+.dark .text-stone-600 { color: hsl(30 6% 70%) !important; }
+.dark .text-stone-700 { color: hsl(30 6% 78%) !important; }
+.dark .text-stone-800 { color: hsl(30 6% 85%) !important; }
+.dark .text-zinc-500 { color: hsl(220 6% 62%) !important; }
+.dark .text-zinc-600 { color: hsl(220 6% 68%) !important; }
+.dark .text-zinc-700 { color: hsl(220 6% 75%) !important; }
+.dark .text-neutral-500 { color: hsl(0 0% 62%) !important; }
+.dark .text-neutral-600 { color: hsl(0 0% 68%) !important; }
+.dark .text-neutral-700 { color: hsl(0 0% 75%) !important; }
+.dark .text-black { color: hsl(210 15% 95%) !important; }
+
+/* Override hardcoded bg colors that cause low contrast in dark mode */
+.dark .bg-gray-100 { background-color: hsl(220 12% 18%) !important; }
+.dark .bg-gray-50 { background-color: hsl(220 12% 15%) !important; }
+.dark .bg-slate-100 { background-color: hsl(220 14% 18%) !important; }
+.dark .bg-slate-50 { background-color: hsl(220 14% 15%) !important; }
+.dark .bg-stone-100 { background-color: hsl(30 8% 18%) !important; }
+.dark .bg-white { background-color: hsl(var(--card)) !important; }
+
+/* Glass morphism dark mode fix */
+.dark .glass-eco {
+  background: hsl(var(--card) / 0.85);
+}
