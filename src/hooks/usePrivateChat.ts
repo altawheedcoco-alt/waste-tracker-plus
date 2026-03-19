@@ -68,6 +68,9 @@ export function usePrivateChat() {
   const publicKeyCache = useRef<Map<string, string>>(new Map());
   const publicKeysCache = useRef<Map<string, string[]>>(new Map());
 
+  // Cache conversation participants to avoid re-fetching on every send
+  const convoPartnersCache = useRef<Map<string, string>>(new Map());
+
   const clearKeyCaches = useCallback(() => {
     publicKeyCache.current.clear();
     publicKeysCache.current.clear();
