@@ -49,8 +49,9 @@ export interface DecryptedMessage {
 export function usePrivateChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { getPublicKey } = useE2EKeys();
+  const { getPublicKey, getPublicKeys } = useE2EKeys();
   const publicKeyCache = useRef<Map<string, string>>(new Map());
+  const publicKeysCache = useRef<Map<string, string[]>>(new Map());
 
   const getCachedPublicKey = useCallback(async (userId: string) => {
     if (publicKeyCache.current.has(userId)) return publicKeyCache.current.get(userId)!;
@@ -58,6 +59,13 @@ export function usePrivateChat() {
     if (key) publicKeyCache.current.set(userId, key);
     return key;
   }, [getPublicKey]);
+
+  const getCachedPublicKeys = useCallback(async (userId: string) => {
+    if (publicKeysCache.current.has(userId)) return publicKeysCache.current.get(userId)!;
+    const keys = await getPublicKeys(userId);
+    publicKeysCache.current.set(userId, keys);
+    return keys;
+  }, [getPublicKeys]);
 
   // ─── Conversations List ──────────────────────────────
   const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
