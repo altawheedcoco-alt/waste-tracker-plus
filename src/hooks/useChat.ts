@@ -79,6 +79,19 @@ export const useChat = () => {
     };
   }, [organization?.id]);
 
+  // Listen for cross-widget chat sync events
+  useEffect(() => {
+    if (!organization?.id) return;
+    return onChatSync((event) => {
+      if (event.type === 'message-sent' && event.partnerOrgId === currentPartnerId) {
+        // Another widget sent a message to the same partner - refresh
+        if (currentPartnerId) {
+          fetchMessagesForPartner(currentPartnerId);
+        }
+      }
+    });
+  }, [organization?.id, currentPartnerId]);
+
   const playNotificationSound = useCallback(() => {
     if (soundEnabled && audioRef.current) {
       audioRef.current.currentTime = 0;
