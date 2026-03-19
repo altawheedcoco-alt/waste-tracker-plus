@@ -247,13 +247,28 @@ export function usePrivateChat() {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
         } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
+          // Sender copy: check for embedded IV format "senderIV|senderCiphertext"
+          const senderData = msg.encrypted_content_for_sender;
+          let senderIv = msg.iv;
+          let senderCiphertext = senderData;
+
+          if (senderData.includes('|')) {
+            const parts = senderData.split('|');
+            senderIv = parts[0];
+            senderCiphertext = parts[1];
+          }
+
           content = await tryDecryptWithKeys(
             Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
-            msg.encrypted_content_for_sender,
-            msg.iv,
+            senderCiphertext,
+            senderIv,
           );
         } else if (msg.sender_id !== user.id) {
-          content = await tryDecryptWithKeys(partnerPublicKeys, msg.encrypted_content, msg.iv);
+          content = await tryDecryptWithKeys(
+            Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
+            msg.encrypted_content,
+            msg.iv,
+          );
         }
       } catch {
         content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
@@ -312,15 +327,17 @@ export function usePrivateChat() {
     // Encrypt for recipient
     const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
 
-    // Encrypt a sender copy using the sender's own public key when available,
-    // with fallback to the old partner-key method for backward compatibility.
+    // Encrypt a sender copy using the sender's own public key
+    // Store the sender IV embedded in the ciphertext as "senderIV|senderCiphertext"
+    // because the DB only has one iv column (for the recipient)
     const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
+    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
       encrypted_content: encrypted.ciphertext,
-      encrypted_content_for_sender: senderCopy.ciphertext,
+      encrypted_content_for_sender: senderPayload,
       iv: encrypted.iv,
       message_type: messageType,
       file_url: fileUrl,
