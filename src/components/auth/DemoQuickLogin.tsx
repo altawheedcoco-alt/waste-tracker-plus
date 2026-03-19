@@ -139,8 +139,8 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
     setLoading(email);
     onLoginStart?.();
     try {
-      await supabase.auth.signOut();
-      
+      await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
+
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {

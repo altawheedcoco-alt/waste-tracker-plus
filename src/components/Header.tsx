@@ -32,14 +32,14 @@ const Header = memo(() => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
-  const { user, profile } = useAuth();
+  const { user, profile, signOut } = useAuth();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
   const handleEmployeeLogin = () => navigate('/auth?mode=employee');
   const handleGoToDashboard = () => navigate('/dashboard');
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     toast.success('تم تسجيل الخروج بنجاح');
     navigate('/');
   };

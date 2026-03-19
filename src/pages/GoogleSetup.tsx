@@ -469,7 +469,7 @@ const GoogleSetup = () => {
                 variant="ghost"
                 size="sm"
                 onClick={async () => {
-                  await supabase.auth.signOut();
+                  await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
                   navigate('/auth?mode=login');
                 }}
                 className="text-muted-foreground text-xs"
