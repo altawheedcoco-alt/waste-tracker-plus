@@ -41,19 +41,64 @@ interface OrgMember {
   position: string | null;
 }
 
-const MiniMessageBubble = memo(({ msg, isMine }: { msg: DecryptedMessage; isMine: boolean }) => (
-  <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
-    <div className={cn(
-      "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
-      isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
-    )}>
-      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-      <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
-        {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
-      </span>
+const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: { 
+  msg: DecryptedMessage; 
+  isMine: boolean; 
+  allImages: string[];
+  onOpenLightbox: (url: string) => void;
+}) => {
+  const isImage = msg.message_type === 'image' && msg.file_url;
+  const isVideo = msg.message_type === 'video' && msg.file_url;
+  const isVoice = msg.message_type === 'voice' && msg.file_url;
+  const isFile = msg.message_type === 'file' && msg.file_url;
+
+  return (
+    <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
+      <div className={cn(
+        "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
+        isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
+      )}>
+        {isImage ? (
+          <button onClick={() => onOpenLightbox(msg.file_url!)} className="block">
+            <img 
+              src={msg.file_url} 
+              alt={msg.file_name || 'صورة'} 
+              className="max-w-full rounded-lg max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+            />
+          </button>
+        ) : isVideo ? (
+          <video 
+            src={msg.file_url} 
+            controls 
+            className="max-w-full rounded-lg max-h-48" 
+            preload="metadata"
+          />
+        ) : isVoice ? (
+          <VoiceMessagePlayer url={msg.file_url!} isOwn={isMine} />
+        ) : isFile ? (
+          <a 
+            href={msg.file_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center gap-2 p-1.5 rounded-lg transition-colors",
+              isMine ? "hover:bg-white/10" : "hover:bg-muted-foreground/10"
+            )}
+          >
+            <FileText className="w-5 h-5 shrink-0" />
+            <span className="truncate flex-1">{msg.file_name || 'ملف'}</span>
+            <Download className="w-3.5 h-3.5 shrink-0 opacity-60" />
+          </a>
+        ) : (
+          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+        )}
+        <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
+          {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
+        </span>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 MiniMessageBubble.displayName = 'MiniMessageBubble';
 
 const EncryptedChatWidget = () => {
