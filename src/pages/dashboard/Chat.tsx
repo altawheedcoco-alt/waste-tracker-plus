@@ -208,12 +208,7 @@ const MessageBubble = memo(({
           </Button>
         </div>
 
-        <div className={cn(
-          "rounded-2xl px-3 py-2 relative shadow-sm",
-          isMine
-            ? "bg-primary text-primary-foreground rounded-br-sm"
-            : "bg-card border border-border rounded-bl-sm"
-        )}>
+        <div className={cn(getBubbleClasses(isMine), "relative")}>
           {!isMine && message.sender && (
             <button
               onClick={(e) => {
