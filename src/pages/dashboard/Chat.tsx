@@ -774,6 +774,28 @@ const EncryptedChat = () => {
     }
   };
 
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedConvoId || sending) return;
+
+    setSending(true);
+    try {
+      await sendFileMessage(selectedConvoId, file);
+      const updated = await fetchMessages(selectedConvoId);
+      setMessages(updated);
+    } catch {
+      toast.error('فشل إرسال الملف');
+    } finally {
+      setSending(false);
+      e.target.value = '';
+      inputRef.current?.focus();
+    }
+  };
+
   const handleReply = (msg: DecryptedMessage) => {
     setReplyTo({
       id: msg.id,
@@ -781,21 +803,6 @@ const EncryptedChat = () => {
       senderName: msg.sender?.full_name || (msg.sender_id === user?.id ? 'أنت' : 'مستخدم'),
     });
     inputRef.current?.focus();
-  };
-
-  const handleForward = (msg: DecryptedMessage) => {
-    // Copy message to clipboard for now, can be enhanced later
-    navigator.clipboard.writeText(msg.content);
-    toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
-  };
-
-  const handleExport = async () => {
-    if (!selectedConvoId) return;
-    try {
-      await exportChatHistory(selectedConvoId);
-    } catch {
-      toast.error('فشل تصدير المحادثة');
-    }
   };
 
   const filteredConversations = conversations.filter(c =>
