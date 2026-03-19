@@ -131,7 +131,11 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
         {/* Cover Photo */}
         <div className="relative h-48 sm:h-56 bg-gradient-to-bl from-primary/30 via-primary/10 to-background">
           {orgData?.cover_url && (
-            <img src={orgData.cover_url} alt="غلاف" className="w-full h-full object-cover" />
+            <ClickableImage
+              src={orgData.cover_url}
+              gallery={[orgData.cover_url, orgData.logo_url].filter(Boolean)}
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
 
