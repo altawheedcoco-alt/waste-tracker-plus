@@ -486,7 +486,7 @@ const EncryptedChat = () => {
       // 3. Fetch members of those orgs
       const { data: profiles } = await supabase
         .from('profiles')
-        .select('user_id, full_name, avatar_url, organization_id, role')
+        .select('user_id, full_name, avatar_url, organization_id')
         .in('organization_id', partnerIdsArr);
 
       const membersByOrg = new Map<string, PartnerMember[]>();
@@ -497,7 +497,6 @@ const EncryptedChat = () => {
           user_id: p.user_id,
           full_name: p.full_name,
           avatar_url: p.avatar_url,
-          role: p.role || undefined,
         });
         membersByOrg.set(p.organization_id, list);
       });
