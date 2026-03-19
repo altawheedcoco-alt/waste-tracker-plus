@@ -146,16 +146,32 @@ export const AccessibilityPanel = () => {
             <h3 className="text-sm font-medium text-muted-foreground">اختصارات لوحة المفاتيح</h3>
             <div className="space-y-2 text-xs text-muted-foreground">
               <div className="flex justify-between">
-                <span>الانتقال للمحتوى الرئيسي</span>
-                <kbd className="px-2 py-1 bg-muted rounded">Alt + 1</kbd>
+                <span>الرجوع للصفحة السابقة</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Backspace</kbd>
               </div>
               <div className="flex justify-between">
-                <span>الانتقال للقائمة</span>
-                <kbd className="px-2 py-1 bg-muted rounded">Alt + 2</kbd>
+                <span>إغلاق النافذة الحالية</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Escape</kbd>
               </div>
               <div className="flex justify-between">
-                <span>فتح إمكانية الوصول</span>
-                <kbd className="px-2 py-1 bg-muted rounded">Alt + A</kbd>
+                <span>طباعة المستند</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Ctrl + P</kbd>
+              </div>
+              <div className="flex justify-between">
+                <span>تحميل PDF</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Ctrl + D</kbd>
+              </div>
+              <div className="flex justify-between">
+                <span>البحث السريع</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Ctrl + K</kbd>
+              </div>
+              <div className="flex justify-between">
+                <span>التنقل السريع للأقسام</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Alt + 1-9</kbd>
+              </div>
+              <div className="flex justify-between">
+                <span>دليل الاختصارات الكامل</span>
+                <kbd className="px-2 py-1 bg-muted rounded">Ctrl + /</kbd>
               </div>
             </div>
           </div>
