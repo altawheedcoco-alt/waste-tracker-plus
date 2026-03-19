@@ -61,11 +61,12 @@ interface ReplyTo {
 
 // ─── Conversation List Item ─────────────────────────────
 const ConversationItem = memo(({ 
-  conversation, isActive, onClick, compact = false
+  conversation, isActive, onClick, currentUserId, compact = false
 }: { 
   conversation: PrivateConversation; 
   isActive: boolean; 
   onClick: () => void;
+  currentUserId?: string;
   compact?: boolean;
 }) => {
   const formatTime = (t?: string | null) => {
@@ -75,6 +76,8 @@ const ConversationItem = memo(({
     if (isYesterday(d)) return 'أمس';
     return format(d, 'd/M', { locale: ar });
   };
+
+  const isMyLastMessage = !!currentUserId && conversation.last_message_sender_id === currentUserId;
 
   return (
     <motion.div
@@ -102,12 +105,18 @@ const ConversationItem = memo(({
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
-        <div className="flex items-center justify-between mt-0.5">
+        <div className="flex items-center justify-between mt-0.5 gap-2">
           <div className="flex items-center gap-1 min-w-0">
-            <Lock className="w-3 h-3 text-emerald-500 shrink-0" />
+            {isMyLastMessage && (
+              conversation.last_message_status === 'read'
+                ? <CheckCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                : conversation.last_message_status === 'delivered'
+                  ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  : <Check className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            )}
+            {!isMyLastMessage && <Lock className="w-3 h-3 text-emerald-500 shrink-0" />}
             <p className="text-xs text-muted-foreground truncate">
-              {!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')}
-              {compact && 'مشفر E2E'}
+              {conversation.lastDecryptedPreview || (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
             </p>
           </div>
           {(conversation.unread_count || 0) > 0 && (
