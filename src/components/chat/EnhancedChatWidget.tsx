@@ -12,6 +12,7 @@ import { usePresence } from '@/hooks/usePresence';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { toast } from 'sonner';
 
 import ChatSidebar, { ChatPartner } from './ChatSidebar';
 import ChatHeader from './ChatHeader';
