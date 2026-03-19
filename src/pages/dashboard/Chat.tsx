@@ -1346,6 +1346,7 @@ const ChatAndNotesPage = () => {
 
   return (
     <DashboardLayout>
+      <ChatAppearanceProvider>
       <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
         {/* Top Tabs */}
         <div className="flex items-center border-b border-border bg-card px-4 shrink-0" dir="rtl">
@@ -1391,6 +1392,7 @@ const ChatAndNotesPage = () => {
           )}
         </div>
       </div>
+      </ChatAppearanceProvider>
     </DashboardLayout>
   );
 };
