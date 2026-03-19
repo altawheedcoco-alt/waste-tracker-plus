@@ -4,6 +4,8 @@ import {
   Copy, 
   Trash2, 
   Star,
+  Pin,
+  Timer,
   MoreHorizontal 
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,20 +23,24 @@ interface MessageActionsProps {
   messageContent: string;
   messageId: string;
   isOwn: boolean;
+  isPinned?: boolean;
   onReply?: () => void;
   onForward?: () => void;
   onDelete?: () => void;
   onStar?: () => void;
+  onPin?: () => void;
 }
 
 const MessageActions = ({
   messageContent,
   messageId,
   isOwn,
+  isPinned,
   onReply,
   onForward,
   onDelete,
-  onStar
+  onStar,
+  onPin,
 }: MessageActionsProps) => {
   const { toast } = useToast();
 
@@ -84,6 +90,12 @@ const MessageActions = ({
           <Copy className="w-4 h-4 ml-2" />
           نسخ
         </DropdownMenuItem>
+        {onPin && (
+          <DropdownMenuItem onClick={onPin}>
+            <Pin className="w-4 h-4 ml-2" />
+            {isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}
+          </DropdownMenuItem>
+        )}
         {onStar && (
           <DropdownMenuItem onClick={onStar}>
             <Star className="w-4 h-4 ml-2" />

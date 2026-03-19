@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,10 @@ import { onWidgetToggle } from '@/lib/widgetBus';
 import { usePresence } from '@/hooks/usePresence';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { usePinnedMessages } from '@/hooks/usePinnedMessages';
+import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useGroupChat } from '@/hooks/useGroupChat';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -22,6 +26,10 @@ import EnhancedChatInput from './EnhancedChatInput';
 import ReplyPreview from './ReplyPreview';
 import ForwardMessageDialog from './ForwardMessageDialog';
 import ChatSearchBar from './ChatSearchBar';
+import PinnedMessagesBar from './PinnedMessagesBar';
+import DisappearingMessagesDialog from './DisappearingMessagesDialog';
+import GroupChatView from './GroupChatView';
+import CreateGroupDialog from './CreateGroupDialog';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
