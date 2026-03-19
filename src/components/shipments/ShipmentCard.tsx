@@ -1261,6 +1261,52 @@ const ShipmentCard = ({
               </div>
             )}
 
+            {/* Shipment Notes & Chat Tabs */}
+            <div className="border-t px-4 py-3" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center gap-2 mb-2">
+                <Button
+                  variant={activeShipmentTab === 'notes' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs h-7 gap-1"
+                  onClick={() => setActiveShipmentTab(activeShipmentTab === 'notes' ? null : 'notes')}
+                >
+                  <StickyNote className="w-3 h-3" />
+                  الملاحظات
+                </Button>
+                <Button
+                  variant={activeShipmentTab === 'chat' ? 'default' : 'outline'}
+                  size="sm"
+                  className="text-xs h-7 gap-1"
+                  onClick={() => setActiveShipmentTab(activeShipmentTab === 'chat' ? null : 'chat')}
+                >
+                  <MessageSquareIcon className="w-3 h-3" />
+                  المحادثات
+                </Button>
+              </div>
+              <AnimatePresence>
+                {activeShipmentTab === 'notes' && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <NotesPanel resourceType="shipment" resourceId={shipment.id} compact maxHeight={300} />
+                  </motion.div>
+                )}
+                {activeShipmentTab === 'chat' && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <ShipmentChatTab shipment={shipment} />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Document Chain Strip — سلسلة المستندات المباشرة */}
             <div className="border-t px-4 py-2.5 bg-muted/30" onClick={(e) => e.stopPropagation()}>
               <DocumentChainStrip shipmentId={shipment.id} variant="full" orgType={organization?.organization_type as any} />
