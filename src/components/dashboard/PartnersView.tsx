@@ -309,7 +309,7 @@ const PartnersView = () => {
                                 {config.label} • {org.city || '—'}
                               </p>
                             </div>
-                            <ClickableImage src={org.logo_url || ''}>
+                            <ClickableImage src={org.logo_url || ''} protected>
                               <Avatar className="w-9 h-9 shrink-0">
                                 <AvatarImage src={org.logo_url || undefined} />
                                 <AvatarFallback className={`${config.color} text-xs`}>

@@ -92,7 +92,7 @@ const ChatPartnerInfo = ({
 
         {/* Partner Profile Card */}
         <div className="text-center space-y-3">
-          <ClickableImage src={partner.logo_url || ''}>
+          <ClickableImage src={partner.logo_url || ''} protected>
             <Avatar className="w-20 h-20 mx-auto ring-2 ring-primary/20">
               {partner.logo_url ? <AvatarImage src={partner.logo_url} /> : null}
               <AvatarFallback className="bg-primary/10">

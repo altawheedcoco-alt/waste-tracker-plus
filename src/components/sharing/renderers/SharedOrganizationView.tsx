@@ -29,6 +29,7 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
             src={data.cover_url}
             gallery={[data.cover_url, data.logo_url].filter(Boolean)}
             className="w-full h-40 object-cover"
+            protected
           />
         )}
 
@@ -39,6 +40,7 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
                 src={data.logo_url}
                 gallery={[data.logo_url, data.cover_url].filter(Boolean)}
                 className="w-16 h-16 rounded-lg object-cover border"
+                protected
               />
             ) : (
               <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">

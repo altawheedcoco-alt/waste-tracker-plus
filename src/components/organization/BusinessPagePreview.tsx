@@ -135,6 +135,7 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
               src={orgData.cover_url}
               gallery={[orgData.cover_url, orgData.logo_url].filter(Boolean)}
               className="w-full h-full object-cover"
+              protected
             />
           )}
         </div>
@@ -146,6 +147,7 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
             <ClickableImage
               src={orgData?.logo_url || ''}
               gallery={[orgData?.logo_url, orgData?.cover_url].filter(Boolean)}
+              protected
             >
               <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-xl">
                 <AvatarImage src={orgData?.logo_url} alt={organizationName} />

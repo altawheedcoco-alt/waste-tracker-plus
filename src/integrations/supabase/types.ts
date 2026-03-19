@@ -29127,6 +29127,7 @@ export type Database = {
           position: string | null
           preferred_language: string | null
           profile_color_theme: string | null
+          profile_photo_privacy: string
           profile_visibility: string | null
           signature_authority_level: string | null
           social_links: Json | null
@@ -29157,6 +29158,7 @@ export type Database = {
           position?: string | null
           preferred_language?: string | null
           profile_color_theme?: string | null
+          profile_photo_privacy?: string
           profile_visibility?: string | null
           signature_authority_level?: string | null
           social_links?: Json | null
@@ -29187,6 +29189,7 @@ export type Database = {
           position?: string | null
           preferred_language?: string | null
           profile_color_theme?: string | null
+          profile_photo_privacy?: string
           profile_visibility?: string | null
           signature_authority_level?: string | null
           social_links?: Json | null

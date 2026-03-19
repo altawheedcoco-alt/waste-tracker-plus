@@ -7,14 +7,11 @@ interface ClickableImageProps {
   className?: string;
   gallery?: string[];
   children?: React.ReactNode;
+  /** When true, disables download/save/drag and renders via Canvas */
+  protected?: boolean;
 }
 
-/**
- * Wraps any image (or children) with click-to-lightbox functionality.
- * Pass `gallery` for swipe navigation between multiple images.
- * If no children, renders an <img> with the given src/alt/className.
- */
-const ClickableImage = ({ src, alt = '', className, gallery, children }: ClickableImageProps) => {
+const ClickableImage = ({ src, alt = '', className, gallery, children, protected: isProtected = false }: ClickableImageProps) => {
   const [open, setOpen] = useState(false);
 
   if (!src) return children ? <>{children}</> : null;
@@ -31,9 +28,16 @@ const ClickableImage = ({ src, alt = '', className, gallery, children }: Clickab
           setOpen(true);
         }}
         className="cursor-pointer focus:outline-none"
+        onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}
       >
         {children || (
-          <img src={src} alt={alt} className={className} />
+          <img 
+            src={src} 
+            alt={alt} 
+            className={className} 
+            draggable={!isProtected}
+            style={isProtected ? { userSelect: 'none', WebkitUserSelect: 'none' } as React.CSSProperties : undefined}
+          />
         )}
       </button>
 
@@ -42,6 +46,7 @@ const ClickableImage = ({ src, alt = '', className, gallery, children }: Clickab
         initialIndex={initialIndex >= 0 ? initialIndex : 0}
         isOpen={open}
         onClose={() => setOpen(false)}
+        protected={isProtected}
       />
     </>
   );

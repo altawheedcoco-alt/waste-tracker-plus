@@ -186,6 +186,7 @@ const DigitalIdentityCard = () => {
                   src={org.logo_url}
                   gallery={[org.logo_url, org.cover_url].filter(Boolean)}
                   className="w-14 h-14 rounded-xl object-cover ring-2 ring-primary/20 shrink-0"
+                  protected
                 />
               ) : (
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
