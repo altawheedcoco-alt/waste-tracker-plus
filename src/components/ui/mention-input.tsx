@@ -37,6 +37,7 @@ const MentionInput = ({
   disabled,
 }: MentionInputProps) => {
   const [showDropdown, setShowDropdown] = useState(false);
+  const [showShipmentDropdown, setShowShipmentDropdown] = useState(false);
   const [search, setSearch] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [cursorPos, setCursorPos] = useState(0);

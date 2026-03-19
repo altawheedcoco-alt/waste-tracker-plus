@@ -75,6 +75,9 @@ import DeliveryDeclarationViewDialog from './DeliveryDeclarationViewDialog';
 import CompleteShipmentDocButton from './CompleteShipmentDocButton';
 const ShipmentEndorsementButton = lazy(() => import('./ShipmentEndorsementButton'));
 import DocumentChainStrip from './DocumentChainStrip';
+import NotesPanel from '@/components/notes/NotesPanel';
+import ShipmentChatTab from './ShipmentChatTab';
+import { StickyNote, MessageSquare as MessageSquareIcon } from 'lucide-react';
 
 // Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
