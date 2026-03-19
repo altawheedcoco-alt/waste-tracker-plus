@@ -167,6 +167,7 @@ const MessageBubble = memo(({
   onForward: () => void;
   allMessages: DecryptedMessage[];
 }) => {
+  const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
