@@ -235,6 +235,7 @@ const EnhancedChatMessages = ({
                   return (
                     <motion.div
                       key={message.id}
+                      id={`msg-${message.id}`}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.12 }}
