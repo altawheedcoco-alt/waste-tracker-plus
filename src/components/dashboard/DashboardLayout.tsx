@@ -490,8 +490,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   return (
     <FocusMusicProvider>
+    <KeyboardShortcutProvider>
     <TooltipProvider>
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
+        <KeyboardShortcutsGuide />
         <LiveEventToast />
         {/* Desktop Sidebar */}
         {!isMobile && isSidebarOpen && (
