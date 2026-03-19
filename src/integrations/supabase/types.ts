@@ -4201,6 +4201,80 @@ export type Database = {
           },
         ]
       }
+      call_records: {
+        Row: {
+          answered_at: string | null
+          call_type: string
+          caller_id: string
+          caller_org_id: string
+          created_at: string
+          duration_seconds: number | null
+          end_reason: string | null
+          ended_at: string | null
+          id: string
+          receiver_org_id: string
+          started_at: string
+          status: string
+        }
+        Insert: {
+          answered_at?: string | null
+          call_type?: string
+          caller_id: string
+          caller_org_id: string
+          created_at?: string
+          duration_seconds?: number | null
+          end_reason?: string | null
+          ended_at?: string | null
+          id?: string
+          receiver_org_id: string
+          started_at?: string
+          status?: string
+        }
+        Update: {
+          answered_at?: string | null
+          call_type?: string
+          caller_id?: string
+          caller_org_id?: string
+          created_at?: string
+          duration_seconds?: number | null
+          end_reason?: string | null
+          ended_at?: string | null
+          id?: string
+          receiver_org_id?: string
+          started_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "call_records_caller_org_id_fkey"
+            columns: ["caller_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "call_records_caller_org_id_fkey"
+            columns: ["caller_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "call_records_receiver_org_id_fkey"
+            columns: ["receiver_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "call_records_receiver_org_id_fkey"
+            columns: ["receiver_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       call_transcriptions: {
         Row: {
           call_log_id: string

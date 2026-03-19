@@ -15,6 +15,7 @@ import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useGroupChat } from '@/hooks/useGroupChat';
+import { useWebRTCCall } from '@/hooks/useWebRTCCall';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ import PinnedMessagesBar from './PinnedMessagesBar';
 import DisappearingMessagesDialog from './DisappearingMessagesDialog';
 import GroupChatView from './GroupChatView';
 import CreateGroupDialog from './CreateGroupDialog';
+import CallScreen from './CallScreen';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -72,6 +74,26 @@ const EnhancedChatWidget = () => {
   const { duration: disappearDuration, setDisappearDuration, getExpiryDate, isActive: disappearActive } = useDisappearingMessages(selectedPartner?.id);
   const { permission: pushPermission, requestPermission: requestPush } = usePushNotifications();
   const { rooms, createGroup, isCreatingGroup } = useGroupChat();
+  const {
+    callInfo,
+    localStream,
+    remoteStream,
+    startCall,
+    answerCall,
+    endCall,
+    toggleMute,
+    toggleVideo,
+    toggleSpeaker,
+  } = useWebRTCCall();
+
+  const handleStartCall = async (type: 'voice' | 'video') => {
+    if (!selectedPartner) return;
+    try {
+      await startCall(selectedPartner.id, type, selectedPartner.name, selectedPartner.logo_url);
+    } catch (err: any) {
+      toast.error(err.message || 'فشل بدء المكالمة');
+    }
+  };
 
   // Listen for unified menu toggle
   useEffect(() => {
@@ -371,6 +393,8 @@ const EnhancedChatWidget = () => {
                   isMobile={isMobile}
                   conversationId={selectedPartner.id}
                   isTyping={isPartnerTyping}
+                  onVoiceCall={() => handleStartCall('voice')}
+                  onVideoCall={() => handleStartCall('video')}
                 />
                 <div className="flex items-center gap-1 pr-2">
                   {/* Disappearing Messages */}
@@ -527,6 +551,20 @@ const EnhancedChatWidget = () => {
         onCreateGroup={createGroup}
         isCreating={isCreatingGroup}
       />
+
+      {/* Call Screen Overlay */}
+      {callInfo && (
+        <CallScreen
+          callInfo={callInfo}
+          localStream={localStream}
+          remoteStream={remoteStream}
+          onAnswer={answerCall}
+          onEnd={() => endCall()}
+          onToggleMute={toggleMute}
+          onToggleVideo={toggleVideo}
+          onToggleSpeaker={toggleSpeaker}
+        />
+      )}
     </>
   );
 };
