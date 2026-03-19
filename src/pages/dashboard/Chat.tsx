@@ -640,8 +640,20 @@ const EncryptedChat = () => {
     }
   }, [orgGroups]);
 
-  // Auto-open conversation from URL params (e.g. ?partnerId=xxx)
+  // Auto-open conversation from URL params (e.g. ?partnerId=xxx or ?conv=xxx)
   useEffect(() => {
+    const convParam = searchParams.get('conv');
+    if (convParam && !conversationsLoading) {
+      const found = conversations.find(c => c.id === convParam);
+      if (found) {
+        setSelectedConvoId(found.id);
+        setShowSidebar(false);
+        searchParams.delete('conv');
+        setSearchParams(searchParams, { replace: true });
+      }
+      return;
+    }
+
     const partnerId = searchParams.get('partnerId') || searchParams.get('partner');
     if (!partnerId || !user || conversationsLoading) return;
 
