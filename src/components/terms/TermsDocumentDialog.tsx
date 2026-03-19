@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import {
   Dialog,
   DialogContent,
@@ -48,17 +49,35 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
     format: 'a4',
   });
 
-  if (!acceptance) return null;
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  const handleDownload = () => {
+    if (printRef.current && acceptance) {
+      exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
+    }
+  };
 
   const handlePrint = () => {
     setThemeOpen(true);
   };
 
-  const handleDownload = () => {
-    if (printRef.current) {
-      exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (open) {
+      kbCtx.registerPrintHandler(handlePrint);
+      kbCtx.registerPdfHandler(handleDownload);
     }
-  };
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [open]);
+
+  if (!acceptance) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

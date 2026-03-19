@@ -3,6 +3,7 @@
  * Opens a full-screen overlay showing the document at real A4 scale
  */
 import { useRef, useEffect, useState, ReactNode } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText } from 'lucide-react';
 import SendToPartiesPopover from './SendToPartiesPopover';
@@ -29,6 +30,24 @@ const A4PreviewModal = ({
   const [zoom, setZoom] = useState(0.75);
   const [currentPage, setCurrentPage] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (isOpen) {
+      kbCtx.registerPrintHandler(onPrint);
+      kbCtx.registerPdfHandler(onDownloadPDF);
+    }
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [isOpen, onPrint, onDownloadPDF]);
 
   useEffect(() => {
     if (isOpen) {

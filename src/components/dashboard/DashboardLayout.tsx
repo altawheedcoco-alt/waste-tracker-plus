@@ -108,6 +108,8 @@ import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
+import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
+import KeyboardShortcutsGuide from '@/components/shared/KeyboardShortcutsGuide';
 
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
@@ -419,7 +421,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   }, [isAdmin, isDriver, organization]);
 
 
-
   // Use quick action preferences hook
   const { applyOrder, preferences: quickActionPrefs } = useQuickActionPreferences();
 
@@ -490,8 +491,10 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   return (
     <FocusMusicProvider>
+    <KeyboardShortcutProvider>
     <TooltipProvider>
       <div className="h-screen bg-background flex overflow-hidden" dir="rtl">
+        <KeyboardShortcutsGuide />
         <LiveEventToast />
         {/* Desktop Sidebar */}
         {!isMobile && isSidebarOpen && (
@@ -1099,6 +1102,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         </div>
       </div>
     </TooltipProvider>
+    </KeyboardShortcutProvider>
     </FocusMusicProvider>
   );
 });

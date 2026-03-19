@@ -8,6 +8,7 @@
  * يوفر: معاينة A4 تفاعلية + طباعة + تحميل PDF
  */
 import { useRef, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Loader2 } from 'lucide-react';
 import { useDocumentService } from '@/hooks/useDocumentService';
@@ -51,30 +52,6 @@ const UnifiedDocumentPreview = ({
     fitSinglePage,
   });
 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      const screenW = window.innerWidth;
-      if (screenW < 768) setZoom(0.5);
-      else if (screenW < 1200) setZoom(0.75);
-      else setZoom(1);
-      autoActionDone.current = false;
-    }
-    return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
-
-  useEffect(() => {
-    if (!isOpen) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-      if (e.ctrlKey && e.key === 'p') { e.preventDefault(); handlePrint(); }
-      if (e.key === '+' || e.key === '=') setZoom(z => Math.min(z + 0.25, 1.5));
-      if (e.key === '-') setZoom(z => Math.max(z - 0.25, 0.5));
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [isOpen]);
-
   const handlePrint = useCallback(() => {
     if (htmlContent && iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.print();
@@ -93,6 +70,48 @@ const UnifiedDocumentPreview = ({
       await downloadPDF(contentRef.current);
     }
   }, [htmlContent, downloadPDF]);
+
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (isOpen) {
+      kbCtx.registerPrintHandler(handlePrint);
+      kbCtx.registerPdfHandler(() => { handleDownloadPDF(); });
+    }
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [isOpen, handlePrint, handleDownloadPDF]);
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      const screenW = window.innerWidth;
+      if (screenW < 768) setZoom(0.5);
+      else if (screenW < 1200) setZoom(0.75);
+      else setZoom(1);
+      autoActionDone.current = false;
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+      if (e.key === '+' || e.key === '=') setZoom(z => Math.min(z + 0.25, 1.5));
+      if (e.key === '-') setZoom(z => Math.max(z - 0.25, 0.5));
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [isOpen]);
+
 
   useEffect(() => {
     if (!autoAction || loading || autoActionDone.current || !isOpen) return;
