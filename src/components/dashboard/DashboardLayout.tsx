@@ -108,6 +108,8 @@ import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
+import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
+import KeyboardShortcutsGuide from '@/components/shared/KeyboardShortcutsGuide';
 
 import DashboardBreadcrumb from './DashboardBreadcrumb';
 import CommandPalette from './CommandPalette';
