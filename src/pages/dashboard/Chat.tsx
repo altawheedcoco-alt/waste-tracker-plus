@@ -773,52 +773,6 @@ const EncryptedChat = () => {
     if (isMobile) setShowSidebar(false);
   };
 
-  const handleSend = async () => {
-    if (!inputText.trim() || !selectedConvoId || sending) return;
-    const text = inputText.trim();
-    setInputText('');
-    setSending(true);
-    try {
-      await sendMessage(selectedConvoId, text, 'text', undefined, undefined, replyTo?.id);
-      setReplyTo(null);
-      const updated = await fetchMessages(selectedConvoId);
-      setMessages(updated);
-    } catch {
-      toast.error('فشل إرسال الرسالة');
-    } finally {
-      setSending(false);
-      inputRef.current?.focus();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleAttachClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedConvoId || sending) return;
-
-    setSending(true);
-    try {
-      await sendFileMessage(selectedConvoId, file);
-      const updated = await fetchMessages(selectedConvoId);
-      setMessages(updated);
-    } catch {
-      toast.error('فشل إرسال الملف');
-    } finally {
-      setSending(false);
-      e.target.value = '';
-      inputRef.current?.focus();
-    }
-  };
 
   const handleReply = (msg: DecryptedMessage) => {
     setReplyTo({
