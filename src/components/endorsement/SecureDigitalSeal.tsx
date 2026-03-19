@@ -145,6 +145,18 @@ const SecureDigitalSeal = ({
           <p className="text-[9px] text-muted-foreground">
             ختم رقمي مشفّر • فريد وغير قابل للتكرار
           </p>
+
+          {linkToProfile && (
+            <Link to={profileUrl} className="inline-flex items-center gap-1 text-[10px] text-primary hover:underline">
+              <ExternalLink className="w-2.5 h-2.5" />
+              عرض الملف الشخصي
+            </Link>
+          )}
+
+          <Link to={`/verify-seal?code=${encodeURIComponent(sealNumber)}`} className="inline-flex items-center gap-1 text-[10px] text-muted-foreground hover:text-primary hover:underline">
+            <Shield className="w-2.5 h-2.5" />
+            تحقق من الختم
+          </Link>
         </div>
       )}
     </div>
