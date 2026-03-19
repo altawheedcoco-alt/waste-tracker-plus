@@ -112,24 +112,6 @@ const UnifiedDocumentPreview = ({
     return () => window.removeEventListener('keydown', handler);
   }, [isOpen]);
 
-  const handlePrint = useCallback(() => {
-    if (htmlContent && iframeRef.current?.contentWindow) {
-      iframeRef.current.contentWindow.print();
-    } else {
-      const el = contentRef.current;
-      if (el) print(el);
-    }
-  }, [htmlContent, print]);
-
-  const handleDownloadPDF = useCallback(async () => {
-    if (htmlContent && iframeRef.current?.contentDocument) {
-      const el = iframeRef.current.contentDocument.querySelector('.manifest-page') as HTMLElement
-        || iframeRef.current.contentDocument.body;
-      if (el) await downloadPDF(el);
-    } else if (contentRef.current) {
-      await downloadPDF(contentRef.current);
-    }
-  }, [htmlContent, downloadPDF]);
 
   useEffect(() => {
     if (!autoAction || loading || autoActionDone.current || !isOpen) return;
