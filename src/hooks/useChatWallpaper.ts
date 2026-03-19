@@ -923,6 +923,13 @@ export function useChatWallpaper(conversationId?: string) {
         }
         return {};
       }
+      case 'image':
+        return {
+          backgroundImage: `url(${wallpaper.value})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        };
       default:
         return {};
     }
