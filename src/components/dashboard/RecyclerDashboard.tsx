@@ -241,6 +241,8 @@ const RecyclerDashboard = () => {
         </Button>
       </DashboardV2Header>
 
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+
       {facility && <FacilityCapacityCard facility={facility} />}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">

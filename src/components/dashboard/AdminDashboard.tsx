@@ -247,6 +247,9 @@ const AdminDashboard = () => {
       </motion.div>
 
       <motion.div variants={itemVariants}>
+        <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      </motion.div>
+      <motion.div variants={itemVariants}>
         <AdminOperationalAlerts />
       </motion.div>
       <motion.div variants={itemVariants}>
