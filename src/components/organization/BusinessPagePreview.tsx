@@ -135,6 +135,7 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
               src={orgData.cover_url}
               gallery={[orgData.cover_url, orgData.logo_url].filter(Boolean)}
               className="w-full h-full object-cover"
+              protected
             />
           )}
         </div>
