@@ -17,6 +17,7 @@ import {
   ClipboardList, Crown, Printer, QrCode, Download
 } from 'lucide-react';
 import { motion } from 'framer-motion';
+import ClickableImage from '@/components/ui/ClickableImage';
 import { useResolvedUrl } from '@/hooks/useResolvedUrl';
 import { printDigitalIdentityCard } from './printTemplates/printDigitalIdentityCard';
 
