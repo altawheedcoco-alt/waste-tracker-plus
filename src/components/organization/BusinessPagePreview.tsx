@@ -14,7 +14,7 @@ import {
   MapPin, Clock, Phone, Globe, ShoppingBag, Info, Calendar,
   Pin, Heart, MessageCircle, Share2, ImageIcon, CheckCircle,
   ExternalLink, Navigation, Copy, Link2, Users, Eye,
-  Building2, Settings
+  Building2, Settings, ShieldCheck
 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
