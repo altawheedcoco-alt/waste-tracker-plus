@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Camera, Upload, Building2, Truck, Recycle, CheckCircle, XCircle, Loader2, BadgeCheck, Scale, FolderCheck } from 'lucide-react';
+import { Camera, Upload, Building2, Truck, Recycle, CheckCircle, XCircle, Loader2, BadgeCheck, Scale, FolderCheck, ShieldCheck, Lock, LockOpen } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { useQuery } from '@tanstack/react-query';
 
