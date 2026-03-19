@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react';
-import { Check, Paintbrush, Search, Palette, Image, Sparkles, Camera } from 'lucide-react';
+import { useState, useMemo, useRef } from 'react';
+import { Check, Paintbrush, Search, Palette, Image, Sparkles, Camera, Upload, Loader2, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -23,6 +23,9 @@ import {
   type ChatWallpaper,
 } from '@/hooks/useChatWallpaper';
 import { IMAGE_WALLPAPERS } from '@/data/chatImageWallpapers';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 interface ChatWallpaperPickerProps {
   conversationId?: string;
@@ -34,6 +37,10 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
   const [selectedColorFamily, setSelectedColorFamily] = useState<string | null>(null);
   const [selectedPatternCategory, setSelectedPatternCategory] = useState<string | null>(null);
   const [selectedImageCategory, setSelectedImageCategory] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [customImages, setCustomImages] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { user } = useAuth();
   const { wallpaper, setWallpaper } = useChatWallpaper(conversationId);
 
   const handleSelectColor = async (value: string) => {
@@ -50,6 +57,77 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
 
   const handleSelectImage = async (src: string) => {
     await setWallpaper({ type: 'image', value: src }, conversationId);
+  };
+
+  // Upload custom image
+  const handleUploadImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('يرجى اختيار ملف صورة فقط');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error('الحد الأقصى لحجم الصورة 5 ميجابايت');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const ext = file.name.split('.').pop() || 'jpg';
+      const fileName = `${user.id}/${Date.now()}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('chat-wallpapers')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: urlData } = supabase.storage
+        .from('chat-wallpapers')
+        .getPublicUrl(fileName);
+
+      const publicUrl = urlData.publicUrl;
+      setCustomImages(prev => [publicUrl, ...prev]);
+      await setWallpaper({ type: 'image', value: publicUrl }, conversationId);
+      toast.success('تم رفع الصورة وتعيينها كخلفية');
+    } catch (err: any) {
+      console.error('Upload error:', err);
+      toast.error('فشل رفع الصورة');
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
+  // Load user's custom uploaded wallpapers
+  const loadCustomImages = async () => {
+    if (!user) return;
+    try {
+      const { data } = await supabase.storage
+        .from('chat-wallpapers')
+        .list(user.id, { limit: 20, sortBy: { column: 'created_at', order: 'desc' } });
+
+      if (data?.length) {
+        const urls = data.map(f => {
+          const { data: urlData } = supabase.storage
+            .from('chat-wallpapers')
+            .getPublicUrl(`${user.id}/${f.name}`);
+          return urlData.publicUrl;
+        });
+        setCustomImages(urls);
+      }
+    } catch (err) {
+      console.error('Error loading custom wallpapers:', err);
+    }
+  };
+
+  // Load custom images when dialog opens
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    if (isOpen) loadCustomImages();
   };
 
   const isColorSelected = (value: string) =>
