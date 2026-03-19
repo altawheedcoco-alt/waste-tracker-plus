@@ -516,7 +516,11 @@ const Notifications = () => {
       return { label: 'راجع الطلب', icon: CheckCircle, action: () => navigate('/dashboard/my-requests') };
     if (['shipment_created', 'shipment_assigned', 'shipment_status', 'shipment'].includes(type || '') && notification.shipment_id)
       return { label: 'عرض الشحنة', icon: Package, action: () => navigate(`/dashboard/shipments/${notification.shipment_id}`) };
-    if (type === 'partner_linked' || type === 'partner_message')
+    if (type === 'partner_message') {
+      const convId = (notification as any).metadata?.conversation_id;
+      return { label: 'فتح المحادثة', icon: MessageCircle, action: () => navigate(convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat') };
+    }
+    if (type === 'partner_linked')
       return { label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners') };
     if (['invoice', 'payment', 'deposit'].includes(type || ''))
       return { label: 'المالية', icon: Wallet, action: () => navigate('/dashboard/accounting') };
