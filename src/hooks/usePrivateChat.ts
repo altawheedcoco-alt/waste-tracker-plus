@@ -145,7 +145,9 @@ export function usePrivateChat() {
 
       return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
     } catch {
-      return buildPreviewText(message.message_type, message.file_name || 'رسالة مشفرة', message.file_name);
+      // Use content_preview fallback if available
+      const preview = (message as any).content_preview;
+      return buildPreviewText(message.message_type, preview || message.file_name || 'رسالة مشفرة', message.file_name);
     }
   }, [user, getCachedPublicKeys, buildPreviewText]);
 
