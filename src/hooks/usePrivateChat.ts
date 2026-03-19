@@ -193,11 +193,36 @@ export function usePrivateChat() {
         organization_name: orgMap.get(p.organization_id || ''),
       }]));
 
-      // Get unread counts
-      const convos: PrivateConversation[] = [];
-      for (const c of data || []) {
+      const conversationIds = (data || []).map(c => c.id);
+      const latestMessageMap = new Map<string, {
+        conversation_id: string;
+        sender_id: string;
+        encrypted_content: string | null;
+        encrypted_content_for_sender: string | null;
+        iv: string;
+        message_type: string | null;
+        file_name: string | null;
+        status: string | null;
+      }>();
+
+      if (conversationIds.length > 0) {
+        const { data: latestMessages } = await supabase
+          .from('encrypted_messages')
+          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        for (const msg of latestMessages || []) {
+          if (!latestMessageMap.has(msg.conversation_id)) {
+            latestMessageMap.set(msg.conversation_id, msg);
+          }
+        }
+      }
+
+      const convos = await Promise.all((data || []).map(async (c) => {
         const partnerId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
-        
+        const latestMessage = latestMessageMap.get(c.id);
+
         const { count } = await supabase
           .from('encrypted_messages')
           .select('*', { count: 'exact', head: true })
@@ -205,12 +230,18 @@ export function usePrivateChat() {
           .neq('sender_id', user.id)
           .in('status', ['sent', 'delivered']);
 
-        convos.push({
+        return {
           ...c,
           partner: profileMap.get(partnerId),
           unread_count: count || 0,
-        });
-      }
+          lastDecryptedPreview: latestMessage
+            ? await decryptConversationPreview(latestMessage, partnerId)
+            : undefined,
+          last_message_type: latestMessage?.message_type || undefined,
+          last_message_status: latestMessage?.status || undefined,
+          last_message_sender_id: latestMessage?.sender_id || undefined,
+        } as PrivateConversation;
+      }));
 
       return convos;
     },
