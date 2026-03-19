@@ -4,9 +4,27 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 
 export interface ChatWallpaper {
-  type: 'color' | 'gradient' | 'pattern' | 'svg-pattern';
+  type: 'color' | 'gradient' | 'pattern' | 'svg-pattern' | 'image';
   value: string;
 }
+
+// ─── IMAGE WALLPAPERS ────────────────────────────────────
+export interface ImageWallpaper {
+  id: string;
+  label: string;
+  category: 'tracking' | 'egypt' | 'digital' | 'eco' | 'premium' | 'ocean' | 'city';
+  src: string;
+}
+
+export const IMAGE_WALLPAPER_CATEGORIES: { id: ImageWallpaper['category']; label: string }[] = [
+  { id: 'tracking', label: '📡 تتبع ذكي' },
+  { id: 'egypt', label: '🏛️ مصر والتدوير' },
+  { id: 'digital', label: '📊 بيانات رقمية' },
+  { id: 'eco', label: '♻️ دورة التدوير' },
+  { id: 'city', label: '🏙️ مدن ذكية' },
+  { id: 'ocean', label: '🌊 بيئة وطبيعة' },
+  { id: 'premium', label: '💎 فاخر' },
+];
 
 // ─── COLORS: Comprehensive global palette ───────────────────
 const COLOR_FAMILIES: { family: string; colors: { label: string; value: string }[] }[] = [
