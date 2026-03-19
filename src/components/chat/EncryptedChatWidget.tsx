@@ -531,7 +531,7 @@ const EncryptedChatWidget = () => {
             ) : (
               <>
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-2">
+                <ScrollArea className="flex-1 p-2" style={getWallpaperStyle()}>
                   {msgLoading ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="animate-spin text-emerald-600" size={20} />
