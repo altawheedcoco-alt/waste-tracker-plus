@@ -9,7 +9,6 @@ import {
   CheckCheck,
   Check,
   Lock,
-  Reply
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,7 +16,9 @@ import { ChatMessage } from '@/hooks/useChat';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
+import MessageReactions from './MessageReactions';
 import { QuotedReply } from './ReplyPreview';
+import { useChatReactions } from '@/hooks/useChatReactions';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -33,6 +34,8 @@ interface EnhancedChatMessagesProps {
   replyToMessage?: ChatMessage | null;
   isPartnerTyping?: boolean;
   partnerName?: string;
+  onDeleteMessage?: (messageId: string) => void;
+  onForwardMessage?: (messageId: string) => void;
 }
 
 const EnhancedChatMessages = ({ 
@@ -44,6 +47,8 @@ const EnhancedChatMessages = ({
   onReply,
   isPartnerTyping = false,
   partnerName,
+  onDeleteMessage,
+  onForwardMessage,
 }: EnhancedChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -53,13 +58,21 @@ const EnhancedChatMessages = ({
   const [lightboxImages, setLightboxImages] = useState<string[]>([]);
   const [lightboxIndex, setLightboxIndex] = useState(0);
 
+  const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
+  const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
+
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isPartnerTyping]);
 
   const parseMessageContent = (message: ChatMessage) => {
     if (message.message_type === 'text') {
-      return { text: message.content, fileUrl: null, fileName: null };
+      try {
+        const parsed = JSON.parse(message.content);
+        return { text: parsed.text || message.content, fileUrl: parsed.file_url || null, fileName: parsed.file_name || null };
+      } catch {
+        return { text: message.content, fileUrl: null, fileName: null };
+      }
     }
     try {
       const parsed = JSON.parse(message.content);
@@ -132,7 +145,6 @@ const EnhancedChatMessages = ({
     return <Check className="w-[14px] h-[14px] text-white/50" />;
   };
 
-  // Find a message by ID for quoted reply display
   const findMessage = (id: string) => messages.find(m => m.id === id);
 
   const messageGroups = groupMessagesByDate(messages);
@@ -187,6 +199,7 @@ const EnhancedChatMessages = ({
                     index === 0 || group.messages[index - 1]?.sender_id !== message.sender_id
                   );
                   const FileIcon = getFileIcon(fileName);
+                  const messageReactions = reactionsMap[message.id] || [];
 
                   // Check if message is a reply
                   let replyContent: string | null = null;
@@ -217,7 +230,7 @@ const EnhancedChatMessages = ({
                         "flex gap-1.5 max-w-[82%]",
                         isOwn ? "flex-row-reverse" : "flex-row"
                       )}>
-                        {/* Avatar (only for received) */}
+                        {/* Avatar */}
                         {!isOwn && showAvatar ? (
                           <Avatar className="h-7 w-7 shrink-0 mt-auto">
                             <AvatarImage src={message.sender?.avatar_url || undefined} />
@@ -229,7 +242,7 @@ const EnhancedChatMessages = ({
                           <div className="w-7" />
                         ) : null}
 
-                        {/* Message Bubble */}
+                        {/* Message Bubble + Reactions */}
                         <div className="relative">
                           <div
                             className={cn(
@@ -260,12 +273,7 @@ const EnhancedChatMessages = ({
                             {/* Image */}
                             {message.message_type === 'image' && fileUrl && (
                               <div className="cursor-pointer group/img relative" onClick={() => openImageLightbox(fileUrl)}>
-                                <img
-                                  src={fileUrl}
-                                  alt={fileName || 'صورة'}
-                                  className="rounded-xl max-w-[260px] max-h-[280px] object-cover"
-                                  loading="lazy"
-                                />
+                                <img src={fileUrl} alt={fileName || 'صورة'} className="rounded-xl max-w-[260px] max-h-[280px] object-cover" loading="lazy" />
                                 <div className="absolute inset-0 bg-black/0 group-hover/img:bg-black/10 rounded-xl transition-colors" />
                               </div>
                             )}
@@ -285,9 +293,7 @@ const EnhancedChatMessages = ({
                             {/* Regular File */}
                             {message.message_type === 'file' && fileUrl && !isVoiceMessage(fileName) && !isVideoFile(fileName) && (
                               <a 
-                                href={fileUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
+                                href={fileUrl} target="_blank" rel="noopener noreferrer"
                                 className={cn(
                                   "flex items-center gap-3 p-2 rounded-xl min-w-[200px] transition-colors",
                                   isOwn ? "hover:bg-white/10" : "hover:bg-muted"
@@ -311,22 +317,28 @@ const EnhancedChatMessages = ({
 
                             {/* Timestamp & Status */}
                             <div className="flex items-center gap-1 mt-1 justify-end">
-                              <span className={cn(
-                                "text-[10px]",
-                                isOwn ? "text-white/60" : "text-muted-foreground"
-                              )}>
+                              <span className={cn("text-[10px]", isOwn ? "text-white/60" : "text-muted-foreground")}>
                                 {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                               </span>
                               {getMessageStatus(message, isOwn)}
                             </div>
                           </div>
 
-                          {/* Message Actions (on hover) */}
+                          {/* Reactions */}
+                          <MessageReactions
+                            reactions={messageReactions}
+                            onReact={(emoji) => toggleReaction(message.id, emoji)}
+                            isOwn={isOwn}
+                          />
+
+                          {/* Message Actions */}
                           <MessageActions
                             messageContent={message.content}
                             messageId={message.id}
                             isOwn={isOwn}
                             onReply={onReply ? () => onReply(message) : undefined}
+                            onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
+                            onForward={onForwardMessage ? () => onForwardMessage(message.id) : undefined}
                           />
                         </div>
                       </div>
@@ -339,35 +351,19 @@ const EnhancedChatMessages = ({
 
           {/* Typing Indicator */}
           {isPartnerTyping && (
-            <motion.div
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              className="flex justify-start"
-            >
+            <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-start">
               <div className="flex items-center gap-1.5">
                 <div className="bg-background border border-border/50 rounded-2xl rounded-tr-[4px] px-4 py-2.5 shadow-sm">
                   <div className="flex items-center gap-1">
-                    <motion.span
-                      className="w-2 h-2 rounded-full bg-emerald-500"
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}
-                    />
-                    <motion.span
-                      className="w-2 h-2 rounded-full bg-emerald-500"
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}
-                    />
-                    <motion.span
-                      className="w-2 h-2 rounded-full bg-emerald-500"
-                      animate={{ opacity: [0.3, 1, 0.3] }}
-                      transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}
-                    />
+                    {[0, 0.2, 0.4].map((delay, i) => (
+                      <motion.span key={i} className="w-2 h-2 rounded-full bg-emerald-500"
+                        animate={{ opacity: [0.3, 1, 0.3] }}
+                        transition={{ repeat: Infinity, duration: 1.2, delay }}
+                      />
+                    ))}
                   </div>
                 </div>
-                {partnerName && (
-                  <span className="text-[10px] text-muted-foreground">{partnerName} يكتب...</span>
-                )}
+                {partnerName && <span className="text-[10px] text-muted-foreground">{partnerName} يكتب...</span>}
               </div>
             </motion.div>
           )}

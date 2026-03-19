@@ -1,5 +1,3 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Reply, 
   Forward, 
@@ -23,10 +21,10 @@ interface MessageActionsProps {
   messageContent: string;
   messageId: string;
   isOwn: boolean;
-  onReply?: (messageId: string) => void;
-  onForward?: (messageId: string) => void;
-  onDelete?: (messageId: string) => void;
-  onStar?: (messageId: string) => void;
+  onReply?: () => void;
+  onForward?: () => void;
+  onDelete?: () => void;
+  onStar?: () => void;
 }
 
 const MessageActions = ({
@@ -42,26 +40,15 @@ const MessageActions = ({
 
   const handleCopy = async () => {
     try {
-      // Try to parse JSON content
       let textToCopy = messageContent;
       try {
         const parsed = JSON.parse(messageContent);
         textToCopy = parsed.text || messageContent;
-      } catch {
-        // Use original content
-      }
-
+      } catch { /* Use original */ }
       await navigator.clipboard.writeText(textToCopy);
-      toast({
-        title: 'تم النسخ',
-        description: 'تم نسخ الرسالة إلى الحافظة',
-      });
-    } catch (error) {
-      toast({
-        title: 'خطأ',
-        description: 'فشل نسخ الرسالة',
-        variant: 'destructive',
-      });
+      toast({ title: 'تم النسخ', description: 'تم نسخ الرسالة إلى الحافظة' });
+    } catch {
+      toast({ title: 'خطأ', description: 'فشل نسخ الرسالة', variant: 'destructive' });
     }
   };
 
@@ -80,15 +67,15 @@ const MessageActions = ({
           <MoreHorizontal className="w-4 h-4" />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={isOwn ? "start" : "end"}>
+      <DropdownMenuContent align={isOwn ? "start" : "end"} className="min-w-[140px]">
         {onReply && (
-          <DropdownMenuItem onClick={() => onReply(messageId)}>
+          <DropdownMenuItem onClick={onReply}>
             <Reply className="w-4 h-4 ml-2" />
             رد
           </DropdownMenuItem>
         )}
         {onForward && (
-          <DropdownMenuItem onClick={() => onForward(messageId)}>
+          <DropdownMenuItem onClick={onForward}>
             <Forward className="w-4 h-4 ml-2" />
             إعادة توجيه
           </DropdownMenuItem>
@@ -98,7 +85,7 @@ const MessageActions = ({
           نسخ
         </DropdownMenuItem>
         {onStar && (
-          <DropdownMenuItem onClick={() => onStar(messageId)}>
+          <DropdownMenuItem onClick={onStar}>
             <Star className="w-4 h-4 ml-2" />
             تمييز بنجمة
           </DropdownMenuItem>
@@ -106,10 +93,7 @@ const MessageActions = ({
         {isOwn && onDelete && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem 
-              onClick={() => onDelete(messageId)}
-              className="text-destructive"
-            >
+            <DropdownMenuItem onClick={onDelete} className="text-destructive">
               <Trash2 className="w-4 h-4 ml-2" />
               حذف
             </DropdownMenuItem>
