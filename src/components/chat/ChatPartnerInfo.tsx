@@ -26,7 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { useSharedMedia, type SharedMediaItem, type SharedLink } from '@/hooks/useSharedMedia';
+import { useEncryptedSharedMedia, type EncryptedMediaItem, type EncryptedSharedLink } from '@/hooks/useEncryptedSharedMedia';
 import { useSharedShipments, type SharedShipment } from '@/hooks/useSharedShipments';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
