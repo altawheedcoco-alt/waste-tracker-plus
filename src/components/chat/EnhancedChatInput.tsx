@@ -237,9 +237,9 @@ const EnhancedChatInput = ({
   return (
     <div className={cn("border-t border-border bg-background", isMobile ? "p-2" : "p-3")}>
       {/* Hidden File Inputs */}
-      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
-      <input ref={imageInputRef} type="file" accept="image/*" onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
-      <input ref={videoInputRef} type="file" accept="video/*" onChange={(e) => handleFileSelect(e, 'video')} className="hidden" />
+      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.csv,.pptx,.ppt" multiple onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
+      <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
+      <input ref={videoInputRef} type="file" accept="video/*" multiple onChange={(e) => handleFileSelect(e, 'video')} className="hidden" />
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
 
       {/* Upload Progress */}

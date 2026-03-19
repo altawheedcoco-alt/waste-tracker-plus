@@ -470,6 +470,43 @@ export function usePrivateChat() {
     toast.success(current ? 'تم إلغاء كتم الصوت' : 'تم كتم المحادثة');
   }, [user, conversations, queryClient]);
 
+  // ─── Send File Message (upload + encrypted metadata) ──
+  const sendFileMessage = useCallback(async (
+    conversationId: string,
+    file: File,
+  ) => {
+    if (!user) return;
+
+    // Upload to storage
+    const ext = file.name.split('.').pop() || 'bin';
+    const filePath = `chat/${conversationId}/${crypto.randomUUID()}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('organization-documents')
+      .upload(filePath, file, { upsert: false });
+
+    if (uploadError) {
+      toast.error('فشل رفع الملف');
+      throw uploadError;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('organization-documents')
+      .getPublicUrl(filePath);
+
+    const fileUrl = urlData.publicUrl;
+
+    // Determine message type
+    let messageType = 'file';
+    if (file.type.startsWith('image/')) messageType = 'image';
+    else if (file.type.startsWith('video/')) messageType = 'video';
+    else if (file.type.startsWith('audio/')) messageType = 'voice';
+
+    // Send encrypted message with file metadata
+    const plaintext = file.name; // The text content is the filename
+    await sendMessage(conversationId, plaintext, messageType, fileUrl, file.name);
+  }, [user, sendMessage]);
+
   return {
     conversations,
     conversationsLoading,
@@ -477,6 +514,7 @@ export function usePrivateChat() {
     getOrCreateConversation,
     fetchMessages,
     sendMessage,
+    sendFileMessage,
     markAsRead,
     exportChatHistory,
     toggleBlock,
