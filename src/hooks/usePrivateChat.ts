@@ -378,7 +378,6 @@ export function usePrivateChat() {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
         } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
-          // Sender copy: check for embedded IV format "senderIV|senderCiphertext"
           const senderData = msg.encrypted_content_for_sender;
           let senderIv = msg.iv;
           let senderCiphertext = senderData;
@@ -402,7 +401,8 @@ export function usePrivateChat() {
           );
         }
       } catch {
-        content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
+        // Fallback to content_preview if decryption fails
+        content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
       }
 
       const profile = profileMap.get(msg.sender_id);
