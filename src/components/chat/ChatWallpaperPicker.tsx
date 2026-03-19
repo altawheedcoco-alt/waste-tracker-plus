@@ -232,7 +232,58 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '380px' }}>
+            {/* Upload Button + Custom Images */}
+            <div className="shrink-0">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleUploadImage}
+                className="hidden"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                className="w-full gap-2 text-xs border-dashed border-primary/40 hover:border-primary hover:bg-primary/5"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Upload className="w-4 h-4" />
+                )}
+                {uploading ? 'جاري الرفع...' : 'رفع صورة من جهازك'}
+              </Button>
+            </div>
+
+            {/* Custom uploaded images */}
+            {customImages.length > 0 && (
+              <div className="shrink-0">
+                <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">📷 صوري المرفوعة</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {customImages.map((url, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => handleSelectImage(url)}
+                      className={cn(
+                        "relative aspect-square rounded-lg border-2 overflow-hidden hover:scale-[1.05] transition-all",
+                        isImageSelected(url) ? "border-primary ring-2 ring-primary/30" : "border-border"
+                      )}
+                    >
+                      <img src={url} alt="خلفية مخصصة" className="w-full h-full object-cover" loading="lazy" />
+                      {isImageSelected(url) && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                          <Check className="w-4 h-4 text-white drop-shadow-lg" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '300px' }}>
               <div className="grid grid-cols-3 gap-2 pb-2">
                 {filteredImages.map(img => (
                   <button
