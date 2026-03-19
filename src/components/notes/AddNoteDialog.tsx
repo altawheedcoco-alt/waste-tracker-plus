@@ -1,15 +1,17 @@
 import { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   MessageSquare, Send, AlertTriangle, ThumbsUp, ThumbsDown, 
   HelpCircle, CheckCircle2, Lock, Users, Globe, StickyNote
 } from 'lucide-react';
 import { useNotes } from '@/hooks/useNotes';
-import { useAuth } from '@/contexts/AuthContext';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import { useShipmentMentions, type ShipmentMention } from '@/hooks/useShipmentMentions';
+import { MentionInput } from '@/components/ui/mention-input';
 
 interface AddNoteDialogProps {
   open: boolean;
@@ -43,21 +45,55 @@ const visibilities = [
 
 const AddNoteDialog = ({ open, onOpenChange, resourceType, resourceId }: AddNoteDialogProps) => {
   const { createNote } = useNotes(resourceType, resourceId);
+  const { users } = useMentionableUsers();
+  const { results: shipmentResults, searchShipments } = useShipmentMentions();
   const [content, setContent] = useState('');
   const [noteType, setNoteType] = useState('comment');
   const [priority, setPriority] = useState('normal');
   const [visibility, setVisibility] = useState('internal');
+  const [linkedShipmentId, setLinkedShipmentId] = useState<string | null>(null);
+  const [sendToChat, setSendToChat] = useState(false);
+
+  const handleShipmentSelect = (shipment: ShipmentMention) => {
+    setLinkedShipmentId(shipment.id);
+  };
 
   const handleSubmit = () => {
     if (!content.trim()) return;
+    
+    // Extract mentioned user IDs from content
+    const mentionRegex = /@\[([^\]]+)\]\(([^)]+)\)/g;
+    const mentionedIds: string[] = [];
+    let match;
+    while ((match = mentionRegex.exec(content)) !== null) {
+      mentionedIds.push(match[2]);
+    }
+
+    // Extract linked shipment IDs from content
+    const shipmentRegex = /#\[([^\]]+)\]\(([^)]+)\)/g;
+    let shipMatch;
+    while ((shipMatch = shipmentRegex.exec(content)) !== null) {
+      if (!linkedShipmentId) setLinkedShipmentId(shipMatch[2]);
+    }
+
     createNote.mutate(
-      { content, note_type: noteType, priority, visibility },
+      { 
+        content, 
+        note_type: noteType, 
+        priority, 
+        visibility,
+        mentioned_user_ids: mentionedIds,
+        linked_shipment_id: linkedShipmentId,
+        send_to_chat: sendToChat,
+      },
       {
         onSuccess: () => {
           setContent('');
           setNoteType('comment');
           setPriority('normal');
           setVisibility('internal');
+          setLinkedShipmentId(null);
+          setSendToChat(false);
           onOpenChange(false);
         },
       }
@@ -118,16 +154,35 @@ const AddNoteDialog = ({ open, onOpenChange, resourceType, resourceId }: AddNote
             </Select>
           </div>
 
-          {/* Content */}
+          {/* Content with @mention and #shipment support */}
           <div>
             <Label className="text-right block mb-1">المحتوى</Label>
-            <Textarea
+            <MentionInput
               value={content}
-              onChange={(e) => setContent(e.target.value)}
-              placeholder="اكتب ملاحظتك هنا..."
+              onChange={setContent}
+              users={users}
+              shipments={shipmentResults}
+              onShipmentSearch={searchShipments}
+              onShipmentSelect={handleShipmentSelect}
+              placeholder="اكتب ملاحظتك... استخدم @ للإشارة لشخص أو # لشحنة"
+              rows={4}
               className="text-right min-h-[120px]"
             />
           </div>
+
+          {/* Send to chat option when visibility is partner */}
+          {visibility === 'partner' && (
+            <div className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/50">
+              <Checkbox
+                id="send-to-chat"
+                checked={sendToChat}
+                onCheckedChange={(checked) => setSendToChat(!!checked)}
+              />
+              <Label htmlFor="send-to-chat" className="text-xs cursor-pointer">
+                أرسل كرسالة دردشة أيضاً للطرف الآخر
+              </Label>
+            </div>
+          )}
         </div>
 
         <DialogFooter className="gap-2">
