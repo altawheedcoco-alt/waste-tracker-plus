@@ -22,7 +22,7 @@ export default function CommunicationHubWidget() {
   const links: QuickLink[] = [
     { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', color: 'text-primary' },
     { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: unreadCount, color: 'text-destructive' },
-    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/notes', color: 'text-accent-foreground' },
+    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/chat?tab=notes', color: 'text-accent-foreground' },
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', color: 'text-primary' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', color: 'text-muted-foreground' },
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', color: 'text-primary' },

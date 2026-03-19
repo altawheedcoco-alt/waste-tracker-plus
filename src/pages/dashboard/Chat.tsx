@@ -1317,7 +1317,9 @@ const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
 
 // ─── Main Page with Chat + Notes Tabs ───────────────────
 const ChatAndNotesPage = () => {
-  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>('chat');
+  const [searchParamsPage] = useSearchParams();
+  const initialTab = searchParamsPage.get('tab') === 'notes' ? 'notes' : 'chat';
+  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>(initialTab);
   const [notesUnread, setNotesUnread] = useState(0);
 
   // Listen for new notes to update badge
