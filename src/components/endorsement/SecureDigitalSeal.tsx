@@ -71,20 +71,37 @@ const SecureDigitalSeal = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const SealImage = (
+    <div
+      className={`inline-block ${linkToProfile ? 'cursor-pointer hover:opacity-80 transition-opacity' : ''}`}
+      dangerouslySetInnerHTML={{ __html: svgString }}
+    />
+  );
+
+  const WrappedSeal = linkToProfile ? (
+    <Link to={profileUrl} title={`عرض ملف ${entityName}`}>
+      {SealImage}
+    </Link>
+  ) : SealImage;
+
   if (compact) {
     return (
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
-            <div
-              className={`inline-block cursor-pointer ${className}`}
-              dangerouslySetInnerHTML={{ __html: svgString }}
-            />
+            <div className={className}>
+              {WrappedSeal}
+            </div>
           </TooltipTrigger>
           <TooltipContent dir="rtl" className="text-center">
             <p className="font-semibold text-xs">{entityName}</p>
             <p className="font-mono text-[10px] text-primary">{sealNumber}</p>
             <p className="text-[10px] text-muted-foreground">ختم رقمي مؤمّن</p>
+            {linkToProfile && (
+              <p className="text-[10px] text-primary flex items-center gap-1 justify-center mt-1">
+                <ExternalLink className="w-2.5 h-2.5" /> عرض الملف الشخصي
+              </p>
+            )}
           </TooltipContent>
         </Tooltip>
       </TooltipProvider>
@@ -94,10 +111,7 @@ const SecureDigitalSeal = ({
   return (
     <div className={`text-center space-y-2 ${className}`} dir="rtl">
       {/* Seal SVG */}
-      <div
-        className="inline-block"
-        dangerouslySetInnerHTML={{ __html: svgString }}
-      />
+      {WrappedSeal}
 
       {showLabel && (
         <div className="space-y-1.5">
