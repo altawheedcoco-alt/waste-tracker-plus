@@ -961,6 +961,7 @@ const EncryptedChat = () => {
                                   conversation={convo}
                                   isActive={selectedConvoId === convo.id}
                                   onClick={() => handleSelectConvo(convo)}
+                                  currentUserId={user?.id}
                                   compact
                                 />
                               ))}
