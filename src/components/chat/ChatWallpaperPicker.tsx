@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Check, Paintbrush, Search, Palette, Image, Sparkles } from 'lucide-react';
+import { Check, Paintbrush, Search, Palette, Image, Sparkles, Camera } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -18,9 +18,11 @@ import {
   GRADIENT_PRESETS,
   SVG_PATTERNS,
   PATTERN_CATEGORIES,
+  IMAGE_WALLPAPER_CATEGORIES,
   useChatWallpaper,
   type ChatWallpaper,
 } from '@/hooks/useChatWallpaper';
+import { IMAGE_WALLPAPERS } from '@/data/chatImageWallpapers';
 
 interface ChatWallpaperPickerProps {
   conversationId?: string;
@@ -31,6 +33,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
   const [searchColors, setSearchColors] = useState('');
   const [selectedColorFamily, setSelectedColorFamily] = useState<string | null>(null);
   const [selectedPatternCategory, setSelectedPatternCategory] = useState<string | null>(null);
+  const [selectedImageCategory, setSelectedImageCategory] = useState<string | null>(null);
   const { wallpaper, setWallpaper } = useChatWallpaper(conversationId);
 
   const handleSelectColor = async (value: string) => {
@@ -45,14 +48,19 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
     await setWallpaper({ type: 'svg-pattern', value: id }, conversationId);
   };
 
+  const handleSelectImage = async (src: string) => {
+    await setWallpaper({ type: 'image', value: src }, conversationId);
+  };
+
   const isColorSelected = (value: string) =>
     wallpaper?.type === 'color' && wallpaper?.value === value;
   const isGradientSelected = (value: string) =>
     wallpaper?.type === 'gradient' && wallpaper?.value === value;
   const isSvgPatternSelected = (id: string) =>
     wallpaper?.type === 'svg-pattern' && wallpaper?.value === id;
+  const isImageSelected = (src: string) =>
+    wallpaper?.type === 'image' && wallpaper?.value === src;
 
-  // Filter colors by search or family
   const filteredFamilies = useMemo(() => {
     if (selectedColorFamily) {
       return COLOR_FAMILIES.filter(f => f.family === selectedColorFamily);
@@ -72,6 +80,13 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
     }
     return SVG_PATTERNS;
   }, [selectedPatternCategory]);
+
+  const filteredImages = useMemo(() => {
+    if (selectedImageCategory) {
+      return IMAGE_WALLPAPERS.filter(i => i.category === selectedImageCategory);
+    }
+    return IMAGE_WALLPAPERS;
+  }, [selectedImageCategory]);
 
   const isDark = (hex: string) => {
     const c = hex.replace('#', '');
@@ -97,25 +112,85 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="colors" className="flex-1 min-h-0 flex flex-col">
-          <TabsList className="grid w-full grid-cols-3 shrink-0">
-            <TabsTrigger value="colors" className="gap-1.5 text-xs">
+        <Tabs defaultValue="images" className="flex-1 min-h-0 flex flex-col">
+          <TabsList className="grid w-full grid-cols-4 shrink-0">
+            <TabsTrigger value="images" className="gap-1 text-xs">
+              <Camera className="w-3.5 h-3.5" />
+              صور
+            </TabsTrigger>
+            <TabsTrigger value="colors" className="gap-1 text-xs">
               <Palette className="w-3.5 h-3.5" />
               ألوان
             </TabsTrigger>
-            <TabsTrigger value="gradients" className="gap-1.5 text-xs">
+            <TabsTrigger value="gradients" className="gap-1 text-xs">
               <Sparkles className="w-3.5 h-3.5" />
               تدرجات
             </TabsTrigger>
-            <TabsTrigger value="patterns" className="gap-1.5 text-xs">
+            <TabsTrigger value="patterns" className="gap-1 text-xs">
               <Image className="w-3.5 h-3.5" />
               أنماط
             </TabsTrigger>
           </TabsList>
 
+          {/* ─── IMAGES TAB ─── */}
+          <TabsContent value="images" className="flex-1 min-h-0 mt-3 flex flex-col gap-3">
+            <div className="flex flex-wrap gap-1.5 shrink-0">
+              <Badge
+                variant={selectedImageCategory === null ? 'default' : 'outline'}
+                className="cursor-pointer text-[10px] px-2 py-0.5"
+                onClick={() => setSelectedImageCategory(null)}
+              >
+                الكل ({IMAGE_WALLPAPERS.length})
+              </Badge>
+              {IMAGE_WALLPAPER_CATEGORIES.map(cat => (
+                <Badge
+                  key={cat.id}
+                  variant={selectedImageCategory === cat.id ? 'default' : 'outline'}
+                  className="cursor-pointer text-[10px] px-2 py-0.5"
+                  onClick={() => setSelectedImageCategory(cat.id === selectedImageCategory ? null : cat.id)}
+                >
+                  {cat.label}
+                </Badge>
+              ))}
+            </div>
+
+            <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '380px' }}>
+              <div className="grid grid-cols-3 gap-2 pb-2">
+                {filteredImages.map(img => (
+                  <button
+                    key={img.id}
+                    onClick={() => handleSelectImage(img.src)}
+                    className={cn(
+                      "relative w-full aspect-[3/4] rounded-xl border-2 transition-all hover:scale-[1.03] hover:shadow-lg overflow-hidden group",
+                      isImageSelected(img.src)
+                        ? "border-primary shadow-md ring-2 ring-primary/30"
+                        : "border-border"
+                    )}
+                  >
+                    <img
+                      src={img.src}
+                      alt={img.label}
+                      className="w-full h-full object-cover"
+                      loading="lazy"
+                    />
+                    {/* Overlay on hover */}
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                    {isImageSelected(img.src) && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                        <Check className="w-6 h-6 text-white drop-shadow-lg" />
+                      </div>
+                    )}
+                    <span className="absolute bottom-0 inset-x-0 text-[9px] text-center font-medium text-white bg-black/40 py-0.5 leading-tight backdrop-blur-sm">
+                      {img.label}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </ScrollArea>
+          </TabsContent>
+
           {/* ─── COLORS TAB ─── */}
           <TabsContent value="colors" className="flex-1 min-h-0 mt-3 flex flex-col gap-3">
-            {/* Search */}
             <div className="relative shrink-0">
               <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -126,7 +201,6 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               />
             </div>
 
-            {/* Family chips */}
             <div className="flex flex-wrap gap-1.5 shrink-0">
               <Badge
                 variant={selectedColorFamily === null ? 'default' : 'outline'}
@@ -147,7 +221,6 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            {/* Color grid */}
             <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '340px' }}>
               <div className="space-y-4 pb-2">
                 {filteredFamilies.map(family => (
@@ -213,7 +286,6 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
 
           {/* ─── PATTERNS TAB ─── */}
           <TabsContent value="patterns" className="flex-1 min-h-0 mt-3 flex flex-col gap-3">
-            {/* Category filter chips */}
             <div className="flex flex-wrap gap-1.5 shrink-0">
               <Badge
                 variant={selectedPatternCategory === null ? 'default' : 'outline'}
