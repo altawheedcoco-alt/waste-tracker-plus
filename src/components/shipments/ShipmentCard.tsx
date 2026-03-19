@@ -150,6 +150,7 @@ const ShipmentCard = ({
   const [isDeclarationViewOpen, setIsDeclarationViewOpen] = useState(false);
   const [isDeliveryCertOpen, setIsDeliveryCertOpen] = useState(false);
   const [showInlineMap, setShowInlineMap] = useState(false);
+  const [activeShipmentTab, setActiveShipmentTab] = useState<'notes' | 'chat' | null>(null);
 
   // استخدام hook صلاحيات الرؤية
   const visibility = useShipmentVisibility(shipment.id);
