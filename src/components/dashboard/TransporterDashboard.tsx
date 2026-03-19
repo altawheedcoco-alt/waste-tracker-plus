@@ -180,6 +180,7 @@ const TransporterDashboard = () => {
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
 
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
       <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
