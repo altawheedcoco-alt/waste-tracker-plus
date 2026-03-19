@@ -227,7 +227,7 @@ const MessageBubble = memo(({
             >
               {message.sender.full_name}
             </button>
-          )
+          )}
 
           {/* Quoted Reply */}
           {repliedMessage && (
