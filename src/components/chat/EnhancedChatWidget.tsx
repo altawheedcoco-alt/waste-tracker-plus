@@ -393,6 +393,8 @@ const EnhancedChatWidget = () => {
                   isMobile={isMobile}
                   conversationId={selectedPartner.id}
                   isTyping={isPartnerTyping}
+                  onVoiceCall={() => handleStartCall('voice')}
+                  onVideoCall={() => handleStartCall('video')}
                 />
                 <div className="flex items-center gap-1 pr-2">
                   {/* Disappearing Messages */}
