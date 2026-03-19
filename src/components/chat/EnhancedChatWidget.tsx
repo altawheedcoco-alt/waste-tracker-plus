@@ -183,6 +183,21 @@ const EnhancedChatWidget = () => {
     setReplyTo(message);
   };
 
+  const handleDeleteMessage = async (messageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('direct_messages')
+        .update({ content: '🚫 تم حذف هذه الرسالة', message_type: 'system' })
+        .eq('id', messageId)
+        .eq('sender_id', user!.id);
+      if (error) throw error;
+      if (selectedPartner) await fetchMessagesForPartner(selectedPartner.id);
+      toast.success('تم حذف الرسالة');
+    } catch {
+      toast.error('فشل حذف الرسالة');
+    }
+  };
+
   if (!user) return null;
 
   const widgetSize = isExpanded 
