@@ -17,6 +17,19 @@ export interface DashboardWidgetConfig {
 }
 
 export const dashboardWidgets: DashboardWidgetConfig[] = [
+  // === مركز التواصل والمشاركة ===
+  {
+    id: 'communication_hub',
+    title: 'التواصل والمشاركة',
+    description: 'رسائل، إشعارات، ملاحظات، حالات — كل قنوات التواصل في مكان واحد',
+    icon: MessageCircle,
+    category: 'quick_action',
+    availableFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'],
+    defaultOrder: -1,
+    defaultPinned: true,
+    size: 'large',
+  },
+
   // === بطاقة الهوية التعريفية الرقمية ===
   {
     id: 'digital_identity_card',
