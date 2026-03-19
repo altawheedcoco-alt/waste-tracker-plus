@@ -212,6 +212,24 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
     }
   };
 
+  const handleToggleLock = async () => {
+    setTogglingLock(true);
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ is_profile_locked: !isLocked })
+        .eq('id', organization.id);
+      if (error) throw error;
+      toast.success(isLocked ? 'تم فتح قفل الملف الشخصي' : 'تم قفل الملف الشخصي بنجاح');
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error toggling lock:', error);
+      toast.error('حدث خطأ في تغيير حالة القفل');
+    } finally {
+      setTogglingLock(false);
+    }
+  };
+
   return (
     <div className="relative">
       {/* Cover Photo */}
@@ -222,7 +240,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
             alt="صورة الغلاف"
             gallery={[organization.cover_url, organization.logo_url].filter(Boolean) as string[]}
             className="w-full h-full object-cover"
-            protected={!isEditable}
+            protected={isProtected}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
