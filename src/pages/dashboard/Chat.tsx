@@ -1231,7 +1231,7 @@ const EncryptedChat = () => {
                   partner={{
                     id: selectedConvo.partner?.organization_id || '',
                     name: selectedConvo.partner?.organization_name || selectedConvo.partner?.full_name || '',
-                    organization_type: selectedConvo.partner?.organization_type || 'generator',
+                    organization_type: (selectedConvo.partner as any)?.organization_type || 'generator',
                     logo_url: selectedConvo.partner?.avatar_url || null,
                   }}
                   notificationsEnabled={true}
