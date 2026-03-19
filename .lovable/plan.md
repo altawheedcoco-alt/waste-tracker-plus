@@ -1,81 +1,77 @@
 
 
-# خطة: عالم الشريك الداخلي — ملف تفصيلي عند الضغط على صورة الشريك في الدردشة
+# خطة إصلاح: مشاكل الربط بين المحادثات والملاحظات والجهات المرتبطة
 
-## إعادة صياغة الطلب
+## المشاكل المكتشفة بعد البحث الشامل
 
-عند الضغط على صورة/اسم الشريك في هيدر المحادثة، يُفتح **لوحة جانبية غنية بنمط واتساب** تحتوي على:
-1. **الملف التجاري** — صورة الجهة، الاسم، النوع، زر "عرض الملف الكامل"
-2. **تبويبات المحتوى المشترك** — كل نوع في تبويب مستقل:
-   - 📸 الوسائط (صور + فيديو)
-   - 📄 المستندات
-   - 🔗 الروابط
-   - 📦 الشحنات المشتركة (بيني وبينه)
-   - ✍️ الشحنات الموقّعة (موقّع أنا / موقّع هو / موقّعين كلانا)
-3. **الإعدادات** — كتم، مفضلة، حذف
+### المشكلة 1: جدولان مختلفان للرسائل — تضارب البيانات
+النظام يستخدم جدولين منفصلين:
+- **`direct_messages`** — الرسائل المباشرة بين المنظمات (يستخدمه `useChat`, `ChatSidebar`, `useSharedMedia`)
+- **`chat_messages`** — رسائل الغرف والمجموعات (يستخدمه `useGroupChat`, `useAutoChat`)
 
-## التغييرات التقنية
+**لكن `EnhancedChatWidget.fetchLastSeenTimes`** (سطر 117) يستعلم من `chat_messages` لجلب آخر نشاط، بينما الرسائل الفعلية في `direct_messages` → النتيجة: "آخر ظهور" لا يظهر أبداً.
 
-### 1. ترقية `ChatPartnerInfo.tsx` بالكامل
+### المشكلة 2: قائمة الشركاء في الدردشة مبنية على الشحنات وليس الشراكات
+**`EnhancedChatWidget.fetchPartners`** (سطر 132-179) يجلب الشركاء من جدول `shipments` فقط. هذا يعني:
+- جهة مرتبطة عبر `verified_partnerships` لكن بدون شحنات مشتركة **لا تظهر في الدردشة**
+- هذا يتعارض مع المبدأ الأساسي: الشركاء يُجلبون من `verified_partnerships`
 
-إعادة بناء المكون ليتحول من قائمة بسيطة إلى **لوحة تبويبات غنية**:
+بينما `EncryptedChatWidget` يستخدم `useLinkedPartners()` بشكل صحيح.
 
-**التبويبات الجديدة:**
-| تبويب | المحتوى | مصدر البيانات |
-|-------|---------|--------------|
-| الوسائط | صور + فيديو من `direct_messages` بفلتر `message_type in (image, video)` | `useSharedMedia(partnerId)` |
-| المستندات | ملفات PDF/DOC من `direct_messages` بفلتر `message_type = file` | نفس الهوك |
-| الروابط | استخراج URLs من محتوى الرسائل النصية | نفس الهوك |
-| الشحنات المشتركة | `shipments` حيث الجهتين مشاركتان (generator/transporter/recycler) | `useSharedShipments(partnerId)` |
-| الشحنات الموقّعة | شحنات لها توقيع من طرف/طرفين عبر `e_signatures` | نفس الهوك مع فلتر |
+### المشكلة 3: `usePartners.ts` يعتمد على الشحنات أيضاً
+الهوك `usePartners.ts` يجلب الشركاء بالكامل من `shipments` وليس من `verified_partnerships`. أي مكون يستخدم هذا الهوك سيفتقد الجهات المرتبطة التي ليس لها شحنات بعد.
 
-### 2. هوك `useSharedMedia.ts` (جديد)
+### المشكلة 4: `useSharedShipments` مكرر بنسختين
+- `src/hooks/useSharedShipments.ts` (الأصلي — يعتمد على `useAuth`)
+- النسخة الجديدة أُنشئت ضمن المرحلة السابقة بنفس الاسم
 
-يجلب من `direct_messages` كل الرسائل غير النصية بين المنظمتين، ويصنفها إلى: media, files, links.
+### المشكلة 5: ملاحظات الشريك لا تُرسل للدردشة فعلياً
+في `AddNoteDialog.tsx`، الخيار `sendToChat` موجود في الواجهة لكن `useNotes.ts` يستقبل `send_to_chat` كحقل دون تنفيذ فعلي لإرسال الملاحظة كرسالة دردشة.
 
-### 3. هوك `useSharedShipments.ts` (جديد)
+### المشكلة 6: `DigitalIdentityCard` يستخدم عمود خاطئ
+سطر 122 في `DigitalIdentityCard.tsx` يستخدم `target_org_id` بدلاً من `partner_org_id` في الاستعلام.
 
-يجلب الشحنات المشتركة بين المنظمتين من جدول `shipments`، مع بيانات التوقيعات من `e_signatures` لتصنيفها.
+---
 
-### 4. تعديل `ChatHeader.tsx`
+## خطة الإصلاح
 
-إضافة `onClick` على الـ Avatar واسم الشريك لتفعيل `onShowPartnerInfo` callback.
+### 1. توحيد مصدر الشركاء في `EnhancedChatWidget`
+استبدال `fetchPartners` المبني على `shipments` بـ `useLinkedPartners()` من الهوك الموحد. هذا يضمن ظهور جميع الجهات المرتبطة في قائمة الدردشة.
 
-### 5. تعديل `EnhancedChatWidget.tsx`
+### 2. إصلاح `fetchLastSeenTimes`
+تغيير الجدول من `chat_messages` إلى `direct_messages` ليتطابق مع مصدر الرسائل الفعلي.
 
-إضافة state `showPartnerInfo` وعرض `ChatPartnerInfo` المُحدّث كلوحة جانبية (أو overlay على الموبايل) عند الضغط.
+### 3. إصلاح `usePartners.ts`
+تحويله ليستخدم `verified_partnerships` كمصدر أساسي بدلاً من `shipments`، مع الحفاظ على نفس الواجهة (generators, transporters, recyclers).
+
+### 4. تفعيل إرسال الملاحظات للدردشة
+في `useNotes.ts`، عند `send_to_chat === true`، إدراج رسالة فعلية في `direct_messages` تحتوي على محتوى الملاحظة مع `message_type: 'system'`.
+
+### 5. إصلاح `DigitalIdentityCard`
+تصحيح الاستعلام ليستخدم `partner_org_id` بدلاً من `target_org_id`.
+
+---
 
 ## الملفات المتأثرة
 
-| ملف | نوع |
-|-----|-----|
-| `src/components/chat/ChatPartnerInfo.tsx` | إعادة بناء كاملة |
-| `src/hooks/useSharedMedia.ts` | **جديد** |
-| `src/hooks/useSharedShipments.ts` | **جديد** |
-| `src/components/chat/ChatHeader.tsx` | تعديل (إضافة onClick) |
-| `src/components/chat/EnhancedChatWidget.tsx` | تعديل (إضافة حالة العرض) |
-
-## النتيجة
+| ملف | نوع التغيير |
+|-----|------------|
+| `src/components/chat/EnhancedChatWidget.tsx` | استبدال fetchPartners بـ useLinkedPartners + إصلاح fetchLastSeenTimes |
+| `src/hooks/usePartners.ts` | إعادة بناء ليعتمد على verified_partnerships |
+| `src/hooks/useNotes.ts` | تفعيل إرسال الملاحظة كرسالة دردشة |
+| `src/components/dashboard/shared/DigitalIdentityCard.tsx` | تصحيح اسم العمود |
 
 ```text
-الضغط على الصورة/الاسم
-         │
-         ▼
-┌────────────────────────┐
-│  صورة + اسم + نوع     │
-│  [عرض الملف الكامل →]  │
-├────────────────────────┤
-│ وسائط│مستندات│روابط│شحنات│موقّعة│
-├────────────────────────┤
-│                        │
-│  محتوى التبويب النشط   │
-│  (شبكة صور / قائمة)   │
-│                        │
-├────────────────────────┤
-│  ⚙️ كتم │ ⭐ مفضلة │ 🗑 حذف │
-└────────────────────────┘
-```
+الحالة الحالية (مكسورة):
+  EnhancedChatWidget → shipments → شركاء ناقصين
+  usePartners        → shipments → شركاء ناقصين
+  fetchLastSeenTimes → chat_messages → لا بيانات
+  sendToChat         → لا تنفيذ → ملاحظات لا تصل
 
-- لا ترحيل قاعدة بيانات (البيانات موجودة بالفعل)
-- 2 ملفات جديدة + 3 ملفات معدلة
+بعد الإصلاح:
+  EnhancedChatWidget → verified_partnerships → كل الشركاء ✓
+  usePartners        → verified_partnerships → كل الشركاء ✓
+  fetchLastSeenTimes → direct_messages → بيانات صحيحة ✓
+  sendToChat         → direct_messages.insert → ملاحظات تصل ✓
+```
 
