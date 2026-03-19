@@ -536,7 +536,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates', bindingType: 'internal' as const },
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center', bindingType: 'internal' as const },
       { icon: BookOpen, labelAr: 'دليل المستخدم', labelEn: 'User Guide', path: '/dashboard/user-guide', key: 'user-guide', bindingType: 'internal' as const },
-      { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center', bindingType: 'internal' as const },
+      { icon: FileText, labelAr: 'منشئ السيرة الذاتية', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'منشئ السيرة الذاتية', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder', bindingType: 'internal' as const },
     ],
   },
