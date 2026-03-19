@@ -4,8 +4,10 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { MentionableUser } from '@/hooks/useMentionableUsers';
-import { Building2, User } from 'lucide-react';
+import { ShipmentMention } from '@/hooks/useShipmentMentions';
+import { Building2, User, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getStatusConfig, mapLegacyStatus, wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 
 interface MentionInputProps {
   value: string;
