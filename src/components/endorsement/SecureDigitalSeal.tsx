@@ -33,8 +33,12 @@ const SecureDigitalSeal = ({
   size = 160,
   showLabel = true,
   compact = false,
+  linkToProfile = false,
   className = '',
 }: SecureDigitalSealProps) => {
+  const profileUrl = entityType === 'member'
+    ? `/dashboard/profile/${entityId}`
+    : `/dashboard/organization/${entityId}`;
   const [copied, setCopied] = useState(false);
 
   const sealNumber = useMemo(
