@@ -74,6 +74,26 @@ const EnhancedChatWidget = () => {
   const { duration: disappearDuration, setDisappearDuration, getExpiryDate, isActive: disappearActive } = useDisappearingMessages(selectedPartner?.id);
   const { permission: pushPermission, requestPermission: requestPush } = usePushNotifications();
   const { rooms, createGroup, isCreatingGroup } = useGroupChat();
+  const {
+    callInfo,
+    localStream,
+    remoteStream,
+    startCall,
+    answerCall,
+    endCall,
+    toggleMute,
+    toggleVideo,
+    toggleSpeaker,
+  } = useWebRTCCall();
+
+  const handleStartCall = async (type: 'voice' | 'video') => {
+    if (!selectedPartner) return;
+    try {
+      await startCall(selectedPartner.id, type, selectedPartner.name, selectedPartner.logo_url);
+    } catch (err: any) {
+      toast.error(err.message || 'فشل بدء المكالمة');
+    }
+  };
 
   // Listen for unified menu toggle
   useEffect(() => {
