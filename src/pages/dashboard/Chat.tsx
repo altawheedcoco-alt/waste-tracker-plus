@@ -278,52 +278,82 @@ const DateSeparator = ({ date }: { date: Date }) => {
 };
 
 // ─── Notes Panel ────────────────────────────────────────
-const NotesPanel = memo(({ conversationId, organizationId }: { conversationId: string; organizationId?: string }) => {
+const NotesPanel = memo(({ 
+  conversationId,
+  organizationId,
+  targetOrganizationId,
+}: {
+  conversationId: string;
+  organizationId?: string;
+  targetOrganizationId?: string | null;
+}) => {
   const [noteText, setNoteText] = useState('');
-  const { user } = useAuth();
+  const { profile } = useAuth();
   const queryClient = useQueryClient();
 
   const { data: notes = [], isLoading } = useQuery({
     queryKey: ['conversation-notes', conversationId],
     queryFn: async () => {
-      const { data } = await (supabase as any)
+      const { data, error } = await supabase
         .from('notes')
-        .select('id, content, created_at, author_id')
+        .select(`
+          id,
+          content,
+          created_at,
+          author:profiles!notes_author_id_fkey(full_name)
+        `)
         .eq('resource_type', 'conversation')
         .eq('resource_id', conversationId)
         .order('created_at', { ascending: false })
         .limit(50);
-      
-      if (!data?.length) return [];
-      
-      const userIds = [...new Set(data.map((n: any) => n.author_id).filter(Boolean))];
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name')
-        .in('user_id', userIds as string[]);
-      const profileMap = new Map((profiles || []).map(p => [p.user_id, p.full_name]));
 
-      return data.map((n: any) => ({
-        id: n.id,
-        content: n.content,
-        created_at: n.created_at,
-        author_name: profileMap.get(n.author_id || '') || 'مجهول',
+      if (error) throw error;
+
+      return (data || []).map((note: any) => ({
+        id: note.id,
+        content: note.content,
+        created_at: note.created_at,
+        author_name: note.author?.full_name || 'مجهول',
       })) as ConversationNote[];
     },
     enabled: !!conversationId,
+    refetchInterval: 5000,
   });
+
+  useEffect(() => {
+    if (!conversationId) return;
+
+    const channel = supabase
+      .channel(`conversation-notes-${conversationId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'notes',
+        filter: `resource_id=eq.${conversationId}`,
+      }, () => {
+        queryClient.invalidateQueries({ queryKey: ['conversation-notes', conversationId] });
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, queryClient]);
 
   const addNote = useMutation({
     mutationFn: async (content: string) => {
-      if (!user?.id || !organizationId) throw new Error('Missing user or org');
-      const { error } = await (supabase as any).from('notes').insert({
+      if (!profile?.id || !organizationId) throw new Error('Missing profile or org');
+      const { error } = await supabase.from('notes').insert({
         resource_type: 'conversation',
         resource_id: conversationId,
         content,
-        author_id: user.id,
+        author_id: profile.id,
         organization_id: organizationId,
+        target_organization_id: targetOrganizationId || null,
+        visibility: targetOrganizationId ? 'shared' : 'internal',
         note_type: 'comment',
-      });
+        priority: 'normal',
+      } as any);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -417,7 +447,7 @@ interface LinkedPartnerOrg {
 
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
-  const { user, organization } = useAuth();
+  const { user, organization, profile } = useAuth();
   const { isMobile } = useDisplayMode();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -1183,7 +1213,11 @@ const EncryptedChat = () => {
                 transition={{ duration: 0.2 }}
                 className="h-full overflow-hidden"
               >
-                <NotesPanel conversationId={selectedConvoId} organizationId={organization?.id} />
+                <NotesPanel
+                  conversationId={selectedConvoId}
+                  organizationId={organization?.id}
+                  targetOrganizationId={selectedConvo?.partner?.organization_id || null}
+                />
               </motion.div>
             )}
           </div>

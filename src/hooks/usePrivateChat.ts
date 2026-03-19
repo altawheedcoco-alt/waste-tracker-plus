@@ -20,6 +20,7 @@ export interface PrivateConversation {
     user_id: string;
     full_name: string;
     avatar_url: string | null;
+    organization_id?: string | null;
     organization_name?: string;
   };
   lastDecryptedPreview?: string;
@@ -48,8 +49,9 @@ export interface DecryptedMessage {
 export function usePrivateChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const { getPublicKey } = useE2EKeys();
+  const { getPublicKey, getPublicKeys } = useE2EKeys();
   const publicKeyCache = useRef<Map<string, string>>(new Map());
+  const publicKeysCache = useRef<Map<string, string[]>>(new Map());
 
   const getCachedPublicKey = useCallback(async (userId: string) => {
     if (publicKeyCache.current.has(userId)) return publicKeyCache.current.get(userId)!;
@@ -57,6 +59,13 @@ export function usePrivateChat() {
     if (key) publicKeyCache.current.set(userId, key);
     return key;
   }, [getPublicKey]);
+
+  const getCachedPublicKeys = useCallback(async (userId: string) => {
+    if (publicKeysCache.current.has(userId)) return publicKeysCache.current.get(userId)!;
+    const keys = await getPublicKeys(userId);
+    publicKeysCache.current.set(userId, keys);
+    return keys;
+  }, [getPublicKeys]);
 
   // ─── Conversations List ──────────────────────────────
   const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
@@ -98,6 +107,7 @@ export function usePrivateChat() {
         user_id: p.user_id,
         full_name: p.full_name,
         avatar_url: p.avatar_url,
+        organization_id: p.organization_id,
         organization_name: orgMap.get(p.organization_id || ''),
       }]));
 
@@ -208,8 +218,19 @@ export function usePrivateChat() {
     if (!convo) return [];
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    const partnerPublicKey = await getCachedPublicKey(partnerId);
-    const myPublicKey = await getCachedPublicKey(user.id);
+    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
+    const myPublicKeys = await getCachedPublicKeys(user.id);
+
+    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
+      for (const candidateKey of candidateKeys) {
+        try {
+          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
+        } catch {
+          continue;
+        }
+      }
+      throw new Error('DECRYPT_FAILED');
+    };
 
     // Get sender profiles
     const senderIds = [...new Set((data || []).map(m => m.sender_id))];
@@ -225,21 +246,17 @@ export function usePrivateChat() {
       try {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
-        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender && myPublicKey) {
-          // Decrypt sender's copy (encrypted with own key derivation isn't standard ECDH)
-          // For simplicity, sender stores their own encrypted copy using partner's key exchange
-          content = await decryptMessage(user.id, partnerPublicKey!, {
-            ciphertext: msg.encrypted_content_for_sender,
-            iv: msg.iv,
-          });
-        } else if (msg.sender_id !== user.id && partnerPublicKey) {
-          content = await decryptMessage(user.id, partnerPublicKey, {
-            ciphertext: msg.encrypted_content,
-            iv: msg.iv,
-          });
+        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
+          content = await tryDecryptWithKeys(
+            Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
+            msg.encrypted_content_for_sender,
+            msg.iv,
+          );
+        } else if (msg.sender_id !== user.id) {
+          content = await tryDecryptWithKeys(partnerPublicKeys, msg.encrypted_content, msg.iv);
         }
       } catch {
-        content = '[تعذر فك التشفير]';
+        content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
       }
 
       const profile = profileMap.get(msg.sender_id);
@@ -261,7 +278,7 @@ export function usePrivateChat() {
     }
 
     return decrypted;
-  }, [user, getCachedPublicKey]);
+  }, [user, getCachedPublicKeys]);
 
   // ─── Send Encrypted Message ──────────────────────────
   const sendMessage = useCallback(async (
@@ -285,6 +302,7 @@ export function usePrivateChat() {
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
     const partnerPublicKey = await getCachedPublicKey(partnerId);
+    const myPublicKey = await getCachedPublicKey(user.id);
 
     if (!partnerPublicKey) {
       toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
@@ -294,8 +312,9 @@ export function usePrivateChat() {
     // Encrypt for recipient
     const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
 
-    // Also encrypt a copy for sender (so sender can read their own messages)
-    const senderCopy = await encryptMessage(user.id, partnerPublicKey, plaintext);
+    // Encrypt a sender copy using the sender's own public key when available,
+    // with fallback to the old partner-key method for backward compatibility.
+    const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
 
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
