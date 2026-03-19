@@ -10,6 +10,7 @@ import {
   getPendingMessages,
   type MessageStatus,
 } from '@/lib/optimisticMessages';
+import { emitChatSync, onChatSync } from '@/lib/chatSyncBus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
