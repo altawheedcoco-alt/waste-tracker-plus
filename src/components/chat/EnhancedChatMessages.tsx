@@ -50,6 +50,7 @@ const EnhancedChatMessages = ({
   partnerName,
   onDeleteMessage,
   onForwardMessage,
+  scrollToMessageId,
 }: EnhancedChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
