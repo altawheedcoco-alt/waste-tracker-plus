@@ -818,7 +818,6 @@ const EncryptedChat = () => {
       toast.error('فشل تصدير المحادثة');
     }
   };
-  };
 
   const filteredConversations = conversations.filter(c =>
     !searchQuery || c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
