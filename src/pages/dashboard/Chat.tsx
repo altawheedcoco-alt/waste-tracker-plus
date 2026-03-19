@@ -464,7 +464,7 @@ const EncryptedChat = () => {
   const queryClient = useQueryClient();
   const {
     conversations, conversationsLoading, getOrCreateConversation,
-    fetchMessages, sendMessage, markAsRead, exportChatHistory,
+    fetchMessages, sendMessage, sendFileMessage, markAsRead, exportChatHistory,
     toggleBlock, toggleMute,
   } = usePrivateChat();
 
@@ -483,6 +483,7 @@ const EncryptedChat = () => {
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
