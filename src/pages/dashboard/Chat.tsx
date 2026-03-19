@@ -496,8 +496,6 @@ const EncryptedChat = () => {
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
