@@ -352,7 +352,7 @@ const NotesPanel = memo(({
         author_id: profile.id,
         organization_id: organizationId,
         target_organization_id: targetOrganizationId || null,
-        visibility: targetOrganizationId ? 'shared' : 'internal',
+        visibility: targetOrganizationId ? 'partner' : 'internal',
         note_type: 'comment',
         priority: 'normal',
       } as any);
