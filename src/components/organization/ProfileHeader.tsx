@@ -33,6 +33,7 @@ interface ProfileHeaderProps {
     phone?: string;
     founded_year?: number;
     activity_type?: string;
+    is_profile_locked?: boolean;
   };
   isEditable?: boolean;
   onUpdate?: () => void;
