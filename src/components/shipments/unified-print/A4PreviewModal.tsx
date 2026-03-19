@@ -31,6 +31,24 @@ const A4PreviewModal = ({
   const [currentPage, setCurrentPage] = useState(1);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (isOpen) {
+      kbCtx.registerPrintHandler(onPrint);
+      kbCtx.registerPdfHandler(onDownloadPDF);
+    }
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [isOpen, onPrint, onDownloadPDF]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';

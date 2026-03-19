@@ -49,6 +49,34 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
     format: 'a4',
   });
 
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  const handleDownload = () => {
+    if (printRef.current && acceptance) {
+      exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
+    }
+  };
+
+  const handlePrint = () => {
+    setThemeOpen(true);
+  };
+
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (open) {
+      kbCtx.registerPrintHandler(handlePrint);
+      kbCtx.registerPdfHandler(handleDownload);
+    }
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [open]);
+
   if (!acceptance) return null;
 
   const handlePrint = () => {

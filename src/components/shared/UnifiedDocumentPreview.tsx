@@ -52,6 +52,24 @@ const UnifiedDocumentPreview = ({
     fitSinglePage,
   });
 
+  // Register print/PDF handlers with global keyboard context
+  let kbCtx: ReturnType<typeof useKeyboardShortcutContext> | null = null;
+  try { kbCtx = useKeyboardShortcutContext(); } catch { /* not wrapped */ }
+
+  useEffect(() => {
+    if (!kbCtx) return;
+    if (isOpen) {
+      kbCtx.registerPrintHandler(handlePrint);
+      kbCtx.registerPdfHandler(() => { handleDownloadPDF(); });
+    }
+    return () => {
+      if (kbCtx) {
+        kbCtx.registerPrintHandler(null);
+        kbCtx.registerPdfHandler(null);
+      }
+    };
+  }, [isOpen, handlePrint, handleDownloadPDF]);
+
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
