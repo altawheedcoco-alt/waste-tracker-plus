@@ -10,6 +10,7 @@ import {
   getPendingMessages,
   type MessageStatus,
 } from '@/lib/optimisticMessages';
+import { emitChatSync, onChatSync } from '@/lib/chatSyncBus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -77,6 +78,19 @@ export const useChat = () => {
       destroyReadSync();
     };
   }, [organization?.id]);
+
+  // Listen for cross-widget chat sync events
+  useEffect(() => {
+    if (!organization?.id) return;
+    return onChatSync((event) => {
+      if (event.type === 'message-sent' && event.partnerOrgId === currentPartnerId) {
+        // Another widget sent a message to the same partner - refresh
+        if (currentPartnerId) {
+          fetchMessagesForPartner(currentPartnerId);
+        }
+      }
+    });
+  }, [organization?.id, currentPartnerId]);
 
   const playNotificationSound = useCallback(() => {
     if (soundEnabled && audioRef.current) {
@@ -208,9 +222,6 @@ export const useChat = () => {
       fileName,
     );
 
-    // Get cached profile for instant display
-    const profile = await getCachedProfile(user.id);
-
     const optimisticChatMsg: ChatMessage = {
       id: optimistic.tempId,
       sender_id: user.id,
@@ -220,15 +231,18 @@ export const useChat = () => {
       message_type: messageType,
       created_at: optimistic.createdAt,
       is_read: false,
-      sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+      sender: { full_name: user.user_metadata?.full_name || 'أنت', avatar_url: null },
       _tempId: optimistic.tempId,
       _status: 'sending',
     };
 
-    // Add to UI immediately
+    // Add to UI immediately - don't wait for profile fetch
     if (currentPartnerId === receiverOrgId) {
       setMessages(prev => [...prev, optimisticChatMsg]);
     }
+
+    // Emit sync event for other widgets
+    emitChatSync({ type: 'message-sent', partnerOrgId: receiverOrgId, message: optimisticChatMsg });
 
     try {
       const messageContent = messageType === 'text' ? content : JSON.stringify({

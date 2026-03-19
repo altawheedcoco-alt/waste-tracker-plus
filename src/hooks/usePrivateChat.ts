@@ -5,6 +5,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { encryptMessage, decryptMessage } from '@/lib/e2e';
 import { useE2EKeys } from './useE2EKeys';
 import { toast } from 'sonner';
+import { emitChatSync } from '@/lib/chatSyncBus';
 
 export interface PrivateConversation {
   id: string;
@@ -66,6 +67,9 @@ export function usePrivateChat() {
   const { getPublicKey, getPublicKeys } = useE2EKeys();
   const publicKeyCache = useRef<Map<string, string>>(new Map());
   const publicKeysCache = useRef<Map<string, string[]>>(new Map());
+
+  // Cache conversation participants to avoid re-fetching on every send
+  const convoPartnersCache = useRef<Map<string, string>>(new Map());
 
   const clearKeyCaches = useCallback(() => {
     publicKeyCache.current.clear();
@@ -216,6 +220,7 @@ export function usePrivateChat() {
       const latestMessageMap = new Map<string, MessageForDecryption & { conversation_id: string; status: string | null }>();
 
       if (conversationIds.length > 0) {
+        // Fetch latest messages - limit to 1 per conversation using distinct
         const { data: latestMessages } = await supabase
           .from('encrypted_messages')
           .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at, content_preview')
@@ -229,21 +234,33 @@ export function usePrivateChat() {
         }
       }
 
+      // Batch unread counts - single query instead of N queries
+      let unreadCountMap = new Map<string, number>();
+      if (conversationIds.length > 0) {
+        const { data: unreadData } = await supabase
+          .from('encrypted_messages')
+          .select('conversation_id')
+          .in('conversation_id', conversationIds)
+          .neq('sender_id', user.id)
+          .in('status', ['sent', 'delivered']);
+
+        // Count per conversation
+        for (const row of unreadData || []) {
+          unreadCountMap.set(row.conversation_id, (unreadCountMap.get(row.conversation_id) || 0) + 1);
+        }
+      }
+
       const convos = await Promise.all((data || []).map(async (c) => {
         const partnerId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
         const latestMessage = latestMessageMap.get(c.id);
-
-        const { count } = await supabase
-          .from('encrypted_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', c.id)
-          .neq('sender_id', user.id)
-          .in('status', ['sent', 'delivered']);
+        
+        // Cache partner mapping
+        convoPartnersCache.current.set(c.id, partnerId);
 
         return {
           ...c,
           partner: profileMap.get(partnerId),
-          unread_count: count || 0,
+          unread_count: unreadCountMap.get(c.id) || 0,
           lastDecryptedPreview: latestMessage
             ? await decryptConversationPreview(latestMessage, partnerId)
             : undefined,
@@ -346,18 +363,29 @@ export function usePrivateChat() {
       query = query.lt('created_at', before);
     }
 
-    const { data, error } = await query;
+    // Use cached partner or fetch in parallel with messages
+    let partnerIdPromise: Promise<string | null>;
+    const cachedPartnerId = convoPartnersCache.current.get(conversationId);
+    if (cachedPartnerId) {
+      partnerIdPromise = Promise.resolve(cachedPartnerId);
+    } else {
+      partnerIdPromise = (async () => {
+        const { data: convo } = await supabase
+          .from('private_conversations')
+          .select('participant_1, participant_2')
+          .eq('id', conversationId)
+          .single();
+        if (!convo) return null;
+        const pid = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+        convoPartnersCache.current.set(conversationId, pid);
+        return pid;
+      })();
+    }
+
+    // Fetch messages and partner in parallel
+    const [{ data, error }, partnerId] = await Promise.all([query, partnerIdPromise]);
     if (error) throw error;
-
-    const { data: convo } = await supabase
-      .from('private_conversations')
-      .select('participant_1, participant_2')
-      .eq('id', conversationId)
-      .single();
-
-    if (!convo) return [];
-
-    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+    if (!partnerId) return [];
 
     const senderIds = [...new Set((data || []).map((m) => m.sender_id))];
     const { data: profiles } = await supabase
@@ -366,32 +394,34 @@ export function usePrivateChat() {
       .in('user_id', senderIds);
     const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
-    const decrypted: DecryptedMessage[] = [];
-    for (const msg of (data || []).reverse()) {
-      let content = '[رسالة مشفرة]';
-      try {
-        content = await decryptForCurrentUser(msg, partnerId);
-      } catch {
-        content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
-      }
-
-      const profile = profileMap.get(msg.sender_id);
-      decrypted.push({
-        id: msg.id,
-        conversation_id: msg.conversation_id,
-        sender_id: msg.sender_id,
-        content,
-        message_type: msg.message_type || 'text',
-        file_url: msg.file_url || undefined,
-        file_name: msg.file_name || undefined,
-        status: msg.status || 'sent',
-        reply_to_id: msg.reply_to_id || undefined,
-        is_edited: msg.is_edited || false,
-        is_deleted: msg.is_deleted || false,
-        created_at: msg.created_at,
-        sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
-      });
-    }
+    // Decrypt all messages - batch for speed
+    const reversed = (data || []).reverse();
+    const decrypted: DecryptedMessage[] = await Promise.all(
+      reversed.map(async (msg) => {
+        let content = '[رسالة مشفرة]';
+        try {
+          content = await decryptForCurrentUser(msg, partnerId);
+        } catch {
+          content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير]';
+        }
+        const profile = profileMap.get(msg.sender_id);
+        return {
+          id: msg.id,
+          conversation_id: msg.conversation_id,
+          sender_id: msg.sender_id,
+          content,
+          message_type: msg.message_type || 'text',
+          file_url: msg.file_url || undefined,
+          file_name: msg.file_name || undefined,
+          status: msg.status || 'sent',
+          reply_to_id: msg.reply_to_id || undefined,
+          is_edited: msg.is_edited || false,
+          is_deleted: msg.is_deleted || false,
+          created_at: msg.created_at,
+          sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+        };
+      })
+    );
 
     return decrypted;
   }, [user, decryptForCurrentUser]);
@@ -406,29 +436,58 @@ export function usePrivateChat() {
   ) => {
     if (!user) return;
 
-    const { data: convo } = await supabase
-      .from('private_conversations')
-      .select('participant_1, participant_2')
-      .eq('id', conversationId)
-      .single();
+    // Use cached partner ID or fetch once
+    let partnerId = convoPartnersCache.current.get(conversationId);
+    if (!partnerId) {
+      const { data: convo } = await supabase
+        .from('private_conversations')
+        .select('participant_1, participant_2')
+        .eq('id', conversationId)
+        .single();
+      if (!convo) throw new Error('Conversation not found');
+      partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+      convoPartnersCache.current.set(conversationId, partnerId);
+    }
 
-    if (!convo) throw new Error('Conversation not found');
-
-    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    clearKeyCaches();
-    const partnerPublicKey = await getPublicKey(partnerId);
-    const myPublicKey = await getPublicKey(user.id);
+    // Fetch keys in parallel (don't clear cache before send!)
+    const [partnerPublicKey, myPublicKey] = await Promise.all([
+      getCachedPublicKey(partnerId),
+      getCachedPublicKey(user.id),
+    ]);
 
     if (!partnerPublicKey) {
       toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
       return;
     }
 
-    const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
-    const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
-    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
+    // Encrypt both copies in parallel
     const contentPreview = messageType === 'text' ? plaintext.slice(0, 120) : (fileName || null);
+    const [encrypted, senderCopy] = await Promise.all([
+      encryptMessage(user.id, partnerPublicKey, plaintext),
+      encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext),
+    ]);
+    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
+    // Emit optimistic sync event BEFORE DB insert for instant UI
+    emitChatSync({
+      type: 'message-sent',
+      conversationId,
+      message: {
+        id: `temp_${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: plaintext,
+        message_type: messageType,
+        file_url: fileUrl,
+        file_name: fileName,
+        status: 'sending',
+        created_at: new Date().toISOString(),
+        is_edited: false,
+        is_deleted: false,
+      },
+    });
+
+    // Insert (no .select() needed - faster)
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
@@ -444,10 +503,10 @@ export function usePrivateChat() {
 
     if (error) throw error;
 
-    clearKeyCaches();
+    // Invalidate queries after successful send
     queryClient.invalidateQueries({ queryKey: ['private-messages', conversationId] });
     queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
-  }, [user, getPublicKey, queryClient, clearKeyCaches]);
+  }, [user, getCachedPublicKey, queryClient]);
 
   const markAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
