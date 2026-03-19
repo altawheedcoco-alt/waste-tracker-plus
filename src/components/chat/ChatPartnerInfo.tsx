@@ -119,6 +119,28 @@ const ChatPartnerInfo = ({
 
         <Separator />
 
+        {/* Scope Filter */}
+        <div className="flex rounded-lg bg-muted/50 p-0.5 mb-3">
+          <button
+            onClick={() => setScope('conversation')}
+            className={cn(
+              "flex-1 text-[10px] py-1 rounded-md transition-colors",
+              scope === 'conversation' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+            )}
+          >
+            المحادثة الحالية
+          </button>
+          <button
+            onClick={() => setScope('all')}
+            className={cn(
+              "flex-1 text-[10px] py-1 rounded-md transition-colors",
+              scope === 'all' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+            )}
+          >
+            كل ما بين الجهتين
+          </button>
+        </div>
+
         {/* Tabbed Content */}
         <Tabs defaultValue="media" dir="rtl" className="w-full">
           <TabsList className="w-full grid grid-cols-5 h-9">
