@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Maximize2, Minimize2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useChat } from '@/hooks/useChat';
+import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -17,6 +17,7 @@ import ChatSidebar, { ChatPartner } from './ChatSidebar';
 import ChatHeader from './ChatHeader';
 import EnhancedChatMessages from './EnhancedChatMessages';
 import EnhancedChatInput from './EnhancedChatInput';
+import ReplyPreview from './ReplyPreview';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -44,8 +45,9 @@ const EnhancedChatWidget = () => {
   const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
   const [unreadTotal, setUnreadTotal] = useState(0);
   const [lastSeenMap, setLastSeenMap] = useState<Map<string, string>>(new Map());
+  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
 
-  const { getWallpaperStyle } = useChatWallpaper();
+  const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
 
   // Listen for unified menu toggle
   useEffect(() => {
@@ -142,6 +144,7 @@ const EnhancedChatWidget = () => {
   const handleSelectPartner = async (partner: ChatPartner) => {
     setSelectedPartner(partner);
     setView('chat');
+    setReplyTo(null);
     await fetchMessagesForPartner(partner.id);
     await markPartnerAsRead(partner.id);
     setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p));
@@ -150,17 +153,33 @@ const EnhancedChatWidget = () => {
 
   const handleBack = () => {
     setSelectedPartner(null);
+    setReplyTo(null);
     setView('sidebar');
   };
 
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
-    await sendMessage(content, selectedPartner.id);
+    // If replying, wrap content with reply metadata
+    if (replyTo) {
+      const payload = JSON.stringify({ 
+        text: content, 
+        reply_to_id: replyTo.id 
+      });
+      await sendMessage(payload, selectedPartner.id);
+      setReplyTo(null);
+    } else {
+      await sendMessage(content, selectedPartner.id);
+    }
   };
 
   const handleSendFile = async (file: File) => {
     if (!selectedPartner) return;
     await sendFileMessage(file, selectedPartner.id);
+    setReplyTo(null);
+  };
+
+  const handleReply = (message: ChatMessage) => {
+    setReplyTo(message);
   };
 
   if (!user) return null;
@@ -175,6 +194,20 @@ const EnhancedChatWidget = () => {
 
   const selectedPartnerOnline = selectedPartner ? isOrgOnline(selectedPartner.id) : false;
   const selectedPartnerLastSeen = selectedPartner ? lastSeenMap.get(selectedPartner.id) : undefined;
+
+  // Get reply preview info
+  const replyPreviewInfo = replyTo ? {
+    id: replyTo.id,
+    content: (() => {
+      try {
+        const parsed = JSON.parse(replyTo.content);
+        return parsed.text || replyTo.content;
+      } catch {
+        return replyTo.content;
+      }
+    })(),
+    senderName: replyTo.sender?.full_name || (replyTo.sender_id === user.id ? 'أنت' : 'مستخدم'),
+  } : null;
 
   return (
     <AnimatePresence>
@@ -237,6 +270,7 @@ const EnhancedChatWidget = () => {
                 soundEnabled={soundEnabled}
                 onToggleSound={() => setSoundEnabled(!soundEnabled)}
                 isMobile={isMobile}
+                conversationId={selectedPartner.id}
               />
               <div className="flex items-center gap-1 pr-2">
                 <Button
@@ -275,8 +309,17 @@ const EnhancedChatWidget = () => {
                     messages={messages}
                     currentUserId={user.id}
                     roomName={selectedPartner?.name}
+                    onReply={handleReply}
+                    partnerName={selectedPartner?.name}
                   />
                 </div>
+                {/* Reply Preview */}
+                {replyPreviewInfo && (
+                  <ReplyPreview
+                    replyToMessage={replyPreviewInfo}
+                    onCancel={() => setReplyTo(null)}
+                  />
+                )}
                 <EnhancedChatInput
                   onSendMessage={handleSendMessage}
                   onSendFile={handleSendFile}

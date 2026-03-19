@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  MessageCircle, 
   FileText, 
   Download,
   Image as ImageIcon,
@@ -9,7 +8,8 @@ import {
   File,
   CheckCheck,
   Check,
-  Lock
+  Lock,
+  Reply
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -17,6 +17,7 @@ import { ChatMessage } from '@/hooks/useChat';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
+import { QuotedReply } from './ReplyPreview';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -28,6 +29,10 @@ interface EnhancedChatMessagesProps {
   roomName?: string;
   onLoadMore?: () => void;
   hasMore?: boolean;
+  onReply?: (message: ChatMessage) => void;
+  replyToMessage?: ChatMessage | null;
+  isPartnerTyping?: boolean;
+  partnerName?: string;
 }
 
 const EnhancedChatMessages = ({ 
@@ -35,7 +40,10 @@ const EnhancedChatMessages = ({
   currentUserId, 
   roomName,
   onLoadMore,
-  hasMore = false
+  hasMore = false,
+  onReply,
+  isPartnerTyping = false,
+  partnerName,
 }: EnhancedChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -47,7 +55,7 @@ const EnhancedChatMessages = ({
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, isPartnerTyping]);
 
   const parseMessageContent = (message: ChatMessage) => {
     if (message.message_type === 'text') {
@@ -120,9 +128,12 @@ const EnhancedChatMessages = ({
 
   const getMessageStatus = (message: ChatMessage, isOwn: boolean) => {
     if (!isOwn) return null;
-    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-emerald-400" />;
+    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-400" />;
     return <Check className="w-[14px] h-[14px] text-white/50" />;
   };
+
+  // Find a message by ID for quoted reply display
+  const findMessage = (id: string) => messages.find(m => m.id === id);
 
   const messageGroups = groupMessagesByDate(messages);
 
@@ -177,17 +188,34 @@ const EnhancedChatMessages = ({
                   );
                   const FileIcon = getFileIcon(fileName);
 
+                  // Check if message is a reply
+                  let replyContent: string | null = null;
+                  let replySender: string | null = null;
+                  try {
+                    const parsed = JSON.parse(message.content);
+                    if (parsed.reply_to_id) {
+                      const original = findMessage(parsed.reply_to_id);
+                      if (original) {
+                        replySender = original.sender?.full_name || 'مستخدم';
+                        const origParsed = parseMessageContent(original);
+                        replyContent = origParsed.text || (origParsed.fileName ? `📎 ${origParsed.fileName}` : 'رسالة');
+                      }
+                    }
+                  } catch {
+                    // not a JSON message
+                  }
+
                   return (
                     <motion.div
                       key={message.id}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.12 }}
-                      className={cn("flex group", isOwn ? "justify-start" : "justify-end")}
+                      className={cn("flex group", isOwn ? "justify-end" : "justify-start")}
                     >
                       <div className={cn(
                         "flex gap-1.5 max-w-[82%]",
-                        isOwn ? "flex-row" : "flex-row-reverse"
+                        isOwn ? "flex-row-reverse" : "flex-row"
                       )}>
                         {/* Avatar (only for received) */}
                         {!isOwn && showAvatar ? (
@@ -207,11 +235,16 @@ const EnhancedChatMessages = ({
                             className={cn(
                               "rounded-2xl overflow-hidden shadow-sm relative",
                               isOwn
-                                ? "bg-emerald-600 text-white rounded-tr-[4px]"
-                                : "bg-background border border-border/50 rounded-tl-[4px]",
+                                ? "bg-emerald-600 text-white rounded-tl-[4px]"
+                                : "bg-background border border-border/50 rounded-tr-[4px]",
                               message.message_type === 'image' ? "p-1" : "px-3 py-2"
                             )}
                           >
+                            {/* Quoted Reply */}
+                            {replyContent && replySender && (
+                              <QuotedReply senderName={replySender} content={replyContent} isOwn={isOwn} />
+                            )}
+
                             {/* Sender Name */}
                             {!isOwn && showAvatar && message.sender && (
                               <p className="text-[11px] text-emerald-600 font-semibold mb-0.5">
@@ -276,11 +309,8 @@ const EnhancedChatMessages = ({
                               </a>
                             )}
 
-                            {/* Timestamp & Status (inside bubble for cleaner look) */}
-                            <div className={cn(
-                              "flex items-center gap-1 mt-1",
-                              isOwn ? "justify-end" : "justify-end"
-                            )}>
+                            {/* Timestamp & Status */}
+                            <div className="flex items-center gap-1 mt-1 justify-end">
                               <span className={cn(
                                 "text-[10px]",
                                 isOwn ? "text-white/60" : "text-muted-foreground"
@@ -296,6 +326,7 @@ const EnhancedChatMessages = ({
                             messageContent={message.content}
                             messageId={message.id}
                             isOwn={isOwn}
+                            onReply={onReply ? () => onReply(message) : undefined}
                           />
                         </div>
                       </div>
@@ -305,6 +336,42 @@ const EnhancedChatMessages = ({
               </div>
             </div>
           ))}
+
+          {/* Typing Indicator */}
+          {isPartnerTyping && (
+            <motion.div
+              initial={{ opacity: 0, y: 5 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              className="flex justify-start"
+            >
+              <div className="flex items-center gap-1.5">
+                <div className="bg-background border border-border/50 rounded-2xl rounded-tr-[4px] px-4 py-2.5 shadow-sm">
+                  <div className="flex items-center gap-1">
+                    <motion.span
+                      className="w-2 h-2 rounded-full bg-emerald-500"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 1.2, delay: 0 }}
+                    />
+                    <motion.span
+                      className="w-2 h-2 rounded-full bg-emerald-500"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 1.2, delay: 0.2 }}
+                    />
+                    <motion.span
+                      className="w-2 h-2 rounded-full bg-emerald-500"
+                      animate={{ opacity: [0.3, 1, 0.3] }}
+                      transition={{ repeat: Infinity, duration: 1.2, delay: 0.4 }}
+                    />
+                  </div>
+                </div>
+                {partnerName && (
+                  <span className="text-[10px] text-muted-foreground">{partnerName} يكتب...</span>
+                )}
+              </div>
+            </motion.div>
+          )}
+
           <div ref={messagesEndRef} />
         </div>
       </ScrollArea>
