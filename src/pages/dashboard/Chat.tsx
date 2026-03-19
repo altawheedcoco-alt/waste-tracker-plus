@@ -805,6 +805,21 @@ const EncryptedChat = () => {
     inputRef.current?.focus();
   };
 
+  const handleForward = (msg: DecryptedMessage) => {
+    navigator.clipboard.writeText(msg.content);
+    toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
+  };
+
+  const handleExport = async () => {
+    if (!selectedConvoId) return;
+    try {
+      await exportChatHistory(selectedConvoId);
+    } catch {
+      toast.error('فشل تصدير المحادثة');
+    }
+  };
+  };
+
   const filteredConversations = conversations.filter(c =>
     !searchQuery || c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.partner?.organization_name?.toLowerCase().includes(searchQuery.toLowerCase())
