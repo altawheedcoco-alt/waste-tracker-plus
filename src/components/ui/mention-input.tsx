@@ -7,7 +7,6 @@ import { MentionableUser } from '@/hooks/useMentionableUsers';
 import { ShipmentMention } from '@/hooks/useShipmentMentions';
 import { Building2, User, Package } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getStatusConfig, mapLegacyStatus, wasteTypeLabels } from '@/lib/shipmentStatusConfig';
 
 interface MentionInputProps {
   value: string;
@@ -49,20 +48,14 @@ const MentionInput = ({
     u.organization_name.toLowerCase().includes(search.toLowerCase())
   ).slice(0, 8);
 
-  const findMentionTrigger = useCallback((text: string, pos: number) => {
-    // Look backwards from cursor for @ that isn't inside a completed mention
+  const findTrigger = useCallback((text: string, pos: number, char: '@' | '#') => {
     const before = text.slice(0, pos);
-    const atIndex = before.lastIndexOf('@');
-    if (atIndex === -1) return null;
-    
-    // Check if it's a new @mention (not part of @[name](id) pattern)
-    const afterAt = before.slice(atIndex + 1);
-    if (afterAt.includes(']') || afterAt.includes('(')) return null;
-    
-    // Make sure @ is at start or preceded by space/newline
-    if (atIndex > 0 && !/[\s\n]/.test(before[atIndex - 1])) return null;
-    
-    return { start: atIndex, query: afterAt };
+    const idx = before.lastIndexOf(char);
+    if (idx === -1) return null;
+    const afterChar = before.slice(idx + 1);
+    if (afterChar.includes(']') || afterChar.includes('(')) return null;
+    if (idx > 0 && !/[\s\n]/.test(before[idx - 1])) return null;
+    return { start: idx, query: afterChar };
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -71,28 +64,37 @@ const MentionInput = ({
     setCursorPos(pos);
     onChange(newValue);
 
-    const trigger = findMentionTrigger(newValue, pos);
-    if (trigger) {
-      setSearch(trigger.query);
+    const atTrigger = findTrigger(newValue, pos, '@');
+    if (atTrigger) {
+      setSearch(atTrigger.query);
       setShowDropdown(true);
+      setShowShipmentDropdown(false);
       setSelectedIndex(0);
-    } else {
-      setShowDropdown(false);
+      return;
     }
+
+    const hashTrigger = findTrigger(newValue, pos, '#');
+    if (hashTrigger && onShipmentSearch) {
+      setSearch(hashTrigger.query);
+      setShowShipmentDropdown(true);
+      setShowDropdown(false);
+      setSelectedIndex(0);
+      onShipmentSearch(hashTrigger.query);
+      return;
+    }
+
+    setShowDropdown(false);
+    setShowShipmentDropdown(false);
   };
 
   const insertMention = (user: MentionableUser) => {
-    const trigger = findMentionTrigger(value, cursorPos);
+    const trigger = findTrigger(value, cursorPos, '@');
     if (!trigger) return;
-
     const before = value.slice(0, trigger.start);
     const after = value.slice(cursorPos);
     const mention = `@[${user.full_name}](${user.id}) `;
-    const newValue = before + mention + after;
-    onChange(newValue);
+    onChange(before + mention + after);
     setShowDropdown(false);
-
-    // Focus back and set cursor
     setTimeout(() => {
       if (textareaRef.current) {
         const newPos = before.length + mention.length;
@@ -103,45 +105,63 @@ const MentionInput = ({
     }, 0);
   };
 
+  const insertShipmentMention = (shipment: ShipmentMention) => {
+    const trigger = findTrigger(value, cursorPos, '#');
+    if (!trigger) return;
+    const before = value.slice(0, trigger.start);
+    const after = value.slice(cursorPos);
+    const mention = `#[${shipment.shipment_number}](${shipment.id}) `;
+    onChange(before + mention + after);
+    setShowShipmentDropdown(false);
+    onShipmentSelect?.(shipment);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = before.length + mention.length;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPos, newPos);
+        setCursorPos(newPos);
+      }
+    }, 0);
+  };
+
+  const activeDropdown = showDropdown ? 'user' : showShipmentDropdown ? 'shipment' : null;
+  const activeList = activeDropdown === 'user' ? filtered : shipments;
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (!showDropdown || filtered.length === 0) return;
+    if (!activeDropdown || activeList.length === 0) return;
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      setSelectedIndex(i => (i + 1) % filtered.length);
+      setSelectedIndex(i => (i + 1) % activeList.length);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      setSelectedIndex(i => (i - 1 + filtered.length) % filtered.length);
+      setSelectedIndex(i => (i - 1 + activeList.length) % activeList.length);
     } else if (e.key === 'Enter' || e.key === 'Tab') {
       e.preventDefault();
-      insertMention(filtered[selectedIndex]);
+      if (activeDropdown === 'user') insertMention(filtered[selectedIndex]);
+      else insertShipmentMention(shipments[selectedIndex]);
     } else if (e.key === 'Escape') {
       setShowDropdown(false);
+      setShowShipmentDropdown(false);
     }
   };
 
-  // Close dropdown on outside click
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setShowDropdown(false);
+        setShowShipmentDropdown(false);
       }
     };
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  // Render display text with highlighted mentions
-  const displayValue = value.replace(
-    /@\[([^\]]+)\]\(([^)]+)\)/g,
-    '@$1'
-  );
-
   return (
     <div className="relative">
       <Textarea
         ref={textareaRef}
-        value={displayValue !== value ? value : value}
+        value={value}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
@@ -151,11 +171,11 @@ const MentionInput = ({
         disabled={disabled}
       />
 
+      {/* User mention dropdown */}
       {showDropdown && filtered.length > 0 && (
         <div
           ref={dropdownRef}
           className="absolute z-50 mt-1 w-full max-w-sm bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
-          style={{ bottom: 'auto' }}
         >
           <ScrollArea className="max-h-48">
             {filtered.map((user, index) => (
@@ -164,9 +184,7 @@ const MentionInput = ({
                 type="button"
                 className={cn(
                   'w-full flex items-center gap-3 px-3 py-2 text-right text-sm transition-colors',
-                  index === selectedIndex
-                    ? 'bg-accent text-accent-foreground'
-                    : 'hover:bg-muted'
+                  index === selectedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
                 )}
                 onClick={() => insertMention(user)}
                 onMouseEnter={() => setSelectedIndex(index)}
@@ -191,6 +209,40 @@ const MentionInput = ({
                     {user.is_external && (
                       <Badge variant="outline" className="text-[8px] py-0 h-3.5">خارجي</Badge>
                     )}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </ScrollArea>
+        </div>
+      )}
+
+      {/* Shipment mention dropdown */}
+      {showShipmentDropdown && shipments.length > 0 && (
+        <div
+          ref={dropdownRef}
+          className="absolute z-50 mt-1 w-full max-w-sm bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
+        >
+          <ScrollArea className="max-h-48">
+            {shipments.map((s, index) => (
+              <button
+                key={s.id}
+                type="button"
+                className={cn(
+                  'w-full flex items-center gap-3 px-3 py-2 text-right text-sm transition-colors',
+                  index === selectedIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                )}
+                onClick={() => insertShipmentMention(s)}
+                onMouseEnter={() => setSelectedIndex(index)}
+              >
+                <div className="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                  <Package className="w-3.5 h-3.5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0 text-right">
+                  <p className="font-medium text-xs" dir="ltr">#{s.shipment_number}</p>
+                  <div className="flex items-center gap-1 justify-end">
+                    <Badge variant="outline" className="text-[8px] py-0 h-3.5">{s.status}</Badge>
+                    <span className="text-[10px] text-muted-foreground">{s.waste_type}</span>
                   </div>
                 </div>
               </button>
