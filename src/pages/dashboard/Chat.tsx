@@ -459,6 +459,7 @@ interface LinkedPartnerOrg {
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
   const { user, organization, profile } = useAuth();
+  const navigate = useNavigate();
   const { isMobile } = useDisplayMode();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
