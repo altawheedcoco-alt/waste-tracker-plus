@@ -1218,8 +1218,32 @@ const EncryptedChat = () => {
               )}
             </div>
 
+            {/* ===== PARTNER INFO PANEL ===== */}
+            {showPartnerInfo && selectedConvo && !isMobile && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 320, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="h-full overflow-hidden border-s border-border"
+              >
+                <ChatPartnerInfo
+                  partner={{
+                    id: selectedConvo.partner?.organization_id || '',
+                    name: selectedConvo.partner?.organization_name || selectedConvo.partner?.full_name || '',
+                    organization_type: selectedConvo.partner?.organization_type || 'generator',
+                    logo_url: selectedConvo.partner?.avatar_url || null,
+                  }}
+                  notificationsEnabled={true}
+                  onToggleNotifications={() => selectedConvoId && toggleMute(selectedConvoId)}
+                  onBack={() => setShowPartnerInfo(false)}
+                  isMobile={isMobile}
+                />
+              </motion.div>
+            )}
+
             {/* ===== NOTES PANEL ===== */}
-            {showNotes && selectedConvoId && !isMobile && (
+            {showNotes && selectedConvoId && !isMobile && !showPartnerInfo && (
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: 280, opacity: 1 }}
