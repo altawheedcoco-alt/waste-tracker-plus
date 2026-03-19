@@ -448,6 +448,28 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
                 )}
               </div>
             )}
+
+            {/* Profile Lock Toggle (Owner only) */}
+            {isEditable && (
+              <div className="mt-3">
+                <Button
+                  size="sm"
+                  variant={isLocked ? 'default' : 'outline'}
+                  className="gap-1.5"
+                  onClick={handleToggleLock}
+                  disabled={togglingLock}
+                >
+                  {togglingLock ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isLocked ? (
+                    <Lock className="w-4 h-4" />
+                  ) : (
+                    <LockOpen className="w-4 h-4" />
+                  )}
+                  {isLocked ? 'الملف مقفول' : 'قفل الملف الشخصي'}
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
