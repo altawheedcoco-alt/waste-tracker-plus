@@ -485,7 +485,7 @@ const EncryptedChat = () => {
   const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [inputText, setInputText] = useState('');
+  
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
