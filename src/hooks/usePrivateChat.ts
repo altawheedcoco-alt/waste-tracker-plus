@@ -312,15 +312,17 @@ export function usePrivateChat() {
     // Encrypt for recipient
     const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
 
-    // Encrypt a sender copy using the sender's own public key when available,
-    // with fallback to the old partner-key method for backward compatibility.
+    // Encrypt a sender copy using the sender's own public key
+    // Store the sender IV embedded in the ciphertext as "senderIV|senderCiphertext"
+    // because the DB only has one iv column (for the recipient)
     const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
+    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
       encrypted_content: encrypted.ciphertext,
-      encrypted_content_for_sender: senderCopy.ciphertext,
+      encrypted_content_for_sender: senderPayload,
       iv: encrypted.iv,
       message_type: messageType,
       file_url: fileUrl,
