@@ -13,6 +13,9 @@ interface MentionInputProps {
   value: string;
   onChange: (value: string) => void;
   users: MentionableUser[];
+  shipments?: ShipmentMention[];
+  onShipmentSearch?: (query: string) => void;
+  onShipmentSelect?: (shipment: ShipmentMention) => void;
   placeholder?: string;
   rows?: number;
   dir?: string;
