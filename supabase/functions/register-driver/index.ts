@@ -199,13 +199,15 @@ Deno.serve(async (req) => {
     // Log credentials securely server-side for admin retrieval
     console.log(`[DRIVER_REGISTERED] user_id=${newUser.user.id}, email=${generatedEmail}`);
 
+    // Only return email, never return plaintext password in HTTP response
+    // Password is logged server-side only (line 200) for secure admin retrieval
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: "تم تسجيل السائق بنجاح",
         credentials: {
           email: generatedEmail,
-          password: generatedPassword,
+          password_hint: "تم إنشاء كلمة المرور تلقائياً. يرجى التواصل مع المسؤول للحصول عليها.",
         },
         user_id: newUser.user.id,
       }),
