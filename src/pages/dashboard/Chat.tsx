@@ -1226,42 +1226,35 @@ const EncryptedChat = () => {
 
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt"
-                      onChange={handleFileSelected}
+                    <EnhancedChatInput
+                      onSendMessage={async (text) => {
+                        setSending(true);
+                        try {
+                          await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
+                          setReplyTo(null);
+                          const updated = await fetchMessages(selectedConvoId!);
+                          setMessages(updated);
+                        } catch {
+                          toast.error('فشل إرسال الرسالة');
+                        } finally {
+                          setSending(false);
+                        }
+                      }}
+                      onSendFile={async (file) => {
+                        setSending(true);
+                        try {
+                          await sendFileMessage(selectedConvoId!, file);
+                          const updated = await fetchMessages(selectedConvoId!);
+                          setMessages(updated);
+                        } catch {
+                          toast.error('فشل إرسال الملف');
+                        } finally {
+                          setSending(false);
+                        }
+                      }}
+                      sending={sending}
+                      disabled={!selectedConvoId}
                     />
-                    <div className="flex items-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-full shrink-0"
-                        onClick={handleAttachClick}
-                        disabled={sending}
-                        title="إرفاق ملف"
-                      >
-                        <FileText className="w-4 h-4" />
-                      </Button>
-                      <Textarea
-                        ref={inputRef}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={replyTo ? "اكتب رداً..." : "اكتب رسالة مشفرة..."}
-                        rows={1}
-                        className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
-                      />
-                      <Button
-                        onClick={handleSend}
-                        disabled={!inputText.trim() || sending}
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
-                      >
-                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      </Button>
-                    </div>
                   </div>
                 </>
               ) : (
