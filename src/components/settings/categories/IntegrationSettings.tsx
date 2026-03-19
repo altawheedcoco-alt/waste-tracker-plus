@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, Volume2, Bell, Webhook, Database } from 'lucide-react';
+import { MessageSquare, Volume2, Bell, Webhook, Database, Palette } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
 import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
 import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
+import ChatAppearanceSettings from '@/components/settings/ChatAppearanceSettings';
+import { ChatAppearanceProvider } from '@/contexts/ChatAppearanceContext';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
