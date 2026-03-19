@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
+import ClickableImage from '@/components/ui/ClickableImage';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -211,9 +212,10 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
       {/* Cover Photo */}
       <div className="relative h-48 sm:h-64 md:h-72 rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
         {organization.cover_url ? (
-          <img
+          <ClickableImage
             src={organization.cover_url}
             alt="صورة الغلاف"
+            gallery={[organization.cover_url, organization.logo_url].filter(Boolean) as string[]}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -266,12 +268,17 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               whileHover={{ scale: 1.02 }}
               className="relative"
             >
-              <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
-                <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
-                <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
-                  {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
-                </AvatarFallback>
-              </Avatar>
+              <ClickableImage
+                src={organization.logo_url || ''}
+                gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
+              >
+                <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
+                  <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
+                    {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
+                  </AvatarFallback>
+                </Avatar>
+              </ClickableImage>
 
               {/* Edit Logo Button */}
               {isEditable && (

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ClickableImage from '@/components/ui/ClickableImage';
 import { 
   Phone, 
   Video, 
@@ -101,17 +102,19 @@ const ChatHeader = ({
             </Button>
           )}
 
-          <button className="relative shrink-0 cursor-pointer" onClick={onShowPartnerInfo}>
-            <Avatar className="h-10 w-10 ring-2 ring-white/20">
-              {partnerLogo ? <AvatarImage src={partnerLogo} /> : null}
-              <AvatarFallback className="bg-white/20 text-white">
-                <Icon className="w-5 h-5" />
-              </AvatarFallback>
-            </Avatar>
+          <div className="relative shrink-0">
+            <ClickableImage src={partnerLogo || ''}>
+              <Avatar className="h-10 w-10 ring-2 ring-white/20">
+                {partnerLogo ? <AvatarImage src={partnerLogo} /> : null}
+                <AvatarFallback className="bg-white/20 text-white">
+                  <Icon className="w-5 h-5" />
+                </AvatarFallback>
+              </Avatar>
+            </ClickableImage>
             {isOnline && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-emerald-700 rounded-full" />
             )}
-          </button>
+          </div>
 
           <button className="min-w-0 text-right cursor-pointer" onClick={onShowPartnerInfo}>
             <h3 className="font-bold text-white text-sm truncate">{partnerName}</h3>

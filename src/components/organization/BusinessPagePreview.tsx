@@ -20,6 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import ClickableImage from '@/components/ui/ClickableImage';
 import StoryCircles from '@/components/stories/StoryCircles';
 import PostInteractions from './PostInteractions';
 import PostShareActions from '@/components/content-generator/PostShareActions';
@@ -130,7 +131,11 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
         {/* Cover Photo */}
         <div className="relative h-48 sm:h-56 bg-gradient-to-bl from-primary/30 via-primary/10 to-background">
           {orgData?.cover_url && (
-            <img src={orgData.cover_url} alt="غلاف" className="w-full h-full object-cover" />
+            <ClickableImage
+              src={orgData.cover_url}
+              gallery={[orgData.cover_url, orgData.logo_url].filter(Boolean)}
+              className="w-full h-full object-cover"
+            />
           )}
         </div>
 
@@ -138,12 +143,17 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
         <div className="relative px-4 sm:px-6 pb-4">
           {/* Avatar - overlapping cover */}
           <div className="flex items-end gap-4 -mt-12 sm:-mt-16">
-            <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-xl">
-              <AvatarImage src={orgData?.logo_url} alt={organizationName} />
-              <AvatarFallback className="text-2xl sm:text-3xl bg-primary/10 text-primary font-bold">
-                {organizationName?.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
+            <ClickableImage
+              src={orgData?.logo_url || ''}
+              gallery={[orgData?.logo_url, orgData?.cover_url].filter(Boolean)}
+            >
+              <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-xl">
+                <AvatarImage src={orgData?.logo_url} alt={organizationName} />
+                <AvatarFallback className="text-2xl sm:text-3xl bg-primary/10 text-primary font-bold">
+                  {organizationName?.charAt(0)}
+                </AvatarFallback>
+              </Avatar>
+            </ClickableImage>
 
             <div className="flex-1 pb-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">

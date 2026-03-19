@@ -1,5 +1,6 @@
 import { Building2, MapPin, Phone, Mail, Globe, Calendar, Award, Shield } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import ClickableImage from '@/components/ui/ClickableImage';
 
 interface SharedOrganizationViewProps {
   data: any;
@@ -24,13 +25,21 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
       <div className="bg-card rounded-xl border overflow-hidden">
         {/* Cover */}
         {data.cover_url && (
-          <img src={data.cover_url} alt="" className="w-full h-40 object-cover" />
+          <ClickableImage
+            src={data.cover_url}
+            gallery={[data.cover_url, data.logo_url].filter(Boolean)}
+            className="w-full h-40 object-cover"
+          />
         )}
 
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             {data.logo_url ? (
-              <img src={data.logo_url} alt={data.name} className="w-16 h-16 rounded-lg object-cover border" />
+              <ClickableImage
+                src={data.logo_url}
+                gallery={[data.logo_url, data.cover_url].filter(Boolean)}
+                className="w-16 h-16 rounded-lg object-cover border"
+              />
             ) : (
               <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Building2 className="w-8 h-8 text-primary" />
