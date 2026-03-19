@@ -1,31 +1,80 @@
 
 
-# تنفيذ: نظام قفل الملف الشخصي (Profile Lock) بنمط Facebook
+# خطة إصلاح وتطوير نظام الدردشة — 3 مشاكل رئيسية
 
-## التغييرات المطلوبة
+---
 
-### 1. Migration — إضافة `is_profile_locked`
-```sql
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_profile_locked boolean NOT NULL DEFAULT false;
-ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS is_profile_locked boolean NOT NULL DEFAULT false;
+## المشكلة 1: الضغط على اسم الراسل/الجهة لا يفتح الملف الشخصي
+
+**الوضع الحالي:**
+- في الزر العائم (`EncryptedChatWidget.tsx`): أسماء الأعضاء والجهات نصوص عادية بدون أي تفاعل
+- في صفحة الشات (`Chat.tsx`): الضغط على اسم الشريك يفتح لوحة المعلومات فقط، لا ينقل للملف الشخصي
+- المسارات موجودة: `/dashboard/profile/:profileId` للأعضاء و `/dashboard/org-profile/:orgId` للجهات
+
+**الحل:**
+- **اسم العضو** (في كلا المكانين) → ينتقل إلى `/dashboard/profile/{profileId}`
+- **اسم الجهة** → ينتقل إلى `/dashboard/org-profile/{orgId}`
+- **الصورة/الأفاتار** → تبقى `ClickableImage` للتكبير بملء الشاشة
+- **فقاعات الرسائل**: اسم المرسل أعلى الفقاعة يصبح رابط قابل للنقر
+
+**الملفات المتأثرة:**
+- `src/components/chat/EncryptedChatWidget.tsx` — إضافة `useNavigate` وروابط الأسماء
+- `src/pages/dashboard/Chat.tsx` — تحويل اسم الشريك في الهيدر + اسم المرسل في `MessageBubble`
+
+---
+
+## المشكلة 2: تبويبات الوسائط والمستندات والروابط لا تعرض شيئاً
+
+**الوضع الحالي:**
+- `useSharedMedia.ts` يستعلم من جدول `direct_messages` (النظام القديم غير المشفر)
+- الرسائل الآن في جدول `encrypted_messages` مع `file_url` و `file_name`
+- لذلك تبويبات `ChatPartnerInfo` (وسائط/مستندات/روابط) تظهر فارغة دائماً
+
+**الحل:**
+1. إنشاء hook جديد `useEncryptedSharedMedia` يستعلم من `encrypted_messages` بدلاً من `direct_messages`
+2. يجلب الرسائل التي تحتوي `file_url` مع فلتر `message_type` للتصنيف
+3. الوضع الافتراضي: محتوى المحادثة الحالية
+4. إضافة زر فلتر للتبديل إلى "كل ما بين الجهتين" (كل المحادثات بين أعضاء الجهتين)
+5. تحديث `ChatPartnerInfo.tsx` لاستخدام الـ hook الجديد
+
+**الملفات المتأثرة:**
+- `src/hooks/useEncryptedSharedMedia.ts` — جديد
+- `src/components/chat/ChatPartnerInfo.tsx` — استبدال `useSharedMedia` بالـ hook الجديد + إضافة فلتر
+
+---
+
+## المشكلة 3: المستلم لا يستطيع قراءة الرسائل (تعذر فك التشفير)
+
+**السبب الجذري (تحليل تقني):**
+- كل تبويب/جهاز جديد يولّد زوج مفاتيح ECDH جديد ويخزن المفتاح الخاص في IndexedDB
+- المرسل يشفّر باستخدام المفتاح العام الأحدث للمستلم
+- لكن المستلم على جهاز مختلف لديه مفتاح خاص مختلف في IndexedDB
+- النتيجة: المستلم لا يملك المفتاح الخاص المناسب لفك التشفير
+- في قاعدة البيانات: بعض المستخدمين لديهم 6+ مفاتيح نشطة (واحد لكل تبويب/جهاز)
+
+**الحل (عملي لمنصة أعمال):**
+
+1. **وقف تعدد المفاتيح**: عند إنشاء مفتاح جديد، تعطيل جميع المفاتيح السابقة لنفس المستخدم (`is_active = false`)
+2. **تخزين نسخة احتياطية**: إضافة عمود `content_preview` في `encrypted_messages` يخزن أول 120 حرف كنص عادي (fallback للأعمال)
+3. **إصلاح `sendMessage`**: تخزين المعاينة النصية مع كل رسالة جديدة
+4. **إصلاح `fetchMessages`**: عند فشل فك التشفير، استخدام `content_preview` كـ fallback بدلاً من "[تعذر فك التشفير]"
+5. **إصلاح `decryptConversationPreview`**: نفس الفكرة للمعاينة في القائمة
+6. **تنظيف المفاتيح القديمة**: migration لتعطيل كل المفاتيح ماعدا الأحدث لكل مستخدم
+
+**الملفات المتأثرة:**
+- Migration SQL: إضافة `content_preview` + تنظيف المفاتيح
+- `src/hooks/useE2EKeys.ts` — تعطيل المفاتيح القديمة عند إنشاء جديدة
+- `src/hooks/usePrivateChat.ts` — تخزين واستخدام `content_preview`
+
+---
+
+## ملخص التنفيذ
+
+```text
+الأولوية   المهمة                              الملفات
+──────────────────────────────────────────────────────
+  1        إصلاح فك التشفير + fallback         migration + useE2EKeys + usePrivateChat
+  2        ربط الأسماء بالملفات الشخصية        EncryptedChatWidget + Chat.tsx
+  3        مزامنة تبويبات الوسائط              hook جديد + ChatPartnerInfo
 ```
-
-### 2. `ProfileHeader.tsx`
-- إضافة `is_profile_locked` للـ interface
-- عند القفل: دائرة زرقاء (`ring-4 ring-blue-500`) حول الأفاتار
-- أيقونة `ShieldCheck` في أسفل منتصف الأفاتار (شارة زرقاء صغيرة)
-- زر "قفل/فتح الملف الشخصي" لصاحب الحساب (`isEditable`)
-- منطق الحماية: `protected={organization.is_profile_locked && !isEditable}`
-
-### 3. `BusinessPagePreview.tsx` + `OrganizationView` وباقي المكونات
-- قراءة `is_profile_locked` وعرض المؤشرات البصرية (الدائرة + الدرع)
-- تمرير `protected` بناءً على حالة القفل
-
-### الملفات المتأثرة
-| ملف | التغيير |
-|-----|--------|
-| Migration جديد | إضافة العمود |
-| `ProfileHeader.tsx` | دائرة زرقاء + درع + زر قفل + منطق protected |
-| `BusinessPagePreview.tsx` | عرض مؤشرات القفل |
-| `SharedOrganizationView.tsx` | عرض مؤشرات القفل في الصفحة العامة |
 
