@@ -112,15 +112,22 @@ const EnhancedChatInput = ({
     }
   };
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image' | 'video') => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const maxSize = type === 'video' ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-    const maxSizeLabel = type === 'video' ? '50 ميجابايت' : '10 ميجابايت';
-    if (file.size > maxSize) {
-      toast({ title: 'حجم الملف كبير', description: `الحد الأقصى ${maxSizeLabel}`, variant: 'destructive' });
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image' | 'video') => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // If multiple files, send each one directly
+    if (files.length > 1) {
+      setShowAttachMenu(false);
+      clearAudioRecording();
+      for (let i = 0; i < files.length; i++) {
+        await onSendFile(files[i]);
+      }
+      e.target.value = '';
       return;
     }
+
+    const file = files[0];
     setSelectedFile(file);
     setShowAttachMenu(false);
     clearAudioRecording();
@@ -230,9 +237,9 @@ const EnhancedChatInput = ({
   return (
     <div className={cn("border-t border-border bg-background", isMobile ? "p-2" : "p-3")}>
       {/* Hidden File Inputs */}
-      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar" onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
-      <input ref={imageInputRef} type="file" accept="image/*" onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
-      <input ref={videoInputRef} type="file" accept="video/*" onChange={(e) => handleFileSelect(e, 'video')} className="hidden" />
+      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.csv,.pptx,.ppt" multiple onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
+      <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
+      <input ref={videoInputRef} type="file" accept="video/*" multiple onChange={(e) => handleFileSelect(e, 'video')} className="hidden" />
       <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
 
       {/* Upload Progress */}

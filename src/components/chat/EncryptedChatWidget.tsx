@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, User } from 'lucide-react';
+import { MessageCircle, X, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +15,9 @@ import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
+import EnhancedChatInput from './EnhancedChatInput';
+import ImageLightbox from './ImageLightbox';
+import VoiceMessagePlayer from './VoiceMessagePlayer';
 
 const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
   <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
@@ -39,26 +41,71 @@ interface OrgMember {
   position: string | null;
 }
 
-const MiniMessageBubble = memo(({ msg, isMine }: { msg: DecryptedMessage; isMine: boolean }) => (
-  <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
-    <div className={cn(
-      "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
-      isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
-    )}>
-      <p className="whitespace-pre-wrap break-words">{msg.content}</p>
-      <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
-        {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
-      </span>
+const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: { 
+  msg: DecryptedMessage; 
+  isMine: boolean; 
+  allImages: string[];
+  onOpenLightbox: (url: string) => void;
+}) => {
+  const isImage = msg.message_type === 'image' && msg.file_url;
+  const isVideo = msg.message_type === 'video' && msg.file_url;
+  const isVoice = msg.message_type === 'voice' && msg.file_url;
+  const isFile = msg.message_type === 'file' && msg.file_url;
+
+  return (
+    <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
+      <div className={cn(
+        "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
+        isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
+      )}>
+        {isImage ? (
+          <button onClick={() => onOpenLightbox(msg.file_url!)} className="block">
+            <img 
+              src={msg.file_url} 
+              alt={msg.file_name || 'صورة'} 
+              className="max-w-full rounded-lg max-h-48 object-cover cursor-pointer hover:opacity-90 transition-opacity" 
+            />
+          </button>
+        ) : isVideo ? (
+          <video 
+            src={msg.file_url} 
+            controls 
+            className="max-w-full rounded-lg max-h-48" 
+            preload="metadata"
+          />
+        ) : isVoice ? (
+          <VoiceMessagePlayer url={msg.file_url!} isOwn={isMine} />
+        ) : isFile ? (
+          <a 
+            href={msg.file_url} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className={cn(
+              "flex items-center gap-2 p-1.5 rounded-lg transition-colors",
+              isMine ? "hover:bg-white/10" : "hover:bg-muted-foreground/10"
+            )}
+          >
+            <FileText className="w-5 h-5 shrink-0" />
+            <span className="truncate flex-1">{msg.file_name || 'ملف'}</span>
+            <Download className="w-3.5 h-3.5 shrink-0 opacity-60" />
+          </a>
+        ) : (
+          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+        )}
+        <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
+          {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
+        </span>
+      </div>
     </div>
-  </div>
-));
+  );
+});
 MiniMessageBubble.displayName = 'MiniMessageBubble';
 
 const EncryptedChatWidget = () => {
   const { user } = useAuth();
   const {
     conversations, conversationsLoading,
-    fetchMessages, sendMessage, markAsRead, getOrCreateConversation,
+    fetchMessages, sendMessage, sendFileMessage, markAsRead, getOrCreateConversation,
   } = usePrivateChat();
   const { data: linkedPartners = [], isLoading: partnersLoading } = useLinkedPartners();
 
@@ -66,13 +113,14 @@ const EncryptedChatWidget = () => {
   const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [msgLoading, setMsgLoading] = useState(false);
-  const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [startingChat, setStartingChat] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState<string | null>(null);
   const [orgMembers, setOrgMembers] = useState<Map<string, OrgMember[]>>(new Map());
   const [loadingMembers, setLoadingMembers] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
@@ -121,18 +169,39 @@ const EncryptedChatWidget = () => {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputText.trim() || !selectedConvoId || sending) return;
-    const text = inputText.trim();
-    setInputText('');
+  const handleSend = async (text: string) => {
+    if (!text.trim() || !selectedConvoId || sending) return;
     setSending(true);
     try {
-      await sendMessage(selectedConvoId, text);
+      await sendMessage(selectedConvoId, text.trim());
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
     } catch { toast.error('فشل الإرسال'); }
     finally { setSending(false); }
   };
+
+  const handleSendFile = async (file: File) => {
+    if (!selectedConvoId || sending) return;
+    setSending(true);
+    try {
+      await sendFileMessage(selectedConvoId, file);
+      const updated = await fetchMessages(selectedConvoId, 30);
+      setMessages(updated);
+    } catch { toast.error('فشل إرسال الملف'); }
+    finally { setSending(false); }
+  };
+
+  // Collect all image URLs for lightbox gallery
+  const allImageUrls = useMemo(() => 
+    messages.filter(m => m.message_type === 'image' && m.file_url).map(m => m.file_url!),
+    [messages]
+  );
+
+  const handleOpenLightbox = useCallback((url: string) => {
+    const idx = allImageUrls.indexOf(url);
+    setLightboxIndex(idx >= 0 ? idx : 0);
+    setLightboxOpen(true);
+  }, [allImageUrls]);
 
   // Load members of a partner org
   const loadOrgMembers = useCallback(async (orgId: string) => {
@@ -459,7 +528,7 @@ const EncryptedChatWidget = () => {
                   ) : (
                     <>
                       {messages.map(msg => (
-                        <MiniMessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user?.id} />
+                        <MiniMessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user?.id} allImages={allImageUrls} onOpenLightbox={handleOpenLightbox} />
                       ))}
                       <div ref={endRef} />
                     </>
@@ -467,24 +536,19 @@ const EncryptedChatWidget = () => {
                 </ScrollArea>
 
                 {/* Input */}
-                <div className="p-2 border-t border-border shrink-0 flex gap-1.5">
-                  <Textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    placeholder="رسالة مشفرة..."
-                    rows={1}
-                    className="flex-1 min-h-[36px] max-h-[80px] resize-none text-xs"
-                  />
-                  <Button
-                    onClick={handleSend}
-                    disabled={!inputText.trim() || sending}
-                    size="icon"
-                    className="h-9 w-9 rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
-                  >
-                    {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                  </Button>
-                </div>
+                <EnhancedChatInput
+                  onSendMessage={handleSend}
+                  onSendFile={handleSendFile}
+                  sending={sending}
+                />
+
+                {/* Image Lightbox */}
+                <ImageLightbox
+                  images={allImageUrls}
+                  initialIndex={lightboxIndex}
+                  isOpen={lightboxOpen}
+                  onClose={() => setLightboxOpen(false)}
+                />
               </>
             )}
           </motion.div>
