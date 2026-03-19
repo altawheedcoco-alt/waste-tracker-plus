@@ -26,6 +26,9 @@ const IntegrationSettings = ({ orgType }: Props) => {
           <TabsTrigger value="whatsapp" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <MessageSquare className="h-3.5 w-3.5" />واتساب
           </TabsTrigger>
+          <TabsTrigger value="chat-appearance" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Palette className="h-3.5 w-3.5" />مظهر الدردشة
+          </TabsTrigger>
           <TabsTrigger value="api" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Webhook className="h-3.5 w-3.5" />API
           </TabsTrigger>
