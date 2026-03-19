@@ -167,16 +167,25 @@ const EnhancedChatWidget = () => {
     setView('chat');
     setReplyTo(null);
     setShowSearch(false);
+    setShowPinned(false);
     await fetchMessagesForPartner(partner.id);
     await markPartnerAsRead(partner.id);
+    fetchPinned();
     setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p));
     setUnreadTotal(prev => Math.max(0, prev - partner.unreadCount));
   };
 
+  const handleSelectGroup = (room: any) => {
+    setSelectedGroup(room);
+    setView('group');
+  };
+
   const handleBack = () => {
     setSelectedPartner(null);
+    setSelectedGroup(null);
     setReplyTo(null);
     setShowSearch(false);
+    setShowPinned(false);
     setView('sidebar');
     stopTyping();
   };
@@ -184,12 +193,26 @@ const EnhancedChatWidget = () => {
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
     stopTyping();
+    const expiresAt = getExpiryDate();
     if (replyTo) {
       const payload = JSON.stringify({ text: content, reply_to_id: replyTo.id });
       await sendMessage(payload, selectedPartner.id);
       setReplyTo(null);
     } else {
       await sendMessage(content, selectedPartner.id);
+    }
+    // Set expiry if disappearing is active
+    if (expiresAt) {
+      // Get latest message and set expiry
+      const { data: latest } = await supabase
+        .from('direct_messages')
+        .select('id')
+        .eq('sender_id', user!.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (latest?.[0]) {
+        await supabase.from('direct_messages').update({ expires_at: expiresAt }).eq('id', latest[0].id);
+      }
     }
   };
 
@@ -214,6 +237,12 @@ const EnhancedChatWidget = () => {
     } catch {
       toast.error('فشل حذف الرسالة');
     }
+  };
+
+  const handlePinMessage = async (messageId: string) => {
+    const isPinned = pinnedMessages.some(m => m.id === messageId);
+    await togglePin(messageId, isPinned);
+    if (selectedPartner) await fetchMessagesForPartner(selectedPartner.id);
   };
 
   const handleForwardMessage = (messageId: string) => {
@@ -241,7 +270,6 @@ const EnhancedChatWidget = () => {
 
   const handleScrollToMessage = (messageId: string) => {
     setScrollToMessageId(messageId);
-    // Reset after a tick so the component can react
     setTimeout(() => setScrollToMessageId(null), 100);
   };
 
