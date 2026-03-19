@@ -39,6 +39,7 @@ interface EnhancedChatMessagesProps {
   partnerName?: string;
   onDeleteMessage?: (messageId: string) => void;
   onForwardMessage?: (messageId: string) => void;
+  onPinMessage?: (messageId: string) => void;
   scrollToMessageId?: string | null;
   firstUnreadMessageId?: string | null;
 }
