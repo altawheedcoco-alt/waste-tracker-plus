@@ -417,8 +417,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       default: return 'generator';
     }
   }, [isAdmin, isDriver, organization]);
-import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
-import KeyboardShortcutsGuide from '@/components/shared/KeyboardShortcutsGuide';
 
 
   // Use quick action preferences hook
