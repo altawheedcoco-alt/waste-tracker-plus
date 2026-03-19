@@ -29,6 +29,7 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
             src={data.cover_url}
             gallery={[data.cover_url, data.logo_url].filter(Boolean)}
             className="w-full h-40 object-cover"
+            protected
           />
         )}
 
