@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import {
   Dialog,
   DialogContent,

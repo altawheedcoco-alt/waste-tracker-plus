@@ -8,6 +8,7 @@
  * يوفر: معاينة A4 تفاعلية + طباعة + تحميل PDF
  */
 import { useRef, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText, Loader2 } from 'lucide-react';
 import { useDocumentService } from '@/hooks/useDocumentService';

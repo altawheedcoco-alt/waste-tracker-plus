@@ -3,6 +3,7 @@
  * Opens a full-screen overlay showing the document at real A4 scale
  */
 import { useRef, useEffect, useState, ReactNode } from 'react';
+import { useKeyboardShortcutContext } from '@/contexts/KeyboardShortcutContext';
 import { Button } from '@/components/ui/button';
 import { Printer, Download, X, ZoomIn, ZoomOut, Maximize2, FileText } from 'lucide-react';
 import SendToPartiesPopover from './SendToPartiesPopover';
