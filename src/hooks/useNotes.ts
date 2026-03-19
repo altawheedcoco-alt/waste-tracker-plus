@@ -137,6 +137,7 @@ export const useNotes = (resourceType: string, resourceId: string) => {
           mentioned_user_ids: input.mentioned_user_ids || [],
           attachment_url: input.attachment_url || null,
           attachment_name: input.attachment_name || null,
+          linked_shipment_id: input.linked_shipment_id || null,
         } as any)
         .select()
         .single();
