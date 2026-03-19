@@ -24,6 +24,9 @@ export interface PrivateConversation {
     organization_name?: string;
   };
   lastDecryptedPreview?: string;
+  last_message_type?: string;
+  last_message_status?: string;
+  last_message_sender_id?: string;
   unread_count?: number;
 }
 
