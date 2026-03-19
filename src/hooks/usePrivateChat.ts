@@ -363,18 +363,29 @@ export function usePrivateChat() {
       query = query.lt('created_at', before);
     }
 
-    const { data, error } = await query;
+    // Use cached partner or fetch in parallel with messages
+    let partnerIdPromise: Promise<string | null>;
+    const cachedPartnerId = convoPartnersCache.current.get(conversationId);
+    if (cachedPartnerId) {
+      partnerIdPromise = Promise.resolve(cachedPartnerId);
+    } else {
+      partnerIdPromise = supabase
+        .from('private_conversations')
+        .select('participant_1, participant_2')
+        .eq('id', conversationId)
+        .single()
+        .then(({ data: convo }) => {
+          if (!convo) return null;
+          const pid = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+          convoPartnersCache.current.set(conversationId, pid);
+          return pid;
+        });
+    }
+
+    // Fetch messages and partner in parallel
+    const [{ data, error }, partnerId] = await Promise.all([query, partnerIdPromise]);
     if (error) throw error;
-
-    const { data: convo } = await supabase
-      .from('private_conversations')
-      .select('participant_1, participant_2')
-      .eq('id', conversationId)
-      .single();
-
-    if (!convo) return [];
-
-    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+    if (!partnerId) return [];
 
     const senderIds = [...new Set((data || []).map((m) => m.sender_id))];
     const { data: profiles } = await supabase
@@ -383,32 +394,34 @@ export function usePrivateChat() {
       .in('user_id', senderIds);
     const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
-    const decrypted: DecryptedMessage[] = [];
-    for (const msg of (data || []).reverse()) {
-      let content = '[رسالة مشفرة]';
-      try {
-        content = await decryptForCurrentUser(msg, partnerId);
-      } catch {
-        content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
-      }
-
-      const profile = profileMap.get(msg.sender_id);
-      decrypted.push({
-        id: msg.id,
-        conversation_id: msg.conversation_id,
-        sender_id: msg.sender_id,
-        content,
-        message_type: msg.message_type || 'text',
-        file_url: msg.file_url || undefined,
-        file_name: msg.file_name || undefined,
-        status: msg.status || 'sent',
-        reply_to_id: msg.reply_to_id || undefined,
-        is_edited: msg.is_edited || false,
-        is_deleted: msg.is_deleted || false,
-        created_at: msg.created_at,
-        sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
-      });
-    }
+    // Decrypt all messages - batch for speed
+    const reversed = (data || []).reverse();
+    const decrypted: DecryptedMessage[] = await Promise.all(
+      reversed.map(async (msg) => {
+        let content = '[رسالة مشفرة]';
+        try {
+          content = await decryptForCurrentUser(msg, partnerId);
+        } catch {
+          content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير]';
+        }
+        const profile = profileMap.get(msg.sender_id);
+        return {
+          id: msg.id,
+          conversation_id: msg.conversation_id,
+          sender_id: msg.sender_id,
+          content,
+          message_type: msg.message_type || 'text',
+          file_url: msg.file_url || undefined,
+          file_name: msg.file_name || undefined,
+          status: msg.status || 'sent',
+          reply_to_id: msg.reply_to_id || undefined,
+          is_edited: msg.is_edited || false,
+          is_deleted: msg.is_deleted || false,
+          created_at: msg.created_at,
+          sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+        };
+      })
+    );
 
     return decrypted;
   }, [user, decryptForCurrentUser]);
