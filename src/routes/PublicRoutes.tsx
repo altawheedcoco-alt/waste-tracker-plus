@@ -42,6 +42,7 @@ const RecyclingHistory = lazy(() => import("@/pages/RecyclingHistory"));
 const SharedResourcePage = lazy(() => import("@/pages/SharedResourcePage"));
 const SharedShipmentEdit = lazy(() => import("@/pages/SharedShipmentEdit"));
 const AccountPendingPage = lazy(() => import("@/pages/AccountPendingPage"));
+const VerifySeal = lazy(() => import("@/pages/VerifySeal"));
 
 const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
@@ -97,6 +98,7 @@ export const publicRoutes = (
     <Route path="/recycling-history" element={<RecyclingHistory />} />
     <Route path="/s/:type/:code" element={<SharedResourcePage />} />
     <Route path="/c2b/:code" element={<C2BPublicView />} />
+    <Route path="/verify-seal" element={<VerifySeal />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

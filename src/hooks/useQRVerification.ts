@@ -435,7 +435,7 @@ export const useQRVerification = () => {
             reference,
             status: 'active',
             message: `ختم رقمي مؤمّن صادر من منصة iRecycle — ${sealType} معتمد`,
-            data: { seal_number: reference, seal_type: sealType },
+            data: { seal_number: reference, seal_type: sealType, verify_url: `/verify-seal?code=${encodeURIComponent(reference)}` },
             verifiedAt: new Date().toISOString(),
           };
           break;
