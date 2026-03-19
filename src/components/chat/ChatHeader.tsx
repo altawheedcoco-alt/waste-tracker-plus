@@ -44,6 +44,7 @@ interface ChatHeaderProps {
   isTyping?: boolean;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
+  onShowPartnerInfo?: () => void;
 }
 
 const ChatHeader = ({
