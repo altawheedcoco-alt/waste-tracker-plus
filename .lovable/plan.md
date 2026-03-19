@@ -1,41 +1,87 @@
 
 
-# تنفيذ: إضافة الرسائل الصوتية لصفحة المحادثة الرئيسية
+# خطة نظام اختصارات لوحة المفاتيح المتقدم (Keyboard Shortcuts System)
 
-## الهدف
-استبدال حقل الإدخال البسيط (Textarea + زر إرسال) في `Chat.tsx` بمكون `EnhancedChatInput` الموجود والمُختبر — والذي يدعم بالفعل تسجيل صوتي + معاينة + حذف + إرسال (مثل WhatsApp).
+## الفكرة المُعاد صياغتها
 
-## التغييرات
+بناء نظام شامل لاختصارات لوحة المفاتيح يُغطي كل جوانب التطبيق:
 
-### ملف واحد: `src/pages/dashboard/Chat.tsx`
+- **التنقل**: `Backspace` أو `Alt+←` للرجوع، `Escape` لإغلاق أي نافذة/حوار/قائمة مفتوحة
+- **الأسهم**: التنقل بين عناصر القوائم والجداول والبطاقات في كل الاتجاهات
+- **الطباعة والمستندات**: `Ctrl+P` يطبع المستند المفتوح حالياً بدلاً من طباعة الصفحة كاملة
+- **اختصارات سريعة**: `Ctrl+K` (موجود) لفتح البحث، `Ctrl+S` للحفظ، `Ctrl+N` لإنشاء جديد
+- **لوحة مرجعية**: `?` أو `Ctrl+/` لعرض كل الاختصارات المتاحة
 
-1. **إضافة استيراد** `EnhancedChatInput` من `@/components/chat/EnhancedChatInput`
+---
 
-2. **استبدال منطقة الإدخال** (السطور 1276-1313) — حذف الـ `<div>` الذي يحتوي على `fileInput` + `Textarea` + أزرار الإرسال والإرفاق، واستبداله بـ:
-```tsx
-<div className="p-2 border-t border-border bg-card shrink-0">
-  <EnhancedChatInput
-    onSendMessage={async (text) => {
-      await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
-      setReplyTo(null);
-      const updated = await fetchMessages(selectedConvoId!);
-      setMessages(updated);
-    }}
-    onSendFile={async (file) => {
-      await sendFileMessage(selectedConvoId!, file);
-      const updated = await fetchMessages(selectedConvoId!);
-      setMessages(updated);
-    }}
-    sending={sending}
-    disabled={!selectedConvoId}
-  />
-</div>
+## الخطة التقنية
+
+### 1. إنشاء `src/hooks/useKeyboardShortcuts.ts`
+Hook مركزي يدير كل الاختصارات عبر التطبيق:
+- تسجيل اختصارات عامة (global) وأخرى خاصة بالسياق (contextual)
+- نظام أولويات: الاختصارات المحلية تتجاوز العامة
+- تجاهل الاختصارات عندما يكون المستخدم يكتب في حقل إدخال
+- دعم تعطيل/تفعيل مجموعات اختصارات
+
+### 2. إنشاء `src/contexts/KeyboardShortcutContext.tsx`
+Context عام يُلف التطبيق بالكامل ويوفر:
+- **التنقل بالأسهم**: التركيز على العنصر التالي/السابق في القوائم والجداول
+- **`Escape`**: إغلاق آخر عنصر مفتوح (Dialog → Dropdown → Modal → الرجوع)
+- **`Backspace` / `Alt+←`**: `navigate(-1)` للرجوع للصفحة السابقة
+- **`Ctrl+P`**: اعتراض طباعة المتصفح وتوجيهها لنظام الطباعة الداخلي
+
+### 3. إنشاء `src/components/shared/KeyboardShortcutsGuide.tsx`
+لوحة مرجعية جميلة تُفتح بـ `Ctrl+/` أو `?`:
+- تعرض كل الاختصارات المتاحة مُصنفة (تنقل، مستندات، إجراءات)
+- تُظهر الاختصارات النشطة حسب الصفحة الحالية
+
+### 4. تحديث مكونات الطباعة والمستندات
+تعديل `UnifiedDocumentPreview.tsx` و `A4PreviewModal.tsx` و `TermsDocumentDialog.tsx`:
+- اعتراض `Ctrl+P` وتوجيهه لدالة `handlePrint` الداخلية
+- إضافة `Ctrl+D` لتحميل PDF
+- `Escape` لإغلاق المعاينة
+
+### 5. تحديث `DashboardLayout` لتفعيل النظام
+- لف التطبيق بـ `KeyboardShortcutProvider`
+- ربط الاختصارات العامة:
+  - `Ctrl+K` → البحث (موجود)
+  - `Ctrl+N` → إنشاء شحنة جديدة
+  - `Ctrl+,` → الإعدادات
+  - `Alt+1-9` → التنقل السريع بين أقسام القائمة الجانبية
+  - `←/→/↑/↓` → التنقل في الجداول والقوائم
+
+### 6. تحديث `AccessibilityPanel.tsx`
+تحديث قائمة الاختصارات المعروضة لتشمل كل الاختصارات الجديدة.
+
+---
+
+## الاختصارات الكاملة المخططة
+
+```text
+عام:
+  Ctrl+K        → فتح البحث السريع
+  Ctrl+/  أو ?  → عرض دليل الاختصارات
+  Escape        → إغلاق النافذة/الحوار المفتوح
+  Backspace     → الرجوع للصفحة السابقة
+  Alt+1..9      → التنقل لأقسام القائمة
+
+مستندات:
+  Ctrl+P        → طباعة المستند المفتوح
+  Ctrl+D        → تحميل PDF
+  +/-           → تكبير/تصغير المعاينة
+  Escape        → إغلاق المعاينة
+
+جداول وقوائم:
+  ↑/↓           → التنقل بين الصفوف
+  Enter         → فتح العنصر المحدد
+  ←/→           → التنقل بين الأعمدة/التبويبات
+
+دردشة:
+  Ctrl+Enter    → إرسال الرسالة
+  Escape        → إغلاق نافذة الدردشة
 ```
 
-3. **تنظيف**: إزالة المتغيرات والدوال التي لم تعد مستخدمة:
-   - `inputText` / `setInputText`
-   - `inputRef` / `fileInputRef`
-   - `handleSend` / `handleKeyDown` / `handleAttachClick` / `handleFileSelected`
-
-هذا يُوحّد تجربة الإدخال بين الزر العائم والصفحة الرئيسية بدون كتابة كود جديد.
+### الملفات المتأثرة
+- **جديد**: `useKeyboardShortcuts.ts`، `KeyboardShortcutContext.tsx`، `KeyboardShortcutsGuide.tsx`
+- **تعديل**: `DashboardLayout.tsx`، `UnifiedDocumentPreview.tsx`، `A4PreviewModal.tsx`، `TermsDocumentDialog.tsx`، `AccessibilityPanel.tsx`
 
