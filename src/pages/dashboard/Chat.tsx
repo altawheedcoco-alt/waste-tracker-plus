@@ -37,6 +37,7 @@ import { Check, CheckCheck } from 'lucide-react';
 import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/MessageReactions';
 import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
+import { ChatAppearanceProvider, useChatAppearance } from '@/contexts/ChatAppearanceContext';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
