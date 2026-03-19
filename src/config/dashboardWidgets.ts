@@ -1,4 +1,4 @@
-import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock, IdCard } from 'lucide-react';
+import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock, IdCard, MessageCircle } from 'lucide-react';
 
 export interface DashboardWidgetConfig {
   id: string;
