@@ -832,11 +832,10 @@ const EncryptedChatInner = () => {
 
   const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
 
-  return (
-    <DashboardLayout>
+    return (
       <div className={cn(
-        "flex overflow-hidden rounded-xl border border-border bg-background shadow-sm",
-        isMobile ? "mx-0 my-0 h-[calc(100vh-3.5rem)] rounded-none border-0" : "mx-4 my-4 h-[calc(100vh-4rem)]"
+        "flex overflow-hidden bg-background",
+        isMobile ? "h-full" : "h-full"
       )}>
         {/* ===== SIDEBAR ===== */}
         <AnimatePresence mode="wait">
