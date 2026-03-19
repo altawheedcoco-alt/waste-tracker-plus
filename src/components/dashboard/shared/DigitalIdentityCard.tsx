@@ -182,7 +182,11 @@ const DigitalIdentityCard = () => {
           <div className="flex items-start justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               {org.logo_url ? (
-                <img src={org.logo_url} alt="Logo" className="w-14 h-14 rounded-xl object-cover ring-2 ring-primary/20 shrink-0" />
+                <ClickableImage
+                  src={org.logo_url}
+                  gallery={[org.logo_url, org.cover_url].filter(Boolean)}
+                  className="w-14 h-14 rounded-xl object-cover ring-2 ring-primary/20 shrink-0"
+                />
               ) : (
                 <div className="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
                   <Building2 className="w-7 h-7 text-primary" />

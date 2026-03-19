@@ -268,12 +268,17 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               whileHover={{ scale: 1.02 }}
               className="relative"
             >
-              <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
-                <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
-                <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
-                  {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
-                </AvatarFallback>
-              </Avatar>
+              <ClickableImage
+                src={organization.logo_url || ''}
+                gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
+              >
+                <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
+                  <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
+                  <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
+                    {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
+                  </AvatarFallback>
+                </Avatar>
+              </ClickableImage>
 
               {/* Edit Logo Button */}
               {isEditable && (

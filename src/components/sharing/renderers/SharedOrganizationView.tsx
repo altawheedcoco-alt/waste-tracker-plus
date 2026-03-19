@@ -35,7 +35,11 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             {data.logo_url ? (
-              <img src={data.logo_url} alt={data.name} className="w-16 h-16 rounded-lg object-cover border" />
+              <ClickableImage
+                src={data.logo_url}
+                gallery={[data.logo_url, data.cover_url].filter(Boolean)}
+                className="w-16 h-16 rounded-lg object-cover border"
+              />
             ) : (
               <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Building2 className="w-8 h-8 text-primary" />

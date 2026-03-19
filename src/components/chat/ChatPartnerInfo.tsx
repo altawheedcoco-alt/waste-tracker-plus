@@ -92,12 +92,14 @@ const ChatPartnerInfo = ({
 
         {/* Partner Profile Card */}
         <div className="text-center space-y-3">
-          <Avatar className="w-20 h-20 mx-auto ring-2 ring-primary/20">
-            {partner.logo_url ? <AvatarImage src={partner.logo_url} /> : null}
-            <AvatarFallback className="bg-primary/10">
-              <Icon className="w-8 h-8 text-primary" />
-            </AvatarFallback>
-          </Avatar>
+          <ClickableImage src={partner.logo_url || ''}>
+            <Avatar className="w-20 h-20 mx-auto ring-2 ring-primary/20">
+              {partner.logo_url ? <AvatarImage src={partner.logo_url} /> : null}
+              <AvatarFallback className="bg-primary/10">
+                <Icon className="w-8 h-8 text-primary" />
+              </AvatarFallback>
+            </Avatar>
+          </ClickableImage>
           <div>
             <h2 className="text-lg font-bold">{partner.name}</h2>
             <Badge variant="outline" className="mt-1 text-[10px]">{getOrgTypeName()}</Badge>
