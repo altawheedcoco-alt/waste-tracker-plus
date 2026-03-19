@@ -144,18 +144,25 @@ const BusinessPagePreview = ({ organizationId, organizationName, orgData, isOwnP
         <div className="relative px-4 sm:px-6 pb-4">
           {/* Avatar - overlapping cover */}
           <div className="flex items-end gap-4 -mt-12 sm:-mt-16">
-            <ClickableImage
-              src={orgData?.logo_url || ''}
-              gallery={[orgData?.logo_url, orgData?.cover_url].filter(Boolean)}
-              protected
-            >
-              <Avatar className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-background shadow-xl">
-                <AvatarImage src={orgData?.logo_url} alt={organizationName} />
-                <AvatarFallback className="text-2xl sm:text-3xl bg-primary/10 text-primary font-bold">
-                  {organizationName?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
-            </ClickableImage>
+            <div className="relative">
+              <ClickableImage
+                src={orgData?.logo_url || ''}
+                gallery={[orgData?.logo_url, orgData?.cover_url].filter(Boolean)}
+                protected={orgData?.is_profile_locked && !isOwnPage}
+              >
+                <Avatar className={`w-24 h-24 sm:w-32 sm:h-32 border-4 shadow-xl ${orgData?.is_profile_locked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
+                  <AvatarImage src={orgData?.logo_url} alt={organizationName} />
+                  <AvatarFallback className="text-2xl sm:text-3xl bg-primary/10 text-primary font-bold">
+                    {organizationName?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+              </ClickableImage>
+              {orgData?.is_profile_locked && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-500 text-white rounded-full p-1 shadow-lg border-2 border-background z-10">
+                  <ShieldCheck className="w-3.5 h-3.5" />
+                </div>
+              )}
+            </div>
 
             <div className="flex-1 pb-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
