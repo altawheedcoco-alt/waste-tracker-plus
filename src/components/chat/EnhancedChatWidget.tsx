@@ -210,6 +210,7 @@ const EnhancedChatWidget = () => {
     setReplyTo(null);
     setShowSearch(false);
     setShowPinned(false);
+    setShowPartnerInfo(false);
     setView('sidebar');
     stopTyping();
   };
