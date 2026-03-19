@@ -1,4 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
+import ClickableImage from '@/components/ui/ClickableImage';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
