@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { onWidgetToggle } from '@/lib/widgetBus';
 import { usePresence } from '@/hooks/usePresence';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -19,6 +20,8 @@ import ChatHeader from './ChatHeader';
 import EnhancedChatMessages from './EnhancedChatMessages';
 import EnhancedChatInput from './EnhancedChatInput';
 import ReplyPreview from './ReplyPreview';
+import ForwardMessageDialog from './ForwardMessageDialog';
+import ChatSearchBar from './ChatSearchBar';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -47,8 +50,12 @@ const EnhancedChatWidget = () => {
   const [unreadTotal, setUnreadTotal] = useState(0);
   const [lastSeenMap, setLastSeenMap] = useState<Map<string, string>>(new Map());
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [showSearch, setShowSearch] = useState(false);
+  const [forwardDialog, setForwardDialog] = useState<{ open: boolean; messageContent: string }>({ open: false, messageContent: '' });
+  const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
 
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
+  const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
 
   // Listen for unified menu toggle
   useEffect(() => {
@@ -82,10 +89,8 @@ const EnhancedChatWidget = () => {
     }
   }, [organization?.id]);
 
-  // Fetch partners when widget opens
   const fetchPartners = useCallback(async () => {
     if (!organization?.id) return;
-    
     setLoadingPartners(true);
     try {
       const { data: shipments } = await supabase
@@ -107,7 +112,7 @@ const EnhancedChatWidget = () => {
           .select('id, name, organization_type, logo_url')
           .in('id', partnerIdsArr)
           .order('name');
-        
+
         const partnersWithUnread: ChatPartner[] = await Promise.all(
           (orgs || []).map(async (org) => {
             const unreadCount = await getPartnerUnreadCount(org.id);
@@ -121,10 +126,9 @@ const EnhancedChatWidget = () => {
             };
           })
         );
-        
+
         setPartners(partnersWithUnread);
-        const total = partnersWithUnread.reduce((sum, p) => sum + p.unreadCount, 0);
-        setUnreadTotal(total);
+        setUnreadTotal(partnersWithUnread.reduce((sum, p) => sum + p.unreadCount, 0));
         fetchLastSeenTimes(partnerIdsArr);
       }
     } catch (error) {
@@ -146,6 +150,7 @@ const EnhancedChatWidget = () => {
     setSelectedPartner(partner);
     setView('chat');
     setReplyTo(null);
+    setShowSearch(false);
     await fetchMessagesForPartner(partner.id);
     await markPartnerAsRead(partner.id);
     setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p));
@@ -155,17 +160,16 @@ const EnhancedChatWidget = () => {
   const handleBack = () => {
     setSelectedPartner(null);
     setReplyTo(null);
+    setShowSearch(false);
     setView('sidebar');
+    stopTyping();
   };
 
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
-    // If replying, wrap content with reply metadata
+    stopTyping();
     if (replyTo) {
-      const payload = JSON.stringify({ 
-        text: content, 
-        reply_to_id: replyTo.id 
-      });
+      const payload = JSON.stringify({ text: content, reply_to_id: replyTo.id });
       await sendMessage(payload, selectedPartner.id);
       setReplyTo(null);
     } else {
@@ -179,9 +183,7 @@ const EnhancedChatWidget = () => {
     setReplyTo(null);
   };
 
-  const handleReply = (message: ChatMessage) => {
-    setReplyTo(message);
-  };
+  const handleReply = (message: ChatMessage) => setReplyTo(message);
 
   const handleDeleteMessage = async (messageId: string) => {
     try {
@@ -198,12 +200,43 @@ const EnhancedChatWidget = () => {
     }
   };
 
+  const handleForwardMessage = (messageId: string) => {
+    const msg = messages.find(m => m.id === messageId);
+    if (msg) {
+      setForwardDialog({ open: true, messageContent: msg.content });
+    }
+  };
+
+  const handleForwardTo = async (targetPartnerId: string) => {
+    try {
+      let content = forwardDialog.messageContent;
+      try {
+        const parsed = JSON.parse(content);
+        content = `⤵️ رسالة مُعاد توجيهها:\n${parsed.text || content}`;
+      } catch {
+        content = `⤵️ رسالة مُعاد توجيهها:\n${content}`;
+      }
+      await sendMessage(content, targetPartnerId);
+      toast.success('تم إعادة التوجيه');
+    } catch {
+      toast.error('فشل إعادة التوجيه');
+    }
+  };
+
+  const handleScrollToMessage = (messageId: string) => {
+    setScrollToMessageId(messageId);
+    // Reset after a tick so the component can react
+    setTimeout(() => setScrollToMessageId(null), 100);
+  };
+
+  const handleInputChange = () => {
+    sendTyping();
+  };
+
   if (!user) return null;
 
-  const widgetSize = isExpanded 
-    ? isMobile 
-      ? 'fixed inset-0 z-50' 
-      : 'fixed bottom-4 left-4 z-50 w-[700px] h-[85vh]'
+  const widgetSize = isExpanded
+    ? isMobile ? 'fixed inset-0 z-50' : 'fixed bottom-4 left-4 z-50 w-[700px] h-[85vh]'
     : isMobile
       ? 'fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 z-50 h-[70vh]'
       : 'fixed bottom-20 left-4 z-50 w-[420px] h-[600px]';
@@ -211,144 +244,141 @@ const EnhancedChatWidget = () => {
   const selectedPartnerOnline = selectedPartner ? isOrgOnline(selectedPartner.id) : false;
   const selectedPartnerLastSeen = selectedPartner ? lastSeenMap.get(selectedPartner.id) : undefined;
 
-  // Get reply preview info
   const replyPreviewInfo = replyTo ? {
     id: replyTo.id,
     content: (() => {
-      try {
-        const parsed = JSON.parse(replyTo.content);
-        return parsed.text || replyTo.content;
-      } catch {
-        return replyTo.content;
-      }
+      try { const p = JSON.parse(replyTo.content); return p.text || replyTo.content; } catch { return replyTo.content; }
     })(),
     senderName: replyTo.sender?.full_name || (replyTo.sender_id === user.id ? 'أنت' : 'مستخدم'),
   } : null;
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: 20, scale: 0.95 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 20, scale: 0.95 }}
-          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-          className={cn(
-            widgetSize,
-            "bg-background rounded-2xl shadow-2xl overflow-hidden flex flex-col",
-            "border border-border/50 backdrop-blur-sm"
-          )}
-        >
-          {/* Header */}
-          {view === 'sidebar' ? (
-            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-l from-emerald-600 to-emerald-700 text-white shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
-                  <MessageCircle className="w-5 h-5" />
-                </div>
-                <div>
-                  <span className="font-bold text-sm">المحادثات</span>
-                  {unreadTotal > 0 && (
-                    <span className="text-[11px] text-emerald-100 block">
-                      {unreadTotal} رسالة جديدة
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                >
-                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          ) : selectedPartner && (
-            <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
-              <ChatHeader
-                partnerName={selectedPartner.name}
-                partnerType={selectedPartner.organization_type}
-                partnerLogo={selectedPartner.logo_url}
-                isOnline={selectedPartnerOnline}
-                lastSeen={selectedPartnerLastSeen}
-                onBack={handleBack}
-                soundEnabled={soundEnabled}
-                onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                isMobile={isMobile}
-                conversationId={selectedPartner.id}
-              />
-              <div className="flex items-center gap-1 pr-2">
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
-                  onClick={() => setIsExpanded(!isExpanded)}
-                >
-                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
-                </Button>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
-                  onClick={() => setIsOpen(false)}
-                >
-                  <X className="w-4 h-4" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Content */}
-          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
-            {view === 'sidebar' ? (
-              <ChatSidebar
-                partners={partners}
-                selectedPartnerId={selectedPartner?.id || null}
-                onSelectPartner={handleSelectPartner}
-                loading={loadingPartners}
-              />
-            ) : (
-              <>
-                <div className="flex-1 overflow-hidden" style={getWallpaperStyle()}>
-                  <EnhancedChatMessages
-                    messages={messages}
-                    currentUserId={user.id}
-                    roomName={selectedPartner?.name}
-                    onReply={handleReply}
-                    partnerName={selectedPartner?.name}
-                    onDeleteMessage={handleDeleteMessage}
-                  />
-                </div>
-                {/* Reply Preview */}
-                {replyPreviewInfo && (
-                  <ReplyPreview
-                    replyToMessage={replyPreviewInfo}
-                    onCancel={() => setReplyTo(null)}
-                  />
-                )}
-                <EnhancedChatInput
-                  onSendMessage={handleSendMessage}
-                  onSendFile={handleSendFile}
-                  sending={sending}
-                  uploadProgress={uploadProgress}
-                />
-              </>
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: 20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+            className={cn(
+              widgetSize,
+              "bg-background rounded-2xl shadow-2xl overflow-hidden flex flex-col",
+              "border border-border/50 backdrop-blur-sm"
             )}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          >
+            {/* Header */}
+            {view === 'sidebar' ? (
+              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-l from-emerald-600 to-emerald-700 text-white shrink-0">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="font-bold text-sm">المحادثات</span>
+                    {unreadTotal > 0 && (
+                      <span className="text-[11px] text-emerald-100 block">{unreadTotal} رسالة جديدة</span>
+                    )}
+                  </div>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsExpanded(!isExpanded)}>
+                    {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsOpen(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ) : selectedPartner && (
+              <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
+                <ChatHeader
+                  partnerName={selectedPartner.name}
+                  partnerType={selectedPartner.organization_type}
+                  partnerLogo={selectedPartner.logo_url}
+                  isOnline={selectedPartnerOnline}
+                  lastSeen={selectedPartnerLastSeen}
+                  onBack={handleBack}
+                  onSearch={() => setShowSearch(!showSearch)}
+                  soundEnabled={soundEnabled}
+                  onToggleSound={() => setSoundEnabled(!soundEnabled)}
+                  isMobile={isMobile}
+                  conversationId={selectedPartner.id}
+                  isTyping={isPartnerTyping}
+                />
+                <div className="flex items-center gap-1 pr-2">
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsExpanded(!isExpanded)}>
+                    {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                  </Button>
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsOpen(false)}>
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {/* Content */}
+            <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+              {view === 'sidebar' ? (
+                <ChatSidebar
+                  partners={partners}
+                  selectedPartnerId={selectedPartner?.id || null}
+                  onSelectPartner={handleSelectPartner}
+                  loading={loadingPartners}
+                />
+              ) : (
+                <>
+                  {/* Search Bar */}
+                  {showSearch && (
+                    <ChatSearchBar
+                      messages={messages}
+                      onScrollToMessage={handleScrollToMessage}
+                      onClose={() => setShowSearch(false)}
+                    />
+                  )}
+
+                  <div className="flex-1 overflow-hidden" style={getWallpaperStyle()}>
+                    <EnhancedChatMessages
+                      messages={messages}
+                      currentUserId={user.id}
+                      roomName={selectedPartner?.name}
+                      onReply={handleReply}
+                      partnerName={partnerTypingName || selectedPartner?.name}
+                      onDeleteMessage={handleDeleteMessage}
+                      onForwardMessage={handleForwardMessage}
+                      isPartnerTyping={isPartnerTyping}
+                      scrollToMessageId={scrollToMessageId}
+                    />
+                  </div>
+
+                  {/* Reply Preview */}
+                  {replyPreviewInfo && (
+                    <ReplyPreview replyToMessage={replyPreviewInfo} onCancel={() => setReplyTo(null)} />
+                  )}
+
+                  <EnhancedChatInput
+                    onSendMessage={handleSendMessage}
+                    onSendFile={handleSendFile}
+                    sending={sending}
+                    uploadProgress={uploadProgress}
+                    onTyping={handleInputChange}
+                  />
+                </>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Forward Dialog */}
+      <ForwardMessageDialog
+        open={forwardDialog.open}
+        onOpenChange={(open) => setForwardDialog(prev => ({ ...prev, open }))}
+        partners={partners.filter(p => p.id !== selectedPartner?.id)}
+        messageContent={forwardDialog.messageContent}
+        onForward={handleForwardTo}
+      />
+    </>
   );
 };
 
