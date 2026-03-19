@@ -854,6 +854,16 @@ const EncryptedChat = () => {
                     <Users className="w-3.5 h-3.5" />
                     الكل
                   </button>
+                  <button
+                    onClick={() => setSidebarTab('partners')}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded-md transition-colors",
+                      sidebarTab === 'partners' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+                    )}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    الجهات
+                  </button>
                 </div>
               </div>
 
