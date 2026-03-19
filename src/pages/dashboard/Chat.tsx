@@ -1216,7 +1216,24 @@ const EncryptedChat = () => {
 
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt"
+                      onChange={handleFileSelected}
+                    />
                     <div className="flex items-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={handleAttachClick}
+                        disabled={sending}
+                        title="إرفاق ملف"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Button>
                       <Textarea
                         ref={inputRef}
                         value={inputText}
