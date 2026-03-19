@@ -1,6 +1,15 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
+import { getCachedProfiles, getCachedProfile } from '@/lib/profileCache';
+import { initReadSync, broadcastRead, onReadSync, destroyReadSync } from '@/lib/readSync';
+import {
+  createOptimisticMessage,
+  confirmMessage,
+  failMessage,
+  getPendingMessages,
+  type MessageStatus,
+} from '@/lib/optimisticMessages';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
@@ -19,6 +28,9 @@ export interface ChatMessage {
     full_name: string;
     avatar_url: string | null;
   };
+  // Optimistic message fields
+  _tempId?: string;
+  _status?: MessageStatus;
 }
 
 // Notification sound as base64 (short beep)
@@ -34,8 +46,9 @@ export const useChat = () => {
   const [soundEnabled, setSoundEnabled] = useState(true);
   const [currentPartnerId, setCurrentPartnerId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Initialize audio for notifications
+  // Initialize audio
   useEffect(() => {
     audioRef.current = new Audio(NOTIFICATION_SOUND_URL);
     audioRef.current.volume = 0.5;
@@ -47,7 +60,24 @@ export const useChat = () => {
     };
   }, []);
 
-  // Play notification sound
+  // Initialize cross-tab read sync
+  useEffect(() => {
+    if (!organization?.id) return;
+    initReadSync(organization.id);
+
+    const unsub = onReadSync((messageIds) => {
+      // Update local messages when another tab marks as read
+      setMessages(prev => prev.map(m =>
+        messageIds.includes(m.id) ? { ...m, is_read: true } : m
+      ));
+    });
+
+    return () => {
+      unsub();
+      destroyReadSync();
+    };
+  }, [organization?.id]);
+
   const playNotificationSound = useCallback(() => {
     if (soundEnabled && audioRef.current) {
       audioRef.current.currentTime = 0;
@@ -55,7 +85,7 @@ export const useChat = () => {
     }
   }, [soundEnabled]);
 
-  // Fetch messages for a specific partner (organization)
+  // Fetch messages with profile caching
   const fetchMessagesForPartner = useCallback(async (partnerOrgId: string) => {
     if (!user || !organization) return;
     
@@ -63,7 +93,6 @@ export const useChat = () => {
     setCurrentPartnerId(partnerOrgId);
     
     try {
-      // Query messages between current org and partner org
       const { data, error } = await supabase
         .from('direct_messages')
         .select('*')
@@ -74,22 +103,17 @@ export const useChat = () => {
 
       if (error) throw error;
 
-      // Get sender profiles
-      const senderIds = [...new Set((data || []).map(m => m.sender_id))];
-      
-      let profileMap = new Map();
-      if (senderIds.length > 0) {
-        const { data: profiles } = await supabase
-          .from('profiles')
-          .select('user_id, full_name, avatar_url')
-          .in('user_id', senderIds);
+      // Filter expired messages
+      const validData = (data || []).filter(m => {
+        if (m.expires_at && new Date(m.expires_at) < new Date()) return false;
+        return true;
+      });
 
-        profileMap = new Map(
-          (profiles || []).map(p => [p.user_id, { full_name: p.full_name, avatar_url: p.avatar_url }])
-        );
-      }
+      // Batch profile fetch using cache
+      const senderIds = [...new Set(validData.map(m => m.sender_id))];
+      const profileMap = await getCachedProfiles(senderIds);
 
-      const messagesWithSenders: ChatMessage[] = (data || []).map(msg => ({
+      const messagesWithSenders: ChatMessage[] = validData.map(msg => ({
         id: msg.id,
         sender_id: msg.sender_id,
         sender_organization_id: msg.sender_organization_id,
@@ -98,7 +122,10 @@ export const useChat = () => {
         message_type: (msg.message_type || 'text') as ChatMessage['message_type'],
         created_at: msg.created_at,
         is_read: msg.is_read,
-        sender: profileMap.get(msg.sender_id),
+        sender: profileMap.get(msg.sender_id) 
+          ? { full_name: profileMap.get(msg.sender_id)!.full_name, avatar_url: profileMap.get(msg.sender_id)!.avatar_url }
+          : undefined,
+        _status: msg.is_read ? 'read' : 'delivered',
       }));
 
       setMessages(messagesWithSenders);
@@ -109,10 +136,9 @@ export const useChat = () => {
     }
   }, [user, organization]);
 
-  // Get unread count for a partner
+  // Unread count
   const getPartnerUnreadCount = useCallback(async (partnerOrgId: string): Promise<number> => {
     if (!user || !organization) return 0;
-
     try {
       const { count, error } = await supabase
         .from('direct_messages')
@@ -120,32 +146,46 @@ export const useChat = () => {
         .eq('sender_organization_id', partnerOrgId)
         .eq('receiver_organization_id', organization.id)
         .eq('is_read', false);
-
       if (error) throw error;
       return count || 0;
-    } catch (error) {
-      console.error('Error getting unread count:', error);
+    } catch {
       return 0;
     }
   }, [user, organization]);
 
-  // Mark messages from partner as read
+  // Mark as read + broadcast to other tabs
   const markPartnerAsRead = useCallback(async (partnerOrgId: string) => {
     if (!user || !organization) return;
-
     try {
-      await supabase
+      const { data: unread } = await supabase
         .from('direct_messages')
-        .update({ is_read: true })
+        .select('id')
         .eq('sender_organization_id', partnerOrgId)
         .eq('receiver_organization_id', organization.id)
         .eq('is_read', false);
+
+      if (!unread?.length) return;
+
+      const ids = unread.map(m => m.id);
+      
+      await supabase
+        .from('direct_messages')
+        .update({ is_read: true })
+        .in('id', ids);
+
+      // Broadcast to other tabs/devices
+      broadcastRead(organization.id, ids);
+
+      // Update local state
+      setMessages(prev => prev.map(m =>
+        ids.includes(m.id) ? { ...m, is_read: true, _status: 'read' } : m
+      ));
     } catch (error) {
       console.error('Error marking as read:', error);
     }
   }, [user, organization]);
 
-  // Send a message to a partner
+  // Optimistic send message
   const sendMessage = useCallback(async (
     content: string, 
     receiverOrgId: string,
@@ -156,6 +196,40 @@ export const useChat = () => {
     if (!user || !organization) return;
 
     setSending(true);
+
+    // Create optimistic message for instant display
+    const optimistic = createOptimisticMessage(
+      messageType === 'text' ? content : JSON.stringify({ text: content, file_url: fileUrl, file_name: fileName }),
+      messageType,
+      user.id,
+      organization.id,
+      receiverOrgId,
+      fileUrl,
+      fileName,
+    );
+
+    // Get cached profile for instant display
+    const profile = await getCachedProfile(user.id);
+
+    const optimisticChatMsg: ChatMessage = {
+      id: optimistic.tempId,
+      sender_id: user.id,
+      sender_organization_id: organization.id,
+      receiver_organization_id: receiverOrgId,
+      content: optimistic.content,
+      message_type: messageType,
+      created_at: optimistic.createdAt,
+      is_read: false,
+      sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+      _tempId: optimistic.tempId,
+      _status: 'sending',
+    };
+
+    // Add to UI immediately
+    if (currentPartnerId === receiverOrgId) {
+      setMessages(prev => [...prev, optimisticChatMsg]);
+    }
+
     try {
       const messageContent = messageType === 'text' ? content : JSON.stringify({
         text: content,
@@ -177,41 +251,43 @@ export const useChat = () => {
 
       if (error) throw error;
 
-      // Add to local messages if this is the current conversation
-      if (currentPartnerId === receiverOrgId && newMessage) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('full_name, avatar_url')
-          .eq('user_id', user.id)
-          .single();
+      // Confirm optimistic message
+      confirmMessage(optimistic.tempId, newMessage.id);
 
-        const formattedMessage: ChatMessage = {
-          id: newMessage.id,
-          sender_id: newMessage.sender_id,
-          sender_organization_id: newMessage.sender_organization_id,
-          receiver_organization_id: newMessage.receiver_organization_id,
-          content: newMessage.content,
-          message_type: newMessage.message_type as ChatMessage['message_type'],
-          created_at: newMessage.created_at,
-          is_read: newMessage.is_read,
-          sender: profile || undefined,
-        };
-
-        setMessages(prev => [...prev, formattedMessage]);
+      // Replace optimistic with real message
+      if (currentPartnerId === receiverOrgId) {
+        setMessages(prev => prev.map(m =>
+          m._tempId === optimistic.tempId
+            ? { ...m, id: newMessage.id, _tempId: undefined, _status: 'sent', created_at: newMessage.created_at }
+            : m
+        ));
       }
     } catch (error: any) {
       console.error('Error sending message:', error);
-      toast({
-        title: 'خطأ',
-        description: 'فشل إرسال الرسالة',
-        variant: 'destructive',
-      });
+      
+      // Mark as failed
+      const shouldRetry = failMessage(optimistic.tempId);
+      
+      if (shouldRetry) {
+        // Auto-retry
+        setTimeout(() => sendMessage(content, receiverOrgId, messageType, fileUrl, fileName), 2000);
+      } else {
+        // Mark as failed in UI
+        setMessages(prev => prev.map(m =>
+          m._tempId === optimistic.tempId ? { ...m, _status: 'failed' } : m
+        ));
+        toast({
+          title: 'خطأ',
+          description: 'فشل إرسال الرسالة',
+          variant: 'destructive',
+        });
+      }
     } finally {
       setSending(false);
     }
   }, [user, organization, currentPartnerId, toast]);
 
-  // Upload file and send as message with progress tracking
+  // Upload file with progress
   const sendFileMessage = useCallback(async (file: File, receiverOrgId: string) => {
     if (!user || !organization) return;
 
@@ -223,13 +299,9 @@ export const useChat = () => {
       const fileName = `${user.id}-${Date.now()}.${fileExt}`;
       const filePath = `chat-files/${organization.id}/${receiverOrgId}/${fileName}`;
 
-      // Simulate upload progress using XMLHttpRequest for real progress tracking
       const { data: sessionData } = await supabase.auth.getSession();
       const accessToken = sessionData?.session?.access_token;
       
-      const formData = new FormData();
-      formData.append('', file);
-
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const uploadUrl = `${supabaseUrl}/storage/v1/object/organization-documents/${filePath}`;
 
@@ -238,29 +310,21 @@ export const useChat = () => {
         
         xhr.upload.addEventListener('progress', (event) => {
           if (event.lengthComputable) {
-            const progress = Math.round((event.loaded / event.total) * 100);
-            setUploadProgress(progress);
+            setUploadProgress(Math.round((event.loaded / event.total) * 100));
           }
         });
 
         xhr.addEventListener('load', () => {
-          if (xhr.status >= 200 && xhr.status < 300) {
-            resolve();
-          } else {
-            reject(new Error(`Upload failed with status ${xhr.status}`));
-          }
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed: ${xhr.status}`));
         });
 
-        xhr.addEventListener('error', () => {
-          reject(new Error('Upload failed'));
-        });
-
+        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
         xhr.open('POST', uploadUrl);
         xhr.setRequestHeader('Authorization', `Bearer ${accessToken}`);
         xhr.send(file);
       });
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('organization-documents')
         .getPublicUrl(filePath);
@@ -282,12 +346,12 @@ export const useChat = () => {
     }
   }, [user, organization, sendMessage, toast]);
 
-  // Subscribe to realtime messages for current partner
+  // Realtime subscription with reconnection resilience
   useEffect(() => {
-    if (!currentPartnerId || !organization) return;
+    if (!currentPartnerId || !organization || !user) return;
 
     const channel = supabase
-      .channel(getTabChannelName(`direct-messages-${currentPartnerId}`))
+      .channel(getTabChannelName(`dm-${currentPartnerId}`))
       .on(
         'postgres_changes',
         {
@@ -298,64 +362,99 @@ export const useChat = () => {
         async (payload) => {
           const newMessage = payload.new as any;
           
-          // Check if this message is for the current conversation
           const isRelevant = 
             (newMessage.sender_organization_id === organization.id && newMessage.receiver_organization_id === currentPartnerId) ||
             (newMessage.sender_organization_id === currentPartnerId && newMessage.receiver_organization_id === organization.id);
 
           if (!isRelevant) return;
 
-          // Don't add if already exists
-          if (messages.some(m => m.id === newMessage.id)) return;
+          // Skip if expired
+          if (newMessage.expires_at && new Date(newMessage.expires_at) < new Date()) return;
 
-          // Get sender profile
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('full_name, avatar_url')
-            .eq('user_id', newMessage.sender_id)
-            .single();
-
-          const formattedMessage: ChatMessage = {
-            id: newMessage.id,
-            sender_id: newMessage.sender_id,
-            sender_organization_id: newMessage.sender_organization_id,
-            receiver_organization_id: newMessage.receiver_organization_id,
-            content: newMessage.content,
-            message_type: newMessage.message_type as ChatMessage['message_type'],
-            created_at: newMessage.created_at,
-            is_read: newMessage.is_read,
-            sender: profile || undefined,
-          };
-
+          // Skip if already exists (optimistic or duplicate)
           setMessages(prev => {
-            if (prev.some(m => m.id === newMessage.id)) return prev;
-            return [...prev, formattedMessage];
-          });
+            if (prev.some(m => m.id === newMessage.id || (m._tempId && prev.some(x => x.id === newMessage.id)))) {
+              return prev;
+            }
 
-          // Play notification sound for messages from others
-          if (newMessage.sender_id !== user?.id) {
-            playNotificationSound();
-            // Mark as read immediately if viewing
-            await supabase
-              .from('direct_messages')
-              .update({ is_read: true })
-              .eq('id', newMessage.id);
+            // Get profile from cache (sync check)
+            const addMessage = async () => {
+              const profile = await getCachedProfile(newMessage.sender_id);
+              
+              const formatted: ChatMessage = {
+                id: newMessage.id,
+                sender_id: newMessage.sender_id,
+                sender_organization_id: newMessage.sender_organization_id,
+                receiver_organization_id: newMessage.receiver_organization_id,
+                content: newMessage.content,
+                message_type: newMessage.message_type as ChatMessage['message_type'],
+                created_at: newMessage.created_at,
+                is_read: newMessage.is_read,
+                sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+                _status: 'delivered',
+              };
+
+              setMessages(p => {
+                if (p.some(m => m.id === newMessage.id)) return p;
+                return [...p, formatted];
+              });
+
+              // Play sound + auto-mark read for incoming
+              if (newMessage.sender_id !== user.id) {
+                playNotificationSound();
+                await supabase
+                  .from('direct_messages')
+                  .update({ is_read: true })
+                  .eq('id', newMessage.id);
+                broadcastRead(organization.id, [newMessage.id]);
+              }
+            };
+
+            addMessage();
+            return prev;
+          });
+        }
+      )
+      // Listen for read status updates
+      .on(
+        'postgres_changes',
+        {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'direct_messages',
+        },
+        (payload) => {
+          const updated = payload.new as any;
+          if (updated.is_read) {
+            setMessages(prev => prev.map(m =>
+              m.id === updated.id ? { ...m, is_read: true, _status: 'read' } : m
+            ));
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status === 'CHANNEL_ERROR') {
+          // Auto-reconnect after error
+          if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('Reconnecting realtime channel...');
+            channel.subscribe();
+          }, 3000);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current);
     };
-  }, [currentPartnerId, organization, user?.id, messages, playNotificationSound]);
+  }, [currentPartnerId, organization, user, playNotificationSound]);
 
-  // Subscribe to all new messages for notification sounds
+  // Global notification subscription
   useEffect(() => {
     if (!user || !organization) return;
 
     const channel = supabase
-      .channel(getTabChannelName('all-direct-messages-notifications'))
+      .channel(getTabChannelName('global-dm-notify'))
       .on(
         'postgres_changes',
         {
@@ -365,19 +464,15 @@ export const useChat = () => {
           filter: `receiver_organization_id=eq.${organization.id}`,
         },
         (payload) => {
-          const newMessage = payload.new as any;
-          
-          // Only play sound if message is not from current user and not in current conversation
-          if (newMessage.sender_id !== user.id && newMessage.sender_organization_id !== currentPartnerId) {
+          const msg = payload.new as any;
+          if (msg.sender_id !== user.id && msg.sender_organization_id !== currentPartnerId) {
             playNotificationSound();
           }
         }
       )
       .subscribe();
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
+    return () => { supabase.removeChannel(channel); };
   }, [user, organization, currentPartnerId, playNotificationSound]);
 
   return {
