@@ -471,6 +471,7 @@ const EncryptedChat = () => {
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
   const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
+  const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
