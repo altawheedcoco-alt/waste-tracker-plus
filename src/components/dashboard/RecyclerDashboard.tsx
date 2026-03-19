@@ -29,6 +29,7 @@ import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
 import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 
 interface RecentShipment {
   id: string;
