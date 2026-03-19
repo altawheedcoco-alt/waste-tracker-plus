@@ -69,12 +69,8 @@ export function useTypingIndicator(conversationId?: string) {
     if (now - lastTypingSentRef.current < 2000) return;
     lastTypingSentRef.current = now;
 
-    // Get user's name
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('full_name')
-      .eq('user_id', user.id)
-      .single();
+    // Get user's name from cache
+    const profile = await getCachedProfile(user.id);
 
     await channelRef.current.track({
       is_typing: true,
