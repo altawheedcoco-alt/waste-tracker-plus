@@ -288,6 +288,11 @@ const GeneratorDashboard = () => {
       </DashboardV2Header>
 
 
+      {/* ★ مركز التواصل والمشاركة */}
+      <Suspense fallback={<TabFallback />}>
+        <CommunicationHubWidget />
+      </Suspense>
+
       {/* ★ مركز القيادة */}
       <GeneratorCommandCenter />
 
