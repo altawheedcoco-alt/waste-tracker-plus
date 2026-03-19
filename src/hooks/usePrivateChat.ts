@@ -384,9 +384,9 @@ export function usePrivateChat() {
           let senderCiphertext = senderData;
 
           if (senderData.includes('|')) {
-            const parts = senderData.split('|');
-            senderIv = parts[0];
-            senderCiphertext = parts[1];
+            const [embeddedIv, ...ciphertextParts] = senderData.split('|');
+            senderIv = embeddedIv;
+            senderCiphertext = ciphertextParts.join('|');
           }
 
           content = await tryDecryptWithKeys(
