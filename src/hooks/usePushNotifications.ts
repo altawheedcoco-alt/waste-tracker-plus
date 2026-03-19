@@ -99,7 +99,6 @@ export function usePushNotifications() {
         showNotification(`رسالة من ${senderName}`, {
           body,
           tag: `msg-${msg.id}`,
-          renotify: true,
         });
       })
       .subscribe();
