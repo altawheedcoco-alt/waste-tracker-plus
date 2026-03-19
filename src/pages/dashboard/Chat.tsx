@@ -494,12 +494,12 @@ const EncryptedChat = () => {
       try {
         const { data: members } = await supabase
           .from('profiles')
-          .select('id')
+          .select('user_id')
           .eq('organization_id', partnerId)
           .limit(1);
 
         if (members && members.length > 0) {
-          const targetUserId = members[0].id;
+          const targetUserId = members[0].user_id;
           // Check if we already have a conversation with this user
           const existingConvo = conversations.find(c => c.partner?.user_id === targetUserId);
           if (existingConvo) {
