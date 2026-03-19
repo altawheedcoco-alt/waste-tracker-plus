@@ -465,6 +465,7 @@ const EnhancedChatMessages = ({
                                 onReply={onReply ? () => onReply(message) : undefined}
                                 onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
                                 onForward={onForwardMessage ? () => onForwardMessage(message.id) : undefined}
+                                onPin={onPinMessage ? () => onPinMessage(message.id) : undefined}
                               />
                             )}
                           </div>
