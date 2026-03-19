@@ -314,7 +314,7 @@ function MediaThumbnail({ item }: { item: EncryptedMediaItem }) {
   );
 }
 
-function FileItem({ item }: { item: SharedMediaItem }) {
+function FileItem({ item }: { item: EncryptedMediaItem }) {
   return (
     <a
       href={item.file_url}
