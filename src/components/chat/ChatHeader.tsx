@@ -42,6 +42,8 @@ interface ChatHeaderProps {
   isMobile?: boolean;
   conversationId?: string;
   isTyping?: boolean;
+  onVoiceCall?: () => void;
+  onVideoCall?: () => void;
 }
 
 const ChatHeader = ({
@@ -57,6 +59,8 @@ const ChatHeader = ({
   isMobile = false,
   conversationId,
   isTyping = false,
+  onVoiceCall,
+  onVideoCall,
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
   const [showWallpaper, setShowWallpaper] = useState(false);
