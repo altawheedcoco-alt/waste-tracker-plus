@@ -68,6 +68,7 @@ const EnhancedChatWidget = () => {
   const [showDisappearing, setShowDisappearing] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [showPartnerInfo, setShowPartnerInfo] = useState(false);
 
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
