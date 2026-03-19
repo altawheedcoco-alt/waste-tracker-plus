@@ -209,9 +209,6 @@ export const useChat = () => {
       fileName,
     );
 
-    // Get cached profile for instant display
-    const profile = await getCachedProfile(user.id);
-
     const optimisticChatMsg: ChatMessage = {
       id: optimistic.tempId,
       sender_id: user.id,
@@ -221,15 +218,18 @@ export const useChat = () => {
       message_type: messageType,
       created_at: optimistic.createdAt,
       is_read: false,
-      sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+      sender: { full_name: user.user_metadata?.full_name || 'أنت', avatar_url: null },
       _tempId: optimistic.tempId,
       _status: 'sending',
     };
 
-    // Add to UI immediately
+    // Add to UI immediately - don't wait for profile fetch
     if (currentPartnerId === receiverOrgId) {
       setMessages(prev => [...prev, optimisticChatMsg]);
     }
+
+    // Emit sync event for other widgets
+    emitChatSync({ type: 'message-sent', partnerOrgId: receiverOrgId, message: optimisticChatMsg });
 
     try {
       const messageContent = messageType === 'text' ? content : JSON.stringify({
