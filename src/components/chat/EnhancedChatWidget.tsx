@@ -551,6 +551,20 @@ const EnhancedChatWidget = () => {
         onCreateGroup={createGroup}
         isCreating={isCreatingGroup}
       />
+
+      {/* Call Screen Overlay */}
+      {callInfo && (
+        <CallScreen
+          callInfo={callInfo}
+          localStream={localStream}
+          remoteStream={remoteStream}
+          onAnswer={answerCall}
+          onEnd={() => endCall()}
+          onToggleMute={toggleMute}
+          onToggleVideo={toggleVideo}
+          onToggleSpeaker={toggleSpeaker}
+        />
+      )}
     </>
   );
 };
