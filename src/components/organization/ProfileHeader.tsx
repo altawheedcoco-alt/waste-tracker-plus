@@ -42,8 +42,12 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHeaderProps) => {
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [togglingLock, setTogglingLock] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const isLocked = organization.is_profile_locked === true;
+  const isProtected = isLocked && !isEditable;
 
   // Fetch organization documents count
   const { data: documentsCount = 0 } = useQuery({
