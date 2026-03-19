@@ -25,7 +25,11 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
       <div className="bg-card rounded-xl border overflow-hidden">
         {/* Cover */}
         {data.cover_url && (
-          <img src={data.cover_url} alt="" className="w-full h-40 object-cover" />
+          <ClickableImage
+            src={data.cover_url}
+            gallery={[data.cover_url, data.logo_url].filter(Boolean)}
+            className="w-full h-40 object-cover"
+          />
         )}
 
         <div className="p-6 space-y-4">
