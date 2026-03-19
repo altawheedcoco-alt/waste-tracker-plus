@@ -464,6 +464,9 @@ export function usePrivateChat() {
     const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
     const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
+    // Store content_preview as plaintext fallback (first 120 chars)
+    const contentPreview = messageType === 'text' ? plaintext.slice(0, 120) : (fileName || null);
+
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
@@ -474,7 +477,8 @@ export function usePrivateChat() {
       file_url: fileUrl,
       file_name: fileName,
       reply_to_id: replyToId,
-    });
+      content_preview: contentPreview,
+    } as any);
 
     if (error) throw error;
 
