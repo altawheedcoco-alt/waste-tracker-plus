@@ -399,6 +399,22 @@ const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string;
   </div>
 );
 
+// ─── Partner Member Type ────────────────────────────────
+interface PartnerMember {
+  user_id: string;
+  full_name: string;
+  avatar_url: string | null;
+  role?: string;
+}
+
+interface LinkedPartnerOrg {
+  id: string;
+  name: string;
+  organization_type: string;
+  logo_url: string | null;
+  members: PartnerMember[];
+}
+
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
   const { user, organization } = useAuth();
@@ -419,8 +435,9 @@ const EncryptedChat = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<'all' | 'orgs'>('orgs');
+  const [sidebarTab, setSidebarTab] = useState<'all' | 'orgs' | 'partners'>('orgs');
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
+  const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -430,6 +447,102 @@ const EncryptedChat = () => {
   // Reactions
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
+
+  // ─── Fetch Linked Partner Orgs + Members ─────────────
+  const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
+    queryKey: ['chat-linked-partners', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
+
+      // 1. Get active verified partnerships
+      const { data: partnerships, error: pErr } = await supabase
+        .from('verified_partnerships')
+        .select('requester_org_id, partner_org_id')
+        .or(`requester_org_id.eq.${organization.id},partner_org_id.eq.${organization.id}`)
+        .eq('status', 'active');
+
+      if (pErr) throw pErr;
+
+      const partnerIds = new Set<string>();
+      partnerships?.forEach(p => {
+        const otherId = p.requester_org_id === organization.id ? p.partner_org_id : p.requester_org_id;
+        if (otherId) partnerIds.add(otherId);
+      });
+
+      if (partnerIds.size === 0) return [];
+
+      const partnerIdsArr = Array.from(partnerIds);
+
+      // 2. Fetch partner orgs
+      const { data: orgs } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, logo_url')
+        .in('id', partnerIdsArr)
+        .eq('is_active', true)
+        .order('name');
+
+      if (!orgs?.length) return [];
+
+      // 3. Fetch members of those orgs
+      const { data: profiles } = await supabase
+        .from('profiles')
+        .select('user_id, full_name, avatar_url, organization_id')
+        .in('organization_id', partnerIdsArr);
+
+      const membersByOrg = new Map<string, PartnerMember[]>();
+      (profiles || []).forEach(p => {
+        if (!p.organization_id) return;
+        const list = membersByOrg.get(p.organization_id) || [];
+        list.push({
+          user_id: p.user_id,
+          full_name: p.full_name,
+          avatar_url: p.avatar_url,
+        });
+        membersByOrg.set(p.organization_id, list);
+      });
+
+      return orgs.map(o => ({
+        id: o.id,
+        name: o.name,
+        organization_type: o.organization_type as string,
+        logo_url: o.logo_url,
+        members: membersByOrg.get(o.id) || [],
+      })) as LinkedPartnerOrg[];
+    },
+    enabled: !!organization?.id,
+  });
+
+  // Start conversation with a partner member
+  const handleStartConvoWithMember = async (member: PartnerMember) => {
+    if (!user) return;
+    try {
+      // Check if conversation already exists
+      const existingConvo = conversations.find(c => c.partner?.user_id === member.user_id);
+      if (existingConvo) {
+        setSelectedConvoId(existingConvo.id);
+        if (isMobile) setShowSidebar(false);
+        return;
+      }
+      const convoId = await getOrCreateConversation(member.user_id);
+      if (convoId) {
+        setSelectedConvoId(convoId);
+        if (isMobile) setShowSidebar(false);
+        // Refresh conversations
+        queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+      }
+    } catch {
+      toast.error('فشل بدء المحادثة');
+    }
+  };
+
+  const togglePartnerOrgExpand = (orgId: string) => {
+    setExpandedPartnerOrgs(prev => {
+      const next = new Set(prev);
+      if (next.has(orgId)) next.delete(orgId);
+      else next.add(orgId);
+      return next;
+    });
+  };
 
   // Wallpaper
   const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
@@ -741,6 +854,16 @@ const EncryptedChat = () => {
                     <Users className="w-3.5 h-3.5" />
                     الكل
                   </button>
+                  <button
+                    onClick={() => setSidebarTab('partners')}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded-md transition-colors",
+                      sidebarTab === 'partners' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+                    )}
+                  >
+                    <Plus className="w-3.5 h-3.5" />
+                    الجهات
+                  </button>
                 </div>
               </div>
 
@@ -787,6 +910,99 @@ const EncryptedChat = () => {
                         </AnimatePresence>
                       </div>
                     ))
+                  )
+                ) : sidebarTab === 'partners' ? (
+                  partnersLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="animate-spin text-primary" size={24} />
+                    </div>
+                  ) : linkedPartners.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <Building2 className="w-10 h-10 mb-2 opacity-30" />
+                      <p className="text-sm">لا توجد جهات مرتبطة</p>
+                      <p className="text-xs mt-1">اربط جهات عبر كود الشراكة لبدء المحادثة</p>
+                    </div>
+                  ) : (
+                    linkedPartners
+                      .filter(lp => !searchQuery || lp.name.toLowerCase().includes(searchQuery.toLowerCase()) || lp.members.some(m => m.full_name.toLowerCase().includes(searchQuery.toLowerCase())))
+                      .map(partner => {
+                        const orgTypeLabel = partner.organization_type === 'generator' ? 'مولّد'
+                          : partner.organization_type === 'transporter' ? 'ناقل'
+                          : partner.organization_type === 'recycler' ? 'مدوّر'
+                          : partner.organization_type === 'disposal' ? 'تخلص'
+                          : partner.organization_type;
+                        const isExpanded = expandedPartnerOrgs.has(partner.id);
+                        return (
+                          <div key={partner.id}>
+                            <button
+                              onClick={() => togglePartnerOrgExpand(partner.id)}
+                              className="w-full flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted/80 transition-colors text-start"
+                            >
+                              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+                              <Avatar className="w-7 h-7">
+                                {partner.logo_url && <AvatarImage src={partner.logo_url} />}
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                                  <Building2 className="w-3.5 h-3.5" />
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-semibold truncate block">{partner.name}</span>
+                                <span className="text-[10px] text-muted-foreground">{orgTypeLabel}</span>
+                              </div>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1.5">
+                                {partner.members.length} عضو
+                              </Badge>
+                            </button>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  {partner.members.length === 0 ? (
+                                    <div className="px-4 py-3 text-center text-xs text-muted-foreground">
+                                      لا يوجد أعضاء مسجلين
+                                    </div>
+                                  ) : (
+                                    partner.members.map(member => {
+                                      const hasConvo = conversations.some(c => c.partner?.user_id === member.user_id);
+                                      return (
+                                        <button
+                                          key={member.user_id}
+                                          onClick={() => handleStartConvoWithMember(member)}
+                                          className={cn(
+                                            "w-full flex items-center gap-3 px-4 py-2.5 transition-colors border-b border-border/20",
+                                            "hover:bg-muted/50 active:bg-muted/80"
+                                          )}
+                                        >
+                                          <Avatar className="w-9 h-9">
+                                            {member.avatar_url && <AvatarImage src={member.avatar_url} />}
+                                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                              {member.full_name?.charAt(0) || '?'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div className="flex-1 min-w-0 text-right">
+                                            <p className="text-sm font-medium truncate">{member.full_name}</p>
+                                            <p className="text-[10px] text-muted-foreground">
+                                              {hasConvo ? '💬 محادثة قائمة' : '➕ بدء محادثة جديدة'}
+                                            </p>
+                                          </div>
+                                          {!hasConvo && (
+                                            <MessageCircle className="w-4 h-4 text-primary/50 shrink-0" />
+                                          )}
+                                        </button>
+                                      );
+                                    })
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })
                   )
                 ) : (
                   filteredConversations.length === 0 ? (
