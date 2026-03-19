@@ -15,6 +15,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
 import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
@@ -125,6 +126,7 @@ const EncryptedChatWidget = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
 
+  const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
 
@@ -529,7 +531,7 @@ const EncryptedChatWidget = () => {
             ) : (
               <>
                 {/* Messages */}
-                <ScrollArea className="flex-1 p-2">
+                <ScrollArea className="flex-1 p-2" style={getWallpaperStyle()}>
                   {msgLoading ? (
                     <div className="flex justify-center py-8">
                       <Loader2 className="animate-spin text-emerald-600" size={20} />
