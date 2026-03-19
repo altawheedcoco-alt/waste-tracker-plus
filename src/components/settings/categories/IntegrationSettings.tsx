@@ -53,6 +53,7 @@ const IntegrationSettings = ({ orgType }: Props) => {
         </ChatAppearanceProvider>
       </TabsContent>
 
+      <TabsContent value="api">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
