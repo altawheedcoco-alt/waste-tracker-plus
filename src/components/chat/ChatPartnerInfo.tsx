@@ -74,7 +74,8 @@ const ChatPartnerInfo = ({
     }
   };
 
-  const signedShipments = shipments.filter(s => s.generator_signature || s.transporter_signature_url || s.driver_signature);
+  // Since shipments table doesn't have signature columns directly, we show all as "shared"
+  const signedShipments = shipments.filter(s => s.status === 'delivered' || s.status === 'completed');
   const Icon = getOrgTypeIcon();
 
   return (
