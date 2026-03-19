@@ -1,8 +1,8 @@
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useQueryClient, useQuery } from '@tanstack/react-query';
-import { encryptMessage, decryptMessage, type EncryptedPayload } from '@/lib/e2e';
+import { encryptMessage, decryptMessage } from '@/lib/e2e';
 import { useE2EKeys } from './useE2EKeys';
 import { toast } from 'sonner';
 
@@ -34,7 +34,7 @@ export interface DecryptedMessage {
   id: string;
   conversation_id: string;
   sender_id: string;
-  content: string; // decrypted
+  content: string;
   message_type: string;
   file_url?: string;
   file_name?: string;
@@ -49,12 +49,28 @@ export interface DecryptedMessage {
   };
 }
 
+type MessageForDecryption = {
+  sender_id: string;
+  encrypted_content: string | null;
+  encrypted_content_for_sender: string | null;
+  iv: string;
+  message_type?: string | null;
+  file_name?: string | null;
+  content_preview?: string | null;
+  is_deleted?: boolean | null;
+};
+
 export function usePrivateChat() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const { getPublicKey, getPublicKeys } = useE2EKeys();
   const publicKeyCache = useRef<Map<string, string>>(new Map());
   const publicKeysCache = useRef<Map<string, string[]>>(new Map());
+
+  const clearKeyCaches = useCallback(() => {
+    publicKeyCache.current.clear();
+    publicKeysCache.current.clear();
+  }, []);
 
   const getCachedPublicKey = useCallback(async (userId: string) => {
     if (publicKeyCache.current.has(userId)) return publicKeyCache.current.get(userId)!;
@@ -86,72 +102,73 @@ export function usePrivateChat() {
     }
   }, []);
 
-  const decryptConversationPreview = useCallback(async (
-    message: {
-      sender_id: string;
-      encrypted_content: string | null;
-      encrypted_content_for_sender: string | null;
-      iv: string;
-      message_type: string | null;
-      file_name: string | null;
-    },
-    partnerId: string,
-  ) => {
+  const parseSenderPayload = useCallback((payload: string, fallbackIv: string) => {
+    if (!payload.includes('|')) {
+      return { iv: fallbackIv, ciphertext: payload };
+    }
+
+    const [embeddedIv, ...ciphertextParts] = payload.split('|');
+    return {
+      iv: embeddedIv || fallbackIv,
+      ciphertext: ciphertextParts.join('|'),
+    };
+  }, []);
+
+  const tryDecryptWithKeys = useCallback(async (candidateKeys: string[], ciphertext?: string | null, iv?: string | null) => {
+    if (!user || !ciphertext || !iv) {
+      throw new Error('DECRYPT_INPUT_INVALID');
+    }
+
+    for (const candidateKey of Array.from(new Set(candidateKeys.filter(Boolean)))) {
+      try {
+        return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
+      } catch {
+        continue;
+      }
+    }
+
+    throw new Error('DECRYPT_FAILED');
+  }, [user]);
+
+  const decryptForCurrentUser = useCallback(async (message: MessageForDecryption, partnerId: string) => {
+    if (!user) return '[رسالة مشفرة]';
+    if (message.is_deleted) return '🚫 تم حذف هذه الرسالة';
+
+    const [partnerPublicKeys, myPublicKeys] = await Promise.all([
+      getCachedPublicKeys(partnerId),
+      getCachedPublicKeys(user.id),
+    ]);
+
+    if (message.sender_id === user.id && message.encrypted_content_for_sender) {
+      const senderPayload = parseSenderPayload(message.encrypted_content_for_sender, message.iv);
+      return tryDecryptWithKeys(myPublicKeys, senderPayload.ciphertext, senderPayload.iv);
+    }
+
+    if (message.sender_id !== user.id && message.encrypted_content) {
+      return tryDecryptWithKeys(partnerPublicKeys, message.encrypted_content, message.iv);
+    }
+
+    return message.content_preview || message.file_name || '[رسالة مشفرة]';
+  }, [user, getCachedPublicKeys, parseSenderPayload, tryDecryptWithKeys]);
+
+  const decryptConversationPreview = useCallback(async (message: MessageForDecryption, partnerId: string) => {
     if (!user) return 'رسالة مشفرة';
     if (message.message_type && message.message_type !== 'text') {
       return buildPreviewText(message.message_type, '', message.file_name);
     }
 
-    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
-    const myPublicKeys = await getCachedPublicKeys(user.id);
-
-    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
-      for (const candidateKey of candidateKeys) {
-        try {
-          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
-        } catch {
-          continue;
-        }
-      }
-      throw new Error('DECRYPT_PREVIEW_FAILED');
-    };
-
     try {
-      if (message.sender_id === user.id && message.encrypted_content_for_sender) {
-        const senderData = message.encrypted_content_for_sender;
-        let senderIv = message.iv;
-        let senderCiphertext = senderData;
-
-        if (senderData.includes('|')) {
-          const [embeddedIv, ...ciphertextParts] = senderData.split('|');
-          senderIv = embeddedIv;
-          senderCiphertext = ciphertextParts.join('|');
-        }
-
-        const content = await tryDecryptWithKeys(
-          Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
-          senderCiphertext,
-          senderIv,
-        );
-
-        return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
-      }
-
-      const content = await tryDecryptWithKeys(
-        Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
-        message.encrypted_content || '',
-        message.iv,
-      );
-
+      const content = await decryptForCurrentUser(message, partnerId);
       return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
     } catch {
-      // Use content_preview fallback if available
-      const preview = (message as any).content_preview;
-      return buildPreviewText(message.message_type, preview || message.file_name || 'رسالة مشفرة', message.file_name);
+      return buildPreviewText(
+        message.message_type,
+        message.content_preview || message.file_name || 'رسالة مشفرة',
+        message.file_name,
+      );
     }
-  }, [user, getCachedPublicKeys, buildPreviewText]);
+  }, [user, decryptForCurrentUser, buildPreviewText]);
 
-  // ─── Conversations List ──────────────────────────────
   const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
     queryKey: ['private-conversations', user?.id],
     queryFn: async () => {
@@ -165,9 +182,8 @@ export function usePrivateChat() {
 
       if (error) throw error;
 
-      // Enrich with partner profiles
-      const partnerIds = (data || []).map(c =>
-        c.participant_1 === user.id ? c.participant_2 : c.participant_1
+      const partnerIds = (data || []).map((c) =>
+        c.participant_1 === user.id ? c.participant_2 : c.participant_1,
       );
 
       if (!partnerIds.length) return [];
@@ -177,17 +193,18 @@ export function usePrivateChat() {
         .select('user_id, full_name, avatar_url, organization_id')
         .in('user_id', partnerIds);
 
-      const orgIds = [...new Set((profiles || []).map(p => p.organization_id).filter(Boolean))];
+      const orgIds = [...new Set((profiles || []).map((p) => p.organization_id).filter(Boolean))];
       let orgMap = new Map<string, string>();
+
       if (orgIds.length) {
         const { data: orgs } = await supabase
           .from('organizations')
           .select('id, name')
           .in('id', orgIds);
-        orgMap = new Map((orgs || []).map(o => [o.id, o.name]));
+        orgMap = new Map((orgs || []).map((o) => [o.id, o.name]));
       }
 
-      const profileMap = new Map((profiles || []).map(p => [p.user_id, {
+      const profileMap = new Map((profiles || []).map((p) => [p.user_id, {
         user_id: p.user_id,
         full_name: p.full_name,
         avatar_url: p.avatar_url,
@@ -195,17 +212,8 @@ export function usePrivateChat() {
         organization_name: orgMap.get(p.organization_id || ''),
       }]));
 
-      const conversationIds = (data || []).map(c => c.id);
-      const latestMessageMap = new Map<string, {
-        conversation_id: string;
-        sender_id: string;
-        encrypted_content: string | null;
-        encrypted_content_for_sender: string | null;
-        iv: string;
-        message_type: string | null;
-        file_name: string | null;
-        status: string | null;
-      }>();
+      const conversationIds = (data || []).map((c) => c.id);
+      const latestMessageMap = new Map<string, MessageForDecryption & { conversation_id: string; status: string | null }>();
 
       if (conversationIds.length > 0) {
         const { data: latestMessages } = await supabase
@@ -251,7 +259,6 @@ export function usePrivateChat() {
     refetchInterval: 30000,
   });
 
-  // ─── Realtime subscription ───────────────────────────
   useEffect(() => {
     if (!user) return;
 
@@ -272,6 +279,7 @@ export function usePrivateChat() {
             .eq('status', 'sent');
         }
 
+        clearKeyCaches();
         queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
         queryClient.invalidateQueries({ queryKey: ['private-messages'] });
       })
@@ -280,21 +288,22 @@ export function usePrivateChat() {
         schema: 'public',
         table: 'encrypted_messages',
       }, () => {
+        clearKeyCaches();
         queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
         queryClient.invalidateQueries({ queryKey: ['private-messages'] });
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
-  }, [user, queryClient]);
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, queryClient, clearKeyCaches]);
 
-  // ─── Get or Create Conversation ──────────────────────
   const getOrCreateConversation = useCallback(async (partnerId: string): Promise<string | null> => {
     if (!user) return null;
 
     const [p1, p2] = [user.id, partnerId].sort();
 
-    // Check existing
     const { data: existing } = await supabase
       .from('private_conversations')
       .select('id')
@@ -319,11 +328,10 @@ export function usePrivateChat() {
     return created.id;
   }, [user, queryClient]);
 
-  // ─── Fetch & Decrypt Messages ────────────────────────
   const fetchMessages = useCallback(async (
     conversationId: string,
     limit = 50,
-    before?: string
+    before?: string,
   ): Promise<DecryptedMessage[]> => {
     if (!user) return [];
 
@@ -341,7 +349,6 @@ export function usePrivateChat() {
     const { data, error } = await query;
     if (error) throw error;
 
-    // Get conversation to find partner
     const { data: convo } = await supabase
       .from('private_conversations')
       .select('participant_1, participant_2')
@@ -351,59 +358,20 @@ export function usePrivateChat() {
     if (!convo) return [];
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
-    const myPublicKeys = await getCachedPublicKeys(user.id);
 
-    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
-      for (const candidateKey of candidateKeys) {
-        try {
-          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
-        } catch {
-          continue;
-        }
-      }
-      throw new Error('DECRYPT_FAILED');
-    };
-
-    // Get sender profiles
-    const senderIds = [...new Set((data || []).map(m => m.sender_id))];
+    const senderIds = [...new Set((data || []).map((m) => m.sender_id))];
     const { data: profiles } = await supabase
       .from('profiles')
       .select('user_id, full_name, avatar_url')
       .in('user_id', senderIds);
-    const profileMap = new Map((profiles || []).map(p => [p.user_id, p]));
+    const profileMap = new Map((profiles || []).map((p) => [p.user_id, p]));
 
     const decrypted: DecryptedMessage[] = [];
     for (const msg of (data || []).reverse()) {
       let content = '[رسالة مشفرة]';
       try {
-        if (msg.is_deleted) {
-          content = '🚫 تم حذف هذه الرسالة';
-        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
-          const senderData = msg.encrypted_content_for_sender;
-          let senderIv = msg.iv;
-          let senderCiphertext = senderData;
-
-          if (senderData.includes('|')) {
-            const [embeddedIv, ...ciphertextParts] = senderData.split('|');
-            senderIv = embeddedIv;
-            senderCiphertext = ciphertextParts.join('|');
-          }
-
-          content = await tryDecryptWithKeys(
-            Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
-            senderCiphertext,
-            senderIv,
-          );
-        } else if (msg.sender_id !== user.id) {
-          content = await tryDecryptWithKeys(
-            Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
-            msg.encrypted_content,
-            msg.iv,
-          );
-        }
+        content = await decryptForCurrentUser(msg, partnerId);
       } catch {
-        // Fallback to content_preview if decryption fails
         content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
       }
 
@@ -426,9 +394,8 @@ export function usePrivateChat() {
     }
 
     return decrypted;
-  }, [user, getCachedPublicKeys]);
+  }, [user, decryptForCurrentUser]);
 
-  // ─── Send Encrypted Message ──────────────────────────
   const sendMessage = useCallback(async (
     conversationId: string,
     plaintext: string,
@@ -439,7 +406,6 @@ export function usePrivateChat() {
   ) => {
     if (!user) return;
 
-    // Get conversation partner
     const { data: convo } = await supabase
       .from('private_conversations')
       .select('participant_1, participant_2')
@@ -449,24 +415,18 @@ export function usePrivateChat() {
     if (!convo) throw new Error('Conversation not found');
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    const partnerPublicKey = await getCachedPublicKey(partnerId);
-    const myPublicKey = await getCachedPublicKey(user.id);
+    clearKeyCaches();
+    const partnerPublicKey = await getPublicKey(partnerId);
+    const myPublicKey = await getPublicKey(user.id);
 
     if (!partnerPublicKey) {
       toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
       return;
     }
 
-    // Encrypt for recipient
     const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
-
-    // Encrypt a sender copy using the sender's own public key
-    // Store the sender IV embedded in the ciphertext as "senderIV|senderCiphertext"
-    // because the DB only has one iv column (for the recipient)
     const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
     const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
-
-    // Store content_preview as plaintext fallback (first 120 chars)
     const contentPreview = messageType === 'text' ? plaintext.slice(0, 120) : (fileName || null);
 
     const { error } = await supabase.from('encrypted_messages').insert({
@@ -484,11 +444,11 @@ export function usePrivateChat() {
 
     if (error) throw error;
 
+    clearKeyCaches();
     queryClient.invalidateQueries({ queryKey: ['private-messages', conversationId] });
     queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
-  }, [user, getCachedPublicKey, queryClient]);
+  }, [user, getPublicKey, queryClient, clearKeyCaches]);
 
-  // ─── Mark as Read ────────────────────────────────────
   const markAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
 
@@ -501,7 +461,6 @@ export function usePrivateChat() {
 
     if (!unread?.length) return;
 
-    // Update message status
     await supabase
       .from('encrypted_messages')
       .update({ status: 'read', read_at: new Date().toISOString() })
@@ -509,8 +468,7 @@ export function usePrivateChat() {
       .neq('sender_id', user.id)
       .in('status', ['sent', 'delivered']);
 
-    // Insert read receipts
-    const receipts = unread.map(m => ({
+    const receipts = unread.map((m) => ({
       message_id: m.id,
       user_id: user.id,
     }));
@@ -523,15 +481,13 @@ export function usePrivateChat() {
     queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
   }, [user, queryClient]);
 
-  // ─── Export Chat History ─────────────────────────────
   const exportChatHistory = useCallback(async (
     conversationId: string,
     dateFrom?: string,
-    dateTo?: string
+    dateTo?: string,
   ): Promise<string> => {
     if (!user) throw new Error('Not authenticated');
 
-    // Fetch all messages in range
     let query = supabase
       .from('encrypted_messages')
       .select('*')
@@ -543,7 +499,6 @@ export function usePrivateChat() {
 
     const { data: messages } = await query;
 
-    // Decrypt all
     const { data: convo } = await supabase
       .from('private_conversations')
       .select('participant_1, participant_2')
@@ -553,25 +508,15 @@ export function usePrivateChat() {
     if (!convo || !messages) throw new Error('No data');
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    const partnerPublicKey = await getCachedPublicKey(partnerId);
-    if (!partnerPublicKey) throw new Error('No partner key');
 
     const decryptedExport = [];
     for (const msg of messages) {
       let content = '[مشفر]';
       try {
-        if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
-          content = await decryptMessage(user.id, partnerPublicKey, {
-            ciphertext: msg.encrypted_content_for_sender,
-            iv: msg.iv,
-          });
-        } else if (msg.sender_id !== user.id) {
-          content = await decryptMessage(user.id, partnerPublicKey, {
-            ciphertext: msg.encrypted_content,
-            iv: msg.iv,
-          });
-        }
-      } catch { /* keep encrypted marker */ }
+        content = await decryptForCurrentUser(msg, partnerId);
+      } catch {
+        content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير]';
+      }
 
       decryptedExport.push({
         timestamp: msg.created_at,
@@ -581,7 +526,6 @@ export function usePrivateChat() {
       });
     }
 
-    // Create export record
     await supabase.from('chat_history_exports').insert({
       user_id: user.id,
       conversation_id: conversationId,
@@ -592,10 +536,9 @@ export function usePrivateChat() {
       completed_at: new Date().toISOString(),
     });
 
-    // Return as downloadable JSON
     const blob = new Blob([JSON.stringify(decryptedExport, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
-    
+
     const a = document.createElement('a');
     a.href = url;
     a.download = `chat-export-${conversationId.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
@@ -604,12 +547,11 @@ export function usePrivateChat() {
 
     toast.success(`تم تصدير ${decryptedExport.length} رسالة بنجاح`);
     return conversationId;
-  }, [user, getCachedPublicKey]);
+  }, [user, decryptForCurrentUser]);
 
-  // ─── Block / Mute ────────────────────────────────────
   const toggleBlock = useCallback(async (conversationId: string) => {
     if (!user) return;
-    const conv = conversations.find(c => c.id === conversationId);
+    const conv = conversations.find((c) => c.id === conversationId);
     if (!conv) return;
 
     const isP1 = conv.participant_1 === user.id;
@@ -627,7 +569,7 @@ export function usePrivateChat() {
 
   const toggleMute = useCallback(async (conversationId: string) => {
     if (!user) return;
-    const conv = conversations.find(c => c.id === conversationId);
+    const conv = conversations.find((c) => c.id === conversationId);
     if (!conv) return;
 
     const isP1 = conv.participant_1 === user.id;
@@ -643,14 +585,9 @@ export function usePrivateChat() {
     toast.success(current ? 'تم إلغاء كتم الصوت' : 'تم كتم المحادثة');
   }, [user, conversations, queryClient]);
 
-  // ─── Send File Message (upload + encrypted metadata) ──
-  const sendFileMessage = useCallback(async (
-    conversationId: string,
-    file: File,
-  ) => {
+  const sendFileMessage = useCallback(async (conversationId: string, file: File) => {
     if (!user) return;
 
-    // Upload to storage
     const ext = file.name.split('.').pop() || 'bin';
     const filePath = `chat/${conversationId}/${crypto.randomUUID()}.${ext}`;
 
@@ -669,14 +606,12 @@ export function usePrivateChat() {
 
     const fileUrl = urlData.publicUrl;
 
-    // Determine message type
     let messageType = 'file';
     if (file.type.startsWith('image/')) messageType = 'image';
     else if (file.type.startsWith('video/')) messageType = 'video';
     else if (file.type.startsWith('audio/')) messageType = 'voice';
 
-    // Send encrypted message with file metadata
-    const plaintext = file.name; // The text content is the filename
+    const plaintext = file.name;
     await sendMessage(conversationId, plaintext, messageType, fileUrl, file.name);
   }, [user, sendMessage]);
 

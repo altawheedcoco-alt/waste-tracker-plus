@@ -2,7 +2,6 @@ import { useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { generateAndSaveKeyPair, hasLocalKeys, getDeviceId } from '@/lib/e2e';
-import { useQuery } from '@tanstack/react-query';
 
 /**
  * Manages E2E key pair lifecycle:
@@ -43,7 +42,7 @@ export function useE2EKeys() {
     })();
   }, [user?.id]);
 
-  // Fetch a user's latest public key
+  // Fetch a user's latest active public key for new outgoing messages
   const getPublicKey = useCallback(async (userId: string): Promise<string | null> => {
     const { data } = await supabase
       .from('e2e_key_pairs')
@@ -57,13 +56,12 @@ export function useE2EKeys() {
     return data?.public_key || null;
   }, []);
 
-  // Fetch all active public keys to support old messages after key rotation/device changes
+  // Fetch all historical public keys so older messages remain decryptable after rotation
   const getPublicKeys = useCallback(async (userId: string): Promise<string[]> => {
     const { data } = await supabase
       .from('e2e_key_pairs')
       .select('public_key')
       .eq('user_id', userId)
-      .eq('is_active', true)
       .order('created_at', { ascending: false });
 
     return Array.from(new Set((data || []).map((item) => item.public_key).filter(Boolean)));
