@@ -39,6 +39,7 @@ interface ChatPartnerInfoProps {
     organization_type: string;
     logo_url: string | null;
   };
+  conversationId?: string;
   notificationsEnabled: boolean;
   onToggleNotifications: () => void;
   onBack: () => void;
