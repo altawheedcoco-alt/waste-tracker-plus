@@ -369,17 +369,17 @@ export function usePrivateChat() {
     if (cachedPartnerId) {
       partnerIdPromise = Promise.resolve(cachedPartnerId);
     } else {
-      partnerIdPromise = supabase
-        .from('private_conversations')
-        .select('participant_1, participant_2')
-        .eq('id', conversationId)
-        .single()
-        .then(({ data: convo }) => {
-          if (!convo) return null;
-          const pid = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-          convoPartnersCache.current.set(conversationId, pid);
-          return pid;
-        });
+      partnerIdPromise = (async () => {
+        const { data: convo } = await supabase
+          .from('private_conversations')
+          .select('participant_1, participant_2')
+          .eq('id', conversationId)
+          .single();
+        if (!convo) return null;
+        const pid = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+        convoPartnersCache.current.set(conversationId, pid);
+        return pid;
+      })();
     }
 
     // Fetch messages and partner in parallel
