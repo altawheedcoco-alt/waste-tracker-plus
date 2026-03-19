@@ -491,8 +491,9 @@ const EncryptedChat = () => {
 
     // Find existing conversation with this partner's org members
     const existing = conversations.find(c => {
-      const partnerOrgId = c.partner?.organization_id;
-      return partnerOrgId === partnerId || c.partner_id === partnerId;
+      const partnerOrgName = c.partner?.organization_name;
+      // Match by user_id or by organization name search
+      return c.partner?.user_id === partnerId;
     });
 
     if (existing) {
