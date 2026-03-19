@@ -259,6 +259,24 @@ export function usePrivateChat() {
         event: 'INSERT',
         schema: 'public',
         table: 'encrypted_messages',
+      }, async (payload) => {
+        const newMessage = payload.new as { id: string; sender_id: string; status?: string | null };
+
+        if (newMessage.sender_id !== user.id) {
+          await supabase
+            .from('encrypted_messages')
+            .update({ status: 'delivered' })
+            .eq('id', newMessage.id)
+            .eq('status', 'sent');
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['private-messages'] });
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'encrypted_messages',
       }, () => {
         queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
         queryClient.invalidateQueries({ queryKey: ['private-messages'] });
