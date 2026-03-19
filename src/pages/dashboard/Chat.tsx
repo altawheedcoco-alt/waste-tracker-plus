@@ -1309,8 +1309,8 @@ const EncryptedChatInner = () => {
           </div>
         )}
       </div>
-    </DashboardLayout>
-  );
+    );
+  };
 };
 
 // ─── Lazy load NotesTab ─────────────────────────────────
