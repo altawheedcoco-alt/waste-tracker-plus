@@ -1,67 +1,31 @@
 
 
-# خطة: ترقية عارض الصور + حماية الملف الشخصي (Profile Photo Protection)
+# تنفيذ: نظام قفل الملف الشخصي (Profile Lock) بنمط Facebook
 
-## كيف يعمل النظام في WhatsApp و Facebook؟
+## التغييرات المطلوبة
 
-| التقنية | WhatsApp | Facebook |
-|---------|----------|----------|
-| منع Screenshot | نعم (FLAG_SECURE على Android) | لا |
-| منع Right-click Save | غير متاح (تطبيق أصلي) | نعم (CSS + JS) |
-| منع Drag & Drop | غير متاح | نعم |
-| إخفاء URL المباشر | نعم (لا يوجد رابط مباشر) | نعم (Canvas rendering) |
-| التحكم بمن يرى الصورة | نعم (الجميع/جهات الاتصال/لا أحد) | نعم (عام/أصدقاء/خاص) |
+### 1. Migration — إضافة `is_profile_locked`
+```sql
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS is_profile_locked boolean NOT NULL DEFAULT false;
+ALTER TABLE public.organizations ADD COLUMN IF NOT EXISTS is_profile_locked boolean NOT NULL DEFAULT false;
+```
 
-**الواقع التقني**: في تطبيق ويب، لا يمكن منع Screenshot فعلياً (هذه ميزة نظام تشغيل). لكن يمكن إضافة **احتكاك كبير** يمنع 99% من المستخدمين العاديين.
+### 2. `ProfileHeader.tsx`
+- إضافة `is_profile_locked` للـ interface
+- عند القفل: دائرة زرقاء (`ring-4 ring-blue-500`) حول الأفاتار
+- أيقونة `ShieldCheck` في أسفل منتصف الأفاتار (شارة زرقاء صغيرة)
+- زر "قفل/فتح الملف الشخصي" لصاحب الحساب (`isEditable`)
+- منطق الحماية: `protected={organization.is_profile_locked && !isEditable}`
 
-## ما سنطبقه
+### 3. `BusinessPagePreview.tsx` + `OrganizationView` وباقي المكونات
+- قراءة `is_profile_locked` وعرض المؤشرات البصرية (الدائرة + الدرع)
+- تمرير `protected` بناءً على حالة القفل
 
-### 1. حماية الصورة في Lightbox (لغير صاحب الحساب)
-
-إضافة prop `protected` إلى `ImageLightbox` و `ClickableImage`:
-- **منع Right-click**: `onContextMenu={e => e.preventDefault()}`
-- **منع Drag**: `draggable={false}` (موجود) + `user-select: none` + `-webkit-touch-callout: none`
-- **إخفاء زر التنزيل والمشاركة**: عندما `protected=true`
-- **رسم على Canvas**: بدلاً من `<img>` مباشر، يُرسم على Canvas مما يمنع "Save Image As" ويخفي URL من DevTools
-- **طبقة شفافة (Overlay)**: div شفاف فوق الصورة يمنع التفاعل المباشر معها
-
-### 2. إعداد خصوصية الصورة الشخصية (Privacy Setting)
-
-إضافة عمود `profile_photo_privacy` في جدول `profiles`:
-- `everyone` — الجميع يرى الصورة (الافتراضي)
-- `partners` — الشركاء المرتبطون فقط
-- `nobody` — لا أحد (تظهر أيقونة افتراضية)
-
-### 3. ترقية تجربة Lightbox
-
-- إضافة **Pinch-to-zoom** للموبايل (touch gestures)
-- إضافة **سحب للإغلاق** (drag down to close)
-- تحسين الانتقال بين الصور (swipe animation)
-
-## الملفات المتأثرة
-
+### الملفات المتأثرة
 | ملف | التغيير |
 |-----|--------|
-| `src/components/chat/ImageLightbox.tsx` | إضافة وضع protected: Canvas rendering + منع تنزيل + pinch zoom + swipe |
-| `src/components/ui/ClickableImage.tsx` | إضافة prop `protected` وتمريره لـ Lightbox |
-| `src/components/organization/ProfileHeader.tsx` | تمرير `protected={!isOwner}` |
-| `src/components/chat/ChatHeader.tsx` | تمرير `protected` |
-| `src/components/chat/ChatPartnerInfo.tsx` | تمرير `protected` |
-| باقي الأماكن المستخدمة لـ ClickableImage | تمرير `protected` حسب السياق |
-| **Migration** | إضافة `profile_photo_privacy` إلى profiles |
-
-## النتيجة
-
-```text
-صاحب الحساب يرى صوره:
-  → زر تنزيل ✓، مشاركة ✓، right-click عادي ✓
-
-أي شخص آخر يرى الصورة:
-  → Canvas rendering (لا يوجد <img> في DOM)
-  → لا زر تنزيل ✗
-  → لا right-click save ✗
-  → لا drag & drop ✗
-  → طبقة حماية شفافة ✓
-  → Zoom فقط للمعاينة ✓
-```
+| Migration جديد | إضافة العمود |
+| `ProfileHeader.tsx` | دائرة زرقاء + درع + زر قفل + منطق protected |
+| `BusinessPagePreview.tsx` | عرض مؤشرات القفل |
+| `SharedOrganizationView.tsx` | عرض مؤشرات القفل في الصفحة العامة |
 
