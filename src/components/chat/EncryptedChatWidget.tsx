@@ -528,7 +528,7 @@ const EncryptedChatWidget = () => {
                   ) : (
                     <>
                       {messages.map(msg => (
-                        <MiniMessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user?.id} />
+                        <MiniMessageBubble key={msg.id} msg={msg} isMine={msg.sender_id === user?.id} allImages={allImageUrls} onOpenLightbox={handleOpenLightbox} />
                       ))}
                       <div ref={endRef} />
                     </>
@@ -536,24 +536,19 @@ const EncryptedChatWidget = () => {
                 </ScrollArea>
 
                 {/* Input */}
-                <div className="p-2 border-t border-border shrink-0 flex gap-1.5">
-                  <Textarea
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); } }}
-                    placeholder="رسالة مشفرة..."
-                    rows={1}
-                    className="flex-1 min-h-[36px] max-h-[80px] resize-none text-xs"
-                  />
-                  <Button
-                    onClick={handleSend}
-                    disabled={!inputText.trim() || sending}
-                    size="icon"
-                    className="h-9 w-9 rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
-                  >
-                    {sending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
-                  </Button>
-                </div>
+                <EnhancedChatInput
+                  onSendMessage={handleSend}
+                  onSendFile={handleSendFile}
+                  sending={sending}
+                />
+
+                {/* Image Lightbox */}
+                <ImageLightbox
+                  images={allImageUrls}
+                  initialIndex={lightboxIndex}
+                  isOpen={lightboxOpen}
+                  onClose={() => setLightboxOpen(false)}
+                />
               </>
             )}
           </motion.div>
