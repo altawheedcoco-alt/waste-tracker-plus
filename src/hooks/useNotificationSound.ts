@@ -204,32 +204,26 @@ export const playNotificationSound = async (type: NotificationSoundType = 'defau
   // Check if specific sound type is enabled
   const soundSettings = getSoundSettings();
   if (!soundSettings[type]) return;
-  
-  try {
-    const unlocked = await ensureAudioUnlocked();
-    if (!unlocked) {
-      console.warn('🔇 Audio context not unlocked yet - needs user gesture first');
-      return;
-    }
-    
-    const ctx = getAudioContext();
-    const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
-    const now = ctx.currentTime;
-    
-    sound.frequencies.forEach((freq, index) => {
-      playTone(
-        freq, 
-        sound.duration, 
-        now + (index * sound.duration) / 1000,
-        sound.waveform,
-        sound.volume
-      );
-    });
-    
-    // sound played
-  } catch (error) {
-    console.warn('Could not play notification sound:', error);
+
+  // Check quiet hours
+  const qhEnabled = localStorage.getItem('quiet_hours_enabled') === 'true';
+  if (qhEnabled) {
+    const start = localStorage.getItem('quiet_hours_start') || '22:00';
+    const end = localStorage.getItem('quiet_hours_end') || '07:00';
+    const now = new Date();
+    const mins = now.getHours() * 60 + now.getMinutes();
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const sMin = sH * 60 + sM, eMin = eH * 60 + eM;
+    const inQuiet = sMin <= eMin ? (mins >= sMin && mins <= eMin) : (mins >= sMin || mins <= eMin);
+    if (inQuiet) return;
   }
+
+  // Use theme and volume from DB-synced localStorage
+  const theme = localStorage.getItem('sound_theme') || 'classic';
+  const globalVol = parseFloat(localStorage.getItem('sound_global_volume') || '0.7');
+  
+  await playThemeSound(type, theme, globalVol);
 };
 
 // Preview a specific sound
@@ -251,10 +245,45 @@ export const previewNotificationSound = async (type: NotificationSoundType) => {
         sound.volume
       );
     });
-    
-    // preview played
   } catch (error) {
     console.warn('Could not preview notification sound:', error);
+  }
+};
+
+// Theme-based volume multipliers
+const THEME_MULTIPLIERS: Record<string, { volumeMul: number; durationMul: number; waveform?: OscillatorType }> = {
+  classic: { volumeMul: 1, durationMul: 1 },
+  gentle: { volumeMul: 0.6, durationMul: 1.5, waveform: 'sine' },
+  modern: { volumeMul: 0.9, durationMul: 0.7, waveform: 'triangle' },
+  minimal: { volumeMul: 0.5, durationMul: 0.5, waveform: 'sine' },
+  professional: { volumeMul: 0.7, durationMul: 0.9, waveform: 'triangle' },
+  playful: { volumeMul: 1, durationMul: 0.8, waveform: 'square' },
+};
+
+// Play sound with theme and volume applied
+export const playThemeSound = async (type: NotificationSoundType, theme: string = 'classic', globalVolume: number = 0.7) => {
+  try {
+    const unlocked = await ensureAudioUnlocked();
+    if (!unlocked) return;
+    
+    const ctx = getAudioContext();
+    const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
+    const themeMod = THEME_MULTIPLIERS[theme] || THEME_MULTIPLIERS.classic;
+    const now = ctx.currentTime;
+    const vol = sound.volume * themeMod.volumeMul * globalVolume;
+    const dur = sound.duration * themeMod.durationMul;
+    
+    sound.frequencies.forEach((freq, index) => {
+      playTone(
+        freq,
+        dur,
+        now + (index * dur) / 1000,
+        themeMod.waveform || sound.waveform,
+        vol
+      );
+    });
+  } catch (error) {
+    console.warn('Could not play theme sound:', error);
   }
 };
 
