@@ -458,6 +458,14 @@ const EnhancedChatWidget = () => {
                 </div>
               ) : view === 'group' && selectedGroup ? (
                 <GroupChatView room={selectedGroup} onBack={handleBack} />
+              ) : showPartnerInfo && selectedPartner ? (
+                <ChatPartnerInfo
+                  partner={selectedPartner}
+                  notificationsEnabled={soundEnabled}
+                  onToggleNotifications={() => setSoundEnabled(!soundEnabled)}
+                  onBack={() => setShowPartnerInfo(false)}
+                  isMobile={isMobile}
+                />
               ) : (
                 <>
                   {/* Pinned Messages Bar */}
