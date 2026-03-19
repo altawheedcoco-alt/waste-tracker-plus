@@ -36,7 +36,7 @@ export function useE2EKeys() {
     })();
   }, [user?.id]);
 
-  // Fetch a user's public key
+  // Fetch a user's latest public key
   const getPublicKey = useCallback(async (userId: string): Promise<string | null> => {
     const { data } = await supabase
       .from('e2e_key_pairs')
@@ -46,9 +46,21 @@ export function useE2EKeys() {
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
-    
+
     return data?.public_key || null;
   }, []);
 
-  return { getPublicKey };
+  // Fetch all active public keys to support old messages after key rotation/device changes
+  const getPublicKeys = useCallback(async (userId: string): Promise<string[]> => {
+    const { data } = await supabase
+      .from('e2e_key_pairs')
+      .select('public_key')
+      .eq('user_id', userId)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    return Array.from(new Set((data || []).map((item) => item.public_key).filter(Boolean)));
+  }, []);
+
+  return { getPublicKey, getPublicKeys };
 }

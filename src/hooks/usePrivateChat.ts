@@ -302,6 +302,7 @@ export function usePrivateChat() {
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
     const partnerPublicKey = await getCachedPublicKey(partnerId);
+    const myPublicKey = await getCachedPublicKey(user.id);
 
     if (!partnerPublicKey) {
       toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
@@ -311,8 +312,9 @@ export function usePrivateChat() {
     // Encrypt for recipient
     const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
 
-    // Also encrypt a copy for sender (so sender can read their own messages)
-    const senderCopy = await encryptMessage(user.id, partnerPublicKey, plaintext);
+    // Encrypt a sender copy using the sender's own public key when available,
+    // with fallback to the old partner-key method for backward compatibility.
+    const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
 
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
