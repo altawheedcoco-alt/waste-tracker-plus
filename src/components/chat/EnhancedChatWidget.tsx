@@ -337,7 +337,7 @@ const EnhancedChatWidget = () => {
                     />
                   )}
 
-                  <div className="flex-1 overflow-hidden" style={getWallpaperStyle()}>
+                  <div className="flex-1 overflow-hidden relative" style={getWallpaperStyle()}>
                     <EnhancedChatMessages
                       messages={messages}
                       currentUserId={user.id}
