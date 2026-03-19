@@ -48,13 +48,14 @@ interface ChatPartnerInfoProps {
 
 const ChatPartnerInfo = ({
   partner,
+  conversationId,
   notificationsEnabled,
   onToggleNotifications,
   onBack,
   isMobile = false
 }: ChatPartnerInfoProps) => {
   const navigate = useNavigate();
-  const { media, files, links, loading: mediaLoading } = useSharedMedia(partner.id);
+  const { media, files, links, loading: mediaLoading, scope, setScope } = useEncryptedSharedMedia(conversationId, partner.id);
   const { shipments, loading: shipmentsLoading } = useSharedShipments(partner.id);
   const [signatureFilter, setSignatureFilter] = useState<'all' | 'signed'>('all');
   
