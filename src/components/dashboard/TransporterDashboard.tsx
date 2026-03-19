@@ -38,6 +38,7 @@ const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
 const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
 const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
 const DashboardAlertsHub = lazy(() => import('./shared/DashboardAlertsHub'));
 const DashboardWidgetCustomizer = lazy(() => import('./DashboardWidgetCustomizer'));
