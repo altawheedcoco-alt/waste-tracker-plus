@@ -36,6 +36,7 @@ interface EnhancedChatMessagesProps {
   partnerName?: string;
   onDeleteMessage?: (messageId: string) => void;
   onForwardMessage?: (messageId: string) => void;
+  scrollToMessageId?: string | null;
 }
 
 const EnhancedChatMessages = ({ 

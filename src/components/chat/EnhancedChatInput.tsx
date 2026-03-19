@@ -35,6 +35,7 @@ interface EnhancedChatInputProps {
   sending: boolean;
   uploadProgress?: number;
   disabled?: boolean;
+  onTyping?: () => void;
 }
 
 const EMOJI_QUICK = ['😀', '😂', '❤️', '👍', '🙏', '😊', '😍', '🔥', '✅', '📦', '🚛', '♻️'];
