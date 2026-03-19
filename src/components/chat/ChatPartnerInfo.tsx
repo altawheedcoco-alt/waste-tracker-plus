@@ -336,7 +336,7 @@ function ShipmentItem({ shipment, showSignature = false }: { shipment: SharedShi
     pending: 'bg-amber-500/10 text-amber-600',
     cancelled: 'bg-destructive/10 text-destructive',
   };
-  const color = statusColors[shipment.status] || 'bg-muted text-muted-foreground';
+  const color = statusColors[shipment.status || ''] || 'bg-muted text-muted-foreground';
 
   return (
     <div className="flex items-center gap-2.5 p-2.5 rounded-lg bg-muted/40">
@@ -345,20 +345,16 @@ function ShipmentItem({ shipment, showSignature = false }: { shipment: SharedShi
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-1.5">
-          <p className="text-xs font-medium truncate">{shipment.receipt_number}</p>
+          <p className="text-xs font-medium truncate">{shipment.shipment_number}</p>
           <Badge variant="secondary" className={cn("text-[9px] px-1.5 py-0", color)}>
-            {shipment.status}
+            {shipment.status || 'غير محدد'}
           </Badge>
         </div>
         <p className="text-[10px] text-muted-foreground">
-          {shipment.waste_type || 'غير محدد'} • {shipment.declared_weight || '—'} {shipment.unit || ''}
+          {shipment.waste_type || 'غير محدد'} • {shipment.quantity || '—'} {shipment.unit || ''}
         </p>
         {showSignature && (
-          <div className="flex gap-2 mt-1">
-            {shipment.generator_signature && <Badge variant="outline" className="text-[8px] px-1 py-0">توقيع المنتج ✓</Badge>}
-            {shipment.transporter_signature_url && <Badge variant="outline" className="text-[8px] px-1 py-0">توقيع الناقل ✓</Badge>}
-            {shipment.driver_signature && <Badge variant="outline" className="text-[8px] px-1 py-0">توقيع السائق ✓</Badge>}
-          </div>
+          <Badge variant="outline" className="text-[8px] px-1 py-0 mt-1">مكتملة ✓</Badge>
         )}
       </div>
     </div>
