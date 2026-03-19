@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
+import { useState, useEffect, useRef, useCallback, memo, useMemo, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
@@ -470,7 +470,7 @@ interface LinkedPartnerOrg {
 }
 
 // ─── Main Chat Page ─────────────────────────────────────
-const EncryptedChat = () => {
+const EncryptedChatInner = () => {
   const { user, organization, profile } = useAuth();
   const navigate = useNavigate();
   const { isMobile } = useDisplayMode();
@@ -832,11 +832,10 @@ const EncryptedChat = () => {
 
   const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
 
-  return (
-    <DashboardLayout>
+    return (
       <div className={cn(
-        "flex overflow-hidden rounded-xl border border-border bg-background shadow-sm",
-        isMobile ? "mx-0 my-0 h-[calc(100vh-3.5rem)] rounded-none border-0" : "mx-4 my-4 h-[calc(100vh-4rem)]"
+        "flex overflow-hidden bg-background",
+        isMobile ? "h-full" : "h-full"
       )}>
         {/* ===== SIDEBAR ===== */}
         <AnimatePresence mode="wait">
@@ -1310,8 +1309,91 @@ const EncryptedChat = () => {
           </div>
         )}
       </div>
+    );
+  };
+
+// ─── Lazy load NotesTab ─────────────────────────────────
+const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
+
+// ─── Main Page with Chat + Notes Tabs ───────────────────
+const ChatAndNotesPage = () => {
+  const [searchParamsPage] = useSearchParams();
+  const initialTab = searchParamsPage.get('tab') === 'notes' ? 'notes' : 'chat';
+  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>(initialTab);
+  const [notesUnread, setNotesUnread] = useState(0);
+
+  // Listen for new notes to update badge
+  useEffect(() => {
+    const channel = supabase
+      .channel('notes-badge-counter')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notes',
+      }, () => {
+        if (activeTab !== 'notes') {
+          setNotesUnread(prev => prev + 1);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [activeTab]);
+
+  // Clear badge when switching to notes
+  useEffect(() => {
+    if (activeTab === 'notes') setNotesUnread(0);
+  }, [activeTab]);
+
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Top Tabs */}
+        <div className="flex items-center border-b border-border bg-card px-4 shrink-0" dir="rtl">
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'chat'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MessageCircle className="w-4 h-4" />
+            الدردشات
+          </button>
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors relative",
+              activeTab === 'notes'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <StickyNote className="w-4 h-4" />
+            الملاحظات
+            {notesUnread > 0 && (
+              <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-destructive text-destructive-foreground">
+                {notesUnread}
+              </Badge>
+            )}
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'chat' ? (
+            <EncryptedChatInner />
+          ) : (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <NotesTab className="h-full" />
+            </Suspense>
+          )}
+        </div>
+      </div>
     </DashboardLayout>
   );
 };
 
-export default EncryptedChat;
+export default ChatAndNotesPage;
