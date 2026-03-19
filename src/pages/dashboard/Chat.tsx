@@ -249,7 +249,7 @@ const MessageBubble = memo(({
             </div>
           )}
           
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+          <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
           
           <div className={cn(
             "flex items-center gap-1 mt-0.5",
