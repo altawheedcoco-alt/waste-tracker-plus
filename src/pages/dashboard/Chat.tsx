@@ -687,6 +687,7 @@ const EncryptedChat = () => {
     
     setMessagesLoading(true);
     setReplyTo(null);
+    setShowPartnerInfo(false);
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
         setMessages(msgs);
