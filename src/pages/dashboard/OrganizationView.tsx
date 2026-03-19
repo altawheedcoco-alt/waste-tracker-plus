@@ -120,8 +120,9 @@ const OrganizationView = () => {
   };
 
   const handleStartChat = () => {
-    // Navigate to partners page to start chat
-    navigate('/dashboard/partners');
+    if (!orgData) return;
+    // Navigate to chat with this specific organization
+    navigate(`/dashboard/chat?partnerId=${orgData.id}&partnerName=${encodeURIComponent(orgData.name)}`);
   };
 
   if (loading) {

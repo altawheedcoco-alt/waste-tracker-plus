@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSearchParams } from 'react-router-dom';
 import {
   MessageCircle, Search, Loader2, ArrowRight, Shield,
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
@@ -402,6 +403,7 @@ const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string;
 const EncryptedChat = () => {
   const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const {
     conversations, conversationsLoading, getOrCreateConversation,
@@ -481,6 +483,47 @@ const EncryptedChat = () => {
       setExpandedOrgs(prev => new Set([...prev, ...withUnread]));
     }
   }, [orgGroups]);
+
+  // Auto-open conversation from URL params (e.g. ?partnerId=xxx)
+  useEffect(() => {
+    const partnerId = searchParams.get('partnerId') || searchParams.get('partner');
+    if (!partnerId || !user || conversationsLoading) return;
+
+    // partnerId is an organization ID — find a member and open/create conversation
+    (async () => {
+      try {
+        const { data: members } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('organization_id', partnerId)
+          .limit(1);
+
+        if (members && members.length > 0) {
+          const targetUserId = members[0].id;
+          // Check if we already have a conversation with this user
+          const existingConvo = conversations.find(c => c.partner?.user_id === targetUserId);
+          if (existingConvo) {
+            setSelectedConvoId(existingConvo.id);
+          } else {
+            const convoId = await getOrCreateConversation(targetUserId);
+            if (convoId) {
+              setSelectedConvoId(convoId);
+            }
+          }
+          setShowSidebar(false);
+        } else {
+          toast.error('لم يتم العثور على أعضاء في هذه الجهة');
+        }
+      } catch {
+        toast.error('فشل فتح المحادثة');
+      }
+      // Clear params
+      searchParams.delete('partnerId');
+      searchParams.delete('partner');
+      searchParams.delete('partnerName');
+      setSearchParams(searchParams, { replace: true });
+    })();
+  }, [searchParams, user, conversations, conversationsLoading]);
 
   const toggleOrgExpand = (orgId: string) => {
     setExpandedOrgs(prev => {
