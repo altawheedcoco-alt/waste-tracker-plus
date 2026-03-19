@@ -327,7 +327,7 @@ const EnhancedChatMessages = ({
                           {/* Reactions */}
                           <MessageReactions
                             reactions={messageReactions}
-                            onToggleReaction={(emoji) => toggleReaction(message.id, emoji)}
+                            onReact={(emoji) => toggleReaction(message.id, emoji)}
                             isOwn={isOwn}
                           />
 
