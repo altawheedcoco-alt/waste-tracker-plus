@@ -20,6 +20,7 @@ export interface PrivateConversation {
     user_id: string;
     full_name: string;
     avatar_url: string | null;
+    organization_id?: string | null;
     organization_name?: string;
   };
   lastDecryptedPreview?: string;
