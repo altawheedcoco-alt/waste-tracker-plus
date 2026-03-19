@@ -32,6 +32,7 @@ import DisappearingMessagesDialog from './DisappearingMessagesDialog';
 import GroupChatView from './GroupChatView';
 import CreateGroupDialog from './CreateGroupDialog';
 import CallScreen from './CallScreen';
+import ChatPartnerInfo from './ChatPartnerInfo';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
