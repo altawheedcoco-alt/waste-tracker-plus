@@ -470,7 +470,7 @@ interface LinkedPartnerOrg {
 }
 
 // ─── Main Chat Page ─────────────────────────────────────
-const EncryptedChat = () => {
+const EncryptedChatInner = () => {
   const { user, organization, profile } = useAuth();
   const navigate = useNavigate();
   const { isMobile } = useDisplayMode();
