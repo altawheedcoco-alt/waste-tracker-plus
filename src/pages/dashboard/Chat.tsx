@@ -6,8 +6,10 @@ import {
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Reply, Forward, SmilePlus, Paintbrush
+  Reply, Forward, SmilePlus, Paintbrush, Info
 } from 'lucide-react';
+import ClickableImage from '@/components/ui/ClickableImage';
+import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -469,6 +471,7 @@ const EncryptedChat = () => {
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
   const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
+  const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -684,6 +687,7 @@ const EncryptedChat = () => {
     
     setMessagesLoading(true);
     setReplyTo(null);
+    setShowPartnerInfo(false);
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
         setMessages(msgs);
@@ -1070,13 +1074,15 @@ const EncryptedChat = () => {
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       )}
-                      <Avatar className="w-9 h-9">
-                        <AvatarImage src={selectedConvo.partner?.avatar_url || ''} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                          {selectedConvo.partner?.full_name?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
+                      <ClickableImage src={selectedConvo.partner?.avatar_url || ''} protected>
+                        <Avatar className="w-9 h-9 cursor-pointer">
+                          <AvatarImage src={selectedConvo.partner?.avatar_url || ''} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                            {selectedConvo.partner?.full_name?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </ClickableImage>
+                      <button className="text-right cursor-pointer" onClick={() => setShowPartnerInfo(true)}>
                         <h3 className="text-sm font-semibold">{selectedConvo.partner?.full_name}</h3>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Building2 className="w-2.5 h-2.5" />
@@ -1085,9 +1091,18 @@ const EncryptedChat = () => {
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
                         </p>
-                      </div>
+                      </button>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShowPartnerInfo(!showPartnerInfo)}
+                        title="معلومات الشريك"
+                      >
+                        <Info className="w-4 h-4" />
+                      </Button>
                       <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
                       <Button
                         variant={showNotes ? "default" : "ghost"}
@@ -1204,8 +1219,32 @@ const EncryptedChat = () => {
               )}
             </div>
 
+            {/* ===== PARTNER INFO PANEL ===== */}
+            {showPartnerInfo && selectedConvo && !isMobile && (
+              <motion.div
+                initial={{ width: 0, opacity: 0 }}
+                animate={{ width: 320, opacity: 1 }}
+                exit={{ width: 0, opacity: 0 }}
+                transition={{ duration: 0.2 }}
+                className="h-full overflow-hidden border-s border-border"
+              >
+                <ChatPartnerInfo
+                  partner={{
+                    id: selectedConvo.partner?.organization_id || '',
+                    name: selectedConvo.partner?.organization_name || selectedConvo.partner?.full_name || '',
+                    organization_type: (selectedConvo.partner as any)?.organization_type || 'generator',
+                    logo_url: selectedConvo.partner?.avatar_url || null,
+                  }}
+                  notificationsEnabled={true}
+                  onToggleNotifications={() => selectedConvoId && toggleMute(selectedConvoId)}
+                  onBack={() => setShowPartnerInfo(false)}
+                  isMobile={isMobile}
+                />
+              </motion.div>
+            )}
+
             {/* ===== NOTES PANEL ===== */}
-            {showNotes && selectedConvoId && !isMobile && (
+            {showNotes && selectedConvoId && !isMobile && !showPartnerInfo && (
               <motion.div
                 initial={{ width: 0, opacity: 0 }}
                 animate={{ width: 280, opacity: 1 }}
