@@ -25529,6 +25529,7 @@ export type Database = {
           industrial_registry: string | null
           is_active: boolean | null
           is_location_public: boolean | null
+          is_profile_locked: boolean
           is_suspended: boolean | null
           is_verified: boolean | null
           land_transport_license: string | null
@@ -25635,6 +25636,7 @@ export type Database = {
           industrial_registry?: string | null
           is_active?: boolean | null
           is_location_public?: boolean | null
+          is_profile_locked?: boolean
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
@@ -25741,6 +25743,7 @@ export type Database = {
           industrial_registry?: string | null
           is_active?: boolean | null
           is_location_public?: boolean | null
+          is_profile_locked?: boolean
           is_suspended?: boolean | null
           is_verified?: boolean | null
           land_transport_license?: string | null
@@ -29122,6 +29125,7 @@ export type Database = {
           invitation_date: string | null
           invited_by: string | null
           is_active: boolean | null
+          is_profile_locked: boolean
           organization_id: string | null
           phone: string | null
           position: string | null
@@ -29153,6 +29157,7 @@ export type Database = {
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
+          is_profile_locked?: boolean
           organization_id?: string | null
           phone?: string | null
           position?: string | null
@@ -29184,6 +29189,7 @@ export type Database = {
           invitation_date?: string | null
           invited_by?: string | null
           is_active?: boolean | null
+          is_profile_locked?: boolean
           organization_id?: string | null
           phone?: string | null
           position?: string | null
