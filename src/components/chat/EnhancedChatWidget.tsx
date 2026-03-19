@@ -51,7 +51,7 @@ const EnhancedChatWidget = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [view, setView] = useState<'sidebar' | 'chat'>('sidebar');
+  const [view, setView] = useState<'sidebar' | 'chat' | 'group'>('sidebar');
   const [partners, setPartners] = useState<ChatPartner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
@@ -61,9 +61,17 @@ const EnhancedChatWidget = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [forwardDialog, setForwardDialog] = useState<{ open: boolean; messageContent: string }>({ open: false, messageContent: '' });
   const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
+  const [showPinned, setShowPinned] = useState(false);
+  const [showDisappearing, setShowDisappearing] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
 
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
+  const { pinnedMessages, fetchPinned, togglePin } = usePinnedMessages(selectedPartner?.id);
+  const { duration: disappearDuration, setDisappearDuration, getExpiryDate, isActive: disappearActive } = useDisappearingMessages(selectedPartner?.id);
+  const { permission: pushPermission, requestPermission: requestPush } = usePushNotifications();
+  const { rooms, createGroup, isCreatingGroup } = useGroupChat();
 
   // Listen for unified menu toggle
   useEffect(() => {
