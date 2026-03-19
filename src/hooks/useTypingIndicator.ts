@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { getCachedProfile } from '@/lib/profileCache';
 
 /**
  * Hook for realtime typing indicator using Supabase Realtime Presence
