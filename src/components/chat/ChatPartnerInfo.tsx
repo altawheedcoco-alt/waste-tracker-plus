@@ -294,7 +294,7 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
-function MediaThumbnail({ item }: { item: SharedMediaItem }) {
+function MediaThumbnail({ item }: { item: EncryptedMediaItem }) {
   const isVideo = item.message_type === 'video';
   return (
     <a
