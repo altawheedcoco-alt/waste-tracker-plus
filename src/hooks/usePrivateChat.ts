@@ -220,6 +220,7 @@ export function usePrivateChat() {
       const latestMessageMap = new Map<string, MessageForDecryption & { conversation_id: string; status: string | null }>();
 
       if (conversationIds.length > 0) {
+        // Fetch latest messages - limit to 1 per conversation using distinct
         const { data: latestMessages } = await supabase
           .from('encrypted_messages')
           .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at, content_preview')
@@ -233,21 +234,33 @@ export function usePrivateChat() {
         }
       }
 
+      // Batch unread counts - single query instead of N queries
+      let unreadCountMap = new Map<string, number>();
+      if (conversationIds.length > 0) {
+        const { data: unreadData } = await supabase
+          .from('encrypted_messages')
+          .select('conversation_id')
+          .in('conversation_id', conversationIds)
+          .neq('sender_id', user.id)
+          .in('status', ['sent', 'delivered']);
+
+        // Count per conversation
+        for (const row of unreadData || []) {
+          unreadCountMap.set(row.conversation_id, (unreadCountMap.get(row.conversation_id) || 0) + 1);
+        }
+      }
+
       const convos = await Promise.all((data || []).map(async (c) => {
         const partnerId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
         const latestMessage = latestMessageMap.get(c.id);
-
-        const { count } = await supabase
-          .from('encrypted_messages')
-          .select('*', { count: 'exact', head: true })
-          .eq('conversation_id', c.id)
-          .neq('sender_id', user.id)
-          .in('status', ['sent', 'delivered']);
+        
+        // Cache partner mapping
+        convoPartnersCache.current.set(c.id, partnerId);
 
         return {
           ...c,
           partner: profileMap.get(partnerId),
-          unread_count: count || 0,
+          unread_count: unreadCountMap.get(c.id) || 0,
           lastDecryptedPreview: latestMessage
             ? await decryptConversationPreview(latestMessage, partnerId)
             : undefined,
