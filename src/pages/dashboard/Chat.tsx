@@ -447,7 +447,7 @@ interface LinkedPartnerOrg {
 
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
-  const { user, organization } = useAuth();
+  const { user, organization, profile } = useAuth();
   const { isMobile } = useDisplayMode();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
