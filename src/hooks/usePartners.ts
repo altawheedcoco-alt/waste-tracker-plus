@@ -42,15 +42,15 @@ interface UsePartnersResult {
   transporters: Partner[];
   recyclers: Partner[];
   allPartners: Partner[];
-  partners: Partner[]; // Alias for allPartners
+  partners: Partner[];
   loading: boolean;
   error: string | null;
   refetch: () => Promise<void>;
 }
 
 /**
- * Hook to fetch partners based on shared shipments
- * Each organization type sees only partners they've worked with via shipments
+ * Hook to fetch partners based on verified_partnerships (not shipments).
+ * This ensures all linked partners appear regardless of shipment history.
  */
 export const usePartners = (): UsePartnersResult => {
   const { organization } = useAuth();
@@ -71,59 +71,27 @@ export const usePartners = (): UsePartnersResult => {
 
     try {
       const orgId = organization.id;
-      const orgType = organization.organization_type;
 
-      // Build query based on organization type to get partner IDs from shipments
-      let partnerIds: Set<string> = new Set();
+      // 1. Get all active verified partnerships
+      const { data: partnerships, error: pError } = await supabase
+        .from('verified_partnerships')
+        .select('requester_org_id, partner_org_id')
+        .or(`requester_org_id.eq.${orgId},partner_org_id.eq.${orgId}`)
+        .eq('status', 'active');
 
-      if (orgType === 'generator') {
-        // Generator sees transporters and recyclers from their shipments
-        const { data: shipments, error: shipmentError } = await supabase
-          .from('shipments')
-          .select('transporter_id, recycler_id')
-          .eq('generator_id', orgId);
+      if (pError) throw pError;
 
-        if (shipmentError) throw shipmentError;
+      const partnerIds = new Set<string>();
+      partnerships?.forEach(p => {
+        const otherId = p.requester_org_id === orgId ? p.partner_org_id : p.requester_org_id;
+        if (otherId) partnerIds.add(otherId);
+      });
 
-        shipments?.forEach(s => {
-          if (s.transporter_id) partnerIds.add(s.transporter_id);
-          if (s.recycler_id) partnerIds.add(s.recycler_id);
-        });
-      } else if (orgType === 'transporter') {
-        // Transporter sees generators and recyclers from their shipments
-        const { data: shipments, error: shipmentError } = await supabase
-          .from('shipments')
-          .select('generator_id, recycler_id')
-          .eq('transporter_id', orgId);
-
-        if (shipmentError) throw shipmentError;
-
-        shipments?.forEach(s => {
-          if (s.generator_id) partnerIds.add(s.generator_id);
-          if (s.recycler_id) partnerIds.add(s.recycler_id);
-        });
-      } else if (orgType === 'recycler') {
-        // Recycler sees generators and transporters from their shipments
-        const { data: shipments, error: shipmentError } = await supabase
-          .from('shipments')
-          .select('generator_id, transporter_id')
-          .eq('recycler_id', orgId);
-
-        if (shipmentError) throw shipmentError;
-
-        shipments?.forEach(s => {
-          if (s.generator_id) partnerIds.add(s.generator_id);
-          if (s.transporter_id) partnerIds.add(s.transporter_id);
-        });
-      }
-
-      // Fetch partner organizations
       if (partnerIds.size > 0) {
         const { data: orgs, error: orgError } = await supabase
           .from('organizations')
           .select('*')
           .in('id', Array.from(partnerIds))
-          .eq('is_verified', true)
           .eq('is_active', true)
           .order('name');
 
@@ -158,7 +126,7 @@ export const usePartners = (): UsePartnersResult => {
     transporters,
     recyclers,
     allPartners,
-    partners: allPartners, // Alias for convenience
+    partners: allPartners,
     loading,
     error,
     refetch: fetchPartners,
