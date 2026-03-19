@@ -217,6 +217,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
             alt="صورة الغلاف"
             gallery={[organization.cover_url, organization.logo_url].filter(Boolean) as string[]}
             className="w-full h-full object-cover"
+            protected={!isEditable}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
