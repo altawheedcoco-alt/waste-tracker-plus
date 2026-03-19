@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback, memo, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
   MessageCircle, Search, Loader2, ArrowRight, Shield,
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
@@ -213,7 +213,20 @@ const MessageBubble = memo(({
             : "bg-card border border-border rounded-bl-sm"
         )}>
           {!isMine && message.sender && (
-            <p className="text-[10px] font-semibold text-primary mb-0.5">{message.sender.full_name}</p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Navigate to sender's profile - need profileId lookup
+                const partnerId = message.sender_id;
+                if (partnerId) {
+                  // Use user_id to find profile — navigate to profile page
+                  window.open(`/dashboard/profile?userId=${partnerId}`, '_blank');
+                }
+              }}
+              className="text-[10px] font-semibold text-primary mb-0.5 hover:underline cursor-pointer text-right"
+            >
+              {message.sender.full_name}
+            </button>
           )}
 
           {/* Quoted Reply */}
@@ -459,6 +472,7 @@ interface LinkedPartnerOrg {
 // ─── Main Chat Page ─────────────────────────────────────
 const EncryptedChat = () => {
   const { user, organization, profile } = useAuth();
+  const navigate = useNavigate();
   const { isMobile } = useDisplayMode();
   const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
@@ -1135,16 +1149,34 @@ const EncryptedChat = () => {
                           </AvatarFallback>
                         </Avatar>
                       </ClickableImage>
-                      <button className="text-right cursor-pointer" onClick={() => setShowPartnerInfo(true)}>
-                        <h3 className="text-sm font-semibold">{selectedConvo.partner?.full_name}</h3>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <div className="text-right">
+                        <button
+                          className="text-sm font-semibold hover:underline cursor-pointer"
+                          onClick={() => {
+                            // Navigate to member profile
+                            if (selectedConvo.partner?.user_id) {
+                              navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`);
+                            }
+                          }}
+                        >
+                          {selectedConvo.partner?.full_name}
+                        </button>
+                        <button
+                          className="text-[10px] text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                          onClick={() => {
+                            // Navigate to org profile
+                            if (selectedConvo.partner?.organization_id) {
+                              navigate(`/dashboard/org-profile/${selectedConvo.partner.organization_id}`);
+                            }
+                          }}
+                        >
                           <Building2 className="w-2.5 h-2.5" />
                           {selectedConvo.partner?.organization_name || 'غير محدد'}
                           <span className="mx-1">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
-                        </p>
-                      </button>
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button
@@ -1305,6 +1337,7 @@ const EncryptedChat = () => {
                     organization_type: (selectedConvo.partner as any)?.organization_type || 'generator',
                     logo_url: selectedConvo.partner?.avatar_url || null,
                   }}
+                  conversationId={selectedConvoId || undefined}
                   notificationsEnabled={true}
                   onToggleNotifications={() => selectedConvoId && toggleMute(selectedConvoId)}
                   onBack={() => setShowPartnerInfo(false)}

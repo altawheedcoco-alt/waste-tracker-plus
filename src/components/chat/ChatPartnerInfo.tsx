@@ -26,7 +26,7 @@ import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { useSharedMedia, type SharedMediaItem, type SharedLink } from '@/hooks/useSharedMedia';
+import { useEncryptedSharedMedia, type EncryptedMediaItem, type EncryptedSharedLink } from '@/hooks/useEncryptedSharedMedia';
 import { useSharedShipments, type SharedShipment } from '@/hooks/useSharedShipments';
 import { useNavigate } from 'react-router-dom';
 import { formatDistanceToNow } from 'date-fns';
@@ -39,6 +39,7 @@ interface ChatPartnerInfoProps {
     organization_type: string;
     logo_url: string | null;
   };
+  conversationId?: string;
   notificationsEnabled: boolean;
   onToggleNotifications: () => void;
   onBack: () => void;
@@ -47,13 +48,14 @@ interface ChatPartnerInfoProps {
 
 const ChatPartnerInfo = ({
   partner,
+  conversationId,
   notificationsEnabled,
   onToggleNotifications,
   onBack,
   isMobile = false
 }: ChatPartnerInfoProps) => {
   const navigate = useNavigate();
-  const { media, files, links, loading: mediaLoading } = useSharedMedia(partner.id);
+  const { media, files, links, loading: mediaLoading, scope, setScope } = useEncryptedSharedMedia(conversationId, partner.id);
   const { shipments, loading: shipmentsLoading } = useSharedShipments(partner.id);
   const [signatureFilter, setSignatureFilter] = useState<'all' | 'signed'>('all');
   
@@ -116,6 +118,28 @@ const ChatPartnerInfo = ({
         </div>
 
         <Separator />
+
+        {/* Scope Filter */}
+        <div className="flex rounded-lg bg-muted/50 p-0.5 mb-3">
+          <button
+            onClick={() => setScope('conversation')}
+            className={cn(
+              "flex-1 text-[10px] py-1 rounded-md transition-colors",
+              scope === 'conversation' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+            )}
+          >
+            المحادثة الحالية
+          </button>
+          <button
+            onClick={() => setScope('all')}
+            className={cn(
+              "flex-1 text-[10px] py-1 rounded-md transition-colors",
+              scope === 'all' ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
+            )}
+          >
+            كل ما بين الجهتين
+          </button>
+        </div>
 
         {/* Tabbed Content */}
         <Tabs defaultValue="media" dir="rtl" className="w-full">
@@ -270,7 +294,7 @@ function EmptyState({ text }: { text: string }) {
   );
 }
 
-function MediaThumbnail({ item }: { item: SharedMediaItem }) {
+function MediaThumbnail({ item }: { item: EncryptedMediaItem }) {
   const isVideo = item.message_type === 'video';
   return (
     <a
@@ -290,7 +314,7 @@ function MediaThumbnail({ item }: { item: SharedMediaItem }) {
   );
 }
 
-function FileItem({ item }: { item: SharedMediaItem }) {
+function FileItem({ item }: { item: EncryptedMediaItem }) {
   return (
     <a
       href={item.file_url}
@@ -311,7 +335,7 @@ function FileItem({ item }: { item: SharedMediaItem }) {
   );
 }
 
-function LinkItem({ item }: { item: SharedLink }) {
+function LinkItem({ item }: { item: EncryptedSharedLink }) {
   return (
     <a
       href={item.url}

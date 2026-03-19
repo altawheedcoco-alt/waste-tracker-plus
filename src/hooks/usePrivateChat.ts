@@ -145,7 +145,9 @@ export function usePrivateChat() {
 
       return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
     } catch {
-      return buildPreviewText(message.message_type, message.file_name || 'رسالة مشفرة', message.file_name);
+      // Use content_preview fallback if available
+      const preview = (message as any).content_preview;
+      return buildPreviewText(message.message_type, preview || message.file_name || 'رسالة مشفرة', message.file_name);
     }
   }, [user, getCachedPublicKeys, buildPreviewText]);
 
@@ -208,7 +210,7 @@ export function usePrivateChat() {
       if (conversationIds.length > 0) {
         const { data: latestMessages } = await supabase
           .from('encrypted_messages')
-          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at')
+          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at, content_preview')
           .in('conversation_id', conversationIds)
           .order('created_at', { ascending: false });
 
@@ -378,7 +380,6 @@ export function usePrivateChat() {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
         } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
-          // Sender copy: check for embedded IV format "senderIV|senderCiphertext"
           const senderData = msg.encrypted_content_for_sender;
           let senderIv = msg.iv;
           let senderCiphertext = senderData;
@@ -402,7 +403,8 @@ export function usePrivateChat() {
           );
         }
       } catch {
-        content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
+        // Fallback to content_preview if decryption fails
+        content = (msg as any).content_preview || msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
       }
 
       const profile = profileMap.get(msg.sender_id);
@@ -464,6 +466,9 @@ export function usePrivateChat() {
     const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
     const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
+    // Store content_preview as plaintext fallback (first 120 chars)
+    const contentPreview = messageType === 'text' ? plaintext.slice(0, 120) : (fileName || null);
+
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
@@ -474,7 +479,8 @@ export function usePrivateChat() {
       file_url: fileUrl,
       file_name: fileName,
       reply_to_id: replyToId,
-    });
+      content_preview: contentPreview,
+    } as any);
 
     if (error) throw error;
 

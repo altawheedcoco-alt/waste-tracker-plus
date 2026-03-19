@@ -13194,6 +13194,7 @@ export type Database = {
       }
       encrypted_messages: {
         Row: {
+          content_preview: string | null
           conversation_id: string
           created_at: string | null
           deleted_at: string | null
@@ -13215,6 +13216,7 @@ export type Database = {
           status: string | null
         }
         Insert: {
+          content_preview?: string | null
           conversation_id: string
           created_at?: string | null
           deleted_at?: string | null
@@ -13236,6 +13238,7 @@ export type Database = {
           status?: string | null
         }
         Update: {
+          content_preview?: string | null
           conversation_id?: string
           created_at?: string | null
           deleted_at?: string | null
