@@ -79,16 +79,6 @@ const TermsDocumentDialog = ({ open, onOpenChange, acceptance, showSignature = f
 
   if (!acceptance) return null;
 
-  const handlePrint = () => {
-    setThemeOpen(true);
-  };
-
-  const handleDownload = () => {
-    if (printRef.current) {
-      exportToPDF(printRef.current, `موافقة-الشروط-${acceptance.organization_name || acceptance.id.slice(0, 8)}`);
-    }
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] p-0">
