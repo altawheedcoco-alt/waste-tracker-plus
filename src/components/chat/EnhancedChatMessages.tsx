@@ -67,6 +67,18 @@ const EnhancedChatMessages = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isPartnerTyping]);
 
+  // Scroll to specific message (for search)
+  useEffect(() => {
+    if (scrollToMessageId) {
+      const el = document.getElementById(`msg-${scrollToMessageId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-primary/50', 'rounded-2xl');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-primary/50', 'rounded-2xl'), 2000);
+      }
+    }
+  }, [scrollToMessageId]);
+
   const parseMessageContent = (message: ChatMessage) => {
     if (message.message_type === 'text') {
       try {
