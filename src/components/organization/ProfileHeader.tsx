@@ -295,15 +295,22 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               <ClickableImage
                 src={organization.logo_url || ''}
                 gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
-                protected={!isEditable}
+                protected={isProtected}
               >
-                <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
+                <Avatar className={`w-32 h-32 sm:w-40 sm:h-40 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
                   <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
                   <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
                     {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
                   </AvatarFallback>
                 </Avatar>
               </ClickableImage>
+
+              {/* Profile Lock Shield Badge */}
+              {isLocked && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-500 text-white rounded-full p-1.5 shadow-lg border-2 border-background z-10">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+              )}
 
               {/* Edit Logo Button */}
               {isEditable && (
