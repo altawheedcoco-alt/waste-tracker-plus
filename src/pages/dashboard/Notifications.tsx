@@ -25,6 +25,7 @@ import {
   AlertTriangle, Zap, TrendingUp, Flame, Timer, Filter, LayoutGrid,
   List, CalendarDays, BellRing, BellOff, Wrench, FileCheck, Gavel,
   Megaphone, Radar, Leaf, ClipboardCheck, UserCheck, Key, Settings,
+  MessageCircle,
 } from 'lucide-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import BackButton from '@/components/ui/back-button';
