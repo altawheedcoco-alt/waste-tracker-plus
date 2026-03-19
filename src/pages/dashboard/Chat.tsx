@@ -1314,4 +1314,86 @@ const EncryptedChat = () => {
   );
 };
 
-export default EncryptedChat;
+// ─── Lazy load NotesTab ─────────────────────────────────
+const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
+
+// ─── Main Page with Chat + Notes Tabs ───────────────────
+const ChatAndNotesPage = () => {
+  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>('chat');
+  const [notesUnread, setNotesUnread] = useState(0);
+
+  // Listen for new notes to update badge
+  useEffect(() => {
+    const channel = supabase
+      .channel('notes-badge-counter')
+      .on('postgres_changes', {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'notes',
+      }, () => {
+        if (activeTab !== 'notes') {
+          setNotesUnread(prev => prev + 1);
+        }
+      })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [activeTab]);
+
+  // Clear badge when switching to notes
+  useEffect(() => {
+    if (activeTab === 'notes') setNotesUnread(0);
+  }, [activeTab]);
+
+  return (
+    <DashboardLayout>
+      <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
+        {/* Top Tabs */}
+        <div className="flex items-center border-b border-border bg-card px-4 shrink-0" dir="rtl">
+          <button
+            onClick={() => setActiveTab('chat')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'chat'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <MessageCircle className="w-4 h-4" />
+            الدردشات
+          </button>
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors relative",
+              activeTab === 'notes'
+                ? "border-primary text-primary"
+                : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <StickyNote className="w-4 h-4" />
+            الملاحظات
+            {notesUnread > 0 && (
+              <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-destructive text-destructive-foreground">
+                {notesUnread}
+              </Badge>
+            )}
+          </button>
+        </div>
+
+        {/* Tab Content */}
+        <div className="flex-1 overflow-hidden">
+          {activeTab === 'chat' ? (
+            <EncryptedChatInner />
+          ) : (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <NotesTab className="h-full" />
+            </Suspense>
+          )}
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+};
+
+export default ChatAndNotesPage;
