@@ -61,11 +61,12 @@ interface ReplyTo {
 
 // ─── Conversation List Item ─────────────────────────────
 const ConversationItem = memo(({ 
-  conversation, isActive, onClick, compact = false
+  conversation, isActive, onClick, currentUserId, compact = false
 }: { 
   conversation: PrivateConversation; 
   isActive: boolean; 
   onClick: () => void;
+  currentUserId?: string;
   compact?: boolean;
 }) => {
   const formatTime = (t?: string | null) => {
@@ -75,6 +76,8 @@ const ConversationItem = memo(({
     if (isYesterday(d)) return 'أمس';
     return format(d, 'd/M', { locale: ar });
   };
+
+  const isMyLastMessage = !!currentUserId && conversation.last_message_sender_id === currentUserId;
 
   return (
     <motion.div
@@ -102,12 +105,18 @@ const ConversationItem = memo(({
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
-        <div className="flex items-center justify-between mt-0.5">
+        <div className="flex items-center justify-between mt-0.5 gap-2">
           <div className="flex items-center gap-1 min-w-0">
-            <Lock className="w-3 h-3 text-emerald-500 shrink-0" />
+            {isMyLastMessage && (
+              conversation.last_message_status === 'read'
+                ? <CheckCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                : conversation.last_message_status === 'delivered'
+                  ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  : <Check className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            )}
+            {!isMyLastMessage && <Lock className="w-3 h-3 text-emerald-500 shrink-0" />}
             <p className="text-xs text-muted-foreground truncate">
-              {!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')}
-              {compact && 'مشفر E2E'}
+              {conversation.lastDecryptedPreview || (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
             </p>
           </div>
           {(conversation.unread_count || 0) > 0 && (
@@ -455,7 +464,7 @@ const EncryptedChat = () => {
   const queryClient = useQueryClient();
   const {
     conversations, conversationsLoading, getOrCreateConversation,
-    fetchMessages, sendMessage, markAsRead, exportChatHistory,
+    fetchMessages, sendMessage, sendFileMessage, markAsRead, exportChatHistory,
     toggleBlock, toggleMute,
   } = usePrivateChat();
 
@@ -474,6 +483,7 @@ const EncryptedChat = () => {
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
@@ -701,7 +711,7 @@ const EncryptedChat = () => {
     return () => { cancelled = true; };
   }, [selectedConvoId, fetchMessages, markAsRead]);
 
-  // Realtime: reload messages
+  // Realtime: reload messages and statuses
   useEffect(() => {
     if (!selectedConvoId) return;
 
@@ -715,6 +725,14 @@ const EncryptedChat = () => {
       }, () => {
         fetchMessages(selectedConvoId).then(setMessages);
         markAsRead(selectedConvoId);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'encrypted_messages',
+        filter: `conversation_id=eq.${selectedConvoId}`,
+      }, () => {
+        fetchMessages(selectedConvoId).then(setMessages);
       })
       .subscribe();
 
@@ -756,6 +774,28 @@ const EncryptedChat = () => {
     }
   };
 
+  const handleAttachClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedConvoId || sending) return;
+
+    setSending(true);
+    try {
+      await sendFileMessage(selectedConvoId, file);
+      const updated = await fetchMessages(selectedConvoId);
+      setMessages(updated);
+    } catch {
+      toast.error('فشل إرسال الملف');
+    } finally {
+      setSending(false);
+      e.target.value = '';
+      inputRef.current?.focus();
+    }
+  };
+
   const handleReply = (msg: DecryptedMessage) => {
     setReplyTo({
       id: msg.id,
@@ -766,7 +806,6 @@ const EncryptedChat = () => {
   };
 
   const handleForward = (msg: DecryptedMessage) => {
-    // Copy message to clipboard for now, can be enhanced later
     navigator.clipboard.writeText(msg.content);
     toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
   };
@@ -936,6 +975,7 @@ const EncryptedChat = () => {
                                   conversation={convo}
                                   isActive={selectedConvoId === convo.id}
                                   onClick={() => handleSelectConvo(convo)}
+                                  currentUserId={user?.id}
                                   compact
                                 />
                               ))}
@@ -1051,6 +1091,7 @@ const EncryptedChat = () => {
                         conversation={convo}
                         isActive={selectedConvoId === convo.id}
                         onClick={() => handleSelectConvo(convo)}
+                        currentUserId={user?.id}
                       />
                     ))
                   )
@@ -1189,7 +1230,24 @@ const EncryptedChat = () => {
 
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      className="hidden"
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt"
+                      onChange={handleFileSelected}
+                    />
                     <div className="flex items-end gap-2">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 rounded-full shrink-0"
+                        onClick={handleAttachClick}
+                        disabled={sending}
+                        title="إرفاق ملف"
+                      >
+                        <FileText className="w-4 h-4" />
+                      </Button>
                       <Textarea
                         ref={inputRef}
                         value={inputText}

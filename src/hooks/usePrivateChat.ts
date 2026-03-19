@@ -24,6 +24,9 @@ export interface PrivateConversation {
     organization_name?: string;
   };
   lastDecryptedPreview?: string;
+  last_message_type?: string;
+  last_message_status?: string;
+  last_message_sender_id?: string;
   unread_count?: number;
 }
 
@@ -66,6 +69,85 @@ export function usePrivateChat() {
     publicKeysCache.current.set(userId, keys);
     return keys;
   }, [getPublicKeys]);
+
+  const buildPreviewText = useCallback((messageType?: string | null, fallbackText = '', fileName?: string | null) => {
+    switch (messageType) {
+      case 'image':
+        return '📷 صورة';
+      case 'video':
+        return '🎥 فيديو';
+      case 'voice':
+      case 'audio':
+        return '🎤 رسالة صوتية';
+      case 'file':
+        return `📎 ${fileName || 'ملف مرفق'}`;
+      default:
+        return fallbackText || 'رسالة مشفرة';
+    }
+  }, []);
+
+  const decryptConversationPreview = useCallback(async (
+    message: {
+      sender_id: string;
+      encrypted_content: string | null;
+      encrypted_content_for_sender: string | null;
+      iv: string;
+      message_type: string | null;
+      file_name: string | null;
+    },
+    partnerId: string,
+  ) => {
+    if (!user) return 'رسالة مشفرة';
+    if (message.message_type && message.message_type !== 'text') {
+      return buildPreviewText(message.message_type, '', message.file_name);
+    }
+
+    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
+    const myPublicKeys = await getCachedPublicKeys(user.id);
+
+    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
+      for (const candidateKey of candidateKeys) {
+        try {
+          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
+        } catch {
+          continue;
+        }
+      }
+      throw new Error('DECRYPT_PREVIEW_FAILED');
+    };
+
+    try {
+      if (message.sender_id === user.id && message.encrypted_content_for_sender) {
+        const senderData = message.encrypted_content_for_sender;
+        let senderIv = message.iv;
+        let senderCiphertext = senderData;
+
+        if (senderData.includes('|')) {
+          const [embeddedIv, ...ciphertextParts] = senderData.split('|');
+          senderIv = embeddedIv;
+          senderCiphertext = ciphertextParts.join('|');
+        }
+
+        const content = await tryDecryptWithKeys(
+          Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
+          senderCiphertext,
+          senderIv,
+        );
+
+        return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
+      }
+
+      const content = await tryDecryptWithKeys(
+        Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
+        message.encrypted_content || '',
+        message.iv,
+      );
+
+      return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
+    } catch {
+      return buildPreviewText(message.message_type, message.file_name || 'رسالة مشفرة', message.file_name);
+    }
+  }, [user, getCachedPublicKeys, buildPreviewText]);
 
   // ─── Conversations List ──────────────────────────────
   const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
@@ -111,11 +193,36 @@ export function usePrivateChat() {
         organization_name: orgMap.get(p.organization_id || ''),
       }]));
 
-      // Get unread counts
-      const convos: PrivateConversation[] = [];
-      for (const c of data || []) {
+      const conversationIds = (data || []).map(c => c.id);
+      const latestMessageMap = new Map<string, {
+        conversation_id: string;
+        sender_id: string;
+        encrypted_content: string | null;
+        encrypted_content_for_sender: string | null;
+        iv: string;
+        message_type: string | null;
+        file_name: string | null;
+        status: string | null;
+      }>();
+
+      if (conversationIds.length > 0) {
+        const { data: latestMessages } = await supabase
+          .from('encrypted_messages')
+          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at')
+          .in('conversation_id', conversationIds)
+          .order('created_at', { ascending: false });
+
+        for (const msg of latestMessages || []) {
+          if (!latestMessageMap.has(msg.conversation_id)) {
+            latestMessageMap.set(msg.conversation_id, msg);
+          }
+        }
+      }
+
+      const convos = await Promise.all((data || []).map(async (c) => {
         const partnerId = c.participant_1 === user.id ? c.participant_2 : c.participant_1;
-        
+        const latestMessage = latestMessageMap.get(c.id);
+
         const { count } = await supabase
           .from('encrypted_messages')
           .select('*', { count: 'exact', head: true })
@@ -123,12 +230,18 @@ export function usePrivateChat() {
           .neq('sender_id', user.id)
           .in('status', ['sent', 'delivered']);
 
-        convos.push({
+        return {
           ...c,
           partner: profileMap.get(partnerId),
           unread_count: count || 0,
-        });
-      }
+          lastDecryptedPreview: latestMessage
+            ? await decryptConversationPreview(latestMessage, partnerId)
+            : undefined,
+          last_message_type: latestMessage?.message_type || undefined,
+          last_message_status: latestMessage?.status || undefined,
+          last_message_sender_id: latestMessage?.sender_id || undefined,
+        } as PrivateConversation;
+      }));
 
       return convos;
     },
@@ -144,6 +257,24 @@ export function usePrivateChat() {
       .channel('private-messages-realtime')
       .on('postgres_changes', {
         event: 'INSERT',
+        schema: 'public',
+        table: 'encrypted_messages',
+      }, async (payload) => {
+        const newMessage = payload.new as { id: string; sender_id: string; status?: string | null };
+
+        if (newMessage.sender_id !== user.id) {
+          await supabase
+            .from('encrypted_messages')
+            .update({ status: 'delivered' })
+            .eq('id', newMessage.id)
+            .eq('status', 'sent');
+        }
+
+        queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
+        queryClient.invalidateQueries({ queryKey: ['private-messages'] });
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
         schema: 'public',
         table: 'encrypted_messages',
       }, () => {
@@ -253,9 +384,9 @@ export function usePrivateChat() {
           let senderCiphertext = senderData;
 
           if (senderData.includes('|')) {
-            const parts = senderData.split('|');
-            senderIv = parts[0];
-            senderCiphertext = parts[1];
+            const [embeddedIv, ...ciphertextParts] = senderData.split('|');
+            senderIv = embeddedIv;
+            senderCiphertext = ciphertextParts.join('|');
           }
 
           content = await tryDecryptWithKeys(
