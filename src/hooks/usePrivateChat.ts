@@ -410,29 +410,58 @@ export function usePrivateChat() {
   ) => {
     if (!user) return;
 
-    const { data: convo } = await supabase
-      .from('private_conversations')
-      .select('participant_1, participant_2')
-      .eq('id', conversationId)
-      .single();
+    // Use cached partner ID or fetch once
+    let partnerId = convoPartnersCache.current.get(conversationId);
+    if (!partnerId) {
+      const { data: convo } = await supabase
+        .from('private_conversations')
+        .select('participant_1, participant_2')
+        .eq('id', conversationId)
+        .single();
+      if (!convo) throw new Error('Conversation not found');
+      partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+      convoPartnersCache.current.set(conversationId, partnerId);
+    }
 
-    if (!convo) throw new Error('Conversation not found');
-
-    const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    clearKeyCaches();
-    const partnerPublicKey = await getPublicKey(partnerId);
-    const myPublicKey = await getPublicKey(user.id);
+    // Fetch keys in parallel (don't clear cache before send!)
+    const [partnerPublicKey, myPublicKey] = await Promise.all([
+      getCachedPublicKey(partnerId),
+      getCachedPublicKey(user.id),
+    ]);
 
     if (!partnerPublicKey) {
       toast.error('الطرف الآخر لم يُفعّل التشفير بعد');
       return;
     }
 
-    const encrypted = await encryptMessage(user.id, partnerPublicKey, plaintext);
-    const senderCopy = await encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext);
-    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
+    // Encrypt both copies in parallel
     const contentPreview = messageType === 'text' ? plaintext.slice(0, 120) : (fileName || null);
+    const [encrypted, senderCopy] = await Promise.all([
+      encryptMessage(user.id, partnerPublicKey, plaintext),
+      encryptMessage(user.id, myPublicKey || partnerPublicKey, plaintext),
+    ]);
+    const senderPayload = `${senderCopy.iv}|${senderCopy.ciphertext}`;
 
+    // Emit optimistic sync event BEFORE DB insert for instant UI
+    emitChatSync({
+      type: 'message-sent',
+      conversationId,
+      message: {
+        id: `temp_${Date.now()}`,
+        conversation_id: conversationId,
+        sender_id: user.id,
+        content: plaintext,
+        message_type: messageType,
+        file_url: fileUrl,
+        file_name: fileName,
+        status: 'sending',
+        created_at: new Date().toISOString(),
+        is_edited: false,
+        is_deleted: false,
+      },
+    });
+
+    // Insert (no .select() needed - faster)
     const { error } = await supabase.from('encrypted_messages').insert({
       conversation_id: conversationId,
       sender_id: user.id,
@@ -448,10 +477,10 @@ export function usePrivateChat() {
 
     if (error) throw error;
 
-    clearKeyCaches();
+    // Invalidate queries after successful send
     queryClient.invalidateQueries({ queryKey: ['private-messages', conversationId] });
     queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
-  }, [user, getPublicKey, queryClient, clearKeyCaches]);
+  }, [user, getCachedPublicKey, queryClient]);
 
   const markAsRead = useCallback(async (conversationId: string) => {
     if (!user) return;
