@@ -5,6 +5,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query';
 import { encryptMessage, decryptMessage } from '@/lib/e2e';
 import { useE2EKeys } from './useE2EKeys';
 import { toast } from 'sonner';
+import { emitChatSync } from '@/lib/chatSyncBus';
 
 export interface PrivateConversation {
   id: string;
