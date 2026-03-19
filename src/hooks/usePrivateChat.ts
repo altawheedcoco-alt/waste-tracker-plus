@@ -218,8 +218,19 @@ export function usePrivateChat() {
     if (!convo) return [];
 
     const partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
-    const partnerPublicKey = await getCachedPublicKey(partnerId);
-    const myPublicKey = await getCachedPublicKey(user.id);
+    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
+    const myPublicKeys = await getCachedPublicKeys(user.id);
+
+    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
+      for (const candidateKey of candidateKeys) {
+        try {
+          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
+        } catch {
+          continue;
+        }
+      }
+      throw new Error('DECRYPT_FAILED');
+    };
 
     // Get sender profiles
     const senderIds = [...new Set((data || []).map(m => m.sender_id))];
@@ -235,21 +246,17 @@ export function usePrivateChat() {
       try {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
-        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender && myPublicKey) {
-          // Decrypt sender's copy (encrypted with own key derivation isn't standard ECDH)
-          // For simplicity, sender stores their own encrypted copy using partner's key exchange
-          content = await decryptMessage(user.id, partnerPublicKey!, {
-            ciphertext: msg.encrypted_content_for_sender,
-            iv: msg.iv,
-          });
-        } else if (msg.sender_id !== user.id && partnerPublicKey) {
-          content = await decryptMessage(user.id, partnerPublicKey, {
-            ciphertext: msg.encrypted_content,
-            iv: msg.iv,
-          });
+        } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
+          content = await tryDecryptWithKeys(
+            Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
+            msg.encrypted_content_for_sender,
+            msg.iv,
+          );
+        } else if (msg.sender_id !== user.id) {
+          content = await tryDecryptWithKeys(partnerPublicKeys, msg.encrypted_content, msg.iv);
         }
       } catch {
-        content = '[تعذر فك التشفير]';
+        content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
       }
 
       const profile = profileMap.get(msg.sender_id);
@@ -271,7 +278,7 @@ export function usePrivateChat() {
     }
 
     return decrypted;
-  }, [user, getCachedPublicKey]);
+  }, [user, getCachedPublicKeys]);
 
   // ─── Send Encrypted Message ──────────────────────────
   const sendMessage = useCallback(async (
