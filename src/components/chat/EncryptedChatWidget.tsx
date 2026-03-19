@@ -331,9 +331,16 @@ const EncryptedChatWidget = () => {
                     <Maximize2 className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-semibold truncate max-w-[140px]">
+                    <button
+                      className="text-sm font-semibold truncate max-w-[140px] hover:underline"
+                      onClick={() => {
+                        if (selectedConvo?.partner?.user_id) {
+                          navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`);
+                        }
+                      }}
+                    >
                       {selectedConvo?.partner?.full_name || 'محادثة'}
-                    </span>
+                    </button>
                     <Lock className="w-3 h-3 text-white/60" />
                   </div>
                   <div className="flex items-center gap-1">
