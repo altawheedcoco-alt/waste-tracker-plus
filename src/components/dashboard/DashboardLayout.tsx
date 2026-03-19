@@ -1101,6 +1101,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
         </div>
       </div>
     </TooltipProvider>
+    </KeyboardShortcutProvider>
     </FocusMusicProvider>
   );
 });
