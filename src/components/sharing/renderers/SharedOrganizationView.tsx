@@ -1,4 +1,4 @@
-import { Building2, MapPin, Phone, Mail, Globe, Calendar, Award, Shield } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Calendar, Award, Shield, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import ClickableImage from '@/components/ui/ClickableImage';
 
