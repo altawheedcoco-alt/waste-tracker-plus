@@ -105,7 +105,7 @@ const EncryptedChatWidget = () => {
   const { user } = useAuth();
   const {
     conversations, conversationsLoading,
-    fetchMessages, sendMessage, markAsRead, getOrCreateConversation,
+    fetchMessages, sendMessage, sendFileMessage, markAsRead, getOrCreateConversation,
   } = usePrivateChat();
   const { data: linkedPartners = [], isLoading: partnersLoading } = useLinkedPartners();
 
@@ -113,13 +113,14 @@ const EncryptedChatWidget = () => {
   const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [msgLoading, setMsgLoading] = useState(false);
-  const [inputText, setInputText] = useState('');
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [startingChat, setStartingChat] = useState(false);
   const [expandedOrgId, setExpandedOrgId] = useState<string | null>(null);
   const [orgMembers, setOrgMembers] = useState<Map<string, OrgMember[]>>(new Map());
   const [loadingMembers, setLoadingMembers] = useState<string | null>(null);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
 
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
