@@ -104,6 +104,7 @@ MiniMessageBubble.displayName = 'MiniMessageBubble';
 
 const EncryptedChatWidget = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const {
     conversations, conversationsLoading,
     fetchMessages, sendMessage, sendFileMessage, markAsRead, getOrCreateConversation,
