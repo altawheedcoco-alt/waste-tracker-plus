@@ -169,18 +169,39 @@ const EncryptedChatWidget = () => {
 
   useEffect(() => { endRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
-  const handleSend = async () => {
-    if (!inputText.trim() || !selectedConvoId || sending) return;
-    const text = inputText.trim();
-    setInputText('');
+  const handleSend = async (text: string) => {
+    if (!text.trim() || !selectedConvoId || sending) return;
     setSending(true);
     try {
-      await sendMessage(selectedConvoId, text);
+      await sendMessage(selectedConvoId, text.trim());
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
     } catch { toast.error('فشل الإرسال'); }
     finally { setSending(false); }
   };
+
+  const handleSendFile = async (file: File) => {
+    if (!selectedConvoId || sending) return;
+    setSending(true);
+    try {
+      await sendFileMessage(selectedConvoId, file);
+      const updated = await fetchMessages(selectedConvoId, 30);
+      setMessages(updated);
+    } catch { toast.error('فشل إرسال الملف'); }
+    finally { setSending(false); }
+  };
+
+  // Collect all image URLs for lightbox gallery
+  const allImageUrls = useMemo(() => 
+    messages.filter(m => m.message_type === 'image' && m.file_url).map(m => m.file_url!),
+    [messages]
+  );
+
+  const handleOpenLightbox = useCallback((url: string) => {
+    const idx = allImageUrls.indexOf(url);
+    setLightboxIndex(idx >= 0 ? idx : 0);
+    setLightboxOpen(true);
+  }, [allImageUrls]);
 
   // Load members of a partner org
   const loadOrgMembers = useCallback(async (orgId: string) => {
