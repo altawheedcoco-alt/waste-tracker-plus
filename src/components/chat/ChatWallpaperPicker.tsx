@@ -256,7 +256,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
 
           {/* ─── GRADIENTS TAB ─── */}
           <TabsContent value="gradients" className="flex-1 min-h-0 mt-3">
-            <ScrollArea className="h-full" style={{ maxHeight: '400px' }}>
+            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '400px' }}>
               <div className="grid grid-cols-4 gap-2 pb-2">
                 {GRADIENT_PRESETS.map((g) => (
                   <button
