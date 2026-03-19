@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import ClickableImage from '@/components/ui/ClickableImage';
 import { 
   Phone, 
   Video, 
