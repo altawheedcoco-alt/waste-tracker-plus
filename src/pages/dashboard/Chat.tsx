@@ -1073,13 +1073,15 @@ const EncryptedChat = () => {
                           <ArrowRight className="w-4 h-4" />
                         </Button>
                       )}
-                      <Avatar className="w-9 h-9">
-                        <AvatarImage src={selectedConvo.partner?.avatar_url || ''} />
-                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                          {selectedConvo.partner?.full_name?.charAt(0) || '?'}
-                        </AvatarFallback>
-                      </Avatar>
-                      <div>
+                      <ClickableImage src={selectedConvo.partner?.avatar_url || ''} protected>
+                        <Avatar className="w-9 h-9 cursor-pointer">
+                          <AvatarImage src={selectedConvo.partner?.avatar_url || ''} />
+                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                            {selectedConvo.partner?.full_name?.charAt(0) || '?'}
+                          </AvatarFallback>
+                        </Avatar>
+                      </ClickableImage>
+                      <button className="text-right cursor-pointer" onClick={() => setShowPartnerInfo(true)}>
                         <h3 className="text-sm font-semibold">{selectedConvo.partner?.full_name}</h3>
                         <p className="text-[10px] text-muted-foreground flex items-center gap-1">
                           <Building2 className="w-2.5 h-2.5" />
@@ -1088,9 +1090,18 @@ const EncryptedChat = () => {
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
                         </p>
-                      </div>
+                      </button>
                     </div>
                     <div className="flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShowPartnerInfo(!showPartnerInfo)}
+                        title="معلومات الشريك"
+                      >
+                        <Info className="w-4 h-4" />
+                      </Button>
                       <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
                       <Button
                         variant={showNotes ? "default" : "ghost"}
