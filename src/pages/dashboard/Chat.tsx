@@ -489,51 +489,51 @@ const EncryptedChat = () => {
     const partnerId = searchParams.get('partnerId') || searchParams.get('partner');
     if (!partnerId || !user || conversationsLoading) return;
 
-    // Find existing conversation with this partner's org members
-    const existing = conversations.find(c => {
-      const partnerOrgName = c.partner?.organization_name;
-      // Match by user_id or by organization name search
-      return c.partner?.user_id === partnerId;
+    // partnerId is an organization ID — find a conversation or create one
+    const existing = conversations.find(c =>
+      c.partner?.organization_name && c.partner?.user_id
+    );
+
+    // Try to find existing convo where partner belongs to that org
+    const matchByOrg = conversations.find(c => {
+      // We need to check org membership — for now search by org name from URL
+      return false; // Will fall through to create
     });
 
-    if (existing) {
-      setSelectedConvoId(existing.id);
-      setShowSidebar(false);
-      // Clear the param so it doesn't re-trigger
+    // Find a member of the target org to chat with
+    (async () => {
+      try {
+        const { data: members } = await supabase
+          .from('profiles')
+          .select('id')
+          .eq('organization_id', partnerId)
+          .limit(1);
+
+        if (members && members.length > 0) {
+          const targetUserId = members[0].id;
+          // Check if we already have a conversation with this user
+          const existingConvo = conversations.find(c => c.partner?.user_id === targetUserId);
+          if (existingConvo) {
+            setSelectedConvoId(existingConvo.id);
+          } else {
+            const convoId = await getOrCreateConversation(targetUserId);
+            if (convoId) {
+              setSelectedConvoId(convoId);
+            }
+          }
+          setShowSidebar(false);
+        } else {
+          toast.error('لم يتم العثور على أعضاء في هذه الجهة');
+        }
+      } catch {
+        toast.error('فشل فتح المحادثة');
+      }
+      // Clear params
       searchParams.delete('partnerId');
       searchParams.delete('partner');
       searchParams.delete('partnerName');
       setSearchParams(searchParams, { replace: true });
-    } else {
-      // Try to create conversation with any member of that org
-      (async () => {
-        try {
-          // Find a member of the target org to chat with
-          const { data: members } = await supabase
-            .from('profiles')
-            .select('id')
-            .eq('organization_id', partnerId)
-            .limit(1);
-
-          if (members && members.length > 0) {
-            const convoId = await getOrCreateConversation(members[0].id);
-            if (convoId) {
-              setSelectedConvoId(convoId);
-              setShowSidebar(false);
-            }
-          } else {
-            toast.error('لم يتم العثور على أعضاء في هذه الجهة');
-          }
-        } catch {
-          toast.error('فشل فتح المحادثة');
-        }
-        // Clear params
-        searchParams.delete('partnerId');
-        searchParams.delete('partner');
-        searchParams.delete('partnerName');
-        setSearchParams(searchParams, { replace: true });
-      })();
-    }
+    })();
   }, [searchParams, user, conversations, conversationsLoading]);
 
   const toggleOrgExpand = (orgId: string) => {
