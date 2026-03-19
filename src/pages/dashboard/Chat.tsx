@@ -780,7 +780,7 @@ const EncryptedChat = () => {
       content: msg.content.substring(0, 100),
       senderName: msg.sender?.full_name || (msg.sender_id === user?.id ? 'أنت' : 'مستخدم'),
     });
-    inputRef.current?.focus();
+    
   };
 
   const handleForward = (msg: DecryptedMessage) => {
