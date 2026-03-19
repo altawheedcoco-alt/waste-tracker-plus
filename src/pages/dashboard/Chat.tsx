@@ -251,24 +251,26 @@ const MessageBubble = memo(({
           
           <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
           
-          <div className={cn(
-            "flex items-center gap-1 mt-0.5",
-            isMine ? "justify-start" : "justify-end"
-          )}>
-            <span className={cn(
-              "text-[9px]",
-              isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+          {showTimestamp && (
+            <div className={cn(
+              "flex items-center gap-1 mt-0.5",
+              isMine ? "justify-start" : "justify-end"
             )}>
-              {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
-            </span>
-            {message.is_edited && (
               <span className={cn(
                 "text-[9px]",
                 isMine ? "text-primary-foreground/60" : "text-muted-foreground"
-              )}>تم التعديل</span>
-            )}
-            {getStatusIcon()}
-          </div>
+              )}>
+                {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
+              </span>
+              {message.is_edited && (
+                <span className={cn(
+                  "text-[9px]",
+                  isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+                )}>تم التعديل</span>
+              )}
+              {getStatusIcon()}
+            </div>
+          )}
         </div>
 
         {/* Reactions Display */}
