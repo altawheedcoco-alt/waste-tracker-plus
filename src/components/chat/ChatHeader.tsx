@@ -103,7 +103,7 @@ const ChatHeader = ({
           )}
 
           <div className="relative shrink-0">
-            <ClickableImage src={partnerLogo || ''}>
+            <ClickableImage src={partnerLogo || ''} protected>
               <Avatar className="h-10 w-10 ring-2 ring-white/20">
                 {partnerLogo ? <AvatarImage src={partnerLogo} /> : null}
                 <AvatarFallback className="bg-white/20 text-white">

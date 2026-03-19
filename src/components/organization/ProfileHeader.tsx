@@ -272,6 +272,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               <ClickableImage
                 src={organization.logo_url || ''}
                 gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
+                protected={!isEditable}
               >
                 <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
                   <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
