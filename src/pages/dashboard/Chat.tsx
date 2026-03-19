@@ -213,8 +213,21 @@ const MessageBubble = memo(({
             : "bg-card border border-border rounded-bl-sm"
         )}>
           {!isMine && message.sender && (
-            <p className="text-[10px] font-semibold text-primary mb-0.5">{message.sender.full_name}</p>
-          )}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                // Navigate to sender's profile - need profileId lookup
+                const partnerId = message.sender_id;
+                if (partnerId) {
+                  // Use user_id to find profile — navigate to profile page
+                  window.open(`/dashboard/profile?userId=${partnerId}`, '_blank');
+                }
+              }}
+              className="text-[10px] font-semibold text-primary mb-0.5 hover:underline cursor-pointer text-right"
+            >
+              {message.sender.full_name}
+            </button>
+          )
 
           {/* Quoted Reply */}
           {repliedMessage && (
