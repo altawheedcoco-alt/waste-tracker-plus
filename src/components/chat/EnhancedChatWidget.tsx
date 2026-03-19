@@ -9,6 +9,7 @@ import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { cn } from '@/lib/utils';
 import { onWidgetToggle } from '@/lib/widgetBus';
 import { usePresence } from '@/hooks/usePresence';
+import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 
@@ -44,6 +45,8 @@ const EnhancedChatWidget = () => {
   const [unreadTotal, setUnreadTotal] = useState(0);
   const [lastSeenMap, setLastSeenMap] = useState<Map<string, string>>(new Map());
 
+  const { getWallpaperStyle } = useChatWallpaper();
+
   // Listen for unified menu toggle
   useEffect(() => {
     return onWidgetToggle((id) => {
@@ -54,7 +57,7 @@ const EnhancedChatWidget = () => {
     });
   }, []);
 
-  // Fetch last message time for each partner (for "last seen")
+  // Fetch last message time for each partner
   const fetchLastSeenTimes = useCallback(async (partnerOrgIds: string[]) => {
     if (!organization?.id || partnerOrgIds.length === 0) return;
     try {
@@ -89,15 +92,9 @@ const EnhancedChatWidget = () => {
 
       const partnerIds = new Set<string>();
       shipments?.forEach(shipment => {
-        if (shipment.generator_id && shipment.generator_id !== organization.id) {
-          partnerIds.add(shipment.generator_id);
-        }
-        if (shipment.transporter_id && shipment.transporter_id !== organization.id) {
-          partnerIds.add(shipment.transporter_id);
-        }
-        if (shipment.recycler_id && shipment.recycler_id !== organization.id) {
-          partnerIds.add(shipment.recycler_id);
-        }
+        if (shipment.generator_id && shipment.generator_id !== organization.id) partnerIds.add(shipment.generator_id);
+        if (shipment.transporter_id && shipment.transporter_id !== organization.id) partnerIds.add(shipment.transporter_id);
+        if (shipment.recycler_id && shipment.recycler_id !== organization.id) partnerIds.add(shipment.recycler_id);
       });
 
       if (partnerIds.size > 0) {
@@ -108,14 +105,13 @@ const EnhancedChatWidget = () => {
           .in('id', partnerIdsArr)
           .order('name');
         
-        // Get unread counts for each partner
         const partnersWithUnread: ChatPartner[] = await Promise.all(
           (orgs || []).map(async (org) => {
             const unreadCount = await getPartnerUnreadCount(org.id);
             return {
               id: org.id,
               name: org.name,
-              organization_type: org.organization_type as 'generator' | 'transporter' | 'recycler',
+              organization_type: org.organization_type as string,
               logo_url: org.logo_url,
               unreadCount,
               isOnline: isOrgOnline(org.id),
@@ -124,12 +120,8 @@ const EnhancedChatWidget = () => {
         );
         
         setPartners(partnersWithUnread);
-        
-        // Calculate total unread
         const total = partnersWithUnread.reduce((sum, p) => sum + p.unreadCount, 0);
         setUnreadTotal(total);
-
-        // Fetch last seen times
         fetchLastSeenTimes(partnerIdsArr);
       }
     } catch (error) {
@@ -139,45 +131,28 @@ const EnhancedChatWidget = () => {
     }
   }, [organization?.id, getPartnerUnreadCount, isOrgOnline, fetchLastSeenTimes]);
 
-  // Update online status in partners list when presence changes
   useEffect(() => {
     setPartners(prev => prev.map(p => ({ ...p, isOnline: isOrgOnline(p.id) })));
   }, [isOrgOnline]);
 
-  // Fetch partners on open
   useEffect(() => {
-    if (isOpen) {
-      fetchPartners();
-    }
+    if (isOpen) fetchPartners();
   }, [isOpen, fetchPartners]);
 
-  // Handle opening the widget
-  const handleOpen = () => {
-    setIsOpen(true);
-    setView('sidebar');
-  };
-
-  // Handle selecting a partner
   const handleSelectPartner = async (partner: ChatPartner) => {
     setSelectedPartner(partner);
     setView('chat');
     await fetchMessagesForPartner(partner.id);
     await markPartnerAsRead(partner.id);
-    
-    // Update unread count
-    setPartners(prev => 
-      prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p)
-    );
+    setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p));
     setUnreadTotal(prev => Math.max(0, prev - partner.unreadCount));
   };
 
-  // Handle going back to sidebar
   const handleBack = () => {
     setSelectedPartner(null);
     setView('sidebar');
   };
 
-  // Handle sending messages
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
     await sendMessage(content, selectedPartner.id);
@@ -192,131 +167,128 @@ const EnhancedChatWidget = () => {
 
   const widgetSize = isExpanded 
     ? isMobile 
-      ? 'fixed inset-2 z-50' 
-      : 'fixed bottom-4 left-4 z-50 w-[600px] h-[700px]'
+      ? 'fixed inset-0 z-50' 
+      : 'fixed bottom-4 left-4 z-50 w-[700px] h-[85vh]'
     : isMobile
-      ? 'fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 z-50 h-[60vh]'
-      : 'fixed bottom-20 left-4 z-50 w-[380px] h-[550px]';
+      ? 'fixed bottom-[calc(4rem+env(safe-area-inset-bottom))] left-2 right-2 z-50 h-[70vh]'
+      : 'fixed bottom-20 left-4 z-50 w-[420px] h-[600px]';
 
   const selectedPartnerOnline = selectedPartner ? isOrgOnline(selectedPartner.id) : false;
   const selectedPartnerLastSeen = selectedPartner ? lastSeenMap.get(selectedPartner.id) : undefined;
 
   return (
-    <>
-
-      {/* Chat Widget */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.95 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 20, scale: 0.95 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            className={cn(
-              widgetSize,
-              "bg-background border border-border rounded-2xl shadow-2xl overflow-hidden flex flex-col"
-            )}
-          >
-            {/* Widget Header (when in sidebar view) */}
-            {view === 'sidebar' && (
-              <div className="flex items-center justify-between p-3 border-b border-border bg-primary text-primary-foreground">
-                <div className="flex items-center gap-2">
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial={{ opacity: 0, y: 20, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 20, scale: 0.95 }}
+          transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+          className={cn(
+            widgetSize,
+            "bg-background rounded-2xl shadow-2xl overflow-hidden flex flex-col",
+            "border border-border/50 backdrop-blur-sm"
+          )}
+        >
+          {/* Header */}
+          {view === 'sidebar' ? (
+            <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-l from-emerald-600 to-emerald-700 text-white shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
                   <MessageCircle className="w-5 h-5" />
-                  <span className="font-semibold">المحادثات</span>
                 </div>
-                <div className="flex items-center gap-1">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
-                    onClick={() => setIsExpanded(!isExpanded)}
-                  >
-                    {isExpanded ? (
-                      <Minimize2 className="w-4 h-4" />
-                    ) : (
-                      <Maximize2 className="w-4 h-4" />
-                    )}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8 text-primary-foreground hover:bg-primary-foreground/20"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                <div>
+                  <span className="font-bold text-sm">المحادثات</span>
+                  {unreadTotal > 0 && (
+                    <span className="text-[11px] text-emerald-100 block">
+                      {unreadTotal} رسالة جديدة
+                    </span>
+                  )}
                 </div>
               </div>
-            )}
-
-            {/* Chat Header (when in chat view) */}
-            {view === 'chat' && selectedPartner && (
-              <div className="flex items-center justify-between border-b border-border">
-                <ChatHeader
-                  partnerName={selectedPartner.name}
-                  partnerType={selectedPartner.organization_type}
-                  partnerLogo={selectedPartner.logo_url}
-                  isOnline={selectedPartnerOnline}
-                  lastSeen={selectedPartnerLastSeen}
-                  onBack={handleBack}
-                  soundEnabled={soundEnabled}
-                  onToggleSound={() => setSoundEnabled(!soundEnabled)}
-                  isMobile={isMobile}
-                />
-                <div className="flex items-center gap-1 pr-2">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={() => setIsExpanded(!isExpanded)}
-                  >
-                    {isExpanded ? (
-                      <Minimize2 className="w-4 h-4" />
-                    ) : (
-                      <Maximize2 className="w-4 h-4" />
-                    )}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
-                </div>
+              <div className="flex items-center gap-1">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
               </div>
-            )}
+            </div>
+          ) : selectedPartner && (
+            <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
+              <ChatHeader
+                partnerName={selectedPartner.name}
+                partnerType={selectedPartner.organization_type}
+                partnerLogo={selectedPartner.logo_url}
+                isOnline={selectedPartnerOnline}
+                lastSeen={selectedPartnerLastSeen}
+                onBack={handleBack}
+                soundEnabled={soundEnabled}
+                onToggleSound={() => setSoundEnabled(!soundEnabled)}
+                isMobile={isMobile}
+              />
+              <div className="flex items-center gap-1 pr-2">
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                  onClick={() => setIsExpanded(!isExpanded)}
+                >
+                  {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+                </Button>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
 
-            {/* Content */}
-            <div className="flex-1 overflow-hidden flex flex-col">
-              {view === 'sidebar' ? (
-                <ChatSidebar
-                  partners={partners}
-                  selectedPartnerId={selectedPartner?.id || null}
-                  onSelectPartner={handleSelectPartner}
-                  loading={loadingPartners}
-                />
-              ) : (
-                <>
+          {/* Content */}
+          <div className="flex-1 overflow-hidden flex flex-col min-h-0">
+            {view === 'sidebar' ? (
+              <ChatSidebar
+                partners={partners}
+                selectedPartnerId={selectedPartner?.id || null}
+                onSelectPartner={handleSelectPartner}
+                loading={loadingPartners}
+              />
+            ) : (
+              <>
+                <div className="flex-1 overflow-hidden" style={getWallpaperStyle()}>
                   <EnhancedChatMessages
                     messages={messages}
                     currentUserId={user.id}
                     roomName={selectedPartner?.name}
                   />
-                  <EnhancedChatInput
-                    onSendMessage={handleSendMessage}
-                    onSendFile={handleSendFile}
-                    sending={sending}
-                    uploadProgress={uploadProgress}
-                  />
-                </>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+                </div>
+                <EnhancedChatInput
+                  onSendMessage={handleSendMessage}
+                  onSendFile={handleSendFile}
+                  sending={sending}
+                  uploadProgress={uploadProgress}
+                />
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 };
 
