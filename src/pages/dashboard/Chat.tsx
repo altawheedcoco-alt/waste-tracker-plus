@@ -402,6 +402,7 @@ const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string;
 const EncryptedChat = () => {
   const { user, organization } = useAuth();
   const { isMobile } = useDisplayMode();
+  const [searchParams, setSearchParams] = useSearchParams();
   const queryClient = useQueryClient();
   const {
     conversations, conversationsLoading, getOrCreateConversation,
