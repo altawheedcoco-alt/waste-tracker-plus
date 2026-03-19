@@ -91,6 +91,7 @@ const EnhancedChatMessages = ({
   partnerName,
   onDeleteMessage,
   onForwardMessage,
+  onPinMessage,
   scrollToMessageId,
   firstUnreadMessageId,
 }: EnhancedChatMessagesProps) => {
