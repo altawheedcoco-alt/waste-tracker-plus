@@ -5161,6 +5161,7 @@ export type Database = {
           is_edited: boolean | null
           is_forwarded: boolean | null
           is_pinned: boolean | null
+          linked_shipment_ids: string[] | null
           message_type: string | null
           metadata: Json | null
           receiver_user_id: string | null
@@ -5182,6 +5183,7 @@ export type Database = {
           is_edited?: boolean | null
           is_forwarded?: boolean | null
           is_pinned?: boolean | null
+          linked_shipment_ids?: string[] | null
           message_type?: string | null
           metadata?: Json | null
           receiver_user_id?: string | null
@@ -5203,6 +5205,7 @@ export type Database = {
           is_edited?: boolean | null
           is_forwarded?: boolean | null
           is_pinned?: boolean | null
+          linked_shipment_ids?: string[] | null
           message_type?: string | null
           metadata?: Json | null
           receiver_user_id?: string | null
@@ -22677,6 +22680,7 @@ export type Database = {
           is_edited: boolean | null
           is_pinned: boolean | null
           is_resolved: boolean | null
+          linked_shipment_id: string | null
           mentioned_user_ids: string[] | null
           note_type: string
           organization_id: string
@@ -22701,6 +22705,7 @@ export type Database = {
           is_edited?: boolean | null
           is_pinned?: boolean | null
           is_resolved?: boolean | null
+          linked_shipment_id?: string | null
           mentioned_user_ids?: string[] | null
           note_type?: string
           organization_id: string
@@ -22725,6 +22730,7 @@ export type Database = {
           is_edited?: boolean | null
           is_pinned?: boolean | null
           is_resolved?: boolean | null
+          linked_shipment_id?: string | null
           mentioned_user_ids?: string[] | null
           note_type?: string
           organization_id?: string
@@ -22744,6 +22750,13 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notes_linked_shipment_id_fkey"
+            columns: ["linked_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
           {
