@@ -44,6 +44,7 @@ interface ChatHeaderProps {
   isTyping?: boolean;
   onVoiceCall?: () => void;
   onVideoCall?: () => void;
+  onShowPartnerInfo?: () => void;
 }
 
 const ChatHeader = ({
@@ -61,6 +62,7 @@ const ChatHeader = ({
   isTyping = false,
   onVoiceCall,
   onVideoCall,
+  onShowPartnerInfo,
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
   const [showWallpaper, setShowWallpaper] = useState(false);
@@ -99,7 +101,7 @@ const ChatHeader = ({
             </Button>
           )}
 
-          <div className="relative shrink-0">
+          <button className="relative shrink-0 cursor-pointer" onClick={onShowPartnerInfo}>
             <Avatar className="h-10 w-10 ring-2 ring-white/20">
               {partnerLogo ? <AvatarImage src={partnerLogo} /> : null}
               <AvatarFallback className="bg-white/20 text-white">
@@ -109,9 +111,9 @@ const ChatHeader = ({
             {isOnline && (
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-emerald-700 rounded-full" />
             )}
-          </div>
+          </button>
 
-          <div className="min-w-0">
+          <button className="min-w-0 text-right cursor-pointer" onClick={onShowPartnerInfo}>
             <h3 className="font-bold text-white text-sm truncate">{partnerName}</h3>
             <p className={cn(
               "text-[11px] truncate",
@@ -119,7 +121,7 @@ const ChatHeader = ({
             )}>
               {getStatusText()}
             </p>
-          </div>
+          </button>
         </div>
 
         {/* Left Side - Actions */}

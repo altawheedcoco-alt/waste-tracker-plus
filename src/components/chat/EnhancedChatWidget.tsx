@@ -32,6 +32,7 @@ import DisappearingMessagesDialog from './DisappearingMessagesDialog';
 import GroupChatView from './GroupChatView';
 import CreateGroupDialog from './CreateGroupDialog';
 import CallScreen from './CallScreen';
+import ChatPartnerInfo from './ChatPartnerInfo';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -67,6 +68,7 @@ const EnhancedChatWidget = () => {
   const [showDisappearing, setShowDisappearing] = useState(false);
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
+  const [showPartnerInfo, setShowPartnerInfo] = useState(false);
 
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
@@ -208,6 +210,7 @@ const EnhancedChatWidget = () => {
     setReplyTo(null);
     setShowSearch(false);
     setShowPinned(false);
+    setShowPartnerInfo(false);
     setView('sidebar');
     stopTyping();
   };
@@ -395,6 +398,7 @@ const EnhancedChatWidget = () => {
                   isTyping={isPartnerTyping}
                   onVoiceCall={() => handleStartCall('voice')}
                   onVideoCall={() => handleStartCall('video')}
+                  onShowPartnerInfo={() => setShowPartnerInfo(true)}
                 />
                 <div className="flex items-center gap-1 pr-2">
                   {/* Disappearing Messages */}
@@ -454,6 +458,14 @@ const EnhancedChatWidget = () => {
                 </div>
               ) : view === 'group' && selectedGroup ? (
                 <GroupChatView room={selectedGroup} onBack={handleBack} />
+              ) : showPartnerInfo && selectedPartner ? (
+                <ChatPartnerInfo
+                  partner={selectedPartner}
+                  notificationsEnabled={soundEnabled}
+                  onToggleNotifications={() => setSoundEnabled(!soundEnabled)}
+                  onBack={() => setShowPartnerInfo(false)}
+                  isMobile={isMobile}
+                />
               ) : (
                 <>
                   {/* Pinned Messages Bar */}
