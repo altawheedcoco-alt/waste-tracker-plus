@@ -62,6 +62,7 @@ const ChatHeader = ({
   isTyping = false,
   onVoiceCall,
   onVideoCall,
+  onShowPartnerInfo,
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
   const [showWallpaper, setShowWallpaper] = useState(false);
