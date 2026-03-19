@@ -306,7 +306,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '340px' }}>
+            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '340px' }}>
               <div className="grid grid-cols-3 gap-2 pb-2">
                 {filteredPatterns.map(p => (
                   <button
