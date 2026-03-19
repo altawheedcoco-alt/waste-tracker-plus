@@ -14,7 +14,8 @@ import {
   Image as ImageIcon,
   Mic,
   Video,
-  FileText
+  FileText,
+  X
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -43,6 +44,7 @@ export interface ChatPartner {
   unreadCount: number;
   isOnline?: boolean;
   isPinned?: boolean;
+  isTyping?: boolean;
 }
 
 interface ChatSidebarProps {
@@ -56,12 +58,12 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
   const { organization } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedPartners, setPinnedPartners] = useState<Set<string>>(new Set());
-  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean }>>(new Map());
+  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string }>>(new Map());
 
   useEffect(() => {
     const fetchLastMessages = async () => {
       if (!organization?.id || partners.length === 0) return;
-      const newLastMessages = new Map<string, { content: string; time: string; isRead: boolean; isMine: boolean }>();
+      const newLastMessages = new Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string }>();
 
       for (const partner of partners) {
         const { data } = await supabase
@@ -80,12 +82,46 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
             time: data.created_at,
             isRead: data.is_read || data.sender_organization_id === organization.id,
             isMine: data.sender_organization_id === organization.id,
+            type: data.message_type,
           });
         }
       }
       setLastMessages(newLastMessages);
     };
     fetchLastMessages();
+
+    // Realtime subscription for new messages to update sidebar
+    if (!organization?.id) return;
+    const channel = supabase
+      .channel('sidebar-messages')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'direct_messages',
+          filter: `receiver_organization_id=eq.${organization.id}`,
+        },
+        (payload: any) => {
+          const newMsg = payload.new;
+          if (!newMsg) return;
+          const partnerId = newMsg.sender_organization_id;
+          setLastMessages(prev => {
+            const updated = new Map(prev);
+            updated.set(partnerId, {
+              content: newMsg.content,
+              time: newMsg.created_at,
+              isRead: false,
+              isMine: false,
+              type: newMsg.message_type,
+            });
+            return updated;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [organization?.id, partners]);
 
   const filteredPartners = useMemo(() => {
@@ -120,18 +156,19 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
     return format(date, 'd/M/yyyy', { locale: ar });
   };
 
-  const getMessagePreview = (content: string, type?: string) => {
+  const getMessagePreview = (content: string) => {
     try {
       const parsed = JSON.parse(content);
       if (parsed.file_name) {
         const ext = parsed.file_name.split('.').pop()?.toLowerCase();
-        if (['jpg','jpeg','png','gif','webp'].includes(ext || '')) return { icon: ImageIcon, text: 'صورة' };
-        if (['mp4','webm','mov'].includes(ext || '')) return { icon: Video, text: 'فيديو' };
-        if (['webm','mp3','wav','ogg','m4a'].includes(ext || '')) return { icon: Mic, text: 'رسالة صوتية' };
-        return { icon: FileText, text: parsed.file_name };
+        if (['jpg','jpeg','png','gif','webp'].includes(ext || '')) return { icon: ImageIcon, text: '📷 صورة' };
+        if (['mp4','webm','mov'].includes(ext || '')) return { icon: Video, text: '🎬 فيديو' };
+        if (['webm','mp3','wav','ogg','m4a'].includes(ext || '')) return { icon: Mic, text: '🎤 رسالة صوتية' };
+        return { icon: FileText, text: `📎 ${parsed.file_name}` };
       }
       return { icon: null, text: parsed.text || content };
     } catch {
+      if (content.includes('تم حذف')) return { icon: null, text: '🚫 تم حذف هذه الرسالة' };
       return { icon: null, text: content.length > 45 ? content.substring(0, 45) + '...' : content };
     }
   };
@@ -171,6 +208,16 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pr-9 h-9 bg-background border-0 shadow-sm rounded-lg text-sm"
           />
+          {searchQuery && (
+            <Button 
+              size="icon" 
+              variant="ghost" 
+              className="absolute left-1 top-1/2 -translate-y-1/2 h-7 w-7"
+              onClick={() => setSearchQuery('')}
+            >
+              <X className="w-3.5 h-3.5" />
+            </Button>
+          )}
         </div>
       </div>
 
@@ -232,17 +279,23 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
 
                       <div className="flex items-center justify-between gap-2 mt-1">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          {lastMsg?.isMine && (
-                            lastMsg.isRead ? (
-                              <CheckCheck className="w-4 h-4 text-emerald-500 shrink-0" />
-                            ) : (
-                              <Check className="w-4 h-4 text-muted-foreground shrink-0" />
-                            )
+                          {/* Typing indicator in sidebar */}
+                          {partner.isTyping ? (
+                            <span className="text-xs text-emerald-600 font-medium italic">يكتب...</span>
+                          ) : (
+                            <>
+                              {lastMsg?.isMine && (
+                                lastMsg.isRead ? (
+                                  <CheckCheck className="w-4 h-4 text-sky-400 shrink-0" />
+                                ) : (
+                                  <Check className="w-4 h-4 text-muted-foreground shrink-0" />
+                                )
+                              )}
+                              <p className="text-xs text-muted-foreground truncate">
+                                {preview?.text || 'ابدأ المحادثة'}
+                              </p>
+                            </>
                           )}
-                          {preview?.icon && <preview.icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
-                          <p className="text-xs text-muted-foreground truncate">
-                            {preview?.text || 'ابدأ المحادثة'}
-                          </p>
                         </div>
                         
                         <div className="flex items-center gap-1.5 shrink-0">
