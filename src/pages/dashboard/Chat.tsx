@@ -1311,7 +1311,6 @@ const EncryptedChatInner = () => {
       </div>
     );
   };
-};
 
 // ─── Lazy load NotesTab ─────────────────────────────────
 const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
