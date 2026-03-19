@@ -1,9 +1,11 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { MessageSquare, Volume2, Bell, Webhook, Database } from 'lucide-react';
+import { MessageSquare, Volume2, Bell, Webhook, Database, Palette } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import NotificationSoundSettings from '@/components/settings/NotificationSoundSettings';
 import NotificationChannelsSettings from '@/components/settings/NotificationChannelsSettings';
 import WhatsAppNotificationManager from '@/components/whatsapp/WhatsAppNotificationManager';
+import ChatAppearanceSettings from '@/components/settings/ChatAppearanceSettings';
+import { ChatAppearanceProvider } from '@/contexts/ChatAppearanceContext';
 import { Badge } from '@/components/ui/badge';
 
 interface Props {
@@ -24,6 +26,9 @@ const IntegrationSettings = ({ orgType }: Props) => {
           <TabsTrigger value="whatsapp" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <MessageSquare className="h-3.5 w-3.5" />واتساب
           </TabsTrigger>
+          <TabsTrigger value="chat-appearance" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
+            <Palette className="h-3.5 w-3.5" />مظهر الدردشة
+          </TabsTrigger>
           <TabsTrigger value="api" className="gap-1.5 rounded-lg px-3 py-2 text-xs data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
             <Webhook className="h-3.5 w-3.5" />API
           </TabsTrigger>
@@ -40,6 +45,12 @@ const IntegrationSettings = ({ orgType }: Props) => {
 
       <TabsContent value="whatsapp">
         <WhatsAppNotificationManager />
+      </TabsContent>
+
+      <TabsContent value="chat-appearance">
+        <ChatAppearanceProvider>
+          <ChatAppearanceSettings />
+        </ChatAppearanceProvider>
       </TabsContent>
 
       <TabsContent value="api">

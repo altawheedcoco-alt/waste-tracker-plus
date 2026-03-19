@@ -37,6 +37,7 @@ import { Check, CheckCheck } from 'lucide-react';
 import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/MessageReactions';
 import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
+import { ChatAppearanceProvider, useChatAppearance } from '@/contexts/ChatAppearanceContext';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -166,6 +167,7 @@ const MessageBubble = memo(({
   onForward: () => void;
   allMessages: DecryptedMessage[];
 }) => {
+  const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
@@ -191,7 +193,7 @@ const MessageBubble = memo(({
   }
 
   return (
-    <div className={cn("flex mb-1 group relative", isMine ? "justify-start" : "justify-end")}>
+    <div className={cn("flex group relative", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}>
       <div className="max-w-[75%] relative">
         {/* Quick action buttons on hover */}
         <div className={cn(
@@ -206,12 +208,7 @@ const MessageBubble = memo(({
           </Button>
         </div>
 
-        <div className={cn(
-          "rounded-2xl px-3 py-2 relative shadow-sm",
-          isMine
-            ? "bg-primary text-primary-foreground rounded-br-sm"
-            : "bg-card border border-border rounded-bl-sm"
-        )}>
+        <div className={cn(getBubbleClasses(isMine), "relative")}>
           {!isMine && message.sender && (
             <button
               onClick={(e) => {
@@ -252,26 +249,28 @@ const MessageBubble = memo(({
             </div>
           )}
           
-          <p className="text-sm leading-relaxed whitespace-pre-wrap break-words">{message.content}</p>
+          <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
           
-          <div className={cn(
-            "flex items-center gap-1 mt-0.5",
-            isMine ? "justify-start" : "justify-end"
-          )}>
-            <span className={cn(
-              "text-[9px]",
-              isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+          {showTimestamp && (
+            <div className={cn(
+              "flex items-center gap-1 mt-0.5",
+              isMine ? "justify-start" : "justify-end"
             )}>
-              {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
-            </span>
-            {message.is_edited && (
               <span className={cn(
                 "text-[9px]",
                 isMine ? "text-primary-foreground/60" : "text-muted-foreground"
-              )}>تم التعديل</span>
-            )}
-            {getStatusIcon()}
-          </div>
+              )}>
+                {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
+              </span>
+              {message.is_edited && (
+                <span className={cn(
+                  "text-[9px]",
+                  isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+                )}>تم التعديل</span>
+              )}
+              {getStatusIcon()}
+            </div>
+          )}
         </div>
 
         {/* Reactions Display */}
@@ -1347,6 +1346,7 @@ const ChatAndNotesPage = () => {
 
   return (
     <DashboardLayout>
+      <ChatAppearanceProvider>
       <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] overflow-hidden">
         {/* Top Tabs */}
         <div className="flex items-center border-b border-border bg-card px-4 shrink-0" dir="rtl">
@@ -1392,6 +1392,7 @@ const ChatAndNotesPage = () => {
           )}
         </div>
       </div>
+      </ChatAppearanceProvider>
     </DashboardLayout>
   );
 };
