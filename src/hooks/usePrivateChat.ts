@@ -247,13 +247,28 @@ export function usePrivateChat() {
         if (msg.is_deleted) {
           content = '🚫 تم حذف هذه الرسالة';
         } else if (msg.sender_id === user.id && msg.encrypted_content_for_sender) {
+          // Sender copy: check for embedded IV format "senderIV|senderCiphertext"
+          const senderData = msg.encrypted_content_for_sender;
+          let senderIv = msg.iv;
+          let senderCiphertext = senderData;
+
+          if (senderData.includes('|')) {
+            const parts = senderData.split('|');
+            senderIv = parts[0];
+            senderCiphertext = parts[1];
+          }
+
           content = await tryDecryptWithKeys(
             Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
-            msg.encrypted_content_for_sender,
-            msg.iv,
+            senderCiphertext,
+            senderIv,
           );
         } else if (msg.sender_id !== user.id) {
-          content = await tryDecryptWithKeys(partnerPublicKeys, msg.encrypted_content, msg.iv);
+          content = await tryDecryptWithKeys(
+            Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
+            msg.encrypted_content,
+            msg.iv,
+          );
         }
       } catch {
         content = msg.file_name || '[تعذر فك التشفير على هذا الجهاز]';
