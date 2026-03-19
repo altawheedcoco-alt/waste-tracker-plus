@@ -24,7 +24,14 @@ export function useE2EKeys() {
       if (!hasKeys) {
         const publicKey = await generateAndSaveKeyPair(user.id, deviceId);
         
-        // Publish public key
+        // Deactivate all previous keys for this user
+        await supabase
+          .from('e2e_key_pairs')
+          .update({ is_active: false })
+          .eq('user_id', user.id)
+          .eq('is_active', true);
+        
+        // Publish new public key
         await supabase.from('e2e_key_pairs').upsert({
           user_id: user.id,
           public_key: publicKey,

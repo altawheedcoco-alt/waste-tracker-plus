@@ -210,7 +210,7 @@ export function usePrivateChat() {
       if (conversationIds.length > 0) {
         const { data: latestMessages } = await supabase
           .from('encrypted_messages')
-          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at')
+          .select('conversation_id, sender_id, encrypted_content, encrypted_content_for_sender, iv, message_type, file_name, status, created_at, content_preview')
           .in('conversation_id', conversationIds)
           .order('created_at', { ascending: false });
 
