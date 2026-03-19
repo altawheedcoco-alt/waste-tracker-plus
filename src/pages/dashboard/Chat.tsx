@@ -1149,16 +1149,34 @@ const EncryptedChat = () => {
                           </AvatarFallback>
                         </Avatar>
                       </ClickableImage>
-                      <button className="text-right cursor-pointer" onClick={() => setShowPartnerInfo(true)}>
-                        <h3 className="text-sm font-semibold">{selectedConvo.partner?.full_name}</h3>
-                        <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                      <div className="text-right">
+                        <button
+                          className="text-sm font-semibold hover:underline cursor-pointer"
+                          onClick={() => {
+                            // Navigate to member profile
+                            if (selectedConvo.partner?.user_id) {
+                              navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`);
+                            }
+                          }}
+                        >
+                          {selectedConvo.partner?.full_name}
+                        </button>
+                        <button
+                          className="text-[10px] text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                          onClick={() => {
+                            // Navigate to org profile
+                            if (selectedConvo.partner?.organization_id) {
+                              navigate(`/dashboard/org-profile/${selectedConvo.partner.organization_id}`);
+                            }
+                          }}
+                        >
                           <Building2 className="w-2.5 h-2.5" />
                           {selectedConvo.partner?.organization_name || 'غير محدد'}
                           <span className="mx-1">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
-                        </p>
-                      </button>
+                        </button>
+                      </div>
                     </div>
                     <div className="flex items-center gap-1">
                       <Button
