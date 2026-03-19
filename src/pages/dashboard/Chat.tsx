@@ -6,8 +6,10 @@ import {
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Reply, Forward, SmilePlus, Paintbrush
+  Reply, Forward, SmilePlus, Paintbrush, Info
 } from 'lucide-react';
+import ClickableImage from '@/components/ui/ClickableImage';
+import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
