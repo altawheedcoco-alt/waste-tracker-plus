@@ -39,6 +39,7 @@ interface EnhancedChatMessagesProps {
   partnerName?: string;
   onDeleteMessage?: (messageId: string) => void;
   onForwardMessage?: (messageId: string) => void;
+  onPinMessage?: (messageId: string) => void;
   scrollToMessageId?: string | null;
   firstUnreadMessageId?: string | null;
 }
@@ -90,6 +91,7 @@ const EnhancedChatMessages = ({
   partnerName,
   onDeleteMessage,
   onForwardMessage,
+  onPinMessage,
   scrollToMessageId,
   firstUnreadMessageId,
 }: EnhancedChatMessagesProps) => {
@@ -463,6 +465,7 @@ const EnhancedChatMessages = ({
                                 onReply={onReply ? () => onReply(message) : undefined}
                                 onDelete={isOwn && onDeleteMessage ? () => onDeleteMessage(message.id) : undefined}
                                 onForward={onForwardMessage ? () => onForwardMessage(message.id) : undefined}
+                                onPin={onPinMessage ? () => onPinMessage(message.id) : undefined}
                               />
                             )}
                           </div>

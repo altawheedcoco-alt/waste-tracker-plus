@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Maximize2, Minimize2 } from 'lucide-react';
+import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat, ChatMessage } from '@/hooks/useChat';
 import { useAuth } from '@/contexts/AuthContext';
@@ -11,6 +11,10 @@ import { onWidgetToggle } from '@/lib/widgetBus';
 import { usePresence } from '@/hooks/usePresence';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { usePinnedMessages } from '@/hooks/usePinnedMessages';
+import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
+import { usePushNotifications } from '@/hooks/usePushNotifications';
+import { useGroupChat } from '@/hooks/useGroupChat';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -22,6 +26,10 @@ import EnhancedChatInput from './EnhancedChatInput';
 import ReplyPreview from './ReplyPreview';
 import ForwardMessageDialog from './ForwardMessageDialog';
 import ChatSearchBar from './ChatSearchBar';
+import PinnedMessagesBar from './PinnedMessagesBar';
+import DisappearingMessagesDialog from './DisappearingMessagesDialog';
+import GroupChatView from './GroupChatView';
+import CreateGroupDialog from './CreateGroupDialog';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -43,7 +51,7 @@ const EnhancedChatWidget = () => {
 
   const [isOpen, setIsOpen] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
-  const [view, setView] = useState<'sidebar' | 'chat'>('sidebar');
+  const [view, setView] = useState<'sidebar' | 'chat' | 'group'>('sidebar');
   const [partners, setPartners] = useState<ChatPartner[]>([]);
   const [loadingPartners, setLoadingPartners] = useState(false);
   const [selectedPartner, setSelectedPartner] = useState<ChatPartner | null>(null);
@@ -53,9 +61,17 @@ const EnhancedChatWidget = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [forwardDialog, setForwardDialog] = useState<{ open: boolean; messageContent: string }>({ open: false, messageContent: '' });
   const [scrollToMessageId, setScrollToMessageId] = useState<string | null>(null);
+  const [showPinned, setShowPinned] = useState(false);
+  const [showDisappearing, setShowDisappearing] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState<any>(null);
 
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
+  const { pinnedMessages, fetchPinned, togglePin } = usePinnedMessages(selectedPartner?.id);
+  const { duration: disappearDuration, setDisappearDuration, getExpiryDate, isActive: disappearActive } = useDisappearingMessages(selectedPartner?.id);
+  const { permission: pushPermission, requestPermission: requestPush } = usePushNotifications();
+  const { rooms, createGroup, isCreatingGroup } = useGroupChat();
 
   // Listen for unified menu toggle
   useEffect(() => {
@@ -151,16 +167,25 @@ const EnhancedChatWidget = () => {
     setView('chat');
     setReplyTo(null);
     setShowSearch(false);
+    setShowPinned(false);
     await fetchMessagesForPartner(partner.id);
     await markPartnerAsRead(partner.id);
+    fetchPinned();
     setPartners(prev => prev.map(p => p.id === partner.id ? { ...p, unreadCount: 0 } : p));
     setUnreadTotal(prev => Math.max(0, prev - partner.unreadCount));
   };
 
+  const handleSelectGroup = (room: any) => {
+    setSelectedGroup(room);
+    setView('group');
+  };
+
   const handleBack = () => {
     setSelectedPartner(null);
+    setSelectedGroup(null);
     setReplyTo(null);
     setShowSearch(false);
+    setShowPinned(false);
     setView('sidebar');
     stopTyping();
   };
@@ -168,12 +193,26 @@ const EnhancedChatWidget = () => {
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
     stopTyping();
+    const expiresAt = getExpiryDate();
     if (replyTo) {
       const payload = JSON.stringify({ text: content, reply_to_id: replyTo.id });
       await sendMessage(payload, selectedPartner.id);
       setReplyTo(null);
     } else {
       await sendMessage(content, selectedPartner.id);
+    }
+    // Set expiry if disappearing is active
+    if (expiresAt) {
+      // Get latest message and set expiry
+      const { data: latest } = await supabase
+        .from('direct_messages')
+        .select('id')
+        .eq('sender_id', user!.id)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (latest?.[0]) {
+        await supabase.from('direct_messages').update({ expires_at: expiresAt }).eq('id', latest[0].id);
+      }
     }
   };
 
@@ -198,6 +237,12 @@ const EnhancedChatWidget = () => {
     } catch {
       toast.error('فشل حذف الرسالة');
     }
+  };
+
+  const handlePinMessage = async (messageId: string) => {
+    const isPinned = pinnedMessages.some(m => m.id === messageId);
+    await togglePin(messageId, isPinned);
+    if (selectedPartner) await fetchMessagesForPartner(selectedPartner.id);
   };
 
   const handleForwardMessage = (messageId: string) => {
@@ -225,7 +270,6 @@ const EnhancedChatWidget = () => {
 
   const handleScrollToMessage = (messageId: string) => {
     setScrollToMessageId(messageId);
-    // Reset after a tick so the component can react
     setTimeout(() => setScrollToMessageId(null), 100);
   };
 
@@ -282,6 +326,26 @@ const EnhancedChatWidget = () => {
                   </div>
                 </div>
                 <div className="flex items-center gap-1">
+                  {/* Push Notification Toggle */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                    onClick={() => pushPermission !== 'granted' ? requestPush() : toast.info('الإشعارات مفعلة بالفعل')}
+                    title={pushPermission === 'granted' ? 'الإشعارات مفعلة' : 'تفعيل الإشعارات'}
+                  >
+                    {pushPermission === 'granted' ? <Bell className="w-4 h-4" /> : <BellOff className="w-4 h-4" />}
+                  </Button>
+                  {/* Create Group */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15"
+                    onClick={() => setShowCreateGroup(true)}
+                    title="إنشاء مجموعة"
+                  >
+                    <Users className="w-4 h-4" />
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsExpanded(!isExpanded)}>
                     {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   </Button>
@@ -290,6 +354,8 @@ const EnhancedChatWidget = () => {
                   </Button>
                 </div>
               </div>
+            ) : view === 'group' && selectedGroup ? (
+              null // GroupChatView has its own header
             ) : selectedPartner && (
               <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
                 <ChatHeader
@@ -307,6 +373,16 @@ const EnhancedChatWidget = () => {
                   isTyping={isPartnerTyping}
                 />
                 <div className="flex items-center gap-1 pr-2">
+                  {/* Disappearing Messages */}
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className={cn("h-8 w-8 hover:bg-white/15", disappearActive ? "text-amber-300" : "text-white/80 hover:text-white")}
+                    onClick={() => setShowDisappearing(true)}
+                    title="الرسائل المؤقتة"
+                  >
+                    <Timer className="w-4 h-4" />
+                  </Button>
                   <Button size="icon" variant="ghost" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={() => setIsExpanded(!isExpanded)}>
                     {isExpanded ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
                   </Button>
@@ -320,14 +396,70 @@ const EnhancedChatWidget = () => {
             {/* Content */}
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               {view === 'sidebar' ? (
-                <ChatSidebar
-                  partners={partners}
-                  selectedPartnerId={selectedPartner?.id || null}
-                  onSelectPartner={handleSelectPartner}
-                  loading={loadingPartners}
-                />
+                <div className="flex-1 overflow-hidden flex flex-col">
+                  {/* Groups Section */}
+                  {rooms.length > 0 && (
+                    <div className="px-3 pt-2 pb-1">
+                      <p className="text-[11px] font-semibold text-muted-foreground mb-1.5">المجموعات</p>
+                      <div className="space-y-0.5">
+                        {rooms.map(room => (
+                          <button
+                            key={room.id}
+                            onClick={() => handleSelectGroup(room)}
+                            className="w-full flex items-center gap-2.5 p-2 rounded-xl hover:bg-muted/50 transition-colors text-right"
+                          >
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                              <Users className="w-5 h-5 text-primary" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm font-medium truncate">{room.name}</p>
+                              <p className="text-[11px] text-muted-foreground">{room.participant_count} عضو</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                      <div className="border-b border-border/50 mt-2" />
+                    </div>
+                  )}
+                  <ChatSidebar
+                    partners={partners}
+                    selectedPartnerId={selectedPartner?.id || null}
+                    onSelectPartner={handleSelectPartner}
+                    loading={loadingPartners}
+                  />
+                </div>
+              ) : view === 'group' && selectedGroup ? (
+                <GroupChatView room={selectedGroup} onBack={handleBack} />
               ) : (
                 <>
+                  {/* Pinned Messages Bar */}
+                  {pinnedMessages.length > 0 && showPinned && (
+                    <PinnedMessagesBar
+                      pinnedMessages={pinnedMessages}
+                      onScrollToMessage={handleScrollToMessage}
+                      onClose={() => setShowPinned(false)}
+                    />
+                  )}
+
+                  {/* Pinned indicator */}
+                  {pinnedMessages.length > 0 && !showPinned && (
+                    <button
+                      onClick={() => setShowPinned(true)}
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] text-amber-600 bg-amber-50/50 dark:bg-amber-950/20 border-b border-border hover:bg-amber-50 dark:hover:bg-amber-950/30 transition-colors"
+                    >
+                      <span className="rotate-45">📌</span>
+                      {pinnedMessages.length} رسالة مثبتة
+                    </button>
+                  )}
+
+                  {/* Disappearing indicator */}
+                  {disappearActive && (
+                    <div className="flex items-center gap-1.5 px-3 py-1 text-[10px] text-amber-600 bg-amber-50/30 dark:bg-amber-950/10 border-b border-border">
+                      <Timer className="w-3 h-3" />
+                      الرسائل المؤقتة مفعلة
+                    </div>
+                  )}
+
                   {/* Search Bar */}
                   {showSearch && (
                     <ChatSearchBar
@@ -346,6 +478,7 @@ const EnhancedChatWidget = () => {
                       partnerName={partnerTypingName || selectedPartner?.name}
                       onDeleteMessage={handleDeleteMessage}
                       onForwardMessage={handleForwardMessage}
+                      onPinMessage={handlePinMessage}
                       isPartnerTyping={isPartnerTyping}
                       scrollToMessageId={scrollToMessageId}
                     />
@@ -377,6 +510,22 @@ const EnhancedChatWidget = () => {
         partners={partners.filter(p => p.id !== selectedPartner?.id)}
         messageContent={forwardDialog.messageContent}
         onForward={handleForwardTo}
+      />
+
+      {/* Disappearing Messages Dialog */}
+      <DisappearingMessagesDialog
+        open={showDisappearing}
+        onOpenChange={setShowDisappearing}
+        currentDuration={disappearDuration}
+        onSetDuration={setDisappearDuration}
+      />
+
+      {/* Create Group Dialog */}
+      <CreateGroupDialog
+        open={showCreateGroup}
+        onOpenChange={setShowCreateGroup}
+        onCreateGroup={createGroup}
+        isCreating={isCreatingGroup}
       />
     </>
   );
