@@ -1,10 +1,10 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { generateDigitalSealSVG, generateSealNumber, generateDocumentSealProof, type DigitalSealData } from '@/lib/secureDigitalSeal';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
-import { Shield, Copy, CheckCircle2 } from 'lucide-react';
+import { Shield, Copy, CheckCircle2, ExternalLink } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
 
 interface SecureDigitalSealProps {
   entityId: string;

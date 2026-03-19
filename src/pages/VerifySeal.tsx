@@ -137,20 +137,21 @@ const VerifySeal = () => {
         // First check document_signatures for platform_seal_number
         const { data: sig } = await supabase
           .from('document_signatures')
-          .select('id, signer_name, signer_role, signer_title, signer_id, document_type, document_id, signature_method, platform_seal_number, created_at, status')
+          .select('id, signer_name, signer_role, signer_title, document_type, document_id, signature_method, platform_seal_number, created_at, status')
           .eq('platform_seal_number', code.trim())
           .maybeSingle();
 
         if (sig) {
+          const s = sig as any;
           await logScan(code.trim(), 'valid');
           setResult({
             isValid: true,
             sealNumber: code.trim(),
             sealType: 'member',
-            entityName: sig.signer_name || '',
-            entityId: sig.signer_id || undefined,
-            profileUrl: sig.signer_id ? `/dashboard/profile/${sig.signer_id}` : undefined,
-            message: `توقيع رقمي مؤمّن — ${sig.signer_name} (${sig.signer_role || sig.signer_title || 'موقّع'}) على مستند ${sig.document_type}`,
+            entityName: s.signer_name || '',
+            entityId: s.signer_id || undefined,
+            profileUrl: s.signer_id ? `/dashboard/profile/${s.signer_id}` : undefined,
+            message: `توقيع رقمي مؤمّن — ${s.signer_name} (${s.signer_role || s.signer_title || 'موقّع'}) على مستند ${s.document_type}`,
             verifiedAt: new Date().toISOString(),
           });
           setLoading(false);

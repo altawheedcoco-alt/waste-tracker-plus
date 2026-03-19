@@ -98,6 +98,7 @@ export const publicRoutes = (
     <Route path="/recycling-history" element={<RecyclingHistory />} />
     <Route path="/s/:type/:code" element={<SharedResourcePage />} />
     <Route path="/c2b/:code" element={<C2BPublicView />} />
+    <Route path="/verify-seal" element={<VerifySeal />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
