@@ -204,32 +204,26 @@ export const playNotificationSound = async (type: NotificationSoundType = 'defau
   // Check if specific sound type is enabled
   const soundSettings = getSoundSettings();
   if (!soundSettings[type]) return;
-  
-  try {
-    const unlocked = await ensureAudioUnlocked();
-    if (!unlocked) {
-      console.warn('🔇 Audio context not unlocked yet - needs user gesture first');
-      return;
-    }
-    
-    const ctx = getAudioContext();
-    const sound = NOTIFICATION_SOUNDS[type] || NOTIFICATION_SOUNDS.default;
-    const now = ctx.currentTime;
-    
-    sound.frequencies.forEach((freq, index) => {
-      playTone(
-        freq, 
-        sound.duration, 
-        now + (index * sound.duration) / 1000,
-        sound.waveform,
-        sound.volume
-      );
-    });
-    
-    // sound played
-  } catch (error) {
-    console.warn('Could not play notification sound:', error);
+
+  // Check quiet hours
+  const qhEnabled = localStorage.getItem('quiet_hours_enabled') === 'true';
+  if (qhEnabled) {
+    const start = localStorage.getItem('quiet_hours_start') || '22:00';
+    const end = localStorage.getItem('quiet_hours_end') || '07:00';
+    const now = new Date();
+    const mins = now.getHours() * 60 + now.getMinutes();
+    const [sH, sM] = start.split(':').map(Number);
+    const [eH, eM] = end.split(':').map(Number);
+    const sMin = sH * 60 + sM, eMin = eH * 60 + eM;
+    const inQuiet = sMin <= eMin ? (mins >= sMin && mins <= eMin) : (mins >= sMin || mins <= eMin);
+    if (inQuiet) return;
   }
+
+  // Use theme and volume from DB-synced localStorage
+  const theme = localStorage.getItem('sound_theme') || 'classic';
+  const globalVol = parseFloat(localStorage.getItem('sound_global_volume') || '0.7');
+  
+  await playThemeSound(type, theme, globalVol);
 };
 
 // Preview a specific sound
