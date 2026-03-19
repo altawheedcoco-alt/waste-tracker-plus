@@ -20,6 +20,14 @@ export { default as ChatSidebar } from './ChatSidebar';
 export { default as ChatHeader } from './ChatHeader';
 export { default as ChatPartnerInfo } from './ChatPartnerInfo';
 
+// Group Chat
+export { default as GroupChatView } from './GroupChatView';
+export { default as CreateGroupDialog } from './CreateGroupDialog';
+
+// Advanced Features
+export { default as PinnedMessagesBar } from './PinnedMessagesBar';
+export { default as DisappearingMessagesDialog } from './DisappearingMessagesDialog';
+
 // Utility Components
 export { default as ImageLightbox } from './ImageLightbox';
 export { default as ChatSearch } from './ChatSearch';
