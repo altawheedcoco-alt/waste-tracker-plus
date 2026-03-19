@@ -193,7 +193,7 @@ const MessageBubble = memo(({
   }
 
   return (
-    <div className={cn("flex mb-1 group relative", isMine ? "justify-start" : "justify-end")}>
+    <div className={cn("flex group relative", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}>
       <div className="max-w-[75%] relative">
         {/* Quick action buttons on hover */}
         <div className={cn(
