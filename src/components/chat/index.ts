@@ -9,6 +9,7 @@ export { default as ChatMessages } from './ChatMessages';
 export { default as EnhancedChatMessages } from './EnhancedChatMessages';
 export { default as VoiceMessagePlayer } from './VoiceMessagePlayer';
 export { default as MessageActions } from './MessageActions';
+export { default as MessageReactions } from './MessageReactions';
 
 // Input Components
 export { default as ChatInput } from './ChatInput';
@@ -22,6 +23,7 @@ export { default as ChatPartnerInfo } from './ChatPartnerInfo';
 // Utility Components
 export { default as ImageLightbox } from './ImageLightbox';
 export { default as ChatSearch } from './ChatSearch';
+export { default as ReplyPreview } from './ReplyPreview';
 
 // Types
 export type { ChatPartner } from './ChatSidebar';
