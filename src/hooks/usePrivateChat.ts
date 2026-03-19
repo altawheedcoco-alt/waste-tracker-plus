@@ -70,6 +70,85 @@ export function usePrivateChat() {
     return keys;
   }, [getPublicKeys]);
 
+  const buildPreviewText = useCallback((messageType?: string | null, fallbackText = '', fileName?: string | null) => {
+    switch (messageType) {
+      case 'image':
+        return '📷 صورة';
+      case 'video':
+        return '🎥 فيديو';
+      case 'voice':
+      case 'audio':
+        return '🎤 رسالة صوتية';
+      case 'file':
+        return `📎 ${fileName || 'ملف مرفق'}`;
+      default:
+        return fallbackText || 'رسالة مشفرة';
+    }
+  }, []);
+
+  const decryptConversationPreview = useCallback(async (
+    message: {
+      sender_id: string;
+      encrypted_content: string | null;
+      encrypted_content_for_sender: string | null;
+      iv: string;
+      message_type: string | null;
+      file_name: string | null;
+    },
+    partnerId: string,
+  ) => {
+    if (!user) return 'رسالة مشفرة';
+    if (message.message_type && message.message_type !== 'text') {
+      return buildPreviewText(message.message_type, '', message.file_name);
+    }
+
+    const partnerPublicKeys = await getCachedPublicKeys(partnerId);
+    const myPublicKeys = await getCachedPublicKeys(user.id);
+
+    const tryDecryptWithKeys = async (candidateKeys: string[], ciphertext: string, iv: string) => {
+      for (const candidateKey of candidateKeys) {
+        try {
+          return await decryptMessage(user.id, candidateKey, { ciphertext, iv });
+        } catch {
+          continue;
+        }
+      }
+      throw new Error('DECRYPT_PREVIEW_FAILED');
+    };
+
+    try {
+      if (message.sender_id === user.id && message.encrypted_content_for_sender) {
+        const senderData = message.encrypted_content_for_sender;
+        let senderIv = message.iv;
+        let senderCiphertext = senderData;
+
+        if (senderData.includes('|')) {
+          const [embeddedIv, ...ciphertextParts] = senderData.split('|');
+          senderIv = embeddedIv;
+          senderCiphertext = ciphertextParts.join('|');
+        }
+
+        const content = await tryDecryptWithKeys(
+          Array.from(new Set([...myPublicKeys, ...partnerPublicKeys])),
+          senderCiphertext,
+          senderIv,
+        );
+
+        return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
+      }
+
+      const content = await tryDecryptWithKeys(
+        Array.from(new Set([...partnerPublicKeys, ...myPublicKeys])),
+        message.encrypted_content || '',
+        message.iv,
+      );
+
+      return buildPreviewText(message.message_type, content.slice(0, 120), message.file_name);
+    } catch {
+      return buildPreviewText(message.message_type, message.file_name || 'رسالة مشفرة', message.file_name);
+    }
+  }, [user, getCachedPublicKeys, buildPreviewText]);
+
   // ─── Conversations List ──────────────────────────────
   const { data: conversations = [], isLoading: conversationsLoading, refetch: refetchConversations } = useQuery({
     queryKey: ['private-conversations', user?.id],
