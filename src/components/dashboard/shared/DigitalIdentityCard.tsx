@@ -119,7 +119,7 @@ const DigitalIdentityCard = () => {
         const { count: partnershipsCount } = await (supabase
           .from('verified_partnerships')
           .select('id', { count: 'exact', head: true })
-          .or(`requester_org_id.eq.${orgId},target_org_id.eq.${orgId}`)
+          .or(`requester_org_id.eq.${orgId},partner_org_id.eq.${orgId}`)
           .eq('status', 'active') as any);
 
         setStats({

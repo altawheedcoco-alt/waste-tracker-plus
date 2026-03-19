@@ -143,6 +143,22 @@ export const useNotes = (resourceType: string, resourceId: string) => {
         .single();
 
       if (error) throw error;
+
+      // Send note as a chat message if send_to_chat is true
+      if (input.send_to_chat && input.target_organization_id) {
+        try {
+          await supabase.from('direct_messages').insert({
+            sender_id: profile.id,
+            sender_organization_id: organization.id,
+            receiver_organization_id: input.target_organization_id,
+            content: `📝 ملاحظة: ${input.content}`,
+            message_type: 'system',
+          } as any);
+        } catch (chatErr) {
+          console.error('Failed to send note to chat:', chatErr);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
