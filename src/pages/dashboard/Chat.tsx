@@ -484,6 +484,57 @@ const EncryptedChat = () => {
     }
   }, [orgGroups]);
 
+  // Auto-open conversation from URL params (e.g. ?partnerId=xxx)
+  useEffect(() => {
+    const partnerId = searchParams.get('partnerId') || searchParams.get('partner');
+    if (!partnerId || !user || conversationsLoading) return;
+
+    // Find existing conversation with this partner's org members
+    const existing = conversations.find(c => {
+      const partnerOrgId = c.partner?.organization_id;
+      return partnerOrgId === partnerId || c.partner_id === partnerId;
+    });
+
+    if (existing) {
+      setSelectedConvoId(existing.id);
+      setShowSidebar(false);
+      // Clear the param so it doesn't re-trigger
+      searchParams.delete('partnerId');
+      searchParams.delete('partner');
+      searchParams.delete('partnerName');
+      setSearchParams(searchParams, { replace: true });
+    } else {
+      // Try to create conversation with any member of that org
+      (async () => {
+        try {
+          // Find a member of the target org to chat with
+          const { data: members } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('organization_id', partnerId)
+            .limit(1);
+
+          if (members && members.length > 0) {
+            const convoId = await getOrCreateConversation(members[0].id);
+            if (convoId) {
+              setSelectedConvoId(convoId);
+              setShowSidebar(false);
+            }
+          } else {
+            toast.error('لم يتم العثور على أعضاء في هذه الجهة');
+          }
+        } catch {
+          toast.error('فشل فتح المحادثة');
+        }
+        // Clear params
+        searchParams.delete('partnerId');
+        searchParams.delete('partner');
+        searchParams.delete('partnerName');
+        setSearchParams(searchParams, { replace: true });
+      })();
+    }
+  }, [searchParams, user, conversations, conversationsLoading]);
+
   const toggleOrgExpand = (orgId: string) => {
     setExpandedOrgs(prev => {
       const next = new Set(prev);
