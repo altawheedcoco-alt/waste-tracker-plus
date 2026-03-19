@@ -20,6 +20,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import ClickableImage from '@/components/ui/ClickableImage';
 import StoryCircles from '@/components/stories/StoryCircles';
 import PostInteractions from './PostInteractions';
 import PostShareActions from '@/components/content-generator/PostShareActions';
