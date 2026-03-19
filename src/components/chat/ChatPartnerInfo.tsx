@@ -335,7 +335,7 @@ function FileItem({ item }: { item: EncryptedMediaItem }) {
   );
 }
 
-function LinkItem({ item }: { item: SharedLink }) {
+function LinkItem({ item }: { item: EncryptedSharedLink }) {
   return (
     <a
       href={item.url}
