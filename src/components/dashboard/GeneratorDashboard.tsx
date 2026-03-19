@@ -39,6 +39,7 @@ import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
 import { Skeleton } from '@/components/ui/skeleton';
 
 // Lazy load heavy tab content
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 
 const GeneratorTrackingWidget = lazy(() => import('./generator/GeneratorTrackingWidget'));
 const DisposalRadarWidget = lazy(() => import('./generator/DisposalRadarWidget'));
@@ -287,6 +288,11 @@ const GeneratorDashboard = () => {
         </Button>
       </DashboardV2Header>
 
+
+      {/* ★ مركز التواصل والمشاركة */}
+      <Suspense fallback={<TabFallback />}>
+        <CommunicationHubWidget />
+      </Suspense>
 
       {/* ★ مركز القيادة */}
       <GeneratorCommandCenter />

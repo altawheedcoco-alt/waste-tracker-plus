@@ -7,9 +7,9 @@ import { useNotifications } from '@/hooks/useNotifications';
  */
 const TYPE_TO_SECTION: Record<string, string[]> = {
   // Shipment-related — maps to item keys AND group IDs for badge rollup
-  shipment_created: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
-  shipment: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
-  status_update: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops'],
+  shipment_created: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops', 'communication'],
+  shipment: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops', 'communication'],
+  status_update: ['transporter-shipments', 'recycler-shipments', 'generator-shipments', 'driver-shipments', 'transporter-ops', 'recycler-ops', 'generator-ops', 'disposal-ops', 'communication'],
   // Recycling reports
   recycling_report: ['transporter-certs', 'generator-certs', 'admin-certs', 'issue-certs', 'reports-analytics'],
   // Partner-related
@@ -25,7 +25,7 @@ const TYPE_TO_SECTION: Record<string, string[]> = {
   receipt_issued: ['transporter-receipts', 'generator-receipts', 'transporter-ops', 'generator-ops', 'recycler-ops'],
   receipt_confirmed: ['transporter-receipts', 'generator-receipts', 'transporter-ops', 'generator-ops'],
   // General notifications
-  general: ['notifications'],
+  general: ['notifications', 'communication'],
 };
 
 export interface SectionNotificationCounts {

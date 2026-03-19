@@ -29,6 +29,7 @@ import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
 import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 
 interface RecentShipment {
   id: string;
@@ -239,6 +240,8 @@ const RecyclerDashboard = () => {
           <Sparkles className="w-4 h-4" />
         </Button>
       </DashboardV2Header>
+
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
 
       {facility && <FacilityCapacityCard facility={facility} />}
 

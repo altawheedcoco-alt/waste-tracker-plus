@@ -45,6 +45,7 @@ import AdminComplianceAnalyticsTabs from './admin/tabs/AdminComplianceAnalyticsT
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CreateWorkOrderDialog = lazy(() => import('@/components/work-orders/CreateWorkOrderDialog'));
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 
 const pillarTabs = [
   { value: 'command-center', labelAr: 'مركز القيادة', labelEn: 'Command Center', icon: Zap },
@@ -245,6 +246,9 @@ const AdminDashboard = () => {
         <OrganizationBreakdown generatorCount={stats.generatorCount} transporterCount={stats.transporterCount} recyclerCount={stats.recyclerCount} />
       </motion.div>
 
+      <motion.div variants={itemVariants}>
+        <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      </motion.div>
       <motion.div variants={itemVariants}>
         <AdminOperationalAlerts />
       </motion.div>

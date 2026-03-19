@@ -60,6 +60,25 @@ export const standaloneItems: SidebarItemConfig[] = [
  * Groups are merged for a cleaner structure (~12 groups instead of ~22).
  */
 export const sidebarGroups: SidebarGroupConfig[] = [
+  // ═══════════════ 0. التواصل والمشاركة (Communication Hub) ═══════════════
+  {
+    id: 'communication',
+    icon: MessageCircle,
+    labelAr: 'التواصل والمشاركة',
+    labelEn: 'Communication Hub',
+    visibleFor: [],
+    items: [
+      { icon: MessageCircle, labelAr: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
+      { icon: Bell, labelAr: 'الإشعارات', labelEn: 'Notifications', path: '/dashboard/notifications', key: 'notifications', badgeKey: 'notifications', bindingType: 'internal' as const },
+      { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center', bindingType: 'internal' as const },
+      { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
+      { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
+      { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
+      { icon: Rss, labelAr: 'آخر أخبار الشركاء', labelEn: 'Partners Timeline', path: '/dashboard/partners-timeline', key: 'comm-partners-timeline', badgeKey: 'partners-timeline', bindingType: 'hybrid' as const, requiredPermissions: ['view_partner_data'] },
+      { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
+    ],
+  },
+
   // ═══════════════ 1. المنظمة والهيكل ═══════════════
   {
     id: 'org-structure',
@@ -467,19 +486,14 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 15. التواصل والطلبات ═══════════════
+  // ═══════════════ 15. الطلبات والتنظيم ═══════════════
   {
-    id: 'communication',
-    icon: MessageCircle,
-    labelAr: 'التواصل والطلبات',
-    labelEn: 'Communication & Requests',
+    id: 'requests-regulatory',
+    icon: ClipboardList,
+    labelAr: 'الطلبات والتنظيم',
+    labelEn: 'Requests & Regulatory',
     visibleFor: [],
     items: [
-      { icon: MessageCircle, labelAr: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
-      { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
-      { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
-      { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
-      { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
       { icon: FileText, labelAr: 'عروض الأسعار', labelEn: 'Quotations', path: '/dashboard/quotations', key: 'quotations', bindingType: 'partner' as const,
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office'] },
       { icon: Scale, labelAr: 'السجل التنظيمي', labelEn: 'Regulatory', path: '/dashboard/regulatory-updates', key: 'regulatory', bindingType: 'admin' as const },
@@ -522,7 +536,6 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates', bindingType: 'internal' as const },
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center', bindingType: 'internal' as const },
       { icon: BookOpen, labelAr: 'دليل المستخدم', labelEn: 'User Guide', path: '/dashboard/user-guide', key: 'user-guide', bindingType: 'internal' as const },
-      { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'منشئ السيرة الذاتية', labelEn: 'CV Builder', path: '/dashboard/cv-builder', key: 'cv-builder', bindingType: 'internal' as const },
     ],
   },

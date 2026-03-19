@@ -1,4 +1,4 @@
-import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock, IdCard } from 'lucide-react';
+import { LucideIcon, Package, Wallet, BarChart3, Bell, TrendingUp, Truck, Users, FileCheck, QrCode, Printer, Activity, MapPin, Scale, ClipboardList, Recycle, Factory, Leaf, Shield, Bot, Calendar, Zap, AlertTriangle, FileText, Gauge, Navigation, Radio, Wrench, BadgeCheck, Landmark, BookOpen, Briefcase, HeartPulse, FlaskConical, LayoutGrid, CreditCard, BarChart, ShieldCheck, Globe, Coins, Cpu, Brain, Star, Search, ScrollText, Lock, IdCard, MessageCircle } from 'lucide-react';
 
 export interface DashboardWidgetConfig {
   id: string;
@@ -17,6 +17,19 @@ export interface DashboardWidgetConfig {
 }
 
 export const dashboardWidgets: DashboardWidgetConfig[] = [
+  // === مركز التواصل والمشاركة ===
+  {
+    id: 'communication_hub',
+    title: 'التواصل والمشاركة',
+    description: 'رسائل، إشعارات، ملاحظات، حالات — كل قنوات التواصل في مكان واحد',
+    icon: MessageCircle,
+    category: 'quick_action',
+    availableFor: ['generator', 'transporter', 'recycler', 'disposal', 'admin'],
+    defaultOrder: -1,
+    defaultPinned: true,
+    size: 'large',
+  },
+
   // === بطاقة الهوية التعريفية الرقمية ===
   {
     id: 'digital_identity_card',
