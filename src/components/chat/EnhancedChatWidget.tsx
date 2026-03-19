@@ -107,14 +107,14 @@ const EnhancedChatWidget = () => {
     });
   }, []);
 
-  // Fetch last message time for each partner
+  // Fetch last message time for each partner from direct_messages
   const fetchLastSeenTimes = useCallback(async (partnerOrgIds: string[]) => {
     if (!organization?.id || partnerOrgIds.length === 0) return;
     try {
       const map = new Map<string, string>();
       for (const pId of partnerOrgIds) {
         const { data } = await supabase
-          .from('chat_messages')
+          .from('direct_messages')
           .select('created_at')
           .eq('sender_organization_id', pId)
           .order('created_at', { ascending: false })
@@ -129,20 +129,21 @@ const EnhancedChatWidget = () => {
     }
   }, [organization?.id]);
 
+  // Fetch partners from verified_partnerships (not shipments)
   const fetchPartners = useCallback(async () => {
     if (!organization?.id) return;
     setLoadingPartners(true);
     try {
-      const { data: shipments } = await supabase
-        .from('shipments')
-        .select('generator_id, transporter_id, recycler_id')
-        .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`);
+      const { data: partnerships } = await supabase
+        .from('verified_partnerships')
+        .select('requester_org_id, partner_org_id')
+        .or(`requester_org_id.eq.${organization.id},partner_org_id.eq.${organization.id}`)
+        .eq('status', 'active');
 
       const partnerIds = new Set<string>();
-      shipments?.forEach(shipment => {
-        if (shipment.generator_id && shipment.generator_id !== organization.id) partnerIds.add(shipment.generator_id);
-        if (shipment.transporter_id && shipment.transporter_id !== organization.id) partnerIds.add(shipment.transporter_id);
-        if (shipment.recycler_id && shipment.recycler_id !== organization.id) partnerIds.add(shipment.recycler_id);
+      partnerships?.forEach(p => {
+        const otherId = p.requester_org_id === organization.id ? p.partner_org_id : p.requester_org_id;
+        if (otherId) partnerIds.add(otherId);
       });
 
       if (partnerIds.size > 0) {
@@ -151,6 +152,7 @@ const EnhancedChatWidget = () => {
           .from('organizations')
           .select('id, name, organization_type, logo_url')
           .in('id', partnerIdsArr)
+          .eq('is_active', true)
           .order('name');
 
         const partnersWithUnread: ChatPartner[] = await Promise.all(
@@ -170,6 +172,9 @@ const EnhancedChatWidget = () => {
         setPartners(partnersWithUnread);
         setUnreadTotal(partnersWithUnread.reduce((sum, p) => sum + p.unreadCount, 0));
         fetchLastSeenTimes(partnerIdsArr);
+      } else {
+        setPartners([]);
+        setUnreadTotal(0);
       }
     } catch (error) {
       console.error('Error fetching partners:', error);
