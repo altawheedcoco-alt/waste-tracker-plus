@@ -489,18 +489,7 @@ const EncryptedChat = () => {
     const partnerId = searchParams.get('partnerId') || searchParams.get('partner');
     if (!partnerId || !user || conversationsLoading) return;
 
-    // partnerId is an organization ID — find a conversation or create one
-    const existing = conversations.find(c =>
-      c.partner?.organization_name && c.partner?.user_id
-    );
-
-    // Try to find existing convo where partner belongs to that org
-    const matchByOrg = conversations.find(c => {
-      // We need to check org membership — for now search by org name from URL
-      return false; // Will fall through to create
-    });
-
-    // Find a member of the target org to chat with
+    // partnerId is an organization ID — find a member and open/create conversation
     (async () => {
       try {
         const { data: members } = await supabase
