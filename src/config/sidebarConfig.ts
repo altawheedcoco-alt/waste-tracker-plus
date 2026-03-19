@@ -486,19 +486,14 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 15. التواصل والطلبات ═══════════════
+  // ═══════════════ 15. الطلبات والتنظيم ═══════════════
   {
-    id: 'communication',
-    icon: MessageCircle,
-    labelAr: 'التواصل والطلبات',
-    labelEn: 'Communication & Requests',
+    id: 'requests-regulatory',
+    icon: ClipboardList,
+    labelAr: 'الطلبات والتنظيم',
+    labelEn: 'Requests & Regulatory',
     visibleFor: [],
     items: [
-      { icon: MessageCircle, labelAr: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
-      { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
-      { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
-      { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
-      { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
       { icon: FileText, labelAr: 'عروض الأسعار', labelEn: 'Quotations', path: '/dashboard/quotations', key: 'quotations', bindingType: 'partner' as const,
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office'] },
       { icon: Scale, labelAr: 'السجل التنظيمي', labelEn: 'Regulatory', path: '/dashboard/regulatory-updates', key: 'regulatory', bindingType: 'admin' as const },
