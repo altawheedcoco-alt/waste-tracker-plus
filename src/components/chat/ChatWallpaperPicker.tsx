@@ -154,7 +154,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '380px' }}>
+            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '380px' }}>
               <div className="grid grid-cols-3 gap-2 pb-2">
                 {filteredImages.map(img => (
                   <button
@@ -221,7 +221,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '340px' }}>
+            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '340px' }}>
               <div className="space-y-4 pb-2">
                 {filteredFamilies.map(family => (
                   <div key={family.family}>
@@ -256,7 +256,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
 
           {/* ─── GRADIENTS TAB ─── */}
           <TabsContent value="gradients" className="flex-1 min-h-0 mt-3">
-            <ScrollArea className="h-full" style={{ maxHeight: '400px' }}>
+            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '400px' }}>
               <div className="grid grid-cols-4 gap-2 pb-2">
                 {GRADIENT_PRESETS.map((g) => (
                   <button
@@ -306,7 +306,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <ScrollArea className="flex-1 min-h-0" style={{ maxHeight: '340px' }}>
+            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '340px' }}>
               <div className="grid grid-cols-3 gap-2 pb-2">
                 {filteredPatterns.map(p => (
                   <button
