@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Textarea } from '@/components/ui/textarea';
+import EnhancedChatInput from '@/components/chat/EnhancedChatInput';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -485,7 +485,7 @@ const EncryptedChat = () => {
   const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
-  const [inputText, setInputText] = useState('');
+  
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
@@ -496,8 +496,6 @@ const EncryptedChat = () => {
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLTextAreaElement>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
@@ -775,52 +773,6 @@ const EncryptedChat = () => {
     if (isMobile) setShowSidebar(false);
   };
 
-  const handleSend = async () => {
-    if (!inputText.trim() || !selectedConvoId || sending) return;
-    const text = inputText.trim();
-    setInputText('');
-    setSending(true);
-    try {
-      await sendMessage(selectedConvoId, text, 'text', undefined, undefined, replyTo?.id);
-      setReplyTo(null);
-      const updated = await fetchMessages(selectedConvoId);
-      setMessages(updated);
-    } catch {
-      toast.error('فشل إرسال الرسالة');
-    } finally {
-      setSending(false);
-      inputRef.current?.focus();
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
-  };
-
-  const handleAttachClick = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileSelected = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !selectedConvoId || sending) return;
-
-    setSending(true);
-    try {
-      await sendFileMessage(selectedConvoId, file);
-      const updated = await fetchMessages(selectedConvoId);
-      setMessages(updated);
-    } catch {
-      toast.error('فشل إرسال الملف');
-    } finally {
-      setSending(false);
-      e.target.value = '';
-      inputRef.current?.focus();
-    }
-  };
 
   const handleReply = (msg: DecryptedMessage) => {
     setReplyTo({
@@ -828,7 +780,7 @@ const EncryptedChat = () => {
       content: msg.content.substring(0, 100),
       senderName: msg.sender?.full_name || (msg.sender_id === user?.id ? 'أنت' : 'مستخدم'),
     });
-    inputRef.current?.focus();
+    
   };
 
   const handleForward = (msg: DecryptedMessage) => {
@@ -1274,42 +1226,35 @@ const EncryptedChat = () => {
 
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
-                    <input
-                      ref={fileInputRef}
-                      type="file"
-                      className="hidden"
-                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar,.txt"
-                      onChange={handleFileSelected}
+                    <EnhancedChatInput
+                      onSendMessage={async (text) => {
+                        setSending(true);
+                        try {
+                          await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
+                          setReplyTo(null);
+                          const updated = await fetchMessages(selectedConvoId!);
+                          setMessages(updated);
+                        } catch {
+                          toast.error('فشل إرسال الرسالة');
+                        } finally {
+                          setSending(false);
+                        }
+                      }}
+                      onSendFile={async (file) => {
+                        setSending(true);
+                        try {
+                          await sendFileMessage(selectedConvoId!, file);
+                          const updated = await fetchMessages(selectedConvoId!);
+                          setMessages(updated);
+                        } catch {
+                          toast.error('فشل إرسال الملف');
+                        } finally {
+                          setSending(false);
+                        }
+                      }}
+                      sending={sending}
+                      disabled={!selectedConvoId}
                     />
-                    <div className="flex items-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 rounded-full shrink-0"
-                        onClick={handleAttachClick}
-                        disabled={sending}
-                        title="إرفاق ملف"
-                      >
-                        <FileText className="w-4 h-4" />
-                      </Button>
-                      <Textarea
-                        ref={inputRef}
-                        value={inputText}
-                        onChange={(e) => setInputText(e.target.value)}
-                        onKeyDown={handleKeyDown}
-                        placeholder={replyTo ? "اكتب رداً..." : "اكتب رسالة مشفرة..."}
-                        rows={1}
-                        className="flex-1 min-h-[40px] max-h-[120px] resize-none text-sm"
-                      />
-                      <Button
-                        onClick={handleSend}
-                        disabled={!inputText.trim() || sending}
-                        size="icon"
-                        className="h-10 w-10 rounded-full bg-emerald-600 hover:bg-emerald-700 shrink-0"
-                      >
-                        {sending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                      </Button>
-                    </div>
                   </div>
                 </>
               ) : (
