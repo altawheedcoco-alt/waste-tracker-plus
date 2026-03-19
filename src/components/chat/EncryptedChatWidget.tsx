@@ -126,6 +126,7 @@ const EncryptedChatWidget = () => {
   const [lightboxIndex, setLightboxIndex] = useState(0);
   const endRef = useRef<HTMLDivElement>(null);
 
+  const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
 
