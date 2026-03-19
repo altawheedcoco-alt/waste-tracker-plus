@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Send, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, User, FileText, Download } from 'lucide-react';
+import { MessageCircle, X, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
