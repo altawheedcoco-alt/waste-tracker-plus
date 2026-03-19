@@ -107,6 +107,7 @@ export function usePrivateChat() {
         user_id: p.user_id,
         full_name: p.full_name,
         avatar_url: p.avatar_url,
+        organization_id: p.organization_id,
         organization_name: orgMap.get(p.organization_id || ''),
       }]));
 
