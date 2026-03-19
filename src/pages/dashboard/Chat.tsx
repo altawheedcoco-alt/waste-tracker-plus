@@ -911,6 +911,99 @@ const EncryptedChat = () => {
                       </div>
                     ))
                   )
+                ) : sidebarTab === 'partners' ? (
+                  partnersLoading ? (
+                    <div className="flex items-center justify-center py-12">
+                      <Loader2 className="animate-spin text-primary" size={24} />
+                    </div>
+                  ) : linkedPartners.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
+                      <Building2 className="w-10 h-10 mb-2 opacity-30" />
+                      <p className="text-sm">لا توجد جهات مرتبطة</p>
+                      <p className="text-xs mt-1">اربط جهات عبر كود الشراكة لبدء المحادثة</p>
+                    </div>
+                  ) : (
+                    linkedPartners
+                      .filter(lp => !searchQuery || lp.name.toLowerCase().includes(searchQuery.toLowerCase()) || lp.members.some(m => m.full_name.toLowerCase().includes(searchQuery.toLowerCase())))
+                      .map(partner => {
+                        const orgTypeLabel = partner.organization_type === 'generator' ? 'مولّد'
+                          : partner.organization_type === 'transporter' ? 'ناقل'
+                          : partner.organization_type === 'recycler' ? 'مدوّر'
+                          : partner.organization_type === 'disposal' ? 'تخلص'
+                          : partner.organization_type;
+                        const isExpanded = expandedPartnerOrgs.has(partner.id);
+                        return (
+                          <div key={partner.id}>
+                            <button
+                              onClick={() => togglePartnerOrgExpand(partner.id)}
+                              className="w-full flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted/80 transition-colors text-start"
+                            >
+                              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
+                              <Avatar className="w-7 h-7">
+                                {partner.logo_url && <AvatarImage src={partner.logo_url} />}
+                                <AvatarFallback className="bg-primary/10 text-primary text-[10px]">
+                                  <Building2 className="w-3.5 h-3.5" />
+                                </AvatarFallback>
+                              </Avatar>
+                              <div className="flex-1 min-w-0">
+                                <span className="text-xs font-semibold truncate block">{partner.name}</span>
+                                <span className="text-[10px] text-muted-foreground">{orgTypeLabel}</span>
+                              </div>
+                              <Badge variant="outline" className="text-[9px] h-4 px-1.5">
+                                {partner.members.length} عضو
+                              </Badge>
+                            </button>
+                            <AnimatePresence>
+                              {isExpanded && (
+                                <motion.div
+                                  initial={{ height: 0, opacity: 0 }}
+                                  animate={{ height: 'auto', opacity: 1 }}
+                                  exit={{ height: 0, opacity: 0 }}
+                                  transition={{ duration: 0.2 }}
+                                  className="overflow-hidden"
+                                >
+                                  {partner.members.length === 0 ? (
+                                    <div className="px-4 py-3 text-center text-xs text-muted-foreground">
+                                      لا يوجد أعضاء مسجلين
+                                    </div>
+                                  ) : (
+                                    partner.members.map(member => {
+                                      const hasConvo = conversations.some(c => c.partner?.user_id === member.user_id);
+                                      return (
+                                        <button
+                                          key={member.user_id}
+                                          onClick={() => handleStartConvoWithMember(member)}
+                                          className={cn(
+                                            "w-full flex items-center gap-3 px-4 py-2.5 transition-colors border-b border-border/20",
+                                            "hover:bg-muted/50 active:bg-muted/80"
+                                          )}
+                                        >
+                                          <Avatar className="w-9 h-9">
+                                            {member.avatar_url && <AvatarImage src={member.avatar_url} />}
+                                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
+                                              {member.full_name?.charAt(0) || '?'}
+                                            </AvatarFallback>
+                                          </Avatar>
+                                          <div className="flex-1 min-w-0 text-right">
+                                            <p className="text-sm font-medium truncate">{member.full_name}</p>
+                                            <p className="text-[10px] text-muted-foreground">
+                                              {hasConvo ? '💬 محادثة قائمة' : '➕ بدء محادثة جديدة'}
+                                            </p>
+                                          </div>
+                                          {!hasConvo && (
+                                            <MessageCircle className="w-4 h-4 text-primary/50 shrink-0" />
+                                          )}
+                                        </button>
+                                      );
+                                    })
+                                  )}
+                                </motion.div>
+                              )}
+                            </AnimatePresence>
+                          </div>
+                        );
+                      })
+                  )
                 ) : (
                   filteredConversations.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
