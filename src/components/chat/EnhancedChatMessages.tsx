@@ -36,6 +36,7 @@ interface EnhancedChatMessagesProps {
   partnerName?: string;
   onDeleteMessage?: (messageId: string) => void;
   onForwardMessage?: (messageId: string) => void;
+  scrollToMessageId?: string | null;
 }
 
 const EnhancedChatMessages = ({ 
@@ -49,6 +50,7 @@ const EnhancedChatMessages = ({
   partnerName,
   onDeleteMessage,
   onForwardMessage,
+  scrollToMessageId,
 }: EnhancedChatMessagesProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -64,6 +66,18 @@ const EnhancedChatMessages = ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isPartnerTyping]);
+
+  // Scroll to specific message (for search)
+  useEffect(() => {
+    if (scrollToMessageId) {
+      const el = document.getElementById(`msg-${scrollToMessageId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        el.classList.add('ring-2', 'ring-primary/50', 'rounded-2xl');
+        setTimeout(() => el.classList.remove('ring-2', 'ring-primary/50', 'rounded-2xl'), 2000);
+      }
+    }
+  }, [scrollToMessageId]);
 
   const parseMessageContent = (message: ChatMessage) => {
     if (message.message_type === 'text') {
@@ -221,6 +235,7 @@ const EnhancedChatMessages = ({
                   return (
                     <motion.div
                       key={message.id}
+                      id={`msg-${message.id}`}
                       initial={{ opacity: 0, y: 5 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.12 }}

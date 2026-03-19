@@ -35,6 +35,7 @@ interface EnhancedChatInputProps {
   sending: boolean;
   uploadProgress?: number;
   disabled?: boolean;
+  onTyping?: () => void;
 }
 
 const EMOJI_QUICK = ['😀', '😂', '❤️', '👍', '🙏', '😊', '😍', '🔥', '✅', '📦', '🚛', '♻️'];
@@ -50,7 +51,8 @@ const EnhancedChatInput = ({
   onSendFile, 
   sending, 
   uploadProgress = 0, 
-  disabled 
+  disabled,
+  onTyping,
 }: EnhancedChatInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -198,6 +200,7 @@ const EnhancedChatInput = ({
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInputValue(e.target.value);
+    onTyping?.();
     const textarea = e.target;
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
