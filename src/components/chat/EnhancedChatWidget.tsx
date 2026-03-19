@@ -327,6 +327,7 @@ const EnhancedChatWidget = () => {
                     roomName={selectedPartner?.name}
                     onReply={handleReply}
                     partnerName={selectedPartner?.name}
+                    onDeleteMessage={handleDeleteMessage}
                   />
                 </div>
                 {/* Reply Preview */}
