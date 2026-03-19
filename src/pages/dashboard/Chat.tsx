@@ -1213,7 +1213,11 @@ const EncryptedChat = () => {
                 transition={{ duration: 0.2 }}
                 className="h-full overflow-hidden"
               >
-                <NotesPanel conversationId={selectedConvoId} organizationId={organization?.id} />
+                <NotesPanel
+                  conversationId={selectedConvoId}
+                  organizationId={organization?.id}
+                  targetOrganizationId={selectedConvo?.partner?.organization_id || null}
+                />
               </motion.div>
             )}
           </div>
