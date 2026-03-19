@@ -45,6 +45,8 @@ interface CreateNoteInput {
   mentioned_user_ids?: string[];
   attachment_url?: string | null;
   attachment_name?: string | null;
+  linked_shipment_id?: string | null;
+  send_to_chat?: boolean;
 }
 
 export const useNotes = (resourceType: string, resourceId: string) => {
