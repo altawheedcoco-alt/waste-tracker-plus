@@ -18,6 +18,8 @@ interface SecureDigitalSealProps {
   showLabel?: boolean;
   /** Compact: just the seal without extras */
   compact?: boolean;
+  /** Enable clicking on seal to navigate to profile */
+  linkToProfile?: boolean;
   className?: string;
 }
 
