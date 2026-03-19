@@ -1337,6 +1337,7 @@ const EncryptedChat = () => {
                     organization_type: (selectedConvo.partner as any)?.organization_type || 'generator',
                     logo_url: selectedConvo.partner?.avatar_url || null,
                   }}
+                  conversationId={selectedConvoId || undefined}
                   notificationsEnabled={true}
                   onToggleNotifications={() => selectedConvoId && toggleMute(selectedConvoId)}
                   onBack={() => setShowPartnerInfo(false)}
