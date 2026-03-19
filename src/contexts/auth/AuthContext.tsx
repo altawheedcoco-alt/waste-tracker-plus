@@ -478,13 +478,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     stopFocusMusicOnLogout();
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
-    setOrganization(null);
-    setUserOrganizations([]);
-    setRoles([]);
+
+    try {
+      await supabase.auth.signOut({ scope: 'local' });
+    } catch (error) {
+      console.error('Local sign out failed:', error);
+    } finally {
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      setOrganization(null);
+      setUserOrganizations([]);
+      setRoles([]);
+      sessionStorage.removeItem('__tab_active_org_id');
+    }
   }, []);
 
   const refreshProfile = useCallback(async () => {

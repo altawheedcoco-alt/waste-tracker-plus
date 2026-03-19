@@ -60,13 +60,13 @@ const orgTypeLabels: Record<string, string> = {
 };
 
 const MyWorkspace = () => {
-  const { profile, organization, user } = useAuth();
+  const { profile, organization, user, signOut } = useAuth();
   const { permissions, isLoading: permsLoading } = useMyPermissions();
   const [activeTab, setActiveTab] = useState('dashboard');
   const navigate = useNavigate();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut();
     toast.success('تم تسجيل الخروج بنجاح');
     navigate('/auth', { replace: true });
   };
