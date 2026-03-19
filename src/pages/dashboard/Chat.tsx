@@ -711,7 +711,7 @@ const EncryptedChat = () => {
     return () => { cancelled = true; };
   }, [selectedConvoId, fetchMessages, markAsRead]);
 
-  // Realtime: reload messages
+  // Realtime: reload messages and statuses
   useEffect(() => {
     if (!selectedConvoId) return;
 
@@ -725,6 +725,14 @@ const EncryptedChat = () => {
       }, () => {
         fetchMessages(selectedConvoId).then(setMessages);
         markAsRead(selectedConvoId);
+      })
+      .on('postgres_changes', {
+        event: 'UPDATE',
+        schema: 'public',
+        table: 'encrypted_messages',
+        filter: `conversation_id=eq.${selectedConvoId}`,
+      }, () => {
+        fetchMessages(selectedConvoId).then(setMessages);
       })
       .subscribe();
 
