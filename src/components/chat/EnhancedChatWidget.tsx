@@ -15,6 +15,7 @@ import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useGroupChat } from '@/hooks/useGroupChat';
+import { useWebRTCCall } from '@/hooks/useWebRTCCall';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -30,6 +31,7 @@ import PinnedMessagesBar from './PinnedMessagesBar';
 import DisappearingMessagesDialog from './DisappearingMessagesDialog';
 import GroupChatView from './GroupChatView';
 import CreateGroupDialog from './CreateGroupDialog';
+import CallScreen from './CallScreen';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
