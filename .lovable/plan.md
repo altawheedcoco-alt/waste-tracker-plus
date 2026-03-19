@@ -1,82 +1,67 @@
 
 
-# خطة: تطوير نظام المحادثات المشفرة — دعم الوسائط والملفات
+# خطة: ترقية عارض الصور + حماية الملف الشخصي (Profile Photo Protection)
 
-## الوضع الحالي
+## كيف يعمل النظام في WhatsApp و Facebook؟
 
-1. **`EncryptedChatWidget`** (المحادثة المشفرة الفعلية المستخدمة في `DashboardLayout`) — يدعم **النصوص فقط**. لا يوجد زر إرفاق أو إرسال ملفات أو صور. حقل إدخال بسيط `<Textarea>` بدون أي خيارات وسائط.
+| التقنية | WhatsApp | Facebook |
+|---------|----------|----------|
+| منع Screenshot | نعم (FLAG_SECURE على Android) | لا |
+| منع Right-click Save | غير متاح (تطبيق أصلي) | نعم (CSS + JS) |
+| منع Drag & Drop | غير متاح | نعم |
+| إخفاء URL المباشر | نعم (لا يوجد رابط مباشر) | نعم (Canvas rendering) |
+| التحكم بمن يرى الصورة | نعم (الجميع/جهات الاتصال/لا أحد) | نعم (عام/أصدقاء/خاص) |
 
-2. **`EnhancedChatWidget`** (الدردشة العامة غير المشفرة) — يدعم الصور والفيديو والصوت والملفات عبر `EnhancedChatInput` و `sendFileMessage` في `useChat.ts`.
+**الواقع التقني**: في تطبيق ويب، لا يمكن منع Screenshot فعلياً (هذه ميزة نظام تشغيل). لكن يمكن إضافة **احتكاك كبير** يمنع 99% من المستخدمين العاديين.
 
-3. **`usePrivateChat.ts`** — الهوك المشفر يدعم حقول `file_url` و `file_name` و `message_type` في `sendMessage`، لكن لا أحد يستخدمها لأن الواجهة لا تدعم الإرفاق.
+## ما سنطبقه
 
-4. **حدود الملفات الحالية**: صور 10MB، فيديو 50MB، ملف واحد فقط في كل مرة.
+### 1. حماية الصورة في Lightbox (لغير صاحب الحساب)
 
-## المشاكل المطلوب حلها
+إضافة prop `protected` إلى `ImageLightbox` و `ClickableImage`:
+- **منع Right-click**: `onContextMenu={e => e.preventDefault()}`
+- **منع Drag**: `draggable={false}` (موجود) + `user-select: none` + `-webkit-touch-callout: none`
+- **إخفاء زر التنزيل والمشاركة**: عندما `protected=true`
+- **رسم على Canvas**: بدلاً من `<img>` مباشر، يُرسم على Canvas مما يمنع "Save Image As" ويخفي URL من DevTools
+- **طبقة شفافة (Overlay)**: div شفاف فوق الصورة يمنع التفاعل المباشر معها
 
-| المشكلة | التفاصيل |
-|---------|----------|
-| لا يمكن إرسال صور/فيديو/ملفات في المحادثة المشفرة | الواجهة لا تحتوي أزرار إرفاق |
-| لا يمكن إرسال أكثر من ملف واحد | `handleFileSelect` يقبل ملف واحد فقط |
-| حجم الملفات محدود | 10MB للصور و50MB للفيديو |
-| الصور لا تُعرض بـ Lightbox/zoom في المحادثة المشفرة | `MiniMessageBubble` يعرض النص فقط |
-| لا يوجد عرض للملفات/الفيديو في الفقاعات | نفس السبب |
+### 2. إعداد خصوصية الصورة الشخصية (Privacy Setting)
 
-## خطة الإصلاح
+إضافة عمود `profile_photo_privacy` في جدول `profiles`:
+- `everyone` — الجميع يرى الصورة (الافتراضي)
+- `partners` — الشركاء المرتبطون فقط
+- `nobody` — لا أحد (تظهر أيقونة افتراضية)
 
-### 1. استبدال حقل الإدخال البسيط في `EncryptedChatWidget` بـ `EnhancedChatInput`
+### 3. ترقية تجربة Lightbox
 
-بدلاً من `<Textarea>` البسيط (سطر 470-487)، سيتم استخدام `EnhancedChatInput` الموجود بالفعل والذي يدعم:
-- إرسال صور، فيديو، مستندات
-- تسجيل صوتي
-- إيموجي
-- معاينة قبل الإرسال
-
-### 2. إضافة `sendFileMessage` إلى `usePrivateChat.ts`
-
-دالة جديدة تقوم بـ:
-- رفع الملف إلى Storage (bucket: `organization-documents`)
-- تشفير اسم الملف ونصه كـ JSON
-- إرسال الرسالة المشفرة مع `file_url` و `file_name` و `message_type`
-
-### 3. ترقية `MiniMessageBubble` لعرض الوسائط
-
-تحويله من عرض نص فقط إلى عرض:
-- **صور**: مع `onClick` لفتح `ImageLightbox` + zoom
-- **فيديو**: مشغل فيديو مدمج
-- **ملفات**: أيقونة + اسم الملف + رابط تحميل
-- **صوت**: `VoiceMessagePlayer`
-
-### 4. رفع حدود الملفات وتفعيل الإرسال المتعدد
-
-- إزالة حدود الحجم (أو رفعها إلى 500MB)
-- تعديل `EnhancedChatInput` لقبول `multiple` files
-- إرسال كل ملف كرسالة مستقلة (حلقة)
-- عرض شريط تقدم لكل ملف
-
-### 5. تكامل `ImageLightbox` مع صور المحادثة المشفرة
-
-جمع كل صور المحادثة وتمريرها كـ gallery للـ lightbox لتمكين التمرير يمين/يسار.
+- إضافة **Pinch-to-zoom** للموبايل (touch gestures)
+- إضافة **سحب للإغلاق** (drag down to close)
+- تحسين الانتقال بين الصور (swipe animation)
 
 ## الملفات المتأثرة
 
 | ملف | التغيير |
 |-----|--------|
-| `src/components/chat/EncryptedChatWidget.tsx` | استبدال الإدخال البسيط بـ `EnhancedChatInput` + ترقية `MiniMessageBubble` |
-| `src/hooks/usePrivateChat.ts` | إضافة `sendFileMessage` للمحادثات المشفرة |
-| `src/components/chat/EnhancedChatInput.tsx` | دعم `multiple` files + رفع حدود الحجم |
+| `src/components/chat/ImageLightbox.tsx` | إضافة وضع protected: Canvas rendering + منع تنزيل + pinch zoom + swipe |
+| `src/components/ui/ClickableImage.tsx` | إضافة prop `protected` وتمريره لـ Lightbox |
+| `src/components/organization/ProfileHeader.tsx` | تمرير `protected={!isOwner}` |
+| `src/components/chat/ChatHeader.tsx` | تمرير `protected` |
+| `src/components/chat/ChatPartnerInfo.tsx` | تمرير `protected` |
+| باقي الأماكن المستخدمة لـ ClickableImage | تمرير `protected` حسب السياق |
+| **Migration** | إضافة `profile_photo_privacy` إلى profiles |
 
 ## النتيجة
 
 ```text
-قبل:
-  EncryptedChatWidget → نصوص فقط، لا صور، لا ملفات
-  حد الملف: 10MB، ملف واحد فقط
+صاحب الحساب يرى صوره:
+  → زر تنزيل ✓، مشاركة ✓، right-click عادي ✓
 
-بعد:
-  EncryptedChatWidget → نصوص + صور + فيديو + صوت + ملفات ✓
-  الصور تُفتح بـ Lightbox مع zoom وتمرير ✓
-  إرسال متعدد الملفات ✓
-  حجم غير محدود ✓
+أي شخص آخر يرى الصورة:
+  → Canvas rendering (لا يوجد <img> في DOM)
+  → لا زر تنزيل ✗
+  → لا right-click save ✗
+  → لا drag & drop ✗
+  → طبقة حماية شفافة ✓
+  → Zoom فقط للمعاينة ✓
 ```
 
