@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Camera, Upload, Building2, Truck, Recycle, CheckCircle, XCircle, Loader2, BadgeCheck, Scale, FolderCheck } from 'lucide-react';
+import { Camera, Upload, Building2, Truck, Recycle, CheckCircle, XCircle, Loader2, BadgeCheck, Scale, FolderCheck, ShieldCheck, Lock, LockOpen } from 'lucide-react';
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from '@/components/ui/tooltip';
 import { useQuery } from '@tanstack/react-query';
 
@@ -33,6 +33,7 @@ interface ProfileHeaderProps {
     phone?: string;
     founded_year?: number;
     activity_type?: string;
+    is_profile_locked?: boolean;
   };
   isEditable?: boolean;
   onUpdate?: () => void;
@@ -41,8 +42,12 @@ interface ProfileHeaderProps {
 const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHeaderProps) => {
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [togglingLock, setTogglingLock] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
+
+  const isLocked = organization.is_profile_locked === true;
+  const isProtected = isLocked && !isEditable;
 
   // Fetch organization documents count
   const { data: documentsCount = 0 } = useQuery({
@@ -207,6 +212,24 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
     }
   };
 
+  const handleToggleLock = async () => {
+    setTogglingLock(true);
+    try {
+      const { error } = await supabase
+        .from('organizations')
+        .update({ is_profile_locked: !isLocked })
+        .eq('id', organization.id);
+      if (error) throw error;
+      toast.success(isLocked ? 'تم فتح قفل الملف الشخصي' : 'تم قفل الملف الشخصي بنجاح');
+      onUpdate?.();
+    } catch (error) {
+      console.error('Error toggling lock:', error);
+      toast.error('حدث خطأ في تغيير حالة القفل');
+    } finally {
+      setTogglingLock(false);
+    }
+  };
+
   return (
     <div className="relative">
       {/* Cover Photo */}
@@ -217,7 +240,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
             alt="صورة الغلاف"
             gallery={[organization.cover_url, organization.logo_url].filter(Boolean) as string[]}
             className="w-full h-full object-cover"
-            protected={!isEditable}
+            protected={isProtected}
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
@@ -272,15 +295,22 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               <ClickableImage
                 src={organization.logo_url || ''}
                 gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
-                protected={!isEditable}
+                protected={isProtected}
               >
-                <Avatar className="w-32 h-32 sm:w-40 sm:h-40 border-4 border-background shadow-xl">
+                <Avatar className={`w-32 h-32 sm:w-40 sm:h-40 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
                   <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
                   <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
                     {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
                   </AvatarFallback>
                 </Avatar>
               </ClickableImage>
+
+              {/* Profile Lock Shield Badge */}
+              {isLocked && (
+                <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-500 text-white rounded-full p-1.5 shadow-lg border-2 border-background z-10">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+              )}
 
               {/* Edit Logo Button */}
               {isEditable && (
@@ -416,6 +446,28 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
                     </a>
                   </Button>
                 )}
+              </div>
+            )}
+
+            {/* Profile Lock Toggle (Owner only) */}
+            {isEditable && (
+              <div className="mt-3">
+                <Button
+                  size="sm"
+                  variant={isLocked ? 'default' : 'outline'}
+                  className="gap-1.5"
+                  onClick={handleToggleLock}
+                  disabled={togglingLock}
+                >
+                  {togglingLock ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isLocked ? (
+                    <Lock className="w-4 h-4" />
+                  ) : (
+                    <LockOpen className="w-4 h-4" />
+                  )}
+                  {isLocked ? 'الملف مقفول' : 'قفل الملف الشخصي'}
+                </Button>
               </div>
             )}
           </div>

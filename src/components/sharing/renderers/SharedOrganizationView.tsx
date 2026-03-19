@@ -1,4 +1,4 @@
-import { Building2, MapPin, Phone, Mail, Globe, Calendar, Award, Shield } from 'lucide-react';
+import { Building2, MapPin, Phone, Mail, Globe, Calendar, Award, Shield, ShieldCheck } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import ClickableImage from '@/components/ui/ClickableImage';
 
@@ -36,12 +36,19 @@ const SharedOrganizationView = ({ data, accessLevel }: SharedOrganizationViewPro
         <div className="p-6 space-y-4">
           <div className="flex items-start gap-4">
             {data.logo_url ? (
-              <ClickableImage
-                src={data.logo_url}
-                gallery={[data.logo_url, data.cover_url].filter(Boolean)}
-                className="w-16 h-16 rounded-lg object-cover border"
-                protected
-              />
+              <div className="relative">
+                <ClickableImage
+                  src={data.logo_url}
+                  gallery={[data.logo_url, data.cover_url].filter(Boolean)}
+                  className={`w-16 h-16 rounded-lg object-cover border ${data.is_profile_locked ? 'ring-4 ring-blue-500/30 border-blue-500' : ''}`}
+                  protected={!!data.is_profile_locked}
+                />
+                {data.is_profile_locked && (
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-blue-500 text-white rounded-full p-0.5 shadow border border-background z-10">
+                    <ShieldCheck className="w-3 h-3" />
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="w-16 h-16 rounded-lg bg-primary/10 flex items-center justify-center">
                 <Building2 className="w-8 h-8 text-primary" />
