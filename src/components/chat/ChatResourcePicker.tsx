@@ -198,7 +198,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
           label: `شحنة #${s.shipment_number}`,
           subtitle: wasteLabel || locationInfo || 'شحنة',
           status: s.status || undefined,
-          date: s.pickup_date || s.scheduled_date || s.created_at || undefined,
+          date: s.pickup_date || s.created_at || undefined,
           extra: {
             pickupCity: s.pickup_city,
             deliveryCity: s.delivery_city,
