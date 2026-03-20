@@ -547,8 +547,15 @@ const statusColors: Record<string, string> = {
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
   userName, orgName, orgLabel, icon: Icon, gradient = 'from-primary to-primary/70',
-  children, radarStats, alerts = [], weather, heatmapData
+  children, radarStats, alerts = [], weather, heatmapData, onRefresh
 }: DashboardV2HeaderProps) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefreshClick = useCallback(() => {
+    if (!onRefresh) return;
+    setIsRefreshing(true);
+    onRefresh();
+    setTimeout(() => setIsRefreshing(false), 1200);
+  }, [onRefresh]);
   const displayName = userName || orgName || 'المستخدم';
   const [now, setNow] = useState(new Date());
   const [tick, setTick] = useState(0);
