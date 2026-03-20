@@ -173,8 +173,26 @@ export default function ComplianceLicenseSettings() {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !orgId) return;
-    const result = await extractAndUpdate(file, orgId);
+    
+    // Only accept images for OCR
+    if (!file.type.startsWith('image/')) {
+      toast.error('يرجى رفع صورة (JPG, PNG) للتحليل بتقنية OCR');
+      e.target.value = '';
+      return;
+    }
+
+    const result = await extractFromImage(file);
     if (result) {
+      setShowOCRPreview(true);
+    }
+    e.target.value = '';
+  };
+
+  const handleApplyOCR = async () => {
+    if (!extractedResult || !orgId) return;
+    const success = await applyToOrganization(orgId, extractedResult.detected_fields);
+    if (success) {
+      // Reload org data
       const { data: org } = await supabase
         .from('organizations')
         .select('licensed_waste_types, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_approval_number, env_approval_expiry, land_transport_license, hazardous_certified')
@@ -192,8 +210,9 @@ export default function ComplianceLicenseSettings() {
           hazardous_certified: org.hazardous_certified || false,
         });
       }
+      setShowOCRPreview(false);
+      setExtractedResult(null);
     }
-    e.target.value = '';
   };
 
   const isExpired = (dateStr: string) => {
