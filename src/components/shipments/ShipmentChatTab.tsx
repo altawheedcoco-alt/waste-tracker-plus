@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { MessageSquare, Building2, Truck, User, Recycle, Users, Send, MessageCircle } from 'lucide-react';
+import { MessageSquare, Building2, Truck, User, Recycle, Users, Send, MessageCircle, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
+import { AnimatePresence, motion } from 'framer-motion';
+import InlineShipmentChat from './InlineShipmentChat';
 
 interface Party {
   id?: string;
@@ -54,11 +56,11 @@ const partyColors = {
 const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) => {
   const navigate = useNavigate();
   const { organization } = useAuth();
+  const [selectedParty, setSelectedParty] = useState<Party | null>(null);
   const [selectedParties, setSelectedParties] = useState<Set<string>>(new Set());
   const [groupMode, setGroupMode] = useState(false);
 
   const parties: Party[] = [];
-  // Only show parties that are NOT the current user's organization
   if (shipment.generator?.id && shipment.generator.id !== organization?.id) {
     parties.push({ id: shipment.generator.id, name: shipment.generator.name, type: 'generator' });
   }
@@ -72,11 +74,9 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
     parties.push({ id: shipment.driver_id, name: shipment.driver.profile.full_name!, type: 'driver' });
   }
 
-  const openDirectChat = useCallback((party: Party) => {
-    if (party.id) {
-      navigate(`/dashboard/chat?partner=${party.id}&ref=shipment&shipment=${shipment.id}`);
-    }
-  }, [navigate, shipment.id]);
+  const openInlineChat = useCallback((party: Party) => {
+    if (party.id) setSelectedParty(party);
+  }, []);
 
   const togglePartySelection = useCallback((partyId: string) => {
     setSelectedParties(prev => {
@@ -89,7 +89,6 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
 
   const openGroupChat = useCallback(() => {
     if (selectedParties.size === 0) return;
-    // For group chat, navigate with multiple partner IDs
     const partnerIds = Array.from(selectedParties).join(',');
     navigate(`/dashboard/chat?partners=${partnerIds}&ref=shipment&shipment=${shipment.id}&group=true`);
   }, [selectedParties, navigate, shipment.id]);
@@ -108,12 +107,36 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
     );
   }
 
+  // Show inline chat if a party is selected
+  if (selectedParty?.id) {
+    return (
+      <div className="min-h-[400px] flex flex-col">
+        <div className="flex items-center justify-between px-3 py-1.5 border-b bg-muted/20">
+          <Badge variant="outline" className={cn('text-[10px]', partyColors[selectedParty.type])}>
+            {partyLabels[selectedParty.type]}
+          </Badge>
+          <Button variant="ghost" size="sm" className="text-xs gap-1" onClick={() => setSelectedParty(null)}>
+            <ArrowRight className="w-3 h-3" /> رجوع للقائمة
+          </Button>
+        </div>
+        <div className="flex-1">
+          <InlineShipmentChat
+            partnerOrgId={selectedParty.id}
+            partnerName={selectedParty.name}
+            shipmentId={shipment.id}
+            onBack={() => setSelectedParty(null)}
+          />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-3 p-3">
       {/* Header with mode toggle */}
       <div className="flex items-center justify-between gap-2">
         <p className="text-xs text-muted-foreground text-right">
-          {groupMode ? 'اختر الأطراف للمحادثة الجماعية' : 'محادثات مباشرة مع أطراف الشحنة'}
+          {groupMode ? 'اختر الأطراف للمحادثة الجماعية' : 'اضغط على طرف لبدء محادثة مباشرة'}
         </p>
         {parties.length > 1 && (
           <Button
@@ -138,54 +161,59 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
       )}
 
       {/* Party list */}
-      {parties.map((party) => {
-        const Icon = partyIcons[party.type];
-        const colorClass = partyColors[party.type];
-        const isSelected = selectedParties.has(party.id!);
-        
-        return (
-          <button
-            key={`${party.type}-${party.id}`}
-            onClick={(e) => {
-              e.stopPropagation();
-              if (groupMode) togglePartySelection(party.id!);
-              else openDirectChat(party);
-            }}
-            className={cn(
-              'w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-right',
-              groupMode && isSelected
-                ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
-                : 'border-border/50 hover:bg-accent/50 hover:border-border',
-            )}
-          >
-            {groupMode && (
-              <Checkbox
-                checked={isSelected}
-                className="shrink-0"
-                onCheckedChange={() => togglePartySelection(party.id!)}
-                onClick={(e) => e.stopPropagation()}
-              />
-            )}
-            <Avatar className="h-9 w-9 shrink-0">
-              <AvatarFallback className={cn('text-xs border', colorClass)}>
-                <Icon className="w-4 h-4" />
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{party.name}</p>
-              <Badge variant="outline" className={cn('text-[10px] py-0 h-4 mt-0.5', colorClass)}>
-                {partyLabels[party.type]}
-              </Badge>
-            </div>
-            {!groupMode && (
-              <div className="flex items-center gap-1 text-primary shrink-0">
-                <MessageCircle className="w-4 h-4" />
-                <span className="text-[10px]">محادثة</span>
+      <AnimatePresence>
+        {parties.map((party) => {
+          const Icon = partyIcons[party.type];
+          const colorClass = partyColors[party.type];
+          const isSelected = selectedParties.has(party.id!);
+          
+          return (
+            <motion.button
+              key={`${party.type}-${party.id}`}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+              onClick={(e) => {
+                e.stopPropagation();
+                if (groupMode) togglePartySelection(party.id!);
+                else openInlineChat(party);
+              }}
+              className={cn(
+                'w-full flex items-center gap-3 p-2.5 rounded-xl border transition-all text-right',
+                groupMode && isSelected
+                  ? 'border-primary bg-primary/5 ring-1 ring-primary/30'
+                  : 'border-border/50 hover:bg-accent/50 hover:border-border',
+              )}
+            >
+              {groupMode && (
+                <Checkbox
+                  checked={isSelected}
+                  className="shrink-0"
+                  onCheckedChange={() => togglePartySelection(party.id!)}
+                  onClick={(e) => e.stopPropagation()}
+                />
+              )}
+              <Avatar className="h-9 w-9 shrink-0">
+                <AvatarFallback className={cn('text-xs border', colorClass)}>
+                  <Icon className="w-4 h-4" />
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{party.name}</p>
+                <Badge variant="outline" className={cn('text-[10px] py-0 h-4 mt-0.5', colorClass)}>
+                  {partyLabels[party.type]}
+                </Badge>
               </div>
-            )}
-          </button>
-        );
-      })}
+              {!groupMode && (
+                <div className="flex items-center gap-1 text-primary shrink-0">
+                  <MessageCircle className="w-4 h-4" />
+                  <span className="text-[10px]">محادثة مباشرة</span>
+                </div>
+              )}
+            </motion.button>
+          );
+        })}
+      </AnimatePresence>
 
       {/* Group chat action */}
       {groupMode && selectedParties.size > 0 && (
