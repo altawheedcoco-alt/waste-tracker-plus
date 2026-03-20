@@ -24,6 +24,7 @@ const TransporterShipments = lazy(() => import("@/pages/dashboard/TransporterShi
 const TransporterDrivers = lazy(() => import("@/pages/dashboard/TransporterDrivers"));
 const AITools = lazy(() => import("@/pages/dashboard/AITools"));
 const AIDocumentStudioPage = lazy(() => import("@/pages/dashboard/AIDocumentStudioPage"));
+const AIExtractedDataPage = lazy(() => import("@/pages/dashboard/AIExtractedDataPage"));
 const RecyclerAITools = lazy(() => import("@/pages/dashboard/RecyclerAITools"));
 const TransporterAITools = lazy(() => import("@/pages/dashboard/TransporterAITools"));
 const Notifications = lazy(() => import("@/pages/dashboard/Notifications"));
