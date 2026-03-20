@@ -411,6 +411,23 @@ const EnhancedChatMessages = ({
                                     </p>
                                   )}
 
+                                  {/* Resource Card */}
+                                  {message.message_type === 'resource_card' && (() => {
+                                    try {
+                                      const parsed = JSON.parse(message.content);
+                                      if (parsed.resource_type && parsed.resource_data) {
+                                        return (
+                                          <ChatMessageCardRenderer
+                                            resourceType={parsed.resource_type}
+                                            resourceData={parsed.resource_data}
+                                            isOwn={isOwn}
+                                          />
+                                        );
+                                      }
+                                    } catch { /* not a card */ }
+                                    return null;
+                                  })()}
+
                                   {/* Image */}
                                   {message.message_type === 'image' && fileUrl && (
                                     <div className="cursor-pointer group/img relative" onClick={() => openImageLightbox(fileUrl)}>
