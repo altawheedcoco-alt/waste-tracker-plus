@@ -1,5 +1,7 @@
 import { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import {
   LucideIcon, Sparkles, Activity, Shield, Zap, Signal, Wifi, Database, Cpu,
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Eye, Radio,
@@ -9,7 +11,9 @@ import {
   ShieldAlert, CircleAlert, Info, XCircle, ChevronLeft, ChevronRight,
   Radar, Waves, Fingerprint, ScanLine, MonitorCheck, ServerCrash, BatteryCharging,
   CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
-  CloudFog, Sunrise, Sunset, Clock, ThermometerSun
+  CloudFog, Sunrise, Sunset, Clock, ThermometerSun,
+  FileSignature, Wallet, Users, ScrollText, Package, Lock, RefreshCw, HardDrive,
+  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain,
 } from 'lucide-react';
 import type { RealWeatherData, HourlyForecast } from '@/hooks/useRealWeather';
 import { cn } from '@/lib/utils';
