@@ -171,6 +171,11 @@ const ChatHeader = ({
                 <Paintbrush className="w-4 h-4 ml-2" />
                 خلفية الدردشة
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowGuide(true)}>
+                <HelpCircle className="w-4 h-4 ml-2" />
+                دليل الأوامر والوظائف
+              </DropdownMenuItem>
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Star className="w-4 h-4 ml-2" />
                 {t('chat.addFavorite')}
