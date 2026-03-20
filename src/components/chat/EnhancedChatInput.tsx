@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Send, 
@@ -15,11 +15,17 @@ import {
   Trash2,
   Smile,
   Camera,
-  Plus
+  Plus,
+  Building2,
+  User,
+  AtSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -28,6 +34,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useMentionableEntities, type MentionableEntity } from '@/hooks/useMentionableEntities';
+import type { MentionableEntity as MentionableEntityType } from '@/components/ui/mentionable-field';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
