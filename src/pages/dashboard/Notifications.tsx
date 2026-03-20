@@ -366,13 +366,14 @@ const getCategories = (): CategoryConfig[] => [
   {
     id: 'operations', label: 'أوامر الشغل', icon: ClipboardCheck, color: 'text-sky-500', bgColor: 'bg-sky-500/10',
   },
+  { id: 'messages', label: 'الرسائل', icon: MessageCircle, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'notes', label: 'الملاحظات', icon: FileText, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
   { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
   { id: 'environmental', label: 'البيئة والكربون', icon: Leaf, color: 'text-lime-600', bgColor: 'bg-lime-500/10' },
   {
     id: 'smart', label: 'التنبيهات الذكية', icon: Sparkles, color: 'text-fuchsia-500', bgColor: 'bg-fuchsia-500/10',
   },
-  { id: 'messages', label: 'الرسائل', icon: MessageSquare, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
   { id: 'announcements', label: 'الإعلانات', icon: Megaphone, color: 'text-blue-600', bgColor: 'bg-blue-500/10' },
   { id: 'identity', label: 'التحقق والهوية', icon: UserCheck, color: 'text-teal-600', bgColor: 'bg-teal-500/10' },
   { id: 'system', label: 'النظام', icon: Settings, color: 'text-red-500', bgColor: 'bg-red-500/10' },
