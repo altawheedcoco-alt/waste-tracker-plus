@@ -125,7 +125,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       // Fetch documents
       const docQuery = supabase
         .from('entity_documents')
-        .select('id, document_name, document_type, status')
+        .select('id, title, file_name, document_type, document_category')
         .eq('organization_id', orgId)
         .order('created_at', { ascending: false })
         .limit(20);
@@ -135,9 +135,8 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
         results.push({
           id: d.id,
           resourceType: 'document',
-          label: d.document_name || 'مستند',
-          subtitle: d.document_type || '',
-          status: d.status,
+          label: d.title || d.file_name || 'مستند',
+          subtitle: d.document_type || d.document_category || '',
           raw: d,
         });
       });
