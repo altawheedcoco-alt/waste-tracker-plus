@@ -325,7 +325,8 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
           <div className="pt-2 border-t border-border space-y-1">
             <p className="text-[10px] font-semibold text-foreground">كيف يُحسب هذا المؤشر؟</p>
             <p className="text-[10px] text-muted-foreground leading-relaxed">
-              يتم حساب نسبة إنجاز كل مؤشر (القيمة الفعلية ÷ القيمة القصوى)، ثم يُؤخذ المتوسط العام. كلما زادت العمليات والنشاط ارتفعت النتيجة.
+              يقيس المؤشر كفاءة العمليات التشغيلية بدون حدود ثابتة — لا يوجد سقف لعدد الشحنات أو السائقين أو أي مورد. 
+              يتم حساب نسبة الإنجاز لكل مؤشر نسبةً لإجمالي النشاط الفعلي، ثم يُؤخذ المتوسط العام. المؤشر ينمو مع نمو الجهة بلا قيود.
             </p>
           </div>
         </div>
