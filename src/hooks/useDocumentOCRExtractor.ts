@@ -2,13 +2,14 @@ import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
-/** Lazy-load pdfjs-dist only when needed to avoid worker fetch errors on page load */
+/** Lazy-load pdfjs-dist only when needed */
 let pdfjsLib: typeof import('pdfjs-dist') | null = null;
 async function getPdfJs() {
   if (!pdfjsLib) {
     pdfjsLib = await import('pdfjs-dist');
-    // Use fake worker (inline) to avoid CDN fetch issues in Vite/preview environments
-    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
+    // Use legacy build approach: import worker entry as a URL for Vite bundler
+    const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl.href;
   }
   return pdfjsLib;
 }
