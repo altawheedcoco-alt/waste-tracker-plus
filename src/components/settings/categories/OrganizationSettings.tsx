@@ -69,7 +69,11 @@ const OrganizationSettings = ({ orgType }: Props) => {
         <ComplianceLicenseSettings />
       </TabsContent>
 
-      {/* Automation */}
+      {/* AI Extracted Data */}
+      <TabsContent value="ai-extracted">
+        <AIExtractedDataViewer />
+      </TabsContent>
+
       <TabsContent value="automation">
         <Card>
           <CardHeader className="pb-3">
