@@ -309,7 +309,7 @@ export default function ComplianceLicenseSettings() {
           <CardHeader className="pb-2">
             <CardTitle className="text-sm flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-primary" />
-              نتائج الاستخراج — دقة {Math.round(extractedResult.confidence)}%
+              نتائج الاستخراج — دقة {Math.round(extractedResult.confidence)}% {extractedResult.pages_count && extractedResult.pages_count > 1 ? `(${extractedResult.pages_count} صفحات)` : ''}
             </CardTitle>
             <CardDescription className="text-xs">راجع البيانات المستخرجة قبل الحفظ</CardDescription>
           </CardHeader>
