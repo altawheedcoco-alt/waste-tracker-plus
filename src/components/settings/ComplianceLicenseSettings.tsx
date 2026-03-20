@@ -54,7 +54,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 
 export default function ComplianceLicenseSettings() {
   const { organization } = useAuth();
-  const { extractFromImage, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
+  const { extractFromFile, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
   const [showOCRPreview, setShowOCRPreview] = useState(false);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
