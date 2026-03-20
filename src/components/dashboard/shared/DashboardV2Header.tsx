@@ -2,6 +2,8 @@ import { memo, useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Progress } from '@/components/ui/progress';
 import {
   LucideIcon, Sparkles, Activity, Shield, Zap, Signal, Wifi, Database, Cpu,
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Eye, Radio,
