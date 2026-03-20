@@ -161,6 +161,36 @@ const Blog = () => {
           </div>
         )}
       </main>
+
+      {/* Scroll navigation buttons */}
+      <AnimatePresence>
+        {showScrollBtns && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-24 left-4 z-50 flex flex-col gap-2"
+          >
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+              aria-label="للأعلى"
+            >
+              <ArrowUp className="w-5 h-5" />
+            </button>
+            {!atBottom && (
+              <button
+                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                className="w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+                aria-label="للأسفل"
+              >
+                <ArrowDown className="w-5 h-5" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );
