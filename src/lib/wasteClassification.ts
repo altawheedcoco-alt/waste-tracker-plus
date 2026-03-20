@@ -57,7 +57,7 @@ export interface MainCategory {
 }
 
 export const mainCategories: MainCategory[] = [
-  // غير خطرة
+  // غير خطرة صلبة
   { id: 'organic', name: 'أخشاب ومواد عضوية', nameShort: 'عضوي/خشب', code: 'WD', isHazardous: false, keywords: ['خشب', 'اخشاب', 'بالت', 'بالتات', 'كونتر', 'حبيبي', 'صندوق', 'mdf', 'hdf', 'عضوي', 'طعام', 'زراعي', 'موسكي', 'ابلكاش', 'خشب زان', 'خشب سويد', 'لتزانيلو', 'تيك', 'نشارة', 'باركيه', 'فورميكا', 'لاتيه', 'كسر خشب', 'أثاث خشب', 'طبالي', 'خشب كسر', 'رايش'] },
   { id: 'plastic', name: 'بلاستيك ومطاط', nameShort: 'بلاستيك', code: 'PL', isHazardous: false, keywords: ['بلاستيك', 'plastic', 'pet', 'hdpe', 'pvc', 'نايلون', 'اكياس', 'عبوات', 'مطاط', 'كاوتش', 'إطار', 'شنطة', 'جردل', 'خرطوم', 'فيبر جلاس'] },
   { id: 'paper', name: 'ورق وكرتون', nameShort: 'ورق', code: 'PA', isHazardous: false, keywords: ['ورق', 'كرتون', 'paper', 'cardboard', 'كراتين', 'علب', 'دشت', 'رول', 'ورق فلوسكاب'] },
@@ -65,6 +65,10 @@ export const mainCategories: MainCategory[] = [
   { id: 'glass', name: 'زجاج', nameShort: 'زجاج', code: 'GL', isHazardous: false, keywords: ['زجاج', 'glass', 'قوارير', 'زجاجات', 'كسر زجاج', 'ازاز'] },
   { id: 'construction', name: 'مخلفات بناء وهدم', nameShort: 'بناء', code: 'CN', isHazardous: false, keywords: ['بناء', 'هدم', 'خرسانة', 'طوب', 'بلاط', 'سيراميك', 'ردم', 'أتربة', 'رمل', 'زلط', 'أسمنت'] },
   { id: 'other', name: 'مخلفات متنوعة', nameShort: 'متنوع', code: 'OT', isHazardous: false, keywords: ['متنوع', 'مختلط', 'اخرى', 'قماش', 'اثاث', 'نسيج', 'جلود'] },
+  // غير خطرة سائلة
+  { id: 'liquid_non_hazardous', name: 'مخلفات سائلة غير خطرة', nameShort: 'سوائل غ.خ', code: 'LQ', isHazardous: false, keywords: ['مياه صرف', 'مياه غسيل', 'بنتونيت', 'زيوت طعام', 'مياه عكرة', 'عصائر', 'مرتجعات سائلة', 'سوائل غذائية', 'مياه تطهير'] },
+  // غير خطرة - بلدية وفندقية
+  { id: 'municipal', name: 'مخلفات بلدية ومختلطة', nameShort: 'بلدية', code: 'MU', isHazardous: false, keywords: ['بلدي', 'بلدية', 'قمامة', 'مخلفات منازل', 'فنادق', 'يخوت', 'مراكب', 'سفن', 'RDF', 'وقود بديل'] },
   // خطرة
   { id: 'chemical', name: 'مخلفات كيميائية وبترولية', nameShort: 'كيميائي', code: 'CH', isHazardous: true, keywords: ['كيميائي', 'مذيب', 'حمض', 'قلوي', 'مبيد', 'زيت ملوث', 'طلاء', 'بترول', 'وقود', 'سولار', 'بنزين', 'ثنر'] },
   { id: 'electronic', name: 'مخلفات إلكترونية وكهربائية', nameShort: 'إلكتروني', code: 'EL', isHazardous: true, keywords: ['إلكتروني', 'بطارية', 'بطاريات', 'شاشة', 'كمبيوتر', 'موبايل', 'كهربائي', 'لمبة', 'فلورسنت'] },
