@@ -164,28 +164,18 @@ const ShipmentStatusTimeline = ({
 
   // Build the relevant timeline steps based on destination type and current status
   const timelineSteps = useMemo(() => {
-    const currentConfig = getStatusConfig(currentDetailedStatus);
-    
-    // الناقل والسائق والمولد يرون فقط مرحلة النقل
-    // مراحل التدوير/التخلص خاصة بالمدور/جهة التخلص فقط
-    const viewerIsTransporterSide = !orgType || ['generator', 'transporter', 'driver'].includes(orgType);
-    
-    // Always show transporter phase
-    const steps: StatusConfig[] = [...transporterStatuses];
-    
-    // Only add recycler/disposal phases if the viewer is recycler/disposal/admin
-    if (!viewerIsTransporterSide) {
-      const isDisposal = shipment.destination_type === 'disposal' || 
-                         currentConfig?.phase === 'disposal';
-      
-      if (isDisposal) {
-        steps.push(...disposalStatuses);
-      } else {
-        steps.push(...recyclerStatuses);
-      }
+    // Each party sees ONLY their own phase statuses
+    if (orgType === 'recycler') return recyclerStatuses;
+    if (orgType === 'disposal') return disposalStatuses;
+    if (orgType === 'admin') {
+      const currentConfig = getStatusConfig(currentDetailedStatus);
+      const isDisposal = shipment.destination_type === 'disposal' || currentConfig?.phase === 'disposal';
+      return isDisposal
+        ? [...transporterStatuses, ...disposalStatuses]
+        : [...transporterStatuses, ...recyclerStatuses];
     }
-    
-    return steps;
+    // generator, transporter, driver → transporter phase only
+    return transporterStatuses;
   }, [currentDetailedStatus, shipment.destination_type, orgType]);
 
   // Find the current status index in the timeline

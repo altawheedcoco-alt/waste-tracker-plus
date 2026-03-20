@@ -43,6 +43,7 @@ import {
   getAvailableNextStatuses,
   canChangeStatus,
   allStatuses,
+  getStatusesForOrgType,
   StatusConfig,
   mapToDbStatus,
   ShipmentStatus,
@@ -195,17 +196,9 @@ const StatusChangeDialog = ({ isOpen, onClose, shipment, onStatusChanged, geofen
   })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
-  const rolePhases: Record<string, string[]> = {
-    generator: ['transporter'],
-    transporter: ['transporter'],
-    driver: ['transporter'],
-    recycler: ['recycler'],
-    disposal: ['disposal'],
-    admin: ['transporter', 'recycler', 'disposal'],
-  };
-  const allowedPhases = rolePhases[organizationType] || rolePhases.admin;
+  const orgVisibleStatuses = getStatusesForOrgType(organizationType);
   const availableStatuses = manualOverride 
-    ? allStatuses.filter(s => s.key !== shipment.status && allowedPhases.includes(s.phase)) 
+    ? orgVisibleStatuses.filter(s => s.key !== shipment.status) 
     : getAvailableNextStatuses(shipment.status, organizationType);
   const canChange = manualOverride || canChangeStatus(shipment.status, organizationType);
 
@@ -782,14 +775,9 @@ export const InlineStatusChange = ({ shipment, onStatusChanged, geofenceRadius =
   })();
 
   const currentStatusConfig = getStatusConfig(shipment.status);
-  const rolePhases: Record<string, string[]> = {
-    generator: ['transporter'], transporter: ['transporter'], driver: ['transporter'],
-    recycler: ['recycler'], disposal: ['disposal'],
-    admin: ['transporter', 'recycler', 'disposal'],
-  };
-  const allowedPhases = rolePhases[organizationType] || rolePhases.admin;
+  const orgVisibleStatuses = getStatusesForOrgType(organizationType);
   const availableStatuses = manualOverride
-    ? allStatuses.filter(s => s.key !== shipment.status && allowedPhases.includes(s.phase))
+    ? orgVisibleStatuses.filter(s => s.key !== shipment.status)
     : getAvailableNextStatuses(shipment.status, organizationType);
   const canChange = manualOverride || canChangeStatus(shipment.status, organizationType);
 

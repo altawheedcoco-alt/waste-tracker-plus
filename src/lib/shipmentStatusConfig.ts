@@ -355,6 +355,28 @@ export const getStatusesByPhase = (phase: 'transporter' | 'recycler' | 'disposal
   return recyclerStatuses;
 };
 
+/**
+ * Get the statuses visible to a specific organization type.
+ * Each party sees ONLY their own phase statuses.
+ * Admin sees all.
+ */
+export const getStatusesForOrgType = (orgType: OrgTypeForStatus): StatusConfig[] => {
+  switch (orgType) {
+    case 'generator':
+    case 'transporter':
+    case 'driver':
+      return transporterStatuses;
+    case 'recycler':
+      return recyclerStatuses;
+    case 'disposal':
+      return disposalStatuses;
+    case 'admin':
+      return allStatuses;
+    default:
+      return allStatuses;
+  }
+};
+
 // Get available next statuses based on current status and organization type
 export const getAvailableNextStatuses = (
   currentStatus: string,
