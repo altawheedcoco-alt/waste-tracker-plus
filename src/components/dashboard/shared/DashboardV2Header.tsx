@@ -655,6 +655,19 @@ const DashboardV2Header = memo(({
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary">
                   <Sparkles className="w-2 h-2" /> v5.0
                 </Badge>
+
+                {onRefresh && (
+                  <motion.button
+                    onClick={handleRefreshClick}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    title="تحديث البيانات"
+                  >
+                    <RefreshCw className={cn("w-3 h-3 text-primary", isRefreshing && "animate-spin")} />
+                    <span className="text-[8px] font-bold text-primary">تحديث</span>
+                  </motion.button>
+                )}
               </div>
 
               {/* Name + org */}
