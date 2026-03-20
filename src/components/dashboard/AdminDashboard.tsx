@@ -280,6 +280,7 @@ const AdminDashboard = () => {
           stats={stats}
           recentShipments={recentShipments}
           quickActions={quickActions}
+          onRefresh={() => refetchDashboard()}
         />
 
         <AdminOperationsTabs

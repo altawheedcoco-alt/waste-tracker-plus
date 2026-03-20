@@ -84,7 +84,7 @@ const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions, onR
         <UnifiedDocumentSearch />
         <AdminShipmentSearch />
         <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsAdmin')} />
-        <AdminRecentShipments shipments={recentShipments} onRefresh={() => {}} />
+        <AdminRecentShipments shipments={recentShipments} onRefresh={onRefresh || (() => {})} />
         <ErrorBoundary fallbackTitle="خطأ في مركز القيادة">
           <Suspense fallback={<TabFallback />}><GeneratorCommandCenter /></Suspense>
         </ErrorBoundary>
