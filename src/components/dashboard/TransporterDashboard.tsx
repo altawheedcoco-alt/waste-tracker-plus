@@ -138,6 +138,7 @@ const TransporterDashboard = () => {
         orgLabel={t('dashboard.orgTypes.certifiedTransporter')}
         icon={Truck}
         gradient="from-primary to-primary/70"
+        onRefresh={handleRefresh}
         radarStats={[
           { label: 'إجمالي الشحنات', value: stats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(stats?.total || 1, 50), trend: 'up' as const },
           { label: 'نشطة', value: stats?.active || 0, icon: Route, color: 'text-amber-500', max: Math.max(stats?.total || 1, 20), trend: 'up' as const },

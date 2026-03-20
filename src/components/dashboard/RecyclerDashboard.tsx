@@ -190,6 +190,7 @@ const RecyclerDashboard = () => {
         orgLabel={t('dashboard.orgTypes.recycler')}
         icon={Recycle}
         gradient="from-emerald-500 to-teal-600"
+        onRefresh={handleRefresh}
         radarStats={[
           { label: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-primary', max: Math.max(stats.total, 50), trend: 'up' as const },
           { label: 'واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },

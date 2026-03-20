@@ -215,6 +215,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         orgLabel="جهة التخلص النهائي"
         icon={Factory}
         gradient="from-destructive to-primary"
+        onRefresh={handleRefresh}
         radarStats={[
           { label: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(operationsStats?.total || 1, 50), trend: 'up' as const },
           { label: 'شحنات واردة', value: recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },
