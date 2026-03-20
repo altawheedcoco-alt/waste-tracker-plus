@@ -80,6 +80,9 @@ export default function MemberSocialProfile() {
   const [avatarGalleryOpen, setAvatarGalleryOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [postToDelete, setPostToDelete] = useState<string | null>(null);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropMode, setCropMode] = useState<CropMode>('cover');
+  const [cropOpen, setCropOpen] = useState(false);
 
   // Clean up preview URLs
   useEffect(() => {
