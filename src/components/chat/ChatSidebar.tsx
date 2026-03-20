@@ -58,12 +58,12 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
   const { organization } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedPartners, setPinnedPartners] = useState<Set<string>>(new Set());
-  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string }>>(new Map());
+  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string; status?: string }>>(new Map());
 
   useEffect(() => {
     const fetchLastMessages = async () => {
       if (!organization?.id || partners.length === 0) return;
-      const newLastMessages = new Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string }>();
+      const newLastMessages = new Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string; status?: string }>();
 
       for (const partner of partners) {
         const { data } = await supabase
@@ -83,6 +83,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
             isRead: data.is_read || data.sender_organization_id === organization.id,
             isMine: data.sender_organization_id === organization.id,
             type: data.message_type,
+            status: data.is_read ? 'read' : 'delivered',
           });
         }
       }
@@ -285,8 +286,10 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                           ) : (
                             <>
                               {lastMsg?.isMine && (
-                                lastMsg.isRead ? (
+                                lastMsg.status === 'read' || lastMsg.isRead ? (
                                   <CheckCheck className="w-4 h-4 text-sky-400 shrink-0" />
+                                ) : lastMsg.status === 'delivered' ? (
+                                  <CheckCheck className="w-4 h-4 text-muted-foreground shrink-0" />
                                 ) : (
                                   <Check className="w-4 h-4 text-muted-foreground shrink-0" />
                                 )

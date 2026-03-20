@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download } from 'lucide-react';
+import { MessageCircle, X, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download, Check, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -94,9 +94,24 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
         ) : (
           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
         )}
-        <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
-          {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
-        </span>
+        <div className={cn("flex items-center gap-1 mt-0.5", isMine ? "justify-start" : "justify-end")}>
+          <span className={cn("text-[8px]", isMine ? "text-white/60" : "text-muted-foreground")}>
+            {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
+          </span>
+          {isMine && (
+            msg.status === 'sending' ? (
+              <Loader2 className="w-3 h-3 text-white/40 animate-spin" />
+            ) : msg.status === 'failed' ? (
+              <span className="text-[8px] text-red-400">!</span>
+            ) : msg.status === 'read' ? (
+              <CheckCheck className="w-3 h-3 text-sky-400" />
+            ) : msg.status === 'delivered' ? (
+              <CheckCheck className="w-3 h-3 text-white/50" />
+            ) : (
+              <Check className="w-3 h-3 text-white/50" />
+            )
+          )}
+        </div>
       </div>
     </div>
   );
@@ -175,23 +190,67 @@ const EncryptedChatWidget = () => {
 
   const handleSend = async (text: string) => {
     if (!text.trim() || !selectedConvoId || sending) return;
+    
+    // Optimistic: add message instantly
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: text.trim(),
+      message_type: 'text',
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
     setSending(true);
     try {
       await sendMessage(selectedConvoId, text.trim());
+      // Replace optimistic with real messages
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
-    } catch { toast.error('فشل الإرسال'); }
+    } catch {
+      // Mark as failed
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل الإرسال');
+    }
     finally { setSending(false); }
   };
 
   const handleSendFile = async (file: File) => {
     if (!selectedConvoId || sending) return;
+    
+    // Optimistic for files
+    let msgType = 'file';
+    if (file.type.startsWith('image/')) msgType = 'image';
+    else if (file.type.startsWith('video/')) msgType = 'video';
+    else if (file.type.startsWith('audio/')) msgType = 'voice';
+    
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: file.name,
+      message_type: msgType,
+      file_name: file.name,
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
     setSending(true);
     try {
       await sendFileMessage(selectedConvoId, file);
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
-    } catch { toast.error('فشل إرسال الملف'); }
+    } catch {
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل إرسال الملف');
+    }
     finally { setSending(false); }
   };
 
