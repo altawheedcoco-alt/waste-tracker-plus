@@ -517,7 +517,7 @@ const OperationalAlertsWidget = () => {
       </CardHeader>
 
       <CardContent>
-        <ScrollArea className="max-h-[600px]">
+        <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-border/60 hover:scrollbar-thumb-border scrollbar-track-transparent" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border) / 0.6) transparent' }}>
           <div className="space-y-2">
             <AnimatePresence>
               {filteredAlerts.map((alert) => {
