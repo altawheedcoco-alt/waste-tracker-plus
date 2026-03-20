@@ -472,7 +472,7 @@ export default function MemberSocialProfile() {
         {/* Cover + Avatar Section */}
         <Card className="overflow-hidden">
           {/* Cover Photo */}
-          <div className="relative h-48 md:h-64 bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden group/cover">
+          <div className="relative aspect-[3/1] min-h-[12rem] max-h-[20rem] bg-gradient-to-l from-primary/20 via-primary/10 to-background overflow-hidden group/cover">
             {(targetProfile as any).cover_url && (
               <>
                 <img
