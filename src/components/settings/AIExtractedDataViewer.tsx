@@ -185,24 +185,29 @@ const AIExtractedDataViewer = () => {
                           )}
                         </div>
 
-                        {/* Key fields */}
+                        {/* Key structured fields */}
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          {fields.license_number && (
+                          {(structured['رقم الترخيص'] || fields.license_number) && (
                             <span className="flex items-center gap-1">
                               <Hash className="h-3 w-3" />
-                              {fields.license_number}
+                              رقم الترخيص: <strong className="text-foreground">{structured['رقم الترخيص'] || fields.license_number}</strong>
                             </span>
                           )}
-                          {fields.issue_date && (
+                          {(structured['تاريخ الإصدار'] || fields.issue_date) && (
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              صدور: {fields.issue_date}
+                              صدور: <strong className="text-foreground">{structured['تاريخ الإصدار'] || fields.issue_date}</strong>
                             </span>
                           )}
-                          {fields.expiry_date && (
+                          {(structured['تاريخ الانتهاء'] || fields.expiry_date) && (
                             <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3 text-red-500" />
-                              انتهاء: {fields.expiry_date}
+                              <Calendar className="h-3 w-3 text-destructive" />
+                              انتهاء: <strong className="text-foreground">{structured['تاريخ الانتهاء'] || fields.expiry_date}</strong>
+                            </span>
+                          )}
+                          {(structured['الجهة المصدرة'] || fields.issuing_authority) && (
+                            <span className="flex items-center gap-1">
+                              🏛️ <strong className="text-foreground">{structured['الجهة المصدرة'] || fields.issuing_authority}</strong>
                             </span>
                           )}
                         </div>
