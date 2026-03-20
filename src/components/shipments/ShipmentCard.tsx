@@ -214,11 +214,12 @@ const ShipmentCard = ({
   // Get available next statuses for quick change
   const availableNextStatuses = getAvailableNextStatuses(mappedStatus, organizationType);
   
-  // All statuses for full dropdown (excluding current)
-  const allStatusesForDropdown = allStatuses.filter(s => s.key !== mappedStatus);
+  // All statuses for full dropdown — filtered by org type
+  const orgStatuses = getStatusesForOrgType(organizationType);
+  const allStatusesForDropdown = orgStatuses.filter(s => s.key !== mappedStatus);
 
-  // Calculate current status index for progress display
-  const currentStatusIndex = allStatuses.findIndex(s => s.key === mappedStatus);
+  // Calculate current status index for progress display (within org's own statuses)
+  const currentStatusIndex = orgStatuses.findIndex(s => s.key === mappedStatus);
 
   const handleCardClick = () => {
     navigate(`/dashboard/s/${shipment.shipment_number}`);
