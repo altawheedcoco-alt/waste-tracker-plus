@@ -346,7 +346,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
               {item.extra?.weight && (
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Weight className="w-3 h-3 shrink-0" />
-                  <span>{Number(item.extra.weight).toLocaleString()} كجم</span>
+                  <span>{Number(item.extra.weight).toLocaleString()} {item.extra.unit || 'كجم'}</span>
                 </div>
               )}
             </>
