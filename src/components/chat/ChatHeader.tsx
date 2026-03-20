@@ -15,7 +15,18 @@ import {
   Star,
   Ban,
   Info,
-  Paintbrush
+  Paintbrush,
+  HelpCircle,
+  Slash,
+  FileSearch,
+  CreditCard,
+  PenTool,
+  FileText,
+  Package,
+  Receipt,
+  MapPin,
+  Stamp,
+  AtSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
