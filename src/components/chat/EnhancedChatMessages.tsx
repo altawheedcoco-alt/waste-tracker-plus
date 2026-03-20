@@ -22,6 +22,7 @@ import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
 import MessageReactions from './MessageReactions';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
+import ChatMentionRenderer from './ChatMentionRenderer';
 import { QuotedReply } from './ReplyPreview';
 import { useChatReactions } from '@/hooks/useChatReactions';
 import { format, isToday, isYesterday } from 'date-fns';
