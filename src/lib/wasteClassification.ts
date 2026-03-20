@@ -615,7 +615,7 @@ export const getWasteTypeCode = (wasteType: WasteType | string): string => {
 
 export const isHazardousWasteType = (wasteType: WasteType | string): boolean => {
   if (!wasteType) return false;
-  return ['chemical', 'electronic', 'medical', 'industrial'].includes(wasteType);
+  return ['chemical', 'electronic', 'medical', 'industrial', 'hazardous_liquid'].includes(wasteType);
 };
 
 export const getHazardLevelFromWasteType = (wasteType: WasteType | string): 'hazardous' | 'non_hazardous' => {
