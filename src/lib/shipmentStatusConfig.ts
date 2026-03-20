@@ -343,9 +343,14 @@ export const disposalStatuses: StatusConfig[] = [
 // All statuses combined in order
 export const allStatuses: StatusConfig[] = [...transporterStatuses, ...recyclerStatuses, ...disposalStatuses];
 
-// Get status config by key
+// Get status config by key (resolves legacy DB statuses automatically)
 export const getStatusConfig = (status: string): StatusConfig | undefined => {
-  return allStatuses.find(s => s.key === status);
+  const direct = allStatuses.find(s => s.key === status);
+  if (direct) return direct;
+  // Try legacy mapping (e.g. 'new' → 'pending', 'approved' → 'registered')
+  const mapped = legacyStatusMapping[status];
+  if (mapped) return allStatuses.find(s => s.key === mapped);
+  return undefined;
 };
 
 // Get statuses by phase
@@ -384,7 +389,10 @@ export const getAvailableNextStatuses = (
   options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
 ): StatusConfig[] => {
   const currentConfig = getStatusConfig(currentStatus);
-  if (!currentConfig) return allStatuses;
+  if (!currentConfig) {
+    // Unknown status — still respect org type isolation
+    return getStatusesForOrgType(organizationType);
+  }
 
   // Admin can change to any status
   if (organizationType === 'admin') {
