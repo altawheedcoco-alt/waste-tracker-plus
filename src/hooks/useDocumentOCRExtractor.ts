@@ -1,10 +1,16 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import * as pdfjsLib from 'pdfjs-dist';
 
-// Configure PDF.js worker
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
+/** Lazy-load pdfjs-dist only when needed to avoid worker fetch errors on page load */
+let pdfjsLib: typeof import('pdfjs-dist') | null = null;
+async function getPdfJs() {
+  if (!pdfjsLib) {
+    pdfjsLib = await import('pdfjs-dist');
+    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
+  }
+  return pdfjsLib;
+}
 
 export interface OCRExtractedData {
   raw_text: string;
@@ -104,7 +110,8 @@ export function useDocumentOCRExtractor() {
     setProgress(5);
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdfjs = await getPdfJs();
+      const pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const totalPages = pdfDoc.numPages;
 
       toast.info(`جارٍ تحليل ${totalPages} صفحة بالذكاء الاصطناعي...`);
