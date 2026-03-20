@@ -49,6 +49,8 @@ interface EnhancedChatInputProps {
   uploadProgress?: number;
   disabled?: boolean;
   onTyping?: () => void;
+  /** Filter @mentions to only show this partner org + my org */
+  chatPartnerOrgId?: string;
 }
 
 const EMOJI_QUICK = ['😀', '😂', '❤️', '👍', '🙏', '😊', '😍', '🔥', '✅', '📦', '🚛', '♻️'];
