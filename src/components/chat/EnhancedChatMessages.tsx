@@ -234,7 +234,23 @@ const EnhancedChatMessages = ({
 
   const getMessageStatus = (message: ChatMessage, isOwn: boolean) => {
     if (!isOwn) return null;
+    
+    // Check optimistic status first
+    const optStatus = (message as any).optimistic_status;
+    if (optStatus === 'sending') {
+      return <Loader2 className="w-[14px] h-[14px] text-white/40 animate-spin" />;
+    }
+    if (optStatus === 'failed') {
+      return <span className="text-[10px] text-red-400">!</span>;
+    }
+    
+    // WhatsApp-style: read = ✓✓ blue, delivered = ✓✓ grey, sent = ✓ grey
     if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-400" />;
+    
+    // Check message_status field for delivered vs sent
+    const msgStatus = (message as any).message_status || (message as any).status;
+    if (msgStatus === 'delivered') return <CheckCheck className="w-[14px] h-[14px] text-white/50" />;
+    
     return <Check className="w-[14px] h-[14px] text-white/50" />;
   };
 
