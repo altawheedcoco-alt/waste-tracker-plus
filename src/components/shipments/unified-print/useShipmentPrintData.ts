@@ -123,7 +123,7 @@ export function useShipmentPrintData({ shipmentData, shipmentId, isOpen }: UseSh
       // Fetch digital signatures for this shipment
       const { data: sigData } = await supabase
         .from('document_signatures')
-        .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id')
+        .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id, signed_by')
         .eq('document_id', data.id)
         .order('timestamp_signed', { ascending: true });
       if (sigData) setSignatures(sigData as unknown as DocumentSignatureData[]);
