@@ -26,7 +26,7 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [scale, setScale] = useState(1);
   const [rotation, setRotation] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [imageError, setImageError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Touch gesture state
@@ -39,34 +39,12 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
     setCurrentIndex(initialIndex);
     setScale(1);
     setRotation(0);
+    setImageError(false);
   }, [initialIndex, isOpen]);
 
-  // Canvas rendering for protected mode
   useEffect(() => {
-    if (!isOpen || !isProtected || !canvasRef.current) return;
-    const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = 'anonymous';
-    img.onload = () => {
-      // Fit image within viewport
-      const maxW = window.innerWidth * 0.9;
-      const maxH = window.innerHeight * 0.8;
-      const ratio = Math.min(maxW / img.width, maxH / img.height, 1);
-      canvas.width = img.width * ratio;
-      canvas.height = img.height * ratio;
-      
-      ctx.save();
-      ctx.translate(canvas.width / 2, canvas.height / 2);
-      ctx.rotate((rotation * Math.PI) / 180);
-      ctx.scale(scale, scale);
-      ctx.drawImage(img, -canvas.width / 2, -canvas.height / 2, canvas.width, canvas.height);
-      ctx.restore();
-    };
-    img.src = images[currentIndex];
-  }, [isOpen, isProtected, currentIndex, scale, rotation, images]);
+    setImageError(false);
+  }, [currentIndex]);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -82,6 +60,14 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, currentIndex]);
+
+  // Lock body scroll when open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      return () => { document.body.style.overflow = ''; };
+    }
+  }, [isOpen]);
 
   // Pinch-to-zoom handler
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
@@ -113,12 +99,10 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
       const dx = e.changedTouches[0].clientX - touchStart.x;
       const dy = e.changedTouches[0].clientY - touchStart.y;
       
-      // Swipe horizontally for navigation
       if (Math.abs(dx) > 80 && Math.abs(dy) < 60) {
         if (dx > 0) goPrev();
         else goNext();
       }
-      // Swipe down to close
       if (dy > 120 && Math.abs(dx) < 60) {
         onClose();
       }
@@ -165,7 +149,16 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
     }
   };
 
+  // Close only when clicking the dark backdrop, not the image area
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
   if (!isOpen) return null;
+
+  const currentSrc = images[currentIndex];
 
   return (
     <AnimatePresence>
@@ -175,7 +168,7 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
         exit={{ opacity: 0 }}
         className="fixed inset-0 z-[100] bg-black/95 flex flex-col"
         style={{ opacity: dragOpacity }}
-        onClick={onClose}
+        onClick={handleBackdropClick}
         onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}
       >
         {/* Protected mode indicator */}
@@ -213,7 +206,6 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
             <Button size="icon" variant="ghost" className="h-10 w-10 text-white hover:bg-white/10" onClick={rotate}>
               <RotateCw className="w-5 h-5" />
             </Button>
-            {/* Hide download & share in protected mode */}
             {!isProtected && (
               <>
                 <Button size="icon" variant="ghost" className="h-10 w-10 text-white hover:bg-white/10" onClick={downloadImage}>
@@ -268,45 +260,42 @@ const ImageLightbox = ({ images, initialIndex, isOpen, onClose, protected: isPro
             </>
           )}
 
-          {/* Image - Protected vs Normal */}
-          {isProtected ? (
-            <div className="relative">
-              <motion.canvas
-                ref={canvasRef}
-                key={currentIndex}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                transition={{ type: 'spring', damping: 25 }}
-                className="max-w-[90vw] max-h-[80vh] rounded-lg"
-                style={{ 
-                  userSelect: 'none',
-                  WebkitUserSelect: 'none',
-                  WebkitTouchCallout: 'none',
-                  pointerEvents: 'none',
-                }}
-                onContextMenu={(e) => e.preventDefault()}
-              />
-              {/* Transparent overlay to block interaction */}
-              <div 
-                className="absolute inset-0 z-10"
-                onContextMenu={(e) => e.preventDefault()}
-                onDragStart={(e) => e.preventDefault()}
-              />
-            </div>
-          ) : (
-            <motion.img
-              key={currentIndex}
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: scale, rotate: rotation }}
-              exit={{ opacity: 0, scale: 0.9 }}
-              transition={{ type: 'spring', damping: 25 }}
-              src={images[currentIndex]}
-              alt="Preview"
-              className="max-w-[90vw] max-h-[80vh] object-contain rounded-lg cursor-grab active:cursor-grabbing"
-              draggable={false}
-              onClick={(e) => e.stopPropagation()}
+          {/* Always use <img> — protected mode uses CSS-only protection */}
+          <motion.img
+            key={`${currentIndex}-${currentSrc}`}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: scale, rotate: rotation }}
+            exit={{ opacity: 0, scale: 0.9 }}
+            transition={{ type: 'spring', damping: 25 }}
+            src={currentSrc}
+            alt="Preview"
+            className={cn(
+              "max-w-[90vw] max-h-[80vh] object-contain rounded-lg",
+              isProtected ? "pointer-events-none select-none" : "cursor-grab active:cursor-grabbing"
+            )}
+            draggable={false}
+            onError={() => setImageError(true)}
+            onContextMenu={isProtected ? (e) => e.preventDefault() : undefined}
+            style={isProtected ? {
+              userSelect: 'none',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none',
+            } as React.CSSProperties : undefined}
+          />
+
+          {/* Transparent overlay for protected mode to block right-click/drag on the image */}
+          {isProtected && (
+            <div 
+              className="absolute inset-0 z-10"
+              onContextMenu={(e) => e.preventDefault()}
+              onDragStart={(e) => e.preventDefault()}
             />
+          )}
+
+          {imageError && (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="text-white/50 text-sm">تعذر تحميل الصورة</p>
+            </div>
           )}
         </div>
 
