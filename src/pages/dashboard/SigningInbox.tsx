@@ -21,6 +21,7 @@ import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
   FileText, ExternalLink, PenTool, FolderOpen, Upload, Paperclip, X,
+  Truck, Receipt, Link2, ArrowUpRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -71,6 +72,77 @@ function SignedDocumentView({ request }: { request: SigningRequest }) {
       </div>
       <SignatureBadges signatures={signatures as any} compact />
     </div>
+  );
+}
+
+/** Fetch linked shipment info for a signing request */
+function LinkedShipmentBadge({ shipmentId }: { shipmentId: string }) {
+  const navigate = useNavigate();
+  const { data: shipment } = useQuery({
+    queryKey: ['linked-shipment', shipmentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('shipments')
+        .select('id, shipment_number, status, waste_type, pickup_city, delivery_city, quantity, unit')
+        .eq('id', shipmentId)
+        .single();
+      return data;
+    },
+    enabled: !!shipmentId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!shipment) return null;
+
+  return (
+    <button
+      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/5 hover:bg-primary/10 border border-primary/10 transition-colors text-xs"
+    >
+      <Truck className="w-3 h-3 text-primary" />
+      <span className="font-medium">{shipment.shipment_number}</span>
+      <span className="text-muted-foreground">
+        {shipment.waste_type} • {shipment.quantity} {shipment.unit}
+      </span>
+      {shipment.pickup_city && shipment.delivery_city && (
+        <span className="text-muted-foreground">({shipment.pickup_city} → {shipment.delivery_city})</span>
+      )}
+      <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+    </button>
+  );
+}
+
+/** Fetch linked document info for a signing request */
+function LinkedDocumentBadge({ documentId, documentType }: { documentId: string; documentType: string }) {
+  const navigate = useNavigate();
+  
+  // Try entity_documents first
+  const { data: doc } = useQuery({
+    queryKey: ['linked-doc', documentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('entity_documents')
+        .select('id, title, file_name, document_type, file_url')
+        .eq('id', documentId)
+        .single();
+      return data;
+    },
+    enabled: !!documentId && !['shipment', 'invoice'].includes(documentType),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!doc) return null;
+
+  return (
+    <button
+      onClick={() => doc.file_url ? window.open(doc.file_url, '_blank') : navigate('/dashboard/document-archive')}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted hover:bg-muted/80 border transition-colors text-xs"
+    >
+      <FileText className="w-3 h-3 text-primary" />
+      <span className="font-medium truncate max-w-[200px]">{doc.title || doc.file_name}</span>
+      <Badge variant="secondary" className="text-[9px] px-1">{doc.document_type}</Badge>
+      <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+    </button>
   );
 }
 
@@ -132,6 +204,16 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
                 <span className="text-muted-foreground">💬 </span>{request.message}
               </div>
             )}
+
+            {/* Linked resources */}
+            <div className="flex flex-wrap gap-2 justify-end">
+              {request.related_shipment_id && (
+                <LinkedShipmentBadge shipmentId={request.related_shipment_id} />
+              )}
+              {request.document_id && request.document_type && (
+                <LinkedDocumentBadge documentId={request.document_id} documentType={request.document_type} />
+              )}
+            </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground justify-end flex-wrap">
               <span className="flex items-center gap-1">
@@ -206,36 +288,60 @@ export default function SigningInbox() {
     enabled: !!profile?.organization_id,
   });
 
-  // Fetch partner organizations
+  // Fetch partner organizations (verified_partnerships + partner_links)
   const { data: partners } = useQuery({
     queryKey: ['partner-orgs-for-signing', profile?.organization_id],
     queryFn: async () => {
       if (!profile?.organization_id) return [];
-      const { data } = await supabase
-        .from('partner_links')
-        .select('partner_organization_id, organizations!partner_links_partner_organization_id_fkey(id, name)')
-        .eq('organization_id', profile.organization_id)
-        .eq('status', 'active');
-      
-      const { data: reverseData } = await supabase
-        .from('partner_links')
-        .select('organization_id, organizations!partner_links_organization_id_fkey(id, name)')
-        .eq('partner_organization_id', profile.organization_id)
-        .eq('status', 'active');
-
-      const orgs: { id: string; name: string }[] = [];
+      const myOrgId = profile.organization_id;
       const seen = new Set<string>();
+      const orgs: { id: string; name: string }[] = [];
 
-      (data || []).forEach((d: any) => {
-        const org = d.organizations;
-        if (org && !seen.has(org.id)) { orgs.push(org); seen.add(org.id); }
-      });
-      (reverseData || []).forEach((d: any) => {
-        const org = d.organizations;
-        if (org && !seen.has(org.id)) { orgs.push(org); seen.add(org.id); }
-      });
+      // 1) verified_partnerships (primary source of truth)
+      const [vpForward, vpReverse] = await Promise.all([
+        supabase.from('verified_partnerships')
+          .select('partner_org_id')
+          .eq('requester_org_id', myOrgId)
+          .eq('status', 'active'),
+        supabase.from('verified_partnerships')
+          .select('requester_org_id')
+          .eq('partner_org_id', myOrgId)
+          .eq('status', 'active'),
+      ]);
 
-      return orgs;
+      const vpIds = [
+        ...(vpForward.data || []).map((d: any) => d.partner_org_id),
+        ...(vpReverse.data || []).map((d: any) => d.requester_org_id),
+      ].filter(Boolean);
+
+      // 2) partner_links (fallback)
+      const [plForward, plReverse] = await Promise.all([
+        supabase.from('partner_links')
+          .select('partner_organization_id')
+          .eq('organization_id', myOrgId)
+          .eq('status', 'active'),
+        supabase.from('partner_links')
+          .select('organization_id')
+          .eq('partner_organization_id', myOrgId)
+          .eq('status', 'active'),
+      ]);
+
+      const plIds = [
+        ...(plForward.data || []).map((d: any) => d.partner_organization_id),
+        ...(plReverse.data || []).map((d: any) => d.organization_id),
+      ].filter(Boolean);
+
+      const allIds = [...new Set([...vpIds, ...plIds])].filter(id => id !== myOrgId);
+      if (!allIds.length) return [];
+
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, logo_url')
+        .in('id', allIds)
+        .eq('is_active', true)
+        .order('name');
+
+      return (orgData || []).map(o => ({ id: o.id, name: o.name, type: o.organization_type, logo: o.logo_url }));
     },
     enabled: !!profile?.organization_id,
   });
@@ -420,8 +526,28 @@ export default function SigningInbox() {
                 <Select value={form.recipient_organization_id} onValueChange={v => setForm(p => ({ ...p, recipient_organization_id: v }))}>
                   <SelectTrigger><SelectValue placeholder="اختر الجهة الشريكة..." /></SelectTrigger>
                   <SelectContent>
-                    {(partners || []).map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    {(partners || []).length === 0 && (
+                      <div className="p-3 text-center text-sm text-muted-foreground">
+                        <Building2 className="w-5 h-5 mx-auto mb-1 opacity-50" />
+                        لا توجد جهات مرتبطة
+                      </div>
+                    )}
+                    {(partners || []).map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        <span className="flex items-center gap-2">
+                          {p.logo ? (
+                            <img src={p.logo} alt="" className="w-4 h-4 rounded-full object-cover" />
+                          ) : (
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                          )}
+                          {p.name}
+                          {p.type && (
+                            <Badge variant="secondary" className="text-[9px] px-1 mr-1">
+                              {p.type === 'generator' ? 'مولد' : p.type === 'transporter' ? 'ناقل' : p.type === 'recycler' ? 'مدور' : p.type}
+                            </Badge>
+                          )}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
@@ -606,7 +732,10 @@ export default function SigningInbox() {
               <CardContent className="p-12 text-center">
                 <Inbox className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground text-lg">لا توجد طلبات واردة</p>
-                <p className="text-sm text-muted-foreground/70">ستظهر هنا المستندات المرسلة إليك للتوقيع</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">ستظهر هنا المستندات المرسلة إليك للتوقيع من الجهات المرتبطة</p>
+                <p className="text-xs text-muted-foreground/50">
+                  يمكن لأي جهة مرتبطة إرسال مستندات لك للتوقيع عبر زر "إرسال للتوقيع" من داخل الشحنات أو المستندات أو الدردشة
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -629,7 +758,10 @@ export default function SigningInbox() {
               <CardContent className="p-12 text-center">
                 <Send className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground text-lg">لا توجد طلبات صادرة</p>
-                <p className="text-sm text-muted-foreground/70">أرسل مستنداً لجهة شريكة للتوقيع عليه</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">أرسل مستنداً لجهة شريكة للتوقيع عليه</p>
+                <Button onClick={() => setSendOpen(true)} className="gap-2">
+                  <Send className="w-4 h-4" /> إرسال طلب توقيع جديد
+                </Button>
               </CardContent>
             </Card>
           ) : (
