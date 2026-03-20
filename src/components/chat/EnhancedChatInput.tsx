@@ -131,6 +131,26 @@ const EnhancedChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle slash command dropdown navigation
+    if (showSlashMenu && filteredSlashCommands.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSlashIndex(i => (i + 1) % filteredSlashCommands.length);
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSlashIndex(i => (i - 1 + filteredSlashCommands.length) % filteredSlashCommands.length);
+        return;
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        handleSlashSelect(filteredSlashCommands[slashIndex]);
+        return;
+      } else if (e.key === 'Escape') {
+        setShowSlashMenu(false);
+        return;
+      }
+    }
+
     // Handle mention dropdown navigation
     if (showMentionDropdown && filteredMentions.length > 0) {
       if (e.key === 'ArrowDown') {
