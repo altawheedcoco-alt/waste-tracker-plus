@@ -458,6 +458,50 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'أحذية جلدية وحقائب', code: 'TX-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جزم جلد تالفة', 'بوت جلد', 'شنط مدرسة', 'شنط سفر تالفة', 'محافظ تالفة', 'شنط يد تالفة'] },
     ],
   },
+  // ============================================
+  // المخلفات السائلة غير الخطرة — مستخرجة من وثائق التصنيف الرسمية
+  // ============================================
+  {
+    id: 'liquid_non_hazardous',
+    name: 'المخلفات السائلة غير الخطرة',
+    description: 'مياه الصرف والسوائل الغذائية والزيوت غير الملوثة',
+    wasteState: 'liquid',
+    category: 'non_hazardous',
+    legalReference: 'قانون 202/2020 - الباب الثالث',
+    subcategories: [
+      { name: 'مياه الصرف الصحي', code: 'LQ-01', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه صرف صحي', 'مياه مجاري', 'صرف منازل', 'مياه صرف آدمي'] },
+      { name: 'مياه عمليات الغسيل (بدون كيماويات)', code: 'LQ-02', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['مياه غسيل عادي', 'مياه غسيل ملابس', 'مياه شطف', 'مياه غسيل سيارات'] },
+      { name: 'البنتونيت غير الخطر (غير مخلوط بزيوت)', code: 'LQ-03', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['بنتونيت', 'طين حفر غير ملوث', 'بنتونيت مخلوط بماء', 'سائل حفر غير خطر'] },
+      { name: 'زيوت الطعام المستهلكة', code: 'LQ-04', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['زيت طعام مستعمل', 'زيت قلي', 'زيت نباتي مستهلك', 'مسلى مستعمل', 'شحوم طعام مستعملة', 'زيت طبخ تالف'] },
+      { name: 'المياه العكرة', code: 'LQ-05', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه عكرة', 'مياه موحلة', 'مياه رشح', 'مياه مطر ملوثة'] },
+      { name: 'مياه غسيل وتطهير الثمار والمواد الغذائية', code: 'LQ-06', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه غسيل خضار', 'مياه غسيل فاكهة', 'مياه تطهير أغذية', 'مياه غسيل مواد غذائية'] },
+      { name: 'ناتج تطهير خزانات المياه', code: 'LQ-07', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه تطهير خزانات', 'مياه تنظيف خزانات', 'رواسب خزانات مياه'] },
+      { name: 'مخلفات العصائر والمشروبات والمرتجعات السائلة', code: 'LQ-08', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['عصائر تالفة', 'مشروبات غازية تالفة', 'مياه معدنية منتهية', 'مرتجعات مشروبات', 'هالك إنتاج سوائل غذائية', 'مركزات تالفة', 'بيبسي تالف', 'كوكا تالفة'] },
+      { name: 'حمأة جافة (محطات معالجة صرف صحي)', code: 'LQ-09', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['حمأة جافة', 'سبلة محطات معالجة', 'حمأة صرف صحي معالجة', 'بيوسوليدز'] },
+      { name: 'السبلة الناتجة من مزارع الدواجن والماشية', code: 'LQ-10', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['سبلة دواجن', 'سبلة ماشية', 'روث حيواني سائل', 'مخلفات مزارع سائلة'] },
+    ],
+  },
+  // ============================================
+  // المخلفات البلدية والمختلطة — مستخرجة من وثائق التصنيف
+  // ============================================
+  {
+    id: 'municipal',
+    name: 'مخلفات بلدية ومختلطة',
+    description: 'مخلفات المدن والقرى والأنشطة التجارية والسياحية',
+    wasteState: 'mixed',
+    category: 'non_hazardous',
+    legalReference: 'قانون 202/2020 - الباب الثالث - المادة 22',
+    subcategories: [
+      { name: 'المخلفات البلدية غير القابلة للتدوير', code: 'MU-01', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['قمامة عادية', 'مخلفات منازل', 'مخلفات بلدية مختلطة', 'نفايات صلبة بلدية'] },
+      { name: 'مخلفات قابلة للحرق لاسترجاع الطاقة (RDF)', code: 'MU-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['وقود بديل RDF', 'مخلفات وقود', 'RDF', 'وقود من مخلفات', 'SRF'] },
+      { name: 'المخلفات العضوية (كمبوست)', code: 'MU-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مخلفات عضوية بلدية', 'بقايا طعام بلدي', 'مخلفات حدائق عامة', 'مخلفات أسواق'] },
+      { name: 'مخلفات الفنادق واليخوت والمراكب', code: 'MU-04', hazardLevel: 'low', wasteState: 'mixed', recyclable: true, commonNames: ['مخلفات فنادق', 'مخلفات يخوت', 'مخلفات مراكب', 'مخلفات سفن', 'مخلفات مراكب الجيت', 'خردة مراكب'] },
+      { name: 'هالك الصناعات الغذائية', code: 'MU-05', hazardLevel: 'low', wasteState: 'mixed', recyclable: true, commonNames: ['هالك صناعات غذائية', 'مخلفات تصنيع غذائي', 'مرتجعات أغذية', 'أغذية منتهية الصلاحية', 'هالك إنتاج', 'معيب غذائي'] },
+      { name: 'مخلفات العبوات الفارغة غير الملوثة', code: 'MU-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['عبوات فارغة نظيفة', 'مخلفات عبوات غذائية', 'هوالك مواد غذائية', 'عبوات بلاستيك فارغة غير ملوثة'] },
+      { name: 'أتربة الخردة المستوردة', code: 'MU-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أتربة خردة مستوردة', 'ناتج فرز خردة', 'أتربة فرز الخردة لصناعة الصلب'] },
+      { name: 'مخلفات أتربة ناتج كنس مخازن الفحم', code: 'MU-08', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['أتربة فحم', 'كنس مخازن فحم', 'غبار فحم', 'مخلفات أتربة فحم حجري'] },
+    ],
+  },
 ];
 
 // ============================================
