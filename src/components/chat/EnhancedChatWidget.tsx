@@ -539,6 +539,7 @@ const EnhancedChatWidget = () => {
                   <EnhancedChatInput
                     onSendMessage={handleSendMessage}
                     onSendFile={handleSendFile}
+                    onSendResourceCard={handleSendResourceCard}
                     sending={sending}
                     uploadProgress={uploadProgress}
                     onTyping={handleInputChange}
