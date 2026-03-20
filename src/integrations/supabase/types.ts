@@ -22951,6 +22951,8 @@ export type Database = {
           pdf_url: string | null
           priority: string | null
           request_id: string | null
+          resource_id: string | null
+          resource_type: string | null
           shipment_id: string | null
           title: string
           type: string | null
@@ -22966,6 +22968,8 @@ export type Database = {
           pdf_url?: string | null
           priority?: string | null
           request_id?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           shipment_id?: string | null
           title: string
           type?: string | null
@@ -22981,6 +22985,8 @@ export type Database = {
           pdf_url?: string | null
           priority?: string | null
           request_id?: string | null
+          resource_id?: string | null
+          resource_type?: string | null
           shipment_id?: string | null
           title?: string
           type?: string | null
