@@ -527,10 +527,16 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
                   <span>استحقاق: {formatDate(item.extra.dueDate as string)}</span>
                 </div>
               )}
-              {item.extra?.paidDate && (
+              {item.extra?.paidAmount && Number(item.extra.paidAmount) > 0 && (
                 <div className="flex items-center gap-2 text-emerald-600">
                   <CheckCircle className="w-3 h-3 shrink-0" />
-                  <span>تم الدفع: {formatDate(item.extra.paidDate as string)}</span>
+                  <span>المدفوع: {Number(item.extra.paidAmount).toLocaleString()} {item.extra.currency}</span>
+                </div>
+              )}
+              {item.extra?.remainingAmount && Number(item.extra.remainingAmount) > 0 && (
+                <div className="flex items-center gap-2 text-amber-600">
+                  <AlertCircle className="w-3 h-3 shrink-0" />
+                  <span>المتبقي: {Number(item.extra.remainingAmount).toLocaleString()} {item.extra.currency}</span>
                 </div>
               )}
               {item.extra?.notes && (
