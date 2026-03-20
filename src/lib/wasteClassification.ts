@@ -14,6 +14,7 @@
  */
 
 import type { Database } from '@/integrations/supabase/types';
+import { extendedWasteTypes, TOTAL_WASTE_TYPES } from './extendedWasteTypes';
 
 export type WasteType = Database['public']['Enums']['waste_type'];
 
@@ -656,8 +657,26 @@ export const getHazardLevelFromWasteType = (wasteType: WasteType | string): 'haz
   return isHazardousWasteType(wasteType) ? 'hazardous' : 'non_hazardous';
 };
 
+const extendedCategory: WasteCategoryInfo = {
+  id: 'extended',
+  name: 'قاعدة بيانات المخلفات الموسّعة',
+  description: `قاعدة بيانات شاملة تضم ${TOTAL_WASTE_TYPES} نوع مخلف إضافي`,
+  wasteState: 'mixed',
+  category: 'all',
+  legalReference: 'قانون 202/2020 + اتفاقية بازل',
+  subcategories: extendedWasteTypes,
+};
+
 export const getAllWasteCategories = (): WasteCategoryInfo[] => {
-  return [...hazardousWasteCategories, ...nonHazardousWasteCategories];
+  return [...hazardousWasteCategories, ...nonHazardousWasteCategories, extendedCategory];
+};
+
+export const getTotalWasteTypesCount = (): number => {
+  let count = 0;
+  for (const cat of getAllWasteCategories()) {
+    count += cat.subcategories.length;
+  }
+  return count;
 };
 
 export const findCategoryById = (id: string): WasteCategoryInfo | undefined => {
