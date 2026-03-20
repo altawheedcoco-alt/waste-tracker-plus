@@ -174,14 +174,13 @@ export default function ComplianceLicenseSettings() {
     const file = e.target.files?.[0];
     if (!file || !orgId) return;
     
-    // Only accept images for OCR
-    if (!file.type.startsWith('image/')) {
-      toast.error('يرجى رفع صورة (JPG, PNG) للتحليل بتقنية OCR');
+    if (!file.type.startsWith('image/') && file.type !== 'application/pdf') {
+      toast.error('يرجى رفع صورة أو ملف PDF');
       e.target.value = '';
       return;
     }
 
-    const result = await extractFromImage(file);
+    const result = await extractFromFile(file);
     if (result) {
       setShowOCRPreview(true);
     }
