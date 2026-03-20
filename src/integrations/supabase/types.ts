@@ -5213,6 +5213,130 @@ export type Database = {
           },
         ]
       }
+      chat_channel_members: {
+        Row: {
+          channel_id: string
+          id: string
+          joined_at: string
+          organization_id: string | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          id?: string
+          joined_at?: string
+          organization_id?: string | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          id?: string
+          joined_at?: string
+          organization_id?: string | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_channel_members_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "chat_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_channel_messages: {
+        Row: {
+          channel_id: string
+          content: string
+          created_at: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          is_pinned: boolean | null
+          message_type: string
+          sender_id: string
+          sender_organization_id: string | null
+        }
+        Insert: {
+          channel_id: string
+          content: string
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          message_type?: string
+          sender_id: string
+          sender_organization_id?: string | null
+        }
+        Update: {
+          channel_id?: string
+          content?: string
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          is_pinned?: boolean | null
+          message_type?: string
+          sender_id?: string
+          sender_organization_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_channel_messages_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "chat_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_channels: {
+        Row: {
+          avatar_url: string | null
+          channel_type: string
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_archived: boolean | null
+          name: string
+          organization_id: string
+          partner_organization_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          channel_type?: string
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          name: string
+          organization_id: string
+          partner_organization_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          channel_type?: string
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_archived?: boolean | null
+          name?: string
+          organization_id?: string
+          partner_organization_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       chat_history_exports: {
         Row: {
           completed_at: string | null
@@ -5513,6 +5637,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      chat_poll_votes: {
+        Row: {
+          created_at: string
+          id: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          option_index: number
+          poll_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          option_index?: number
+          poll_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_poll_votes_poll_id_fkey"
+            columns: ["poll_id"]
+            isOneToOne: false
+            referencedRelation: "chat_polls"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_polls: {
+        Row: {
+          channel_id: string | null
+          closes_at: string | null
+          created_at: string
+          created_by: string
+          direct_message_context: Json | null
+          id: string
+          is_anonymous: boolean | null
+          is_closed: boolean | null
+          options: Json
+          organization_id: string | null
+          poll_type: string
+          question: string
+          room_id: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          closes_at?: string | null
+          created_at?: string
+          created_by: string
+          direct_message_context?: Json | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_closed?: boolean | null
+          options?: Json
+          organization_id?: string | null
+          poll_type?: string
+          question: string
+          room_id?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          closes_at?: string | null
+          created_at?: string
+          created_by?: string
+          direct_message_context?: Json | null
+          id?: string
+          is_anonymous?: boolean | null
+          is_closed?: boolean | null
+          options?: Json
+          organization_id?: string | null
+          poll_type?: string
+          question?: string
+          room_id?: string | null
+        }
+        Relationships: []
       }
       chat_rooms: {
         Row: {
@@ -22386,6 +22590,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      message_threads: {
+        Row: {
+          content: string
+          created_at: string
+          file_name: string | null
+          file_url: string | null
+          id: string
+          message_type: string
+          parent_message_id: string
+          parent_message_table: string
+          room_id: string | null
+          sender_id: string
+          sender_organization_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          message_type?: string
+          parent_message_id: string
+          parent_message_table?: string
+          room_id?: string | null
+          sender_id: string
+          sender_organization_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          message_type?: string
+          parent_message_id?: string
+          parent_message_table?: string
+          room_id?: string | null
+          sender_id?: string
+          sender_organization_id?: string | null
+        }
+        Relationships: []
       }
       mro_inventory: {
         Row: {
