@@ -3,7 +3,7 @@
  * عند تنفيذ أي إجراء في المنصة، يتم إرسال رسالة تلقائية في المحادثة المرتبطة
  */
 
-type ActionType = 
+export type ActionType = 
   | 'shipment_status_changed'
   | 'invoice_issued'
   | 'invoice_approved'
