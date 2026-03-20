@@ -120,6 +120,26 @@ const EnhancedChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle mention dropdown navigation
+    if (showMentionDropdown && filteredMentions.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setMentionIndex(i => (i + 1) % filteredMentions.length);
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setMentionIndex(i => (i - 1 + filteredMentions.length) % filteredMentions.length);
+        return;
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        insertMention(filteredMentions[mentionIndex]);
+        return;
+      } else if (e.key === 'Escape') {
+        setShowMentionDropdown(false);
+        return;
+      }
+    }
+    
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSend();
