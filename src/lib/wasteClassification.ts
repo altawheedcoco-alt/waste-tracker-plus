@@ -220,6 +220,11 @@ export const hazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'مخلفات الأصباغ السائلة والمخلوطة بمياه الصرف الصناعي', code: 'HL-12', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['أصباغ سائلة ملوثة', 'مياه صباغة صناعية', 'مخلفات ورنيش سائلة', 'مواد لاصقة سائلة ملوثة'] },
       { name: 'نفايات المحاليل السائلة الناتجة عن تنقية النحاس بالتحليل الكهربائي', code: 'HL-13', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['محاليل تحليل كهربائي', 'نفايات تنقية نحاس', 'محاليل إلكتروليت مستعملة'] },
       { name: 'المحاليل الأكالة المستعملة', code: 'HL-14', hazardLevel: 'critical', wasteState: 'liquid', commonNames: ['محاليل أكالة', 'محاليل إتش', 'محاليل حمضية أكالة', 'محاليل نحاس مذاب'] },
+      { name: 'المذيبات الهالوجينية المستعملة', code: 'HL-15', hazardLevel: 'critical', wasteState: 'liquid', baselCode: 'A3150', commonNames: ['مذيبات هالوجينية', 'ثلاثي كلورو الإيثلين', 'رباعي كلورو الإيثلين', 'كلوروفورم مستعمل', 'ثنائي كلورو ميثان'] },
+      { name: 'الجاروسايت والهيماتيت ونواتج معالجة الزنك', code: 'HL-16', hazardLevel: 'high', wasteState: 'semi_solid', commonNames: ['جاروسايت', 'هيماتيت', 'jarosite', 'hematite', 'مخلفات معالجة زنك', 'غبار زنك', 'حمأة زنك'] },
+      { name: 'مخلفات غسيل وتشريح معالجة الزنك والمعادن', code: 'HL-17', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مخلفات تشريح زنك', 'مياه غسيل معالجة معادن', 'محاليل إذابة معادن', 'سوائل حمضية لتنقية معادن'] },
+      { name: 'الزيوت المحتوية على ثنائي الفينيل متعدد الكلور (PCBs)', code: 'HL-18', hazardLevel: 'critical', wasteState: 'liquid', baselCode: 'A3180', commonNames: ['زيوت PCBs', 'زيوت محولات ملوثة', 'ثنائي فينيل متعدد الكلور', 'زيوت عازلة ملوثة PCB'] },
+      { name: 'مخلفات الأصباغ والدهانات والورنيش واللاصقات واللحام السائلة', code: 'HL-19', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['أصباغ سائلة خطرة', 'دهانات سائلة ملوثة', 'ورنيش سائل تالف', 'مواد لاصقة سائلة خطرة', 'مواد لحام سائلة'] },
     ],
   },
 ];
