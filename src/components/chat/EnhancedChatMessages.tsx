@@ -412,7 +412,7 @@ const EnhancedChatMessages = ({
                                   )}
 
                                   {/* Resource Card */}
-                                  {message.message_type === 'resource_card' && (() => {
+                                  {(message.message_type as string) === 'resource_card' && (() => {
                                     try {
                                       const parsed = JSON.parse(message.content);
                                       if (parsed.resource_type && parsed.resource_data) {
