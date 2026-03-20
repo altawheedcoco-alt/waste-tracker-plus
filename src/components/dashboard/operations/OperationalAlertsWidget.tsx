@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Progress } from '@/components/ui/progress';
 import {
   AlertTriangle, Clock, ShieldAlert, EyeOff, CheckCircle2, ExternalLink,
@@ -517,7 +517,7 @@ const OperationalAlertsWidget = () => {
       </CardHeader>
 
       <CardContent>
-        <ScrollArea className="max-h-[600px]">
+        <div className="max-h-[600px] overflow-y-auto scrollbar-thin scrollbar-thumb-border/60 hover:scrollbar-thumb-border scrollbar-track-transparent" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border) / 0.6) transparent' }}>
           <div className="space-y-2">
             <AnimatePresence>
               {filteredAlerts.map((alert) => {
@@ -616,7 +616,7 @@ const OperationalAlertsWidget = () => {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
