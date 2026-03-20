@@ -75,6 +75,77 @@ function SignedDocumentView({ request }: { request: SigningRequest }) {
   );
 }
 
+/** Fetch linked shipment info for a signing request */
+function LinkedShipmentBadge({ shipmentId }: { shipmentId: string }) {
+  const navigate = useNavigate();
+  const { data: shipment } = useQuery({
+    queryKey: ['linked-shipment', shipmentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('shipments')
+        .select('id, shipment_number, status, waste_type, pickup_city, delivery_city, quantity, unit')
+        .eq('id', shipmentId)
+        .single();
+      return data;
+    },
+    enabled: !!shipmentId,
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!shipment) return null;
+
+  return (
+    <button
+      onClick={() => navigate(`/dashboard/shipments/${shipment.id}`)}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/5 hover:bg-primary/10 border border-primary/10 transition-colors text-xs"
+    >
+      <Truck className="w-3 h-3 text-primary" />
+      <span className="font-medium">{shipment.shipment_number}</span>
+      <span className="text-muted-foreground">
+        {shipment.waste_type} • {shipment.quantity} {shipment.unit}
+      </span>
+      {shipment.pickup_city && shipment.delivery_city && (
+        <span className="text-muted-foreground">({shipment.pickup_city} → {shipment.delivery_city})</span>
+      )}
+      <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+    </button>
+  );
+}
+
+/** Fetch linked document info for a signing request */
+function LinkedDocumentBadge({ documentId, documentType }: { documentId: string; documentType: string }) {
+  const navigate = useNavigate();
+  
+  // Try entity_documents first
+  const { data: doc } = useQuery({
+    queryKey: ['linked-doc', documentId],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('entity_documents')
+        .select('id, title, file_name, document_type, file_url')
+        .eq('id', documentId)
+        .single();
+      return data;
+    },
+    enabled: !!documentId && !['shipment', 'invoice'].includes(documentType),
+    staleTime: 5 * 60 * 1000,
+  });
+
+  if (!doc) return null;
+
+  return (
+    <button
+      onClick={() => doc.file_url ? window.open(doc.file_url, '_blank') : navigate('/dashboard/document-archive')}
+      className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-muted hover:bg-muted/80 border transition-colors text-xs"
+    >
+      <FileText className="w-3 h-3 text-primary" />
+      <span className="font-medium truncate max-w-[200px]">{doc.title || doc.file_name}</span>
+      <Badge variant="secondary" className="text-[9px] px-1">{doc.document_type}</Badge>
+      <ArrowUpRight className="w-3 h-3 text-muted-foreground" />
+    </button>
+  );
+}
+
 function RequestCard({ request, type, onSign, onReject, onView }: {
   request: SigningRequest;
   type: 'incoming' | 'outgoing';
@@ -133,6 +204,16 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
                 <span className="text-muted-foreground">💬 </span>{request.message}
               </div>
             )}
+
+            {/* Linked resources */}
+            <div className="flex flex-wrap gap-2 justify-end">
+              {request.related_shipment_id && (
+                <LinkedShipmentBadge shipmentId={request.related_shipment_id} />
+              )}
+              {request.document_id && request.document_type && (
+                <LinkedDocumentBadge documentId={request.document_id} documentType={request.document_type} />
+              )}
+            </div>
 
             <div className="flex items-center gap-4 text-xs text-muted-foreground justify-end flex-wrap">
               <span className="flex items-center gap-1">
