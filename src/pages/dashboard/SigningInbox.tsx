@@ -21,7 +21,7 @@ import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
   FileText, ExternalLink, PenTool, FolderOpen, Upload, Paperclip, X,
-  Truck, Receipt, Link2, ArrowUpRight,
+  Truck, Receipt, Link2, ArrowUpRight, GitBranch, BarChart3,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -31,6 +31,11 @@ import type { SignatureData } from '@/components/signatures/UniversalSignatureDi
 import { withTagline } from '@/utils/platformTaglines';
 import SignatureBadges from '@/components/signatures/SignatureBadges';
 import PlatformDocumentPicker, { type PlatformDocument } from '@/components/signing/PlatformDocumentPicker';
+import { useSigningChains } from '@/hooks/useSigningChains';
+import SigningChainCard from '@/components/signing/SigningChainCard';
+import CreateSigningChainDialog from '@/components/signing/CreateSigningChainDialog';
+import DocumentJourneyTimeline from '@/components/signing/DocumentJourneyTimeline';
+import { logJourneyEvent } from '@/hooks/useDocumentJourney';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'في الانتظار', icon: Clock, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
