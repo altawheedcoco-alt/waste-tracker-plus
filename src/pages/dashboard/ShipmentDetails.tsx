@@ -34,7 +34,7 @@ import {
   User, Phone, Mail, FileText, AlertTriangle, Scale, Box, Loader2,
   Edit, Navigation, Lock, Route, Eye, Star, Shield, Users2,
   RefreshCw, ChevronDown, Settings2, Download, FileCheck, CheckCircle2,
-  EyeOff, XCircle,
+  EyeOff, XCircle, StickyNote, MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
@@ -74,6 +74,8 @@ const JobLifecycleOrchestrator = lazy(() => import('@/components/shipments/JobLi
 const ImpactTrailWidget = lazy(() => import('@/components/impact/ImpactTrailWidget'));
 const RouteProgressBar = lazy(() => import('@/components/tracking/RouteProgressBar'));
 const UnifiedShipmentTracker = lazy(() => import('@/components/tracking/UnifiedShipmentTracker'));
+const NotesPanel = lazy(() => import('@/components/notes/NotesPanel'));
+const ShipmentChatTab = lazy(() => import('@/components/shipments/ShipmentChatTab'));
 
 type ShipmentDetails = EnrichedShipment;
 
@@ -103,6 +105,8 @@ const TABS: TabItem[] = [
   { value: 'tracking', label: 'التتبع', icon: Navigation },
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
+  { value: 'notes', label: 'الملاحظات', icon: StickyNote },
+  { value: 'chat', label: 'المحادثات', icon: MessageSquare },
   { value: 'actions', label: 'الإجراءات', icon: Shield },
 ];
 
@@ -722,6 +726,44 @@ const ShipmentDetailsPage = () => {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          {/* ===== الملاحظات ===== */}
+          <TabsContent value="notes">
+            <ErrorBoundary fallbackTitle="خطأ في الملاحظات">
+              <Card>
+                <CardHeader className="text-right pb-3">
+                  <CardTitle className="text-base flex items-center gap-2 justify-end">
+                    <StickyNote className="w-4 h-4 text-orange-500" />ملاحظات الشحنة
+                  </CardTitle>
+                  <CardDescription className="text-right">إضافة وعرض الملاحظات المرتبطة بهذه الشحنة</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Suspense fallback={<TabFallback />}>
+                    <NotesPanel resourceType="shipment" resourceId={shipment.id} maxHeight={500} />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            </ErrorBoundary>
+          </TabsContent>
+
+          {/* ===== المحادثات ===== */}
+          <TabsContent value="chat">
+            <ErrorBoundary fallbackTitle="خطأ في المحادثات">
+              <Card>
+                <CardHeader className="text-right pb-3">
+                  <CardTitle className="text-base flex items-center gap-2 justify-end">
+                    <MessageSquare className="w-4 h-4 text-pink-500" />محادثات الشحنة
+                  </CardTitle>
+                  <CardDescription className="text-right">تواصل مباشر مع أطراف الشحنة — فردي أو جماعي</CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Suspense fallback={<TabFallback />}>
+                    <ShipmentChatTab shipment={shipment} />
+                  </Suspense>
+                </CardContent>
+              </Card>
+            </ErrorBoundary>
           </TabsContent>
 
           {/* ===== الإجراءات ===== */}

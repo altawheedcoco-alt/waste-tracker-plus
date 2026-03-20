@@ -1271,19 +1271,25 @@ const ShipmentCard = ({
                 <Button
                   variant={activeShipmentTab === 'notes' ? 'default' : 'outline'}
                   size="sm"
-                  className="text-xs h-7 gap-1"
+                  className={cn(
+                    "text-xs h-8 gap-1.5 rounded-lg",
+                    activeShipmentTab !== 'notes' && 'border-orange-200 text-orange-600 hover:bg-orange-50 dark:border-orange-800 dark:text-orange-400 dark:hover:bg-orange-950/30'
+                  )}
                   onClick={() => setActiveShipmentTab(activeShipmentTab === 'notes' ? null : 'notes')}
                 >
-                  <StickyNote className="w-3 h-3" />
+                  <StickyNote className="w-3.5 h-3.5" />
                   الملاحظات
                 </Button>
                 <Button
                   variant={activeShipmentTab === 'chat' ? 'default' : 'outline'}
                   size="sm"
-                  className="text-xs h-7 gap-1"
+                  className={cn(
+                    "text-xs h-8 gap-1.5 rounded-lg",
+                    activeShipmentTab !== 'chat' && 'border-pink-200 text-pink-600 hover:bg-pink-50 dark:border-pink-800 dark:text-pink-400 dark:hover:bg-pink-950/30'
+                  )}
                   onClick={() => setActiveShipmentTab(activeShipmentTab === 'chat' ? null : 'chat')}
                 >
-                  <MessageSquareIcon className="w-3 h-3" />
+                  <MessageSquareIcon className="w-3.5 h-3.5" />
                   المحادثات
                 </Button>
               </div>
