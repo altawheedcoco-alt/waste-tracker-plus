@@ -21,6 +21,7 @@ import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
+import ChatMentionRenderer from './ChatMentionRenderer';
 
 const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
   <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
