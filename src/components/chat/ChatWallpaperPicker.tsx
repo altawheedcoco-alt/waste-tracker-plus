@@ -182,7 +182,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           خلفية الدردشة
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col overflow-hidden" dir="rtl">
+      <DialogContent className="sm:max-w-lg h-[85vh] flex flex-col overflow-hidden" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Paintbrush className="w-5 h-5 text-primary" />
@@ -190,7 +190,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </DialogTitle>
         </DialogHeader>
 
-        <Tabs defaultValue="images" className="flex-1 min-h-0 flex flex-col">
+        <Tabs defaultValue="images" className="flex-1 min-h-0 flex flex-col overflow-hidden">
           <TabsList className="grid w-full grid-cols-4 shrink-0">
             <TabsTrigger value="images" className="gap-1 text-xs">
               <Camera className="w-3.5 h-3.5" />
@@ -211,9 +211,9 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsList>
 
           {/* ─── IMAGES TAB ─── */}
-          <TabsContent value="images" className="mt-3 flex-1 min-h-0 overflow-hidden">
-            <div className="h-full overflow-y-auto overscroll-contain rounded-lg" style={{ maxHeight: 'calc(90vh - 10rem)' }}>
-              <div className="flex flex-col gap-3 px-1 pb-4">
+          <TabsContent value="images" className="mt-3 flex-1 min-h-0 overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.3)' }}>
+              <div className="flex flex-col gap-3 px-1 pb-6">
                 <div className="flex flex-wrap gap-1.5">
                   <Badge
                     variant={selectedImageCategory === null ? 'default' : 'outline'}
@@ -321,7 +321,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsContent>
 
           {/* ─── COLORS TAB ─── */}
-          <TabsContent value="colors" className="flex-1 min-h-0 mt-3 flex flex-col gap-3 overflow-hidden">
+          <TabsContent value="colors" className="flex-1 min-h-0 mt-3 flex flex-col gap-3 overflow-hidden" style={{ scrollbarWidth: 'thin' }}>
             <div className="relative shrink-0">
               <Search className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -352,8 +352,8 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain rounded-lg" style={{ maxHeight: 'calc(90vh - 14rem)' }}>
-              <div className="space-y-4 pb-2">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.3)' }}>
+              <div className="space-y-4 pb-6">
                 {filteredFamilies.map(family => (
                   <div key={family.family}>
                     <p className="text-[11px] text-muted-foreground font-semibold mb-1.5">{family.family}</p>
@@ -386,9 +386,9 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsContent>
 
           {/* ─── GRADIENTS TAB ─── */}
-          <TabsContent value="gradients" className="flex-1 min-h-0 mt-3 overflow-hidden">
-            <div className="overflow-y-auto overscroll-contain rounded-lg" style={{ maxHeight: 'calc(90vh - 10rem)' }}>
-              <div className="grid grid-cols-4 gap-2 pb-2">
+          <TabsContent value="gradients" className="flex-1 min-h-0 mt-3 overflow-hidden flex flex-col">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.3)' }}>
+              <div className="grid grid-cols-4 gap-2 pb-6">
                 {GRADIENT_PRESETS.map((g) => (
                   <button
                     key={g.value}
@@ -416,7 +416,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsContent>
 
           {/* ─── PATTERNS TAB ─── */}
-          <TabsContent value="patterns" className="flex-1 min-h-0 mt-3 flex flex-col gap-3 overflow-hidden">
+          <TabsContent value="patterns" className="flex-1 min-h-0 mt-3 flex flex-col gap-3 overflow-hidden" style={{ scrollbarWidth: 'thin' }}>
             <div className="flex flex-wrap gap-1.5 shrink-0">
               <Badge
                 variant={selectedPatternCategory === null ? 'default' : 'outline'}
@@ -437,8 +437,8 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
               ))}
             </div>
 
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain rounded-lg" style={{ maxHeight: 'calc(90vh - 14rem)' }}>
-              <div className="grid grid-cols-3 gap-2 pb-2">
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain scroll-smooth" style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--primary) / 0.4) hsl(var(--muted) / 0.3)' }}>
+              <div className="grid grid-cols-3 gap-2 pb-6">
                 {filteredPatterns.map(p => (
                   <button
                     key={p.id}
