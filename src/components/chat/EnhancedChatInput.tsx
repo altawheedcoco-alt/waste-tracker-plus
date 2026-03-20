@@ -34,8 +34,8 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useMentionableEntities, type MentionableEntity } from '@/hooks/useMentionableEntities';
-import type { MentionableEntity as MentionableEntityType } from '@/components/ui/mentionable-field';
+import { useMentionableEntities } from '@/hooks/useMentionableEntities';
+import type { MentionableEntity } from '@/components/ui/mentionable-field';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
