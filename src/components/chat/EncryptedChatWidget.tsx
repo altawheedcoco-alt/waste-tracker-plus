@@ -95,6 +95,16 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
         ) : (
           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
         )}
+        {/* Resource Card */}
+        {msg.message_type === 'resource_card' && (() => {
+          try {
+            const parsed = JSON.parse(msg.content);
+            if (parsed.resource_type && parsed.resource_data) {
+              return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isMine} />;
+            }
+          } catch { /* not a card */ }
+          return null;
+        })()}
         <div className={cn("flex items-center gap-1 mt-0.5", isMine ? "justify-start" : "justify-end")}>
           <span className={cn("text-[8px]", isMine ? "text-white/60" : "text-muted-foreground")}>
             {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
