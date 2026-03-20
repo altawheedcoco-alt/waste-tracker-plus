@@ -15,7 +15,18 @@ import {
   Star,
   Ban,
   Info,
-  Paintbrush
+  Paintbrush,
+  HelpCircle,
+  Slash,
+  FileSearch,
+  CreditCard,
+  PenTool,
+  FileText,
+  Package,
+  Receipt,
+  MapPin,
+  Stamp,
+  AtSign
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -67,6 +78,7 @@ const ChatHeader = ({
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
   const [showWallpaper, setShowWallpaper] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   
   const getOrgTypeIcon = () => {
     switch (partnerType) {
@@ -159,6 +171,10 @@ const ChatHeader = ({
                 <Paintbrush className="w-4 h-4 ml-2" />
                 خلفية الدردشة
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setShowGuide(true)}>
+                <HelpCircle className="w-4 h-4 ml-2" />
+                دليل الأوامر والوظائف
+              </DropdownMenuItem>
               <DropdownMenuItem>
                 <Star className="w-4 h-4 ml-2" />
                 {t('chat.addFavorite')}
@@ -198,6 +214,119 @@ const ChatHeader = ({
           onOpenChange={setShowWallpaper} 
         />
       )}
+
+      {/* Chat Features Guide Dialog */}
+      <Dialog open={showGuide} onOpenChange={setShowGuide}>
+        <DialogContent className="sm:max-w-lg max-h-[85vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              <HelpCircle className="w-5 h-5 text-primary" />
+              دليل وظائف الدردشة التفاعلية
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 text-sm">
+            {/* Slash Commands */}
+            <div className="space-y-2">
+              <h4 className="font-bold flex items-center gap-2 text-foreground">
+                <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Slash className="w-4 h-4 text-primary" />
+                </div>
+                الأوامر السريعة (/)
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                اكتب <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">/</kbd> في حقل الإدخال لرؤية قائمة الأوامر:
+              </p>
+              <div className="grid grid-cols-2 gap-1.5">
+                {[
+                  { icon: Package, cmd: '/shipment', label: 'مشاركة بطاقة شحنة' },
+                  { icon: Receipt, cmd: '/invoice', label: 'إرسال/طلب فاتورة' },
+                  { icon: FileText, cmd: '/doc', label: 'إرفاق مستند من الأرشيف' },
+                  { icon: PenTool, cmd: '/sign', label: 'طلب توقيع على مستند' },
+                  { icon: Stamp, cmd: '/stamp', label: 'طلب ختم رسمي' },
+                  { icon: MapPin, cmd: '/track', label: 'مشاركة رابط تتبع' },
+                ].map(item => (
+                  <div key={item.cmd} className="flex items-center gap-2 p-2 rounded-lg bg-muted/50 border border-border/50">
+                    <item.icon className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <div className="min-w-0">
+                      <code className="text-[11px] font-mono text-primary font-bold">{item.cmd}</code>
+                      <p className="text-[10px] text-muted-foreground truncate">{item.label}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Rich Cards */}
+            <div className="space-y-2">
+              <h4 className="font-bold flex items-center gap-2 text-foreground">
+                <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                  <CreditCard className="w-4 h-4 text-emerald-600" />
+                </div>
+                البطاقات التفاعلية
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                عند مشاركة شحنة أو فاتورة أو مستند، تظهر كـ <strong>بطاقة تفاعلية</strong> داخل الرسالة مع أزرار مثل:
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {['فتح التفاصيل', 'وقّع الآن', 'اعتمد الفاتورة', 'تتبع الشحنة'].map(action => (
+                  <span key={action} className="px-2 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-medium">
+                    {action}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Resource Search */}
+            <div className="space-y-2">
+              <h4 className="font-bold flex items-center gap-2 text-foreground">
+                <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                  <FileSearch className="w-4 h-4 text-amber-600" />
+                </div>
+                البحث السياقي (🔍)
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                اضغط زر <strong>🔍</strong> بجانب حقل الإدخال للبحث في مواردك (شحنات، فواتير، مستندات، طلبات توقيع) وإرفاقها مباشرة في المحادثة.
+              </p>
+            </div>
+
+            {/* Mentions */}
+            <div className="space-y-2">
+              <h4 className="font-bold flex items-center gap-2 text-foreground">
+                <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center">
+                  <AtSign className="w-4 h-4 text-blue-600" />
+                </div>
+                الإشارات (@mention)
+              </h4>
+              <p className="text-muted-foreground text-xs leading-relaxed">
+                اكتب <kbd className="px-1.5 py-0.5 rounded bg-muted border text-[11px] font-mono">@</kbd> لإشارة شخص أو جهة مرتبطة بك. سيتم إشعارهم فوراً.
+              </p>
+            </div>
+
+            {/* Read receipts */}
+            <div className="space-y-2">
+              <h4 className="font-bold flex items-center gap-2 text-foreground">
+                <div className="w-7 h-7 rounded-lg bg-green-500/10 flex items-center justify-center">
+                  <Check className="w-4 h-4 text-green-600" />
+                </div>
+                علامات القراءة
+              </h4>
+              <div className="grid grid-cols-1 gap-1">
+                {[
+                  { mark: '✓', color: 'text-muted-foreground', desc: 'وصلت للخادم' },
+                  { mark: '✓✓', color: 'text-muted-foreground', desc: 'وصلت للمستلم' },
+                  { mark: '✓✓', color: 'text-blue-500', desc: 'تمت القراءة' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-xs">
+                    <span className={`font-bold ${item.color}`}>{item.mark}</span>
+                    <span className="text-muted-foreground">{item.desc}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
