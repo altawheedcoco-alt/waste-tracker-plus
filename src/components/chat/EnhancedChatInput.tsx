@@ -240,12 +240,55 @@ const EnhancedChatInput = ({
   };
 
   const handleTextareaChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setInputValue(e.target.value);
+    const newValue = e.target.value;
+    const pos = e.target.selectionStart || 0;
+    setInputValue(newValue);
+    setCursorPos(pos);
     onTyping?.();
     const textarea = e.target;
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+    
+    // Detect @ mention trigger
+    const before = newValue.slice(0, pos);
+    const atIndex = before.lastIndexOf('@');
+    if (atIndex !== -1) {
+      const afterAt = before.slice(atIndex + 1);
+      // Only trigger if @ is at start or preceded by whitespace, and no ] or ( after it
+      if ((atIndex === 0 || /[\s\n]/.test(before[atIndex - 1])) && !afterAt.includes(']') && !afterAt.includes('(')) {
+        setMentionSearch(afterAt);
+        setShowMentionDropdown(true);
+        setMentionIndex(0);
+        return;
+      }
+    }
+    setShowMentionDropdown(false);
   };
+
+  const filteredMentions = mentionableEntities.filter(e =>
+    e.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
+    (e.subtitle?.toLowerCase().includes(mentionSearch.toLowerCase()) ?? false)
+  ).slice(0, 8);
+
+  const insertMention = useCallback((entity: MentionableEntity) => {
+    const before = inputValue.slice(0, cursorPos);
+    const atIndex = before.lastIndexOf('@');
+    if (atIndex === -1) return;
+    const beforeAt = inputValue.slice(0, atIndex);
+    const afterCursor = inputValue.slice(cursorPos);
+    const mention = `@[${entity.name}](${entity.id}) `;
+    const newValue = beforeAt + mention + afterCursor;
+    setInputValue(newValue);
+    setShowMentionDropdown(false);
+    setTimeout(() => {
+      if (textareaRef.current) {
+        const newPos = beforeAt.length + mention.length;
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(newPos, newPos);
+        setCursorPos(newPos);
+      }
+    }, 0);
+  }, [inputValue, cursorPos]);
 
   const insertEmoji = (emoji: string) => {
     setInputValue(prev => prev + emoji);
