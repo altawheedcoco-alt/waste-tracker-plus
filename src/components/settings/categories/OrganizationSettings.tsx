@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, FileText, Zap, Eye, Users, Building2, Receipt } from 'lucide-react';
+import { Shield, FileText, Zap, Eye, Users, Building2, Receipt, ClipboardCheck } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
@@ -9,6 +9,7 @@ import OrganizationTermsSettings from '@/components/settings/OrganizationTermsSe
 import MovementSupervisorSettings from '@/components/settings/MovementSupervisorSettings';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
+import ComplianceLicenseSettings from '@/components/settings/ComplianceLicenseSettings';
 
 interface Props {
   orgType: string;
@@ -22,6 +23,7 @@ type TabConfig = {
 };
 
 const tabs: TabConfig[] = [
+  { value: 'compliance', label: 'التراخيص والامتثال', icon: ClipboardCheck, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'transport_office'] },
   { value: 'automation', label: 'الأتمتة', icon: Zap, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'consultant', 'consulting_office', 'transport_office'] },
   { value: 'visibility', label: 'الرؤية والحجب', icon: Shield, visibleFor: ['transporter'] },
   { value: 'supervisors', label: 'مسئولو الحركة', icon: Users, visibleFor: ['transporter', 'generator'] },
@@ -59,6 +61,11 @@ const OrganizationSettings = ({ orgType }: Props) => {
           })}
         </TabsList>
       </div>
+
+      {/* Compliance & Licenses */}
+      <TabsContent value="compliance">
+        <ComplianceLicenseSettings />
+      </TabsContent>
 
       {/* Automation */}
       <TabsContent value="automation">
