@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -9,18 +9,18 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import {
   Shield, ShieldCheck, ShieldAlert, ShieldX, AlertTriangle, CheckCircle2,
   XCircle, Clock, ChevronDown, ChevronUp, Eye, FileText, Scale, Leaf,
-  ClipboardCheck, HardHat, Settings2, Ban, ThumbsUp
+  ClipboardCheck, HardHat, Settings2, Ban, ThumbsUp, ExternalLink, Loader2
 } from 'lucide-react';
+import { useShipmentCompliance } from '@/hooks/useShipmentCompliance';
 import {
-  runComplianceChecks,
   CATEGORY_LABELS,
   STATUS_LABELS,
-  type ComplianceResult,
   type ComplianceCategory,
   type ComplianceCheck,
   type ComplianceStatus,
 } from '@/lib/supervisorComplianceEngine';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Props {
   shipment: any;
@@ -49,11 +49,20 @@ const statusIcons: Record<ComplianceStatus, React.ReactNode> = {
 const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorType = 'human', onDecision, compact = false }: Props) => {
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set(['legal', 'environmental', 'regulatory', 'permit']));
   const [decisionNotes, setDecisionNotes] = useState('');
+  const navigate = useNavigate();
 
-  const result = useMemo(() => {
-    if (!shipment) return null;
-    return runComplianceChecks(shipment);
-  }, [shipment]);
+  const { result, loading, orgs } = useShipmentCompliance(shipment);
+
+  if (loading) {
+    return (
+      <Card className="border-2">
+        <CardContent className="py-8 flex items-center justify-center gap-2">
+          <Loader2 className="h-5 w-5 animate-spin text-primary" />
+          <span className="text-sm text-muted-foreground">جارٍ فحص الامتثال...</span>
+        </CardContent>
+      </Card>
+    );
+  }
 
   if (!result) return null;
 
@@ -65,21 +74,45 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
     });
   };
 
-  const grouped = useMemo(() => {
-    const map = new Map<ComplianceCategory, ComplianceCheck[]>();
-    for (const check of result.checks) {
-      if (!map.has(check.category)) map.set(check.category, []);
-      map.get(check.category)!.push(check);
+  const grouped = new Map<ComplianceCategory, ComplianceCheck[]>();
+  for (const check of result.checks) {
+    if (!grouped.has(check.category)) grouped.set(check.category, []);
+    grouped.get(check.category)!.push(check);
+  }
+
+  // Remediation helpers
+  const getRemediationAction = (check: ComplianceCheck) => {
+    if (check.status === 'pass') return null;
+
+    // If it's about missing org data, link to settings
+    if (check.id.includes('generator') && shipment.generator_id) {
+      return { label: 'فتح ملف المولد', orgId: shipment.generator_id };
     }
-    return map;
-  }, [result]);
+    if (check.id.includes('transport') && shipment.transporter_id) {
+      return { label: 'فتح ملف الناقل', orgId: shipment.transporter_id };
+    }
+    if (check.id.includes('recycler') && (shipment.recycler_id || shipment.disposal_facility_id)) {
+      return { label: 'فتح ملف المدور', orgId: shipment.recycler_id || shipment.disposal_facility_id };
+    }
+    if (check.id === 'permit_wmra_scope') {
+      // Find the first org without WMRA
+      const parties = [
+        { id: shipment.generator_id, org: orgs.generator },
+        { id: shipment.transporter_id, org: orgs.transporter },
+        { id: shipment.recycler_id || shipment.disposal_facility_id, org: orgs.recycler },
+      ];
+      const missing = parties.find(p => p.id && !p.org?.wmra_license);
+      if (missing) return { label: 'تعديل بيانات التصريح', orgId: missing.id };
+    }
+    return null;
+  };
 
   const OverallBadge = () => {
     const { overallStatus, score } = result;
     const config = {
-      pass: { icon: <ShieldCheck className="h-5 w-5" />, label: 'مطابق للمعايير', bg: 'bg-emerald-100 text-emerald-800 border-emerald-300', progressColor: 'bg-emerald-500' },
-      warning: { icon: <ShieldAlert className="h-5 w-5" />, label: 'تحذيرات قائمة', bg: 'bg-amber-100 text-amber-800 border-amber-300', progressColor: 'bg-amber-500' },
-      fail: { icon: <ShieldX className="h-5 w-5" />, label: 'مخالفات حرجة', bg: 'bg-red-100 text-red-800 border-red-300', progressColor: 'bg-red-500' },
+      pass: { icon: <ShieldCheck className="h-5 w-5" />, label: 'مطابق للمعايير', bg: 'bg-emerald-100 text-emerald-800 border-emerald-300 dark:bg-emerald-950/30 dark:text-emerald-300 dark:border-emerald-700', progressColor: 'bg-emerald-500' },
+      warning: { icon: <ShieldAlert className="h-5 w-5" />, label: 'تحذيرات قائمة', bg: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/30 dark:text-amber-300 dark:border-amber-700', progressColor: 'bg-amber-500' },
+      fail: { icon: <ShieldX className="h-5 w-5" />, label: 'مخالفات حرجة', bg: 'bg-red-100 text-red-800 border-red-300 dark:bg-red-950/30 dark:text-red-300 dark:border-red-700', progressColor: 'bg-red-500' },
       pending: { icon: <Shield className="h-5 w-5" />, label: 'قيد المراجعة', bg: 'bg-muted text-muted-foreground border-border', progressColor: 'bg-muted-foreground' },
     }[overallStatus];
 
@@ -105,9 +138,7 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
             <Badge variant="outline" className="text-[10px]">
               {supervisorType === 'ai' ? '🤖 AI' : '👤 بشري'}
             </Badge>
-            {supervisorName && (
-              <span className="text-xs text-muted-foreground">{supervisorName}</span>
-            )}
+            {supervisorName && <span className="text-xs text-muted-foreground">{supervisorName}</span>}
           </div>
           <CardTitle className="text-sm flex items-center gap-2">
             <Shield className="h-4 w-4" />
@@ -117,46 +148,61 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
       </CardHeader>
 
       <CardContent className="space-y-4">
-        {/* Overall Score */}
         <OverallBadge />
 
         {/* Summary Chips */}
         <div className="flex flex-wrap gap-2 justify-end">
-          <Badge variant="outline" className="gap-1 text-emerald-700 border-emerald-300">
+          <Badge variant="outline" className="gap-1 text-emerald-700 border-emerald-300 dark:text-emerald-400 dark:border-emerald-700">
             <CheckCircle2 className="h-3 w-3" />
             {result.checks.filter(c => c.status === 'pass').length} ناجح
           </Badge>
           {result.warnings.length > 0 && (
-            <Badge variant="outline" className="gap-1 text-amber-700 border-amber-300">
+            <Badge variant="outline" className="gap-1 text-amber-700 border-amber-300 dark:text-amber-400 dark:border-amber-700">
               <AlertTriangle className="h-3 w-3" />
               {result.warnings.length} تحذير
             </Badge>
           )}
           {result.blockers.length > 0 && (
-            <Badge variant="outline" className="gap-1 text-red-700 border-red-300">
+            <Badge variant="outline" className="gap-1 text-red-700 border-red-300 dark:text-red-400 dark:border-red-700">
               <XCircle className="h-3 w-3" />
               {result.blockers.length} حرج
             </Badge>
           )}
         </div>
 
-        {/* Blockers Alert */}
+        {/* Blockers Alert with remediation buttons */}
         {result.blockers.length > 0 && (
           <div className="p-3 rounded-lg bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-800">
             <div className="flex items-center gap-2 mb-2 text-red-800 dark:text-red-400">
               <Ban className="h-4 w-4" />
               <span className="font-bold text-xs">مخالفات حرجة تمنع المتابعة</span>
             </div>
-            <ul className="space-y-1">
-              {result.blockers.map(b => (
-                <li key={b.id} className="text-[11px] text-red-700 dark:text-red-400 flex items-start gap-1.5">
-                  <XCircle className="h-3 w-3 mt-0.5 shrink-0" />
-                  <div>
-                    <span className="font-medium">{b.title}</span>
-                    {b.legalReference && <span className="text-red-500 mr-1">({b.legalReference})</span>}
-                  </div>
-                </li>
-              ))}
+            <ul className="space-y-2">
+              {result.blockers.map(b => {
+                const action = getRemediationAction(b);
+                return (
+                  <li key={b.id} className="text-[11px] text-red-700 dark:text-red-400">
+                    <div className="flex items-start gap-1.5">
+                      <XCircle className="h-3 w-3 mt-0.5 shrink-0" />
+                      <div className="flex-1">
+                        <span className="font-semibold">{b.title}</span>
+                        {b.legalReference && <span className="text-red-500 mr-1 text-[10px]">({b.legalReference})</span>}
+                        {b.details && <p className="text-[10px] mt-0.5 opacity-80">{b.details}</p>}
+                      </div>
+                      {action && (
+                        <Button
+                          size="sm" variant="outline"
+                          className="h-6 text-[10px] px-2 gap-1 shrink-0 border-red-300 text-red-700 hover:bg-red-100 dark:border-red-700 dark:text-red-400"
+                          onClick={() => navigate(`/dashboard/settings`)}
+                        >
+                          <ExternalLink className="h-2.5 w-2.5" />
+                          {action.label}
+                        </Button>
+                      )}
+                    </div>
+                  </li>
+                );
+              })}
             </ul>
           </div>
         )}
@@ -195,25 +241,38 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
 
                   {isExpanded && (
                     <div className="border-t divide-y">
-                      {checks.map(check => (
-                        <div key={check.id} className="p-2.5 flex items-start gap-2 text-right">
-                          <div className="flex-1 space-y-0.5">
-                            <div className="flex items-center gap-1.5 justify-end">
-                              <span className="text-[11px] font-semibold">{check.title}</span>
-                              {statusIcons[check.status]}
+                      {checks.map(check => {
+                        const action = getRemediationAction(check);
+                        return (
+                          <div key={check.id} className="p-2.5 flex items-start gap-2 text-right">
+                            <div className="flex-1 space-y-0.5">
+                              <div className="flex items-center gap-1.5 justify-end">
+                                <span className="text-[11px] font-semibold">{check.title}</span>
+                                {statusIcons[check.status]}
+                              </div>
+                              <p className="text-[10px] text-muted-foreground leading-relaxed">{check.description}</p>
+                              {check.legalReference && (
+                                <p className="text-[9px] text-blue-600 dark:text-blue-400 font-mono">📎 {check.legalReference}</p>
+                              )}
+                              {check.details && (
+                                <p className="text-[10px] mt-0.5" style={{ color: STATUS_LABELS[check.status].color }}>
+                                  {check.details}
+                                </p>
+                              )}
+                              {action && check.status !== 'pass' && (
+                                <Button
+                                  size="sm" variant="ghost"
+                                  className="h-5 text-[9px] px-2 gap-1 mt-1 text-primary"
+                                  onClick={() => navigate(`/dashboard/settings`)}
+                                >
+                                  <ExternalLink className="h-2.5 w-2.5" />
+                                  {action.label}
+                                </Button>
+                              )}
                             </div>
-                            <p className="text-[10px] text-muted-foreground leading-relaxed">{check.description}</p>
-                            {check.legalReference && (
-                              <p className="text-[9px] text-blue-600 dark:text-blue-400 font-mono">📎 {check.legalReference}</p>
-                            )}
-                            {check.details && (
-                              <p className="text-[10px] mt-0.5" style={{ color: STATUS_LABELS[check.status].color }}>
-                                {STATUS_LABELS[check.status].icon} {check.details}
-                              </p>
-                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -242,27 +301,22 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
 
               <div className="flex gap-2">
                 <Button
-                  variant="destructive"
-                  size="sm"
-                  className="flex-1 gap-1.5"
+                  variant="destructive" size="sm" className="flex-1 gap-1.5"
                   onClick={() => onDecision(false, decisionNotes)}
                 >
-                  <Ban className="h-3.5 w-3.5" />
-                  رفض / إيقاف
+                  <Ban className="h-3.5 w-3.5" />رفض / إيقاف
                 </Button>
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <div className="flex-1">
                         <Button
-                          variant="default"
-                          size="sm"
+                          variant="default" size="sm"
                           className="w-full gap-1.5 bg-emerald-600 hover:bg-emerald-700"
                           disabled={!result.canProceed}
                           onClick={() => onDecision(true, decisionNotes)}
                         >
-                          <ThumbsUp className="h-3.5 w-3.5" />
-                          موافقة / متابعة
+                          <ThumbsUp className="h-3.5 w-3.5" />موافقة / متابعة
                         </Button>
                       </div>
                     </TooltipTrigger>
@@ -284,7 +338,13 @@ const SupervisorComplianceDashboard = ({ shipment, supervisorName, supervisorTyp
           </>
         )}
 
-        {/* Footer */}
+        {/* Disclaimer */}
+        <div className="p-2 rounded-lg bg-amber-50/50 border border-amber-200/50 dark:bg-amber-950/10 dark:border-amber-800/30">
+          <p className="text-[9px] text-amber-700 dark:text-amber-400 text-center leading-relaxed">
+            ⚖️ المسؤولية القانونية تقع على منشئ الشحنة — المطابقة تعتمد على البيانات المسجّلة ذاتياً من الجهات
+          </p>
+        </div>
+
         <div className="text-[9px] text-muted-foreground text-center pt-2 border-t">
           آخر فحص: {new Date(result.timestamp).toLocaleString('ar-EG')} | المعايير: قانون 202/2020 • قانون 4/1994 • WMRA • شروط الموافقة البيئية
         </div>
