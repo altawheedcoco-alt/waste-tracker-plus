@@ -74,6 +74,8 @@ const JobLifecycleOrchestrator = lazy(() => import('@/components/shipments/JobLi
 const ImpactTrailWidget = lazy(() => import('@/components/impact/ImpactTrailWidget'));
 const RouteProgressBar = lazy(() => import('@/components/tracking/RouteProgressBar'));
 const UnifiedShipmentTracker = lazy(() => import('@/components/tracking/UnifiedShipmentTracker'));
+const NotesPanel = lazy(() => import('@/components/notes/NotesPanel'));
+const ShipmentChatTab = lazy(() => import('@/components/shipments/ShipmentChatTab'));
 
 type ShipmentDetails = EnrichedShipment;
 
