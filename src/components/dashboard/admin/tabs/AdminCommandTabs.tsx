@@ -51,9 +51,10 @@ interface AdminCommandTabsProps {
   };
   recentShipments: any[];
   quickActions: any[];
+  onRefresh?: () => void;
 }
 
-const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions }: AdminCommandTabsProps) => {
+const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions, onRefresh }: AdminCommandTabsProps) => {
   const { t, isRTL } = useLanguage();
 
   return (
@@ -83,7 +84,7 @@ const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions }: A
         <UnifiedDocumentSearch />
         <AdminShipmentSearch />
         <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsAdmin')} />
-        <AdminRecentShipments shipments={recentShipments} onRefresh={() => {}} />
+        <AdminRecentShipments shipments={recentShipments} onRefresh={onRefresh || (() => {})} />
         <ErrorBoundary fallbackTitle="خطأ في مركز القيادة">
           <Suspense fallback={<TabFallback />}><GeneratorCommandCenter /></Suspense>
         </ErrorBoundary>

@@ -227,6 +227,7 @@ const GeneratorDashboard = () => {
         orgLabel={t('dashboard.orgTypes.generator')}
         icon={Package}
         gradient="from-primary to-primary/70"
+        onRefresh={() => fetchDashboardData()}
         radarStats={[
           { label: 'إجمالي الشحنات', value: recentShipments.length, icon: Package, color: 'text-primary', max: Math.max(recentShipments.length, 50), trend: 'up' as const },
           { label: 'نشطة', value: recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length, icon: Route, color: 'text-amber-500', max: 20, trend: 'up' as const },

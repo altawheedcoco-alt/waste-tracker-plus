@@ -75,6 +75,7 @@ interface DashboardV2HeaderProps {
   alerts?: AlertItem[];
   weather?: WeatherData;
   heatmapData?: HeatmapCell[];
+  onRefresh?: () => void;
 }
 
 /* ── English animated counter ── */
@@ -546,8 +547,15 @@ const statusColors: Record<string, string> = {
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
   userName, orgName, orgLabel, icon: Icon, gradient = 'from-primary to-primary/70',
-  children, radarStats, alerts = [], weather, heatmapData
+  children, radarStats, alerts = [], weather, heatmapData, onRefresh
 }: DashboardV2HeaderProps) => {
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const handleRefreshClick = useCallback(() => {
+    if (!onRefresh) return;
+    setIsRefreshing(true);
+    onRefresh();
+    setTimeout(() => setIsRefreshing(false), 1200);
+  }, [onRefresh]);
   const displayName = userName || orgName || 'المستخدم';
   const [now, setNow] = useState(new Date());
   const [tick, setTick] = useState(0);
@@ -647,6 +655,19 @@ const DashboardV2Header = memo(({
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary">
                   <Sparkles className="w-2 h-2" /> v5.0
                 </Badge>
+
+                {onRefresh && (
+                  <motion.button
+                    onClick={handleRefreshClick}
+                    className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors"
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    title="تحديث البيانات"
+                  >
+                    <RefreshCw className={cn("w-3 h-3 text-primary", isRefreshing && "animate-spin")} />
+                    <span className="text-[8px] font-bold text-primary">تحديث</span>
+                  </motion.button>
+                )}
               </div>
 
               {/* Name + org */}
