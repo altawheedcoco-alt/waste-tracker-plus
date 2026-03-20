@@ -132,7 +132,16 @@ const EnhancedChatInput = ({
       return;
     }
     if (!inputValue.trim()) return;
-    await onSendMessage(inputValue.trim());
+    const msgText = inputValue.trim();
+    await onSendMessage(msgText);
+    // Send mention notifications if text contains @[name](id)
+    if (msgText.includes('@[')) {
+      notifyMentions({
+        text: msgText,
+        users: mentionableUsers,
+        context: 'دردشة',
+      });
+    }
     setInputValue('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
