@@ -1,5 +1,7 @@
 import { memo, useState, useEffect, useMemo, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import {
   LucideIcon, Sparkles, Activity, Shield, Zap, Signal, Wifi, Database, Cpu,
   BarChart3, TrendingUp, TrendingDown, AlertTriangle, CheckCircle2, Eye, Radio,
@@ -9,7 +11,9 @@ import {
   ShieldAlert, CircleAlert, Info, XCircle, ChevronLeft, ChevronRight,
   Radar, Waves, Fingerprint, ScanLine, MonitorCheck, ServerCrash, BatteryCharging,
   CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
-  CloudFog, Sunrise, Sunset, Clock, ThermometerSun
+  CloudFog, Sunrise, Sunset, Clock, ThermometerSun,
+  FileSignature, Wallet, Users, ScrollText, Package, Lock, RefreshCw, HardDrive,
+  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain,
 } from 'lucide-react';
 import type { RealWeatherData, HourlyForecast } from '@/hooks/useRealWeather';
 import { cn } from '@/lib/utils';
@@ -25,6 +29,7 @@ export interface RadarStat {
   max?: number;
   trend?: 'up' | 'down' | 'stable';
   suffix?: string;
+  route?: string;
 }
 
 export interface AlertItem {
@@ -499,12 +504,44 @@ const RadarChart = ({ stats }: { stats: RadarStat[] }) => {
 };
 
 /* ── System icons ── */
-const systemIcons = [
-  { icon: Wifi, label: 'NET' }, { icon: Database, label: 'DB' }, { icon: Cpu, label: 'CPU' },
-  { icon: Shield, label: 'SEC' }, { icon: Signal, label: 'SIG' }, { icon: Satellite, label: 'GPS' },
-  { icon: Fingerprint, label: 'AUTH' }, { icon: CircuitBoard, label: 'IOT' },
-  { icon: BatteryCharging, label: 'PWR' }, { icon: Antenna, label: 'RF' },
+interface SystemIcon {
+  icon: LucideIcon;
+  label: string;
+  tooltip: string;
+  status: 'ok' | 'warn' | 'error';
+  route?: string;
+}
+
+const systemIcons: SystemIcon[] = [
+  { icon: Wifi, label: 'NET', tooltip: 'الشبكة متصلة', status: 'ok' },
+  { icon: Database, label: 'DB', tooltip: 'قاعدة البيانات تعمل', status: 'ok' },
+  { icon: Cpu, label: 'CPU', tooltip: 'المعالجة مستقرة', status: 'ok' },
+  { icon: Shield, label: 'SEC', tooltip: 'الأمان مفعّل - RLS نشط', status: 'ok', route: '/dashboard/system-status' },
+  { icon: Signal, label: 'SIG', tooltip: 'الإشارة قوية', status: 'ok' },
+  { icon: Satellite, label: 'GPS', tooltip: 'التتبع الجغرافي نشط', status: 'ok', route: '/dashboard/tracking-center' },
+  { icon: Fingerprint, label: 'AUTH', tooltip: 'المصادقة مفعّلة', status: 'ok' },
+  { icon: CircuitBoard, label: 'IOT', tooltip: 'أجهزة IoT متصلة', status: 'ok' },
+  { icon: BatteryCharging, label: 'PWR', tooltip: 'الطاقة مستقرة', status: 'ok' },
+  { icon: Antenna, label: 'RF', tooltip: 'التردد اللاسلكي نشط', status: 'ok' },
+  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox' },
+  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/accounting' },
+  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/members' },
+  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive' },
+  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments' },
+  { icon: Lock, label: 'RLS', tooltip: 'سياسات الأمان', status: 'ok' },
+  { icon: RefreshCw, label: 'SYNC', tooltip: 'المزامنة اللحظية', status: 'ok' },
+  { icon: HardDrive, label: 'STOR', tooltip: 'التخزين السحابي', status: 'ok' },
+  { icon: MessageSquare, label: 'CHAT', tooltip: 'نظام الدردشة', status: 'ok', route: '/dashboard/chat' },
+  { icon: ClipboardCheck, label: 'CMPL', tooltip: 'الامتثال البيئي', status: 'ok', route: '/dashboard/compliance' },
+  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/ai-studio' },
+  { icon: PlugZap, label: 'API', tooltip: 'واجهات API', status: 'ok' },
 ];
+
+const statusColors: Record<string, string> = {
+  ok: 'text-emerald-500',
+  warn: 'text-amber-500',
+  error: 'text-destructive',
+};
 
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
@@ -514,6 +551,7 @@ const DashboardV2Header = memo(({
   const displayName = userName || orgName || 'المستخدم';
   const [now, setNow] = useState(new Date());
   const [tick, setTick] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setInterval(() => { setNow(new Date()); setTick(p => p + 1); }, 1000);
@@ -574,15 +612,37 @@ const DashboardV2Header = memo(({
                 </div>
 
                 {/* System status icons */}
-                <div className="hidden lg:flex items-center gap-0 px-1 py-0.5 rounded-md bg-muted/30 border border-border/20">
+                <TooltipProvider delayDuration={200}>
+                <div className="hidden lg:flex items-center gap-0 px-1.5 py-0.5 rounded-md bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[480px]">
                   {systemIcons.map((si, i) => (
-                    <motion.div key={si.label} className="flex items-center gap-0 px-0.5" title={si.label}
-                      initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.04 }}>
-                      <si.icon className="w-2.5 h-2.5 text-emerald-500" />
-                      <span className="text-[6px] font-mono text-muted-foreground">{si.label}</span>
-                    </motion.div>
+                    <Tooltip key={si.label}>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          className={cn(
+                            "flex items-center gap-0 px-0.5 cursor-pointer rounded transition-colors hover:bg-primary/10",
+                            si.route && "cursor-pointer"
+                          )}
+                          onClick={() => si.route && navigate(si.route)}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.3 + i * 0.03 }}
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <si.icon className={cn("w-2.5 h-2.5", statusColors[si.status])} />
+                          <span className="text-[6px] font-mono text-muted-foreground">{si.label}</span>
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className={cn("w-1.5 h-1.5 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />
+                          {si.tooltip}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                   ))}
                 </div>
+                </TooltipProvider>
 
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary">
                   <Sparkles className="w-2 h-2" /> v5.0
@@ -648,7 +708,11 @@ const DashboardV2Header = memo(({
               <div className="flex-1 grid grid-cols-3 gap-1 sm:gap-1.5">
                 {radarStats!.map((stat, i) => (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
-                    className="group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden cursor-default">
+                    onClick={() => stat.route && navigate(stat.route)}
+                    className={cn(
+                      "group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden",
+                      stat.route ? "cursor-pointer active:scale-[0.97]" : "cursor-default"
+                    )}>
                     <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center justify-between mb-1 relative z-10">
                       <div className="flex items-center gap-0.5">
@@ -697,49 +761,67 @@ const DashboardV2Header = memo(({
             <motion.div className="mt-2 flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-muted/30 border border-border/20"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard')}>
                   <Boxes className="w-3 h-3 text-primary" />
                   <span className="text-[9px] font-mono text-muted-foreground">TOTAL:</span>
                   <span className="text-[10px] font-mono font-black text-primary tabular-nums" dir="ltr"><AnimDigit value={totalValue} /></span>
                 </div>
                 <span className="text-border/40 shrink-0">|</span>
-                <div className="hidden sm:flex items-center gap-1 shrink-0">
+                <div className="hidden sm:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/system-status')}>
                   <Gauge className="w-3 h-3 text-emerald-500" />
                   <span className="text-[8px] font-mono text-muted-foreground">UPTIME:</span>
                   <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">99.9%</span>
                 </div>
                 <span className="text-border/40 hidden sm:inline shrink-0">|</span>
-                <div className="hidden sm:flex items-center gap-1 shrink-0">
+                <div className="hidden sm:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors">
                   <Zap className="w-3 h-3 text-amber-500" />
                   <span className="text-[8px] font-mono text-muted-foreground">PERF:</span>
                   <span className="text-[9px] font-mono font-bold text-amber-500" dir="ltr">HIGH</span>
                 </div>
                 <span className="text-border/40 hidden md:inline shrink-0">|</span>
-                <div className="hidden md:flex items-center gap-1 shrink-0">
+                <div className="hidden md:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/tracking-center')}>
                   <LocateFixed className="w-3 h-3 text-primary/60" />
                   <span className="text-[8px] font-mono text-muted-foreground">TRACKING:</span>
                   <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">ACTIVE</span>
                 </div>
                 <span className="text-border/40 hidden md:inline shrink-0">|</span>
-                <div className="hidden md:flex items-center gap-1 shrink-0">
+                <div className="hidden md:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors">
                   <Siren className="w-3 h-3 text-primary/60" />
                   <span className="text-[8px] font-mono text-muted-foreground">ALERTS:</span>
                   <span className={cn("text-[9px] font-mono font-bold", alerts.length > 0 ? "text-amber-500" : "text-emerald-500")} dir="ltr">
                     {alerts.length > 0 ? formatNumber(alerts.length) : 'CLEAR'}
                   </span>
                 </div>
+                <span className="text-border/40 hidden lg:inline shrink-0">|</span>
+                <div className="hidden lg:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/signing-inbox')}>
+                  <FileSignature className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">SIGN:</span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">READY</span>
+                </div>
+                <span className="text-border/40 hidden lg:inline shrink-0">|</span>
+                <div className="hidden lg:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/chat')}>
+                  <MessageSquare className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">CHAT:</span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">LIVE</span>
+                </div>
+                <span className="text-border/40 hidden xl:inline shrink-0">|</span>
+                <div className="hidden xl:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/ai-studio')}>
+                  <Brain className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">AI:</span>
+                  <span className="text-[9px] font-mono font-bold text-primary" dir="ltr">ON</span>
+                </div>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
-                <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors">
                   <Globe2 className="w-2.5 h-2.5 text-primary/60" />
                   <span className="text-[7px] font-mono text-muted-foreground">EG</span>
                 </div>
-                <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors">
                   <MonitorCheck className="w-2.5 h-2.5 text-primary/60" />
                   <span className="text-[7px] font-mono text-muted-foreground">ON</span>
                 </div>
-                <motion.div className="flex items-center gap-0.5"
+                <motion.div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors"
                   animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}>
                   <Flame className="w-3 h-3 text-orange-500" />
                   <span className="text-[7px] font-mono text-orange-500 font-bold">ACTIVE</span>
