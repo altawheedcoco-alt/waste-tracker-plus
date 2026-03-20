@@ -3338,6 +3338,153 @@ export type Database = {
         }
         Relationships: []
       }
+      broadcast_channel_subscribers: {
+        Row: {
+          channel_id: string
+          id: string
+          organization_id: string
+          subscribed_at: string | null
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          id?: string
+          organization_id: string
+          subscribed_at?: string | null
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          id?: string
+          organization_id?: string
+          subscribed_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_channel_subscribers_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broadcast_channel_subscribers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broadcast_channel_subscribers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_channels: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          organization_id: string
+          subscriber_count: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          organization_id: string
+          subscriber_count?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          organization_id?: string
+          subscriber_count?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_channels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "broadcast_channels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_posts: {
+        Row: {
+          channel_id: string
+          content: string
+          created_at: string | null
+          file_name: string | null
+          file_url: string | null
+          id: string
+          metadata: Json | null
+          post_type: string | null
+          sender_id: string
+          views_count: number | null
+        }
+        Insert: {
+          channel_id: string
+          content: string
+          created_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          post_type?: string | null
+          sender_id: string
+          views_count?: number | null
+        }
+        Update: {
+          channel_id?: string
+          content?: string
+          created_at?: string | null
+          file_name?: string | null
+          file_url?: string | null
+          id?: string
+          metadata?: Json | null
+          post_type?: string | null
+          sender_id?: string
+          views_count?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_posts_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broker_deals: {
         Row: {
           created_at: string
@@ -5882,6 +6029,86 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      communication_analytics: {
+        Row: {
+          active_conversations: number | null
+          avg_response_time_minutes: number | null
+          created_at: string | null
+          documents_shared: number | null
+          id: string
+          invoices_exchanged: number | null
+          messages_received: number | null
+          messages_sent: number | null
+          organization_id: string
+          partner_organization_id: string | null
+          period_date: string
+          period_type: string | null
+          signatures_completed: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          active_conversations?: number | null
+          avg_response_time_minutes?: number | null
+          created_at?: string | null
+          documents_shared?: number | null
+          id?: string
+          invoices_exchanged?: number | null
+          messages_received?: number | null
+          messages_sent?: number | null
+          organization_id: string
+          partner_organization_id?: string | null
+          period_date: string
+          period_type?: string | null
+          signatures_completed?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          active_conversations?: number | null
+          avg_response_time_minutes?: number | null
+          created_at?: string | null
+          documents_shared?: number | null
+          id?: string
+          invoices_exchanged?: number | null
+          messages_received?: number | null
+          messages_sent?: number | null
+          organization_id?: string
+          partner_organization_id?: string | null
+          period_date?: string
+          period_type?: string | null
+          signatures_completed?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "communication_analytics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "communication_analytics_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "communication_analytics_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "communication_analytics_partner_organization_id_fkey"
+            columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       compliance_certificates: {
         Row: {
@@ -32792,6 +33019,57 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      shared_collaboration_files: {
+        Row: {
+          category: string | null
+          conversation_key: string
+          created_at: string | null
+          file_name: string
+          file_size: number | null
+          file_type: string | null
+          file_url: string
+          id: string
+          metadata: Json | null
+          notes: string | null
+          status: string | null
+          updated_at: string | null
+          uploaded_by: string
+          uploaded_by_org_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          conversation_key: string
+          created_at?: string | null
+          file_name: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_by: string
+          uploaded_by_org_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          conversation_key?: string
+          created_at?: string | null
+          file_name?: string
+          file_size?: number | null
+          file_type?: string | null
+          file_url?: string
+          id?: string
+          metadata?: Json | null
+          notes?: string | null
+          status?: string | null
+          updated_at?: string | null
+          uploaded_by?: string
+          uploaded_by_org_id?: string | null
+        }
+        Relationships: []
       }
       shared_documents: {
         Row: {
