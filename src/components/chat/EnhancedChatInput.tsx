@@ -338,10 +338,22 @@ const EnhancedChatInput = ({
     }
   }, [onSendResourceCard]);
 
-  const filteredMentions = mentionableEntities.filter(e =>
+  // Filter mentions: if chatPartnerOrgId is set, only show my org + partner org entities
+  const contextMentions = chatPartnerOrgId
+    ? mentionableEntities.filter(e => {
+        // Always show organizations that match partner org
+        if (e.type === 'organization') return e.id === chatPartnerOrgId;
+        // For users: show internal (is_external=false) + users from partner org (subtitle matches)
+        return !e.is_external || mentionableEntities.some(
+          org => org.type === 'organization' && org.id === chatPartnerOrgId && e.subtitle === org.name
+        );
+      })
+    : mentionableEntities;
+
+  const filteredMentions = contextMentions.filter(e =>
     e.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
     (e.subtitle?.toLowerCase().includes(mentionSearch.toLowerCase()) ?? false)
-  ).slice(0, 8);
+  ).slice(0, 12);
 
   const insertMention = useCallback((entity: MentionableEntity) => {
     const before = inputValue.slice(0, cursorPos);
