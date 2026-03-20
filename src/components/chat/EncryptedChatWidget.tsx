@@ -264,8 +264,39 @@ const EncryptedChatWidget = () => {
     }
     finally { setSending(false); }
   };
+  const handleSendResourceCard = async (resourceType: string, resourceData: any) => {
+    if (!selectedConvoId || sending) return;
+    const cardContent = JSON.stringify({ resource_type: resourceType, resource_data: resourceData });
+    const label = resourceData.shipment_number || resourceData.invoice_number || resourceData.document_name || 'مورد';
+    
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: cardContent,
+      message_type: 'resource_card',
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
+    setSending(true);
+    try {
+      // Send as text with resource_card content — the card renderer will handle display
+      await sendMessage(selectedConvoId, cardContent);
+      const updated = await fetchMessages(selectedConvoId, 30);
+      setMessages(updated);
+    } catch {
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل إرسال البطاقة');
+    } finally {
+      setSending(false);
+    }
+  };
 
-  // Collect all image URLs for lightbox gallery
+
   const allImageUrls = useMemo(() => 
     messages.filter(m => m.message_type === 'image' && m.file_url).map(m => m.file_url!),
     [messages]
