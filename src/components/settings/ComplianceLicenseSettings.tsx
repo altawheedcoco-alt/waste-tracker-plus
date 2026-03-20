@@ -338,8 +338,7 @@ export default function ComplianceLicenseSettings() {
                   <Filter className="h-3 w-3 inline ml-1" />
                   نتائج البحث: {searchResults.length} نتيجة
                 </p>
-                <ScrollArea className="max-h-48">
-                  <div className="space-y-1">
+                <div className="max-h-48 overflow-y-auto scrollbar-thin space-y-1">
                     {searchResults.map(item => (
                       <div
                         key={item.code}
