@@ -233,13 +233,13 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   return (
     <div className="relative">
       {/* Cover Photo */}
-      <div className="relative h-48 sm:h-64 md:h-72 rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+      <div className="relative aspect-[3/1] min-h-[12rem] max-h-[22rem] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
         {organization.cover_url ? (
           <ClickableImage
             src={organization.cover_url}
             alt="صورة الغلاف"
             gallery={[organization.cover_url, organization.logo_url].filter(Boolean) as string[]}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover object-center"
             protected={isProtected}
           />
         ) : (
