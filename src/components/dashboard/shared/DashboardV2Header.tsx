@@ -807,7 +807,7 @@ const DashboardV2Header = memo(({
             <div className="flex items-stretch gap-2 sm:gap-3">
               {/* Performance Gauge */}
               <div className="hidden md:flex flex-col items-center gap-1 shrink-0 justify-center">
-                <PerformanceGauge score={performanceScore} label="HEALTH" />
+                <PerformanceGauge score={performanceScore} label="HEALTH" radarStats={radarStats} />
                 <div className="flex items-center gap-1">
                   <HeartPulse className="w-3 h-3 text-primary animate-pulse" />
                   <span className="text-[7px] font-mono text-muted-foreground">SCORE</span>
