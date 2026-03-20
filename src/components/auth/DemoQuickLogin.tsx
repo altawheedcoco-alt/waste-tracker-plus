@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield,
@@ -14,6 +15,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const DEMO_PASSWORD = 'Demo@575757';
 const ACCESS_PIN_HASH = '575757';
+const SESSION_WAIT_MS = 5000;
+const SESSION_POLL_MS = 250;
 
 interface DemoAccount {
   email: string;
@@ -132,12 +135,29 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
   const [pinInput, setPinInput] = useState('');
   const [pinVerified, setPinVerified] = useState(false);
   const [pinError, setPinError] = useState(false);
+  const navigate = useNavigate();
   const { signIn } = useAuth();
   const { toast } = useToast();
+
+  const waitForSession = async (email: string) => {
+    const startedAt = Date.now();
+
+    while (Date.now() - startedAt < SESSION_WAIT_MS) {
+      const { data } = await supabase.auth.getSession();
+      if (data.session?.user?.email?.toLowerCase() === email.toLowerCase()) {
+        return true;
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
+    }
+
+    return false;
+  };
 
   const handleQuickLogin = async (email: string, label: string) => {
     setLoading(email);
     onLoginStart?.();
+
     try {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
 
@@ -148,11 +168,16 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         } else {
           throw error;
         }
-      } else {
-        toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
-        window.location.href = '/dashboard';
         return;
       }
+
+      const sessionReady = await waitForSession(email);
+      if (!sessionReady) {
+        throw new Error('تم تسجيل الدخول لكن الجلسة لم تكتمل بعد، حاول مرة أخرى خلال ثوانٍ.');
+      }
+
+      toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
+      navigate('/dashboard', { replace: true });
     } catch (err: any) {
       toast({ title: 'خطأ', description: err.message, variant: 'destructive' });
     } finally {
@@ -218,7 +243,6 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
 
                   {accountGroups.map(group => (
                     <TabsContent key={group.id} value={group.id} className="mt-2">
-                      {/* Show badge for member tabs */}
                       {group.id === 'transporter-members' && (
                         <div className="flex items-center gap-2 mb-2 px-1">
                           <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
