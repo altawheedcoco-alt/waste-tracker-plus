@@ -761,49 +761,67 @@ const DashboardV2Header = memo(({
             <motion.div className="mt-2 flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-muted/30 border border-border/20"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
-                <div className="flex items-center gap-1 shrink-0">
+                <div className="flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard')}>
                   <Boxes className="w-3 h-3 text-primary" />
                   <span className="text-[9px] font-mono text-muted-foreground">TOTAL:</span>
                   <span className="text-[10px] font-mono font-black text-primary tabular-nums" dir="ltr"><AnimDigit value={totalValue} /></span>
                 </div>
                 <span className="text-border/40 shrink-0">|</span>
-                <div className="hidden sm:flex items-center gap-1 shrink-0">
+                <div className="hidden sm:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/system-status')}>
                   <Gauge className="w-3 h-3 text-emerald-500" />
                   <span className="text-[8px] font-mono text-muted-foreground">UPTIME:</span>
                   <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">99.9%</span>
                 </div>
                 <span className="text-border/40 hidden sm:inline shrink-0">|</span>
-                <div className="hidden sm:flex items-center gap-1 shrink-0">
+                <div className="hidden sm:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors">
                   <Zap className="w-3 h-3 text-amber-500" />
                   <span className="text-[8px] font-mono text-muted-foreground">PERF:</span>
                   <span className="text-[9px] font-mono font-bold text-amber-500" dir="ltr">HIGH</span>
                 </div>
                 <span className="text-border/40 hidden md:inline shrink-0">|</span>
-                <div className="hidden md:flex items-center gap-1 shrink-0">
+                <div className="hidden md:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/tracking-center')}>
                   <LocateFixed className="w-3 h-3 text-primary/60" />
                   <span className="text-[8px] font-mono text-muted-foreground">TRACKING:</span>
                   <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">ACTIVE</span>
                 </div>
                 <span className="text-border/40 hidden md:inline shrink-0">|</span>
-                <div className="hidden md:flex items-center gap-1 shrink-0">
+                <div className="hidden md:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors">
                   <Siren className="w-3 h-3 text-primary/60" />
                   <span className="text-[8px] font-mono text-muted-foreground">ALERTS:</span>
                   <span className={cn("text-[9px] font-mono font-bold", alerts.length > 0 ? "text-amber-500" : "text-emerald-500")} dir="ltr">
                     {alerts.length > 0 ? formatNumber(alerts.length) : 'CLEAR'}
                   </span>
                 </div>
+                <span className="text-border/40 hidden lg:inline shrink-0">|</span>
+                <div className="hidden lg:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/signing-inbox')}>
+                  <FileSignature className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">SIGN:</span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">READY</span>
+                </div>
+                <span className="text-border/40 hidden lg:inline shrink-0">|</span>
+                <div className="hidden lg:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/chat')}>
+                  <MessageSquare className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">CHAT:</span>
+                  <span className="text-[9px] font-mono font-bold text-emerald-500" dir="ltr">LIVE</span>
+                </div>
+                <span className="text-border/40 hidden xl:inline shrink-0">|</span>
+                <div className="hidden xl:flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard/ai-studio')}>
+                  <Brain className="w-3 h-3 text-primary/60" />
+                  <span className="text-[8px] font-mono text-muted-foreground">AI:</span>
+                  <span className="text-[9px] font-mono font-bold text-primary" dir="ltr">ON</span>
+                </div>
               </div>
 
               <div className="flex items-center gap-1.5 shrink-0">
-                <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors">
                   <Globe2 className="w-2.5 h-2.5 text-primary/60" />
                   <span className="text-[7px] font-mono text-muted-foreground">EG</span>
                 </div>
-                <div className="flex items-center gap-0.5">
+                <div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors">
                   <MonitorCheck className="w-2.5 h-2.5 text-primary/60" />
                   <span className="text-[7px] font-mono text-muted-foreground">ON</span>
                 </div>
-                <motion.div className="flex items-center gap-0.5"
+                <motion.div className="flex items-center gap-0.5 cursor-pointer hover:bg-primary/10 rounded px-0.5 py-0.5 transition-colors"
                   animate={{ opacity: [0.5, 1, 0.5] }} transition={{ duration: 2, repeat: Infinity }}>
                   <Flame className="w-3 h-3 text-orange-500" />
                   <span className="text-[7px] font-mono text-orange-500 font-bold">ACTIVE</span>
