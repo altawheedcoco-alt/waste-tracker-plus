@@ -484,7 +484,7 @@ export default function MemberSocialProfile() {
                 <img
                   src={(targetProfile as any).cover_url}
                   alt="غلاف"
-                  className="relative z-10 w-full h-full object-contain cursor-pointer"
+                  className="relative z-10 w-full h-full object-cover object-center cursor-pointer"
                   onClick={() => setCoverGalleryOpen(true)}
                 />
               </>
