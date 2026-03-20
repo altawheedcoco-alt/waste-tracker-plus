@@ -61,7 +61,8 @@ const EMOJI_CATEGORIES = {
 
 const EnhancedChatInput = ({ 
   onSendMessage, 
-  onSendFile, 
+  onSendFile,
+  onSendResourceCard,
   sending, 
   uploadProgress = 0, 
   disabled,
