@@ -56,6 +56,7 @@ export default function ComplianceLicenseSettings() {
   const { organization } = useAuth();
   const { extractFromFile, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
   const [showOCRPreview, setShowOCRPreview] = useState(false);
+  const [uploadedFileRef, setUploadedFileRef] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [customWaste, setCustomWaste] = useState('');
