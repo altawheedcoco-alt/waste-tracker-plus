@@ -389,8 +389,7 @@ export default function ComplianceLicenseSettings() {
 
             {['hazardous', 'non_hazardous', 'all'].map(tab => (
               <TabsContent key={tab} value={tab} className="mt-3">
-                <ScrollArea className="max-h-[400px]">
-                  <div className="space-y-2">
+                <div className="max-h-[400px] overflow-y-auto scrollbar-thin space-y-2">
                     {filteredCategories.map(cat => {
                       const selected = getSelectedCount(cat);
                       const isOpen = openCategories.has(cat.id);
