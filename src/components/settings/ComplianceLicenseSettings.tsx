@@ -270,23 +270,31 @@ export default function ComplianceLicenseSettings() {
 
   return (
     <div className="space-y-4">
-      {/* AI Document Upload */}
+      {/* OCR Document Upload */}
       <Card className="border-primary/20 bg-primary/5">
         <CardContent className="p-4">
           <div className="flex items-start gap-3">
             <FileCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-bold">استخراج البيانات تلقائياً بالذكاء الاصطناعي</p>
+              <p className="text-sm font-bold">استخراج البيانات تلقائياً (OCR)</p>
               <p className="text-xs text-muted-foreground mt-1">
-                ارفع أي مستند (ترخيص، موافقة بيئية، تصريح WMRA) وسيتم استخراج البيانات وملء الحقول تلقائياً
+                ارفع صورة مستند (ترخيص، موافقة بيئية، تصريح WMRA) وسيتم استخراج النص والبيانات بتقنية Tesseract OCR بدون AI
               </p>
+              {extracting && (
+                <div className="mt-2">
+                  <div className="w-full bg-muted rounded-full h-2">
+                    <div className="bg-primary h-2 rounded-full transition-all" style={{ width: `${progress}%` }} />
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-1">جارٍ التحليل... {progress}%</p>
+                </div>
+              )}
               <div className="mt-3">
                 <label className="cursor-pointer">
-                  <input type="file" className="hidden" accept="image/*,.pdf" onChange={handleFileUpload} disabled={extracting} />
+                  <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={extracting} />
                   <Button variant="outline" size="sm" className="gap-2" asChild disabled={extracting}>
                     <span>
                       {extracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileCheck className="h-4 w-4" />}
-                      {extracting ? 'جارٍ التحليل...' : 'رفع مستند للتحليل'}
+                      {extracting ? 'جارٍ التحليل...' : 'رفع صورة مستند'}
                     </span>
                   </Button>
                 </label>
@@ -295,6 +303,80 @@ export default function ComplianceLicenseSettings() {
           </div>
         </CardContent>
       </Card>
+
+      {/* OCR Preview Result */}
+      {showOCRPreview && extractedResult && (
+        <Card className="border-primary/30">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm flex items-center gap-2">
+              <CheckCircle2 className="h-4 w-4 text-primary" />
+              نتائج الاستخراج — دقة {Math.round(extractedResult.confidence)}%
+            </CardTitle>
+            <CardDescription className="text-xs">راجع البيانات المستخرجة قبل الحفظ</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {extractedResult.detected_fields.document_type && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">نوع المستند:</span>
+                <Badge variant="outline">
+                  {extractedResult.detected_fields.document_type === 'wmra_license' ? 'تصريح WMRA' :
+                   extractedResult.detected_fields.document_type === 'environmental_approval' ? 'موافقة بيئية' :
+                   extractedResult.detected_fields.document_type === 'transport_license' ? 'ترخيص نقل' : 'غير محدد'}
+                </Badge>
+              </div>
+            )}
+            {extractedResult.detected_fields.license_number && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">رقم الترخيص:</span>
+                <span className="font-mono">{extractedResult.detected_fields.license_number}</span>
+              </div>
+            )}
+            {extractedResult.detected_fields.issue_date && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">تاريخ الإصدار:</span>
+                <span>{extractedResult.detected_fields.issue_date}</span>
+              </div>
+            )}
+            {extractedResult.detected_fields.expiry_date && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">تاريخ الانتهاء:</span>
+                <span>{extractedResult.detected_fields.expiry_date}</span>
+              </div>
+            )}
+            {extractedResult.detected_fields.issuing_authority && (
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">الجهة المصدرة:</span>
+                <span>{extractedResult.detected_fields.issuing_authority}</span>
+              </div>
+            )}
+            
+            {/* Raw text collapsible */}
+            <Collapsible>
+              <CollapsibleTrigger asChild>
+                <Button variant="ghost" size="sm" className="w-full justify-between text-xs">
+                  عرض النص الخام المستخرج
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent>
+                <div className="bg-muted p-3 rounded text-xs font-mono max-h-40 overflow-y-auto whitespace-pre-wrap" dir="auto">
+                  {extractedResult.raw_text || 'لم يتم استخراج نص'}
+                </div>
+              </CollapsibleContent>
+            </Collapsible>
+
+            <Separator />
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" size="sm" onClick={() => { setShowOCRPreview(false); setExtractedResult(null); }}>
+                <X className="h-4 w-4 ml-1" /> تجاهل
+              </Button>
+              <Button size="sm" onClick={handleApplyOCR} className="gap-2">
+                <CheckCircle2 className="h-4 w-4" /> تأكيد وحفظ البيانات
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Stats Summary */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
