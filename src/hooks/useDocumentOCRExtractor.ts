@@ -7,7 +7,6 @@ let pdfjsLib: typeof import('pdfjs-dist') | null = null;
 async function getPdfJs() {
   if (!pdfjsLib) {
     pdfjsLib = await import('pdfjs-dist');
-    // Use legacy build approach: import worker entry as a URL for Vite bundler
     const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
     pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl.href;
   }
@@ -52,15 +51,71 @@ async function pdfPageToImage(page: any, scale = 2): Promise<Blob> {
   });
 }
 
+/** Extract verbatim text from a PDF page text layer when available */
+async function pdfPageToText(page: any): Promise<string> {
+  try {
+    const textContent = await page.getTextContent();
+    const items = (textContent?.items || []) as Array<{ str?: string; transform?: number[] }>;
+
+    if (!items.length) return '';
+
+    const lines: Array<{ y: number; parts: string[] }> = [];
+
+    for (const item of items) {
+      const text = item?.str?.trim();
+      if (!text) continue;
+
+      const y = item.transform?.[5] ?? 0;
+      const existingLine = lines.find((line) => Math.abs(line.y - y) < 4);
+
+      if (existingLine) {
+        existingLine.parts.push(text);
+      } else {
+        lines.push({ y, parts: [text] });
+      }
+    }
+
+    return lines
+      .sort((a, b) => b.y - a.y)
+      .map((line) => line.parts.join(' ').replace(/\s+/g, ' ').trim())
+      .filter(Boolean)
+      .join('\n')
+      .trim();
+  } catch {
+    return '';
+  }
+}
+
+function mergePageTexts(nativeText: string, aiText: string): string {
+  const cleanNative = nativeText.trim();
+  const cleanAi = aiText.trim();
+
+  if (!cleanNative) return cleanAi;
+  if (!cleanAi) return cleanNative;
+
+  const normalizedNative = cleanNative.replace(/\s+/g, ' ').trim();
+  const normalizedAi = cleanAi.replace(/\s+/g, ' ').trim();
+
+  if (normalizedNative === normalizedAi) return cleanNative;
+  if (normalizedNative.includes(normalizedAi)) return cleanNative;
+  if (normalizedAi.includes(normalizedNative)) return cleanAi;
+
+  return `${cleanNative}\n\n${cleanAi}`.trim();
+}
+
 export function useDocumentOCRExtractor() {
   const [extracting, setExtracting] = useState(false);
   const [progress, setProgress] = useState(0);
   const [extractedResult, setExtractedResult] = useState<OCRExtractedData | null>(null);
 
   /** Call AI edge function with an image base64 */
-  const callAIExtract = async (base64: string, fileName: string): Promise<OCRExtractedData | null> => {
+  const callAIExtract = async (
+    base64: string,
+    fileName: string,
+    supplementalText?: string
+  ): Promise<OCRExtractedData | null> => {
     const { data, error } = await supabase.functions.invoke('ocr-extract', {
-      body: { imageBase64: base64, fileName },
+      body: { imageBase64: base64, fileName, supplementalText },
     });
 
     if (error) throw error;
@@ -68,7 +123,7 @@ export function useDocumentOCRExtractor() {
 
     const r = data.result;
     return {
-      raw_text: r.raw_text || '',
+      raw_text: r.raw_text || supplementalText || '',
       detected_fields: {
         license_number: r.detected_fields?.license_number || undefined,
         issue_date: r.detected_fields?.issue_date || undefined,
@@ -116,23 +171,28 @@ export function useDocumentOCRExtractor() {
       const pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const totalPages = pdfDoc.numPages;
 
-      toast.info(`جارٍ تحليل ${totalPages} صفحة بالذكاء الاصطناعي...`);
+      toast.info(`جارٍ تحليل ${totalPages} صفحة...`);
 
       let allText = '';
       let allFields: OCRExtractedData['detected_fields'] = {};
       let totalConfidence = 0;
+      let analyzedPages = 0;
 
       for (let i = 1; i <= totalPages; i++) {
         setProgress(Math.round((i / (totalPages + 1)) * 90));
         const page = await pdfDoc.getPage(i);
+
+        const nativePageText = await pdfPageToText(page);
         const pageBlob = await pdfPageToImage(page);
         const pageBase64 = await toBase64(pageBlob);
+        const pageResult = await callAIExtract(pageBase64, `${file.name} - صفحة ${i}`, nativePageText || undefined);
 
-        const pageResult = await callAIExtract(pageBase64, `${file.name} - صفحة ${i}`);
         if (pageResult) {
-          allText += `--- صفحة ${i} ---\n${pageResult.raw_text}\n\n`;
+          const mergedPageText = mergePageTexts(nativePageText, pageResult.raw_text || '');
+          allText += `--- صفحة ${i} ---\n${mergedPageText}\n\n`;
           totalConfidence += pageResult.confidence;
-          // Merge fields (later pages override earlier if non-empty)
+          analyzedPages += 1;
+
           const f = pageResult.detected_fields;
           if (f.license_number) allFields.license_number = f.license_number;
           if (f.issue_date) allFields.issue_date = f.issue_date;
@@ -143,12 +203,14 @@ export function useDocumentOCRExtractor() {
           if (f.waste_types?.length) {
             allFields.waste_types = [...new Set([...(allFields.waste_types || []), ...f.waste_types])];
           }
+        } else if (nativePageText) {
+          allText += `--- صفحة ${i} ---\n${nativePageText}\n\n`;
         }
       }
 
-      const avgConfidence = totalConfidence / totalPages;
+      const avgConfidence = analyzedPages > 0 ? totalConfidence / analyzedPages : 0;
       const result: OCRExtractedData = {
-        raw_text: allText,
+        raw_text: allText.trim(),
         detected_fields: allFields,
         confidence: avgConfidence,
         pages_count: totalPages,
@@ -156,7 +218,7 @@ export function useDocumentOCRExtractor() {
 
       setExtractedResult(result);
       setProgress(100);
-      toast.success(`تم تحليل ${totalPages} صفحة بدقة ${Math.round(avgConfidence)}%`);
+      toast.success(`تم تحليل ${totalPages} صفحة وحفظ النص الكامل`);
       return result;
     } catch (err: any) {
       console.error('PDF AI OCR Error:', err);
