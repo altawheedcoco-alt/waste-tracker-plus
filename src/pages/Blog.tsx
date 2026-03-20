@@ -20,6 +20,17 @@ const Blog = () => {
   usePageTitle(language === 'ar' ? 'المدونة' : 'Blog');
   const navigate = useNavigate();
   const isAr = language === 'ar';
+  const [showScrollBtns, setShowScrollBtns] = useState(false);
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollBtns(window.scrollY > 200);
+      setAtBottom(window.innerHeight + window.scrollY >= document.body.scrollHeight - 100);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['blog-posts'],
