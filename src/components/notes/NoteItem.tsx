@@ -14,6 +14,11 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { type Note, useNoteReplies, useNotes } from '@/hooks/useNotes';
+import { MentionInput } from '@/components/ui/mention-input';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import { useShipmentMentions } from '@/hooks/useShipmentMentions';
+import { useMentionNotifier } from '@/hooks/useMentionNotifier';
+import MentionRenderer from './MentionRenderer';
 
 const noteTypeConfig: Record<string, { label: string; icon: React.ReactNode; color: string }> = {
   comment: { label: 'تعليق', icon: <MessageSquare className="h-3 w-3" />, color: 'bg-blue-100 text-blue-700' },
@@ -53,6 +58,9 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
   const [editContent, setEditContent] = useState(note.content);
   const { replies, isLoading: loadingReplies } = useNoteReplies(showReplies ? note.id : '');
   const { createNote, updateNote, deleteNote, togglePin, toggleResolve } = useNotes(resourceType, resourceId);
+  const { users } = useMentionableUsers();
+  const { results: shipmentResults, searchShipments } = useShipmentMentions();
+  const { notify: notifyMentions } = useMentionNotifier();
 
   const isAuthor = profile?.id === note.author_id;
   const typeConfig = noteTypeConfig[note.note_type] || noteTypeConfig.comment;
@@ -65,6 +73,14 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
       parent_note_id: note.id,
       visibility: note.visibility,
       target_organization_id: note.target_organization_id,
+    });
+    // Send mention notifications
+    notifyMentions({
+      text: replyContent,
+      users,
+      context: `رد على ملاحظة في ${resourceType === 'shipment' ? 'شحنة' : 'محادثة'}`,
+      referenceId: resourceId,
+      referenceType: resourceType,
     });
     setReplyContent('');
   };
@@ -153,14 +169,24 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
       {/* Content */}
       {isEditing ? (
         <div className="mt-2 space-y-2">
-          <Textarea value={editContent} onChange={(e) => setEditContent(e.target.value)} className="text-right text-sm" />
+          <MentionInput
+            value={editContent}
+            onChange={setEditContent}
+            users={users}
+            shipments={shipmentResults}
+            onShipmentSearch={searchShipments}
+            placeholder="تعديل الملاحظة..."
+            className="text-right text-sm"
+          />
           <div className="flex gap-2 justify-end">
             <Button size="sm" variant="ghost" onClick={() => setIsEditing(false)}>إلغاء</Button>
             <Button size="sm" onClick={handleEdit}>حفظ</Button>
           </div>
         </div>
       ) : (
-        <p className="mt-2 text-sm text-right whitespace-pre-wrap leading-relaxed">{note.content}</p>
+        <div className="mt-2 text-sm text-right leading-relaxed">
+          <MentionRenderer content={note.content} />
+        </div>
       )}
 
       {/* Reply Section */}
@@ -186,10 +212,13 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
                 <Button size="sm" onClick={handleReply} disabled={!replyContent.trim()}>
                   <Send className="h-3 w-3" />
                 </Button>
-                <Textarea
+                <MentionInput
                   value={replyContent}
-                  onChange={(e) => setReplyContent(e.target.value)}
-                  placeholder="اكتب ردك..."
+                  onChange={setReplyContent}
+                  users={users}
+                  shipments={shipmentResults}
+                  onShipmentSearch={searchShipments}
+                  placeholder="اكتب ردك... (استخدم @ للإشارة)"
                   className="text-right text-sm min-h-[60px]"
                 />
               </div>
