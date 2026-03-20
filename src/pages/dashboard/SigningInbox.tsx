@@ -725,7 +725,7 @@ export default function SigningInbox() {
 
       {/* Tabs */}
       <Tabs defaultValue="incoming" dir="rtl">
-        <TabsList className="w-full grid grid-cols-2">
+        <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="w-4 h-4" /> الواردة
             {pendingCount > 0 && (
@@ -734,6 +734,12 @@ export default function SigningInbox() {
           </TabsTrigger>
           <TabsTrigger value="outgoing" className="gap-2">
             <Send className="w-4 h-4" /> الصادرة
+          </TabsTrigger>
+          <TabsTrigger value="chains" className="gap-2">
+            <GitBranch className="w-4 h-4" /> سلاسل متعددة
+            {chains.filter(c => c.status === 'active').length > 0 && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{chains.filter(c => c.status === 'active').length}</Badge>
+            )}
           </TabsTrigger>
         </TabsList>
 
