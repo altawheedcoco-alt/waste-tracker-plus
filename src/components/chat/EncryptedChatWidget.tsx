@@ -651,6 +651,7 @@ const EncryptedChatWidget = () => {
                 <EnhancedChatInput
                   onSendMessage={handleSend}
                   onSendFile={handleSendFile}
+                  onSendResourceCard={handleSendResourceCard}
                   sending={sending}
                 />
 
