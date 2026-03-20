@@ -1188,6 +1188,14 @@ export default function MemberSocialProfile() {
           open={avatarGalleryOpen}
           onOpenChange={setAvatarGalleryOpen}
         />
+      {/* Image Crop Dialog */}
+      <ImageCropDialog
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        imageFile={cropFile}
+        mode={cropMode}
+        onSave={handleCropSave}
+      />
       </div>
     </DashboardLayout>
   );
