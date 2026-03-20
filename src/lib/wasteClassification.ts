@@ -538,6 +538,8 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'مخلفات العصائر والمشروبات والمرتجعات السائلة', code: 'LQ-08', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['عصائر تالفة', 'مشروبات غازية تالفة', 'مياه معدنية منتهية', 'مرتجعات مشروبات', 'هالك إنتاج سوائل غذائية', 'مركزات تالفة', 'بيبسي تالف', 'كوكا تالفة'] },
       { name: 'حمأة جافة (محطات معالجة صرف صحي)', code: 'LQ-09', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['حمأة جافة', 'سبلة محطات معالجة', 'حمأة صرف صحي معالجة', 'بيوسوليدز'] },
       { name: 'السبلة الناتجة من مزارع الدواجن والماشية', code: 'LQ-10', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['سبلة دواجن', 'سبلة ماشية', 'روث حيواني سائل', 'مخلفات مزارع سائلة'] },
+      { name: 'مياه الصرف الصحي والصناعي المعالجة', code: 'LQ-11', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['مياه صرف معالجة', 'مياه صرف صناعي معالج', 'مياه معالجة ثلاثياً', 'مياه ثانوية معالجة'] },
+      { name: 'مياه التبريد', code: 'LQ-12', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['مياه تبريد', 'مياه أبراج تبريد', 'مياه تبريد مصانع', 'مياه كوندنسر'] },
     ],
   },
   // ============================================
