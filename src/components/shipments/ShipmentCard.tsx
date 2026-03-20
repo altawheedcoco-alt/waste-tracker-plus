@@ -1347,11 +1347,11 @@ const ShipmentCard = ({
               </Suspense>
             </div>
 
-            {/* Simplified Progress Steps — 5 key milestones only */}
+            {/* Simplified Progress Steps — org-specific milestones only */}
             <div className="border-t bg-gradient-to-l from-muted/50 to-transparent px-4 py-2">
               <div className="flex items-center justify-between gap-1">
-                {allStatuses.filter((_, i) => i % 2 === 0).slice(0, 5).map((status, index, arr) => {
-                  const origIndex = allStatuses.findIndex(s => s.key === status.key);
+                {orgStatuses.filter((_, i) => i % 2 === 0).slice(0, 5).map((status, index, arr) => {
+                  const origIndex = orgStatuses.findIndex(s => s.key === status.key);
                   const isActive = origIndex <= currentStatusIndex;
                   const isCurrent = status.key === mappedStatus;
                   const StatusIcon = status.icon;
