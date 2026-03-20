@@ -20,6 +20,7 @@ import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
 import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
+import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 
 const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
   <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
