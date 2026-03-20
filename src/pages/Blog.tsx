@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useNavigate } from "react-router-dom";
