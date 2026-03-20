@@ -10,6 +10,7 @@ import MovementSupervisorSettings from '@/components/settings/MovementSupervisor
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 import ComplianceLicenseSettings from '@/components/settings/ComplianceLicenseSettings';
+import AIExtractedDataViewer from '@/components/settings/AIExtractedDataViewer';
 
 interface Props {
   orgType: string;
