@@ -668,6 +668,71 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
     );
   };
 
+  const renderDetailLines = (item: ResourceItem): { icon: any; text: string; color?: string }[] => {
+    const lines: { icon: any; text: string; color?: string }[] = [];
+    const e = item.extra || {};
+
+    switch (item.resourceType) {
+      case 'shipment':
+        if (e.pickupCity || e.deliveryCity) lines.push({ icon: MapPin, text: `${e.pickupCity || '—'} → ${e.deliveryCity || '—'}` });
+        if (e.quantity || e.actualWeight) lines.push({ icon: Weight, text: e.actualWeight ? `الوزن الفعلي: ${Number(e.actualWeight).toLocaleString()} ${e.unit || 'كجم'}` : `الكمية: ${Number(e.quantity).toLocaleString()} ${e.unit || 'كجم'}` });
+        if (e.totalValue) lines.push({ icon: Receipt, text: `القيمة: ${Number(e.totalValue).toLocaleString()} EGP` });
+        if (e.paymentStatus) lines.push({ icon: CheckCircle, text: `الدفع: ${e.paymentStatus}`, color: e.paymentStatus === 'paid' ? 'text-emerald-600' : 'text-amber-600' });
+        if (e.shipmentType) lines.push({ icon: Truck, text: `النوع: ${e.shipmentType}` });
+        if (e.notes) lines.push({ icon: Info, text: String(e.notes).slice(0, 50) });
+        break;
+      case 'invoice':
+        if (e.invoiceType) lines.push({ icon: FileText, text: `النوع: ${e.invoiceType}` });
+        if (e.totalAmount) lines.push({ icon: Receipt, text: `الإجمالي: ${Number(e.totalAmount).toLocaleString()} ${e.currency || 'EGP'}` });
+        if (e.paidAmount && Number(e.paidAmount) > 0) lines.push({ icon: CheckCircle, text: `المدفوع: ${Number(e.paidAmount).toLocaleString()} ${e.currency || 'EGP'}`, color: 'text-emerald-600' });
+        if (e.remainingAmount && Number(e.remainingAmount) > 0) lines.push({ icon: AlertCircle, text: `المتبقي: ${Number(e.remainingAmount).toLocaleString()} ${e.currency || 'EGP'}`, color: 'text-amber-600' });
+        if (e.dueDate) lines.push({ icon: Calendar, text: `الاستحقاق: ${formatDate(e.dueDate as string)}` });
+        if (e.partnerName) lines.push({ icon: Building2, text: `الجهة: ${e.partnerName}` });
+        break;
+      case 'contract':
+        if (e.contractType) lines.push({ icon: ScrollText, text: `النوع: ${e.contractType}` });
+        if (e.partnerName) lines.push({ icon: Building2, text: `الطرف: ${e.partnerName}` });
+        if (e.value) lines.push({ icon: Receipt, text: `القيمة: ${Number(e.value).toLocaleString()} ${e.currency || 'EGP'}` });
+        if (e.startDate || e.endDate) lines.push({ icon: Calendar, text: `${formatDate(e.startDate as string) || '—'} — ${formatDate(e.endDate as string) || '—'}` });
+        if (e.wasteType) lines.push({ icon: Truck, text: `المخلف: ${e.wasteType}` });
+        if (e.clauseCount) lines.push({ icon: FileCheck, text: `${e.clauseCount} بند` });
+        if (e.description) lines.push({ icon: Info, text: String(e.description).slice(0, 50) });
+        break;
+      case 'award_letter':
+        if (e.quantity) lines.push({ icon: Weight, text: `الكمية التقديرية: ${Number(e.quantity).toLocaleString()}` });
+        if (e.startDate || e.endDate) lines.push({ icon: Calendar, text: `${formatDate(e.startDate as string) || '—'} — ${formatDate(e.endDate as string) || '—'}` });
+        if (e.notes) lines.push({ icon: Info, text: String(e.notes).slice(0, 50) });
+        break;
+      case 'work_order':
+        if (e.wasteType) lines.push({ icon: Truck, text: `المخلف: ${e.wasteType}` });
+        if (e.quantity) lines.push({ icon: Weight, text: `الكمية: ${Number(e.quantity).toLocaleString()} ${e.unit || 'كجم'}` });
+        if (e.location) lines.push({ icon: MapPin, text: `الموقع: ${e.location}` });
+        if (e.urgency) lines.push({ icon: AlertCircle, text: `الأولوية: ${e.urgency}`, color: e.urgency === 'urgent' ? 'text-red-600' : undefined });
+        if (e.hazardous === 1) lines.push({ icon: AlertCircle, text: '⚠️ مواد خطرة', color: 'text-red-600' });
+        if (e.instructions) lines.push({ icon: Info, text: String(e.instructions).slice(0, 50) });
+        break;
+      case 'document':
+        if (e.docType) lines.push({ icon: FileText, text: `النوع: ${DOC_TYPE_LABELS[e.docType as string] || e.docType}` });
+        if (e.category) lines.push({ icon: Layers, text: `التصنيف: ${e.category}` });
+        if (e.refNumber) lines.push({ icon: FileCheck, text: `المرجع: ${e.refNumber}` });
+        if (e.fileSize) lines.push({ icon: FileText, text: `الحجم: ${formatFileSize(e.fileSize)} • ${e.fileType || ''}` });
+        if (e.fileName) lines.push({ icon: Download, text: `الملف: ${e.fileName}` });
+        if (e.description) lines.push({ icon: Info, text: String(e.description).slice(0, 50) });
+        if (e.shipmentId) lines.push({ icon: Truck, text: `مرتبط بشحنة` });
+        if (e.invoiceId) lines.push({ icon: Receipt, text: `مرتبط بفاتورة` });
+        if (e.tags) lines.push({ icon: Info, text: `الوسوم: ${e.tags}` });
+        break;
+      case 'signing_request':
+        if (e.docType) lines.push({ icon: FileText, text: `على: ${DOC_TYPE_LABELS[e.docType as string] || e.docType}` });
+        if (e.signerTitle) lines.push({ icon: Pen, text: `الصفة: ${e.signerTitle}` });
+        if (e.signatureMethod) lines.push({ icon: FileSignature, text: `طريقة التوقيع: ${e.signatureMethod}` });
+        if (e.stampApplied === 1) lines.push({ icon: Stamp, text: '✓ تم تطبيق الختم', color: 'text-emerald-600' });
+        if (e.sealNumber) lines.push({ icon: Shield, text: `رقم الختم: ${e.sealNumber}` });
+        break;
+    }
+    return lines;
+  };
+
   const renderListItem = (item: ResourceItem) => {
     const section = RESOURCE_SECTIONS.find(s => s.key === item.resourceType);
     const Icon = section?.icon || FileText;
@@ -676,38 +741,58 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
     const dateStr = formatDate(item.date);
     const isSelected = selectedItem?.id === item.id;
     const isBulkChecked = bulkSelected.has(item.id);
+    const detailLines = renderDetailLines(item);
 
     return (
       <button
         key={`${item.resourceType}-${item.id}`}
         className={cn(
-          'w-full px-3 py-2 rounded-lg transition-colors text-right',
+          'w-full px-3 py-2.5 rounded-lg transition-colors text-right',
           isSelected ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-muted/80'
         )}
         onClick={() => bulkMode ? toggleBulkItem(item.id) : setSelectedItem(isSelected ? null : item)}
       >
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-start gap-2.5">
           {bulkMode && (
-            <div className={cn('w-4 h-4 rounded border flex items-center justify-center shrink-0', isBulkChecked ? 'bg-primary border-primary' : 'border-border')}>
+            <div className={cn('w-4 h-4 rounded border flex items-center justify-center shrink-0 mt-0.5', isBulkChecked ? 'bg-primary border-primary' : 'border-border')}>
               {isBulkChecked && <CheckCircle className="w-3 h-3 text-white" />}
             </div>
           )}
-          <div className={cn('w-7 h-7 rounded-lg flex items-center justify-center shrink-0', colorClass)}>
-            <Icon className="w-3.5 h-3.5" />
+          <div className={cn('w-8 h-8 rounded-lg flex items-center justify-center shrink-0', colorClass)}>
+            <Icon className="w-4 h-4" />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 space-y-1">
+            {/* Title row */}
             <div className="flex items-center gap-2">
-              <p className="text-[11px] font-semibold truncate flex-1">{item.label}</p>
+              <p className="text-[11px] font-bold truncate flex-1">{item.label}</p>
               {statusInfo && <Badge variant="outline" className={cn('text-[9px] py-0 shrink-0', statusInfo.color)}>{statusInfo.label}</Badge>}
+              {!statusInfo && item.status && <Badge variant="outline" className="text-[9px] py-0">{item.status}</Badge>}
             </div>
-            <p className="text-[10px] text-muted-foreground truncate mt-0.5">{item.subtitle}</p>
-            {/* Analysis preview */}
-            {item.analysis && (
-              <p className="text-[9px] text-muted-foreground/60 mt-0.5 truncate">
-                📋 {item.analysis.slice(0, 80)}
-              </p>
+            {/* Subtitle */}
+            <p className="text-[10px] text-muted-foreground">{item.subtitle}</p>
+
+            {/* Structured detail lines below title */}
+            {detailLines.length > 0 && (
+              <div className="bg-muted/40 rounded-md px-2 py-1.5 space-y-0.5 border border-border/30">
+                {detailLines.map((line, idx) => {
+                  const LineIcon = line.icon;
+                  return (
+                    <div key={idx} className={cn('flex items-center gap-1.5 text-[10px]', line.color || 'text-muted-foreground')}>
+                      <LineIcon className="w-3 h-3 shrink-0" />
+                      <span className="truncate">{line.text}</span>
+                    </div>
+                  );
+                })}
+              </div>
             )}
-            {dateStr && <span className="text-[9px] text-muted-foreground/50">{dateStr}</span>}
+
+            {/* Date */}
+            {dateStr && (
+              <div className="flex items-center gap-1 text-[9px] text-muted-foreground/60">
+                <Calendar className="w-2.5 h-2.5" />
+                <span>{dateStr}</span>
+              </div>
+            )}
           </div>
         </div>
       </button>
