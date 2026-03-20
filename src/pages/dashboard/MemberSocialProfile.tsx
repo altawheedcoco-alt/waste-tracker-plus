@@ -488,6 +488,13 @@ export default function MemberSocialProfile() {
       <div className="space-y-4 max-w-4xl mx-auto" dir="rtl">
         <BackButton />
 
+        {/* Hidden file inputs — outside overflow-hidden to ensure they work on all browsers */}
+        {isOwnProfile && (
+          <>
+            <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
+          </>
+        )}
+
         {/* Cover + Avatar Section */}
         <Card className="overflow-hidden">
           {/* Cover Photo */}
@@ -511,22 +518,22 @@ export default function MemberSocialProfile() {
             {/* Cover action buttons */}
             <div className="absolute bottom-3 left-3 z-20 flex max-w-[calc(100%-1.5rem)] flex-wrap gap-2">
               {isOwnProfile && (
-                <>
-                  <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handleCoverUpload} />
-                  <Button
-                    size="sm" variant="secondary"
-                    className="gap-1.5 opacity-80 hover:opacity-100"
-                    onClick={() => coverInputRef.current?.click()}
-                    disabled={uploading}
-                  >
-                    {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
-                    {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
-                  </Button>
-                </>
+                <Button
+                  size="sm" variant="secondary"
+                  className="gap-1.5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    coverInputRef.current?.click();
+                  }}
+                  disabled={uploading}
+                >
+                  {uploading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Camera className="w-4 h-4" />}
+                  {(targetProfile as any).cover_url ? 'تغيير الغلاف' : 'إضافة غلاف'}
+                </Button>
               )}
               <Button
                 size="sm" variant="secondary"
-                className="gap-1.5 opacity-80 hover:opacity-100"
+                className="gap-1.5"
                 onClick={() => setCoverGalleryOpen(true)}
               >
                 <Images className="w-4 h-4" />
