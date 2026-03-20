@@ -20,6 +20,7 @@ import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
 import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
+import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 
 const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
   <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
@@ -94,6 +95,16 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
         ) : (
           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
         )}
+        {/* Resource Card */}
+        {msg.message_type === 'resource_card' && (() => {
+          try {
+            const parsed = JSON.parse(msg.content);
+            if (parsed.resource_type && parsed.resource_data) {
+              return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isMine} />;
+            }
+          } catch { /* not a card */ }
+          return null;
+        })()}
         <div className={cn("flex items-center gap-1 mt-0.5", isMine ? "justify-start" : "justify-end")}>
           <span className={cn("text-[8px]", isMine ? "text-white/60" : "text-muted-foreground")}>
             {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
@@ -253,8 +264,39 @@ const EncryptedChatWidget = () => {
     }
     finally { setSending(false); }
   };
+  const handleSendResourceCard = async (resourceType: string, resourceData: any) => {
+    if (!selectedConvoId || sending) return;
+    const cardContent = JSON.stringify({ resource_type: resourceType, resource_data: resourceData });
+    const label = resourceData.shipment_number || resourceData.invoice_number || resourceData.document_name || 'مورد';
+    
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: cardContent,
+      message_type: 'resource_card',
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
+    setSending(true);
+    try {
+      // Send as text with resource_card content — the card renderer will handle display
+      await sendMessage(selectedConvoId, cardContent);
+      const updated = await fetchMessages(selectedConvoId, 30);
+      setMessages(updated);
+    } catch {
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل إرسال البطاقة');
+    } finally {
+      setSending(false);
+    }
+  };
 
-  // Collect all image URLs for lightbox gallery
+
   const allImageUrls = useMemo(() => 
     messages.filter(m => m.message_type === 'image' && m.file_url).map(m => m.file_url!),
     [messages]
@@ -609,6 +651,7 @@ const EncryptedChatWidget = () => {
                 <EnhancedChatInput
                   onSendMessage={handleSend}
                   onSendFile={handleSendFile}
+                  onSendResourceCard={handleSendResourceCard}
                   sending={sending}
                 />
 

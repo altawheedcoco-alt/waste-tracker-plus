@@ -21,6 +21,7 @@ import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
 import MessageReactions from './MessageReactions';
+import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 import { QuotedReply } from './ReplyPreview';
 import { useChatReactions } from '@/hooks/useChatReactions';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -403,12 +404,43 @@ const EnhancedChatMessages = ({
                                 <p className="text-[13px] text-muted-foreground">🚫 تم حذف هذه الرسالة</p>
                               ) : (
                                 <>
-                                  {/* Text with link detection */}
-                                  {message.message_type === 'text' && (
-                                    <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
-                                      {renderTextWithLinks(text, isOwn)}
-                                    </p>
-                                  )}
+                                  {/* Text - check if it's a resource card first */}
+                                  {message.message_type === 'text' && (() => {
+                                    try {
+                                      const parsed = JSON.parse(text);
+                                      if (parsed.resource_type && parsed.resource_data) {
+                                        return (
+                                          <ChatMessageCardRenderer
+                                            resourceType={parsed.resource_type}
+                                            resourceData={parsed.resource_data}
+                                            isOwn={isOwn}
+                                          />
+                                        );
+                                      }
+                                    } catch { /* not JSON, render as text */ }
+                                    return (
+                                      <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
+                                        {renderTextWithLinks(text, isOwn)}
+                                      </p>
+                                    );
+                                  })()}
+
+                                  {/* Resource Card */}
+                                  {(message.message_type as string) === 'resource_card' && (() => {
+                                    try {
+                                      const parsed = JSON.parse(message.content);
+                                      if (parsed.resource_type && parsed.resource_data) {
+                                        return (
+                                          <ChatMessageCardRenderer
+                                            resourceType={parsed.resource_type}
+                                            resourceData={parsed.resource_data}
+                                            isOwn={isOwn}
+                                          />
+                                        );
+                                      }
+                                    } catch { /* not a card */ }
+                                    return null;
+                                  })()}
 
                                   {/* Image */}
                                   {message.message_type === 'image' && fileUrl && (

@@ -19,6 +19,7 @@ import {
   Building2,
   User,
   AtSign,
+  Search as SearchIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -36,10 +37,14 @@ import {
 } from '@/components/ui/popover';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import type { MentionableEntity } from '@/components/ui/mentionable-field';
+import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
+import SlashCommandMenu from './SlashCommandMenu';
+import ChatResourcePicker from './ChatResourcePicker';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   onSendFile: (file: File) => Promise<void>;
+  onSendResourceCard?: (resourceType: string, resourceData: any) => Promise<void>;
   sending: boolean;
   uploadProgress?: number;
   disabled?: boolean;
@@ -56,7 +61,8 @@ const EMOJI_CATEGORIES = {
 
 const EnhancedChatInput = ({ 
   onSendMessage, 
-  onSendFile, 
+  onSendFile,
+  onSendResourceCard,
   sending, 
   uploadProgress = 0, 
   disabled,
@@ -76,6 +82,11 @@ const EnhancedChatInput = ({
   const [mentionSearch, setMentionSearch] = useState('');
   const [mentionIndex, setMentionIndex] = useState(0);
   const [cursorPos, setCursorPos] = useState(0);
+  const [showSlashMenu, setShowSlashMenu] = useState(false);
+  const [slashSearch, setSlashSearch] = useState('');
+  const [slashIndex, setSlashIndex] = useState(0);
+  const [showResourcePicker, setShowResourcePicker] = useState(false);
+  const [resourcePickerTab, setResourcePickerTab] = useState<'shipments' | 'invoices' | 'documents' | 'signing'>('shipments');
   
   const { entities: mentionableEntities } = useMentionableEntities();
   
@@ -120,6 +131,26 @@ const EnhancedChatInput = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Handle slash command dropdown navigation
+    if (showSlashMenu && filteredSlashCommands.length > 0) {
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setSlashIndex(i => (i + 1) % filteredSlashCommands.length);
+        return;
+      } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setSlashIndex(i => (i - 1 + filteredSlashCommands.length) % filteredSlashCommands.length);
+        return;
+      } else if (e.key === 'Enter' || e.key === 'Tab') {
+        e.preventDefault();
+        handleSlashSelect(filteredSlashCommands[slashIndex]);
+        return;
+      } else if (e.key === 'Escape') {
+        setShowSlashMenu(false);
+        return;
+      }
+    }
+
     // Handle mention dropdown navigation
     if (showMentionDropdown && filteredMentions.length > 0) {
       if (e.key === 'ArrowDown') {
@@ -249,12 +280,22 @@ const EnhancedChatInput = ({
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     
-    // Detect @ mention trigger
     const before = newValue.slice(0, pos);
+
+    // Detect / slash command trigger
+    if (before === '/' || (before.startsWith('/') && !before.includes(' '))) {
+      setSlashSearch(before);
+      setShowSlashMenu(true);
+      setSlashIndex(0);
+      setShowMentionDropdown(false);
+      return;
+    }
+    setShowSlashMenu(false);
+
+    // Detect @ mention trigger
     const atIndex = before.lastIndexOf('@');
     if (atIndex !== -1) {
       const afterAt = before.slice(atIndex + 1);
-      // Only trigger if @ is at start or preceded by whitespace, and no ] or ( after it
       if ((atIndex === 0 || /[\s\n]/.test(before[atIndex - 1])) && !afterAt.includes(']') && !afterAt.includes('(')) {
         setMentionSearch(afterAt);
         setShowMentionDropdown(true);
@@ -264,6 +305,35 @@ const EnhancedChatInput = ({
     }
     setShowMentionDropdown(false);
   };
+
+  const filteredSlashCommands = filterCommands(slashSearch);
+
+  const RESOURCE_TAB_MAP: Record<string, 'shipments' | 'invoices' | 'documents' | 'signing'> = {
+    shipment: 'shipments',
+    tracking: 'shipments',
+    invoice: 'invoices',
+    document: 'documents',
+    doc: 'documents',
+    signing_request: 'signing',
+    sign: 'signing',
+    stamp: 'signing',
+  };
+
+  const handleSlashSelect = useCallback((cmd: SlashCommand) => {
+    setInputValue('');
+    setShowSlashMenu(false);
+    // Open resource picker for the selected command type
+    setResourcePickerTab(RESOURCE_TAB_MAP[cmd.resourceType] || 'shipments');
+    setShowResourcePicker(true);
+    textareaRef.current?.focus();
+  }, []);
+
+  const handleResourceSelect = useCallback(async (resource: { type: string; data: any }) => {
+    setShowResourcePicker(false);
+    if (onSendResourceCard) {
+      await onSendResourceCard(resource.type, resource.data);
+    }
+  }, [onSendResourceCard]);
 
   const filteredMentions = mentionableEntities.filter(e =>
     e.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
@@ -447,20 +517,40 @@ const EnhancedChatInput = ({
             </PopoverContent>
           </Popover>
 
-          {/* Text Input with Mention Dropdown */}
+          {/* Text Input with Slash Commands + Mention + Resource Picker */}
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={inputValue}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (@للإشارة)"}
+              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (/ للأوامر، @ للإشارة)"}
               className="min-h-[36px] max-h-[120px] resize-none py-2 px-1 border-0 shadow-none bg-transparent focus-visible:ring-0 text-sm"
               disabled={sending || disabled || isRecording}
               dir="rtl"
               rows={1}
             />
             
+            {/* Slash Command Menu */}
+            <AnimatePresence>
+              {showSlashMenu && filteredSlashCommands.length > 0 && (
+                <SlashCommandMenu
+                  commands={filteredSlashCommands}
+                  selectedIndex={slashIndex}
+                  onSelect={handleSlashSelect}
+                  onHover={setSlashIndex}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Resource Picker */}
+            <ChatResourcePicker
+              isOpen={showResourcePicker}
+              onClose={() => setShowResourcePicker(false)}
+              onSelect={handleResourceSelect}
+              initialTab={resourcePickerTab}
+            />
+
             {/* @Mention Dropdown */}
             <AnimatePresence>
               {showMentionDropdown && filteredMentions.length > 0 && (
@@ -523,6 +613,20 @@ const EnhancedChatInput = ({
               )}
             </AnimatePresence>
           </div>
+
+          {/* Resource Search Button */}
+          {onSendResourceCard && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 shrink-0 rounded-full"
+              disabled={sending || disabled || isRecording}
+              onClick={() => setShowResourcePicker(true)}
+              title="إرفاق مورد (شحنة، فاتورة، مستند...)"
+            >
+              <SearchIcon className="w-4.5 h-4.5 text-muted-foreground" />
+            </Button>
+          )}
 
           {/* Attachment Plus Button */}
           <Popover open={showAttachMenu} onOpenChange={setShowAttachMenu}>
