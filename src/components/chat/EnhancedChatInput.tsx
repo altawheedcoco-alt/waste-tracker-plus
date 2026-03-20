@@ -40,6 +40,8 @@ import type { MentionableEntity } from '@/components/ui/mentionable-field';
 import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
 import SlashCommandMenu from './SlashCommandMenu';
 import ChatResourcePicker from './ChatResourcePicker';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import { useMentionNotifier } from '@/hooks/useMentionNotifier';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
