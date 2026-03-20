@@ -133,7 +133,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       // Fetch shipments with more fields
       const shipmentQuery = supabase
         .from('shipments')
-        .select('id, shipment_number, status, waste_type, waste_description, generator_id, transporter_id, recycler_id, origin_city, destination_city, weight, created_at, scheduled_date')
+        .select('id, shipment_number, status, waste_type, waste_description, generator_id, transporter_id, recycler_id, pickup_city, delivery_city, quantity, unit, created_at, pickup_date')
         .order('created_at', { ascending: false })
         .limit(30);
 
@@ -151,11 +151,12 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
           label: `شحنة #${s.shipment_number || s.id.slice(0, 8)}`,
           subtitle: s.waste_type || s.waste_description || '',
           status: s.status || undefined,
-          date: s.scheduled_date || s.created_at,
+          date: s.pickup_date || s.created_at,
           extra: {
-            origin: s.origin_city,
-            destination: s.destination_city,
-            weight: s.weight,
+            origin: s.pickup_city,
+            destination: s.delivery_city,
+            weight: s.quantity,
+            unit: s.unit,
           },
           raw: s,
         });
