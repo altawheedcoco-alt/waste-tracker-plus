@@ -94,6 +94,8 @@ const EnhancedChatInput = ({
   const [resourcePickerTab, setResourcePickerTab] = useState<'outgoing' | 'incoming'>('outgoing');
   
   const { entities: mentionableEntities } = useMentionableEntities();
+  const { users: mentionableUsers } = useMentionableUsers();
+  const { notify: notifyMentions } = useMentionNotifier();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
