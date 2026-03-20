@@ -69,6 +69,7 @@ const EnhancedChatInput = ({
   uploadProgress = 0, 
   disabled,
   onTyping,
+  chatPartnerOrgId,
 }: EnhancedChatInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
