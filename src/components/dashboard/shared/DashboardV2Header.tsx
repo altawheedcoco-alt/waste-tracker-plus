@@ -708,7 +708,11 @@ const DashboardV2Header = memo(({
               <div className="flex-1 grid grid-cols-3 gap-1 sm:gap-1.5">
                 {radarStats!.map((stat, i) => (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
-                    className="group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden cursor-default">
+                    onClick={() => stat.route && navigate(stat.route)}
+                    className={cn(
+                      "group relative rounded-lg border border-border/30 bg-card/60 backdrop-blur-sm p-1.5 sm:p-2 hover:border-primary/40 hover:shadow-md hover:shadow-primary/5 transition-all duration-300 overflow-hidden",
+                      stat.route ? "cursor-pointer active:scale-[0.97]" : "cursor-default"
+                    )}>
                     <div className="absolute inset-0 bg-primary/[0.03] opacity-0 group-hover:opacity-100 transition-opacity" />
                     <div className="flex items-center justify-between mb-1 relative z-10">
                       <div className="flex items-center gap-0.5">
