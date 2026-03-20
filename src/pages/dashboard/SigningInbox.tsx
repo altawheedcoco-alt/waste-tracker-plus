@@ -253,6 +253,7 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
 
 export default function SigningInbox() {
   const { incoming, outgoing, isLoading, sendRequest, updateStatus } = useSigningInbox();
+  const { chains, isLoading: chainsLoading, signStep } = useSigningChains();
   const { profile } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -265,6 +266,8 @@ export default function SigningInbox() {
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedPlatformDoc, setSelectedPlatformDoc] = useState<PlatformDocument | null>(null);
+  const [chainDialogOpen, setChainDialogOpen] = useState(false);
+  const [journeyDialogId, setJourneyDialogId] = useState<string | null>(null);
   const [form, setForm] = useState({
     recipient_organization_id: '',
     document_title: '',
