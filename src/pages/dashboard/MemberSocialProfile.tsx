@@ -219,50 +219,65 @@ export default function MemberSocialProfile() {
     } as any);
   };
 
-  // Update cover photo
+  // Update cover photo — open crop dialog
   const handleCoverUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !targetProfile) return;
+    e.target.value = '';
     if (file.size > 5 * 1024 * 1024) {
       toast.error('حجم الصورة يجب أن لا يتجاوز 5 ميجابايت');
       return;
     }
-    setUploading(true);
-    try {
-      const url = await uploadFile(file, 'covers');
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ cover_url: url } as any)
-        .eq('id', targetProfile.id);
-      if (updateError) throw updateError;
-      await savePhotoHistory(url, 'cover');
-      queryClient.invalidateQueries({ queryKey: ['social-profile'] });
-      queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
-      toast.success('تم تحديث صورة الغلاف');
-    } catch (err: any) {
-      console.error('Cover upload error:', err);
-      toast.error(err?.message || 'فشل رفع الصورة');
-    } finally {
-      setUploading(false);
-      if (e.target) e.target.value = '';
-    }
+    setCropFile(file);
+    setCropMode('cover');
+    setCropOpen(true);
   };
 
-  // Update avatar
+  // Update avatar — open crop dialog
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !targetProfile) return;
+    e.target.value = '';
+    setCropFile(file);
+    setCropMode('avatar');
+    setCropOpen(true);
+  };
+
+  // Handle cropped image save
+  const handleCropSave = useCallback(async (croppedBlob: Blob) => {
+    if (!targetProfile || !user?.id) return;
+    const isCover = cropMode === 'cover';
     setUploading(true);
+
     try {
-      const url = await uploadFile(file, 'avatars');
-      await supabase.from('profiles').update({ avatar_url: url }).eq('id', targetProfile.id);
-      await savePhotoHistory(url, 'avatar');
+      const folder = isCover ? 'covers' : 'avatars';
+      const path = `${user.id}/${folder}/${Date.now()}.jpg`;
+      const { error } = await supabase.storage.from('profile-media').upload(path, croppedBlob, { contentType: 'image/jpeg' });
+      if (error) throw error;
+      const { data: urlData } = supabase.storage.from('profile-media').getPublicUrl(path);
+      const url = urlData.publicUrl;
+
+      if (isCover) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ cover_url: url } as any)
+          .eq('id', targetProfile.id);
+        if (updateError) throw updateError;
+      } else {
+        await supabase.from('profiles').update({ avatar_url: url }).eq('id', targetProfile.id);
+      }
+
+      await savePhotoHistory(url, isCover ? 'cover' : 'avatar');
       queryClient.invalidateQueries({ queryKey: ['social-profile'] });
       queryClient.invalidateQueries({ queryKey: ['profile-photos'] });
-      toast.success('تم تحديث صورة الملف الشخصي');
-    } catch { toast.error('فشل رفع الصورة'); }
-    finally { setUploading(false); }
-  };
+      toast.success(isCover ? 'تم تحديث صورة الغلاف' : 'تم تحديث صورة الملف الشخصي');
+    } catch (err: any) {
+      console.error('Crop upload error:', err);
+      toast.error(err?.message || 'فشل رفع الصورة');
+    } finally {
+      setUploading(false);
+    }
+  }, [cropMode, targetProfile, user?.id, queryClient]);
 
   // Update profile info
   const saveProfile = useMutation({
