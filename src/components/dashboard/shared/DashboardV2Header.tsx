@@ -127,8 +127,25 @@ const MiniSpark = ({ color = 'hsl(var(--primary))' }: { color?: string }) => {
   );
 };
 
+/* ═══════════ HEALTH EXPLANATION HELPERS ═══════════ */
+const getHealthLevel = (score: number) => {
+  if (score >= 80) return { label: 'ممتاز', color: 'text-primary', bg: 'bg-primary/10', emoji: '🟢', desc: 'الجهة تعمل بكفاءة عالية وجميع المؤشرات في المستوى الأمثل' };
+  if (score >= 60) return { label: 'جيد', color: 'text-primary', bg: 'bg-primary/10', emoji: '🔵', desc: 'أداء جيد مع فرص للتحسين في بعض المجالات' };
+  if (score >= 40) return { label: 'متوسط', color: 'text-amber-600', bg: 'bg-amber-500/10', emoji: '🟡', desc: 'يحتاج تحسين - هناك مجالات تحتاج اهتمام أكثر' };
+  if (score >= 20) return { label: 'ضعيف', color: 'text-orange-600', bg: 'bg-orange-500/10', emoji: '🟠', desc: 'أداء منخفض - يُنصح بزيادة النشاط التشغيلي' };
+  return { label: 'يحتاج تفعيل', color: 'text-destructive', bg: 'bg-destructive/10', emoji: '🔴', desc: 'الجهة في بداية نشاطها أو لديها عمليات محدودة جداً' };
+};
+
+const getStatAdvice = (_label: string, value: number, max: number) => {
+  const pct = max > 0 ? (value / max) * 100 : 0;
+  if (pct >= 80) return 'ممتاز';
+  if (pct >= 50) return 'جيد';
+  if (pct >= 20) return 'يحتاج تحسين';
+  return 'منخفض';
+};
+
 /* ═══════════ CIRCULAR GAUGE METER ═══════════ */
-const PerformanceGauge = memo(({ score, label }: { score: number; label: string }) => {
+const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; label: string; radarStats?: RadarStat[] }) => {
   const size = 90;
   const strokeW = 6;
   const r = (size - strokeW) / 2;
@@ -140,25 +157,23 @@ const PerformanceGauge = memo(({ score, label }: { score: number; label: string 
   const dashGap = circ - dashLen;
   const color = score >= 80 ? 'hsl(var(--primary))' : score >= 50 ? 'hsl(45, 93%, 47%)' : 'hsl(var(--destructive))';
   const glowColor = score >= 80 ? 'hsl(var(--primary) / 0.4)' : score >= 50 ? 'hsl(45, 93%, 47%, 0.4)' : 'hsl(var(--destructive) / 0.4)';
+  const level = getHealthLevel(score);
 
-  return (
-    <div className="relative flex flex-col items-center">
+  const gaugeElement = (
+    <div className="relative flex flex-col items-center cursor-pointer">
       <svg width={size} height={size} className="drop-shadow-lg">
         <defs>
           <filter id="gaugeGlow"><feGaussianBlur stdDeviation="3" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
         </defs>
-        {/* BG arc */}
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeW}
           strokeDasharray={`${circ * sweepAngle / 360} ${circ * (1 - sweepAngle / 360)}`}
           strokeDashoffset={-circ * startAngle / 360} strokeLinecap="round" opacity="0.2" />
-        {/* Value arc */}
         <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={strokeW}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeDashoffset={-circ * startAngle / 360} strokeLinecap="round" filter="url(#gaugeGlow)"
           initial={{ strokeDasharray: `0 ${circ}` }}
           animate={{ strokeDasharray: `${dashLen} ${dashGap}` }}
           transition={{ duration: 1.5, ease: 'easeOut' }} />
-        {/* Tick marks */}
         {[0, 0.25, 0.5, 0.75, 1].map((t, i) => {
           const ang = ((startAngle + sweepAngle * t) * Math.PI) / 180;
           const x1 = size / 2 + (r + 4) * Math.cos(ang);
@@ -177,12 +192,93 @@ const PerformanceGauge = memo(({ score, label }: { score: number; label: string 
         </motion.span>
         <span className="text-[7px] font-mono text-muted-foreground mt-0.5">{label}</span>
       </div>
-      {/* Glow ring */}
       <motion.div className="absolute inset-2 rounded-full"
         style={{ boxShadow: `0 0 20px ${glowColor}` }}
         animate={{ opacity: [0.3, 0.7, 0.3] }}
         transition={{ duration: 2, repeat: Infinity }} />
     </div>
+  );
+
+  return (
+    <Popover>
+      <PopoverTrigger asChild>{gaugeElement}</PopoverTrigger>
+      <PopoverContent className="w-80 p-0 rounded-xl" align="center" dir="rtl">
+        <div className="p-4 space-y-3">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HeartPulse className="w-5 h-5 text-primary" />
+              <span className="font-bold text-sm">مؤشر صحة الأداء</span>
+            </div>
+            <Badge variant="outline" className={`${level.color} text-xs font-bold`}>
+              {level.emoji} {level.label}
+            </Badge>
+          </div>
+
+          {/* Score bar */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="text-muted-foreground">النتيجة الإجمالية</span>
+              <span className={`font-bold ${level.color}`}>{score}%</span>
+            </div>
+            <Progress value={score} className="h-2.5" />
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>0% - ضعيف</span>
+              <span>50% - متوسط</span>
+              <span>100% - ممتاز</span>
+            </div>
+          </div>
+
+          {/* Description */}
+          <p className="text-xs text-muted-foreground leading-relaxed p-2 rounded-lg bg-muted/50">
+            {level.desc}
+          </p>
+
+          {/* Stats breakdown */}
+          {radarStats && radarStats.length > 0 && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-foreground">تفصيل المؤشرات:</p>
+              {radarStats.map((stat) => {
+                const max = stat.max || Math.max(stat.value, 1);
+                const statPct = Math.round(Math.min(stat.value / max, 1) * 100);
+                const StatIcon = stat.icon;
+                return (
+                  <div key={stat.label} className="flex items-center gap-2 p-1.5 rounded-md bg-muted/30">
+                    <StatIcon className="w-3.5 h-3.5 shrink-0" style={{ color: stat.color }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="font-medium truncate">{stat.label}</span>
+                        <span className="text-muted-foreground">{stat.value}/{max}</span>
+                      </div>
+                      <div className="w-full h-1 rounded-full bg-border/50 mt-0.5">
+                        <motion.div
+                          className="h-full rounded-full"
+                          style={{ backgroundColor: stat.color }}
+                          initial={{ width: 0 }}
+                          animate={{ width: `${statPct}%` }}
+                          transition={{ duration: 0.8 }}
+                        />
+                      </div>
+                    </div>
+                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
+                      {getStatAdvice(stat.label, stat.value, max)}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* How it's calculated */}
+          <div className="pt-2 border-t border-border space-y-1">
+            <p className="text-[10px] font-semibold text-foreground">كيف يُحسب هذا المؤشر؟</p>
+            <p className="text-[10px] text-muted-foreground leading-relaxed">
+              يتم حساب نسبة إنجاز كل مؤشر (القيمة الفعلية ÷ القيمة القصوى)، ثم يُؤخذ المتوسط العام. كلما زادت العمليات والنشاط ارتفعت النتيجة.
+            </p>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
   );
 });
 PerformanceGauge.displayName = 'PerformanceGauge';
