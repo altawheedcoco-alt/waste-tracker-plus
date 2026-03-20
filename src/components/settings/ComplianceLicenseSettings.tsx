@@ -230,6 +230,17 @@ export default function ComplianceLicenseSettings() {
         ? `${docType} - ${extractedResult.detected_fields.license_number}`
         : `مستند امتثال - ${new Date().toLocaleDateString('ar-EG')}`;
 
+      // Build structured extracted fields with Arabic labels
+      const structuredFields: Record<string, string | string[]> = {};
+      const f = extractedResult.detected_fields;
+      if (f.license_number) structuredFields['رقم الترخيص'] = f.license_number;
+      if (f.issue_date) structuredFields['تاريخ الإصدار'] = f.issue_date;
+      if (f.expiry_date) structuredFields['تاريخ الانتهاء'] = f.expiry_date;
+      if (f.holder_name) structuredFields['اسم صاحب الترخيص'] = f.holder_name;
+      if (f.issuing_authority) structuredFields['الجهة المصدرة'] = f.issuing_authority;
+      if (f.document_type) structuredFields['نوع المستند'] = f.document_type;
+      if (f.waste_types?.length) structuredFields['أنواع المخلفات'] = f.waste_types;
+
       const { error: docErr } = await supabase
         .from('entity_documents')
         .insert({
@@ -241,9 +252,15 @@ export default function ComplianceLicenseSettings() {
           file_name: uploadedFileRef?.name || 'unknown',
           file_type: uploadedFileRef?.type || 'application/octet-stream',
           file_size: uploadedFileRef?.size || 0,
-          reference_number: extractedResult.detected_fields.license_number || null,
+          reference_number: f.license_number || null,
           tags: ['ai-extracted', 'compliance', docType],
-          ocr_extracted_data: extractedResult as any,
+          ocr_extracted_data: {
+            structured_fields: structuredFields,
+            raw_text: extractedResult.raw_text,
+            confidence: extractedResult.confidence,
+            pages_count: extractedResult.pages_count,
+            detected_fields: extractedResult.detected_fields,
+          } as any,
           ocr_confidence: extractedResult.confidence,
           ai_extracted: true,
         });
