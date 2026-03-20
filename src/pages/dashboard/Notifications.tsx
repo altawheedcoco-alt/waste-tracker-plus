@@ -112,7 +112,9 @@ const getNotificationColor = (type: string | null) => {
     case 'document_uploaded': case 'signing_request': case 'signature_request':
     case 'document_signed': case 'document_issued': case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
     case 'recycling_report': case 'report': case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
-    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'partner_post': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'partner_note': return 'bg-orange-500/10 text-orange-500';
+    case 'partner_message': return 'bg-pink-500/10 text-pink-500';
     case 'approval_request': return 'bg-amber-500/10 text-amber-500';
     case 'invoice': case 'payment': case 'deposit': case 'financial': return 'bg-emerald-500/10 text-emerald-500';
     case 'warning': case 'signal_lost': case 'violation': return 'bg-red-500/10 text-red-500';
