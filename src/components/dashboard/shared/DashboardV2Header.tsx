@@ -142,7 +142,8 @@ const getStatAdvice = (_label: string, value: number, max: number) => {
   if (pct >= 80) return 'ممتاز';
   if (pct >= 50) return 'جيد';
   if (pct >= 20) return 'يحتاج تحسين';
-  return 'منخفض';
+  if (value === 0) return 'لم يبدأ بعد';
+  return 'قيد النمو';
 };
 
 /* ═══════════ CIRCULAR GAUGE METER ═══════════ */

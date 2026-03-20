@@ -228,14 +228,22 @@ const GeneratorDashboard = () => {
         icon={Package}
         gradient="from-primary to-primary/70"
         onRefresh={() => fetchDashboardData()}
-        radarStats={[
-          { label: 'إجمالي الشحنات', value: recentShipments.length, icon: Package, color: 'text-primary', max: Math.max(recentShipments.length, 50), trend: 'up' as const },
-          { label: 'نشطة', value: recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length, icon: Route, color: 'text-amber-500', max: 20, trend: 'up' as const },
-          { label: 'معلقة', value: recentShipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const },
-          { label: 'مكتملة', value: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(recentShipments.length, 50), trend: 'up' as const },
-          { label: 'بتقارير', value: recentShipments.filter(s => s.has_report).length, icon: FileCheck, color: 'text-violet-500', max: Math.max(recentShipments.length, 20), trend: 'stable' as const },
-          { label: 'ناقلون', value: new Set(recentShipments.map(s => s.transporter?.name).filter(Boolean)).size, icon: Building2, color: 'text-primary', max: 10, trend: 'stable' as const },
-        ]}
+        radarStats={(() => {
+          const total = recentShipments.length;
+          const active = recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length;
+          const pending = recentShipments.filter(s => s.status === 'new').length;
+          const completed = recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length;
+          const withReports = recentShipments.filter(s => s.has_report).length;
+          const transporters = new Set(recentShipments.map(s => s.transporter?.name).filter(Boolean)).size;
+          return [
+            { label: 'إجمالي الشحنات', value: total, icon: Package, color: 'text-primary', max: total || 1, trend: 'up' as const },
+            { label: 'نشطة', value: active, icon: Route, color: 'text-amber-500', max: Math.max(total, 1), trend: 'up' as const },
+            { label: 'معلقة', value: pending, icon: Clock, color: 'text-amber-500', max: Math.max(total, 1), trend: 'down' as const },
+            { label: 'مكتملة', value: completed, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(total, 1), trend: 'up' as const },
+            { label: 'بتقارير', value: withReports, icon: FileCheck, color: 'text-violet-500', max: Math.max(total, 1), trend: 'stable' as const },
+            { label: 'ناقلون', value: transporters, icon: Building2, color: 'text-primary', max: transporters || 1, trend: 'stable' as const },
+          ];
+        })()}
         alerts={[
           ...(recentShipments.filter(s => s.status === 'new').length > 0 ? [{ id: 'pending-gen', message: `⏳ ${recentShipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج موافقة وتعيين ناقل`, severity: recentShipments.filter(s => s.status === 'new').length > 5 ? 'critical' as const : 'warning' as const, icon: Clock }] : []),
           ...(recentShipments.filter(s => s.status === 'in_transit').length > 0 ? [{ id: 'in-transit', message: `🚛 ${recentShipments.filter(s => s.status === 'in_transit').length} شحنة في الطريق — تتبع مباشر`, severity: 'info' as const, icon: Truck }] : []),
