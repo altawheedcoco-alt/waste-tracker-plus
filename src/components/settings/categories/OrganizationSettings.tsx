@@ -62,6 +62,11 @@ const OrganizationSettings = ({ orgType }: Props) => {
         </TabsList>
       </div>
 
+      {/* Compliance & Licenses */}
+      <TabsContent value="compliance">
+        <ComplianceLicenseSettings />
+      </TabsContent>
+
       {/* Automation */}
       <TabsContent value="automation">
         <Card>
