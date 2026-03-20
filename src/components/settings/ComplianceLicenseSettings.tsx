@@ -229,7 +229,7 @@ export default function ComplianceLicenseSettings() {
         .insert({
           organization_id: orgId,
           document_type: docType,
-          document_category: 'compliance',
+          document_category: 'legal',
           title,
           file_url: fileUrl,
           file_name: uploadedFileRef?.name || 'unknown',
