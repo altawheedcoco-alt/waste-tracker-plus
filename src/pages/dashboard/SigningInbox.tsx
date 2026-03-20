@@ -516,6 +516,9 @@ export default function SigningInbox() {
         <Button variant="outline" className="gap-2" onClick={() => navigate('/dashboard/document-archive?tab=signing_request')}>
           <FolderOpen className="w-4 h-4" /> سجل المستندات
         </Button>
+        <Button variant="outline" className="gap-2" onClick={() => setChainDialogOpen(true)}>
+          <GitBranch className="w-4 h-4" /> سلسلة توقيع متعدد
+        </Button>
         <Dialog open={sendOpen} onOpenChange={setSendOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
