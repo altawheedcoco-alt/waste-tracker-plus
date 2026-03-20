@@ -25,6 +25,7 @@ type TabConfig = {
 
 const tabs: TabConfig[] = [
   { value: 'compliance', label: 'التراخيص والامتثال', icon: ClipboardCheck, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'transport_office'] },
+  { value: 'ai-extracted', label: 'البيانات المستخرجة بالـ AI', icon: Brain, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'transport_office', 'consultant', 'consulting_office'] },
   { value: 'automation', label: 'الأتمتة', icon: Zap, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'consultant', 'consulting_office', 'transport_office'] },
   { value: 'visibility', label: 'الرؤية والحجب', icon: Shield, visibleFor: ['transporter'] },
   { value: 'supervisors', label: 'مسئولو الحركة', icon: Users, visibleFor: ['transporter', 'generator'] },
