@@ -421,7 +421,7 @@ const EnhancedChatMessages = ({
                                     } catch { /* not JSON, render as text */ }
                                     return (
                                       <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
-                                        {renderTextWithLinks(text, isOwn)}
+                                        <ChatMentionRenderer text={text} isOwn={isOwn} />
                                       </p>
                                     );
                                   })()}
