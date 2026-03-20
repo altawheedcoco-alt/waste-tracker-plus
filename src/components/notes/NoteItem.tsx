@@ -75,16 +75,13 @@ const NoteItem = ({ note, resourceType, resourceId, isReply = false }: NoteItemP
       target_organization_id: note.target_organization_id,
     });
     // Send mention notifications
-    const mentioned = parseMentions(replyContent);
-    if (mentioned.length > 0) {
-      notifyMentions({
-        mentionedUserIds: mentioned,
-        content: replyContent,
-        context: `رد على ملاحظة في ${resourceType === 'shipment' ? 'شحنة' : 'محادثة'}`,
-        resourceType,
-        resourceId,
-      });
-    }
+    notifyMentions({
+      text: replyContent,
+      users,
+      context: `رد على ملاحظة في ${resourceType === 'shipment' ? 'شحنة' : 'محادثة'}`,
+      referenceId: resourceId,
+      referenceType: resourceType,
+    });
     setReplyContent('');
   };
 
