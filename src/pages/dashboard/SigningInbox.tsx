@@ -526,8 +526,28 @@ export default function SigningInbox() {
                 <Select value={form.recipient_organization_id} onValueChange={v => setForm(p => ({ ...p, recipient_organization_id: v }))}>
                   <SelectTrigger><SelectValue placeholder="اختر الجهة الشريكة..." /></SelectTrigger>
                   <SelectContent>
-                    {(partners || []).map(p => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                    {(partners || []).length === 0 && (
+                      <div className="p-3 text-center text-sm text-muted-foreground">
+                        <Building2 className="w-5 h-5 mx-auto mb-1 opacity-50" />
+                        لا توجد جهات مرتبطة
+                      </div>
+                    )}
+                    {(partners || []).map((p: any) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        <span className="flex items-center gap-2">
+                          {p.logo ? (
+                            <img src={p.logo} alt="" className="w-4 h-4 rounded-full object-cover" />
+                          ) : (
+                            <Building2 className="w-4 h-4 text-muted-foreground" />
+                          )}
+                          {p.name}
+                          {p.type && (
+                            <Badge variant="secondary" className="text-[9px] px-1 mr-1">
+                              {p.type === 'generator' ? 'مولد' : p.type === 'transporter' ? 'ناقل' : p.type === 'recycler' ? 'مدور' : p.type}
+                            </Badge>
+                          )}
+                        </span>
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
