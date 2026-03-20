@@ -47,9 +47,9 @@ const OrganizationSettings = ({ orgType }: Props) => {
   }
 
   return (
-    <Tabs defaultValue={defaultTab} className="space-y-4">
-      <div className="overflow-x-auto scrollbar-thin pb-1">
-        <TabsList className="inline-flex w-max gap-0.5 h-auto p-1 bg-muted/30 backdrop-blur-sm rounded-xl border border-border/30">
+    <Tabs defaultValue={defaultTab} className="space-y-4" dir="rtl">
+      <div className="overflow-x-auto scrollbar-thin pb-1" dir="rtl">
+        <TabsList className="inline-flex w-max gap-0.5 h-auto p-1 bg-muted/30 backdrop-blur-sm rounded-xl border border-border/30 flex-row-reverse">
           {visibleTabs.map(tab => {
             const Icon = tab.icon;
             return (
