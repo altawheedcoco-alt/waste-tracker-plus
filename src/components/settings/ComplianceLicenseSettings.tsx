@@ -453,8 +453,7 @@ export default function ComplianceLicenseSettings() {
                         </Collapsible>
                       );
                     })}
-                  </div>
-                </ScrollArea>
+                </div>
               </TabsContent>
             ))}
           </Tabs>
