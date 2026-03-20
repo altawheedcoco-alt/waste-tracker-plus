@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, FileText, Zap, Eye, Users, Building2, Receipt, ClipboardCheck } from 'lucide-react';
+import { Shield, FileText, Zap, Eye, Users, Building2, Receipt, ClipboardCheck, Brain } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
@@ -10,6 +10,7 @@ import MovementSupervisorSettings from '@/components/settings/MovementSupervisor
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 import DocumentTemplateManager from '@/components/documents/DocumentTemplateManager';
 import ComplianceLicenseSettings from '@/components/settings/ComplianceLicenseSettings';
+import AIExtractedDataViewer from '@/components/settings/AIExtractedDataViewer';
 
 interface Props {
   orgType: string;
@@ -24,6 +25,7 @@ type TabConfig = {
 
 const tabs: TabConfig[] = [
   { value: 'compliance', label: 'التراخيص والامتثال', icon: ClipboardCheck, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'transport_office'] },
+  { value: 'ai-extracted', label: 'البيانات المستخرجة بالـ AI', icon: Brain, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'transport_office', 'consultant', 'consulting_office'] },
   { value: 'automation', label: 'الأتمتة', icon: Zap, visibleFor: ['transporter', 'generator', 'recycler', 'disposal', 'consultant', 'consulting_office', 'transport_office'] },
   { value: 'visibility', label: 'الرؤية والحجب', icon: Shield, visibleFor: ['transporter'] },
   { value: 'supervisors', label: 'مسئولو الحركة', icon: Users, visibleFor: ['transporter', 'generator'] },
@@ -67,7 +69,11 @@ const OrganizationSettings = ({ orgType }: Props) => {
         <ComplianceLicenseSettings />
       </TabsContent>
 
-      {/* Automation */}
+      {/* AI Extracted Data */}
+      <TabsContent value="ai-extracted">
+        <AIExtractedDataViewer />
+      </TabsContent>
+
       <TabsContent value="automation">
         <Card>
           <CardHeader className="pb-3">

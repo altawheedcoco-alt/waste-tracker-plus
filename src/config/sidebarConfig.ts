@@ -587,6 +587,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Sparkles, labelAr: 'استوديو المستندات', labelEn: 'AI Document Studio', path: '/dashboard/ai-document-studio', key: 'ai-document-studio', bindingType: 'internal' as const },
       { icon: Scale, labelAr: 'المستندات التنظيمية', labelEn: 'Regulatory Docs', path: '/dashboard/regulatory-documents', key: 'regulatory-documents', bindingType: 'admin' as const },
+      { icon: Brain, labelAr: 'البيانات المستخرجة بالـ AI', labelEn: 'AI Extracted Data', path: '/dashboard/ai-extracted-data', key: 'ai-extracted-data', bindingType: 'internal' as const },
     ],
   },
 
