@@ -211,9 +211,10 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsList>
 
           {/* ─── IMAGES TAB ─── */}
-          <TabsContent value="images" className="flex-1 min-h-0 mt-3">
-            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:w-3 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:bg-muted/50 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:rounded-full [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:bg-primary/50 [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:rounded-full [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:hover:bg-primary/70" style={{ maxHeight: '55vh' }}>
-              <div className="flex flex-col gap-3 pb-2">
+          <TabsContent value="images" className="mt-3 flex flex-1 min-h-0 flex-col overflow-hidden">
+            <div className="min-h-0 flex-1 overflow-hidden rounded-xl border border-border/60 bg-background/60">
+            <ScrollArea className="h-[min(56vh,26rem)] min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-auto [&_[data-radix-scroll-area-scrollbar]]:opacity-100 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:w-3 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:bg-muted/50 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:rounded-full [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:bg-primary/50 [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:rounded-full [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:hover:bg-primary/70">
+              <div className="flex flex-col gap-3 p-3 pb-4">
                 <div className="flex flex-wrap gap-1.5">
                   <Badge
                     variant={selectedImageCategory === null ? 'default' : 'outline'}
@@ -318,6 +319,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
                 </div>
               </div>
             </ScrollArea>
+            </div>
           </TabsContent>
 
           {/* ─── COLORS TAB ─── */}
