@@ -42592,6 +42592,7 @@ export type Database = {
           total_amount: number
         }[]
       }
+      get_org_chain_ids: { Args: { _org_id: string }; Returns: string[] }
       get_organization_summary: {
         Args: { _org_id: string }
         Returns: {
