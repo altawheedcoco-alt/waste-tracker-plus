@@ -105,6 +105,8 @@ const TABS: TabItem[] = [
   { value: 'tracking', label: 'التتبع', icon: Navigation },
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
+  { value: 'notes', label: 'الملاحظات', icon: StickyNote },
+  { value: 'chat', label: 'المحادثات', icon: MessageSquare },
   { value: 'actions', label: 'الإجراءات', icon: Shield },
 ];
 
