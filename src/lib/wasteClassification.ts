@@ -57,7 +57,7 @@ export interface MainCategory {
 }
 
 export const mainCategories: MainCategory[] = [
-  // غير خطرة
+  // غير خطرة صلبة
   { id: 'organic', name: 'أخشاب ومواد عضوية', nameShort: 'عضوي/خشب', code: 'WD', isHazardous: false, keywords: ['خشب', 'اخشاب', 'بالت', 'بالتات', 'كونتر', 'حبيبي', 'صندوق', 'mdf', 'hdf', 'عضوي', 'طعام', 'زراعي', 'موسكي', 'ابلكاش', 'خشب زان', 'خشب سويد', 'لتزانيلو', 'تيك', 'نشارة', 'باركيه', 'فورميكا', 'لاتيه', 'كسر خشب', 'أثاث خشب', 'طبالي', 'خشب كسر', 'رايش'] },
   { id: 'plastic', name: 'بلاستيك ومطاط', nameShort: 'بلاستيك', code: 'PL', isHazardous: false, keywords: ['بلاستيك', 'plastic', 'pet', 'hdpe', 'pvc', 'نايلون', 'اكياس', 'عبوات', 'مطاط', 'كاوتش', 'إطار', 'شنطة', 'جردل', 'خرطوم', 'فيبر جلاس'] },
   { id: 'paper', name: 'ورق وكرتون', nameShort: 'ورق', code: 'PA', isHazardous: false, keywords: ['ورق', 'كرتون', 'paper', 'cardboard', 'كراتين', 'علب', 'دشت', 'رول', 'ورق فلوسكاب'] },
@@ -65,6 +65,10 @@ export const mainCategories: MainCategory[] = [
   { id: 'glass', name: 'زجاج', nameShort: 'زجاج', code: 'GL', isHazardous: false, keywords: ['زجاج', 'glass', 'قوارير', 'زجاجات', 'كسر زجاج', 'ازاز'] },
   { id: 'construction', name: 'مخلفات بناء وهدم', nameShort: 'بناء', code: 'CN', isHazardous: false, keywords: ['بناء', 'هدم', 'خرسانة', 'طوب', 'بلاط', 'سيراميك', 'ردم', 'أتربة', 'رمل', 'زلط', 'أسمنت'] },
   { id: 'other', name: 'مخلفات متنوعة', nameShort: 'متنوع', code: 'OT', isHazardous: false, keywords: ['متنوع', 'مختلط', 'اخرى', 'قماش', 'اثاث', 'نسيج', 'جلود'] },
+  // غير خطرة سائلة
+  { id: 'liquid_non_hazardous', name: 'مخلفات سائلة غير خطرة', nameShort: 'سوائل غ.خ', code: 'LQ', isHazardous: false, keywords: ['مياه صرف', 'مياه غسيل', 'بنتونيت', 'زيوت طعام', 'مياه عكرة', 'عصائر', 'مرتجعات سائلة', 'سوائل غذائية', 'مياه تطهير'] },
+  // غير خطرة - بلدية وفندقية
+  { id: 'municipal', name: 'مخلفات بلدية ومختلطة', nameShort: 'بلدية', code: 'MU', isHazardous: false, keywords: ['بلدي', 'بلدية', 'قمامة', 'مخلفات منازل', 'فنادق', 'يخوت', 'مراكب', 'سفن', 'RDF', 'وقود بديل'] },
   // خطرة
   { id: 'chemical', name: 'مخلفات كيميائية وبترولية', nameShort: 'كيميائي', code: 'CH', isHazardous: true, keywords: ['كيميائي', 'مذيب', 'حمض', 'قلوي', 'مبيد', 'زيت ملوث', 'طلاء', 'بترول', 'وقود', 'سولار', 'بنزين', 'ثنر'] },
   { id: 'electronic', name: 'مخلفات إلكترونية وكهربائية', nameShort: 'إلكتروني', code: 'EL', isHazardous: true, keywords: ['إلكتروني', 'بطارية', 'بطاريات', 'شاشة', 'كمبيوتر', 'موبايل', 'كهربائي', 'لمبة', 'فلورسنت'] },
@@ -173,6 +177,40 @@ export const hazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'فلاتر صناعية ملوثة', code: 'IN-08', hazardLevel: 'medium', wasteState: 'solid', commonNames: ['فلتر هواء صناعي', 'فلتر زيت', 'فلتر مياه صناعي', 'كربون نشط مستعمل', 'أكياس فلترة'] },
       { name: 'مخلفات تعدين ومعادن ثقيلة', code: 'IN-09', hazardLevel: 'high', wasteState: 'solid', baselCode: 'A1010', commonNames: ['غبار أفران', 'مخلفات تعدين', 'خامات مستنفدة', 'أتربة معادن ثقيلة'] },
       { name: 'مخلفات صناعة النسيج الملوثة', code: 'IN-10', hazardLevel: 'medium', wasteState: 'liquid', commonNames: ['مياه صباغة', 'أصباغ كيميائية', 'محاليل تبييض نسيج', 'مواد تثبيت ألوان', 'مياه غسيل نسيج ملوثة'] },
+      { name: 'مخلفات البنتونيت الخطر المخلوط بزيوت وشحوم', code: 'IN-11', hazardLevel: 'high', wasteState: 'semi_solid', commonNames: ['بنتونيت ملوث', 'طين حفر ملوث بزيوت', 'بنتونيت مخلوط بشحوم'] },
+      { name: 'الطفلة الزيتية من مواقع البترول', code: 'IN-12', hazardLevel: 'high', wasteState: 'semi_solid', commonNames: ['طفلة زيتية', 'طفلة بترولية', 'حمأة ناتجة عن معالجة المياه المصاحبة'] },
+      { name: 'الحمأة الجلفانية', code: 'IN-13', hazardLevel: 'critical', wasteState: 'semi_solid', commonNames: ['حمأة جلفانية', 'رواسب جلفنة', 'حمأة معالجة سطحية'] },
+      { name: 'النفايات الفلزية والمعدنية الخطرة', code: 'IN-14', hazardLevel: 'high', wasteState: 'solid', commonNames: ['نفايات فلزية خطرة', 'أنتيمون', 'زرنيخ', 'بريليوم', 'كادميوم', 'رصاص', 'زئبق', 'تاليوم', 'سلينيوم', 'كروم سداسي'] },
+      { name: 'نفايات الجبس الناجمة عن العمليات الصناعية الملوثة', code: 'IN-15', hazardLevel: 'medium', wasteState: 'solid', commonNames: ['جبس صناعي ملوث', 'فوسفوجبس', 'جبس ملوث بعناصر خطرة'] },
+      { name: 'المخلفات البترولية الصلبة', code: 'IN-16', hazardLevel: 'high', wasteState: 'solid', commonNames: ['مخلفات بترولية صلبة', 'كوك بترولي ملوث', 'بقايا تكرير صلبة'] },
+      { name: 'حرق أسلاك النحاس المعزولة', code: 'IN-17', hazardLevel: 'high', wasteState: 'solid', commonNames: ['رماد حرق أسلاك', 'نواتج حرق كابلات', 'أسلاك نحاس محروقة'] },
+    ],
+  },
+  // ============================================
+  // المخلفات السائلة الخطرة — مستخرجة من وثائق التصنيف الرسمية
+  // ============================================
+  {
+    id: 'hazardous_liquid',
+    name: 'المخلفات السائلة الخطرة',
+    description: 'السوائل الخطرة والملوثة بمواد كيميائية أو بترولية أو معادن ثقيلة',
+    wasteState: 'liquid',
+    category: 'hazardous',
+    legalReference: 'قانون 202/2020 - الباب الرابع + اتفاقية بازل',
+    subcategories: [
+      { name: 'الزيوت المعدنية المُستهلكة', code: 'HL-01', hazardLevel: 'high', wasteState: 'liquid', baselCode: 'A3020', commonNames: ['زيوت معدنية مستهلكة', 'زيوت محركات مستعملة', 'زيوت هيدروليك مستعملة', 'زيوت ترس مستعملة'] },
+      { name: 'المياه المُصاحبة الناتجة عن إنتاج النفط والغاز', code: 'HL-02', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مياه مصاحبة بترول', 'مياه إنتاج نفط', 'مياه آبار بترول'] },
+      { name: 'مياه الصرف الصحي والصناعي الملوثة', code: 'HL-03', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مياه صرف صناعي ملوث', 'مياه صرف مصانع', 'مياه ملوثة بمعادن ثقيلة'] },
+      { name: 'المخلفات السائلة لتنظيف تنكات وصهاريج البترول', code: 'HL-04', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مخلفات تنظيف تنكات', 'مياه غسيل صهاريج', 'مخلفات غسيل ناقلات بترول'] },
+      { name: 'مخلفات الزيوت والشحوم ونواتج التنظيف وإزالة الشحوم وصيانة الماكينات', code: 'HL-05', hazardLevel: 'medium', wasteState: 'liquid', commonNames: ['زيوت صيانة ملوثة', 'مخلفات إزالة شحوم', 'سوائل تنظيف صناعي ملوثة'] },
+      { name: 'مخلفات السوائل الحمضية والقاعدية', code: 'HL-06', hazardLevel: 'high', wasteState: 'liquid', baselCode: 'A4090', commonNames: ['أحماض مستعملة', 'قلويات مستعملة', 'محاليل حمضية صناعية', 'سوائل قاعدية مستعملة'] },
+      { name: 'مخلفات العصائر والمركزات المنتهية الملوثة', code: 'HL-07', hazardLevel: 'medium', wasteState: 'liquid', commonNames: ['عصائر ملوثة بمواد خطرة', 'سوائل غذائية ملوثة', 'مركزات منتهية ملوثة'] },
+      { name: 'مخلفات المذيبات العضوية والدهانات السائلة', code: 'HL-08', hazardLevel: 'high', wasteState: 'liquid', baselCode: 'A3140', commonNames: ['مذيبات مستعملة', 'ثنر مستعمل', 'دهانات سائلة تالفة', 'بويات سائلة ملوثة'] },
+      { name: 'مخلفات صناعة الأسمدة والمبيدات السائلة', code: 'HL-09', hazardLevel: 'critical', wasteState: 'liquid', commonNames: ['مبيدات سائلة منتهية', 'أسمدة سائلة تالفة', 'مخلفات مصانع أسمدة', 'مبيدات محظورة'] },
+      { name: 'المياه الملوثة المستخدمة في صناعة البطاريات', code: 'HL-10', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مياه بطاريات ملوثة', 'حمض بطاريات مستعمل', 'مياه غسيل بطاريات'] },
+      { name: 'مخلفات المذيبات العضوية والمخلفات غير العضوية السائلة', code: 'HL-11', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['مذيبات عضوية مختلطة', 'سوائل كيميائية مختلطة', 'مياه غسيل سيراميك وبورسلين ملوثة'] },
+      { name: 'مخلفات الأصباغ السائلة والمخلوطة بمياه الصرف الصناعي', code: 'HL-12', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['أصباغ سائلة ملوثة', 'مياه صباغة صناعية', 'مخلفات ورنيش سائلة', 'مواد لاصقة سائلة ملوثة'] },
+      { name: 'نفايات المحاليل السائلة الناتجة عن تنقية النحاس بالتحليل الكهربائي', code: 'HL-13', hazardLevel: 'high', wasteState: 'liquid', commonNames: ['محاليل تحليل كهربائي', 'نفايات تنقية نحاس', 'محاليل إلكتروليت مستعملة'] },
+      { name: 'المحاليل الأكالة المستعملة', code: 'HL-14', hazardLevel: 'critical', wasteState: 'liquid', commonNames: ['محاليل أكالة', 'محاليل إتش', 'محاليل حمضية أكالة', 'محاليل نحاس مذاب'] },
     ],
   },
 ];
@@ -454,6 +492,50 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'أحذية جلدية وحقائب', code: 'TX-06A', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['جزم جلد تالفة', 'بوت جلد', 'شنط مدرسة', 'شنط سفر تالفة', 'محافظ تالفة', 'شنط يد تالفة'] },
     ],
   },
+  // ============================================
+  // المخلفات السائلة غير الخطرة — مستخرجة من وثائق التصنيف الرسمية
+  // ============================================
+  {
+    id: 'liquid_non_hazardous',
+    name: 'المخلفات السائلة غير الخطرة',
+    description: 'مياه الصرف والسوائل الغذائية والزيوت غير الملوثة',
+    wasteState: 'liquid',
+    category: 'non_hazardous',
+    legalReference: 'قانون 202/2020 - الباب الثالث',
+    subcategories: [
+      { name: 'مياه الصرف الصحي', code: 'LQ-01', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه صرف صحي', 'مياه مجاري', 'صرف منازل', 'مياه صرف آدمي'] },
+      { name: 'مياه عمليات الغسيل (بدون كيماويات)', code: 'LQ-02', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['مياه غسيل عادي', 'مياه غسيل ملابس', 'مياه شطف', 'مياه غسيل سيارات'] },
+      { name: 'البنتونيت غير الخطر (غير مخلوط بزيوت)', code: 'LQ-03', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['بنتونيت', 'طين حفر غير ملوث', 'بنتونيت مخلوط بماء', 'سائل حفر غير خطر'] },
+      { name: 'زيوت الطعام المستهلكة', code: 'LQ-04', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['زيت طعام مستعمل', 'زيت قلي', 'زيت نباتي مستهلك', 'مسلى مستعمل', 'شحوم طعام مستعملة', 'زيت طبخ تالف'] },
+      { name: 'المياه العكرة', code: 'LQ-05', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه عكرة', 'مياه موحلة', 'مياه رشح', 'مياه مطر ملوثة'] },
+      { name: 'مياه غسيل وتطهير الثمار والمواد الغذائية', code: 'LQ-06', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه غسيل خضار', 'مياه غسيل فاكهة', 'مياه تطهير أغذية', 'مياه غسيل مواد غذائية'] },
+      { name: 'ناتج تطهير خزانات المياه', code: 'LQ-07', hazardLevel: 'low', wasteState: 'liquid', recyclable: false, commonNames: ['مياه تطهير خزانات', 'مياه تنظيف خزانات', 'رواسب خزانات مياه'] },
+      { name: 'مخلفات العصائر والمشروبات والمرتجعات السائلة', code: 'LQ-08', hazardLevel: 'low', wasteState: 'liquid', recyclable: true, commonNames: ['عصائر تالفة', 'مشروبات غازية تالفة', 'مياه معدنية منتهية', 'مرتجعات مشروبات', 'هالك إنتاج سوائل غذائية', 'مركزات تالفة', 'بيبسي تالف', 'كوكا تالفة'] },
+      { name: 'حمأة جافة (محطات معالجة صرف صحي)', code: 'LQ-09', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['حمأة جافة', 'سبلة محطات معالجة', 'حمأة صرف صحي معالجة', 'بيوسوليدز'] },
+      { name: 'السبلة الناتجة من مزارع الدواجن والماشية', code: 'LQ-10', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: true, commonNames: ['سبلة دواجن', 'سبلة ماشية', 'روث حيواني سائل', 'مخلفات مزارع سائلة'] },
+    ],
+  },
+  // ============================================
+  // المخلفات البلدية والمختلطة — مستخرجة من وثائق التصنيف
+  // ============================================
+  {
+    id: 'municipal',
+    name: 'مخلفات بلدية ومختلطة',
+    description: 'مخلفات المدن والقرى والأنشطة التجارية والسياحية',
+    wasteState: 'mixed',
+    category: 'non_hazardous',
+    legalReference: 'قانون 202/2020 - الباب الثالث - المادة 22',
+    subcategories: [
+      { name: 'المخلفات البلدية غير القابلة للتدوير', code: 'MU-01', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['قمامة عادية', 'مخلفات منازل', 'مخلفات بلدية مختلطة', 'نفايات صلبة بلدية'] },
+      { name: 'مخلفات قابلة للحرق لاسترجاع الطاقة (RDF)', code: 'MU-02', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['وقود بديل RDF', 'مخلفات وقود', 'RDF', 'وقود من مخلفات', 'SRF'] },
+      { name: 'المخلفات العضوية (كمبوست)', code: 'MU-03', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['مخلفات عضوية بلدية', 'بقايا طعام بلدي', 'مخلفات حدائق عامة', 'مخلفات أسواق'] },
+      { name: 'مخلفات الفنادق واليخوت والمراكب', code: 'MU-04', hazardLevel: 'low', wasteState: 'mixed', recyclable: true, commonNames: ['مخلفات فنادق', 'مخلفات يخوت', 'مخلفات مراكب', 'مخلفات سفن', 'مخلفات مراكب الجيت', 'خردة مراكب'] },
+      { name: 'هالك الصناعات الغذائية', code: 'MU-05', hazardLevel: 'low', wasteState: 'mixed', recyclable: true, commonNames: ['هالك صناعات غذائية', 'مخلفات تصنيع غذائي', 'مرتجعات أغذية', 'أغذية منتهية الصلاحية', 'هالك إنتاج', 'معيب غذائي'] },
+      { name: 'مخلفات العبوات الفارغة غير الملوثة', code: 'MU-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['عبوات فارغة نظيفة', 'مخلفات عبوات غذائية', 'هوالك مواد غذائية', 'عبوات بلاستيك فارغة غير ملوثة'] },
+      { name: 'أتربة الخردة المستوردة', code: 'MU-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أتربة خردة مستوردة', 'ناتج فرز خردة', 'أتربة فرز الخردة لصناعة الصلب'] },
+      { name: 'مخلفات أتربة ناتج كنس مخازن الفحم', code: 'MU-08', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['أتربة فحم', 'كنس مخازن فحم', 'غبار فحم', 'مخلفات أتربة فحم حجري'] },
+    ],
+  },
 ];
 
 // ============================================
@@ -472,6 +554,9 @@ export const wasteTypeLabels: Record<string, string> = {
   construction: 'بناء وهدم',
   industrial: 'صناعي خطر',
   textile: 'نسيج وجلود',
+  liquid_non_hazardous: 'سوائل غير خطرة',
+  municipal: 'بلدية ومختلطة',
+  hazardous_liquid: 'سوائل خطرة',
   other: 'أخرى',
 };
 
@@ -520,6 +605,9 @@ export const getWasteTypeCode = (wasteType: WasteType | string): string => {
     construction: 'CN',
     industrial: 'IN',
     textile: 'TX',
+    liquid_non_hazardous: 'LQ',
+    municipal: 'MU',
+    hazardous_liquid: 'HL',
     other: 'OT',
   };
   return codes[wasteType] || 'OT';
@@ -527,7 +615,7 @@ export const getWasteTypeCode = (wasteType: WasteType | string): string => {
 
 export const isHazardousWasteType = (wasteType: WasteType | string): boolean => {
   if (!wasteType) return false;
-  return ['chemical', 'electronic', 'medical', 'industrial'].includes(wasteType);
+  return ['chemical', 'electronic', 'medical', 'industrial', 'hazardous_liquid'].includes(wasteType);
 };
 
 export const getHazardLevelFromWasteType = (wasteType: WasteType | string): 'hazardous' | 'non_hazardous' => {
