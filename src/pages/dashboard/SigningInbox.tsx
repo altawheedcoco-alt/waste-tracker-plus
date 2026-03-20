@@ -732,7 +732,10 @@ export default function SigningInbox() {
               <CardContent className="p-12 text-center">
                 <Inbox className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground text-lg">لا توجد طلبات واردة</p>
-                <p className="text-sm text-muted-foreground/70">ستظهر هنا المستندات المرسلة إليك للتوقيع</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">ستظهر هنا المستندات المرسلة إليك للتوقيع من الجهات المرتبطة</p>
+                <p className="text-xs text-muted-foreground/50">
+                  يمكن لأي جهة مرتبطة إرسال مستندات لك للتوقيع عبر زر "إرسال للتوقيع" من داخل الشحنات أو المستندات أو الدردشة
+                </p>
               </CardContent>
             </Card>
           ) : (
@@ -755,7 +758,10 @@ export default function SigningInbox() {
               <CardContent className="p-12 text-center">
                 <Send className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
                 <p className="text-muted-foreground text-lg">لا توجد طلبات صادرة</p>
-                <p className="text-sm text-muted-foreground/70">أرسل مستنداً لجهة شريكة للتوقيع عليه</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">أرسل مستنداً لجهة شريكة للتوقيع عليه</p>
+                <Button onClick={() => setSendOpen(true)} className="gap-2">
+                  <Send className="w-4 h-4" /> إرسال طلب توقيع جديد
+                </Button>
               </CardContent>
             </Card>
           ) : (
