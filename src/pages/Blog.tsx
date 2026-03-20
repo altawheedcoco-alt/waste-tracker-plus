@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useNavigate } from "react-router-dom";
@@ -5,10 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star } from "lucide-react";
+import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PageNavBar from "@/components/ui/page-nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -18,6 +20,17 @@ const Blog = () => {
   usePageTitle(language === 'ar' ? 'المدونة' : 'Blog');
   const navigate = useNavigate();
   const isAr = language === 'ar';
+  const [showScrollBtns, setShowScrollBtns] = useState(false);
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setShowScrollBtns(window.scrollY > 200);
+      setAtBottom(window.innerHeight + window.scrollY >= document.body.scrollHeight - 100);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const { data: posts = [], isLoading } = useQuery({
     queryKey: ['blog-posts'],
@@ -148,6 +161,36 @@ const Blog = () => {
           </div>
         )}
       </main>
+
+      {/* Scroll navigation buttons */}
+      <AnimatePresence>
+        {showScrollBtns && (
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="fixed bottom-24 left-4 z-50 flex flex-col gap-2"
+          >
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+              aria-label="للأعلى"
+            >
+              <ArrowUp className="w-5 h-5" />
+            </button>
+            {!atBottom && (
+              <button
+                onClick={() => window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' })}
+                className="w-10 h-10 rounded-full bg-primary text-primary-foreground shadow-lg flex items-center justify-center hover:bg-primary/90 transition-colors"
+                aria-label="للأسفل"
+              >
+                <ArrowDown className="w-5 h-5" />
+              </button>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <Footer />
     </div>
   );
