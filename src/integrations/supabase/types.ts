@@ -26018,6 +26018,7 @@ export type Database = {
           bio: string | null
           branches: Json | null
           business_email: string | null
+          can_create_shipments: boolean
           certifications_approvals: Json | null
           city: string | null
           client_code: string | null
@@ -26125,6 +26126,7 @@ export type Database = {
           bio?: string | null
           branches?: Json | null
           business_email?: string | null
+          can_create_shipments?: boolean
           certifications_approvals?: Json | null
           city?: string | null
           client_code?: string | null
@@ -26232,6 +26234,7 @@ export type Database = {
           bio?: string | null
           branches?: Json | null
           business_email?: string | null
+          can_create_shipments?: boolean
           certifications_approvals?: Json | null
           city?: string | null
           client_code?: string | null
