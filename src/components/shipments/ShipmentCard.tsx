@@ -51,6 +51,7 @@ import {
   getStatusConfig,
   canChangeStatus,
   allStatuses,
+  getStatusesForOrgType,
   wasteTypeLabels,
   mapLegacyStatus,
   getAvailableNextStatuses,
