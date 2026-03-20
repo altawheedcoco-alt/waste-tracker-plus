@@ -112,7 +112,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
-  const { data: dashboardData, isLoading: loading } = useQuery({
+  const { data: dashboardData, isLoading: loading, refetch: refetchDashboard } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
       // Parallel queries instead of sequential (4 queries instead of 6)
