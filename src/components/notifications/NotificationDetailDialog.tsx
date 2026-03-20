@@ -100,10 +100,12 @@ const getNotificationIcon = (type: string | null) => {
     case 'mention':
       return User;
     case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
     case 'partner_linked':
       return Building2;
+    case 'partner_note':
+      return FileText;
+    case 'partner_message':
+      return User;
     default:
       return Info;
   }
