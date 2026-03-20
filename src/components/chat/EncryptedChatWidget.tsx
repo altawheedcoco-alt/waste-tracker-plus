@@ -175,12 +175,32 @@ const EncryptedChatWidget = () => {
 
   const handleSend = async (text: string) => {
     if (!text.trim() || !selectedConvoId || sending) return;
+    
+    // Optimistic: add message instantly
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: text.trim(),
+      message_type: 'text',
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
     setSending(true);
     try {
       await sendMessage(selectedConvoId, text.trim());
+      // Replace optimistic with real messages
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
-    } catch { toast.error('فشل الإرسال'); }
+    } catch {
+      // Mark as failed
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل الإرسال');
+    }
     finally { setSending(false); }
   };
 
