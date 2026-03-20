@@ -187,19 +187,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
       setUploading(false);
     }
   }, [cropMode, organization.id, onUpdate]);
-        .eq('id', organization.id);
 
-      if (updateError) throw updateError;
-
-      toast.success('تم تحديث صورة الشعار بنجاح');
-      onUpdate?.();
-    } catch (error) {
-      console.error('Error uploading logo:', error);
-      toast.error('حدث خطأ في رفع صورة الشعار');
-    } finally {
-      setUploadingLogo(false);
-    }
-  };
 
   const handleToggleLock = async () => {
     setTogglingLock(true);
