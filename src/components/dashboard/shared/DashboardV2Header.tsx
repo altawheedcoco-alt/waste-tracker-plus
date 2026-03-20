@@ -129,11 +129,12 @@ const MiniSpark = ({ color = 'hsl(var(--primary))' }: { color?: string }) => {
 
 /* ═══════════ HEALTH EXPLANATION HELPERS ═══════════ */
 const getHealthLevel = (score: number) => {
-  if (score >= 80) return { label: 'ممتاز', color: 'text-primary', bg: 'bg-primary/10', emoji: '🟢', desc: 'الجهة تعمل بكفاءة عالية وجميع المؤشرات في المستوى الأمثل' };
-  if (score >= 60) return { label: 'جيد', color: 'text-primary', bg: 'bg-primary/10', emoji: '🔵', desc: 'أداء جيد مع فرص للتحسين في بعض المجالات' };
-  if (score >= 40) return { label: 'متوسط', color: 'text-amber-600', bg: 'bg-amber-500/10', emoji: '🟡', desc: 'يحتاج تحسين - هناك مجالات تحتاج اهتمام أكثر' };
-  if (score >= 20) return { label: 'ضعيف', color: 'text-orange-600', bg: 'bg-orange-500/10', emoji: '🟠', desc: 'أداء منخفض - يُنصح بزيادة النشاط التشغيلي' };
-  return { label: 'يحتاج تفعيل', color: 'text-destructive', bg: 'bg-destructive/10', emoji: '🔴', desc: 'الجهة في بداية نشاطها أو لديها عمليات محدودة جداً' };
+  if (score === 100) return { label: 'اكتمال تام', color: 'text-primary', bg: 'bg-primary/10', emoji: '🏆', desc: '🎉 تهانينا! الجهة وصلت لأقصى طاقتها التشغيلية - جميع المؤشرات في الذروة!', isCelebration: true };
+  if (score >= 80) return { label: 'ممتاز', color: 'text-primary', bg: 'bg-primary/10', emoji: '🟢', desc: 'الجهة تعمل بكفاءة عالية وجميع المؤشرات في المستوى الأمثل', isCelebration: false };
+  if (score >= 60) return { label: 'جيد', color: 'text-primary', bg: 'bg-primary/10', emoji: '🔵', desc: 'أداء جيد مع فرص للتحسين في بعض المجالات', isCelebration: false };
+  if (score >= 40) return { label: 'متوسط', color: 'text-amber-600', bg: 'bg-amber-500/10', emoji: '🟡', desc: 'يحتاج تحسين - هناك مجالات تحتاج اهتمام أكثر', isCelebration: false };
+  if (score >= 20) return { label: 'ضعيف', color: 'text-orange-600', bg: 'bg-orange-500/10', emoji: '🟠', desc: 'أداء منخفض - يُنصح بزيادة النشاط التشغيلي', isCelebration: false };
+  return { label: 'يحتاج تفعيل', color: 'text-destructive', bg: 'bg-destructive/10', emoji: '🔴', desc: 'الجهة في بداية نشاطها أو لديها عمليات محدودة جداً', isCelebration: false };
 };
 
 const getStatAdvice = (_label: string, value: number, max: number) => {
