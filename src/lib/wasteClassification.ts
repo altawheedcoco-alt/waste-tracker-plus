@@ -14,6 +14,7 @@
  */
 
 import type { Database } from '@/integrations/supabase/types';
+import { extendedWasteTypes, TOTAL_WASTE_TYPES } from './extendedWasteTypes';
 
 export type WasteType = Database['public']['Enums']['waste_type'];
 
