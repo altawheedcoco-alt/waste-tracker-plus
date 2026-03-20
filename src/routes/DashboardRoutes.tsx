@@ -480,6 +480,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/admin-cyber-security" element={<CyberSecurityCenter />} />
     <Route path="/dashboard/call-center" element={<SupportCenter />} />
     <Route path="/dashboard/ai-document-studio" element={<AIDocumentStudioPage />} />
+    <Route path="/dashboard/ai-extracted-data" element={<AIExtractedDataPage />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
