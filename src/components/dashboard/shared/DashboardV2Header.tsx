@@ -503,12 +503,44 @@ const RadarChart = ({ stats }: { stats: RadarStat[] }) => {
 };
 
 /* ── System icons ── */
-const systemIcons = [
-  { icon: Wifi, label: 'NET' }, { icon: Database, label: 'DB' }, { icon: Cpu, label: 'CPU' },
-  { icon: Shield, label: 'SEC' }, { icon: Signal, label: 'SIG' }, { icon: Satellite, label: 'GPS' },
-  { icon: Fingerprint, label: 'AUTH' }, { icon: CircuitBoard, label: 'IOT' },
-  { icon: BatteryCharging, label: 'PWR' }, { icon: Antenna, label: 'RF' },
+interface SystemIcon {
+  icon: LucideIcon;
+  label: string;
+  tooltip: string;
+  status: 'ok' | 'warn' | 'error';
+  route?: string;
+}
+
+const systemIcons: SystemIcon[] = [
+  { icon: Wifi, label: 'NET', tooltip: 'الشبكة متصلة', status: 'ok' },
+  { icon: Database, label: 'DB', tooltip: 'قاعدة البيانات تعمل', status: 'ok' },
+  { icon: Cpu, label: 'CPU', tooltip: 'المعالجة مستقرة', status: 'ok' },
+  { icon: Shield, label: 'SEC', tooltip: 'الأمان مفعّل - RLS نشط', status: 'ok', route: '/dashboard/system-status' },
+  { icon: Signal, label: 'SIG', tooltip: 'الإشارة قوية', status: 'ok' },
+  { icon: Satellite, label: 'GPS', tooltip: 'التتبع الجغرافي نشط', status: 'ok', route: '/dashboard/tracking-center' },
+  { icon: Fingerprint, label: 'AUTH', tooltip: 'المصادقة مفعّلة', status: 'ok' },
+  { icon: CircuitBoard, label: 'IOT', tooltip: 'أجهزة IoT متصلة', status: 'ok' },
+  { icon: BatteryCharging, label: 'PWR', tooltip: 'الطاقة مستقرة', status: 'ok' },
+  { icon: Antenna, label: 'RF', tooltip: 'التردد اللاسلكي نشط', status: 'ok' },
+  { icon: FileSignature, label: 'SIGN', tooltip: 'التوقيعات الرقمية', status: 'ok', route: '/dashboard/signing-inbox' },
+  { icon: Wallet, label: 'FIN', tooltip: 'النظام المالي', status: 'ok', route: '/dashboard/accounting' },
+  { icon: Users, label: 'TEAM', tooltip: 'إدارة الأعضاء', status: 'ok', route: '/dashboard/members' },
+  { icon: ScrollText, label: 'DOCS', tooltip: 'أرشيف المستندات', status: 'ok', route: '/dashboard/document-archive' },
+  { icon: Package, label: 'SHIP', tooltip: 'إدارة الشحنات', status: 'ok', route: '/dashboard/shipments' },
+  { icon: Lock, label: 'RLS', tooltip: 'سياسات الأمان', status: 'ok' },
+  { icon: RefreshCw, label: 'SYNC', tooltip: 'المزامنة اللحظية', status: 'ok' },
+  { icon: HardDrive, label: 'STOR', tooltip: 'التخزين السحابي', status: 'ok' },
+  { icon: MessageSquare, label: 'CHAT', tooltip: 'نظام الدردشة', status: 'ok', route: '/dashboard/chat' },
+  { icon: ClipboardCheck, label: 'CMPL', tooltip: 'الامتثال البيئي', status: 'ok', route: '/dashboard/compliance' },
+  { icon: Brain, label: 'AI', tooltip: 'الذكاء الاصطناعي', status: 'ok', route: '/dashboard/ai-studio' },
+  { icon: PlugZap, label: 'API', tooltip: 'واجهات API', status: 'ok' },
 ];
+
+const statusColors: Record<string, string> = {
+  ok: 'text-emerald-500',
+  warn: 'text-amber-500',
+  error: 'text-destructive',
+};
 
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
