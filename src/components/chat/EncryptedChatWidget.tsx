@@ -206,12 +206,36 @@ const EncryptedChatWidget = () => {
 
   const handleSendFile = async (file: File) => {
     if (!selectedConvoId || sending) return;
+    
+    // Optimistic for files
+    let msgType = 'file';
+    if (file.type.startsWith('image/')) msgType = 'image';
+    else if (file.type.startsWith('video/')) msgType = 'video';
+    else if (file.type.startsWith('audio/')) msgType = 'voice';
+    
+    const optimisticMsg: DecryptedMessage = {
+      id: `temp_${Date.now()}`,
+      conversation_id: selectedConvoId,
+      sender_id: user!.id,
+      content: file.name,
+      message_type: msgType,
+      file_name: file.name,
+      status: 'sending',
+      is_edited: false,
+      is_deleted: false,
+      created_at: new Date().toISOString(),
+    };
+    setMessages(prev => [...prev, optimisticMsg]);
+    
     setSending(true);
     try {
       await sendFileMessage(selectedConvoId, file);
       const updated = await fetchMessages(selectedConvoId, 30);
       setMessages(updated);
-    } catch { toast.error('فشل إرسال الملف'); }
+    } catch {
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
+      toast.error('فشل إرسال الملف');
+    }
     finally { setSending(false); }
   };
 

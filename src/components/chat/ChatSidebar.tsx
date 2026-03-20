@@ -286,8 +286,10 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                           ) : (
                             <>
                               {lastMsg?.isMine && (
-                                lastMsg.isRead ? (
+                                lastMsg.status === 'read' || lastMsg.isRead ? (
                                   <CheckCheck className="w-4 h-4 text-sky-400 shrink-0" />
+                                ) : lastMsg.status === 'delivered' ? (
+                                  <CheckCheck className="w-4 h-4 text-muted-foreground shrink-0" />
                                 ) : (
                                   <Check className="w-4 h-4 text-muted-foreground shrink-0" />
                                 )
