@@ -159,7 +159,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       
       let shipmentQuery = supabase
         .from('shipments')
-        .select('id, shipment_number, status, waste_type, waste_description, generator_id, transporter_id, recycler_id, disposal_facility_id, pickup_city, delivery_city, pickup_address, delivery_address, quantity, unit, actual_weight, created_at, pickup_date, scheduled_date, total_value, price_per_unit, currency, shipment_type, notes, payment_status')
+        .select('id, shipment_number, status, waste_type, waste_description, generator_id, transporter_id, recycler_id, disposal_facility_id, pickup_city, delivery_city, pickup_address, delivery_address, quantity, unit, actual_weight, created_at, pickup_date, total_value, price_per_unit, shipment_type, notes, payment_status')
         .order('created_at', { ascending: false })
         .limit(50);
 
