@@ -17,7 +17,7 @@ import {
   AlertTriangle, CheckCircle2, Plus, X, Search, ChevronDown, ChevronRight,
   Flame, Droplets, Stethoscope, Leaf, Package, Filter
 } from 'lucide-react';
-import { useDocumentComplianceExtractor } from '@/hooks/useDocumentComplianceExtractor';
+import { useDocumentOCRExtractor, type OCRExtractedData } from '@/hooks/useDocumentOCRExtractor';
 import {
   getAllWasteCategories, hazardousWasteCategories, nonHazardousWasteCategories,
   getTotalWasteTypesCount, searchWasteByCommonName,
