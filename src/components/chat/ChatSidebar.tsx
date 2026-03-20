@@ -68,7 +68,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
       for (const partner of partners) {
         const { data } = await supabase
           .from('direct_messages')
-          .select('content, created_at, is_read, sender_organization_id, message_type, message_status')
+          .select('content, created_at, is_read, sender_organization_id, message_type')
           .or(
             `and(sender_organization_id.eq.${organization.id},receiver_organization_id.eq.${partner.id}),and(sender_organization_id.eq.${partner.id},receiver_organization_id.eq.${organization.id})`
           )
@@ -83,7 +83,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
             isRead: data.is_read || data.sender_organization_id === organization.id,
             isMine: data.sender_organization_id === organization.id,
             type: data.message_type,
-            status: (data as any).message_status || (data.is_read ? 'read' : 'sent'),
+            status: data.is_read ? 'read' : 'delivered',
           });
         }
       }
