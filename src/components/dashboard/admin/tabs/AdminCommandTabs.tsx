@@ -51,9 +51,10 @@ interface AdminCommandTabsProps {
   };
   recentShipments: any[];
   quickActions: any[];
+  onRefresh?: () => void;
 }
 
-const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions }: AdminCommandTabsProps) => {
+const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions, onRefresh }: AdminCommandTabsProps) => {
   const { t, isRTL } = useLanguage();
 
   return (
