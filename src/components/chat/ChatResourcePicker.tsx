@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Truck, Receipt, FileText, FileSignature, X, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
@@ -214,7 +214,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
           </div>
 
           {/* Items */}
-          <ScrollArea className="max-h-48">
+          <div className="max-h-48 overflow-y-auto scrollbar-thin">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -223,6 +223,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
               <div className="text-center py-8 text-muted-foreground text-xs">لا توجد نتائج</div>
             ) : (
               <div className="p-1">
+                <div className="px-3 py-1 text-[10px] text-muted-foreground">{filteredItems.length} نتيجة</div>
                 {filteredItems.map(item => (
                   <button
                     key={item.id}
@@ -234,7 +235,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
                 ))}
               </div>
             )}
-          </ScrollArea>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

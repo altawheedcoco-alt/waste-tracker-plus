@@ -24,7 +24,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Progress } from '@/components/ui/progress';
-import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -49,6 +49,8 @@ interface EnhancedChatInputProps {
   uploadProgress?: number;
   disabled?: boolean;
   onTyping?: () => void;
+  /** Filter @mentions to only show this partner org + my org */
+  chatPartnerOrgId?: string;
 }
 
 const EMOJI_QUICK = ['😀', '😂', '❤️', '👍', '🙏', '😊', '😍', '🔥', '✅', '📦', '🚛', '♻️'];
@@ -67,6 +69,7 @@ const EnhancedChatInput = ({
   uploadProgress = 0, 
   disabled,
   onTyping,
+  chatPartnerOrgId,
 }: EnhancedChatInputProps) => {
   const [inputValue, setInputValue] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -335,10 +338,22 @@ const EnhancedChatInput = ({
     }
   }, [onSendResourceCard]);
 
-  const filteredMentions = mentionableEntities.filter(e =>
+  // Filter mentions: if chatPartnerOrgId is set, only show my org + partner org entities
+  const contextMentions = chatPartnerOrgId
+    ? mentionableEntities.filter(e => {
+        // Always show organizations that match partner org
+        if (e.type === 'organization') return e.id === chatPartnerOrgId;
+        // For users: show internal (is_external=false) + users from partner org (subtitle matches)
+        return !e.is_external || mentionableEntities.some(
+          org => org.type === 'organization' && org.id === chatPartnerOrgId && e.subtitle === org.name
+        );
+      })
+    : mentionableEntities;
+
+  const filteredMentions = contextMentions.filter(e =>
     e.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
     (e.subtitle?.toLowerCase().includes(mentionSearch.toLowerCase()) ?? false)
-  ).slice(0, 8);
+  ).slice(0, 12);
 
   const insertMention = useCallback((entity: MentionableEntity) => {
     const before = inputValue.slice(0, cursorPos);
@@ -561,7 +576,7 @@ const EnhancedChatInput = ({
                   transition={{ duration: 0.15 }}
                   className="absolute bottom-full mb-1 right-0 left-0 z-50 bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
                 >
-                  <ScrollArea className="max-h-48">
+                  <div className="max-h-48 overflow-y-auto scrollbar-thin">
                     {filteredMentions.map((entity, index) => (
                       <button
                         key={`${entity.type}-${entity.id}`}
@@ -604,7 +619,7 @@ const EnhancedChatInput = ({
                         )}
                       </button>
                     ))}
-                  </ScrollArea>
+                  </div>
                   <div className="px-3 py-1 border-t border-border/50 text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1">
                     <AtSign className="w-3 h-3" />
                     اكتب @ للإشارة لشخص أو جهة

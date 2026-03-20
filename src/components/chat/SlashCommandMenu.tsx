@@ -1,7 +1,5 @@
 import { memo } from 'react';
 import { motion } from 'framer-motion';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { type SlashCommand } from '@/config/chatSlashCommands';
 
@@ -26,7 +24,7 @@ const SlashCommandMenu = memo(({ commands, selectedIndex, onSelect, onHover }: S
       <div className="px-3 py-1.5 border-b border-border/50 bg-muted/30">
         <span className="text-[10px] font-semibold text-muted-foreground">⚡ أوامر سريعة</span>
       </div>
-      <ScrollArea className="max-h-52">
+      <div className="max-h-52 overflow-y-auto scrollbar-thin">
         {commands.map((cmd, index) => {
           const Icon = cmd.icon;
           return (
@@ -53,7 +51,7 @@ const SlashCommandMenu = memo(({ commands, selectedIndex, onSelect, onHover }: S
             </button>
           );
         })}
-      </ScrollArea>
+      </div>
     </motion.div>
   );
 });
