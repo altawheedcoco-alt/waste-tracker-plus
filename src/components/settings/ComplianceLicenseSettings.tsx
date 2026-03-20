@@ -277,7 +277,7 @@ export default function ComplianceLicenseSettings() {
             <div className="flex-1">
               <p className="text-sm font-bold">استخراج البيانات تلقائياً بالذكاء الاصطناعي</p>
               <p className="text-xs text-muted-foreground mt-1">
-                ارفع صورة أو ملف PDF (صفحة واحدة أو متعدد الصفحات) وسيتم استخراج النص والبيانات تلقائياً
+                ارفع صورة أو ملف PDF (ترخيص، موافقة بيئية، تصريح) وسيتم استخراج البيانات تلقائياً بالذكاء الاصطناعي
               </p>
               {extracting && (
                 <div className="mt-2">
