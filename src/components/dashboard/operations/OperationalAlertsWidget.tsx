@@ -505,7 +505,7 @@ const OperationalAlertsWidget = () => {
               const Icon = tab.icon;
               const count = categoryCounts[tab.value];
               return (
-                <TabsTrigger key={tab.value} value={tab.value} className="text-[10px] px-1 py-1.5 gap-0.5 flex-col h-auto" disabled={count === 0 && tab.value !== 'all'}>
+                <TabsTrigger key={tab.value} value={tab.value} className="text-[10px] px-1 py-1.5 gap-0.5 flex-col h-auto">
                   <Icon className="w-3.5 h-3.5" />
                   <span>{tab.label}</span>
                   {count > 0 && <Badge variant="secondary" className="text-[9px] h-3.5 px-1 mt-0.5">{count}</Badge>}
