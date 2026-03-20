@@ -1,15 +1,23 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Truck, Receipt, FileText, FileSignature, X, Loader2 } from 'lucide-react';
+import { Search, Truck, Receipt, FileText, FileSignature, X, Loader2, ArrowUpFromLine, ArrowDownToLine } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
-type ResourceType = 'shipments' | 'invoices' | 'documents' | 'signing';
+type Direction = 'outgoing' | 'incoming';
+
+interface ResourceItem {
+  id: string;
+  resourceType: 'shipment' | 'invoice' | 'document' | 'signing_request';
+  label: string;
+  subtitle: string;
+  status?: string;
+  raw: any;
+}
 
 interface PickedResource {
   type: string;
@@ -20,145 +28,176 @@ interface ChatResourcePickerProps {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (resource: PickedResource) => void;
-  initialTab?: ResourceType;
+  initialTab?: Direction;
 }
 
-const TABS: { key: ResourceType; label: string; icon: any }[] = [
-  { key: 'shipments', label: 'شحنات', icon: Truck },
-  { key: 'invoices', label: 'فواتير', icon: Receipt },
-  { key: 'documents', label: 'مستندات', icon: FileText },
-  { key: 'signing', label: 'توقيعات', icon: FileSignature },
+const DIRECTION_TABS: { key: Direction; label: string; icon: any }[] = [
+  { key: 'outgoing', label: 'صادر', icon: ArrowUpFromLine },
+  { key: 'incoming', label: 'وارد', icon: ArrowDownToLine },
 ];
 
-const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments' }: ChatResourcePickerProps) => {
+const TYPE_ICONS: Record<string, any> = {
+  shipment: Truck,
+  invoice: Receipt,
+  document: FileText,
+  signing_request: FileSignature,
+};
+
+const TYPE_COLORS: Record<string, string> = {
+  shipment: 'text-emerald-600',
+  invoice: 'text-blue-600',
+  document: 'text-violet-600',
+  signing_request: 'text-amber-600',
+};
+
+const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing' }: ChatResourcePickerProps) => {
   const { organization } = useAuth();
-  const [activeTab, setActiveTab] = useState<ResourceType>(initialTab);
+  const [direction, setDirection] = useState<Direction>(initialTab);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(false);
-  const [items, setItems] = useState<any[]>([]);
+  const [items, setItems] = useState<ResourceItem[]>([]);
 
   useEffect(() => {
     if (!isOpen || !organization?.id) return;
     setLoading(true);
-    fetchItems(activeTab).then(data => {
+    fetchAllByDirection(direction).then(data => {
       setItems(data);
       setLoading(false);
     });
-  }, [isOpen, activeTab, organization?.id]);
+  }, [isOpen, direction, organization?.id]);
 
-  const fetchItems = async (tab: ResourceType) => {
+  const fetchAllByDirection = async (dir: Direction): Promise<ResourceItem[]> => {
     if (!organization?.id) return [];
+    const orgId = organization.id;
+    const results: ResourceItem[] = [];
+
     try {
-      switch (tab) {
-        case 'shipments': {
-          const { data } = await supabase
-            .from('shipments')
-            .select('id, shipment_number, status, waste_type, origin_city, destination_city, weight')
-            .or(`generator_id.eq.${organization.id},transporter_id.eq.${organization.id},recycler_id.eq.${organization.id}`)
-            .order('created_at', { ascending: false })
-            .limit(30);
-          return data || [];
-        }
-        case 'invoices': {
-          const { data } = await supabase
-            .from('invoices')
-            .select('id, invoice_number, status, total_amount, currency, due_date')
-            .eq('organization_id', organization.id)
-            .order('created_at', { ascending: false })
-            .limit(30);
-          return data || [];
-        }
-        case 'documents': {
-          const { data } = await supabase
-            .from('entity_documents')
-            .select('id, document_name, document_type, file_url, status')
-            .eq('organization_id', organization.id)
-            .order('created_at', { ascending: false })
-            .limit(30);
-          return data || [];
-        }
-        case 'signing': {
-          const { data } = await supabase
-            .from('document_signatures')
-            .select('id, signer_name, document_type, status, shipment_id')
-            .eq('organization_id', organization.id)
-            .order('created_at', { ascending: false })
-            .limit(30);
-          return data || [];
-        }
-        default:
-          return [];
+      // Fetch shipments
+      const shipmentQuery = supabase
+        .from('shipments')
+        .select('id, shipment_number, status, waste_type, generator_id, transporter_id, recycler_id')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (dir === 'outgoing') {
+        shipmentQuery.eq('generator_id', orgId);
+      } else {
+        shipmentQuery.or(`transporter_id.eq.${orgId},recycler_id.eq.${orgId}`);
       }
+
+      const { data: shipments } = await shipmentQuery;
+      shipments?.forEach(s => {
+        results.push({
+          id: s.id,
+          resourceType: 'shipment',
+          label: `شحنة #${s.shipment_number || s.id.slice(0, 8)}`,
+          subtitle: s.waste_type || s.status || '',
+          status: s.status,
+          raw: s,
+        });
+      });
+
+      // Fetch invoices
+      const invoiceQuery = supabase
+        .from('invoices')
+        .select('id, invoice_number, status, total_amount, currency, issuer_organization_id, recipient_organization_id')
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (dir === 'outgoing') {
+        invoiceQuery.eq('issuer_organization_id', orgId);
+      } else {
+        invoiceQuery.eq('recipient_organization_id', orgId);
+      }
+
+      const { data: invoices } = await invoiceQuery;
+      invoices?.forEach(inv => {
+        results.push({
+          id: inv.id,
+          resourceType: 'invoice',
+          label: `فاتورة #${inv.invoice_number || inv.id.slice(0, 8)}`,
+          subtitle: `${inv.total_amount?.toLocaleString() || '0'} ${inv.currency || 'EGP'}`,
+          status: inv.status,
+          raw: inv,
+        });
+      });
+
+      // Fetch documents
+      const docQuery = supabase
+        .from('entity_documents')
+        .select('id, document_name, document_type, status')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const { data: docs } = await docQuery;
+      docs?.forEach(d => {
+        results.push({
+          id: d.id,
+          resourceType: 'document',
+          label: d.document_name || 'مستند',
+          subtitle: d.document_type || '',
+          status: d.status,
+          raw: d,
+        });
+      });
+
+      // Fetch signing requests
+      const signQuery = supabase
+        .from('document_signatures')
+        .select('id, signer_name, document_type, status')
+        .eq('organization_id', orgId)
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      const { data: signs } = await signQuery;
+      signs?.forEach(s => {
+        results.push({
+          id: s.id,
+          resourceType: 'signing_request',
+          label: s.signer_name || 'طلب توقيع',
+          subtitle: s.document_type || '',
+          status: s.status,
+          raw: s,
+        });
+      });
     } catch {
-      return [];
+      // silent
     }
+
+    return results;
   };
 
   const filteredItems = useMemo(() => {
     if (!search.trim()) return items;
     const q = search.toLowerCase();
-    return items.filter(item => JSON.stringify(item).toLowerCase().includes(q));
+    return items.filter(item =>
+      item.label.toLowerCase().includes(q) ||
+      item.subtitle.toLowerCase().includes(q) ||
+      (item.status || '').toLowerCase().includes(q)
+    );
   }, [items, search]);
 
-  const handleSelect = (item: any) => {
-    const typeMap: Record<ResourceType, string> = {
-      shipments: 'shipment',
-      invoices: 'invoice',
-      documents: 'document',
-      signing: 'signing_request',
-    };
-    onSelect({ type: typeMap[activeTab], data: item });
+  const handleSelect = (item: ResourceItem) => {
+    onSelect({ type: item.resourceType, data: item.raw });
     onClose();
   };
 
-  const renderItem = (item: any) => {
-    switch (activeTab) {
-      case 'shipments':
-        return (
-          <div className="flex items-center gap-3">
-            <Truck className="w-4 h-4 text-emerald-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">شحنة #{item.shipment_number || item.id.slice(0, 8)}</p>
-              <p className="text-[10px] text-muted-foreground">{item.waste_type || item.status}</p>
-            </div>
-            <Badge variant="outline" className="text-[9px] py-0 shrink-0">{item.status}</Badge>
-          </div>
-        );
-      case 'invoices':
-        return (
-          <div className="flex items-center gap-3">
-            <Receipt className="w-4 h-4 text-blue-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">#{item.invoice_number || item.id.slice(0, 8)}</p>
-              <p className="text-[10px] text-muted-foreground">{item.total_amount?.toLocaleString()} {item.currency || 'EGP'}</p>
-            </div>
-            <Badge variant="outline" className="text-[9px] py-0 shrink-0">{item.status}</Badge>
-          </div>
-        );
-      case 'documents':
-        return (
-          <div className="flex items-center gap-3">
-            <FileText className="w-4 h-4 text-violet-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{item.document_name || 'مستند'}</p>
-              <p className="text-[10px] text-muted-foreground">{item.document_type}</p>
-            </div>
-          </div>
-        );
-      case 'signing':
-        return (
-          <div className="flex items-center gap-3">
-            <FileSignature className="w-4 h-4 text-amber-600 shrink-0" />
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-medium truncate">{item.signer_name || 'طلب توقيع'}</p>
-              <p className="text-[10px] text-muted-foreground">{item.document_type}</p>
-            </div>
-            <Badge variant="outline" className="text-[9px] py-0 shrink-0">{item.status}</Badge>
-          </div>
-        );
-      default:
-        return null;
-    }
+  const renderItem = (item: ResourceItem) => {
+    const Icon = TYPE_ICONS[item.resourceType] || FileText;
+    const color = TYPE_COLORS[item.resourceType] || 'text-muted-foreground';
+    return (
+      <div className="flex items-center gap-3">
+        <Icon className={cn('w-4 h-4 shrink-0', color)} />
+        <div className="flex-1 min-w-0">
+          <p className="text-xs font-medium truncate">{item.label}</p>
+          <p className="text-[10px] text-muted-foreground truncate">{item.subtitle}</p>
+        </div>
+        {item.status && (
+          <Badge variant="outline" className="text-[9px] py-0 shrink-0">{item.status}</Badge>
+        )}
+      </div>
+    );
   };
 
   return (
@@ -169,7 +208,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: 8 }}
           className="absolute bottom-full mb-1 right-0 left-0 z-50 bg-popover border border-border rounded-xl shadow-lg overflow-hidden"
-          style={{ maxHeight: '22rem' }}
+          style={{ maxHeight: '24rem' }}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-border bg-muted/30">
@@ -179,20 +218,22 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
             </Button>
           </div>
 
-          {/* Tabs */}
+          {/* Direction Tabs - 2 buttons */}
           <div className="flex border-b border-border">
-            {TABS.map(tab => {
+            {DIRECTION_TABS.map(tab => {
               const Icon = tab.icon;
               return (
                 <button
                   key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  onClick={() => setDirection(tab.key)}
                   className={cn(
-                    'flex-1 flex items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors border-b-2',
-                    activeTab === tab.key ? 'border-primary text-primary' : 'border-transparent text-muted-foreground hover:text-foreground'
+                    'flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors border-b-2',
+                    direction === tab.key
+                      ? 'border-primary text-primary bg-primary/5'
+                      : 'border-transparent text-muted-foreground hover:text-foreground hover:bg-muted/50'
                   )}
                 >
-                  <Icon className="w-3.5 h-3.5" />
+                  <Icon className="w-4 h-4" />
                   {tab.label}
                 </button>
               );
@@ -214,7 +255,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
           </div>
 
           {/* Items */}
-          <div className="max-h-48 overflow-y-auto scrollbar-thin">
+          <div className="max-h-52 overflow-y-auto scrollbar-thin">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -223,10 +264,12 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
               <div className="text-center py-8 text-muted-foreground text-xs">لا توجد نتائج</div>
             ) : (
               <div className="p-1">
-                <div className="px-3 py-1 text-[10px] text-muted-foreground">{filteredItems.length} نتيجة</div>
+                <div className="px-3 py-1 text-[10px] text-muted-foreground">
+                  {filteredItems.length} نتيجة — {direction === 'outgoing' ? 'صادر' : 'وارد'}
+                </div>
                 {filteredItems.map(item => (
                   <button
-                    key={item.id}
+                    key={`${item.resourceType}-${item.id}`}
                     className="w-full px-3 py-2 rounded-lg hover:bg-muted transition-colors text-right"
                     onClick={() => handleSelect(item)}
                   >
