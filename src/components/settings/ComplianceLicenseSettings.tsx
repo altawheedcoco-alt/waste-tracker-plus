@@ -275,7 +275,7 @@ export default function ComplianceLicenseSettings() {
           <div className="flex items-start gap-3">
             <FileCheck className="h-5 w-5 text-primary mt-0.5 shrink-0" />
             <div className="flex-1">
-              <p className="text-sm font-bold">استخراج البيانات تلقائياً (OCR)</p>
+              <p className="text-sm font-bold">استخراج البيانات تلقائياً بالذكاء الاصطناعي</p>
               <p className="text-xs text-muted-foreground mt-1">
                 ارفع صورة أو ملف PDF (صفحة واحدة أو متعدد الصفحات) وسيتم استخراج النص والبيانات تلقائياً
               </p>
