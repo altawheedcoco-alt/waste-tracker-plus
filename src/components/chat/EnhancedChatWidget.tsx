@@ -252,6 +252,12 @@ const EnhancedChatWidget = () => {
     setReplyTo(null);
   };
 
+  const handleSendResourceCard = async (resourceType: string, resourceData: any) => {
+    if (!selectedPartner) return;
+    const cardContent = JSON.stringify({ resource_type: resourceType, resource_data: resourceData });
+    await sendMessage(cardContent, selectedPartner.id);
+  };
+
   const handleReply = (message: ChatMessage) => setReplyTo(message);
 
   const handleDeleteMessage = async (messageId: string) => {
