@@ -125,6 +125,7 @@ export interface DocumentSignatureData {
   status: string | null;
   timestamp_signed: string;
   organization_id: string | null;
+  signed_by: string | null;
 }
 
 export type PrintMode = 'dialog' | 'quick' | 'enhanced';
