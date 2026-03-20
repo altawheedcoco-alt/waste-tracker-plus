@@ -520,6 +520,9 @@ export const wasteTypeLabels: Record<string, string> = {
   construction: 'بناء وهدم',
   industrial: 'صناعي خطر',
   textile: 'نسيج وجلود',
+  liquid_non_hazardous: 'سوائل غير خطرة',
+  municipal: 'بلدية ومختلطة',
+  hazardous_liquid: 'سوائل خطرة',
   other: 'أخرى',
 };
 
