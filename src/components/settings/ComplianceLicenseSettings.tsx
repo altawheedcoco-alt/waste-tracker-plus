@@ -368,8 +368,7 @@ export default function ComplianceLicenseSettings() {
                       </div>
                     ))}
                     {searchResults.length === 0 && <p className="text-xs text-muted-foreground text-center py-2">لا توجد نتائج</p>}
-                  </div>
-                </ScrollArea>
+                </div>
               </CardContent>
             </Card>
           )}
