@@ -19,6 +19,7 @@ import {
   Building2,
   User,
   AtSign,
+  Search as SearchIcon,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
