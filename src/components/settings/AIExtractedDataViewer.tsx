@@ -160,6 +160,7 @@ const AIExtractedDataViewer = () => {
         <ScrollArea className="max-h-[600px]">
           <div className="space-y-3">
             {filteredDocs.map(doc => {
+              const structured = doc.ocr_extracted_data?.structured_fields || {};
               const fields = doc.ocr_extracted_data?.detected_fields || {};
               const confidence = doc.ocr_confidence || doc.ocr_extracted_data?.confidence || 0;
 
@@ -184,24 +185,29 @@ const AIExtractedDataViewer = () => {
                           )}
                         </div>
 
-                        {/* Key fields */}
+                        {/* Key structured fields */}
                         <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                          {fields.license_number && (
+                          {(structured['رقم الترخيص'] || fields.license_number) && (
                             <span className="flex items-center gap-1">
                               <Hash className="h-3 w-3" />
-                              {fields.license_number}
+                              رقم الترخيص: <strong className="text-foreground">{structured['رقم الترخيص'] || fields.license_number}</strong>
                             </span>
                           )}
-                          {fields.issue_date && (
+                          {(structured['تاريخ الإصدار'] || fields.issue_date) && (
                             <span className="flex items-center gap-1">
                               <Calendar className="h-3 w-3" />
-                              صدور: {fields.issue_date}
+                              صدور: <strong className="text-foreground">{structured['تاريخ الإصدار'] || fields.issue_date}</strong>
                             </span>
                           )}
-                          {fields.expiry_date && (
+                          {(structured['تاريخ الانتهاء'] || fields.expiry_date) && (
                             <span className="flex items-center gap-1">
-                              <Calendar className="h-3 w-3 text-red-500" />
-                              انتهاء: {fields.expiry_date}
+                              <Calendar className="h-3 w-3 text-destructive" />
+                              انتهاء: <strong className="text-foreground">{structured['تاريخ الانتهاء'] || fields.expiry_date}</strong>
+                            </span>
+                          )}
+                          {(structured['الجهة المصدرة'] || fields.issuing_authority) && (
+                            <span className="flex items-center gap-1">
+                              🏛️ <strong className="text-foreground">{structured['الجهة المصدرة'] || fields.issuing_authority}</strong>
                             </span>
                           )}
                         </div>
@@ -277,30 +283,68 @@ const AIExtractedDataViewer = () => {
 
           {selectedDoc && (
             <div className="space-y-4">
-              {/* Fields */}
-              {selectedDoc.ocr_extracted_data?.detected_fields && (
+              {/* Structured Fields (Arabic labels) */}
+              {selectedDoc.ocr_extracted_data?.structured_fields && Object.keys(selectedDoc.ocr_extracted_data.structured_fields).length > 0 && (
                 <div>
                   <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
                     <FileText className="h-4 w-4 text-primary" />
-                    الحقول المكتشفة
+                    البيانات المستخرجة
                   </h4>
                   <div className="bg-muted/30 rounded-lg p-3 space-y-2">
-                    {Object.entries(selectedDoc.ocr_extracted_data.detected_fields).map(([key, value]) => (
-                      <div key={key} className="flex justify-between text-sm border-b border-border/30 pb-1 last:border-0">
-                        <span className="text-muted-foreground">{key}</span>
-                        <span className="font-medium">{String(value || '—')}</span>
+                    {Object.entries(selectedDoc.ocr_extracted_data.structured_fields).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-start text-sm border-b border-border/30 pb-2 last:border-0 gap-4">
+                        <span className="text-muted-foreground font-medium shrink-0">{key}</span>
+                        <span className="font-semibold text-foreground text-left">
+                          {Array.isArray(value) ? (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {(value as string[]).map((v, i) => (
+                                <Badge key={i} variant="secondary" className="text-xs">{v}</Badge>
+                              ))}
+                            </div>
+                          ) : String(value || '—')}
+                        </span>
                       </div>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* Waste Types */}
-              {selectedDoc.ocr_extracted_data?.detected_fields?.waste_types?.length > 0 && (
+              {/* Fallback: Raw detected fields (for older records without structured_fields) */}
+              {!selectedDoc.ocr_extracted_data?.structured_fields && selectedDoc.ocr_extracted_data?.detected_fields && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2 flex items-center gap-1">
+                    <FileText className="h-4 w-4 text-primary" />
+                    الحقول المكتشفة
+                  </h4>
+                  <div className="bg-muted/30 rounded-lg p-3 space-y-2">
+                    {Object.entries(selectedDoc.ocr_extracted_data.detected_fields).map(([key, value]) => {
+                      const arabicLabels: Record<string, string> = {
+                        license_number: 'رقم الترخيص', issue_date: 'تاريخ الإصدار',
+                        expiry_date: 'تاريخ الانتهاء', holder_name: 'اسم صاحب الترخيص',
+                        issuing_authority: 'الجهة المصدرة', document_type: 'نوع المستند',
+                        waste_types: 'أنواع المخلفات',
+                      };
+                      return (
+                        <div key={key} className="flex justify-between items-start text-sm border-b border-border/30 pb-1 last:border-0">
+                          <span className="text-muted-foreground">{arabicLabels[key] || key}</span>
+                          <span className="font-medium">
+                            {Array.isArray(value) ? (value as string[]).join('، ') : String(value || '—')}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Waste Types (separate section for emphasis) */}
+              {(selectedDoc.ocr_extracted_data?.structured_fields?.['أنواع المخلفات']?.length > 0 ||
+                selectedDoc.ocr_extracted_data?.detected_fields?.waste_types?.length > 0) && (
                 <div>
                   <h4 className="text-sm font-medium mb-2">أنواع المخلفات المكتشفة</h4>
                   <div className="flex flex-wrap gap-1">
-                    {selectedDoc.ocr_extracted_data.detected_fields.waste_types.map((wt: string, i: number) => (
+                    {(selectedDoc.ocr_extracted_data?.structured_fields?.['أنواع المخلفات'] ||
+                      selectedDoc.ocr_extracted_data?.detected_fields?.waste_types || []).map((wt: string, i: number) => (
                       <Badge key={i} variant="secondary" className="text-xs">{wt}</Badge>
                     ))}
                   </div>
