@@ -206,9 +206,12 @@ const categorizeNotification = (type: string | null): string => {
       return 'documents';
     case 'invoice': case 'payment': case 'deposit': case 'financial':
       return 'finance';
-    case 'partner_post': case 'partner_note': case 'partner_message':
-    case 'partner_request': case 'partner_linked':
+    case 'partner_post': case 'partner_request': case 'partner_linked':
       return 'partners';
+    case 'partner_note':
+      return 'notes';
+    case 'partner_message':
+      return 'messages';
     case 'approval_request': case 'approval_granted': case 'approval_rejected':
       return 'approvals';
     case 'recycling_report': case 'report': case 'certificate': case 'compliance':
