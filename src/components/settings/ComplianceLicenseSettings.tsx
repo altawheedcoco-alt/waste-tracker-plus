@@ -353,7 +353,7 @@ export default function ComplianceLicenseSettings() {
                   <p className="text-xs text-muted-foreground mt-1">جارٍ التحليل... {progress}%</p>
                 </div>
               )}
-              <div className="mt-3 flex gap-2">
+              <div className="mt-3 flex gap-2 flex-wrap">
                 <label className="cursor-pointer">
                   <input type="file" className="hidden" accept="image/*,.pdf,application/pdf" onChange={handleFileUpload} disabled={extracting} />
                   <Button variant="outline" size="sm" className="gap-2" asChild disabled={extracting}>
@@ -363,6 +363,17 @@ export default function ComplianceLicenseSettings() {
                     </span>
                   </Button>
                 </label>
+                <Button
+                  variant="secondary" size="sm" className="gap-1.5"
+                  onClick={() => {
+                    // Navigate to the AI extracted data tab in parent
+                    const tabTrigger = document.querySelector('[data-state][value="ai-extracted"]') as HTMLElement;
+                    if (tabTrigger) tabTrigger.click();
+                  }}
+                >
+                  <Brain className="h-3.5 w-3.5" />
+                  عرض البيانات المستخرجة
+                </Button>
               </div>
             </div>
           </div>
