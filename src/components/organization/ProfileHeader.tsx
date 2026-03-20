@@ -1,5 +1,6 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import ClickableImage from '@/components/ui/ClickableImage';
+import ImageCropDialog, { CropMode } from '@/components/ui/ImageCropDialog';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
