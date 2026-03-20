@@ -89,7 +89,7 @@ const EnhancedChatInput = ({
   const [slashSearch, setSlashSearch] = useState('');
   const [slashIndex, setSlashIndex] = useState(0);
   const [showResourcePicker, setShowResourcePicker] = useState(false);
-  const [resourcePickerTab, setResourcePickerTab] = useState<'shipments' | 'invoices' | 'documents' | 'signing'>('shipments');
+  const [resourcePickerTab, setResourcePickerTab] = useState<'outgoing' | 'incoming'>('outgoing');
   
   const { entities: mentionableEntities } = useMentionableEntities();
   
