@@ -216,14 +216,21 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         icon={Factory}
         gradient="from-destructive to-primary"
         onRefresh={handleRefresh}
-        radarStats={[
-          { label: 'إجمالي العمليات', value: operationsStats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(operationsStats?.total || 1, 50), trend: 'up' as const },
-          { label: 'شحنات واردة', value: recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },
-          { label: 'قيد المعالجة', value: operationsStats?.processing || 0, icon: Clock, color: 'text-violet-500', max: 20, trend: 'stable' as const },
-          { label: 'مكتملة', value: operationsStats?.completed || 0, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(operationsStats?.total || 1, 50), trend: 'up' as const },
-          { label: 'الكميات (طن)', value: Math.round(operationsStats?.totalQuantity || 0), icon: Scale, color: 'text-primary', max: Math.max(Math.round(operationsStats?.totalQuantity || 1), 100), trend: 'up' as const },
-          { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-destructive', max: 1, trend: 'stable' as const },
-        ]}
+        radarStats={(() => {
+          const total = operationsStats?.total || 0;
+          const incoming = recentShipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length;
+          const processing = operationsStats?.processing || 0;
+          const completed = operationsStats?.completed || 0;
+          const qty = Math.round(operationsStats?.totalQuantity || 0);
+          return [
+            { label: 'إجمالي العمليات', value: total, icon: Package, color: 'text-primary', max: total || 1, trend: 'up' as const },
+            { label: 'شحنات واردة', value: incoming, icon: Truck, color: 'text-amber-500', max: Math.max(total, 1), trend: 'up' as const },
+            { label: 'قيد المعالجة', value: processing, icon: Clock, color: 'text-violet-500', max: Math.max(total, 1), trend: 'stable' as const },
+            { label: 'مكتملة', value: completed, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(total, 1), trend: 'up' as const },
+            { label: 'الكميات (طن)', value: qty, icon: Scale, color: 'text-primary', max: qty || 1, trend: 'up' as const },
+            { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-destructive', max: 1, trend: 'stable' as const },
+          ];
+        })()}
         alerts={[
           ...(recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 0 ? [{ id: 'incoming-urgent', message: `🚛 ${recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length} شحنة واردة تحتاج استقبال ومعالجة`, severity: recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 5 ? 'critical' as const : 'warning' as const, icon: Truck }] : []),
           ...(operationsStats?.processing && operationsStats.processing > 0 ? [{ id: 'processing-ops', message: `⚙️ ${operationsStats.processing} عملية تخلص قيد التنفيذ حالياً`, severity: operationsStats.processing > 8 ? 'warning' as const : 'info' as const, icon: Clock }] : []),

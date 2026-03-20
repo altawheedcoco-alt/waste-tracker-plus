@@ -191,14 +191,17 @@ const RecyclerDashboard = () => {
         icon={Recycle}
         gradient="from-emerald-500 to-teal-600"
         onRefresh={handleRefresh}
-        radarStats={[
-          { label: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-primary', max: Math.max(stats.total, 50), trend: 'up' as const },
-          { label: 'واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', max: 20, trend: 'up' as const },
-          { label: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-violet-500', max: 20, trend: 'stable' as const },
-          { label: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats.total, 50), trend: 'up' as const },
-          { label: 'المولّدون', value: new Set(recentShipments.map(s => s.generator?.name).filter(Boolean)).size, icon: Building2, color: 'text-primary', max: 10, trend: 'stable' as const },
-          { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-emerald-500', max: 1, trend: 'stable' as const },
-        ]}
+        radarStats={(() => {
+          const generators = new Set(recentShipments.map(s => s.generator?.name).filter(Boolean)).size;
+          return [
+            { label: 'إجمالي الشحنات', value: stats.total, icon: Package, color: 'text-primary', max: stats.total || 1, trend: 'up' as const },
+            { label: 'واردة', value: stats.incoming, icon: Truck, color: 'text-amber-500', max: Math.max(stats.total, 1), trend: 'up' as const },
+            { label: 'قيد المعالجة', value: stats.processing, icon: Clock, color: 'text-violet-500', max: Math.max(stats.total, 1), trend: 'stable' as const },
+            { label: 'مؤكدة', value: stats.completed, icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats.total, 1), trend: 'up' as const },
+            { label: 'المولّدون', value: generators, icon: Building2, color: 'text-primary', max: generators || 1, trend: 'stable' as const },
+            { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-emerald-500', max: 1, trend: 'stable' as const },
+          ];
+        })()}
         alerts={[
           ...(stats.incoming > 0 ? [{ id: 'incoming-shipments', message: `🚛 ${stats.incoming} شحنة واردة تحتاج استقبال وفحص`, severity: stats.incoming > 5 ? 'critical' as const : 'warning' as const, icon: Truck }] : []),
           ...(stats.processing > 0 ? [{ id: 'processing-active', message: `⚙️ ${stats.processing} شحنة قيد المعالجة والتدوير حالياً`, severity: stats.processing > 8 ? 'warning' as const : 'info' as const, icon: Clock }] : []),
