@@ -1,4 +1,4 @@
-import { Deno } from "https://deno.land/x/deno@v2.0.0/mod.ts";
+// Chat AI Co-Pilot Edge Function
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
