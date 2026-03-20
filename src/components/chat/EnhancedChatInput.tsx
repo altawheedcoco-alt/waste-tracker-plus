@@ -311,22 +311,11 @@ const EnhancedChatInput = ({
 
   const filteredSlashCommands = filterCommands(slashSearch);
 
-  const RESOURCE_TAB_MAP: Record<string, 'shipments' | 'invoices' | 'documents' | 'signing'> = {
-    shipment: 'shipments',
-    tracking: 'shipments',
-    invoice: 'invoices',
-    document: 'documents',
-    doc: 'documents',
-    signing_request: 'signing',
-    sign: 'signing',
-    stamp: 'signing',
-  };
-
   const handleSlashSelect = useCallback((cmd: SlashCommand) => {
     setInputValue('');
     setShowSlashMenu(false);
-    // Open resource picker for the selected command type
-    setResourcePickerTab(RESOURCE_TAB_MAP[cmd.resourceType] || 'shipments');
+    // Open resource picker - default to outgoing
+    setResourcePickerTab('outgoing');
     setShowResourcePicker(true);
     textareaRef.current?.focus();
   }, []);
