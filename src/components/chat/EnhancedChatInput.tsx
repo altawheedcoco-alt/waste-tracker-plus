@@ -517,20 +517,40 @@ const EnhancedChatInput = ({
             </PopoverContent>
           </Popover>
 
-          {/* Text Input with Mention Dropdown */}
+          {/* Text Input with Slash Commands + Mention + Resource Picker */}
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={inputValue}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (@للإشارة)"}
+              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (/ للأوامر، @ للإشارة)"}
               className="min-h-[36px] max-h-[120px] resize-none py-2 px-1 border-0 shadow-none bg-transparent focus-visible:ring-0 text-sm"
               disabled={sending || disabled || isRecording}
               dir="rtl"
               rows={1}
             />
             
+            {/* Slash Command Menu */}
+            <AnimatePresence>
+              {showSlashMenu && filteredSlashCommands.length > 0 && (
+                <SlashCommandMenu
+                  commands={filteredSlashCommands}
+                  selectedIndex={slashIndex}
+                  onSelect={handleSlashSelect}
+                  onHover={setSlashIndex}
+                />
+              )}
+            </AnimatePresence>
+
+            {/* Resource Picker */}
+            <ChatResourcePicker
+              isOpen={showResourcePicker}
+              onClose={() => setShowResourcePicker(false)}
+              onSelect={handleResourceSelect}
+              initialTab={resourcePickerTab}
+            />
+
             {/* @Mention Dropdown */}
             <AnimatePresence>
               {showMentionDropdown && filteredMentions.length > 0 && (
