@@ -288,36 +288,60 @@ export default function SigningInbox() {
     enabled: !!profile?.organization_id,
   });
 
-  // Fetch partner organizations
+  // Fetch partner organizations (verified_partnerships + partner_links)
   const { data: partners } = useQuery({
     queryKey: ['partner-orgs-for-signing', profile?.organization_id],
     queryFn: async () => {
       if (!profile?.organization_id) return [];
-      const { data } = await supabase
-        .from('partner_links')
-        .select('partner_organization_id, organizations!partner_links_partner_organization_id_fkey(id, name)')
-        .eq('organization_id', profile.organization_id)
-        .eq('status', 'active');
-      
-      const { data: reverseData } = await supabase
-        .from('partner_links')
-        .select('organization_id, organizations!partner_links_organization_id_fkey(id, name)')
-        .eq('partner_organization_id', profile.organization_id)
-        .eq('status', 'active');
-
-      const orgs: { id: string; name: string }[] = [];
+      const myOrgId = profile.organization_id;
       const seen = new Set<string>();
+      const orgs: { id: string; name: string }[] = [];
 
-      (data || []).forEach((d: any) => {
-        const org = d.organizations;
-        if (org && !seen.has(org.id)) { orgs.push(org); seen.add(org.id); }
-      });
-      (reverseData || []).forEach((d: any) => {
-        const org = d.organizations;
-        if (org && !seen.has(org.id)) { orgs.push(org); seen.add(org.id); }
-      });
+      // 1) verified_partnerships (primary source of truth)
+      const [vpForward, vpReverse] = await Promise.all([
+        supabase.from('verified_partnerships')
+          .select('partner_org_id')
+          .eq('requester_org_id', myOrgId)
+          .eq('status', 'active'),
+        supabase.from('verified_partnerships')
+          .select('requester_org_id')
+          .eq('partner_org_id', myOrgId)
+          .eq('status', 'active'),
+      ]);
 
-      return orgs;
+      const vpIds = [
+        ...(vpForward.data || []).map((d: any) => d.partner_org_id),
+        ...(vpReverse.data || []).map((d: any) => d.requester_org_id),
+      ].filter(Boolean);
+
+      // 2) partner_links (fallback)
+      const [plForward, plReverse] = await Promise.all([
+        supabase.from('partner_links')
+          .select('partner_organization_id')
+          .eq('organization_id', myOrgId)
+          .eq('status', 'active'),
+        supabase.from('partner_links')
+          .select('organization_id')
+          .eq('partner_organization_id', myOrgId)
+          .eq('status', 'active'),
+      ]);
+
+      const plIds = [
+        ...(plForward.data || []).map((d: any) => d.partner_organization_id),
+        ...(plReverse.data || []).map((d: any) => d.organization_id),
+      ].filter(Boolean);
+
+      const allIds = [...new Set([...vpIds, ...plIds])].filter(id => id !== myOrgId);
+      if (!allIds.length) return [];
+
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('id, name, organization_type, logo_url')
+        .in('id', allIds)
+        .eq('is_active', true)
+        .order('name');
+
+      return (orgData || []).map(o => ({ id: o.id, name: o.name, type: o.organization_type, logo: o.logo_url }));
     },
     enabled: !!profile?.organization_id,
   });
