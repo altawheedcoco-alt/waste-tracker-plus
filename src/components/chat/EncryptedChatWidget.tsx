@@ -94,9 +94,24 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
         ) : (
           <p className="whitespace-pre-wrap break-words">{msg.content}</p>
         )}
-        <span className={cn("text-[8px] block mt-0.5", isMine ? "text-white/60" : "text-muted-foreground")}>
-          {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
-        </span>
+        <div className={cn("flex items-center gap-1 mt-0.5", isMine ? "justify-start" : "justify-end")}>
+          <span className={cn("text-[8px]", isMine ? "text-white/60" : "text-muted-foreground")}>
+            {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
+          </span>
+          {isMine && (
+            msg.status === 'sending' ? (
+              <Loader2 className="w-3 h-3 text-white/40 animate-spin" />
+            ) : msg.status === 'failed' ? (
+              <span className="text-[8px] text-red-400">!</span>
+            ) : msg.status === 'read' ? (
+              <CheckCheck className="w-3 h-3 text-sky-400" />
+            ) : msg.status === 'delivered' ? (
+              <CheckCheck className="w-3 h-3 text-white/50" />
+            ) : (
+              <Check className="w-3 h-3 text-white/50" />
+            )
+          )}
+        </div>
       </div>
     </div>
   );
