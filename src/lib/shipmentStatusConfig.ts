@@ -389,7 +389,10 @@ export const getAvailableNextStatuses = (
   options?: { hasAssignedDriver?: boolean; driverBelongsToTransporter?: boolean }
 ): StatusConfig[] => {
   const currentConfig = getStatusConfig(currentStatus);
-  if (!currentConfig) return allStatuses;
+  if (!currentConfig) {
+    // Unknown status — still respect org type isolation
+    return getStatusesForOrgType(organizationType);
+  }
 
   // Admin can change to any status
   if (organizationType === 'admin') {
