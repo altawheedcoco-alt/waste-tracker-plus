@@ -7,7 +7,8 @@ let pdfjsLib: typeof import('pdfjs-dist') | null = null;
 async function getPdfJs() {
   if (!pdfjsLib) {
     pdfjsLib = await import('pdfjs-dist');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs`;
+    // Use fake worker (inline) to avoid CDN fetch issues in Vite/preview environments
+    pdfjsLib.GlobalWorkerOptions.workerSrc = '';
   }
   return pdfjsLib;
 }
