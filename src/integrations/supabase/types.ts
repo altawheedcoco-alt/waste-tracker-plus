@@ -13916,6 +13916,7 @@ export type Database = {
       }
       entity_documents: {
         Row: {
+          ai_extracted: boolean | null
           award_letter_id: string | null
           contract_id: string | null
           created_at: string
@@ -13931,6 +13932,8 @@ export type Database = {
           file_url: string
           id: string
           invoice_id: string | null
+          ocr_confidence: number | null
+          ocr_extracted_data: Json | null
           organization_id: string
           partner_organization_id: string | null
           reference_number: string | null
@@ -13943,6 +13946,7 @@ export type Database = {
           uploaded_by_role: string | null
         }
         Insert: {
+          ai_extracted?: boolean | null
           award_letter_id?: string | null
           contract_id?: string | null
           created_at?: string
@@ -13958,6 +13962,8 @@ export type Database = {
           file_url: string
           id?: string
           invoice_id?: string | null
+          ocr_confidence?: number | null
+          ocr_extracted_data?: Json | null
           organization_id: string
           partner_organization_id?: string | null
           reference_number?: string | null
@@ -13970,6 +13976,7 @@ export type Database = {
           uploaded_by_role?: string | null
         }
         Update: {
+          ai_extracted?: boolean | null
           award_letter_id?: string | null
           contract_id?: string | null
           created_at?: string
@@ -13985,6 +13992,8 @@ export type Database = {
           file_url?: string
           id?: string
           invoice_id?: string | null
+          ocr_confidence?: number | null
+          ocr_extracted_data?: Json | null
           organization_id?: string
           partner_organization_id?: string | null
           reference_number?: string | null

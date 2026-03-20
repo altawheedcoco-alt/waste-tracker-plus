@@ -56,6 +56,7 @@ export default function ComplianceLicenseSettings() {
   const { organization } = useAuth();
   const { extractFromFile, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
   const [showOCRPreview, setShowOCRPreview] = useState(false);
+  const [uploadedFileRef, setUploadedFileRef] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
   const [customWaste, setCustomWaste] = useState('');
@@ -180,6 +181,7 @@ export default function ComplianceLicenseSettings() {
       return;
     }
 
+    setUploadedFileRef(file);
     const result = await extractFromFile(file);
     if (result) {
       setShowOCRPreview(true);
@@ -189,28 +191,92 @@ export default function ComplianceLicenseSettings() {
 
   const handleApplyOCR = async () => {
     if (!extractedResult || !orgId) return;
-    const success = await applyToOrganization(orgId, extractedResult.detected_fields);
-    if (success) {
-      // Reload org data
-      const { data: org } = await supabase
-        .from('organizations')
-        .select('licensed_waste_types, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_approval_number, env_approval_expiry, land_transport_license, hazardous_certified')
-        .eq('id', orgId)
-        .single();
-      if (org) {
-        setData({
-          licensed_waste_types: (org.licensed_waste_types as string[]) || [],
-          wmra_license: org.wmra_license || '',
-          wmra_license_issue_date: org.wmra_license_issue_date || '',
-          wmra_license_expiry_date: org.wmra_license_expiry_date || '',
-          environmental_approval_number: org.environmental_approval_number || '',
-          env_approval_expiry: org.env_approval_expiry || '',
-          land_transport_license: org.land_transport_license || '',
-          hazardous_certified: org.hazardous_certified || false,
-        });
+
+    try {
+      // 1. Upload original file to storage (preserve as-is)
+      let fileUrl = '';
+      if (uploadedFileRef) {
+        const timestamp = Date.now();
+        const safeName = uploadedFileRef.name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+        const storagePath = `${orgId}/compliance/${timestamp}-${safeName}`;
+
+        const { data: uploadData, error: uploadErr } = await supabase.storage
+          .from('organization-documents')
+          .upload(storagePath, uploadedFileRef, {
+            cacheControl: '3600',
+            upsert: false,
+          });
+
+        if (uploadErr) {
+          console.error('File upload error:', uploadErr);
+          toast.error('فشل في رفع الملف الأصلي');
+        } else {
+          const { data: urlData } = supabase.storage
+            .from('organization-documents')
+            .getPublicUrl(uploadData.path);
+          fileUrl = urlData.publicUrl;
+        }
       }
+
+      // 2. Save extracted data to entity_documents
+      const docType = extractedResult.detected_fields.document_type || 'compliance_document';
+      const title = extractedResult.detected_fields.license_number
+        ? `${docType} - ${extractedResult.detected_fields.license_number}`
+        : `مستند امتثال - ${new Date().toLocaleDateString('ar-EG')}`;
+
+      const { error: docErr } = await supabase
+        .from('entity_documents')
+        .insert({
+          organization_id: orgId,
+          document_type: docType,
+          document_category: 'compliance',
+          title,
+          file_url: fileUrl,
+          file_name: uploadedFileRef?.name || 'unknown',
+          file_type: uploadedFileRef?.type || 'application/octet-stream',
+          file_size: uploadedFileRef?.size || 0,
+          reference_number: extractedResult.detected_fields.license_number || null,
+          tags: ['ai-extracted', 'compliance', docType],
+          ocr_extracted_data: extractedResult as any,
+          ocr_confidence: extractedResult.confidence,
+          ai_extracted: true,
+        });
+
+      if (docErr) {
+        console.error('Save document error:', docErr);
+        toast.warning('تم استخراج البيانات لكن فشل حفظ المستند في الأرشيف');
+      } else {
+        toast.success('تم حفظ المستند والبيانات المستخرجة في الأرشيف');
+      }
+
+      // 3. Apply fields to organization
+      const success = await applyToOrganization(orgId, extractedResult.detected_fields);
+      if (success) {
+        const { data: org } = await supabase
+          .from('organizations')
+          .select('licensed_waste_types, wmra_license, wmra_license_issue_date, wmra_license_expiry_date, environmental_approval_number, env_approval_expiry, land_transport_license, hazardous_certified')
+          .eq('id', orgId)
+          .single();
+        if (org) {
+          setData({
+            licensed_waste_types: (org.licensed_waste_types as string[]) || [],
+            wmra_license: org.wmra_license || '',
+            wmra_license_issue_date: org.wmra_license_issue_date || '',
+            wmra_license_expiry_date: org.wmra_license_expiry_date || '',
+            environmental_approval_number: org.environmental_approval_number || '',
+            env_approval_expiry: org.env_approval_expiry || '',
+            land_transport_license: org.land_transport_license || '',
+            hazardous_certified: org.hazardous_certified || false,
+          });
+        }
+      }
+      
       setShowOCRPreview(false);
       setExtractedResult(null);
+      setUploadedFileRef(null);
+    } catch (err) {
+      console.error('Apply OCR error:', err);
+      toast.error('حدث خطأ أثناء حفظ البيانات');
     }
   };
 
