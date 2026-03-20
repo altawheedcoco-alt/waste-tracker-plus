@@ -80,7 +80,9 @@ const getNotificationIcon = (type: string | null) => {
     case 'signature_request': case 'document_signed': return PenTool;
     case 'stamp_applied': return Stamp;
     case 'recycling_report': case 'report': case 'certificate': return BarChart3;
-    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return Handshake;
+    case 'partner_post': case 'partner_linked': return Handshake;
+    case 'partner_note': return FileText;
+    case 'partner_message': return MessageCircle;
     case 'approval_request': return Inbox;
     case 'invoice': case 'payment': case 'deposit': case 'financial': return Wallet;
     case 'warning': case 'signal_lost': return AlertCircle;
