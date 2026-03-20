@@ -21,7 +21,7 @@ export type ActionType =
   | 'work_order_created'
   | 'quality_inspection';
 
-interface ActionToChatEvent {
+export interface ActionToChatEvent {
   type: ActionType;
   resourceId: string;
   resourceType: string;
