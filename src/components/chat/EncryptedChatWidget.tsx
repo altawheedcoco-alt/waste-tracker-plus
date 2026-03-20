@@ -21,6 +21,7 @@ import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
 import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
+import ChatMentionRenderer from './ChatMentionRenderer';
 
 const ChatVideoCallButtonMini = ({ partnerName, partnerUserId }: { partnerName: string; partnerUserId?: string }) => (
   <ChatVideoCallButton partnerName={partnerName} partnerUserId={partnerUserId} />
@@ -93,7 +94,7 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
             <Download className="w-3.5 h-3.5 shrink-0 opacity-60" />
           </a>
         ) : (
-          <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+          <p className="whitespace-pre-wrap break-words"><ChatMentionRenderer text={msg.content} isOwn={isMine} /></p>
         )}
         {/* Resource Card */}
         {msg.message_type === 'resource_card' && (() => {

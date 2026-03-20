@@ -40,6 +40,8 @@ import type { MentionableEntity } from '@/components/ui/mentionable-field';
 import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
 import SlashCommandMenu from './SlashCommandMenu';
 import ChatResourcePicker from './ChatResourcePicker';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
+import { useMentionNotifier } from '@/hooks/useMentionNotifier';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
@@ -92,6 +94,8 @@ const EnhancedChatInput = ({
   const [resourcePickerTab, setResourcePickerTab] = useState<'outgoing' | 'incoming'>('outgoing');
   
   const { entities: mentionableEntities } = useMentionableEntities();
+  const { users: mentionableUsers } = useMentionableUsers();
+  const { notify: notifyMentions } = useMentionNotifier();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
@@ -128,7 +132,16 @@ const EnhancedChatInput = ({
       return;
     }
     if (!inputValue.trim()) return;
-    await onSendMessage(inputValue.trim());
+    const msgText = inputValue.trim();
+    await onSendMessage(msgText);
+    // Send mention notifications if text contains @[name](id)
+    if (msgText.includes('@[')) {
+      notifyMentions({
+        text: msgText,
+        users: mentionableUsers,
+        context: 'دردشة',
+      });
+    }
     setInputValue('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };

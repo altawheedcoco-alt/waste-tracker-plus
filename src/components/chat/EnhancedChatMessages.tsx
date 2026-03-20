@@ -22,6 +22,7 @@ import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
 import MessageReactions from './MessageReactions';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
+import ChatMentionRenderer from './ChatMentionRenderer';
 import { QuotedReply } from './ReplyPreview';
 import { useChatReactions } from '@/hooks/useChatReactions';
 import { format, isToday, isYesterday } from 'date-fns';
@@ -420,7 +421,7 @@ const EnhancedChatMessages = ({
                                     } catch { /* not JSON, render as text */ }
                                     return (
                                       <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
-                                        {renderTextWithLinks(text, isOwn)}
+                                        <ChatMentionRenderer text={text} isOwn={isOwn} />
                                       </p>
                                     );
                                   })()}
