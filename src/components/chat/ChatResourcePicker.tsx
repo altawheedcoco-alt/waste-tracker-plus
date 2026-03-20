@@ -209,7 +209,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
             unit: s.unit,
             totalValue: s.total_value,
             pricePerUnit: s.price_per_unit,
-            currency: s.currency || 'EGP',
+            currency: 'EGP',
             shipmentType: s.shipment_type,
             paymentStatus: s.payment_status,
             notes: s.notes,
