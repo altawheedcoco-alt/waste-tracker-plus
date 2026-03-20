@@ -730,6 +730,15 @@ const ShipmentDetailsPage = () => {
             </div>
           </TabsContent>
 
+          {/* ===== الامتثال والمعايير ===== */}
+          <TabsContent value="compliance">
+            <ErrorBoundary fallbackTitle="خطأ في الامتثال">
+              <Suspense fallback={<TabFallback />}>
+                <SupervisorComplianceDashboard shipment={shipment} compact={false} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
           {/* ===== الملاحظات ===== */}
           <TabsContent value="notes">
             <ErrorBoundary fallbackTitle="خطأ في الملاحظات">
