@@ -237,25 +237,27 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       if (invErr) console.warn('Invoices fetch error:', invErr.message);
 
       invoices?.forEach(inv => {
-        const amount = inv.total_amount || inv.amount || 0;
+        const amount = inv.total_amount || inv.subtotal || 0;
         const currency = inv.currency || 'EGP';
         results.push({
           id: inv.id,
           resourceType: 'invoice',
           label: `فاتورة #${inv.invoice_number || inv.id.slice(0, 8)}`,
-          subtitle: `${amount.toLocaleString()} ${currency}`,
+          subtitle: `${amount.toLocaleString()} ${currency}${inv.partner_name ? ` • ${inv.partner_name}` : ''}`,
           status: inv.status || undefined,
           date: inv.due_date || inv.created_at,
           extra: {
             invoiceType: inv.invoice_type,
-            amount: inv.amount,
+            amount: inv.subtotal,
             taxAmount: inv.tax_amount,
             totalAmount: inv.total_amount,
             currency,
             dueDate: inv.due_date,
-            paidDate: inv.paid_date,
+            paidAmount: inv.paid_amount,
+            remainingAmount: inv.remaining_amount,
             notes: inv.notes,
-            shipmentId: inv.shipment_id,
+            category: inv.invoice_category,
+            partnerName: inv.partner_name,
           },
           raw: inv,
         });
