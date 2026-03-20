@@ -413,7 +413,7 @@ export default function ComplianceLicenseSettings() {
                             </div>
                           </CollapsibleTrigger>
                           <CollapsibleContent>
-                            <div className="pr-8 pt-2 pb-1 space-y-1">
+                            <div className="pr-8 pt-2 pb-1 space-y-1 max-h-60 overflow-y-auto scrollbar-thin">
                               {/* Select/Deselect All */}
                               <div className="flex gap-2 mb-2">
                                 <Button
