@@ -100,14 +100,14 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       // Fetch invoices
       const invoiceQuery = supabase
         .from('invoices')
-        .select('id, invoice_number, status, total_amount, currency, issuer_organization_id, recipient_organization_id')
+        .select('id, invoice_number, status, total_amount, currency, organization_id, partner_organization_id')
         .order('created_at', { ascending: false })
         .limit(20);
 
       if (dir === 'outgoing') {
-        invoiceQuery.eq('issuer_organization_id', orgId);
+        invoiceQuery.eq('organization_id', orgId);
       } else {
-        invoiceQuery.eq('recipient_organization_id', orgId);
+        invoiceQuery.eq('partner_organization_id', orgId);
       }
 
       const { data: invoices } = await invoiceQuery;
