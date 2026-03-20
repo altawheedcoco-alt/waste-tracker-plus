@@ -160,6 +160,7 @@ const AIExtractedDataViewer = () => {
         <ScrollArea className="max-h-[600px]">
           <div className="space-y-3">
             {filteredDocs.map(doc => {
+              const structured = doc.ocr_extracted_data?.structured_fields || {};
               const fields = doc.ocr_extracted_data?.detected_fields || {};
               const confidence = doc.ocr_confidence || doc.ocr_extracted_data?.confidence || 0;
 
