@@ -178,7 +178,7 @@ const GroupChatView = ({ room, onBack }: GroupChatViewProps) => {
                           ? "bg-emerald-600 text-white rounded-tl-[4px]"
                           : "bg-background border border-border/50 rounded-tr-[4px]"
                       )}>
-                        <p className="text-[13px] whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        <p className="text-[13px] whitespace-pre-wrap leading-relaxed"><ChatMentionRenderer text={msg.content} isOwn={isOwn} /></p>
                         <span className={cn("text-[10px] block text-left mt-1", isOwn ? "text-white/60" : "text-muted-foreground")}>
                           {format(new Date(msg.created_at), 'hh:mm a', { locale: ar })}
                         </span>
