@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, FileText, Zap, Eye, Users, Building2, Receipt, ClipboardCheck } from 'lucide-react';
+import { Shield, FileText, Zap, Eye, Users, Building2, Receipt, ClipboardCheck, Brain } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import PartnerVisibilitySettings from '@/components/settings/PartnerVisibilitySettings';
