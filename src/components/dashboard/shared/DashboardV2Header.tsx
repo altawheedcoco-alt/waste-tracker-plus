@@ -162,14 +162,28 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
 
   const gaugeElement = (
     <div className="relative flex flex-col items-center cursor-pointer">
+      {/* Celebration ring at 100% */}
+      {level.isCelebration && (
+        <motion.div className="absolute -inset-2 rounded-full border-2 border-primary/40"
+          animate={{ scale: [1, 1.15, 1], opacity: [0.6, 0, 0.6] }}
+          transition={{ duration: 2, repeat: Infinity }} />
+      )}
       <svg width={size} height={size} className="drop-shadow-lg">
         <defs>
           <filter id="gaugeGlow"><feGaussianBlur stdDeviation="3" result="b" /><feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge></filter>
+          {level.isCelebration && (
+            <linearGradient id="celebGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="hsl(var(--primary))" />
+              <stop offset="50%" stopColor="hsl(142, 76%, 36%)" />
+              <stop offset="100%" stopColor="hsl(var(--primary))" />
+            </linearGradient>
+          )}
         </defs>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke="hsl(var(--border))" strokeWidth={strokeW}
           strokeDasharray={`${circ * sweepAngle / 360} ${circ * (1 - sweepAngle / 360)}`}
           strokeDashoffset={-circ * startAngle / 360} strokeLinecap="round" opacity="0.2" />
-        <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={strokeW}
+        <motion.circle cx={size / 2} cy={size / 2} r={r} fill="none"
+          stroke={level.isCelebration ? 'url(#celebGrad)' : color} strokeWidth={level.isCelebration ? strokeW + 1 : strokeW}
           strokeDasharray={`${dashLen} ${dashGap}`}
           strokeDashoffset={-circ * startAngle / 360} strokeLinecap="round" filter="url(#gaugeGlow)"
           initial={{ strokeDasharray: `0 ${circ}` }}
@@ -185,25 +199,48 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center pt-1">
-        <motion.span className="text-xl font-black font-mono tabular-nums leading-none"
-          style={{ color }}
-          key={score}
-          initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
-          {formatNumber(score)}
-        </motion.span>
+        {level.isCelebration ? (
+          <motion.span className="text-lg leading-none"
+            animate={{ scale: [1, 1.2, 1], rotate: [0, 10, -10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}>
+            🏆
+          </motion.span>
+        ) : (
+          <motion.span className="text-xl font-black font-mono tabular-nums leading-none"
+            style={{ color }}
+            key={score}
+            initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}>
+            {formatNumber(score)}
+          </motion.span>
+        )}
         <span className="text-[7px] font-mono text-muted-foreground mt-0.5">{label}</span>
       </div>
       <motion.div className="absolute inset-2 rounded-full"
-        style={{ boxShadow: `0 0 20px ${glowColor}` }}
-        animate={{ opacity: [0.3, 0.7, 0.3] }}
-        transition={{ duration: 2, repeat: Infinity }} />
+        style={{ boxShadow: `0 0 ${level.isCelebration ? '30' : '20'}px ${glowColor}` }}
+        animate={{ opacity: level.isCelebration ? [0.5, 1, 0.5] : [0.3, 0.7, 0.3] }}
+        transition={{ duration: level.isCelebration ? 1 : 2, repeat: Infinity }} />
     </div>
   );
 
   return (
     <Popover>
       <PopoverTrigger asChild>{gaugeElement}</PopoverTrigger>
-      <PopoverContent className="w-80 p-0 rounded-xl" align="center" dir="rtl">
+      <PopoverContent className="w-80 p-0 rounded-xl overflow-hidden" align="center" dir="rtl">
+        {/* Celebration banner */}
+        {level.isCelebration && (
+          <motion.div
+            className="bg-gradient-to-l from-primary/20 via-primary/10 to-primary/20 p-3 text-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <motion.div className="text-3xl mb-1"
+              animate={{ scale: [1, 1.15, 1], rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 1.5, repeat: Infinity }}>
+              🎉🏆🎉
+            </motion.div>
+            <p className="text-sm font-bold text-primary">تهانينا! إنجاز استثنائي</p>
+            <p className="text-[11px] text-muted-foreground">جميع المؤشرات وصلت للذروة</p>
+          </motion.div>
+        )}
+
         <div className="p-4 space-y-3">
           {/* Header */}
           <div className="flex items-center justify-between">
@@ -231,9 +268,22 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
           </div>
 
           {/* Description */}
-          <p className="text-xs text-muted-foreground leading-relaxed p-2 rounded-lg bg-muted/50">
+          <p className={`text-xs leading-relaxed p-2 rounded-lg ${level.isCelebration ? 'bg-primary/10 text-primary font-semibold' : 'bg-muted/50 text-muted-foreground'}`}>
             {level.desc}
           </p>
+
+          {/* Achievement badge at 100% */}
+          {level.isCelebration && (
+            <motion.div
+              initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-3 p-2.5 rounded-lg border border-primary/20 bg-primary/5">
+              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-xl">🥇</div>
+              <div>
+                <p className="text-xs font-bold text-foreground">شارة الأداء المثالي</p>
+                <p className="text-[10px] text-muted-foreground">حققت الجهة أقصى معدل تشغيلي ممكن</p>
+              </div>
+            </motion.div>
+          )}
 
           {/* Stats breakdown */}
           {radarStats && radarStats.length > 0 && (
@@ -262,7 +312,7 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
                       </div>
                     </div>
                     <span className="text-[10px] text-muted-foreground whitespace-nowrap">
-                      {getStatAdvice(stat.label, stat.value, max)}
+                      {statPct === 100 ? '✅ مكتمل' : getStatAdvice(stat.label, stat.value, max)}
                     </span>
                   </div>
                 );
