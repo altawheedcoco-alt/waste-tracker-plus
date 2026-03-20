@@ -78,6 +78,7 @@ const ChatHeader = ({
 }: ChatHeaderProps) => {
   const { t } = useLanguage();
   const [showWallpaper, setShowWallpaper] = useState(false);
+  const [showGuide, setShowGuide] = useState(false);
   
   const getOrgTypeIcon = () => {
     switch (partnerType) {
