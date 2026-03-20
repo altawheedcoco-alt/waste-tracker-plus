@@ -6,7 +6,9 @@ import { ArrowRight } from 'lucide-react';
 import BackButton from '@/components/ui/back-button';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
+import ShipmentCreationFrozenOverlay from '@/components/shipments/ShipmentCreationFrozenOverlay';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useShipmentCreationControl } from '@/hooks/useShipmentCreationControl';
 
 interface CreateShipmentProps {
   isModal?: boolean;
@@ -17,6 +19,7 @@ interface CreateShipmentProps {
 const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isFrozen } = useShipmentCreationControl();
 
   if (isModal) {
     return (
@@ -26,7 +29,10 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
             <DialogTitle>{t('shipments.createNewShipment')}</DialogTitle>
             <DialogDescription>{t('shipments.createNewShipmentDesc')}</DialogDescription>
           </DialogHeader>
-          <CreateShipmentForm onSuccess={onSuccess} onClose={onClose} />
+          <div className="relative">
+            {isFrozen && <ShipmentCreationFrozenOverlay />}
+            <CreateShipmentForm onSuccess={onSuccess} onClose={onClose} />
+          </div>
         </DialogContent>
       </Dialog>
     );
@@ -44,7 +50,8 @@ const CreateShipment = ({ isModal = false, onClose, onSuccess }: CreateShipmentP
         </div>
 
         <Card>
-          <CardContent className="pt-6">
+          <CardContent className="pt-6 relative">
+            {isFrozen && <ShipmentCreationFrozenOverlay />}
             <CreateShipmentForm />
           </CardContent>
         </Card>

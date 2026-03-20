@@ -33,6 +33,7 @@ export interface Organization {
   logo_url?: string | null;
   stamp_url?: string | null;
   signature_url?: string | null;
+  can_create_shipments?: boolean;
 }
 
 export interface UserOrganization {

@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Plus, X, Truck, Sparkles } from 'lucide-react';
+import { Plus, X, Truck, Sparkles, Construction } from 'lucide-react';
 import CreateShipmentForm from '@/components/shipments/CreateShipmentForm';
-import { motion } from 'framer-motion';
+import ShipmentCreationFrozenOverlay from '@/components/shipments/ShipmentCreationFrozenOverlay';
+import { useShipmentCreationControl } from '@/hooks/useShipmentCreationControl';
 
 interface CreateShipmentButtonProps {
   variant?: 'default' | 'eco' | 'outline' | 'ghost';
@@ -19,6 +20,7 @@ const CreateShipmentButton = ({
   onSuccess 
 }: CreateShipmentButtonProps) => {
   const [isOpen, setIsOpen] = useState(false);
+  const { isFrozen } = useShipmentCreationControl();
 
   const handleSuccess = () => {
     setIsOpen(false);
@@ -31,10 +33,14 @@ const CreateShipmentButton = ({
         variant={variant} 
         size={size} 
         onClick={() => setIsOpen(true)}
-        className={className}
+        className={`${className} relative`}
       >
+        {isFrozen && <Construction className="ml-1 h-3.5 w-3.5 text-amber-500" />}
         <Plus className="ml-2 h-4 w-4" />
         إنشاء شحنة
+        {isFrozen && (
+          <span className="mr-1 text-[10px] text-amber-500 font-normal">(قيد التطوير)</span>
+        )}
       </Button>
 
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -72,7 +78,8 @@ const CreateShipmentButton = ({
               </div>
             </div>
           </div>
-          <div className="p-6 pt-4">
+          <div className="p-6 pt-4 relative">
+            {isFrozen && <ShipmentCreationFrozenOverlay />}
             <CreateShipmentForm 
               onClose={() => setIsOpen(false)} 
               onSuccess={handleSuccess}
