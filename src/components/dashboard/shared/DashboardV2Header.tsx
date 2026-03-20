@@ -613,29 +613,29 @@ const DashboardV2Header = memo(({
 
                 {/* System status icons */}
                 <TooltipProvider delayDuration={200}>
-                <div className="hidden lg:flex items-center gap-0 px-1.5 py-0.5 rounded-md bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[480px]">
+                <div className="hidden lg:flex items-center gap-0.5 px-2 py-1 rounded-lg bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[600px]">
                   {systemIcons.map((si, i) => (
                     <Tooltip key={si.label}>
                       <TooltipTrigger asChild>
                         <motion.div
                           className={cn(
-                            "flex items-center gap-0 px-0.5 cursor-pointer rounded transition-colors hover:bg-primary/10",
+                            "flex items-center gap-0.5 px-1 py-0.5 cursor-pointer rounded-md transition-colors hover:bg-primary/10",
                             si.route && "cursor-pointer"
                           )}
                           onClick={() => si.route && navigate(si.route)}
                           initial={{ opacity: 0, scale: 0 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.3 + i * 0.03 }}
-                          whileHover={{ scale: 1.2 }}
+                          whileHover={{ scale: 1.15 }}
                           whileTap={{ scale: 0.9 }}
                         >
-                          <si.icon className={cn("w-2.5 h-2.5", statusColors[si.status])} />
-                          <span className="text-[6px] font-mono text-muted-foreground">{si.label}</span>
+                          <si.icon className={cn("w-3.5 h-3.5", statusColors[si.status])} />
+                          <span className="text-[8px] font-mono font-bold text-foreground/70">{si.label}</span>
                         </motion.div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="text-xs">
                         <div className="flex items-center gap-1.5">
-                          <span className={cn("w-1.5 h-1.5 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />
+                          <span className={cn("w-2 h-2 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />
                           {si.tooltip}
                         </div>
                       </TooltipContent>
