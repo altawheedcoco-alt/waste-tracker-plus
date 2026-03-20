@@ -21,6 +21,7 @@ import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
   FileText, ExternalLink, PenTool, FolderOpen, Upload, Paperclip, X,
+  Truck, Receipt, Link2, ArrowUpRight,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
