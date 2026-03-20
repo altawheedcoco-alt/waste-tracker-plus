@@ -76,6 +76,7 @@ const RouteProgressBar = lazy(() => import('@/components/tracking/RouteProgressB
 const UnifiedShipmentTracker = lazy(() => import('@/components/tracking/UnifiedShipmentTracker'));
 const NotesPanel = lazy(() => import('@/components/notes/NotesPanel'));
 const ShipmentChatTab = lazy(() => import('@/components/shipments/ShipmentChatTab'));
+const SupervisorComplianceDashboard = lazy(() => import('@/components/supervisors/SupervisorComplianceDashboard'));
 
 type ShipmentDetails = EnrichedShipment;
 
@@ -105,9 +106,10 @@ const TABS: TabItem[] = [
   { value: 'tracking', label: 'التتبع', icon: Navigation },
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
+  { value: 'compliance', label: 'الامتثال', icon: Shield },
   { value: 'notes', label: 'الملاحظات', icon: StickyNote },
   { value: 'chat', label: 'المحادثات', icon: MessageSquare },
-  { value: 'actions', label: 'الإجراءات', icon: Shield },
+  { value: 'actions', label: 'الإجراءات', icon: Settings2 },
 ];
 
 const ShipmentDetailsPage = () => {
@@ -726,6 +728,15 @@ const ShipmentDetailsPage = () => {
                 </Card>
               )}
             </div>
+          </TabsContent>
+
+          {/* ===== الامتثال والمعايير ===== */}
+          <TabsContent value="compliance">
+            <ErrorBoundary fallbackTitle="خطأ في الامتثال">
+              <Suspense fallback={<TabFallback />}>
+                <SupervisorComplianceDashboard shipment={shipment} compact={false} />
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
           {/* ===== الملاحظات ===== */}
