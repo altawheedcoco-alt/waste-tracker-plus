@@ -561,7 +561,13 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'مخلفات العبوات الفارغة غير الملوثة', code: 'MU-06', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['عبوات فارغة نظيفة', 'مخلفات عبوات غذائية', 'هوالك مواد غذائية', 'عبوات بلاستيك فارغة غير ملوثة'] },
       { name: 'أتربة الخردة المستوردة', code: 'MU-07', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['أتربة خردة مستوردة', 'ناتج فرز خردة', 'أتربة فرز الخردة لصناعة الصلب'] },
       { name: 'مخلفات أتربة ناتج كنس مخازن الفحم', code: 'MU-08', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['أتربة فحم', 'كنس مخازن فحم', 'غبار فحم', 'مخلفات أتربة فحم حجري'] },
-    ],
+      { name: 'الرماد المتطاير من محطات توليد الكهرباء', code: 'MU-09', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['رماد متطاير', 'fly ash', 'رماد محطات كهرباء', 'رماد مازوت', 'رماد غاز طبيعي'] },
+      { name: 'خبث الأفران العالية والحديد والصلب', code: 'MU-10', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خبث أفران عالية', 'خبث حديد صلب', 'خبث أفران كهربائية', 'slag', 'خبث سبائكي'] },
+      { name: 'حمأة مرشحات مياه الشرب', code: 'MU-11', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: false, commonNames: ['حمأة مرشحات رملية', 'حمأة مرشحات زلطية', 'رواسب محطات تنقية مياه', 'حمأة مياه شرب'] },
+      { name: 'حمأة إزالة عسر المياه', code: 'MU-12', hazardLevel: 'low', wasteState: 'semi_solid', recyclable: false, commonNames: ['حمأة إزالة عسر', 'رواسب تيسير مياه', 'حمأة معالجة مياه كيميائية'] },
+      { name: 'نواتج تطهير الترع والمصارف وقنوات الري', code: 'MU-13', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['نواتج تطهير ترع', 'طمي مصارف', 'نواتج تطهير قنوات ري', 'رواسب ترع مجففة'] },
+      { name: 'هالك البلاستيك والكرتون بمصانع الأدوية (غير ملوث)', code: 'MU-14', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['هالك بلاستيك أدوية نظيف', 'كرتون مصانع أدوية', 'ورق تغليف أدوية غير ملوث', 'عبوات أدوية فارغة نظيفة'] },
+      { name: 'خردة المراكب والسفن', code: 'MU-15', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خردة مراكب', 'خردة سفن', 'خردة يخوت', 'هياكل سفن', 'خردة جيت بحري', 'تفكيك سفن'] },
   },
 ];
 
