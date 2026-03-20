@@ -1,5 +1,5 @@
-// Auto-generated extended waste classification database
-// إجمالي: 1210 نوع مخلف
+// Auto-generated extended waste classification database — v2
+// إجمالي: 1210 نوع مخلف (محدّث)
 
 import type { WasteSubcategory } from './wasteClassification';
 
