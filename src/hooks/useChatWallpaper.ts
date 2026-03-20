@@ -12,7 +12,7 @@ export interface ChatWallpaper {
 export interface ImageWallpaper {
   id: string;
   label: string;
-  category: 'tracking' | 'egypt' | 'digital' | 'eco' | 'premium' | 'ocean' | 'city';
+  category: 'tracking' | 'egypt' | 'digital' | 'eco' | 'premium' | 'ocean' | 'city' | 'nature' | 'space' | 'abstract' | 'energy';
   src: string;
 }
 
@@ -24,6 +24,10 @@ export const IMAGE_WALLPAPER_CATEGORIES: { id: ImageWallpaper['category']; label
   { id: 'city', label: '🏙️ مدن ذكية' },
   { id: 'ocean', label: '🌊 بيئة وطبيعة' },
   { id: 'premium', label: '💎 فاخر' },
+  { id: 'nature', label: '🌿 طبيعة' },
+  { id: 'space', label: '🌌 فضاء وليل' },
+  { id: 'abstract', label: '🎨 تجريدي' },
+  { id: 'energy', label: '⚡ طاقة متجددة' },
 ];
 
 // ─── COLORS: Comprehensive global palette ───────────────────
