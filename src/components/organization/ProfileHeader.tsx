@@ -450,6 +450,14 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           </div>
         </div>
       </div>
+      {/* Image Crop Dialog */}
+      <ImageCropDialog
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        imageFile={cropFile}
+        mode={cropMode}
+        onSave={handleCropSave}
+      />
     </div>
   );
 };
