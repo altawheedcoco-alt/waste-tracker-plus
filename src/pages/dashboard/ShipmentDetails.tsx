@@ -106,9 +106,10 @@ const TABS: TabItem[] = [
   { value: 'tracking', label: 'التتبع', icon: Navigation },
   { value: 'documents', label: 'المستندات', icon: FileText },
   { value: 'parties', label: 'الأطراف', icon: Users2 },
+  { value: 'compliance', label: 'الامتثال', icon: Shield },
   { value: 'notes', label: 'الملاحظات', icon: StickyNote },
   { value: 'chat', label: 'المحادثات', icon: MessageSquare },
-  { value: 'actions', label: 'الإجراءات', icon: Shield },
+  { value: 'actions', label: 'الإجراءات', icon: Settings2 },
 ];
 
 const ShipmentDetailsPage = () => {
