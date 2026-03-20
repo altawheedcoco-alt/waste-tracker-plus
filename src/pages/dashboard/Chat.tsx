@@ -239,12 +239,31 @@ const MessageBubble = memo(({
           {message.file_url && (
             <div className="mb-1">
               {message.message_type === 'image' ? (
-                <img src={message.file_url} alt="" className="rounded-lg max-w-full max-h-60 object-cover" />
+                <img src={message.file_url} alt="" className="rounded-lg max-w-full max-h-60 object-cover cursor-pointer" onClick={() => window.open(message.file_url, '_blank')} />
+              ) : message.message_type === 'voice' || (message.message_type === 'file' && message.file_name && /\.(webm|mp3|wav|ogg|m4a)$/i.test(message.file_name)) ? (
+                <VoiceMessagePlayer url={message.file_url} isOwn={isMine} />
+              ) : message.message_type === 'video' || (message.message_type === 'file' && message.file_name && /\.(mp4|webm|mov|avi)$/i.test(message.file_name)) ? (
+                <div className="max-w-[280px]">
+                  <video src={message.file_url} controls className="rounded-lg w-full max-h-60" preload="metadata" playsInline />
+                </div>
+              ) : message.file_name && /\.pdf$/i.test(message.file_name) ? (
+                <a href={message.file_url} target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-2 p-2.5 rounded-lg bg-background/20 hover:bg-background/30 transition-colors">
+                  <div className="w-10 h-10 rounded-lg bg-red-500/20 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5 text-red-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <span className="text-xs font-medium truncate block">{message.file_name}</span>
+                    <span className="text-[10px] text-muted-foreground">PDF — اضغط للفتح</span>
+                  </div>
+                  <Download className="w-4 h-4 shrink-0 opacity-60" />
+                </a>
               ) : (
                 <a href={message.file_url} target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-2 p-2 rounded-lg bg-background/20">
+                  className="flex items-center gap-2 p-2 rounded-lg bg-background/20 hover:bg-background/30 transition-colors">
                   <FileText className="w-5 h-5" />
                   <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
+                  <Download className="w-4 h-4 shrink-0 opacity-60" />
                 </a>
               )}
             </div>
