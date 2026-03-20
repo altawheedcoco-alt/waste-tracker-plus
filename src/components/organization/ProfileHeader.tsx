@@ -44,6 +44,9 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [togglingLock, setTogglingLock] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropMode, setCropMode] = useState<CropMode>('cover');
+  const [cropOpen, setCropOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
