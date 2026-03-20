@@ -616,7 +616,7 @@ const OperationalAlertsWidget = () => {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
       </CardContent>
     </Card>
   );
