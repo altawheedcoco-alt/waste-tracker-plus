@@ -223,7 +223,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       // Incoming: invoices sent to me (partner_organization_id = me)
       let invoiceQuery = supabase
         .from('invoices')
-        .select('id, invoice_number, status, amount, tax_amount, total_amount, currency, organization_id, partner_organization_id, due_date, paid_date, created_at, invoice_type, notes, shipment_id')
+        .select('id, invoice_number, status, subtotal, tax_amount, total_amount, currency, organization_id, partner_organization_id, due_date, created_at, invoice_type, notes, paid_amount, remaining_amount, partner_name, invoice_category')
         .order('created_at', { ascending: false })
         .limit(50);
 
