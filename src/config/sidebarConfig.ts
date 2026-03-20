@@ -1,6 +1,6 @@
 /**
  * Sidebar menu configuration with smart grouping per organization type.
- * Merges similar sections and filters irrelevant items per role.
+ * Granular groups with all internal tabs exposed as sidebar items.
  */
 import {
   LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle, Wrench,
@@ -56,46 +56,79 @@ export const standaloneItems: SidebarItemConfig[] = [
 ];
 
 /**
- * All sidebar groups with smart visibility rules.
- * Groups are merged for a cleaner structure (~12 groups instead of ~22).
+ * All sidebar groups — granular structure with internal tabs exposed.
  */
 export const sidebarGroups: SidebarGroupConfig[] = [
-  // ═══════════════ 0. التواصل والمشاركة (Communication Hub) ═══════════════
+
+  // ═══════════════ 0A. الرسائل والمحادثات ═══════════════
   {
-    id: 'communication',
+    id: 'messaging',
     icon: MessageCircle,
-    labelAr: 'التواصل والمشاركة',
-    labelEn: 'Communication Hub',
+    labelAr: 'الرسائل والمحادثات',
+    labelEn: 'Messages & Chat',
     visibleFor: [],
     items: [
       { icon: MessageCircle, labelAr: 'الرسائل', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
       { icon: Bell, labelAr: 'الإشعارات', labelEn: 'Notifications', path: '/dashboard/notifications', key: 'notifications', badgeKey: 'notifications', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'مركز الملاحظات', labelEn: 'Notes', path: '/dashboard/notes', key: 'notes-center', bindingType: 'internal' as const },
-      { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
       { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
+    ],
+  },
+
+  // ═══════════════ 0B. الطلبات والمشاركة ═══════════════
+  {
+    id: 'requests-sharing',
+    icon: Send,
+    labelAr: 'الطلبات والمشاركة',
+    labelEn: 'Requests & Sharing',
+    visibleFor: [],
+    items: [
       { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
+      { icon: CircleDot, labelAr: 'الحالات', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
       { icon: Rss, labelAr: 'آخر أخبار الشركاء', labelEn: 'Partners Timeline', path: '/dashboard/partners-timeline', key: 'comm-partners-timeline', badgeKey: 'partners-timeline', bindingType: 'hybrid' as const, requiredPermissions: ['view_partner_data'] },
       { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
     ],
   },
 
-  // ═══════════════ 1. المنظمة والهيكل ═══════════════
+  // ═══════════════ 1A. ملف المنظمة ═══════════════
   {
-    id: 'org-structure',
+    id: 'org-profile',
     icon: Building2,
-    labelAr: 'المنظمة والهيكل',
-    labelEn: 'Organization',
-    visibleFor: [], // all
+    labelAr: 'ملف المنظمة',
+    labelEn: 'Organization Profile',
+    visibleFor: [],
     items: [
       { icon: Building2, labelAr: 'ملف المنظمة', labelEn: 'Org Profile', path: '/dashboard/organization-profile', key: 'org-profile', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'الإفادة الرقمية', labelEn: 'Digital Attestation', path: '/dashboard/organization-attestation', key: 'org-attestation', bindingType: 'admin' as const },
+      { icon: Fingerprint, labelAr: 'بطاقة الهوية الرقمية', labelEn: 'Digital Identity', path: '/dashboard/digital-identity-card', key: 'digital-identity-card', bindingType: 'internal' as const },
+      { icon: Newspaper, labelAr: 'منشورات المنظمة', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'posts', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 1B. إدارة الفريق والشركاء ═══════════════
+  {
+    id: 'team-partners',
+    icon: Users,
+    labelAr: 'الفريق والشركاء',
+    labelEn: 'Team & Partners',
+    visibleFor: [],
+    items: [
       { icon: Network, labelAr: 'الهيكل التنظيمي', labelEn: 'Org Structure', path: '/dashboard/org-structure', key: 'org-structure', bindingType: 'internal' as const, requiredPermissions: ['manage_members', 'manage_settings'] },
       { icon: Users, labelAr: 'إدارة الموظفين', labelEn: 'Employees', path: '/dashboard/employees', key: 'employees', bindingType: 'internal' as const, requiredPermissions: ['manage_members'] },
       { icon: Users, labelAr: 'بيانات الفريق', labelEn: 'Team Data', path: '/dashboard/team-credentials', key: 'other-team', bindingType: 'internal' as const, requiredPermissions: ['manage_members'] },
       { icon: Handshake, labelAr: 'الشركاء', labelEn: 'Partners', path: '/dashboard/partners', key: 'partners', badgeKey: 'partners', bindingType: 'hybrid' as const, requiredPermissions: ['manage_partners', 'view_partner_data'] },
       { icon: Rss, labelAr: 'آخر أخبار الشركاء', labelEn: 'Partners Timeline', path: '/dashboard/partners-timeline', key: 'partners-timeline', badgeKey: 'partners-timeline', bindingType: 'hybrid' as const, requiredPermissions: ['view_partner_data'] },
-      { icon: Newspaper, labelAr: 'منشورات المنظمة', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'posts', bindingType: 'internal' as const },
-      { icon: Fingerprint, labelAr: 'بطاقة الهوية الرقمية', labelEn: 'Digital Identity', path: '/dashboard/digital-identity-card', key: 'digital-identity-card', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 1C. الحوكمة والأمان ═══════════════
+  {
+    id: 'governance-security',
+    icon: Shield,
+    labelAr: 'الحوكمة والأمان',
+    labelEn: 'Governance & Security',
+    visibleFor: [],
+    items: [
       { icon: Shield, labelAr: 'الحوكمة والرقابة', labelEn: 'Governance', path: '/dashboard/governance', key: 'governance', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: Brain, labelAr: 'الأمن السيبراني', labelEn: 'Cyber Security', path: '/dashboard/cyber-security', key: 'cyber-security', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
     ],
@@ -119,7 +152,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 3. العمليات — الناقل ═══════════════
+  // ═══════════════ 3A. عمليات الشحن — الناقل ═══════════════
   {
     id: 'transporter-ops',
     icon: Package,
@@ -132,10 +165,21 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'شهادات الاستلام', labelEn: 'Receipt Certs', path: '/dashboard/transporter-receipts', key: 'transporter-receipts', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: Scale, labelAr: 'سجل الكميات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'transporter-external-records', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: Scale, labelAr: 'الوزنات الجماعية', labelEn: 'Bulk Weight Entries', path: '/dashboard/bulk-weight-entries', key: 'transporter-bulk-weight', bindingType: 'hybrid' as const, requiredPermissions: ['manage_shipments'] },
-      { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche', bindingType: 'internal' as const },
       { icon: Inbox, labelAr: 'طلبات الجمع', labelEn: 'Collection Requests', path: '/dashboard/collection-requests', key: 'collection-requests', bindingType: 'partner' as const, requiredPermissions: ['view_shipments', 'manage_shipments'] },
+    ],
+  },
+
+  // ═══════════════ 3B. الشحنات اليدوية — الناقل ═══════════════
+  {
+    id: 'transporter-manual',
+    icon: Plus,
+    labelAr: 'الشحنات اليدوية',
+    labelEn: 'Manual Shipments',
+    visibleFor: ['transporter'],
+    items: [
       { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Manual Shipment', path: '/dashboard/manual-shipment', key: 'manual-shipment', bindingType: 'hybrid' as const, requiredPermissions: ['create_shipments'] },
       { icon: FileText, labelAr: 'أرشيف النماذج اليدوية', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche', bindingType: 'internal' as const },
       { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center', bindingType: 'internal' as const, requiredPermissions: ['view_shipments', 'export_reports'] },
     ],
   },
@@ -157,23 +201,34 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 4B. إدارة القوى العاملة (ناقل فقط) ═══════════════
+  // ═══════════════ 4B. إدارة السائقين ═══════════════
   {
-    id: 'workforce-management',
+    id: 'driver-management',
     icon: Users,
-    labelAr: 'إدارة القوى العاملة',
-    labelEn: 'Workforce Management',
+    labelAr: 'إدارة السائقين',
+    labelEn: 'Driver Management',
     visibleFor: ['transporter'],
     items: [
       { icon: Users, labelAr: 'إدارة السائقين', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers', 'view_drivers'] },
       { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Driver Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const, requiredPermissions: ['manage_drivers'] },
       { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shift Scheduler', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+    ],
+  },
+
+  // ═══════════════ 4C. تطوير السائقين ═══════════════
+  {
+    id: 'driver-development',
+    icon: GraduationCap,
+    labelAr: 'تطوير السائقين',
+    labelEn: 'Driver Development',
+    visibleFor: ['transporter'],
+    items: [
       { icon: GraduationCap, labelAr: 'أكاديمية السائقين', labelEn: 'Driver Academy', path: '/dashboard/driver-academy', key: 'driver-academy', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: Trophy, labelAr: 'مكافآت السائقين', labelEn: 'Driver Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
-  // ═══════════════ 4C. المركز التنظيمي (ناقل فقط) ═══════════════
+  // ═══════════════ 4D. المركز التنظيمي (ناقل) ═══════════════
   {
     id: 'transporter-regulatory',
     icon: Shield,
@@ -220,13 +275,24 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Package, labelAr: 'الطلبات الواردة', labelEn: 'Incoming Requests', path: '/dashboard/disposal/incoming-requests', key: 'disposal-incoming', bindingType: 'partner' as const, requiredPermissions: ['view_shipments', 'manage_shipments'] },
       { icon: FolderCheck, labelAr: 'شهادات التخلص', labelEn: 'Disposal Certs', path: '/dashboard/disposal/certificates', key: 'disposal-certs', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: BarChart3, labelAr: 'تقارير التخلص', labelEn: 'Disposal Reports', path: '/dashboard/disposal/reports', key: 'disposal-reports', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
+    ],
+  },
+
+  // ═══════════════ 6B. مرافق وسعة التخلص ═══════════════
+  {
+    id: 'disposal-facilities',
+    icon: GaugeIcon,
+    labelAr: 'المرافق والسعة',
+    labelEn: 'Facilities & Capacity',
+    visibleFor: ['disposal'],
+    items: [
       { icon: Factory, labelAr: 'مرافق التخلص', labelEn: 'Facilities', path: '/dashboard/disposal-facilities', key: 'disposal-facilities', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: HardHat, labelAr: 'السلامة والصحة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'disposal-safety', bindingType: 'hybrid' as const },
       { icon: GaugeIcon, labelAr: 'إدارة السعة', labelEn: 'Capacity Management', path: '/dashboard/capacity-management', key: 'capacity-management', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
     ],
   },
 
-  // ═══════════════ 7. مركز القيادة الرقابي ═══════════════
+  // ═══════════════ 7. الرقابة والإشراف (regulator) ═══════════════
   {
     id: 'regulator-command',
     icon: Shield,
@@ -375,30 +441,41 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 10. العمليات والأنشطة (مدمج) ═══════════════
+  // ═══════════════ 10A. لوحة العمليات ═══════════════
   {
-    id: 'operations-activity',
-    icon: Activity,
-    labelAr: 'العمليات والأنشطة',
-    labelEn: 'Operations & Activity',
+    id: 'operations-board',
+    icon: Gauge,
+    labelAr: 'لوحة العمليات',
+    labelEn: 'Operations Board',
     visibleFor: [],
     items: [
       { icon: Gauge, labelAr: 'لوحة العمليات', labelEn: 'Operations Dashboard', path: '/dashboard/operations', key: 'operations', bindingType: 'internal' as const },
       { icon: CheckSquare, labelAr: 'لوحة المهام', labelEn: 'Task Board', path: '/dashboard/task-board', key: 'task-board', bindingType: 'internal' as const },
       { icon: ClipboardList, labelAr: 'سجل الأنشطة', labelEn: 'Activity Log', path: '/dashboard/activity-log', key: 'activity-log', bindingType: 'internal' as const },
       { icon: FileText, labelAr: 'السجلات الخارجية', labelEn: 'External Records', path: '/dashboard/external-records', key: 'external-records', bindingType: 'hybrid' as const },
+    ],
+  },
+
+  // ═══════════════ 10B. إعدادات الأجهزة ═══════════════
+  {
+    id: 'device-settings',
+    icon: Zap,
+    labelAr: 'الأجهزة والمستشعرات',
+    labelEn: 'Devices & Sensors',
+    visibleFor: [],
+    items: [
       { icon: MapPin, labelAr: 'إعدادات GPS', labelEn: 'GPS Settings', path: '/dashboard/gps-settings', key: 'gps-settings', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: Zap, labelAr: 'إعدادات IoT', labelEn: 'IoT Settings', path: '/dashboard/iot-settings', key: 'iot-settings', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: Eye, labelAr: 'الكاميرات والتحقق', labelEn: 'Cameras & Verification', path: '/dashboard/cameras', key: 'cameras', bindingType: 'internal' as const, visibleFor: ['recycler', 'disposal', 'generator', 'transporter'], requiredPermissions: ['manage_settings'] },
     ],
   },
 
-  // ═══════════════ 11. مركز المستندات (موحد) ═══════════════
+  // ═══════════════ 11A. المستندات الأساسية ═══════════════
   {
-    id: 'docs-contracts',
+    id: 'docs-main',
     icon: FolderOpen,
-    labelAr: 'مركز المستندات',
-    labelEn: 'Document Center',
+    labelAr: 'المستندات',
+    labelEn: 'Documents',
     visibleFor: [],
     items: [
       { icon: Sparkles, labelAr: 'استوديو المستندات الذكي', labelEn: 'AI Document Studio', path: '/dashboard/ai-document-studio', key: 'ai-document-studio', bindingType: 'internal' as const,
@@ -409,27 +486,65 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Scale, labelAr: 'المستندات التنظيمية', labelEn: 'Regulatory Documents', path: '/dashboard/regulatory-documents', key: 'regulatory-documents', bindingType: 'admin' as const,
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'admin'] },
       { icon: FolderOpen, labelAr: 'الأرشيف', labelEn: 'Archive', path: '/dashboard/document-center?tab=archive', key: 'doc-center-archive', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 11B. التوقيعات والأمان ═══════════════
+  {
+    id: 'docs-signatures',
+    icon: PenTool,
+    labelAr: 'التوقيعات والأختام',
+    labelEn: 'Signatures & Stamps',
+    visibleFor: [],
+    items: [
       { icon: PenTool, labelAr: 'التوقيعات والأختام', labelEn: 'Signatures & Stamps', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures', bindingType: 'internal' as const },
       { icon: CircleDot, labelAr: 'QR وباركود', labelEn: 'QR & Barcode', path: '/dashboard/document-center?tab=qr-barcode', key: 'doc-center-qr', bindingType: 'internal' as const },
       { icon: Shield, labelAr: 'التحقق والأمان', labelEn: 'Verification', path: '/dashboard/document-center?tab=verification', key: 'doc-center-verification', bindingType: 'internal' as const },
-      { icon: Printer, labelAr: 'الطباعة والتصدير', labelEn: 'Print & Export', path: '/dashboard/document-center?tab=print', key: 'doc-center-print', bindingType: 'internal' as const, requiredPermissions: ['export_reports'] },
+    ],
+  },
+
+  // ═══════════════ 11C. العقود والشهادات والطباعة ═══════════════
+  {
+    id: 'docs-contracts',
+    icon: FileSignature,
+    labelAr: 'العقود والشهادات',
+    labelEn: 'Contracts & Certificates',
+    visibleFor: [],
+    items: [
       { icon: FileSignature, labelAr: 'العقود', labelEn: 'Contracts', path: '/dashboard/document-center?tab=contracts', key: 'doc-center-contracts', bindingType: 'partner' as const },
       { icon: Award, labelAr: 'الشهادات', labelEn: 'Certificates', path: '/dashboard/document-center?tab=certificates', key: 'doc-center-certificates', bindingType: 'hybrid' as const },
       { icon: Receipt, labelAr: 'الفواتير', labelEn: 'Invoices', path: '/dashboard/document-center?tab=invoices', key: 'doc-center-invoices', bindingType: 'hybrid' as const, requiredPermissions: ['view_accounts'] },
       { icon: FileText, labelAr: 'القوالب والنماذج', labelEn: 'Templates', path: '/dashboard/document-center?tab=templates', key: 'doc-center-templates', bindingType: 'internal' as const },
+      { icon: Printer, labelAr: 'الطباعة والتصدير', labelEn: 'Print & Export', path: '/dashboard/document-center?tab=print', key: 'doc-center-print', bindingType: 'internal' as const, requiredPermissions: ['export_reports'] },
     ],
   },
 
-  // ═══════════════ 12. المالية والمحاسبة ═══════════════
+  // ═══════════════ 12A. المحاسبة والمالية ═══════════════
   {
-    id: 'finance',
-    icon: Wallet,
-    labelAr: 'المالية والمحاسبة',
-    labelEn: 'Finance & Accounting',
+    id: 'accounting',
+    icon: Calculator,
+    labelAr: 'المحاسبة والمالية',
+    labelEn: 'Accounting & Finance',
     visibleFor: [],
     items: [
       { icon: Calculator, labelAr: 'المحاسبة', labelEn: 'Accounting', path: '/dashboard/erp/accounting', key: 'erp-accounting', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'view_account_details'] },
       { icon: Package, labelAr: 'المخزون', labelEn: 'Inventory', path: '/dashboard/erp/inventory', key: 'erp-inventory', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
+      { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'create_deposits'] },
+      { icon: BarChart3, labelAr: 'التقارير المالية', labelEn: 'Financial Reports', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'view_reports'] },
+      { icon: Activity, labelAr: 'الإيرادات والمصروفات', labelEn: 'Revenue & Expenses', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
+      { icon: Banknote, labelAr: 'تكلفة البضاعة', labelEn: 'COGS', path: '/dashboard/erp/cogs', key: 'erp-cogs', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
+      { icon: GitCompareArrows, labelAr: 'المقارنات المالية', labelEn: 'Comparisons', path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'view_reports'] },
+    ],
+  },
+
+  // ═══════════════ 12B. الموارد البشرية ═══════════════
+  {
+    id: 'hr-management',
+    icon: Users,
+    labelAr: 'الموارد البشرية',
+    labelEn: 'Human Resources',
+    visibleFor: [],
+    items: [
       { icon: Users, labelAr: 'الموارد البشرية', labelEn: 'HR', path: '/dashboard/erp/hr', key: 'erp-hr', bindingType: 'internal' as const, requiredPermissions: ['manage_members', 'manage_settings'] },
       { icon: Banknote, labelAr: 'مسيّر الرواتب', labelEn: 'Payroll', path: '/dashboard/hr/payroll', key: 'hr-payroll', bindingType: 'internal' as const, requiredPermissions: ['manage_members', 'manage_settings'] },
       { icon: Award, labelAr: 'تقييم الأداء', labelEn: 'Performance', path: '/dashboard/hr/performance', key: 'hr-performance', bindingType: 'internal' as const, requiredPermissions: ['manage_members'] },
@@ -437,38 +552,66 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Network, labelAr: 'الهيكل التنظيمي', labelEn: 'Org Chart', path: '/dashboard/hr/org-chart', key: 'hr-org-chart', bindingType: 'internal' as const },
       { icon: UserPlus, labelAr: 'نهاية الخدمة', labelEn: 'End of Service', path: '/dashboard/hr/end-of-service', key: 'hr-eos', bindingType: 'internal' as const, requiredPermissions: ['manage_members', 'manage_settings'] },
       { icon: Inbox, labelAr: 'الخدمة الذاتية', labelEn: 'Self Service', path: '/dashboard/hr/self-service', key: 'hr-self-service', bindingType: 'internal' as const },
-      { icon: ShoppingCart, labelAr: 'المشتريات والمبيعات', labelEn: 'Purchasing & Sales', path: '/dashboard/erp/purchasing-sales', key: 'erp-purchasing-sales', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'create_deposits'] },
-      { icon: BarChart3, labelAr: 'التقارير المالية', labelEn: 'Financial Reports', path: '/dashboard/erp/financial-dashboard', key: 'erp-financial-dashboard', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'view_reports'] },
-      { icon: Activity, labelAr: 'الإيرادات والمصروفات', labelEn: 'Revenue & Expenses', path: '/dashboard/erp/revenue-expenses', key: 'erp-revenue-expenses', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
-      { icon: Banknote, labelAr: 'تكلفة البضاعة', labelEn: 'COGS', path: '/dashboard/erp/cogs', key: 'erp-cogs', bindingType: 'internal' as const, requiredPermissions: ['view_accounts'] },
-      { icon: GitCompareArrows, labelAr: 'المقارنات المالية', labelEn: 'Comparisons', path: '/dashboard/erp/financial-comparisons', key: 'erp-comparisons', bindingType: 'internal' as const, requiredPermissions: ['view_accounts', 'view_reports'] },
-      { icon: Umbrella, labelAr: 'التأمين الذكي', labelEn: 'Smart Insurance', path: '/dashboard/smart-insurance', key: 'smart-insurance', bindingType: 'hybrid' as const, visibleFor: ['transporter'] },
-      { icon: TrendingUp, labelAr: 'العقود الآجلة', labelEn: 'Futures Market', path: '/dashboard/futures-market', key: 'futures-market', bindingType: 'hybrid' as const, visibleFor: ['transporter'] },
-      { icon: Wallet, labelAr: 'المحفظة الرقمية', labelEn: 'Digital Wallet', path: '/dashboard/digital-wallet', key: 'digital-wallet', bindingType: 'internal' as const, visibleFor: ['transporter'] },
     ],
   },
 
-  // ═══════════════ 13. التقارير والتحليلات ═══════════════
+  // ═══════════════ 12C. المحفظة والتأمين (ناقل) ═══════════════
   {
-    id: 'reports-analytics',
-    icon: BarChart3,
-    labelAr: 'التقارير والتحليلات',
-    labelEn: 'Reports & Analytics',
+    id: 'wallet-insurance',
+    icon: Wallet,
+    labelAr: 'المحفظة والتأمين',
+    labelEn: 'Wallet & Insurance',
+    visibleFor: ['transporter'],
+    items: [
+      { icon: Umbrella, labelAr: 'التأمين الذكي', labelEn: 'Smart Insurance', path: '/dashboard/smart-insurance', key: 'smart-insurance', bindingType: 'hybrid' as const },
+      { icon: TrendingUp, labelAr: 'العقود الآجلة', labelEn: 'Futures Market', path: '/dashboard/futures-market', key: 'futures-market', bindingType: 'hybrid' as const },
+      { icon: Wallet, labelAr: 'المحفظة الرقمية', labelEn: 'Digital Wallet', path: '/dashboard/digital-wallet', key: 'digital-wallet', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 13A. تقارير الشحنات ═══════════════
+  {
+    id: 'shipment-reports',
+    icon: FileText,
+    labelAr: 'تقارير الشحنات',
+    labelEn: 'Shipment Reports',
     visibleFor: [],
     items: [
       { icon: BarChart3, labelAr: 'التقارير', labelEn: 'Reports', path: '/dashboard/reports', key: 'reports', bindingType: 'internal' as const, requiredPermissions: ['view_reports', 'create_reports'] },
       { icon: FileText, labelAr: 'تقارير الشحنات', labelEn: 'Shipment Reports', path: '/dashboard/shipment-reports', key: 'shipment-reports', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: ClipboardList, labelAr: 'التقرير التجميعي', labelEn: 'Aggregate Report', path: '/dashboard/aggregate-report', key: 'aggregate-report', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Reports Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
+    ],
+  },
+
+  // ═══════════════ 13B. سجلات المخلفات ═══════════════
+  {
+    id: 'waste-registers',
+    icon: Layers,
+    labelAr: 'سجلات المخلفات',
+    labelEn: 'Waste Registers',
+    visibleFor: [],
+    items: [
       { icon: FileSpreadsheet, labelAr: 'سجل غير خطرة', labelEn: 'Non-Hazardous', path: '/dashboard/non-hazardous-register', key: 'non-hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: AlertTriangle, labelAr: 'سجل خطرة', labelEn: 'Hazardous', path: '/dashboard/hazardous-register', key: 'hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
+      { icon: BarChart3, labelAr: 'تحليل النفايات التفصيلي', labelEn: 'Waste Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
+      { icon: Activity, labelAr: 'خريطة تدفق النفايات', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+    ],
+  },
+
+  // ═══════════════ 13C. التقارير البيئية ═══════════════
+  {
+    id: 'environmental-reports',
+    icon: Leaf,
+    labelAr: 'التقارير البيئية',
+    labelEn: 'Environmental Reports',
+    visibleFor: [],
+    items: [
       { icon: Leaf, labelAr: 'البصمة الكربونية', labelEn: 'Carbon Footprint', path: '/dashboard/carbon-footprint', key: 'carbon-footprint', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: TreePine, labelAr: 'الاستدامة البيئية', labelEn: 'Sustainability', path: '/dashboard/environmental-sustainability', key: 'environmental-sustainability', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
       { icon: Leaf, labelAr: 'تقارير ESG', labelEn: 'ESG Reports', path: '/dashboard/esg-reports', key: 'esg-reports', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
       { icon: Shield, labelAr: 'تقارير السلامة', labelEn: 'OHS Reports', path: '/dashboard/ohs-reports', key: 'ohs-reports', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
-      { icon: BarChart3, labelAr: 'تحليل النفايات التفصيلي', labelEn: 'Waste Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
-      { icon: Activity, labelAr: 'خريطة تدفق النفايات', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
     ],
   },
 
@@ -486,18 +629,29 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 15. الطلبات والتنظيم ═══════════════
+  // ═══════════════ 15A. عروض الأسعار والطلبات ═══════════════
   {
-    id: 'requests-regulatory',
-    icon: ClipboardList,
-    labelAr: 'الطلبات والتنظيم',
-    labelEn: 'Requests & Regulatory',
+    id: 'quotations-requests',
+    icon: FileText,
+    labelAr: 'العروض والطلبات',
+    labelEn: 'Quotations & Requests',
     visibleFor: [],
     items: [
       { icon: FileText, labelAr: 'عروض الأسعار', labelEn: 'Quotations', path: '/dashboard/quotations', key: 'quotations', bindingType: 'partner' as const,
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office'] },
       { icon: Scale, labelAr: 'السجل التنظيمي', labelEn: 'Regulatory', path: '/dashboard/regulatory-updates', key: 'regulatory', bindingType: 'admin' as const },
       { icon: ClipboardList, labelAr: 'الخطط التشغيلية', labelEn: 'Plans', path: '/dashboard/operational-plans', key: 'operational-plans', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 15B. حسابات الشركاء والقوانين ═══════════════
+  {
+    id: 'partner-accounts',
+    icon: Handshake,
+    labelAr: 'حسابات الشركاء',
+    labelEn: 'Partner Accounts',
+    visibleFor: [],
+    items: [
       { icon: Users, labelAr: 'حسابات الشركاء', labelEn: 'Partner Accounts', path: '/dashboard/partner-accounts', key: 'partner-accounts', badgeKey: 'partner-accounts', bindingType: 'partner' as const, requiredPermissions: ['view_partner_data', 'manage_partners'] },
       { icon: BookOpen, labelAr: 'القوانين واللوائح', labelEn: 'Laws & Regulations', path: '/dashboard/laws-regulations', key: 'laws-regulations', bindingType: 'admin' as const,
         visibleFor: ['generator', 'transporter', 'recycler', 'disposal', 'consultant', 'consulting_office', 'admin'] },
@@ -521,17 +675,28 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 17. أدوات ذكية وتعلّم ═══════════════
+  // ═══════════════ 17A. أدوات الذكاء الاصطناعي ═══════════════
   {
-    id: 'smart-tools',
+    id: 'ai-tools',
     icon: Brain,
-    labelAr: 'أدوات ذكية وتعلّم',
-    labelEn: 'Smart Tools & Learning',
+    labelAr: 'أدوات الذكاء الاصطناعي',
+    labelEn: 'AI Tools',
     visibleFor: [],
     items: [
       { icon: Brain, labelAr: 'أدوات الذكاء الاصطناعي', labelEn: 'AI Tools', path: '/dashboard/ai-tools', key: 'ai-tools', bindingType: 'hybrid' as const },
       { icon: TrendingUp, labelAr: 'التنبؤ الذكي', labelEn: 'AI Forecasting', path: '/dashboard/ai-forecasting', key: 'ai-forecasting', bindingType: 'hybrid' as const },
       { icon: Sparkles, labelAr: 'توصيات الوظائف', labelEn: 'Smart Jobs', path: '/dashboard/smart-job-recommendations', key: 'smart-jobs', bindingType: 'hybrid' as const },
+    ],
+  },
+
+  // ═══════════════ 17B. التعلّم والإنجازات ═══════════════
+  {
+    id: 'learning-achievements',
+    icon: GraduationCap,
+    labelAr: 'التعلّم والإنجازات',
+    labelEn: 'Learning & Achievements',
+    visibleFor: [],
+    items: [
       { icon: Trophy, labelAr: 'نظام الإنجازات', labelEn: 'Gamification', path: '/dashboard/gamification', key: 'gamification', bindingType: 'internal' as const },
       { icon: Award, labelAr: 'شهادات التميز', labelEn: 'Certificates', path: '/dashboard/pride-certificates', key: 'pride-certificates', bindingType: 'internal' as const },
       { icon: GraduationCap, labelAr: 'المركز التعليمي', labelEn: 'Learning Center', path: '/dashboard/learning-center', key: 'learning-center', bindingType: 'internal' as const },
@@ -557,7 +722,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18B. إدارة الكيانات (أدمن فقط) ═══════════════
+  // ═══════════════ 18B. إدارة الكيانات (أدمن) ═══════════════
   {
     id: 'admin-entity-management',
     icon: Building2,
@@ -577,7 +742,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18C. المستخدمون والأسطول (أدمن فقط) ═══════════════
+  // ═══════════════ 18C. المستخدمون والأسطول (أدمن) ═══════════════
   {
     id: 'admin-users-fleet',
     icon: Truck,
@@ -596,7 +761,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18D. المالية والإيرادات (أدمن فقط) ═══════════════
+  // ═══════════════ 18D. المالية والإيرادات (أدمن) ═══════════════
   {
     id: 'admin-finance',
     icon: CreditCard,
@@ -612,7 +777,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18E. المحتوى والتسويق (أدمن فقط) ═══════════════
+  // ═══════════════ 18E. المحتوى والتسويق (أدمن) ═══════════════
   {
     id: 'admin-content',
     icon: Globe,
@@ -633,7 +798,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 18F. البنية التحتية (أدمن فقط) ═══════════════
+  // ═══════════════ 18F. البنية التحتية (أدمن) ═══════════════
   {
     id: 'admin-infrastructure',
     icon: Database,
@@ -657,26 +822,38 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ 19. النظام والدعم ═══════════════
+  // ═══════════════ 19A. الدعم الفني ═══════════════
   {
-    id: 'system-support',
-    icon: Settings,
-    labelAr: 'النظام والدعم',
-    labelEn: 'System & Support',
+    id: 'support',
+    icon: Headphones,
+    labelAr: 'الدعم الفني',
+    labelEn: 'Support',
     visibleFor: [],
     items: [
       { icon: Headphones, labelAr: 'الدعم الفني', labelEn: 'Support', path: '/dashboard/support', key: 'support', bindingType: 'internal' as const },
       { icon: Bell, labelAr: 'الإشعارات', labelEn: 'Notifications', path: '/dashboard/notifications', key: 'notifications', bindingType: 'internal' as const },
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'System Status', path: '/dashboard/system-status', key: 'all-system-status', bindingType: 'internal' as const },
+      { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ 19B. الإعدادات ═══════════════
+  {
+    id: 'settings-system',
+    icon: Settings,
+    labelAr: 'الإعدادات',
+    labelEn: 'Settings',
+    visibleFor: [],
+    items: [
+      { icon: Settings, labelAr: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', key: 'settings', bindingType: 'internal' as const, requiredPermissions: ['manage_settings', 'view_settings'] },
       { icon: Wallet, labelAr: 'إدارة الاشتراك', labelEn: 'Subscription', path: '/dashboard/subscription', key: 'subscription', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
       { icon: Database, labelAr: 'تصدير البيانات', labelEn: 'Data Export', path: '/dashboard/data-export', key: 'data-export', bindingType: 'internal' as const, requiredPermissions: ['export_reports', 'export_accounts'] },
       { icon: WifiOff, labelAr: 'وضع بدون إنترنت', labelEn: 'Offline Mode', path: '/dashboard/offline-mode', key: 'offline-mode', bindingType: 'internal' as const },
-      { icon: Info, labelAr: 'عن المنصة', labelEn: 'About', path: '/dashboard/about-platform', key: 'about-platform', bindingType: 'internal' as const },
-      { icon: Settings, labelAr: 'الإعدادات', labelEn: 'Settings', path: '/dashboard/settings', key: 'settings', bindingType: 'internal' as const, requiredPermissions: ['manage_settings', 'view_settings'] },
       { icon: Zap, labelAr: 'الإجراءات التلقائية', labelEn: 'Auto Actions', path: '/dashboard/auto-actions', key: 'auto-actions', bindingType: 'internal' as const, requiredPermissions: ['manage_settings'] },
     ],
   },
 ];
+
 /**
  * Admin-only group IDs for quick lookup
  */
@@ -707,90 +884,57 @@ export function isAdminSovereignView(isAdmin: boolean): boolean {
 
 /**
  * Get visible sidebar groups for a given org type.
- * 
- * Admin logic:
- * 1. Sovereign mode (own account): Admin-specific groups + shared groups ONLY (no role-specific clutter)
- * 2. Voluntary org switch: That org's groups + shared groups, then admin tools as a separated section
- * 
- * Non-admin: Standard filtering by org type.
  */
 export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarGroupConfig[] {
   if (isAdmin) {
     const viewingAsOrg = getAdminViewingOrg();
-    
-    if (viewingAsOrg && orgType) {
-      // ── Voluntary org mimicry: show org-relevant groups, then admin tools at end ──
-      const orgGroups = sidebarGroups.filter(group => {
-        if (ADMIN_GROUP_IDS.has(group.id)) return false; // exclude admin groups from main list
-        if (group.visibleFor.length === 0) return true;
-        return group.visibleFor.includes(orgType);
-      }).map(group => ({
-        ...group,
-        items: group.items.filter(item => {
-          if (!item.visibleFor || item.visibleFor.length === 0) return true;
-          return item.visibleFor.includes(orgType);
-        }),
-      }));
-      
-      // Add admin-only groups at the end (sovereign tools always accessible)
-      const adminTools = sidebarGroups.filter(group => ADMIN_GROUP_IDS.has(group.id));
-      
-      return [...orgGroups, ...adminTools];
+    if (viewingAsOrg) {
+      // Viewing as org: show that org's groups + shared groups, then admin groups
+      return sidebarGroups.filter(g => {
+        if (ADMIN_GROUP_IDS.has(g.id)) return true; // always show admin groups
+        if (g.visibleFor.length === 0) return true; // shared groups
+        return g.visibleFor.includes(orgType);
+      });
     }
-    
-    // ── Sovereign mode: Admin groups first, then shared groups only ──
-    // NO role-specific groups — admin uses the org switcher to view those
-    const adminGroups = sidebarGroups.filter(group => ADMIN_GROUP_IDS.has(group.id));
-    const sharedGroups = sidebarGroups.filter(group => 
-      group.visibleFor.length === 0 && !ADMIN_GROUP_IDS.has(group.id)
-    );
-    
-    return [...adminGroups, ...sharedGroups];
+    // Sovereign mode: admin groups + shared groups only
+    return sidebarGroups.filter(g => {
+      if (ADMIN_GROUP_IDS.has(g.id)) return true;
+      if (g.visibleFor.length === 0) return true;
+      return false; // hide role-specific groups in sovereign mode
+    });
   }
 
-  // ── Standard user: filter by org type ──
-  return sidebarGroups.filter(group => {
-    if (group.visibleFor.length === 0) return true;
-    return group.visibleFor.includes(orgType);
-  }).map(group => ({
-    ...group,
-    items: group.items.filter(item => {
-      if (!item.visibleFor || item.visibleFor.length === 0) return true;
-      return item.visibleFor.includes(orgType);
-    }),
-  }));
+  // Non-admin: standard filtering
+  return sidebarGroups.filter(g => {
+    if (g.visibleFor.length === 0) return true;
+    return g.visibleFor.includes(orgType);
+  });
 }
 
 /**
- * Get all group IDs in default order for a given org type.
- */
-export function getDefaultGroupOrder(orgType: string, isAdmin: boolean): string[] {
-  return getGroupsForOrgType(orgType, isAdmin).map(g => g.id);
-}
-
-/**
- * Filter sidebar groups by employee permissions.
- * Admins and company_admins bypass this filter entirely.
- * For employees: items with requiredPermissions are only shown if the user has at least one of them.
- * Groups with zero visible items after filtering are removed.
+ * Filter groups based on employee permissions
  */
 export function filterGroupsByPermissions(
   groups: SidebarGroupConfig[],
-  userPermissions: string[],
+  permissions: string[],
   isEmployee: boolean
 ): SidebarGroupConfig[] {
-  if (!isEmployee) return groups; // admins/company_admins see everything
-  
-  const hasFullAccess = userPermissions.includes('full_access');
-  if (hasFullAccess) return groups;
+  if (!isEmployee || permissions.length === 0) return groups;
 
-  return groups.map(group => ({
-    ...group,
-    items: group.items.filter(item => {
-      // No permission requirement → visible to all
+  return groups.map(group => {
+    const filteredItems = group.items.filter(item => {
       if (!item.requiredPermissions || item.requiredPermissions.length === 0) return true;
-      // Check if user has ANY of the required permissions
-      return item.requiredPermissions.some(p => userPermissions.includes(p));
-    }),
-  })).filter(group => group.items.length > 0);
+      return item.requiredPermissions.some(p => permissions.includes(p));
+    });
+
+    if (filteredItems.length === 0) return null;
+    return { ...group, items: filteredItems };
+  }).filter(Boolean) as SidebarGroupConfig[];
+}
+
+/**
+ * Default group order for a given org type.
+ */
+export function getDefaultGroupOrder(orgType: string, isAdmin: boolean): string[] {
+  return getGroupsForOrgType(orgType, isAdmin).map(g => g.id);
 }
