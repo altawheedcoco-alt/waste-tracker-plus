@@ -1,5 +1,6 @@
-import { useState, useRef, useMemo } from 'react';
+import { useState, useRef, useMemo, useCallback } from 'react';
 import ClickableImage from '@/components/ui/ClickableImage';
+import ImageCropDialog, { CropMode } from '@/components/ui/ImageCropDialog';
 import { motion } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -43,6 +44,9 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [togglingLock, setTogglingLock] = useState(false);
+  const [cropFile, setCropFile] = useState<File | null>(null);
+  const [cropMode, setCropMode] = useState<CropMode>('cover');
+  const [cropOpen, setCropOpen] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
 
@@ -109,108 +113,81 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   const handleCoverUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    event.target.value = '';
 
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast.error('نوع الملف غير مدعوم. يرجى رفع صورة JPG أو PNG أو WebP');
       return;
     }
-
-    // Validate file size (5MB)
     if (file.size > 5 * 1024 * 1024) {
       toast.error('حجم الملف كبير جداً. الحد الأقصى 5 ميجابايت');
       return;
     }
 
-    setUploadingCover(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `cover_${Date.now()}.${fileExt}`;
-      const filePath = `${organization.id}/${fileName}`;
-
-      // Upload to storage
-      const { error: uploadError } = await supabase.storage
-        .from('public-assets')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) throw uploadError;
-
-      // Get public URL
-      const { data: urlData } = supabase.storage
-        .from('public-assets')
-        .getPublicUrl(filePath);
-
-      // Update organization
-      const { error: updateError } = await supabase
-        .from('organizations')
-        .update({ cover_url: urlData.publicUrl })
-        .eq('id', organization.id);
-
-      if (updateError) throw updateError;
-
-      toast.success('تم تحديث صورة الغلاف بنجاح');
-      onUpdate?.();
-    } catch (error) {
-      console.error('Error uploading cover:', error);
-      toast.error('حدث خطأ في رفع صورة الغلاف');
-    } finally {
-      setUploadingCover(false);
-    }
+    setCropFile(file);
+    setCropMode('cover');
+    setCropOpen(true);
   };
 
   const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+    event.target.value = '';
 
-    // Validate file type
     const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
     if (!allowedTypes.includes(file.type)) {
       toast.error('نوع الملف غير مدعوم. يرجى رفع صورة JPG أو PNG أو WebP');
       return;
     }
-
-    // Validate file size (2MB)
     if (file.size > 2 * 1024 * 1024) {
       toast.error('حجم الملف كبير جداً. الحد الأقصى 2 ميجابايت');
       return;
     }
 
-    setUploadingLogo(true);
+    setCropFile(file);
+    setCropMode('avatar');
+    setCropOpen(true);
+  };
+
+  const handleCropSave = useCallback(async (croppedBlob: Blob) => {
+    const isCover = cropMode === 'cover';
+    const setUploading = isCover ? setUploadingCover : setUploadingLogo;
+    setUploading(true);
+
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `logo_${Date.now()}.${fileExt}`;
+      const prefix = isCover ? 'cover' : 'logo';
+      const fileName = `${prefix}_${Date.now()}.jpg`;
       const filePath = `${organization.id}/${fileName}`;
 
-      // Upload to storage
       const { error: uploadError } = await supabase.storage
         .from('public-assets')
-        .upload(filePath, file, { upsert: true });
+        .upload(filePath, croppedBlob, { upsert: true, contentType: 'image/jpeg' });
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
       const { data: urlData } = supabase.storage
         .from('public-assets')
         .getPublicUrl(filePath);
 
-      // Update organization
+      const updateField = isCover ? 'cover_url' : 'logo_url';
       const { error: updateError } = await supabase
         .from('organizations')
-        .update({ logo_url: urlData.publicUrl })
+        .update({ [updateField]: urlData.publicUrl })
         .eq('id', organization.id);
 
       if (updateError) throw updateError;
 
-      toast.success('تم تحديث صورة الشعار بنجاح');
+      toast.success(isCover ? 'تم تحديث صورة الغلاف بنجاح' : 'تم تحديث صورة الشعار بنجاح');
       onUpdate?.();
     } catch (error) {
-      console.error('Error uploading logo:', error);
-      toast.error('حدث خطأ في رفع صورة الشعار');
+      console.error('Error uploading:', error);
+      toast.error('حدث خطأ في رفع الصورة');
     } finally {
-      setUploadingLogo(false);
+      setUploading(false);
     }
-  };
+  }, [cropMode, organization.id, onUpdate]);
+
 
   const handleToggleLock = async () => {
     setTogglingLock(true);
@@ -473,6 +450,14 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           </div>
         </div>
       </div>
+      {/* Image Crop Dialog */}
+      <ImageCropDialog
+        open={cropOpen}
+        onOpenChange={setCropOpen}
+        imageFile={cropFile}
+        mode={cropMode}
+        onSave={handleCropSave}
+      />
     </div>
   );
 };
