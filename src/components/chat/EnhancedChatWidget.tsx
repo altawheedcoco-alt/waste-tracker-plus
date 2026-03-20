@@ -543,6 +543,7 @@ const EnhancedChatWidget = () => {
                     sending={sending}
                     uploadProgress={uploadProgress}
                     onTyping={handleInputChange}
+                    chatPartnerOrgId={selectedPartner?.id}
                   />
                 </>
               )}

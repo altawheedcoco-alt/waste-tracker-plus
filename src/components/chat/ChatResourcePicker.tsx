@@ -214,7 +214,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
           </div>
 
           {/* Items */}
-          <ScrollArea className="max-h-48">
+          <div className="max-h-48 overflow-y-auto scrollbar-thin">
             {loading ? (
               <div className="flex justify-center py-8">
                 <Loader2 className="w-5 h-5 animate-spin text-primary" />
@@ -223,6 +223,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
               <div className="text-center py-8 text-muted-foreground text-xs">لا توجد نتائج</div>
             ) : (
               <div className="p-1">
+                <div className="px-3 py-1 text-[10px] text-muted-foreground">{filteredItems.length} نتيجة</div>
                 {filteredItems.map(item => (
                   <button
                     key={item.id}
@@ -234,7 +235,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'shipments
                 ))}
               </div>
             )}
-          </ScrollArea>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

@@ -653,6 +653,7 @@ const EncryptedChatWidget = () => {
                   onSendFile={handleSendFile}
                   onSendResourceCard={handleSendResourceCard}
                   sending={sending}
+                  chatPartnerOrgId={selectedConvo?.partner?.organization_id}
                 />
 
                 {/* Image Lightbox */}

@@ -619,7 +619,7 @@ const EnhancedChatInput = ({
                         )}
                       </button>
                     ))}
-                  </ScrollArea>
+                  </div>
                   <div className="px-3 py-1 border-t border-border/50 text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1">
                     <AtSign className="w-3 h-3" />
                     اكتب @ للإشارة لشخص أو جهة
