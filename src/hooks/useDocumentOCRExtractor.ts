@@ -110,7 +110,8 @@ export function useDocumentOCRExtractor() {
     setProgress(5);
     try {
       const arrayBuffer = await file.arrayBuffer();
-      const pdfDoc = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const pdfjs = await getPdfJs();
+      const pdfDoc = await pdfjs.getDocument({ data: arrayBuffer }).promise;
       const totalPages = pdfDoc.numPages;
 
       toast.info(`جارٍ تحليل ${totalPages} صفحة بالذكاء الاصطناعي...`);
