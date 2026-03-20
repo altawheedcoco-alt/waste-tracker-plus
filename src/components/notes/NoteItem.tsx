@@ -15,7 +15,7 @@ import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { type Note, useNoteReplies, useNotes } from '@/hooks/useNotes';
 import { MentionInput } from '@/components/ui/mention-input';
-import { useMentionableUsers, parseMentions } from '@/hooks/useMentionableUsers';
+import { useMentionableUsers } from '@/hooks/useMentionableUsers';
 import { useShipmentMentions } from '@/hooks/useShipmentMentions';
 import { useMentionNotifier } from '@/hooks/useMentionNotifier';
 import MentionRenderer from './MentionRenderer';
