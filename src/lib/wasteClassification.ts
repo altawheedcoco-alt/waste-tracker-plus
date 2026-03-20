@@ -568,6 +568,7 @@ export const nonHazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'نواتج تطهير الترع والمصارف وقنوات الري', code: 'MU-13', hazardLevel: 'low', wasteState: 'solid', recyclable: false, commonNames: ['نواتج تطهير ترع', 'طمي مصارف', 'نواتج تطهير قنوات ري', 'رواسب ترع مجففة'] },
       { name: 'هالك البلاستيك والكرتون بمصانع الأدوية (غير ملوث)', code: 'MU-14', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['هالك بلاستيك أدوية نظيف', 'كرتون مصانع أدوية', 'ورق تغليف أدوية غير ملوث', 'عبوات أدوية فارغة نظيفة'] },
       { name: 'خردة المراكب والسفن', code: 'MU-15', hazardLevel: 'low', wasteState: 'solid', recyclable: true, commonNames: ['خردة مراكب', 'خردة سفن', 'خردة يخوت', 'هياكل سفن', 'خردة جيت بحري', 'تفكيك سفن'] },
+    ],
   },
 ];
 
