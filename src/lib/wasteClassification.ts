@@ -157,6 +157,10 @@ export const hazardousWasteCategories: WasteCategoryInfo[] = [
       { name: 'مخلفات بيطرية', code: 'MD-10', hazardLevel: 'high', wasteState: 'mixed', commonNames: ['نفايات عيادة بيطرية', 'لقاحات حيوانية', 'أدوية بيطرية منتهية', 'أدوات جراحة حيوانات'] },
       { name: 'نفايات مشعة طبية', code: 'MD-11', hazardLevel: 'critical', wasteState: 'mixed', baselCode: 'Y5', commonNames: ['نفايات أشعة', 'يود مشع', 'مصادر مشعة طبية', 'محاليل نووية'] },
       { name: 'نفايات غسيل كلوي وأجهزة طبية', code: 'MD-12', hazardLevel: 'high', wasteState: 'mixed', commonNames: ['فلاتر غسيل كلوي', 'خطوط غسيل كلوي', 'أكياس محاليل ديلزة', 'أجهزة طبية تالفة'] },
+      { name: 'رماد المحارق الطبية', code: 'MD-13', hazardLevel: 'high', wasteState: 'solid', commonNames: ['رماد محارق طبية', 'رماد حرق نفايات طبية', 'مخلفات محارق مستشفيات', 'رماد أفران طبية'] },
+      { name: 'نواتج فرم وتعقيم النفايات الطبية', code: 'MD-14', hazardLevel: 'high', wasteState: 'solid', commonNames: ['نواتج فرم طبي', 'نفايات طبية مفرومة ومعقمة', 'مخرجات أوتوكلاف', 'نواتج تعقيم نفايات طبية'] },
+      { name: 'جيف الحيوانات وأنسجة التجارب والمسحات الملوثة', code: 'MD-15', hazardLevel: 'critical', wasteState: 'solid', commonNames: ['جيف حيوانات تجارب', 'أنسجة حيوانات ملوثة', 'مسحات ملوثة بيولوجياً', 'حيوانات تجارب ميتة'] },
+      { name: 'حاويات وأسطوانات مضغوطة طبية', code: 'MD-16', hazardLevel: 'high', wasteState: 'solid', commonNames: ['حاويات مضغوطة طبية', 'أسطوانات غاز طبية تالفة', 'إيروسولات طبية', 'بخاخات طبية فارغة'] },
     ],
   },
   {
