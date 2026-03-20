@@ -1,35 +1,43 @@
 
 
-# خطة إصلاح 3 مشاكل في الدردشة
+# خطة: منظومة Mention متكاملة في الملاحظات والردود
 
-## المشكلة 1: أوامر Slash لا تجلب بيانات فعلية
-**السبب**: عند اختيار أمر مثل `/shipment`، يفتح `ChatResourcePicker` الذي يجلب البيانات من Supabase — هذا يعمل فعلاً. لكن المشكلة أن `ChatResourcePicker` يستخدم `ScrollArea` الذي قد لا يعمل جيداً، والنتائج محدودة بـ 30 عنصراً بدون شريط تمرير واضح.
+## المشكلة الحالية
+- حقل الرد في `NoteItem.tsx` (سطر 189) يستخدم `Textarea` عادي بدون دعم @mention أو #shipment
+- لوحة الملاحظات في صفحة الدردشة `Chat.tsx` (سطر 445) تستخدم `Input` عادي أيضاً
+- حقل التعديل في `NoteItem.tsx` (سطر 156) أيضاً بدون mention
 
-**الحل**: استبدال `ScrollArea` بـ `overflow-y-auto` أصلي مع ارتفاع ثابت في `ChatResourcePicker`، وإضافة عدّاد النتائج.
+## التغييرات المطلوبة
 
-## المشكلة 2: @mention يعرض جميع الجهات وليس فقط أطراف المحادثة الحالية
-**السبب**: `EnhancedChatInput` يستخدم `useMentionableEntities()` الذي يجلب **كل** الشركاء والأعضاء بدون تصفية. لا يعرف من هو الطرف الآخر في المحادثة.
+### 1. تطوير NoteItem.tsx - الردود والتعديل
+- استبدال `Textarea` في حقل الرد (سطر 189) بـ `MentionInput` مع دعم `@users` و `#shipments`
+- استبدال `Textarea` في حقل التعديل (سطر 156) بـ `MentionInput`
+- إضافة hooks: `useMentionableUsers` و `useShipmentMentions`
+- استخراج `mentioned_user_ids` من محتوى الرد وإرسالها مع `createNote.mutate`
+- عرض المنشن بشكل مُنسق (تحويل `@[اسم](id)` إلى badge ملونة) في محتوى الملاحظة بدلاً من النص الخام
 
-**الحل**:
-- إضافة prop جديد `chatPartnerOrgId?: string` لـ `EnhancedChatInput`
-- تمريره من `EncryptedChatWidget` (من `selectedConvo?.partner?.organization_id`) ومن `EnhancedChatWidget` (من `selectedPartner?.id`)
-- تصفية `filteredMentions` ليعرض فقط: أعضاء جهتي + الجهة المحادَثة وأعضاؤها
+### 2. تطوير عرض المحتوى - Mention Rendering
+- إنشاء مكون `MentionRenderer` يحوّل نص الملاحظة من markup (`@[name](id)` و `#[SHP-001](id)`) إلى عناصر تفاعلية:
+  - @mention → badge بلون أخضر مع أيقونة مستخدم، قابل للنقر
+  - #shipment → badge بلون أزرق مع أيقونة شحنة، يفتح بطاقة الشحنة عند النقر
 
-## المشكلة 3: لا يوجد شريط تمرير في قوائم Slash و @mention
-**السبب**: `ScrollArea` المستخدم في القوائم المنسدلة لا يعرض شريط تمرير مرئي.
+### 3. إرسال إشعارات Mention من الردود
+- ربط `useMentionNotifier` في الردود لإرسال إشعارات مزدوجة (داخلي + واتساب) عند ذكر مستخدم في رد
+- تمرير السياق: "رد على ملاحظة في [اسم المورد]"
 
-**الحل**: استبدال `ScrollArea` بـ `div` مع `overflow-y-auto` وشريط تمرير مرئي عبر CSS class مخصص، في:
-- `SlashCommandMenu.tsx`
-- قائمة @mention في `EnhancedChatInput.tsx`
-- `ChatResourcePicker.tsx`
+### 4. تحديث NotesPanel في Chat.tsx
+- استبدال `Input` العادي بـ `MentionInput` مصغّر في لوحة الملاحظات بصفحة الدردشة
 
-## الملفات المتأثرة
+### 5. عرض المنشن في جميع الأماكن
+- تطبيق `MentionRenderer` على محتوى الملاحظات في `NoteItem.tsx` (سطر 163) بدلاً من النص العادي
+- تطبيقه أيضاً في لوحة ملاحظات الدردشة
 
-| الملف | التعديل |
-|---|---|
-| `EnhancedChatInput.tsx` | إضافة prop `chatPartnerOrgId` + تصفية mentions حسب المحادثة + استبدال ScrollArea |
-| `EncryptedChatWidget.tsx` | تمرير `chatPartnerOrgId` من `selectedConvo` |
-| `EnhancedChatWidget.tsx` | تمرير `chatPartnerOrgId` من `selectedPartner` |
-| `SlashCommandMenu.tsx` | استبدال ScrollArea بتمرير أصلي مع شريط مرئي |
-| `ChatResourcePicker.tsx` | استبدال ScrollArea بتمرير أصلي مع شريط مرئي |
+## التفاصيل التقنية
+
+**ملف جديد:**
+- `src/components/notes/MentionRenderer.tsx` - مكون لتحويل markup المنشن إلى عناصر React تفاعلية
+
+**ملفات معدّلة:**
+- `src/components/notes/NoteItem.tsx` - استبدال Textarea بـ MentionInput + إضافة MentionRenderer + إشعارات
+- `src/pages/dashboard/Chat.tsx` - تحديث حقل إدخال الملاحظات
 
