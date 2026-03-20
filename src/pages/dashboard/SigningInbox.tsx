@@ -793,8 +793,46 @@ export default function SigningInbox() {
               />
             ))
           )}
+        <TabsContent value="chains" className="space-y-3 mt-4">
+          {chainsLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : chains.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <GitBranch className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+                <p className="text-muted-foreground text-lg">لا توجد سلاسل توقيع متعدد</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">أنشئ سلسلة لتوقيع مستند من عدة أطراف بدون قيود ترتيب أو زمن</p>
+                <Button onClick={() => setChainDialogOpen(true)} className="gap-2">
+                  <GitBranch className="w-4 h-4" /> إنشاء سلسلة جديدة
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            chains.map(chain => (
+              <SigningChainCard
+                key={chain.id}
+                chain={chain}
+                myOrgId={profile?.organization_id || ''}
+                onSignStep={(step, ch) => {
+                  // Open signing dialog for chain step
+                  setSigningRequest({
+                    id: step.id,
+                    document_title: ch.document_title,
+                    document_type: ch.document_type,
+                    document_url: ch.document_url,
+                    status: 'pending',
+                    sender_organization_id: ch.initiated_org_id || '',
+                    recipient_organization_id: step.signer_org_id || '',
+                  } as any);
+                }}
+              />
+            ))
+          )}
         </TabsContent>
       </Tabs>
+
+      {/* Create Chain Dialog */}
+      <CreateSigningChainDialog open={chainDialogOpen} onOpenChange={setChainDialogOpen} />
 
       {/* Reject Dialog */}
       <Dialog open={!!rejectOpen} onOpenChange={v => { if (!v) { setRejectOpen(null); setRejectReason(''); } }}>
