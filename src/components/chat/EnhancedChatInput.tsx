@@ -72,6 +72,12 @@ const EnhancedChatInput = ({
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showAttachMenu, setShowAttachMenu] = useState(false);
+  const [showMentionDropdown, setShowMentionDropdown] = useState(false);
+  const [mentionSearch, setMentionSearch] = useState('');
+  const [mentionIndex, setMentionIndex] = useState(0);
+  const [cursorPos, setCursorPos] = useState(0);
+  
+  const { entities: mentionableEntities } = useMentionableEntities();
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
