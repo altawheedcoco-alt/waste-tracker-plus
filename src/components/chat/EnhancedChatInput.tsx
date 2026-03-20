@@ -280,12 +280,22 @@ const EnhancedChatInput = ({
     textarea.style.height = 'auto';
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     
-    // Detect @ mention trigger
     const before = newValue.slice(0, pos);
+
+    // Detect / slash command trigger
+    if (before === '/' || (before.startsWith('/') && !before.includes(' '))) {
+      setSlashSearch(before);
+      setShowSlashMenu(true);
+      setSlashIndex(0);
+      setShowMentionDropdown(false);
+      return;
+    }
+    setShowSlashMenu(false);
+
+    // Detect @ mention trigger
     const atIndex = before.lastIndexOf('@');
     if (atIndex !== -1) {
       const afterAt = before.slice(atIndex + 1);
-      // Only trigger if @ is at start or preceded by whitespace, and no ] or ( after it
       if ((atIndex === 0 || /[\s\n]/.test(before[atIndex - 1])) && !afterAt.includes(']') && !afterAt.includes('(')) {
         setMentionSearch(afterAt);
         setShowMentionDropdown(true);
@@ -295,6 +305,35 @@ const EnhancedChatInput = ({
     }
     setShowMentionDropdown(false);
   };
+
+  const filteredSlashCommands = filterCommands(slashSearch);
+
+  const RESOURCE_TAB_MAP: Record<string, 'shipments' | 'invoices' | 'documents' | 'signing'> = {
+    shipment: 'shipments',
+    tracking: 'shipments',
+    invoice: 'invoices',
+    document: 'documents',
+    doc: 'documents',
+    signing_request: 'signing',
+    sign: 'signing',
+    stamp: 'signing',
+  };
+
+  const handleSlashSelect = useCallback((cmd: SlashCommand) => {
+    setInputValue('');
+    setShowSlashMenu(false);
+    // Open resource picker for the selected command type
+    setResourcePickerTab(RESOURCE_TAB_MAP[cmd.resourceType] || 'shipments');
+    setShowResourcePicker(true);
+    textareaRef.current?.focus();
+  }, []);
+
+  const handleResourceSelect = useCallback(async (resource: { type: string; data: any }) => {
+    setShowResourcePicker(false);
+    if (onSendResourceCard) {
+      await onSendResourceCard(resource.type, resource.data);
+    }
+  }, [onSendResourceCard]);
 
   const filteredMentions = mentionableEntities.filter(e =>
     e.name.toLowerCase().includes(mentionSearch.toLowerCase()) ||
