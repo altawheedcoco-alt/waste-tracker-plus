@@ -529,6 +529,9 @@ const Notifications = () => {
       const convId = (notification as any).metadata?.conversation_id;
       return { label: 'فتح المحادثة', icon: MessageCircle, action: () => navigate(convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat') };
     }
+    if (type === 'partner_note') {
+      return { label: 'مركز الملاحظات', icon: FileText, action: () => navigate('/dashboard/notes') };
+    }
     if (type === 'partner_linked')
       return { label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners') };
     if (['invoice', 'payment', 'deposit'].includes(type || ''))
