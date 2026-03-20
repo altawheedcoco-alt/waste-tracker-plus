@@ -498,7 +498,7 @@ const NotesPanel = memo(({
                     شحنة #{note.shipment_number}
                   </Badge>
                 )}
-                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+                <p className="text-sm whitespace-pre-wrap"><MentionRendererNote content={note.content} /></p>
                 <div className="flex items-center justify-between mt-1.5 text-[10px] text-muted-foreground">
                   <span>{note.author_name}</span>
                   <span>{format(new Date(note.created_at), 'dd/MM HH:mm')}</span>
