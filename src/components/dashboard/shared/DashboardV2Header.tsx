@@ -29,6 +29,7 @@ export interface RadarStat {
   max?: number;
   trend?: 'up' | 'down' | 'stable';
   suffix?: string;
+  route?: string;
 }
 
 export interface AlertItem {
