@@ -224,7 +224,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
       // Fetch signing requests with more fields
       const signQuery = supabase
         .from('document_signatures')
-        .select('id, signer_name, document_type, status, created_at, signed_at, shipment_id')
+        .select('id, signer_name, document_type, status, created_at, timestamp_signed')
         .eq('organization_id', orgId)
         .order('created_at', { ascending: false })
         .limit(30);
@@ -237,7 +237,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
           label: s.signer_name || 'طلب توقيع',
           subtitle: s.document_type || '',
           status: s.status || undefined,
-          date: s.signed_at || s.created_at,
+          date: s.timestamp_signed || s.created_at,
           raw: s,
         });
       });
