@@ -21,7 +21,7 @@ import {
   Send, Inbox, FileSignature, Clock, CheckCircle2, XCircle, Eye,
   Loader2, AlertTriangle, Stamp, ArrowLeft, Building2, User, Calendar,
   FileText, ExternalLink, PenTool, FolderOpen, Upload, Paperclip, X,
-  Truck, Receipt, Link2, ArrowUpRight,
+  Truck, Receipt, Link2, ArrowUpRight, GitBranch, BarChart3,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -31,6 +31,11 @@ import type { SignatureData } from '@/components/signatures/UniversalSignatureDi
 import { withTagline } from '@/utils/platformTaglines';
 import SignatureBadges from '@/components/signatures/SignatureBadges';
 import PlatformDocumentPicker, { type PlatformDocument } from '@/components/signing/PlatformDocumentPicker';
+import { useSigningChains } from '@/hooks/useSigningChains';
+import SigningChainCard from '@/components/signing/SigningChainCard';
+import CreateSigningChainDialog from '@/components/signing/CreateSigningChainDialog';
+import DocumentJourneyTimeline from '@/components/signing/DocumentJourneyTimeline';
+import { logJourneyEvent } from '@/hooks/useDocumentJourney';
 
 const statusConfig: Record<string, { label: string; icon: any; color: string }> = {
   pending: { label: 'في الانتظار', icon: Clock, color: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' },
@@ -248,6 +253,7 @@ function RequestCard({ request, type, onSign, onReject, onView }: {
 
 export default function SigningInbox() {
   const { incoming, outgoing, isLoading, sendRequest, updateStatus } = useSigningInbox();
+  const { chains, isLoading: chainsLoading, signStep } = useSigningChains();
   const { profile } = useAuth();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -260,6 +266,8 @@ export default function SigningInbox() {
   const [uploading, setUploading] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [selectedPlatformDoc, setSelectedPlatformDoc] = useState<PlatformDocument | null>(null);
+  const [chainDialogOpen, setChainDialogOpen] = useState(false);
+  const [journeyDialogId, setJourneyDialogId] = useState<string | null>(null);
   const [form, setForm] = useState({
     recipient_organization_id: '',
     document_title: '',
@@ -508,6 +516,9 @@ export default function SigningInbox() {
         <Button variant="outline" className="gap-2" onClick={() => navigate('/dashboard/document-archive?tab=signing_request')}>
           <FolderOpen className="w-4 h-4" /> سجل المستندات
         </Button>
+        <Button variant="outline" className="gap-2" onClick={() => setChainDialogOpen(true)}>
+          <GitBranch className="w-4 h-4" /> سلسلة توقيع متعدد
+        </Button>
         <Dialog open={sendOpen} onOpenChange={setSendOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2">
@@ -714,7 +725,7 @@ export default function SigningInbox() {
 
       {/* Tabs */}
       <Tabs defaultValue="incoming" dir="rtl">
-        <TabsList className="w-full grid grid-cols-2">
+        <TabsList className="w-full grid grid-cols-3">
           <TabsTrigger value="incoming" className="gap-2">
             <Inbox className="w-4 h-4" /> الواردة
             {pendingCount > 0 && (
@@ -723,6 +734,12 @@ export default function SigningInbox() {
           </TabsTrigger>
           <TabsTrigger value="outgoing" className="gap-2">
             <Send className="w-4 h-4" /> الصادرة
+          </TabsTrigger>
+          <TabsTrigger value="chains" className="gap-2">
+            <GitBranch className="w-4 h-4" /> سلاسل متعددة
+            {chains.filter(c => c.status === 'active').length > 0 && (
+              <Badge variant="secondary" className="text-[10px] px-1.5 py-0">{chains.filter(c => c.status === 'active').length}</Badge>
+            )}
           </TabsTrigger>
         </TabsList>
 
@@ -777,7 +794,46 @@ export default function SigningInbox() {
             ))
           )}
         </TabsContent>
+        <TabsContent value="chains" className="space-y-3 mt-4">
+          {chainsLoading ? (
+            <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
+          ) : chains.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <GitBranch className="w-16 h-16 mx-auto text-muted-foreground/20 mb-4" />
+                <p className="text-muted-foreground text-lg">لا توجد سلاسل توقيع متعدد</p>
+                <p className="text-sm text-muted-foreground/70 mb-4">أنشئ سلسلة لتوقيع مستند من عدة أطراف بدون قيود ترتيب أو زمن</p>
+                <Button onClick={() => setChainDialogOpen(true)} className="gap-2">
+                  <GitBranch className="w-4 h-4" /> إنشاء سلسلة جديدة
+                </Button>
+              </CardContent>
+            </Card>
+          ) : (
+            chains.map(chain => (
+              <SigningChainCard
+                key={chain.id}
+                chain={chain}
+                myOrgId={profile?.organization_id || ''}
+                onSignStep={(step, ch) => {
+                  // Open signing dialog for chain step
+                  setSigningRequest({
+                    id: step.id,
+                    document_title: ch.document_title,
+                    document_type: ch.document_type,
+                    document_url: ch.document_url,
+                    status: 'pending',
+                    sender_organization_id: ch.initiated_org_id || '',
+                    recipient_organization_id: step.signer_org_id || '',
+                  } as any);
+                }}
+              />
+            ))
+          )}
+        </TabsContent>
       </Tabs>
+
+      {/* Create Chain Dialog */}
+      <CreateSigningChainDialog open={chainDialogOpen} onOpenChange={setChainDialogOpen} />
 
       {/* Reject Dialog */}
       <Dialog open={!!rejectOpen} onOpenChange={v => { if (!v) { setRejectOpen(null); setRejectReason(''); } }}>

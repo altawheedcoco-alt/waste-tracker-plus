@@ -10420,6 +10420,48 @@ export type Database = {
           },
         ]
       }
+      document_journey_events: {
+        Row: {
+          actor_name: string | null
+          actor_org_id: string | null
+          actor_user_id: string | null
+          created_at: string
+          document_id: string
+          document_type: string
+          event_description: string | null
+          event_title: string
+          event_type: string
+          id: string
+          metadata: Json | null
+        }
+        Insert: {
+          actor_name?: string | null
+          actor_org_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          document_id: string
+          document_type?: string
+          event_description?: string | null
+          event_title: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+        }
+        Update: {
+          actor_name?: string | null
+          actor_org_id?: string | null
+          actor_user_id?: string | null
+          created_at?: string
+          document_id?: string
+          document_type?: string
+          event_description?: string | null
+          event_title?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+        }
+        Relationships: []
+      }
       document_print_log: {
         Row: {
           action_type: string
@@ -34688,6 +34730,142 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      signing_chain_steps: {
+        Row: {
+          chain_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          rejection_reason: string | null
+          signature_id: string | null
+          signature_url: string | null
+          signed_at: string | null
+          signer_name: string | null
+          signer_org_id: string | null
+          signer_user_id: string | null
+          status: string
+          step_order: number | null
+          updated_at: string
+        }
+        Insert: {
+          chain_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          signature_id?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          signer_org_id?: string | null
+          signer_user_id?: string | null
+          status?: string
+          step_order?: number | null
+          updated_at?: string
+        }
+        Update: {
+          chain_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          rejection_reason?: string | null
+          signature_id?: string | null
+          signature_url?: string | null
+          signed_at?: string | null
+          signer_name?: string | null
+          signer_org_id?: string | null
+          signer_user_id?: string | null
+          status?: string
+          step_order?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signing_chain_steps_chain_id_fkey"
+            columns: ["chain_id"]
+            isOneToOne: false
+            referencedRelation: "signing_chains"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "signing_chain_steps_signer_org_id_fkey"
+            columns: ["signer_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "signing_chain_steps_signer_org_id_fkey"
+            columns: ["signer_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      signing_chains: {
+        Row: {
+          completed_signers: number
+          created_at: string
+          document_id: string
+          document_title: string
+          document_type: string
+          document_url: string | null
+          id: string
+          initiated_by: string | null
+          initiated_org_id: string | null
+          metadata: Json | null
+          status: string
+          total_signers: number
+          updated_at: string
+        }
+        Insert: {
+          completed_signers?: number
+          created_at?: string
+          document_id: string
+          document_title: string
+          document_type?: string
+          document_url?: string | null
+          id?: string
+          initiated_by?: string | null
+          initiated_org_id?: string | null
+          metadata?: Json | null
+          status?: string
+          total_signers?: number
+          updated_at?: string
+        }
+        Update: {
+          completed_signers?: number
+          created_at?: string
+          document_id?: string
+          document_title?: string
+          document_type?: string
+          document_url?: string | null
+          id?: string
+          initiated_by?: string | null
+          initiated_org_id?: string | null
+          metadata?: Json | null
+          status?: string
+          total_signers?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signing_chains_initiated_org_id_fkey"
+            columns: ["initiated_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "signing_chains_initiated_org_id_fkey"
+            columns: ["initiated_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       signing_requests: {
         Row: {
