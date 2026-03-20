@@ -9,6 +9,7 @@ import {
   Reply, Forward, SmilePlus, Paintbrush, Info
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
+import VoiceMessagePlayer from '@/components/chat/VoiceMessagePlayer';
 import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
