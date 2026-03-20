@@ -476,7 +476,7 @@ export default function ComplianceLicenseSettings() {
 
           {/* Selected custom types (not in system) */}
           {data.licensed_waste_types.filter(t => !t.match(/^[A-Z]{2,3}-\d/)).length > 0 && (
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto scrollbar-thin">
               <p className="text-xs text-muted-foreground w-full mb-1">أنواع مخصصة:</p>
               {data.licensed_waste_types.filter(t => !t.match(/^[A-Z]{2,3}-\d/)).map(type => (
                 <Badge key={type} variant="default" className="cursor-pointer text-xs py-0.5 px-2" onClick={() => toggleWasteType(type)}>
