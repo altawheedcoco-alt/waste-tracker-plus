@@ -614,6 +614,20 @@ const EnhancedChatInput = ({
             </AnimatePresence>
           </div>
 
+          {/* Resource Search Button */}
+          {onSendResourceCard && (
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-9 w-9 shrink-0 rounded-full"
+              disabled={sending || disabled || isRecording}
+              onClick={() => setShowResourcePicker(true)}
+              title="إرفاق مورد (شحنة، فاتورة، مستند...)"
+            >
+              <SearchIcon className="w-4.5 h-4.5 text-muted-foreground" />
+            </Button>
+          )}
+
           {/* Attachment Plus Button */}
           <Popover open={showAttachMenu} onOpenChange={setShowAttachMenu}>
             <PopoverTrigger asChild>
