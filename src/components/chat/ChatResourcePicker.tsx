@@ -475,7 +475,7 @@ const ChatResourcePicker = ({ isOpen, onClose, onSelect, initialTab = 'outgoing'
             {item.resourceType === 'shipment' && item.extra?.origin && (
               <p className="text-[9px] text-muted-foreground/70 mt-0.5 truncate">
                 📍 {item.extra.origin} ← {item.extra.destination || '—'}
-                {item.extra.weight ? ` • ${Number(item.extra.weight).toLocaleString()} كجم` : ''}
+                {item.extra.weight ? ` • ${Number(item.extra.weight).toLocaleString()} ${item.extra.unit || 'كجم'}` : ''}
               </p>
             )}
             {item.resourceType === 'document' && item.extra?.refNumber && (
