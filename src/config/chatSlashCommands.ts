@@ -1,11 +1,11 @@
-import { FileText, Truck, Receipt, FileSignature, Stamp, MapPin } from 'lucide-react';
+import { FileText, Truck, Receipt, FileSignature, Stamp, MapPin, BarChart3, Bot, Hash, Timer } from 'lucide-react';
 
 export interface SlashCommand {
   command: string;
   label: string;
   description: string;
   icon: any;
-  resourceType: 'shipment' | 'invoice' | 'document' | 'signing_request' | 'stamp' | 'tracking';
+  resourceType: 'shipment' | 'invoice' | 'document' | 'signing_request' | 'stamp' | 'tracking' | 'poll' | 'ai' | 'channel' | 'disappear';
   color: string;
 }
 
@@ -57,6 +57,38 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     icon: MapPin,
     resourceType: 'tracking',
     color: 'text-teal-600 bg-teal-500/10',
+  },
+  {
+    command: '/poll',
+    label: 'تصويت',
+    description: 'إنشاء تصويت سريع',
+    icon: BarChart3,
+    resourceType: 'poll',
+    color: 'text-orange-600 bg-orange-500/10',
+  },
+  {
+    command: '/ai',
+    label: 'المساعد الذكي',
+    description: 'استدعاء المساعد الذكي @ai',
+    icon: Bot,
+    resourceType: 'ai',
+    color: 'text-purple-600 bg-purple-500/10',
+  },
+  {
+    command: '/channel',
+    label: 'قناة',
+    description: 'إنشاء قناة مواضيعية',
+    icon: Hash,
+    resourceType: 'channel',
+    color: 'text-sky-600 bg-sky-500/10',
+  },
+  {
+    command: '/disappear',
+    label: 'رسائل مؤقتة',
+    description: 'تفعيل الرسائل المختفية',
+    icon: Timer,
+    resourceType: 'disappear',
+    color: 'text-pink-600 bg-pink-500/10',
   },
 ];
 

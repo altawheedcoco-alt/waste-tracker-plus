@@ -24,9 +24,30 @@ export { default as ChatPartnerInfo } from './ChatPartnerInfo';
 export { default as GroupChatView } from './GroupChatView';
 export { default as CreateGroupDialog } from './CreateGroupDialog';
 
+// Threads
+export { default as ThreadPanel } from './ThreadPanel';
+
+// Channels
+export { default as ChannelListView } from './ChannelListView';
+export { default as CreateChannelDialog } from './CreateChannelDialog';
+
+// Polls
+export { default as ChatPollCard } from './ChatPollCard';
+export { default as CreatePollDialog } from './CreatePollDialog';
+
+// AI Copilot
+export { default as AICopilotBubble } from './AICopilotBubble';
+
 // Advanced Features
 export { default as PinnedMessagesBar } from './PinnedMessagesBar';
 export { default as DisappearingMessagesDialog } from './DisappearingMessagesDialog';
+export { default as SmartRepliesBar } from './SmartRepliesBar';
+export { default as ScheduleMessageDialog } from './ScheduleMessageDialog';
+export { default as ReminderDialog } from './ReminderDialog';
+export { default as CollaborationBoard } from './CollaborationBoard';
+export { default as BroadcastChannelView } from './BroadcastChannelView';
+export { default as CommunicationAnalyticsPanel } from './CommunicationAnalyticsPanel';
+export { default as OperationRoomList } from './OperationRoomList';
 
 // Utility Components
 export { default as ImageLightbox } from './ImageLightbox';
