@@ -212,7 +212,7 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
 
           {/* ─── IMAGES TAB ─── */}
           <TabsContent value="images" className="flex-1 min-h-0 mt-3">
-            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '55vh' }}>
+            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100 [&_[data-radix-scroll-area-scrollbar][data-orientation=vertical]]:w-2.5 [&_[data-radix-scroll-area-scrollbar]_[data-radix-scroll-area-thumb]]:bg-primary/40" style={{ maxHeight: '55vh' }}>
               <div className="flex flex-col gap-3 pb-2">
                 <div className="flex flex-wrap gap-1.5">
                   <Badge
