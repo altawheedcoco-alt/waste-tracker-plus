@@ -58,7 +58,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
   const { organization } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [pinnedPartners, setPinnedPartners] = useState<Set<string>>(new Set());
-  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string }>>(new Map());
+  const [lastMessages, setLastMessages] = useState<Map<string, { content: string; time: string; isRead: boolean; isMine: boolean; type?: string; status?: string }>>(new Map());
 
   useEffect(() => {
     const fetchLastMessages = async () => {
