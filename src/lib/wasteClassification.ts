@@ -571,6 +571,9 @@ export const getWasteTypeCode = (wasteType: WasteType | string): string => {
     construction: 'CN',
     industrial: 'IN',
     textile: 'TX',
+    liquid_non_hazardous: 'LQ',
+    municipal: 'MU',
+    hazardous_liquid: 'HL',
     other: 'OT',
   };
   return codes[wasteType] || 'OT';
