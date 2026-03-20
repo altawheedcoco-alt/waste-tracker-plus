@@ -80,7 +80,9 @@ const getNotificationIcon = (type: string | null) => {
     case 'signature_request': case 'document_signed': return PenTool;
     case 'stamp_applied': return Stamp;
     case 'recycling_report': case 'report': case 'certificate': return BarChart3;
-    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return Handshake;
+    case 'partner_post': case 'partner_linked': return Handshake;
+    case 'partner_note': return FileText;
+    case 'partner_message': return MessageCircle;
     case 'approval_request': return Inbox;
     case 'invoice': case 'payment': case 'deposit': case 'financial': return Wallet;
     case 'warning': case 'signal_lost': return AlertCircle;
@@ -110,7 +112,9 @@ const getNotificationColor = (type: string | null) => {
     case 'document_uploaded': case 'signing_request': case 'signature_request':
     case 'document_signed': case 'document_issued': case 'stamp_applied': return 'bg-indigo-500/10 text-indigo-500';
     case 'recycling_report': case 'report': case 'certificate': return 'bg-cyan-500/10 text-cyan-500';
-    case 'partner_post': case 'partner_note': case 'partner_message': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'partner_post': case 'partner_linked': return 'bg-purple-500/10 text-purple-500';
+    case 'partner_note': return 'bg-orange-500/10 text-orange-500';
+    case 'partner_message': return 'bg-pink-500/10 text-pink-500';
     case 'approval_request': return 'bg-amber-500/10 text-amber-500';
     case 'invoice': case 'payment': case 'deposit': case 'financial': return 'bg-emerald-500/10 text-emerald-500';
     case 'warning': case 'signal_lost': case 'violation': return 'bg-red-500/10 text-red-500';
@@ -202,9 +206,12 @@ const categorizeNotification = (type: string | null): string => {
       return 'documents';
     case 'invoice': case 'payment': case 'deposit': case 'financial':
       return 'finance';
-    case 'partner_post': case 'partner_note': case 'partner_message':
-    case 'partner_request': case 'partner_linked':
+    case 'partner_post': case 'partner_request': case 'partner_linked':
       return 'partners';
+    case 'partner_note':
+      return 'notes';
+    case 'partner_message':
+      return 'messages';
     case 'approval_request': case 'approval_granted': case 'approval_rejected':
       return 'approvals';
     case 'recycling_report': case 'report': case 'certificate': case 'compliance':
@@ -359,13 +366,14 @@ const getCategories = (): CategoryConfig[] => [
   {
     id: 'operations', label: 'أوامر الشغل', icon: ClipboardCheck, color: 'text-sky-500', bgColor: 'bg-sky-500/10',
   },
+  { id: 'messages', label: 'الرسائل', icon: MessageCircle, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
+  { id: 'notes', label: 'الملاحظات', icon: FileText, color: 'text-orange-500', bgColor: 'bg-orange-500/10' },
   { id: 'partners', label: 'الشركاء', icon: Handshake, color: 'text-purple-500', bgColor: 'bg-purple-500/10' },
   { id: 'reports', label: 'التقارير والشهادات', icon: BarChart3, color: 'text-cyan-500', bgColor: 'bg-cyan-500/10' },
   { id: 'environmental', label: 'البيئة والكربون', icon: Leaf, color: 'text-lime-600', bgColor: 'bg-lime-500/10' },
   {
     id: 'smart', label: 'التنبيهات الذكية', icon: Sparkles, color: 'text-fuchsia-500', bgColor: 'bg-fuchsia-500/10',
   },
-  { id: 'messages', label: 'الرسائل', icon: MessageSquare, color: 'text-pink-500', bgColor: 'bg-pink-500/10' },
   { id: 'announcements', label: 'الإعلانات', icon: Megaphone, color: 'text-blue-600', bgColor: 'bg-blue-500/10' },
   { id: 'identity', label: 'التحقق والهوية', icon: UserCheck, color: 'text-teal-600', bgColor: 'bg-teal-500/10' },
   { id: 'system', label: 'النظام', icon: Settings, color: 'text-red-500', bgColor: 'bg-red-500/10' },
@@ -520,6 +528,9 @@ const Notifications = () => {
     if (type === 'partner_message') {
       const convId = (notification as any).metadata?.conversation_id;
       return { label: 'فتح المحادثة', icon: MessageCircle, action: () => navigate(convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat') };
+    }
+    if (type === 'partner_note') {
+      return { label: 'مركز الملاحظات', icon: FileText, action: () => navigate('/dashboard/notes') };
     }
     if (type === 'partner_linked')
       return { label: 'عرض الشركاء', icon: Handshake, action: () => navigate('/dashboard/partners') };
@@ -968,6 +979,9 @@ const NotificationCard = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                 {Object.entries(notification.metadata).map(([key, value]) => {
                   if (value === null || value === undefined || value === '' || (typeof value === 'object' && !Array.isArray(value))) return null;
+                  // Hide raw UUIDs for message/note notifications - show human-readable info instead
+                  const isUUID = typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+                  if (isUUID && ['sender_id', 'message_id', 'conversation_id'].includes(key)) return null;
                   return (
                     <div key={key} className="flex items-start gap-1 text-[10px]">
                       <span className="text-muted-foreground/70 shrink-0">{getMetadataFieldLabel(key).label}:</span>
@@ -976,6 +990,35 @@ const NotificationCard = ({
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Message-specific detail card */}
+          {notification.type === 'partner_message' && (
+            <div className="bg-pink-500/5 rounded-lg p-2.5 border border-pink-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <MessageCircle className="w-3.5 h-3.5 text-pink-500" />
+                <span className="font-semibold text-pink-600 dark:text-pink-400">تفاصيل الرسالة</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <User className="w-3 h-3" />
+                <span className="font-medium">{notification.title?.replace('رسالة جديدة من ', '') || 'مرسل غير معروف'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Note-specific detail card */}
+          {notification.type === 'partner_note' && (
+            <div className="bg-orange-500/5 rounded-lg p-2.5 border border-orange-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <FileText className="w-3.5 h-3.5 text-orange-500" />
+                <span className="font-semibold text-orange-600 dark:text-orange-400">تفاصيل الملاحظة</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <User className="w-3 h-3" />
+                <span className="font-medium">{notification.title?.replace('ملاحظة جديدة من ', '') || 'شريك'}</span>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
             </div>
           )}
 

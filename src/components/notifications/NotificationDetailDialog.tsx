@@ -100,10 +100,12 @@ const getNotificationIcon = (type: string | null) => {
     case 'mention':
       return User;
     case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
     case 'partner_linked':
       return Building2;
+    case 'partner_note':
+      return FileText;
+    case 'partner_message':
+      return User;
     default:
       return Info;
   }
@@ -137,10 +139,12 @@ const getNotificationColor = (type: string | null) => {
     case 'mention':
       return 'bg-teal-500/10 text-teal-500';
     case 'partner_post':
-    case 'partner_note':
-    case 'partner_message':
     case 'partner_linked':
       return 'bg-purple-500/10 text-purple-500';
+    case 'partner_note':
+      return 'bg-orange-500/10 text-orange-500';
+    case 'partner_message':
+      return 'bg-pink-500/10 text-pink-500';
     case 'invoice':
     case 'payment':
     case 'deposit':

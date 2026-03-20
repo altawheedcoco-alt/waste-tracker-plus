@@ -14,8 +14,8 @@ const TYPE_TO_SECTION: Record<string, string[]> = {
   recycling_report: ['transporter-certs', 'generator-certs', 'admin-certs', 'issue-certs', 'reports-analytics'],
   // Partner-related
   partner_post: ['partners', 'partners-timeline', 'org-structure', 'communication'],
-  partner_note: ['partners', 'partner-accounts', 'org-structure', 'communication'],
-  partner_message: ['chat', 'communication'],
+  partner_note: ['partners', 'partner-accounts', 'org-structure', 'communication', 'notes'],
+  partner_message: ['chat', 'communication', 'messages'],
   partner_update: ['partners', 'partner-accounts', 'org-structure'],
   // Approvals
   approval_request: ['company-approvals', 'driver-approvals', 'my-requests', 'communication', 'admin-entity-management'],
