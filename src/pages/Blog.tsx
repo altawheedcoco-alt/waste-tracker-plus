@@ -6,10 +6,11 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star } from "lucide-react";
+import { BookOpen, Calendar, ArrowLeft, ArrowRight, Clock, User, Sparkles, Star, ArrowUp, ArrowDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import PageNavBar from "@/components/ui/page-nav-bar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatePresence, motion } from "framer-motion";
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
