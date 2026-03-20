@@ -576,7 +576,7 @@ const EnhancedChatInput = ({
                   transition={{ duration: 0.15 }}
                   className="absolute bottom-full mb-1 right-0 left-0 z-50 bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
                 >
-                  <ScrollArea className="max-h-48">
+                  <div className="max-h-48 overflow-y-auto scrollbar-thin">
                     {filteredMentions.map((entity, index) => (
                       <button
                         key={`${entity.type}-${entity.id}`}
