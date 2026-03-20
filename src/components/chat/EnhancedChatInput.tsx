@@ -37,6 +37,9 @@ import {
 } from '@/components/ui/popover';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import type { MentionableEntity } from '@/components/ui/mentionable-field';
+import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
+import SlashCommandMenu from './SlashCommandMenu';
+import ChatResourcePicker from './ChatResourcePicker';
 
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
