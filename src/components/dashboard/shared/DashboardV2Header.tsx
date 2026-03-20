@@ -75,6 +75,7 @@ interface DashboardV2HeaderProps {
   alerts?: AlertItem[];
   weather?: WeatherData;
   heatmapData?: HeatmapCell[];
+  onRefresh?: () => void;
 }
 
 /* ── English animated counter ── */
