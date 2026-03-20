@@ -21,7 +21,7 @@ export function useMessageReminders() {
     queryKey: ['message-reminders', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('message_reminders')
         .select('*')
         .eq('user_id', user.id)
@@ -42,7 +42,7 @@ export function useMessageReminders() {
       note?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase.from('message_reminders').insert({
+      const { error } = await (supabase as any).from('message_reminders').insert({
         user_id: user.id,
         ...r,
       });
@@ -57,7 +57,7 @@ export function useMessageReminders() {
 
   const dismiss = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('message_reminders')
         .update({ is_triggered: true })
         .eq('id', id);

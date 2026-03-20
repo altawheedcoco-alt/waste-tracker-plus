@@ -22,7 +22,7 @@ export function useScheduledMessages() {
     queryKey: ['scheduled-messages', user?.id],
     queryFn: async () => {
       if (!user) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('scheduled_messages')
         .select('*')
         .eq('sender_id', user.id)
@@ -44,7 +44,7 @@ export function useScheduledMessages() {
       if (!user) throw new Error('Not authenticated');
       const profile = await supabase.from('profiles').select('organization_id').eq('user_id', user.id).single();
       
-      const { error } = await supabase.from('scheduled_messages').insert({
+      const { error } = await (supabase as any).from('scheduled_messages').insert({
         sender_id: user.id,
         sender_organization_id: profile.data?.organization_id,
         ...msg,
@@ -60,7 +60,7 @@ export function useScheduledMessages() {
 
   const cancel = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('scheduled_messages')
         .update({ status: 'cancelled' })
         .eq('id', id);

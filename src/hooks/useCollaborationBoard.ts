@@ -28,7 +28,7 @@ export function useCollaborationBoard(conversationKey: string | null) {
     queryKey: ['collab-files', conversationKey],
     queryFn: async () => {
       if (!conversationKey) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('shared_collaboration_files')
         .select('*')
         .eq('conversation_key', conversationKey)
@@ -44,16 +44,13 @@ export function useCollaborationBoard(conversationKey: string | null) {
       category?: string; notes?: string;
     }) => {
       if (!user || !organization || !conversationKey) throw new Error('Missing context');
-      const { error } = await supabase.from('shared_collaboration_files').insert({
+      const { error } = await (supabase as any).from('shared_collaboration_files').insert({
         conversation_key: conversationKey,
         uploaded_by: user.id,
         uploaded_by_org_id: organization.id,
-        file_name: fileName,
-        file_url: fileUrl,
-        file_type: fileType,
-        file_size: fileSize,
-        category: category || 'general',
-        notes,
+        file_name: fileName, file_url: fileUrl,
+        file_type: fileType, file_size: fileSize,
+        category: category || 'general', notes,
       });
       if (error) throw error;
     },
@@ -65,7 +62,7 @@ export function useCollaborationBoard(conversationKey: string | null) {
 
   const updateStatus = useMutation({
     mutationFn: async ({ fileId, status }: { fileId: string; status: string }) => {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('shared_collaboration_files')
         .update({ status, updated_at: new Date().toISOString() })
         .eq('id', fileId);
@@ -77,10 +74,5 @@ export function useCollaborationBoard(conversationKey: string | null) {
     },
   });
 
-  return {
-    files,
-    isLoading,
-    upload: upload.mutate,
-    updateStatus: updateStatus.mutate,
-  };
+  return { files, isLoading, upload: upload.mutate, updateStatus: updateStatus.mutate };
 }

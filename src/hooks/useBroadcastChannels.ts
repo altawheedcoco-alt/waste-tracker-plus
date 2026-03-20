@@ -35,7 +35,7 @@ export function useBroadcastChannels() {
     queryKey: ['broadcast-channels', organization?.id],
     queryFn: async () => {
       if (!organization) return [];
-      const { data } = await supabase
+      const { data } = await (supabase as any)
         .from('broadcast_channels')
         .select('*')
         .eq('is_active', true)
@@ -43,15 +43,14 @@ export function useBroadcastChannels() {
 
       if (!data) return [];
 
-      // Check subscriptions
-      const { data: subs } = await supabase
+      const { data: subs } = await (supabase as any)
         .from('broadcast_channel_subscribers')
         .select('channel_id')
         .eq('user_id', user!.id);
 
-      const subSet = new Set((subs || []).map(s => s.channel_id));
+      const subSet = new Set((subs || []).map((s: any) => s.channel_id));
 
-      return data.map(ch => ({
+      return data.map((ch: any) => ({
         ...ch,
         is_mine: ch.organization_id === organization.id,
         is_subscribed: subSet.has(ch.id),
@@ -63,11 +62,8 @@ export function useBroadcastChannels() {
   const createChannel = useMutation({
     mutationFn: async ({ name, description }: { name: string; description?: string }) => {
       if (!user || !organization) throw new Error('Not authenticated');
-      const { error } = await supabase.from('broadcast_channels').insert({
-        name,
-        description,
-        organization_id: organization.id,
-        created_by: user.id,
+      const { error } = await (supabase as any).from('broadcast_channels').insert({
+        name, description, organization_id: organization.id, created_by: user.id,
       });
       if (error) throw error;
     },
@@ -81,10 +77,8 @@ export function useBroadcastChannels() {
   const subscribe = useMutation({
     mutationFn: async (channelId: string) => {
       if (!user || !organization) throw new Error('Not authenticated');
-      const { error } = await supabase.from('broadcast_channel_subscribers').insert({
-        channel_id: channelId,
-        user_id: user.id,
-        organization_id: organization.id,
+      const { error } = await (supabase as any).from('broadcast_channel_subscribers').insert({
+        channel_id: channelId, user_id: user.id, organization_id: organization.id,
       });
       if (error) throw error;
     },
@@ -97,7 +91,7 @@ export function useBroadcastChannels() {
   const unsubscribe = useMutation({
     mutationFn: async (channelId: string) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('broadcast_channel_subscribers')
         .delete()
         .eq('channel_id', channelId)
@@ -115,13 +109,9 @@ export function useBroadcastChannels() {
       channelId: string; content: string; postType?: string; fileUrl?: string; fileName?: string;
     }) => {
       if (!user) throw new Error('Not authenticated');
-      const { error } = await supabase.from('broadcast_posts').insert({
-        channel_id: channelId,
-        sender_id: user.id,
-        content,
-        post_type: postType || 'text',
-        file_url: fileUrl,
-        file_name: fileName,
+      const { error } = await (supabase as any).from('broadcast_posts').insert({
+        channel_id: channelId, sender_id: user.id, content,
+        post_type: postType || 'text', file_url: fileUrl, file_name: fileName,
       });
       if (error) throw error;
     },
@@ -132,8 +122,7 @@ export function useBroadcastChannels() {
   });
 
   return {
-    channels,
-    isLoading,
+    channels, isLoading,
     createChannel: createChannel.mutate,
     subscribe: subscribe.mutate,
     unsubscribe: unsubscribe.mutate,
