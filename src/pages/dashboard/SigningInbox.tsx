@@ -793,6 +793,7 @@ export default function SigningInbox() {
               />
             ))
           )}
+        </TabsContent>
         <TabsContent value="chains" className="space-y-3 mt-4">
           {chainsLoading ? (
             <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin text-primary" /></div>
