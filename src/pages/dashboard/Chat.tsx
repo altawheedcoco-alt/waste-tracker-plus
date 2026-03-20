@@ -39,6 +39,7 @@ import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/Messa
 import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
 import { ChatAppearanceProvider, useChatAppearance } from '@/contexts/ChatAppearanceContext';
+import MentionRendererNote from '@/components/notes/MentionRenderer';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
