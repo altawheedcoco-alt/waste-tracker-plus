@@ -20,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
+import ChatMentionRenderer from './ChatMentionRenderer';
 
 interface GroupChatViewProps {
   room: ChatRoom;
