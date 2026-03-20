@@ -211,109 +211,111 @@ const ChatWallpaperPicker = ({ conversationId }: ChatWallpaperPickerProps) => {
           </TabsList>
 
           {/* ─── IMAGES TAB ─── */}
-          <TabsContent value="images" className="flex-1 min-h-0 mt-3 flex flex-col gap-3">
-            <div className="flex flex-wrap gap-1.5 shrink-0">
-              <Badge
-                variant={selectedImageCategory === null ? 'default' : 'outline'}
-                className="cursor-pointer text-[10px] px-2 py-0.5"
-                onClick={() => setSelectedImageCategory(null)}
-              >
-                الكل ({IMAGE_WALLPAPERS.length})
-              </Badge>
-              {IMAGE_WALLPAPER_CATEGORIES.map(cat => (
-                <Badge
-                  key={cat.id}
-                  variant={selectedImageCategory === cat.id ? 'default' : 'outline'}
-                  className="cursor-pointer text-[10px] px-2 py-0.5"
-                  onClick={() => setSelectedImageCategory(cat.id === selectedImageCategory ? null : cat.id)}
-                >
-                  {cat.label}
-                </Badge>
-              ))}
-            </div>
+          <TabsContent value="images" className="flex-1 min-h-0 mt-3">
+            <ScrollArea className="h-full [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '55vh' }}>
+              <div className="flex flex-col gap-3 pb-2">
+                <div className="flex flex-wrap gap-1.5">
+                  <Badge
+                    variant={selectedImageCategory === null ? 'default' : 'outline'}
+                    className="cursor-pointer text-[10px] px-2 py-0.5"
+                    onClick={() => setSelectedImageCategory(null)}
+                  >
+                    الكل ({IMAGE_WALLPAPERS.length})
+                  </Badge>
+                  {IMAGE_WALLPAPER_CATEGORIES.map(cat => (
+                    <Badge
+                      key={cat.id}
+                      variant={selectedImageCategory === cat.id ? 'default' : 'outline'}
+                      className="cursor-pointer text-[10px] px-2 py-0.5"
+                      onClick={() => setSelectedImageCategory(cat.id === selectedImageCategory ? null : cat.id)}
+                    >
+                      {cat.label}
+                    </Badge>
+                  ))}
+                </div>
 
-            {/* Upload Button + Custom Images */}
-            <div className="shrink-0">
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleUploadImage}
-                className="hidden"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full gap-2 text-xs border-dashed border-primary/40 hover:border-primary hover:bg-primary/5"
-                onClick={() => fileInputRef.current?.click()}
-                disabled={uploading}
-              >
-                {uploading ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Upload className="w-4 h-4" />
+                {/* Upload Button */}
+                <div>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleUploadImage}
+                    className="hidden"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="w-full gap-2 text-xs border-dashed border-primary/40 hover:border-primary hover:bg-primary/5"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                  >
+                    {uploading ? (
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4" />
+                    )}
+                    {uploading ? 'جاري الرفع...' : 'رفع صورة من جهازك'}
+                  </Button>
+                </div>
+
+                {/* Custom uploaded images */}
+                {customImages.length > 0 && (
+                  <div>
+                    <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">📷 صوري المرفوعة</p>
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {customImages.map((url, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => handleSelectImage(url)}
+                          className={cn(
+                            "relative aspect-square rounded-lg border-2 overflow-hidden hover:scale-[1.05] transition-all",
+                            isImageSelected(url) ? "border-primary ring-2 ring-primary/30" : "border-border"
+                          )}
+                        >
+                          <img src={url} alt="خلفية مخصصة" className="w-full h-full object-cover" loading="lazy" />
+                          {isImageSelected(url) && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
+                              <Check className="w-4 h-4 text-white drop-shadow-lg" />
+                            </div>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
-                {uploading ? 'جاري الرفع...' : 'رفع صورة من جهازك'}
-              </Button>
-            </div>
 
-            {/* Custom uploaded images */}
-            {customImages.length > 0 && (
-              <div className="shrink-0">
-                <p className="text-[10px] font-semibold text-muted-foreground mb-1.5">📷 صوري المرفوعة</p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {customImages.map((url, idx) => (
+                {/* Preset images grid */}
+                <div className="grid grid-cols-3 gap-2">
+                  {filteredImages.map(img => (
                     <button
-                      key={idx}
-                      onClick={() => handleSelectImage(url)}
+                      key={img.id}
+                      onClick={() => handleSelectImage(img.src)}
                       className={cn(
-                        "relative aspect-square rounded-lg border-2 overflow-hidden hover:scale-[1.05] transition-all",
-                        isImageSelected(url) ? "border-primary ring-2 ring-primary/30" : "border-border"
+                        "relative w-full aspect-[3/4] rounded-xl border-2 transition-all hover:scale-[1.03] hover:shadow-lg overflow-hidden group",
+                        isImageSelected(img.src)
+                          ? "border-primary shadow-md ring-2 ring-primary/30"
+                          : "border-border"
                       )}
                     >
-                      <img src={url} alt="خلفية مخصصة" className="w-full h-full object-cover" loading="lazy" />
-                      {isImageSelected(url) && (
+                      <img
+                        src={img.src}
+                        alt={img.label}
+                        className="w-full h-full object-cover"
+                        loading="lazy"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
+                      {isImageSelected(img.src) && (
                         <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-                          <Check className="w-4 h-4 text-white drop-shadow-lg" />
+                          <Check className="w-6 h-6 text-white drop-shadow-lg" />
                         </div>
                       )}
+                      <span className="absolute bottom-0 inset-x-0 text-[9px] text-center font-medium text-white bg-black/40 py-0.5 leading-tight backdrop-blur-sm">
+                        {img.label}
+                      </span>
                     </button>
                   ))}
                 </div>
-              </div>
-            )}
-
-            <ScrollArea className="flex-1 min-h-0 [&>[data-radix-scroll-area-viewport]]:!overflow-y-scroll [&_[data-radix-scroll-area-scrollbar]]:opacity-100" style={{ maxHeight: '300px' }}>
-              <div className="grid grid-cols-3 gap-2 pb-2">
-                {filteredImages.map(img => (
-                  <button
-                    key={img.id}
-                    onClick={() => handleSelectImage(img.src)}
-                    className={cn(
-                      "relative w-full aspect-[3/4] rounded-xl border-2 transition-all hover:scale-[1.03] hover:shadow-lg overflow-hidden group",
-                      isImageSelected(img.src)
-                        ? "border-primary shadow-md ring-2 ring-primary/30"
-                        : "border-border"
-                    )}
-                  >
-                    <img
-                      src={img.src}
-                      alt={img.label}
-                      className="w-full h-full object-cover"
-                      loading="lazy"
-                    />
-                    {/* Overlay on hover */}
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors" />
-                    {isImageSelected(img.src) && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-primary/20">
-                        <Check className="w-6 h-6 text-white drop-shadow-lg" />
-                      </div>
-                    )}
-                    <span className="absolute bottom-0 inset-x-0 text-[9px] text-center font-medium text-white bg-black/40 py-0.5 leading-tight backdrop-blur-sm">
-                      {img.label}
-                    </span>
-                  </button>
-                ))}
               </div>
             </ScrollArea>
           </TabsContent>
