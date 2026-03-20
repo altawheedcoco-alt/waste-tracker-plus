@@ -277,7 +277,7 @@ export default function ComplianceLicenseSettings() {
             <div className="flex-1">
               <p className="text-sm font-bold">استخراج البيانات تلقائياً (OCR)</p>
               <p className="text-xs text-muted-foreground mt-1">
-                ارفع صورة مستند (ترخيص، موافقة بيئية، تصريح WMRA) وسيتم استخراج النص والبيانات بتقنية Tesseract OCR بدون AI
+                ارفع صورة أو ملف PDF (صفحة واحدة أو متعدد الصفحات) وسيتم استخراج النص والبيانات تلقائياً
               </p>
               {extracting && (
                 <div className="mt-2">
@@ -287,13 +287,13 @@ export default function ComplianceLicenseSettings() {
                   <p className="text-xs text-muted-foreground mt-1">جارٍ التحليل... {progress}%</p>
                 </div>
               )}
-              <div className="mt-3">
+              <div className="mt-3 flex gap-2">
                 <label className="cursor-pointer">
-                  <input type="file" className="hidden" accept="image/*" onChange={handleFileUpload} disabled={extracting} />
+                  <input type="file" className="hidden" accept="image/*,.pdf,application/pdf" onChange={handleFileUpload} disabled={extracting} />
                   <Button variant="outline" size="sm" className="gap-2" asChild disabled={extracting}>
                     <span>
                       {extracting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileCheck className="h-4 w-4" />}
-                      {extracting ? 'جارٍ التحليل...' : 'رفع صورة مستند'}
+                      {extracting ? 'جارٍ التحليل...' : 'رفع صورة أو PDF'}
                     </span>
                   </Button>
                 </label>
