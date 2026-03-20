@@ -550,6 +550,7 @@ const DashboardV2Header = memo(({
   const displayName = userName || orgName || 'المستخدم';
   const [now, setNow] = useState(new Date());
   const [tick, setTick] = useState(0);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const t = setInterval(() => { setNow(new Date()); setTick(p => p + 1); }, 1000);
