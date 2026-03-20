@@ -219,7 +219,13 @@ export default function ComplianceLicenseSettings() {
       }
 
       // 2. Save extracted data to entity_documents
-      const docType = extractedResult.detected_fields.document_type || 'compliance_document';
+      const aiDocType = extractedResult.detected_fields.document_type || 'other';
+      // Map AI-detected type to allowed DB values
+      const typeMap: Record<string, string> = {
+        wmra_license: 'license', environmental_approval: 'certificate',
+        transport_license: 'license', compliance_document: 'certificate',
+      };
+      const docType = typeMap[aiDocType] || 'other';
       const title = extractedResult.detected_fields.license_number
         ? `${docType} - ${extractedResult.detected_fields.license_number}`
         : `مستند امتثال - ${new Date().toLocaleDateString('ar-EG')}`;
