@@ -334,7 +334,8 @@ const NotesPanel = memo(({
   const { profile } = useAuth();
   const queryClient = useQueryClient();
 
-  const { data: notes = [], isLoading } = useQuery({
+  // Conversation notes
+  const { data: convoNotes = [], isLoading: loadingConvo } = useQuery({
     queryKey: ['conversation-notes', conversationId],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -357,11 +358,72 @@ const NotesPanel = memo(({
         content: note.content,
         created_at: note.created_at,
         author_name: note.author?.full_name || 'مجهول',
-      })) as ConversationNote[];
+        source: 'conversation' as const,
+      })) as (ConversationNote & { source: string })[];
     },
     enabled: !!conversationId,
     refetchInterval: 5000,
   });
+
+  // Shipment notes shared between the two orgs
+  const { data: shipmentNotes = [], isLoading: loadingShipment } = useQuery({
+    queryKey: ['shared-shipment-notes', organizationId, targetOrganizationId],
+    queryFn: async () => {
+      if (!organizationId || !targetOrganizationId) return [];
+      
+      // Find shipments shared between the two orgs
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('id, shipment_number')
+        .or(
+          `and(generator_id.eq.${organizationId},transporter_id.eq.${targetOrganizationId}),` +
+          `and(generator_id.eq.${organizationId},recycler_id.eq.${targetOrganizationId}),` +
+          `and(transporter_id.eq.${organizationId},generator_id.eq.${targetOrganizationId}),` +
+          `and(transporter_id.eq.${organizationId},recycler_id.eq.${targetOrganizationId}),` +
+          `and(recycler_id.eq.${organizationId},generator_id.eq.${targetOrganizationId}),` +
+          `and(recycler_id.eq.${organizationId},transporter_id.eq.${targetOrganizationId})`
+        )
+        .order('created_at', { ascending: false })
+        .limit(20);
+
+      if (!shipments?.length) return [];
+
+      const shipmentIds = shipments.map(s => s.id);
+      const shipmentMap = new Map(shipments.map(s => [s.id, s.shipment_number]));
+
+      const { data: notes } = await supabase
+        .from('notes')
+        .select(`
+          id, content, created_at, resource_id,
+          author:profiles!notes_author_id_fkey(full_name)
+        `)
+        .eq('resource_type', 'shipment')
+        .in('resource_id', shipmentIds)
+        .order('created_at', { ascending: false })
+        .limit(30);
+
+      return (notes || []).map((note: any) => ({
+        id: note.id,
+        content: note.content,
+        created_at: note.created_at,
+        author_name: note.author?.full_name || 'مجهول',
+        source: 'shipment',
+        shipment_number: shipmentMap.get(note.resource_id) || '',
+      }));
+    },
+    enabled: !!organizationId && !!targetOrganizationId,
+    refetchInterval: 10000,
+  });
+
+  const notes = useMemo(() => {
+    const all = [
+      ...convoNotes.map(n => ({ ...n, source: 'conversation' })),
+      ...shipmentNotes,
+    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    return all;
+  }, [convoNotes, shipmentNotes]);
+
+  const isLoading = loadingConvo || loadingShipment;
 
   useEffect(() => {
     if (!conversationId) return;
