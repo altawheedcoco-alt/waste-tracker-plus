@@ -611,15 +611,37 @@ const DashboardV2Header = memo(({
                 </div>
 
                 {/* System status icons */}
-                <div className="hidden lg:flex items-center gap-0 px-1 py-0.5 rounded-md bg-muted/30 border border-border/20">
+                <TooltipProvider delayDuration={200}>
+                <div className="hidden lg:flex items-center gap-0 px-1.5 py-0.5 rounded-md bg-muted/30 border border-border/20 overflow-x-auto scrollbar-hide max-w-[480px]">
                   {systemIcons.map((si, i) => (
-                    <motion.div key={si.label} className="flex items-center gap-0 px-0.5" title={si.label}
-                      initial={{ opacity: 0, scale: 0 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.3 + i * 0.04 }}>
-                      <si.icon className="w-2.5 h-2.5 text-emerald-500" />
-                      <span className="text-[6px] font-mono text-muted-foreground">{si.label}</span>
-                    </motion.div>
+                    <Tooltip key={si.label}>
+                      <TooltipTrigger asChild>
+                        <motion.div
+                          className={cn(
+                            "flex items-center gap-0 px-0.5 cursor-pointer rounded transition-colors hover:bg-primary/10",
+                            si.route && "cursor-pointer"
+                          )}
+                          onClick={() => si.route && navigate(si.route)}
+                          initial={{ opacity: 0, scale: 0 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ delay: 0.3 + i * 0.03 }}
+                          whileHover={{ scale: 1.2 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
+                          <si.icon className={cn("w-2.5 h-2.5", statusColors[si.status])} />
+                          <span className="text-[6px] font-mono text-muted-foreground">{si.label}</span>
+                        </motion.div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="text-xs">
+                        <div className="flex items-center gap-1.5">
+                          <span className={cn("w-1.5 h-1.5 rounded-full", si.status === 'ok' ? 'bg-emerald-500' : si.status === 'warn' ? 'bg-amber-500' : 'bg-destructive')} />
+                          {si.tooltip}
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
                   ))}
                 </div>
+                </TooltipProvider>
 
                 <Badge variant="outline" className="text-[7px] px-1 py-0 h-[14px] gap-0.5 border-primary/20 text-primary">
                   <Sparkles className="w-2 h-2" /> v5.0
