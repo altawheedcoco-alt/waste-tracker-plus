@@ -447,18 +447,82 @@ const EnhancedChatInput = ({
             </PopoverContent>
           </Popover>
 
-          {/* Text Input */}
-          <Textarea
-            ref={textareaRef}
-            value={inputValue}
-            onChange={handleTextareaChange}
-            onKeyDown={handleKeyDown}
-            placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة..."}
-            className="min-h-[36px] max-h-[120px] resize-none py-2 px-1 border-0 shadow-none bg-transparent focus-visible:ring-0 text-sm"
-            disabled={sending || disabled || isRecording}
-            dir="rtl"
-            rows={1}
-          />
+          {/* Text Input with Mention Dropdown */}
+          <div className="flex-1 relative">
+            <Textarea
+              ref={textareaRef}
+              value={inputValue}
+              onChange={handleTextareaChange}
+              onKeyDown={handleKeyDown}
+              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (@للإشارة)"}
+              className="min-h-[36px] max-h-[120px] resize-none py-2 px-1 border-0 shadow-none bg-transparent focus-visible:ring-0 text-sm"
+              disabled={sending || disabled || isRecording}
+              dir="rtl"
+              rows={1}
+            />
+            
+            {/* @Mention Dropdown */}
+            <AnimatePresence>
+              {showMentionDropdown && filteredMentions.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 4 }}
+                  transition={{ duration: 0.15 }}
+                  className="absolute bottom-full mb-1 right-0 left-0 z-50 bg-popover border border-border rounded-lg shadow-lg overflow-hidden"
+                >
+                  <ScrollArea className="max-h-48">
+                    {filteredMentions.map((entity, index) => (
+                      <button
+                        key={`${entity.type}-${entity.id}`}
+                        type="button"
+                        className={cn(
+                          'w-full flex items-center gap-2.5 px-3 py-2 text-right text-sm transition-colors',
+                          index === mentionIndex ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
+                        )}
+                        onClick={() => insertMention(entity)}
+                        onMouseEnter={() => setMentionIndex(index)}
+                      >
+                        <Avatar className="h-7 w-7 shrink-0">
+                          <AvatarImage src={entity.avatar_url || undefined} />
+                          <AvatarFallback className="text-[10px]">
+                            {entity.type === 'organization' ? (
+                              <Building2 className="h-3.5 w-3.5" />
+                            ) : (
+                              entity.name.slice(0, 2)
+                            )}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 min-w-0 text-right">
+                          <p className="font-medium text-xs truncate">{entity.name}</p>
+                          {entity.subtitle && (
+                            <div className="flex items-center gap-1 justify-end">
+                              {entity.type === 'organization' ? (
+                                <Building2 className="w-2.5 h-2.5 text-muted-foreground" />
+                              ) : (
+                                <User className="w-2.5 h-2.5 text-muted-foreground" />
+                              )}
+                              <span className="text-[10px] text-muted-foreground truncate">{entity.subtitle}</span>
+                            </div>
+                          )}
+                        </div>
+                        {entity.type === 'organization' && (
+                          <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">جهة</Badge>
+                        )}
+                        {entity.is_external && entity.type === 'user' && (
+                          <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">خارجي</Badge>
+                        )}
+                      </button>
+                    ))}
+                  </ScrollArea>
+                  <div className="px-3 py-1 border-t border-border/50 text-[10px] text-muted-foreground text-center flex items-center justify-center gap-1">
+                    <AtSign className="w-3 h-3" />
+                    اكتب @ للإشارة لشخص أو جهة
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Attachment Plus Button */}
           <Popover open={showAttachMenu} onOpenChange={setShowAttachMenu}>
