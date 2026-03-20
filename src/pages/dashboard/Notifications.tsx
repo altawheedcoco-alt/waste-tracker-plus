@@ -979,6 +979,9 @@ const NotificationCard = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                 {Object.entries(notification.metadata).map(([key, value]) => {
                   if (value === null || value === undefined || value === '' || (typeof value === 'object' && !Array.isArray(value))) return null;
+                  // Hide raw UUIDs for message/note notifications - show human-readable info instead
+                  const isUUID = typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+                  if (isUUID && ['sender_id', 'message_id', 'conversation_id'].includes(key)) return null;
                   return (
                     <div key={key} className="flex items-start gap-1 text-[10px]">
                       <span className="text-muted-foreground/70 shrink-0">{getMetadataFieldLabel(key).label}:</span>
@@ -987,6 +990,35 @@ const NotificationCard = ({
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Message-specific detail card */}
+          {notification.type === 'partner_message' && (
+            <div className="bg-pink-500/5 rounded-lg p-2.5 border border-pink-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <MessageCircle className="w-3.5 h-3.5 text-pink-500" />
+                <span className="font-semibold text-pink-600 dark:text-pink-400">تفاصيل الرسالة</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <User className="w-3 h-3" />
+                <span className="font-medium">{notification.title?.replace('رسالة جديدة من ', '') || 'مرسل غير معروف'}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Note-specific detail card */}
+          {notification.type === 'partner_note' && (
+            <div className="bg-orange-500/5 rounded-lg p-2.5 border border-orange-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <FileText className="w-3.5 h-3.5 text-orange-500" />
+                <span className="font-semibold text-orange-600 dark:text-orange-400">تفاصيل الملاحظة</span>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <User className="w-3 h-3" />
+                <span className="font-medium">{notification.title?.replace('ملاحظة جديدة من ', '') || 'شريك'}</span>
+              </div>
+              <p className="text-xs text-muted-foreground line-clamp-2">{notification.message}</p>
             </div>
           )}
 
