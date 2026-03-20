@@ -69,7 +69,7 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
     parties.push({ id: shipment.recycler.id, name: shipment.recycler.name, type: 'recycler' });
   }
   if (shipment.driver_id && shipment.driver?.profile?.full_name) {
-    parties.push({ id: shipment.driver_id, name: shipment.driver.profile.full_name, type: 'driver' });
+    parties.push({ id: shipment.driver_id, name: shipment.driver.profile.full_name!, type: 'driver' });
   }
 
   const openDirectChat = useCallback((party: Party) => {
