@@ -486,8 +486,18 @@ const NotesPanel = memo(({
           </div>
         ) : (
           <div className="space-y-2">
-            {notes.map(note => (
-              <div key={note.id} className="p-2.5 rounded-lg bg-amber-50/50 dark:bg-amber-900/10 border border-amber-200/30 dark:border-amber-800/30">
+            {notes.map((note: any) => (
+              <div key={note.id} className={cn(
+                'p-2.5 rounded-lg border',
+                note.source === 'shipment'
+                  ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200/30 dark:border-blue-800/30'
+                  : 'bg-amber-50/50 dark:bg-amber-900/10 border-amber-200/30 dark:border-amber-800/30'
+              )}>
+                {note.source === 'shipment' && note.shipment_number && (
+                  <Badge variant="outline" className="text-[9px] mb-1 text-blue-600 border-blue-300">
+                    شحنة #{note.shipment_number}
+                  </Badge>
+                )}
                 <p className="text-sm whitespace-pre-wrap">{note.content}</p>
                 <div className="flex items-center justify-between mt-1.5 text-[10px] text-muted-foreground">
                   <span>{note.author_name}</span>
