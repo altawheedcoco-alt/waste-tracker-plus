@@ -34,7 +34,7 @@ import {
   User, Phone, Mail, FileText, AlertTriangle, Scale, Box, Loader2,
   Edit, Navigation, Lock, Route, Eye, Star, Shield, Users2,
   RefreshCw, ChevronDown, Settings2, Download, FileCheck, CheckCircle2,
-  EyeOff, XCircle,
+  EyeOff, XCircle, StickyNote, MessageSquare,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
