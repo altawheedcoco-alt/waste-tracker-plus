@@ -21,7 +21,7 @@ interface ShipmentChatTabProps {
     generator?: { name: string; id?: string } | null;
     recycler?: { name: string; id?: string } | null;
     transporter?: { name: string; id?: string } | null;
-    driver?: { profile?: { full_name: string } } | null;
+    driver?: { profile?: { full_name?: string } } | null;
     driver_id?: string | null;
     generator_id?: string | null;
     transporter_id?: string | null;
