@@ -393,7 +393,7 @@ const ShipmentA4Document = forwardRef<HTMLDivElement, ShipmentA4DocumentProps>((
                       </div>
                       {latestSig ? (
                         <div style={{ borderTop: '1px dashed #16a34a', marginTop: '1px', paddingTop: '1px', fontSize: '5pt', color: '#16a34a' }}>
-                          {latestSig.signer_name} | {METHOD_LABELS[latestSig.signature_method] || latestSig.signature_method}
+                          {profileLink(latestSig.signer_name, latestSig.signed_by ? memberProfileUrl(latestSig.signed_by) : '', '#16a34a')} | {METHOD_LABELS[latestSig.signature_method] || latestSig.signature_method}
                           {latestSig.platform_seal_number && <div style={{ fontFamily: 'monospace', fontSize: '4.5pt', color: '#4b5563' }}>{latestSig.platform_seal_number}</div>}
                         </div>
                       ) : (

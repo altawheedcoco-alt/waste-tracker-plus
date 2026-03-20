@@ -1,4 +1,5 @@
 import { useState, useEffect, lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -23,6 +24,8 @@ interface SignatureRecord {
   platform_seal_number: string | null;
   status: string | null;
   timestamp_signed: string;
+  organization_id: string | null;
+  signed_by: string | null;
 }
 
 const ROLE_LABELS: Record<string, string> = {
@@ -43,6 +46,7 @@ interface ShipmentSignaturesCardProps {
 }
 
 const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => {
+  const navigate = useNavigate();
   const [signatures, setSignatures] = useState<SignatureRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDocPreview, setShowDocPreview] = useState(false);
@@ -52,7 +56,7 @@ const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => 
     setLoading(true);
     supabase
       .from('document_signatures')
-      .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed')
+      .select('id, document_type, signer_name, signer_role, signer_title, signature_image_url, stamp_image_url, stamp_applied, signature_method, signature_hash, platform_seal_number, status, timestamp_signed, organization_id, signed_by')
       .eq('document_id', shipmentId)
       .order('timestamp_signed', { ascending: true })
       .then(({ data }) => {
@@ -60,6 +64,16 @@ const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => 
         setLoading(false);
       });
   }, [shipmentId]);
+
+  const goToProfile = (e: React.MouseEvent, profileId: string | null) => {
+    e.stopPropagation();
+    if (profileId) navigate(`/dashboard/profile/${profileId}`);
+  };
+
+  const goToOrg = (e: React.MouseEvent, orgId: string | null) => {
+    e.stopPropagation();
+    if (orgId) navigate(`/dashboard/organization/${orgId}`);
+  };
 
   if (loading) return null;
   if (signatures.length === 0) {
@@ -120,9 +134,20 @@ const ShipmentSignaturesCard = ({ shipmentId }: ShipmentSignaturesCardProps) => 
                 {/* Details */}
                 <div className="flex-1 min-w-0 space-y-1">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-sm font-semibold">{sig.signer_name}</span>
+                    <span
+                      className={`text-sm font-semibold ${sig.signed_by ? 'text-primary hover:underline cursor-pointer' : ''}`}
+                      onClick={(e) => goToProfile(e, sig.signed_by)}
+                    >
+                      {sig.signer_name}
+                    </span>
                     {sig.signer_role && (
-                      <Badge variant="outline" className="text-[10px] h-4">{ROLE_LABELS[sig.signer_role] || sig.signer_role}</Badge>
+                      <Badge
+                        variant="outline"
+                        className={`text-[10px] h-4 ${sig.organization_id ? 'cursor-pointer hover:bg-muted' : ''}`}
+                        onClick={(e) => goToOrg(e, sig.organization_id)}
+                      >
+                        {ROLE_LABELS[sig.signer_role] || sig.signer_role}
+                      </Badge>
                     )}
                     {sig.status === 'signed' && (
                       <ShieldCheck className="w-3.5 h-3.5 text-primary" />
