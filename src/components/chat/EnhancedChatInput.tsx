@@ -44,6 +44,7 @@ import ChatResourcePicker from './ChatResourcePicker';
 interface EnhancedChatInputProps {
   onSendMessage: (message: string) => Promise<void>;
   onSendFile: (file: File) => Promise<void>;
+  onSendResourceCard?: (resourceType: string, resourceData: any) => Promise<void>;
   sending: boolean;
   uploadProgress?: number;
   disabled?: boolean;
