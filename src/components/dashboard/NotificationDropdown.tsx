@@ -3,24 +3,25 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Bell } from 'lucide-react';
-import { useNotifications } from '@/hooks/useNotifications';
+import { usePlatformCounts } from '@/hooks/usePlatformCounts';
 import { cn } from '@/lib/utils';
 
 const NotificationDropdown = () => {
-  const { unreadCount } = useNotifications();
+  const { data: counts } = usePlatformCounts();
+  // Combined: notifications + unread messages + pending signatures
+  const totalUnread = (counts?.unreadNotifications ?? 0) + (counts?.unreadMessages ?? 0) + (counts?.pendingSignatures ?? 0);
   const navigate = useNavigate();
-  const prevCount = useRef(unreadCount);
+  const prevCount = useRef(totalUnread);
   const [isPulsing, setIsPulsing] = useState(false);
 
-  // Pulse effect when unread count increases
   useEffect(() => {
-    if (unreadCount > prevCount.current) {
+    if (totalUnread > prevCount.current) {
       setIsPulsing(true);
       const timer = setTimeout(() => setIsPulsing(false), 600);
       return () => clearTimeout(timer);
     }
-    prevCount.current = unreadCount;
-  }, [unreadCount]);
+    prevCount.current = totalUnread;
+  }, [totalUnread]);
 
   const handleClick = () => {
     startTransition(() => {
@@ -34,15 +35,15 @@ const NotificationDropdown = () => {
       size="icon" 
       className="relative" 
       onClick={handleClick}
-      aria-label={`الإشعارات${unreadCount > 0 ? ` (${unreadCount} غير مقروءة)` : ''}`}
+      aria-label={`الإشعارات${totalUnread > 0 ? ` (${totalUnread} غير مقروءة)` : ''}`}
     >
       <Bell className={cn(
         "w-5 h-5 transition-colors",
-        unreadCount > 0 && "text-primary",
+        totalUnread > 0 && "text-primary",
         isPulsing && "animate-[bell-shake_0.5s_ease-in-out]"
       )} />
       <AnimatePresence>
-        {unreadCount > 0 && (
+        {totalUnread > 0 && (
           <motion.span
             initial={{ scale: 0, opacity: 0 }}
             animate={{ 
@@ -59,21 +60,20 @@ const NotificationDropdown = () => {
             }
             className={cn(
               "absolute flex items-center justify-center font-bold text-primary-foreground bg-destructive rounded-full pointer-events-none",
-              unreadCount > 99
+              totalUnread > 99
                 ? "-top-2 -right-3 h-6 min-w-[1.5rem] px-1 text-[10px]"
-                : unreadCount > 9
+                : totalUnread > 9
                 ? "-top-1.5 -right-2 h-5 min-w-[1.25rem] px-0.5 text-[10px]"
                 : "-top-1 -right-1 h-5 w-5 text-xs"
             )}
           >
-            {unreadCount > 99 ? '99+' : unreadCount}
+            {totalUnread > 99 ? '99+' : totalUnread}
           </motion.span>
         )}
       </AnimatePresence>
 
-      {/* Pulse ring effect */}
       <AnimatePresence>
-        {isPulsing && unreadCount > 0 && (
+        {isPulsing && totalUnread > 0 && (
           <motion.span
             initial={{ scale: 1, opacity: 0.6 }}
             animate={{ scale: 2.5, opacity: 0 }}
