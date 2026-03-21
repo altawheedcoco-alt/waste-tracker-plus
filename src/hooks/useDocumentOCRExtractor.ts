@@ -219,7 +219,7 @@ export function useDocumentOCRExtractor() {
         const pageResult = await callAIExtract(pageBase64, `${file.name} - صفحة ${i}`, nativePageText || undefined);
 
         if (pageResult) {
-          const mergedPageText = mergePageTexts(nativePageText, pageResult.raw_text || '');
+          const mergedPageText = filterGarbageText(mergePageTexts(nativePageText, pageResult.raw_text || ''));
           allText += `--- صفحة ${i} ---\n${mergedPageText}\n\n`;
           totalConfidence += pageResult.confidence;
           analyzedPages += 1;
