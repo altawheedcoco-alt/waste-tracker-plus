@@ -1,68 +1,112 @@
 
 
-# خطة ربط استخراج المستندات بالذكاء الاصطناعي عبر المنصة
+# خطة ربط بيانات الجهة الناقلة بالكامل — مركز التواصل والعمليات + لوحة التحكم + القوائم الجانبية + الهيدر
 
-## الهدف
-ربط نظام استخراج البيانات بالـ AI بين 3 مواقع: (1) إعدادات المؤسسة (التراخيص والامتثال + البيانات المستخرجة بالـ AI)، (2) تبويب "الوثائق" في ملف الجهة، (3) زر جديد "تحليل الجهة" في ملف الجهة. مع ضمان أن أي مستند يُرفع من أي مكان يتم تحليله إلزامياً بالـ AI وحفظ بياناته مصنفة.
+## المشكلة الحالية
+مركز التواصل والعمليات (`CommunicationHubWidget`) يعرض 12 زراً لكنه يجلب **فقط** عدد الإشعارات غير المقروءة (`unreadCount`). باقي الأزرار (الرسائل، الملاحظات، التوقيعات، القنوات، البث، إلخ) لا تعرض بيانات حقيقية ولا أرقام شارات (badges). كذلك بعض أزرار مركز القيادة ليست مربوطة بمسارات فعلية.
+
+## الجداول الموجودة فعلاً في قاعدة البيانات
+- `direct_messages` ✅ (الرسائل)
+- `signing_chain_steps` ✅ (التوقيعات)
+- `work_orders` ✅ (الطلبات)
+- `stories` ✅ (الحالات)
+- `broadcast_channels` ✅ (البث)
+- `notes` ✅ (الملاحظات)
+- `notifications` ✅ (الإشعارات)
+- `polls` ❌ غير موجود
+- `meetings` ❌ غير موجود
 
 ---
 
-## الخطوات
+## المرحلة 1: مركز التواصل والعمليات — ربط البيانات الحقيقية
 
-### 1. تعديل تبويب "الوثائق" في ملف الجهة (`OrganizationProfile.tsx`)
-**الملف**: `src/pages/dashboard/OrganizationProfile.tsx` (سطر 542-604)
+### 1.1 إنشاء Hook جديد `useCommHubCounts`
+سيجلب عدادات حقيقية من قاعدة البيانات لكل قسم:
+- **الرسائل**: `direct_messages` حيث `receiver_organization_id = orgId AND is_read = false` → عدد الرسائل غير المقروءة
+- **الملاحظات**: `notes` حيث `organization_id = orgId AND is_read = false` → عدد الملاحظات الجديدة
+- **التوقيعات**: `signing_chain_steps` حيث `signer_org_id = orgId AND status = 'pending'` → عدد التوقيعات المعلقة
+- **الحالات**: `stories` حيث `organization_id = orgId AND created_at > 24h ago` → عدد القصص النشطة
+- **البث**: `broadcast_channels` حيث `organization_id = orgId` → عدد القنوات
+- **الطلبات**: `work_orders` حيث `(sender_org_id = orgId OR recipient_org_id = orgId) AND status = 'pending'` → عدد الطلبات المعلقة
+- تفعيل `refetchInterval: 30000` للتحديث التلقائي كل 30 ثانية
 
-- **عند رفع أي مستند** من تبويب الوثائق (السجل التجاري، الترخيص البيئي، هوية الممثل، تفويض، مستند آخر): يتم استدعاء `useDocumentOCRExtractor` إلزامياً لتحليل الملف واستخراج البيانات.
-- **بعد الاستخراج**: يُحفظ المستند في `entity_documents` مع `ai_extracted = true` و`ocr_extracted_data` و`ocr_confidence` بالإضافة لحفظه في `organization_documents` الحالي.
-- **إضافة شريط تقدم** أثناء التحليل ونتيجة سريعة (نوع المستند المكتشف + نسبة الثقة).
-- **تصنيف تلقائي**: حسب نوع المستند المكتشف بالـ AI (موافقة بيئية، رخصة تشغيل، سجل صناعي، سجل تجاري، عقد، فاتورة، إلخ).
+### 1.2 تحديث `CommunicationHubWidget.tsx`
+- استبدال العداد الثابت بعدادات حقيقية من `useCommHubCounts`
+- إضافة `badgeCount` لكل زر: الرسائل، الملاحظات، التوقيعات، الطلبات
+- الأزرار التي لا يوجد لها جدول (الاجتماعات، التصويت) تبقى بدون عداد مع ملاحظة "قريباً"
 
-### 2. إضافة تبويب "تحليل الجهة" في ملف الجهة
-**الملف**: `src/pages/dashboard/OrganizationProfile.tsx`
+---
 
-- إضافة تبويب جديد `{ value: 'analysis', label: 'تحليل الجهة', icon: Brain }` بعد "الوثائق".
-- **إنشاء مكون جديد** `src/components/organization/OrganizationAnalysis.tsx`:
-  - يجمع كل البيانات المستخرجة بالـ AI من `entity_documents` الخاصة بالجهة.
-  - يعرض ملخصاً شاملاً مقسماً إلى أقسام:
-    - **التراخيص والتصاريح**: كل ترخيص مستخرج مع تواريخ الإصدار والانتهاء وحالة الصلاحية.
-    - **الامتثال البيئي**: الموافقات البيئية والاشتراطات والالتزامات المستخرجة.
-    - **أنواع المخلفات المرخصة**: المخلفات المذكورة في التراخيص.
-    - **تحليل المخاطر**: مستوى المخاطرة بناءً على انتهاء التراخيص أو نقص المستندات.
-    - **التوصيات**: توصيات لتحسين الامتثال.
-  - **زر "إعادة التحليل الشامل"**: يستدعي Edge Function `analyze-document` لتوليد تقرير شامل عن الجهة باستخدام كل البيانات المستخرجة.
+## المرحلة 2: تحديث Realtime للناقل
 
-### 3. ربط البيانات المستخرجة بالـ AI بالوثائق
-**الملف**: `src/components/settings/AIExtractedDataViewer.tsx`
+### 2.1 توسيع `useTransporterRealtime.ts`
+إضافة اشتراكات لحظية للجداول الجديدة:
+- `direct_messages` → إبطال كاش `comm-hub-counts`
+- `signing_chain_steps` → إبطال كاش `comm-hub-counts`
+- `work_orders` → إبطال كاش `comm-hub-counts` + `transporter-incoming-requests`
+- `notes` → إبطال كاش `comm-hub-counts`
+- `stories` → إبطال كاش `comm-hub-counts`
+- `invoices` → إبطال كاش `transporter-command-center-v4`
+- `fleet_vehicles` → إبطال كاش `transporter-command-center-v4`
+- `contracts` → إبطال كاش `transporter-command-center-v4`
+- `organization_members` → إبطال كاش `transporter-command-center-v4`
+- `entity_documents` → إبطال كاش `transporter-command-center-v4`
 
-- إضافة تصنيف بصري للمستندات حسب النوع (فلاتر: موافقة بيئية، رخصة WMRA، رخصة نقل، سجل تجاري، عقد، فاتورة، أخرى).
-- إضافة رابط "عرض في ملف الجهة" لكل مستند مستخرج.
+---
 
-### 4. ربط تبويب "التراخيص والامتثال" بالوثائق
-**الملف**: `src/components/settings/ComplianceLicenseSettings.tsx`
+## المرحلة 3: مركز القيادة — ربط التنقل الكامل
 
-- عند رفع مستند من التراخيص والامتثال، يتم حفظه أيضاً بحيث يظهر في تبويب "الوثائق" بملف الجهة (الحفظ المزدوج موجود بالفعل في `entity_documents`).
-- إضافة زر "عرض الوثائق المرتبطة" ينقل المستخدم لتبويب الوثائق في ملف الجهة.
+### 3.1 تحديث `TransporterCommandCenter.tsx`
+ربط كل `StatMicro` بمسار تنقل فعلي:
+- **بانتظار الموافقة** → `/dashboard/transporter-shipments?status=new`
+- **متأخرة** → `/dashboard/transporter-shipments?status=overdue`
+- **الشهادات/الإيصالات** → `/dashboard/transporter-receipts`
+- **المركبات** → `/dashboard/fleet` أو صفحة الأسطول
+- **العقود** → `/dashboard/contracts`
+- **الإيداعات** → `/dashboard/deposits`
 
-### 5. إنشاء Edge Function لتحليل الجهة الشامل
-**الملف**: `supabase/functions/analyze-organization/index.ts`
+---
 
-- يستقبل `organization_id` ويجمع كل `entity_documents` حيث `ai_extracted = true`.
-- يرسل البيانات المستخرجة لموديل Gemini لتوليد تقرير تحليلي شامل عن:
-  - حالة الامتثال الكاملة.
-  - التراخيص المنتهية أو القريبة من الانتهاء.
-  - الاشتراطات غير المستوفاة.
-  - المستندات الناقصة.
-  - تقييم عام للجهة مع درجة امتثال.
+## المرحلة 4: الهيدر — ربط التنبيهات الحقيقية
+
+### 4.1 تحديث `DashboardV2Header` props في `TransporterDashboard.tsx`
+تحويل التنبيهات من نصوص ثابتة إلى بيانات ديناميكية:
+- جلب التنبيهات من `notifications` الأخيرة (آخر 5 تنبيهات عاجلة)
+- جلب المستندات المنتهية من `entity_documents` 
+- جلب الشحنات المتأخرة الفعلية وعرضها كتنبيهات
+- إزالة التنبيهات المعلبة مثل "تذكير: فحص دوري" واستبدالها ببيانات حقيقية
+
+### 4.2 ربط `radarStats` بمسارات التنقل
+إضافة `route` لكل إحصائية في الرادار ليصبح كل رقم قابلاً للنقر:
+- إجمالي الشحنات → `/dashboard/transporter-shipments`
+- نشطة → `/dashboard/tracking-center`
+- السائقون → `/dashboard/transporter-drivers`
+- الشركاء → `/dashboard/partners`
+
+---
+
+## المرحلة 5: جداول مفقودة (اختياري)
+
+### 5.1 Migration لإنشاء الجداول غير الموجودة
+- `meetings` — جدول الاجتماعات (id, title, organizer_id, organization_id, scheduled_at, meeting_url, status)
+- `polls` — جدول التصويتات (id, question, organization_id, created_by, created_at, is_active)
+- مع RLS policies مناسبة
 
 ---
 
 ## الملفات المتأثرة
+| ملف | التغيير |
+|------|---------|
+| `src/hooks/useCommHubCounts.ts` | **جديد** — Hook عدادات مركز التواصل |
+| `src/components/dashboard/widgets/CommunicationHubWidget.tsx` | ربط العدادات الحقيقية |
+| `src/hooks/useTransporterRealtime.ts` | توسيع الاشتراكات اللحظية |
+| `src/components/dashboard/transporter/TransporterCommandCenter.tsx` | ربط التنقل للإحصائيات |
+| `src/components/dashboard/TransporterDashboard.tsx` | تحويل التنبيهات لديناميكية |
+| Migration SQL | جداول `meetings` و `polls` |
 
-| ملف | نوع التعديل |
-|---|---|
-| `src/pages/dashboard/OrganizationProfile.tsx` | تعديل تبويب الوثائق + إضافة تبويب تحليل الجهة |
-| `src/components/organization/OrganizationAnalysis.tsx` | **جديد** — مكون تحليل الجهة الشامل |
-| `src/components/settings/AIExtractedDataViewer.tsx` | إضافة فلاتر تصنيف + رابط ملف الجهة |
-| `src/components/settings/ComplianceLicenseSettings.tsx` | إضافة زر ربط بالوثائق |
-| `supabase/functions/analyze-organization/index.ts` | **جديد** — Edge Function للتحليل الشامل |
+## ترتيب التنفيذ
+1. المرحلة 1 + 2 معاً (Hook + Realtime + Widget)
+2. المرحلة 3 (Command Center navigation)
+3. المرحلة 4 (Header dynamic alerts)
+4. المرحلة 5 (جداول جديدة إن أردت)
 
