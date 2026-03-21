@@ -83,6 +83,7 @@ const OrganizationProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [aiExtracting, setAiExtracting] = useState(false);
   const [documents, setDocuments] = useState<OrganizationDocument[]>([]);
   const [orgData, setOrgData] = useState<any>(null);
 
