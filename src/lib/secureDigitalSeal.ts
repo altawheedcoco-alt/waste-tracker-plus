@@ -1,8 +1,8 @@
 /**
- * منظومة الختم الرقمي المؤمّن — Secure Digital Seal System v2.0
+ * منظومة الختم الرقمي المؤمّن — Secure Digital Seal System v3.0
  * 
  * طبقات الأمان المتقدمة (World-Class Anti-Counterfeiting):
- * 1. بصمة تشفيرية مزدوجة (Dual HMAC-like hash) — FNV-1a × 3 rounds
+ * 1. بصمة تشفيرية ثلاثية (Triple HMAC-like hash) — FNV-1a × 3 rounds
  * 2. أنماط جيلوشي متعددة الطبقات (Multi-layer Guilloche) — 4 حلقات فريدة
  * 3. نمط سبيروغراف تداخلي (Spirograph Interference Pattern)
  * 4. نمط موير مضاد للنسخ (Anti-copy Moiré Pattern)
@@ -12,6 +12,9 @@
  * 8. نقاط أمنية ديناميكية (Dynamic Security Dots) — 2 طبقة
  * 9. علامة مائية غير مرئية (Invisible Watermark Layer)
  * 10. ختم زمني مشفر (Encrypted Timestamp Seal)
+ * 11. شريط MICR (حبر مغناطيسي) أمني متكرر
+ * 12. حلقات أسماء أمنية متكررة (اسم العضو + اسم الجهة)
+ * 13. خطوط جيلوشي متصلة ومتقطعة إضافية (Rose + Lissajous curves)
  * 
  * 5 أنماط تصميم: كلاسيكي، ملكي، حديث، هولوغرافي، رسمي
  */
