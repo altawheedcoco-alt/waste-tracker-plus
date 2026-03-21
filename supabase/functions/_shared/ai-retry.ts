@@ -7,8 +7,8 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/
 const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const DEFAULT_MODEL = "gemini-2.0-flash";
 const LOVABLE_DEFAULT_MODEL = "google/gemini-3-flash-preview";
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
+const MAX_RETRIES = 5;
+const BASE_DELAY_MS = 2000;
 
 interface AIRequestOptions {
   messages: Array<{ role: string; content: any }>;
@@ -27,7 +27,21 @@ export async function callAIWithRetry(
   const geminiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
   
   if (geminiKey) {
-    return callGeminiDirect(geminiKey, options);
+    try {
+      const response = await callGeminiDirect(geminiKey, options);
+      // If Gemini returned rate limit after all retries, fallback to Lovable Gateway
+      if (response.status === 429 && apiKeyOrLovableKey) {
+        console.warn("Gemini exhausted all retries (429), falling back to Lovable AI Gateway");
+        return callLovableGateway(apiKeyOrLovableKey, options);
+      }
+      return response;
+    } catch (err) {
+      console.warn("Gemini failed completely, falling back to Lovable AI Gateway:", err);
+      if (apiKeyOrLovableKey) {
+        return callLovableGateway(apiKeyOrLovableKey, options);
+      }
+      throw err;
+    }
   }
   
   // Fallback to Lovable AI Gateway
