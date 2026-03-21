@@ -1071,7 +1071,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating actions moved to FloatingSidePanel */}
+          {/* Smart Floating Action Button */}
+          <Suspense fallback={null}><UnifiedFloatingMenu /></Suspense>
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
