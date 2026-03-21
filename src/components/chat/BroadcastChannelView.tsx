@@ -739,7 +739,15 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
                 <MessageCircle className={cn("w-[18px] h-[18px]", showComments && "fill-primary/20")} /><span>تعليق</span>
               </button>
             )}
-            <button onClick={() => { navigator.clipboard.writeText(post.content || post.file_url || ''); toast.success('تم نسخ المحتوى'); }}
+            <button onClick={() => {
+              const postLink = `${window.location.origin}/dashboard/broadcast-channels?post=${post.id}`;
+              if (navigator.share) {
+                navigator.share({ title: channelName, text: post.content?.slice(0, 100) || '', url: postLink }).catch(() => {});
+              } else {
+                navigator.clipboard.writeText(postLink);
+                toast.success('تم نسخ رابط المنشور');
+              }
+            }}
               className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
               <Share2 className="w-[18px] h-[18px]" /><span>مشاركة</span>
             </button>
