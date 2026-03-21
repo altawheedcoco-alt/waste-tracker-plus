@@ -153,7 +153,7 @@ export const usePlatformCounts = () => {
           .eq('organization_id', orgId!),
 
         // Pending approvals
-        supabase
+        (supabase as any)
           .from('approval_requests')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', orgId!)
