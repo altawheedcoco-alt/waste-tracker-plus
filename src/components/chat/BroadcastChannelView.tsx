@@ -1163,13 +1163,21 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
 
       {/* Action buttons — differ by role */}
       <div className="grid grid-cols-4 gap-2 px-4 mt-4">
-        <button onClick={() => {}} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+        <button onClick={() => {
+          onBack();
+          toast.info('استخدم شريط البحث في قائمة المنشورات');
+        }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Search className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">بحث</span>
         </button>
         <button onClick={() => {
-          navigator.clipboard.writeText(`${window.location.origin}/dashboard/broadcast-channels`);
-          toast.success('تم نسخ رابط القناة');
+          const link = `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`;
+          if (navigator.share) {
+            navigator.share({ title: channel.name, url: link }).catch(() => {});
+          } else {
+            navigator.clipboard.writeText(link);
+            toast.success('تم نسخ رابط القناة');
+          }
         }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Share2 className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">مشاركة</span>
