@@ -936,9 +936,9 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
 
       {/* Avatar & Name */}
       <div className="flex flex-col items-center -mt-10 relative z-10 px-4">
-        <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+        <Avatar className="w-40 h-40 border-4 border-background shadow-lg">
           {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+          <AvatarFallback className="bg-primary/10 text-primary text-5xl font-bold">
             {channel.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
