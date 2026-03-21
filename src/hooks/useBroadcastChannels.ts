@@ -54,7 +54,31 @@ export function useBroadcastChannels() {
 
       const subSet = new Set((subs || []).map((s: any) => s.channel_id));
 
-      return data.map((ch: any) => ({
+      // Get partner org IDs for partners_only filtering
+      const { data: partnerships } = await (supabase as any)
+        .from('verified_partnerships')
+        .select('organization_id, partner_organization_id')
+        .or(`organization_id.eq.${organization.id},partner_organization_id.eq.${organization.id}`)
+        .eq('status', 'active');
+
+      const partnerOrgIds = new Set<string>();
+      (partnerships || []).forEach((p: any) => {
+        if (p.organization_id === organization.id) partnerOrgIds.add(p.partner_organization_id);
+        else partnerOrgIds.add(p.organization_id);
+      });
+
+      // Filter by visibility
+      const filtered = data.filter((ch: any) => {
+        const vis = ch.channel_visibility || 'public';
+        // Own channel always visible
+        if (ch.organization_id === organization.id) return true;
+        if (vis === 'public') return true;
+        if (vis === 'internal') return true; // all orgs in system can see
+        if (vis === 'partners_only') return partnerOrgIds.has(ch.organization_id);
+        return true;
+      });
+
+      return filtered.map((ch: any) => ({
         ...ch,
         is_mine: ch.organization_id === organization.id,
         is_subscribed: subSet.has(ch.id),
@@ -64,10 +88,11 @@ export function useBroadcastChannels() {
   });
 
   const createChannel = useMutation({
-    mutationFn: async ({ name, description }: { name: string; description?: string }) => {
+    mutationFn: async ({ name, description, channel_visibility }: { name: string; description?: string; channel_visibility?: string }) => {
       if (!user || !organization) throw new Error('Not authenticated');
       const { error } = await (supabase as any).from('broadcast_channels').insert({
         name, description, organization_id: organization.id, created_by: user.id,
+        channel_visibility: channel_visibility || 'public',
       });
       if (error) throw error;
     },
