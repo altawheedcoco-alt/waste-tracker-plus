@@ -6,7 +6,7 @@ import {
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Reply, Forward, SmilePlus, Paintbrush, Info
+  Reply, Forward, SmilePlus, Paintbrush, Info, BarChart3
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import VoiceMessagePlayer from '@/components/chat/VoiceMessagePlayer';
