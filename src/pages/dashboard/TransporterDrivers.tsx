@@ -496,7 +496,22 @@ const TransporterDrivers = () => {
               />
             </div>
             <div>
-              <Label>كلمة المرور الجديدة (اختياري)</Label>
+              <div className="flex items-center justify-between">
+                <Label>كلمة المرور الجديدة (اختياري)</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => {
+                    const pwd = generateStrongPassword();
+                    setEditForm(prev => ({ ...prev, new_password: pwd }));
+                    setShowEditPassword(true);
+                  }}
+                >
+                  توليد كلمة مرور قوية
+                </Button>
+              </div>
               <div className="relative">
                 <Input
                   value={editForm.new_password}
@@ -514,6 +529,9 @@ const TransporterDrivers = () => {
                   {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+              {editForm.new_password && validatePassword(editForm.new_password) && (
+                <p className="text-xs text-destructive mt-1">{validatePassword(editForm.new_password)}</p>
+              )}
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setEditDialog({ open: false, driver: null })}>
