@@ -42,6 +42,7 @@ export interface AlertItem {
   icon?: LucideIcon;
   type?: string;
   route?: string;
+  isRead?: boolean;
 }
 
 export interface WeatherData {
