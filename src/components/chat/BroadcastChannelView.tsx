@@ -1137,6 +1137,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
           posts.map((p: any) => (
             <PostCard
               key={p.id} post={p} channelName={channel.name}
+              channelAvatar={channel.avatar_url}
               onReact={(postId, type) => toggleReaction({ postId, type })}
               myReactions={myReactions}
               isMine={!!channel.is_mine}
