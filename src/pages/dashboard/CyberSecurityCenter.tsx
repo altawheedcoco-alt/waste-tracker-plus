@@ -311,6 +311,7 @@ const CyberSecurityCenter = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         نبضة #{monitorPulse} · المراقبة {autoMonitorEnabled ? 'نشطة' : 'متوقفة'} · كل {monitorInterval} ثانية
+                        {heartbeat && ` · مستخدمون نشطون: ${heartbeat.active_users_5m} · أحداث الساعة: ${heartbeat.security_events_1h}`}
                       </p>
                     </div>
                   </div>
