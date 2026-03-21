@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import {
   useCyberThreats, useDefenseRules, useThreatPatterns, useRunThreatScan,
-  useResolveThreat, useCyberStats, useCyberAdvancedStats, CyberThreat,
+  useResolveThreat, useCyberStats, useCyberAdvancedStats, useZeroTrustCheck,
+  useSystemHeartbeat, CyberThreat,
 } from '@/hooks/useCyberSecurity';
 import { useSecurityReports, useGenerateSecurityReport, SecurityReport } from '@/hooks/useSecurityReports';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
