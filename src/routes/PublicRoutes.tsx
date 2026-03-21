@@ -1,8 +1,30 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 
-const Index = lazy(() => import("@/pages/Index"));
-const Auth = lazy(() => import("@/pages/Auth"));
+// Retry wrapper for lazy imports — handles stale chunk errors after deploys
+function lazyRetry<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>,
+  retries = 2
+): React.LazyExoticComponent<T> {
+  return lazy(async () => {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        return await factory();
+      } catch (err) {
+        if (i < retries) {
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        } else {
+          window.location.reload();
+          throw err;
+        }
+      }
+    }
+    throw new Error('lazyRetry exhausted');
+  });
+}
+
+const Index = lazyRetry(() => import("@/pages/Index"));
+const Auth = lazyRetry(() => import("@/pages/Auth"));
 const GoogleSetup = lazy(() => import("@/pages/GoogleSetup"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const News = lazy(() => import("@/pages/News"));
