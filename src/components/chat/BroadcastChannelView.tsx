@@ -1040,11 +1040,12 @@ ChannelProfileView.displayName = 'ChannelProfileView';
 // ═══════════════════════════════════════════════════════════════
 // Channel Feed View
 // ═══════════════════════════════════════════════════════════════
-const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
+const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isSystemAdmin }: {
   channel: BroadcastChannel;
   onBack: () => void;
   onShowProfile: () => void;
   onShowAdmin: () => void;
+  isSystemAdmin?: boolean;
 }) => {
   const { subscribe, unsubscribe } = useBroadcastChannels();
   const { report } = useBroadcastNotificationSettings(channel.id);
@@ -1081,8 +1082,8 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
         </button>
 
         <div className="flex items-center gap-0.5">
-          {/* Owner-only: Admin panel */}
-          {channel.is_mine && (
+          {/* Owner or Admin: Admin panel */}
+          {(channel.is_mine || isSystemAdmin) && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onShowAdmin}>
               <Crown className="w-4 h-4 text-amber-500" />
             </Button>
@@ -1096,7 +1097,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={onShowProfile}>معلومات القناة</DropdownMenuItem>
-              {channel.is_mine && (
+              {(channel.is_mine || isSystemAdmin) && (
                 <DropdownMenuItem onClick={onShowAdmin}>
                   <Crown className="w-3.5 h-3.5 ml-2 text-amber-500" /> لوحة الإدارة
                 </DropdownMenuItem>
@@ -1150,8 +1151,8 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
         )}
       </div>
 
-      {/* Composer: Owner only */}
-      {channel.is_mine && (
+      {/* Composer: Owner or System Admin */}
+      {(channel.is_mine || isSystemAdmin) && (
         <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} />
       )}
     </div>
@@ -1339,6 +1340,8 @@ CreateBroadcastDialog.displayName = 'CreateBroadcastDialog';
 // ═══════════════════════════════════════════════════════════════
 const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const { channels, isLoading, createChannel, subscribe, unsubscribe } = useBroadcastChannels();
+  const { roles } = useAuth();
+  const isAdmin = roles.includes('admin');
   const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [view, setView] = useState<'feed' | 'profile' | 'admin'>('feed');
@@ -1378,7 +1381,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
       );
     }
 
-    if (view === 'admin' && selectedChannel.is_mine) {
+    if (view === 'admin' && (selectedChannel.is_mine || isAdmin)) {
       return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
     }
 
@@ -1399,6 +1402,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
         onBack={handleBackToList}
         onShowProfile={() => setView('profile')}
         onShowAdmin={() => setView('admin')}
+        isSystemAdmin={isAdmin}
       />
     );
   };

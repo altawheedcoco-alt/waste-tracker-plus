@@ -68,6 +68,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: MessageCircle, labelAr: 'الدردشة', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
       { icon: Users, labelAr: 'المجموعات', labelEn: 'Group Chats', path: '/dashboard/chat?view=groups', key: 'group-chats', bindingType: 'partner' as const },
+      { icon: Radio, labelAr: 'قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'broadcast-channels', badgeKey: 'broadcastChannels', bindingType: 'internal' as const },
       { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
     ],
   },
@@ -975,6 +976,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Automation',
     visibleFor: ['admin'],
     items: [
+      { icon: Radio, labelAr: 'إدارة قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'admin-broadcast', bindingType: 'admin' as const },
       { icon: Send, labelAr: 'WaPilot', labelEn: 'WaPilot', path: '/dashboard/wapilot', key: 'wapilot', bindingType: 'admin' as const },
       { icon: Bot, labelAr: 'الوكيل الذكي', labelEn: 'Smart Agent', path: '/dashboard/smart-agent', key: 'smart-agent', bindingType: 'admin' as const },
       { icon: Inbox, labelAr: 'صندوق C2B', labelEn: 'C2B Inbox', path: '/dashboard/c2b-management', key: 'c2b-management', bindingType: 'admin' as const },
