@@ -213,7 +213,7 @@ export function useSmartBriefData(role: Role) {
     queryKey: ['brief-driver', userId, today],
     queryFn: async () => {
       if (!userId) return null;
-      const { data: driverProfile } = await supabase
+      const { data: driverProfile } = await (supabase as any)
         .from('drivers')
         .select('id, is_available')
         .eq('user_id', userId)
