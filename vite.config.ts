@@ -52,9 +52,9 @@ export default defineConfig(({ mode }) => ({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'favicon.png', 'irecycle-logo.png', 'robots.txt'],
       manifest: {
-        name: 'آي ريسايكل - iRecycle',
+        name: 'آي ريسايكل - iRecycle v3.0',
         short_name: 'iRecycle',
-        description: 'نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر',
+        description: 'منصة iRecycle لتتبع وإدارة المخلفات الذكية — نظام متكامل لإدارة المخلفات والنفايات والحفاظ على البيئة في مصر',
         theme_color: '#0d9488',
         background_color: '#ffffff',
         display: 'standalone',
