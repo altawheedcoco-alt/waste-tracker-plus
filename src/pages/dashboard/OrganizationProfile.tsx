@@ -39,6 +39,7 @@ const OrganizationSignatureSettings = lazy(() => import('@/components/signature'
 const LMSProfileCertificates = lazy(() => import('@/components/lms/LMSProfileCertificates'));
 const OrganizationAnalysis = lazy(() => import('@/components/organization/OrganizationAnalysis'));
 const AttestationTabContent = lazy(() => import('@/components/attestation/AttestationTabContent'));
+const DocumentAnalysisTab = lazy(() => import('@/components/organization/DocumentAnalysisTab'));
 
 interface OrganizationDocument {
   id: string;
