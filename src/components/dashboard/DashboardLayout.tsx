@@ -126,7 +126,6 @@ import DepositButton from '@/components/deposits/DepositButton';
 import { getAvatarEmoji, getColorTheme } from '@/components/settings/ProfileCustomization';
 
 import { getSidebarItemsFromQuickActions, getQuickActionsByType } from '@/config/quickActions';
-import FloatingActionsStack from '@/components/layout/FloatingActionsStack';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import GlobalRefreshButton from './GlobalRefreshButton';
 import MyShipmentsButton from './header/MyShipmentsButton';
