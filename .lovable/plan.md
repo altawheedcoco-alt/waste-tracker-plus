@@ -1,46 +1,41 @@
 
+# إصلاح أخطاء شريط التنبيهات التشغيلية + توسيعه ليكون مسرح عمليات شامل
 
-# خطة تحويل شريط التنبيهات التشغيلية إلى مركز رصد شامل
+## المشكلة الحالية
+الشبكة تُظهر **7 أخطاء 400** بسبب أعمدة/علاقات غير موجودة في قاعدة البيانات:
 
-## المشكلة
-الشريط الحالي (`AlertTicker`) يعرض 3-4 تنبيهات فقط (إشعارات غير مقروءة + تحذير شحنات معلقة + رسالة ثابتة "الأنظمة تعمل"). المطلوب: تحويله لمركز رصد يعرض **كل شيء** يحدث في الجهة.
+| الخطأ | السبب |
+|-------|-------|
+| `direct_messages.sender_name does not exist` | لا يوجد عمود `sender_name` — يجب استخدام `sender_id` + join مع `profiles` |
+| `signing_chain_steps.step_label does not exist` | لا يوجد عمود `step_label` — يجب استخدام `signer_name` أو `notes` |
+| `work_orders.title does not exist` | لا يوجد عمود `title` — يجب استخدام `order_number` + `waste_description` |
+| `work_orders` لا تحتوي `sender_org_id/recipient_org_id` | الأعمدة هي `organization_id` + `created_by` |
+| `verified_partnerships` FK hint خاطئ | FK اسمه مختلف — يجب استخدام `partner_org_id` مع join مباشر |
+| `notes.is_read does not exist` | لا يوجد عمود `is_read` — يمكن استخدام `is_resolved` بدلاً منه |
+| `shipment_status` لا تقبل `completed` | القيم المسموحة: `new, registered, approved, collecting, in_transit, delivered, confirmed, cancelled` |
 
 ## التنفيذ
 
-### 1. إنشاء `useOperationalAlerts` Hook
-ملف جديد يجمع تنبيهات من **كل** المصادر:
+### 1. إصلاح `useOperationalAlerts.ts` — تصحيح كل الاستعلامات
+- **الرسائل**: `select('id,content,created_at,is_read,sender_id,sender:profiles!direct_messages_sender_id_fkey(full_name)')` بدل `sender_name`
+- **التوقيعات**: `select('id,signer_name,status,chain_id')` بدل `step_label`
+- **أوامر العمل**: `select('id,order_number,waste_description,status,created_at').eq('organization_id', orgId).eq('status', 'pending')` بدل `sender_org_id/recipient_org_id` و`title`
+- **الشركاء**: `select('id,partner_org_id')` ثم fetch أسماء المنظمات بشكل منفصل من `organizations`
+- **الشحنات**: إزالة `completed` من فلتر الحالات واستخدام القيم الصحيحة فقط
 
-| المصدر | الجدول | ما يعرضه |
-|--------|--------|----------|
-| الإشعارات | `notifications` | كل الإشعارات (بدون حد 3) بعنوانها ورسالتها |
-| الشحنات | `shipments` | حالة كل شحنة: "شحنة SHP-XXX نوعها بلاستيك في الطريق" |
-| السائقون | `drivers` + `profiles` | "السائق محمد متاح/مشغول - يقود شحنة رقم..." |
-| المركبات | `fleet_vehicles` | حالة كل مركبة وصيانتها |
-| الرسائل | `direct_messages` | "رسالة جديدة من عبدالله المولد" |
-| الشركاء | `verified_partnerships` + `organizations` | "لديك 2 شريك: عبدالله المولد، عبدالله المدور" |
-| التوقيعات | `signing_chain_steps` | "توقيع معلق على شحنة رقم..." |
-| العقود | `contracts` | "عقد ساري/منتهٍ..." |
-| الإيصالات | `shipment_receipts` | "إيصال جديد بانتظار التأكيد" |
-| أوامر العمل | `work_orders` | "أمر عمل جديد وارد..." |
+### 2. إصلاح `useCommHubCounts.ts` — نفس الأخطاء
+- **الملاحظات**: إزالة فلتر `is_read` واستخدام `is_resolved` بدلاً منه
+- **أوامر العمل**: تصحيح الفلتر ليستخدم `organization_id` بدل `sender_org_id/recipient_org_id`
 
-- تحديث تلقائي كل 30 ثانية
-- كل تنبيه يحمل: `type`, `icon`, `severity`, `message`, `timestamp`, `route` (للتنقل عند النقر)
-
-### 2. تطوير `AlertTicker` → شريط رصد شامل
-- دعم مئات/آلاف التنبيهات بالتدوير كل 3 ثوانٍ
-- عداد إجمالي (مثلاً "12/156")
-- أيقونات فلتر سريعة (شحنات، سائقين، رسائل، شركاء)
-- النقر على التنبيه يفتح الصفحة المعنية
-- إمكانية الإيقاف المؤقت بالنقر
-
-### 3. تحديث `TransporterDashboard.tsx`
-- استبدال مصفوفة `alerts` الثابتة بنتائج `useOperationalAlerts`
-- إزالة الرسالة الثابتة "أنظمة التتبع تعمل بكفاءة"
+### 3. توسيع التنبيهات — إضافة حالات القراءة والإخفاء
+- إضافة حقل `isRead` لكل تنبيه (بناءً على `is_read` من الإشعارات والرسائل)
+- عرض شارة "غير مقروء" بجانب كل تنبيه (نقطة ملونة)
+- عند النقر على تنبيه → تحويله لـ "مقروء" + فتح الصفحة المعنية
+- إضافة زر "عرض/إخفاء التفاصيل" لكل تنبيه في الشريط
 
 ## الملفات المتأثرة
 | ملف | التغيير |
 |------|---------|
-| `src/hooks/useOperationalAlerts.ts` | **جديد** |
-| `src/components/dashboard/shared/DashboardV2Header.tsx` | تطوير `AlertTicker` |
-| `src/components/dashboard/TransporterDashboard.tsx` | ربط الـ Hook الجديد |
-
+| `src/hooks/useOperationalAlerts.ts` | إصلاح 7 استعلامات خاطئة + إضافة `isRead` |
+| `src/hooks/useCommHubCounts.ts` | إصلاح استعلامات `notes` و`work_orders` |
+| `src/components/dashboard/shared/DashboardV2Header.tsx` | إضافة شارة القراءة + زر إخفاء/إظهار |
