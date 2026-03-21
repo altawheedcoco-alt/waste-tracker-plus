@@ -8,15 +8,22 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+export interface AlertDetail {
+  label: string;
+  value: string;
+}
+
 export interface OperationalAlert {
   id: string;
   message: string;
+  subtitle?: string;
   severity: 'info' | 'warning' | 'critical';
   type: 'notification' | 'shipment' | 'driver' | 'vehicle' | 'message' | 'partner' | 'signature' | 'contract' | 'receipt' | 'work_order' | 'system' | 'activity' | 'log' | 'approval';
   icon: LucideIcon;
   timestamp?: string;
   route?: string;
   isRead?: boolean;
+  details?: AlertDetail[];
 }
 
 const STATUS_AR: Record<string, string> = {
