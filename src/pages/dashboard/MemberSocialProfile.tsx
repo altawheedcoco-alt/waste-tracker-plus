@@ -1006,7 +1006,8 @@ export default function MemberSocialProfile() {
                     entityName={targetProfile.full_name || 'عضو'}
                     title={memberPosition?.title_ar || memberPosition?.title || targetProfile.position || undefined}
                     orgName={profileOrg?.name || undefined}
-                    size={180}
+                    size={200}
+                    allowStyleChange={isOwnProfile}
                   />
                 </CardContent>
               </Card>
