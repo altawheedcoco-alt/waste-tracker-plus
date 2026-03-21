@@ -184,6 +184,11 @@ const OrganizationProfile = () => {
       const filePath = `${organization.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage.from('organization-documents').upload(filePath, file);
       if (uploadError) throw uploadError;
+      
+      // Get public URL for AI extraction
+      const { data: urlData } = supabase.storage.from('organization-documents').getPublicUrl(filePath);
+      const fileUrl = urlData?.publicUrl || '';
+
       const { error: dbError } = await supabase.from('organization_documents').insert({
         organization_id: organization.id, document_type: documentType,
         file_name: file.name, file_path: filePath, file_size: file.size, uploaded_by: user.id,
@@ -191,6 +196,73 @@ const OrganizationProfile = () => {
       if (dbError) throw dbError;
       toast.success(t('orgProfile.fileUploaded'));
       fetchOrganizationData();
+
+      // AI Extraction (async, non-blocking)
+      setAiExtracting(true);
+      try {
+        const { useDocumentOCRExtractor } = await import('@/hooks/useDocumentOCRExtractor');
+        // Use direct function call approach
+        const toBase64 = (blob: Blob): Promise<string> => new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onloadend = () => res(r.result as string);
+          r.onerror = rej;
+          r.readAsDataURL(blob);
+        });
+        
+        const base64 = await toBase64(file);
+        const { data: aiData } = await supabase.functions.invoke('ocr-extract', {
+          body: { imageBase64: base64, fileName: file.name, mimeType: file.type },
+        });
+        
+        if (aiData?.result) {
+          const result = aiData.result;
+          const fields = result.detected_fields || {};
+          const structuredFields: Record<string, string | string[]> = {};
+          if (fields.license_number) structuredFields['رقم الترخيص'] = fields.license_number;
+          if (fields.issue_date) structuredFields['تاريخ الإصدار'] = fields.issue_date;
+          if (fields.expiry_date) structuredFields['تاريخ الانتهاء'] = fields.expiry_date;
+          if (fields.holder_name) structuredFields['اسم صاحب الترخيص'] = fields.holder_name;
+          if (fields.issuing_authority) structuredFields['الجهة المصدرة'] = fields.issuing_authority;
+          if (fields.document_type) structuredFields['نوع المستند'] = fields.document_type;
+          if (fields.waste_types?.length) structuredFields['أنواع المخلفات'] = fields.waste_types;
+          if (result.obligations?.length) structuredFields['الاشتراطات والالتزامات'] = result.obligations;
+
+          const typeMap: Record<string, string> = {
+            wmra_license: 'license', environmental_approval: 'certificate',
+            transport_license: 'license', compliance_document: 'certificate',
+          };
+          const docType = typeMap[fields.document_type] || 'other';
+
+          await supabase.from('entity_documents').insert({
+            organization_id: organization.id,
+            document_type: docType,
+            document_category: 'legal',
+            title: `${fields.document_type || documentType} - ${file.name}`,
+            file_url: fileUrl,
+            file_name: file.name,
+            file_type: file.type,
+            file_size: file.size,
+            reference_number: fields.license_number || null,
+            tags: ['ai-extracted', documentType, docType],
+            ocr_extracted_data: {
+              structured_fields: structuredFields,
+              raw_text: result.raw_text || '',
+              obligations: result.obligations || [],
+              confidence: result.confidence || 0,
+              pages_count: result.pages_count,
+              detected_fields: fields,
+            } as any,
+            ocr_confidence: result.confidence || 0,
+            ai_extracted: true,
+          });
+          toast.success('✅ تم استخراج البيانات بالذكاء الاصطناعي وحفظها', { duration: 4000 });
+        }
+      } catch (aiErr) {
+        console.error('AI extraction error (non-blocking):', aiErr);
+        // Non-blocking: don't show error to user since upload succeeded
+      } finally {
+        setAiExtracting(false);
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error(t('orgProfile.fileUploadError'));
