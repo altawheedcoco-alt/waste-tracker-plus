@@ -39,6 +39,7 @@ import V2TabsNav from './shared/V2TabsNav';
 const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
 const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
@@ -169,17 +170,7 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <Suspense fallback={null}>
-        <SmartDailyBrief
-          role="transporter"
-          stats={{
-            pending: shipments.filter(s => s.status === 'new').length,
-            active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-            completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-            total: shipments.length,
-          }}
-        />
-      </Suspense>
+      <ConnectedSmartBrief role="transporter" />
       <Suspense fallback={null}><StoryCircles /></Suspense>
       <DashboardV2Header
         userName={organization?.name || ''}

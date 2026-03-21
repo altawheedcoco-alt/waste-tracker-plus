@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList, Building2, Route, CheckCircle2 } from 'lucide-react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
@@ -202,15 +202,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <SmartDailyBrief
-        role="disposal"
-        stats={{
-          pending: operationsStats?.pending || 0,
-          active: operationsStats?.processing || 0,
-          completed: operationsStats?.completed || 0,
-          total: operationsStats?.total || 0,
-        }}
-      />
+      <ConnectedSmartBrief role="disposal" />
       <StoryCircles />
 
       <DashboardV2Header

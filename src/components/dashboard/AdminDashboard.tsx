@@ -28,7 +28,7 @@ import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSear
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
@@ -193,15 +193,7 @@ const AdminDashboard = () => {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={itemVariants}>
-        <SmartDailyBrief
-          role="admin"
-          stats={{
-            pending: recentShipments.filter(s => s.status === 'new').length,
-            active: recentShipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-            completed: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-            total: stats.totalShipments,
-          }}
-        />
+        <ConnectedSmartBrief role="admin" />
       </motion.div>
 
       <motion.div variants={itemVariants}>

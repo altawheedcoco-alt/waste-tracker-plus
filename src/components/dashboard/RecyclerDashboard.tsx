@@ -21,7 +21,7 @@ import { StatCardItem } from './shared/StatsCardsGrid';
 import { DetailSection } from './shared/InteractiveDetailDrawer';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { useQuickActions } from '@/hooks/useQuickActions';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
@@ -187,7 +187,7 @@ const RecyclerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <SmartDailyBrief role="recycler" stats={{ pending: stats.incoming, active: stats.processing, completed: stats.completed, total: stats.total }} />
+      <ConnectedSmartBrief role="recycler" />
       <StoryCircles />
 
       <DashboardV2Header
