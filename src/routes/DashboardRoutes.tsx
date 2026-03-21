@@ -47,6 +47,7 @@ const DriverOffers = lazy(() => import("@/pages/dashboard/DriverOffers"));
 const RegulatoryUpdates = lazy(() => import("@/pages/dashboard/RegulatoryUpdates"));
 const OperationalPlans = lazy(() => import("@/pages/dashboard/OperationalPlans"));
 const Chat = lazy(() => import("@/pages/dashboard/Chat"));
+const BroadcastChannels = lazy(() => import("@/pages/dashboard/BroadcastChannels"));
 const TeamCredentials = lazy(() => import("@/pages/dashboard/TeamCredentials"));
 const PartnersTimeline = lazy(() => import("@/pages/dashboard/PartnersTimeline"));
 const AddOrganization = lazy(() => import("@/pages/dashboard/AddOrganization"));
