@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList, Building2, Route, CheckCircle2 } from 'lucide-react';
 import StoryCircles from '@/components/stories/StoryCircles';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { DISPOSAL_TAB_BINDINGS } from '@/config/disposal/disposalBindings';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
