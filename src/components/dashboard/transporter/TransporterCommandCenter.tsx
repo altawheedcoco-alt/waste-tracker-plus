@@ -467,7 +467,7 @@ const TransporterCommandCenter = () => {
                   label: 'السائقون', value: a.drivers, raw: stats?.totalDrivers || 0,
                   icon: Users, gradient: 'from-violet-500 to-purple-400', color: '#8B5CF6',
                   sub: `${stats?.availableDrivers || 0} متاح · ${stats?.activeDrivers || 0} نشط`,
-                  sparkData: null, onClick: () => navigate('/dashboard/drivers'),
+                  sparkData: null, onClick: () => navigate('/dashboard/transporter-drivers'),
                 },
               ].map((m, index) => (
                 <motion.div key={m.label}
