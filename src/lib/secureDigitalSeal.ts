@@ -543,13 +543,22 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
     ${securityDots}
   </g>
 
-  <!-- Layer 10: Decorative rings -->
+  <!-- Layer 10: MICR Magnetic Ink Security Band -->
+  ${micrBand}
+
+  <!-- Layer 11: Extra Connected & Dashed Guilloche Lines -->
+  ${extraGuilloche}
+
+  <!-- Layer 12: Decorative rings -->
   <circle cx="100" cy="100" r="92" fill="none" stroke="${palette.primary}" stroke-width="1.5" opacity="0.3"/>
   <circle cx="100" cy="100" r="90" fill="none" stroke="${palette.primary}" stroke-width="0.4" stroke-dasharray="2,2,1,2" opacity="0.35"/>
   <circle cx="100" cy="100" r="86" fill="none" stroke="${palette.accent}" stroke-width="0.3" stroke-dasharray="1,3" opacity="0.25"/>
   <circle cx="100" cy="100" r="50" fill="none" stroke="${palette.primary}" stroke-width="1" opacity="0.3"/>
   <circle cx="100" cy="100" r="48" fill="none" stroke="${palette.accent}" stroke-width="0.4" stroke-dasharray="1,2" opacity="0.25"/>
   <circle cx="100" cy="100" r="46" fill="none" stroke="${palette.primary}" stroke-width="0.2" stroke-dasharray="0.5,1.5" opacity="0.2"/>
+
+  <!-- Layer 13: Name-Based Security Rings (Entity + Org names repeated) -->
+  ${nameRings}
 
   <!-- Layer 11: Micro-text Ring 1 (outermost) -->
   <text font-size="3" fill="${palette.primary}" opacity="0.45" font-family="monospace" direction="rtl">
