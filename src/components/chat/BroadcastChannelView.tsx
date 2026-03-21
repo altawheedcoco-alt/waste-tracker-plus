@@ -1319,18 +1319,26 @@ ChannelListView.displayName = 'ChannelListView';
 const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
   open: boolean;
   onOpenChange: (v: boolean) => void;
-  onCreate: (data: { name: string; description?: string }) => void;
+  onCreate: (data: { name: string; description?: string; channel_visibility?: string }) => void;
 }) => {
   const [name, setName] = useState('');
   const [desc, setDesc] = useState('');
+  const [visibility, setVisibility] = useState('public');
 
   const handleSubmit = () => {
     if (!name.trim()) return;
-    onCreate({ name: name.trim(), description: desc.trim() || undefined });
+    onCreate({ name: name.trim(), description: desc.trim() || undefined, channel_visibility: visibility });
     setName('');
     setDesc('');
+    setVisibility('public');
     onOpenChange(false);
   };
+
+  const visibilityOptions = [
+    { value: 'public', label: 'عامة', desc: 'يمكن للجميع اكتشافها', icon: '🌍' },
+    { value: 'internal', label: 'جهات المنصة فقط', desc: 'مرئية داخل المنصة فقط', icon: '🏢' },
+    { value: 'partners_only', label: 'الجهات المرتبطة فقط', desc: 'مرئية للشركاء فقط', icon: '🤝' },
+  ];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -1349,6 +1357,31 @@ const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
           <div>
             <Label className="text-xs mb-1.5 block">الوصف (اختياري)</Label>
             <Textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="وصف مختصر للقناة..." className="text-sm min-h-[60px]" />
+          </div>
+          <div>
+            <Label className="text-xs mb-1.5 block">رؤية القناة</Label>
+            <div className="space-y-1.5">
+              {visibilityOptions.map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setVisibility(opt.value)}
+                  className={cn(
+                    "w-full flex items-center gap-2.5 p-2 rounded-lg border text-right transition-all",
+                    visibility === opt.value
+                      ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                      : "border-border/50 hover:bg-muted/50"
+                  )}
+                >
+                  <span className="text-base">{opt.icon}</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium">{opt.label}</p>
+                    <p className="text-[9px] text-muted-foreground">{opt.desc}</p>
+                  </div>
+                  {visibility === opt.value && <Check className="w-3.5 h-3.5 text-primary shrink-0" />}
+                </button>
+              ))}
+            </div>
           </div>
           <Button onClick={handleSubmit} className="w-full" disabled={!name.trim()}>
             إنشاء القناة
