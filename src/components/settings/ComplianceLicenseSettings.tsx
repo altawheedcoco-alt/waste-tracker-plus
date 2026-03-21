@@ -401,6 +401,13 @@ export default function ComplianceLicenseSettings() {
                   <Brain className="h-3.5 w-3.5" />
                   عرض البيانات المستخرجة
                 </Button>
+                <Button
+                  variant="ghost" size="sm" className="gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/organization-profile')}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  عرض الوثائق في ملف الجهة
+                </Button>
               </div>
             </div>
           </div>
