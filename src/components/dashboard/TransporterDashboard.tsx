@@ -170,13 +170,7 @@ const TransporterDashboard = () => {
           refreshFromGPS: realWeather.refreshFromGPS,
           isLocating: realWeather.isLocating,
         }}
-        heatmapData={[
-          { region: 'القاهرة', value: stats?.active || 0, max: 20 },
-          { region: 'الجيزة', value: Math.round((stats?.active || 0) * 0.6), max: 15 },
-          { region: 'الإسكندرية', value: Math.round((stats?.active || 0) * 0.4), max: 12 },
-          { region: 'الدلتا', value: Math.round((stats?.active || 0) * 0.3), max: 10 },
-          { region: 'الصعيد', value: Math.round((stats?.active || 0) * 0.2), max: 8 },
-        ]}
+        heatmapData={heatmapRegions}
       >
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>

@@ -164,11 +164,24 @@ export const useTransporterStatsDB = () => {
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', orgId!);
 
+      // Fetch real partner companies count from verified_partnerships
+      const { data: partnerships } = await supabase
+        .from('verified_partnerships')
+        .select('requester_org_id, partner_org_id')
+        .or(`requester_org_id.eq.${orgId},partner_org_id.eq.${orgId}`)
+        .eq('status', 'active');
+
+      const partnerIds = new Set(
+        (partnerships || []).map(p =>
+          p.requester_org_id === orgId ? p.partner_org_id : p.requester_org_id
+        )
+      );
+
       return {
         total: stats?.total || 0,
         active: stats?.active || 0,
         drivers: driverCount || 0,
-        partnerCompanies: 0, // Will be calculated separately if needed
+        partnerCompanies: partnerIds.size,
       };
     },
     enabled: !!orgId,
