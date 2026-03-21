@@ -720,6 +720,15 @@ const OrganizationProfile = () => {
             </Card>
           </TabsContent>
 
+          {/* تحليل الوثائق */}
+          <TabsContent value="doc-analysis">
+            <ErrorBoundary fallbackTitle="خطأ في تحليل الوثائق">
+              <Suspense fallback={<TabFallback />}>
+                <DocumentAnalysisTab organizationId={organization.id} />
+              </Suspense>
+            </ErrorBoundary>
+          </TabsContent>
+
           {/* تحليل الجهة */}
           <TabsContent value="analysis">
             <ErrorBoundary fallbackTitle="خطأ في تحليل الجهة">
