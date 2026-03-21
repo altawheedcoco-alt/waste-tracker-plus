@@ -216,11 +216,44 @@ const TransporterDrivers = () => {
     }
   };
 
+  const generateStrongPassword = () => {
+    const lower = 'abcdefghijklmnopqrstuvwxyz';
+    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const digits = '0123456789';
+    const special = '!@#$%^&*()_+-=';
+    const all = lower + upper + digits + special;
+    let pwd = [
+      lower[Math.floor(Math.random() * lower.length)],
+      upper[Math.floor(Math.random() * upper.length)],
+      digits[Math.floor(Math.random() * digits.length)],
+      special[Math.floor(Math.random() * special.length)],
+    ];
+    for (let i = 0; i < 8; i++) pwd.push(all[Math.floor(Math.random() * all.length)]);
+    pwd.sort(() => Math.random() - 0.5);
+    return pwd.join('');
+  };
+
+  const validatePassword = (pwd: string) => {
+    if (!/[a-z]/.test(pwd)) return 'يجب أن تحتوي على حرف صغير';
+    if (!/[A-Z]/.test(pwd)) return 'يجب أن تحتوي على حرف كبير';
+    if (!/[0-9]/.test(pwd)) return 'يجب أن تحتوي على رقم';
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|<>?,./`~]/.test(pwd)) return 'يجب أن تحتوي على رمز خاص';
+    if (pwd.length < 8) return 'يجب أن تكون 8 أحرف على الأقل';
+    return null;
+  };
+
   const handleEditCredentials = async () => {
     if (!editDialog.driver?.profile?.user_id) return;
     if (!editForm.new_email && !editForm.new_password) {
       toast.error('أدخل البريد الجديد أو كلمة المرور الجديدة');
       return;
+    }
+    if (editForm.new_password) {
+      const pwdError = validatePassword(editForm.new_password);
+      if (pwdError) {
+        toast.error(pwdError);
+        return;
+      }
     }
 
     setEditLoading(true);
@@ -463,7 +496,22 @@ const TransporterDrivers = () => {
               />
             </div>
             <div>
-              <Label>كلمة المرور الجديدة (اختياري)</Label>
+              <div className="flex items-center justify-between">
+                <Label>كلمة المرور الجديدة (اختياري)</Label>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="text-xs h-6 px-2"
+                  onClick={() => {
+                    const pwd = generateStrongPassword();
+                    setEditForm(prev => ({ ...prev, new_password: pwd }));
+                    setShowEditPassword(true);
+                  }}
+                >
+                  توليد كلمة مرور قوية
+                </Button>
+              </div>
               <div className="relative">
                 <Input
                   value={editForm.new_password}
@@ -481,6 +529,9 @@ const TransporterDrivers = () => {
                   {showEditPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
+              {editForm.new_password && validatePassword(editForm.new_password) && (
+                <p className="text-xs text-destructive mt-1">{validatePassword(editForm.new_password)}</p>
+              )}
             </div>
             <div className="flex justify-end gap-2 pt-4">
               <Button variant="outline" onClick={() => setEditDialog({ open: false, driver: null })}>
