@@ -1082,8 +1082,8 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
         </button>
 
         <div className="flex items-center gap-0.5">
-          {/* Owner-only: Admin panel */}
-          {channel.is_mine && (
+          {/* Owner or Admin: Admin panel */}
+          {(channel.is_mine || isSystemAdmin) && (
             <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onShowAdmin}>
               <Crown className="w-4 h-4 text-amber-500" />
             </Button>
