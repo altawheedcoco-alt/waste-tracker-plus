@@ -5,10 +5,6 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-function normalizeText(value: string) {
-  return value.replace(/\s+/g, " ").trim();
-}
-
 function mergeVerbatimText(aiText: string, supplementalText?: string) {
   const cleanAi = (aiText || "").trim();
   const cleanSupplemental = (supplementalText || "").trim();
@@ -16,14 +12,20 @@ function mergeVerbatimText(aiText: string, supplementalText?: string) {
   if (!cleanSupplemental) return cleanAi;
   if (!cleanAi) return cleanSupplemental;
 
-  const normalizedAi = normalizeText(cleanAi);
-  const normalizedSupplemental = normalizeText(cleanSupplemental);
+  // If AI text is shorter than supplemental, prefer supplemental (AI likely summarized)
+  if (cleanAi.length < cleanSupplemental.length * 0.7) {
+    return cleanSupplemental;
+  }
+
+  const normalizedAi = cleanAi.replace(/\s+/g, " ").trim();
+  const normalizedSupplemental = cleanSupplemental.replace(/\s+/g, " ").trim();
 
   if (normalizedAi === normalizedSupplemental) return cleanSupplemental;
   if (normalizedSupplemental.includes(normalizedAi)) return cleanSupplemental;
   if (normalizedAi.includes(normalizedSupplemental)) return cleanAi;
 
-  return `${cleanSupplemental}\n\n${cleanAi}`.trim();
+  // Merge both — supplemental first (verbatim), then AI additions
+  return `${cleanSupplemental}\n\n--- نص إضافي مستخرج بالذكاء الاصطناعي ---\n${cleanAi}`.trim();
 }
 
 serve(async (req) => {
@@ -36,24 +38,30 @@ serve(async (req) => {
     const { imageBase64, fileName, supplementalText } = await req.json();
     if (!imageBase64) throw new Error("imageBase64 is required");
 
-    const systemPrompt = `أنت محلل مستندات متخصص في استخراج البيانات من المستندات العربية والإنجليزية، خاصة التراخيص والتصاريح البيئية المصرية.
+    const systemPrompt = `أنت محلل مستندات متخصص في استخراج البيانات من المستندات العربية والإنجليزية، خاصة التراخيص والتصاريح البيئية المصرية والموافقات البيئية الصادرة من جهاز شؤون البيئة.
 
-مهمتك:
-1. استخرج النص الكامل الحرفي من الصورة بدون اختصار أو تلخيص أو حذف
-2. إذا وصلك نص إضافي من طبقة PDF فاستخدمه كنص مرجعي حرفي وحافظ عليه كاملاً داخل raw_text
-3. حدد نوع المستند (ترخيص WMRA، موافقة بيئية، ترخيص نقل، فاتورة، عقد، أو غير ذلك)
-4. استخرج البيانات المنظمة التالية إن وجدت:
-   - رقم الترخيص/التصريح
-   - تاريخ الإصدار
-   - تاريخ الانتهاء
-   - اسم الجهة المصدرة
-   - اسم صاحب الترخيص
-   - أنواع المخلفات المرخصة
-   - أي بيانات أخرى مهمة
+## القواعد الحاسمة:
+- يجب أن يحتوي raw_text على النص الكامل الحرفي من المستند بدون أي اختصار أو تلخيص أو حذف
+- انسخ النص كما هو حرفياً — كل كلمة وكل رقم وكل بند
+- إذا كان المستند يحتوي على قسم "الاشتراطات" أو "الالتزامات" أو "الشروط" فانسخه بالكامل حرفياً بند بند
+- إذا وصلك نص مرجعي من طبقة PDF فاحتفظ به كاملاً وأضف إليه أي نص إضافي قرأته من الصورة
 
-أجب عبر function call فقط، ويجب أن يحتوي raw_text على النص الكامل الفعلي للمستند.`;
+## البيانات المطلوبة:
+1. raw_text: النص الكامل الحرفي (بدون اختصار)
+2. document_type: نوع المستند
+3. detected_fields: البيانات المنظمة (رقم الترخيص، التواريخ، الجهات، الأسماء)
+4. obligations: قائمة الاشتراطات والالتزامات (إن وجدت) — كل بند على حده
+5. waste_types: أنواع المخلفات المذكورة
+6. confidence: نسبة الثقة`;
 
-    const userText = `حلل هذا المستند (${fileName || 'document'}) واستخرج كل البيانات منه.\n\n${supplementalText ? `نص طبقة PDF المرجعي (يجب الحفاظ عليه كاملاً داخل raw_text إن كان صحيحاً):\n"""\n${supplementalText}\n"""\n\n` : ''}أجب بالتنسيق المطلوب بحيث يكون raw_text هو النص الكامل المستخرج من المستند، وليس ملخصاً.`;
+    const userText = `حلل هذا المستند (${fileName || 'document'}) واستخرج كل البيانات منه بالكامل حرفياً.
+
+${supplementalText ? `نص طبقة PDF المرجعي (يجب الحفاظ عليه كاملاً ودمجه مع ما تقرأه من الصورة):\n"""\n${supplementalText}\n"""\n\n` : ''}
+
+هام جداً:
+- raw_text يجب أن يحتوي على النص الكامل الحرفي بدون أي حذف أو اختصار
+- إذا كان هناك قسم "الاشتراطات" أو "الالتزامات" فانسخه بالكامل حرفياً داخل raw_text وأيضاً ضعه في obligations كقائمة
+- لا تلخص ولا تختصر — انسخ كل شيء`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -68,14 +76,8 @@ serve(async (req) => {
           {
             role: "user",
             content: [
-              {
-                type: "text",
-                text: userText,
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageBase64 },
-              },
+              { type: "text", text: userText },
+              { type: "image_url", image_url: { url: imageBase64 } },
             ],
           },
         ],
@@ -84,12 +86,18 @@ serve(async (req) => {
             type: "function",
             function: {
               name: "extract_document_data",
-              description: "Extract structured data from a document image",
+              description: "Extract ALL data from a document image verbatim — no summarization",
               parameters: {
                 type: "object",
                 properties: {
-                  raw_text: { type: "string", description: "Full verbatim extracted text from the document without summarization" },
-                  document_type: { type: "string", enum: ["wmra_license", "environmental_approval", "transport_license", "invoice", "contract", "other"] },
+                  raw_text: {
+                    type: "string",
+                    description: "The COMPLETE verbatim text extracted from the document. Must include every word, number, and line. Never summarize or shorten.",
+                  },
+                  document_type: {
+                    type: "string",
+                    enum: ["wmra_license", "environmental_approval", "transport_license", "invoice", "contract", "other"],
+                  },
                   detected_fields: {
                     type: "object",
                     properties: {
@@ -100,6 +108,11 @@ serve(async (req) => {
                       issuing_authority: { type: "string" },
                       waste_types: { type: "array", items: { type: "string" } },
                     },
+                  },
+                  obligations: {
+                    type: "array",
+                    items: { type: "string" },
+                    description: "List of obligations/conditions/requirements mentioned in the document (الاشتراطات/الالتزامات), each as a separate verbatim item",
                   },
                   confidence: { type: "number", description: "Confidence percentage 0-100" },
                 },
@@ -114,15 +127,13 @@ serve(async (req) => {
 
     if (!response.ok) {
       if (response.status === 429) {
-        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، حاول مرة أخرى لاحقاً" }), {
-          status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "تم تجاوز حد الطلبات، حاول لاحقاً" }), {
+          status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
-        return new Response(JSON.stringify({ error: "يرجى إضافة رصيد للذكاء الاصطناعي" }), {
-          status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        return new Response(JSON.stringify({ error: "يرجى إضافة رصيد" }), {
+          status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
       const errText = await response.text();
@@ -146,6 +157,7 @@ serve(async (req) => {
       }
     }
 
+    // Ensure full text is preserved by merging with supplemental
     result.raw_text = mergeVerbatimText(result.raw_text || "", supplementalText);
 
     return new Response(JSON.stringify({ success: true, result }), {
@@ -154,8 +166,7 @@ serve(async (req) => {
   } catch (e) {
     console.error("ocr-extract error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 });
