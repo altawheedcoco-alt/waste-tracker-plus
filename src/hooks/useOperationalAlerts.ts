@@ -16,6 +16,7 @@ export interface OperationalAlert {
   icon: LucideIcon;
   timestamp?: string;
   route?: string;
+  isRead?: boolean;
 }
 
 const STATUS_AR: Record<string, string> = {
@@ -27,6 +28,7 @@ const STATUS_AR: Record<string, string> = {
   cancelled: 'ملغاة',
   pending: 'معلقة',
   collecting: 'جاري التحميل',
+  registered: 'مسجلة',
 };
 
 const WASTE_AR: Record<string, string> = {
@@ -54,7 +56,6 @@ export const useOperationalAlerts = () => {
       if (!orgId) return [];
       const alerts: OperationalAlert[] = [];
 
-      // Parallel fetch all data sources
       const [
         notifRes,
         shipmentsRes,
@@ -67,29 +68,88 @@ export const useOperationalAlerts = () => {
         receiptsRes,
         workOrdersRes,
       ] = await Promise.allSettled([
-        // 1. Notifications (all, no limit)
-        userId ? (supabase.from('notifications') as any).select('id,title,message,type,is_read,created_at').eq('user_id', userId).order('created_at', { ascending: false }).limit(100) : Promise.resolve({ data: [] }),
+        // 1. Notifications
+        userId
+          ? (supabase.from('notifications') as any)
+              .select('id,title,message,type,is_read,created_at')
+              .eq('user_id', userId)
+              .order('created_at', { ascending: false })
+              .limit(100)
+          : Promise.resolve({ data: [] }),
         // 2. Shipments
-        supabase.from('shipments').select('id,shipment_number,status,waste_type,quantity,unit,driver_id,created_at,pickup_address,delivery_address').eq('transporter_id', orgId).order('created_at', { ascending: false }).limit(50),
+        supabase
+          .from('shipments')
+          .select('id,shipment_number,status,waste_type,quantity,unit,driver_id,created_at,pickup_address,delivery_address')
+          .eq('transporter_id', orgId)
+          .order('created_at', { ascending: false })
+          .limit(50),
         // 3. Drivers with profiles
-        supabase.from('drivers').select('id,is_available,profile:profiles(full_name)').eq('organization_id', orgId),
+        supabase
+          .from('drivers')
+          .select('id,is_available,profile:profiles(full_name)')
+          .eq('organization_id', orgId),
         // 4. Fleet vehicles
-        supabase.from('fleet_vehicles').select('id,plate_number,status,vehicle_type').eq('organization_id', orgId),
-        // 5. Unread messages
-        (supabase.from('direct_messages') as any).select('id,content,sender_name,created_at,is_read').eq('receiver_organization_id', orgId).eq('is_read', false).order('created_at', { ascending: false }).limit(20),
-        // 6. Partners
-        (supabase.from('verified_partnerships') as any).select('id,partner_org:organizations!verified_partnerships_partner_organization_id_fkey(name)').eq('organization_id', orgId).eq('status', 'active'),
-        // 7. Pending signatures
-        (supabase.from('signing_chain_steps') as any).select('id,step_label,status').eq('signer_org_id', orgId).eq('status', 'pending'),
+        supabase
+          .from('fleet_vehicles')
+          .select('id,plate_number,status,vehicle_type')
+          .eq('organization_id', orgId),
+        // 5. Unread messages — use sender_id + join with sender org name
+        (supabase.from('direct_messages') as any)
+          .select('id,content,created_at,is_read,sender_organization_id,sender_org:organizations!direct_messages_sender_organization_id_fkey(name)')
+          .eq('receiver_organization_id', orgId)
+          .eq('is_read', false)
+          .order('created_at', { ascending: false })
+          .limit(20),
+        // 6. Partners — two queries: requester + partner side
+        (async () => {
+          const [r1, r2] = await Promise.all([
+            supabase
+              .from('verified_partnerships')
+              .select('id,partner_org_id')
+              .eq('requester_org_id', orgId)
+              .eq('status', 'active'),
+            supabase
+              .from('verified_partnerships')
+              .select('id,requester_org_id')
+              .eq('partner_org_id', orgId)
+              .eq('status', 'active'),
+          ]);
+          const partnerOrgIds = [
+            ...(r1.data || []).map((p: any) => p.partner_org_id),
+            ...(r2.data || []).map((p: any) => p.requester_org_id),
+          ];
+          if (partnerOrgIds.length === 0) return { data: [] };
+          const { data: orgs } = await supabase
+            .from('organizations')
+            .select('id,name')
+            .in('id', partnerOrgIds);
+          return { data: orgs || [] };
+        })(),
+        // 7. Pending signatures — use signer_name
+        supabase
+          .from('signing_chain_steps')
+          .select('id,signer_name,status,chain_id')
+          .eq('signer_org_id', orgId)
+          .eq('status', 'pending'),
         // 8. Contracts
-        supabase.from('contracts').select('id,title,status,end_date').eq('organization_id', orgId),
+        supabase
+          .from('contracts')
+          .select('id,title,status,end_date')
+          .eq('organization_id', orgId),
         // 9. Receipts pending
-        supabase.from('shipment_receipts').select('id,status,created_at').eq('transporter_id', orgId).eq('status', 'pending'),
-        // 10. Work orders
-        (supabase.from('work_orders') as any).select('id,title,status,created_at').or(`sender_org_id.eq.${orgId},recipient_org_id.eq.${orgId}`).eq('status', 'pending'),
+        supabase
+          .from('shipment_receipts')
+          .select('id,status,created_at')
+          .eq('transporter_id', orgId)
+          .eq('status', 'pending'),
+        // 10. Work orders — use order_number, waste_description, organization_id
+        supabase
+          .from('work_orders')
+          .select('id,order_number,waste_description,status,created_at')
+          .eq('organization_id', orgId)
+          .eq('status', 'pending'),
       ]);
 
-      // Helper to extract data safely
       const getData = (res: PromiseSettledResult<any>) =>
         res.status === 'fulfilled' ? (res.value?.data || []) : [];
 
@@ -104,6 +164,7 @@ export const useOperationalAlerts = () => {
           icon: Bell,
           timestamp: n.created_at,
           route: '/dashboard/notifications',
+          isRead: n.is_read,
         });
       }
 
@@ -112,7 +173,7 @@ export const useOperationalAlerts = () => {
       for (const s of ships) {
         const wasteLabel = WASTE_AR[s.waste_type] || s.waste_type;
         const statusLabel = STATUS_AR[s.status] || s.status;
-        const severity = ['new', 'pending'].includes(s.status) ? 'warning' : s.status === 'in_transit' ? 'info' : 'info';
+        const severity = ['new', 'pending'].includes(s.status) ? 'warning' : 'info';
         alerts.push({
           id: `ship-${s.id}`,
           message: `شحنة ${s.shipment_number} - ${wasteLabel} ${s.quantity} ${s.unit} - ${statusLabel}`,
@@ -129,7 +190,6 @@ export const useOperationalAlerts = () => {
       for (const d of drivers) {
         const name = d.profile?.full_name || 'سائق';
         const statusMsg = d.is_available ? 'متاح للعمل' : 'مشغول حالياً';
-        // Check if driver has active shipment
         const activeShip = ships.find((s: any) => s.driver_id === d.id && ['in_transit', 'approved', 'collecting'].includes(s.status));
         const extra = activeShip ? ` - يقود شحنة ${activeShip.shipment_number}` : '';
         alerts.push({
@@ -159,21 +219,23 @@ export const useOperationalAlerts = () => {
       // 5. Messages
       const messages = getData(messagesRes);
       for (const m of messages) {
+        const senderName = m.sender_org?.name || 'مجهول';
         alerts.push({
           id: `msg-${m.id}`,
-          message: `💬 رسالة جديدة من ${m.sender_name || 'مجهول'}: ${(m.content || '').slice(0, 50)}`,
+          message: `💬 رسالة جديدة من ${senderName}: ${(m.content || '').slice(0, 50)}`,
           severity: 'warning',
           type: 'message',
           icon: MessageSquare,
           timestamp: m.created_at,
           route: '/dashboard/messages',
+          isRead: m.is_read,
         });
       }
 
       // 6. Partners
       const partners = getData(partnersRes);
       if (partners.length > 0) {
-        const names = partners.map((p: any) => p.partner_org?.name).filter(Boolean).join('، ');
+        const names = partners.map((p: any) => p.name).filter(Boolean).join('، ');
         alerts.push({
           id: 'partners-summary',
           message: `لديك ${partners.length} شريك نشط: ${names || 'غير محدد'}`,
@@ -189,7 +251,7 @@ export const useOperationalAlerts = () => {
       for (const s of sigs) {
         alerts.push({
           id: `sig-${s.id}`,
-          message: `✍️ توقيع معلق: ${s.step_label || 'بانتظار التوقيع'}`,
+          message: `✍️ توقيع معلق: ${s.signer_name || 'بانتظار التوقيع'}`,
           severity: 'warning',
           type: 'signature',
           icon: FileSignature,
@@ -229,7 +291,7 @@ export const useOperationalAlerts = () => {
       for (const w of workOrders) {
         alerts.push({
           id: `wo-${w.id}`,
-          message: `📦 أمر عمل جديد: ${w.title || 'بدون عنوان'}`,
+          message: `📦 أمر عمل ${w.order_number}: ${w.waste_description || 'بدون وصف'}`,
           severity: 'warning',
           type: 'work_order',
           icon: Truck,
@@ -238,7 +300,7 @@ export const useOperationalAlerts = () => {
         });
       }
 
-      // Sort: warnings/critical first, then by timestamp
+      // Sort: critical first, then warnings, then by timestamp
       alerts.sort((a, b) => {
         const sevOrder = { critical: 0, warning: 1, info: 2 };
         const diff = sevOrder[a.severity] - sevOrder[b.severity];
