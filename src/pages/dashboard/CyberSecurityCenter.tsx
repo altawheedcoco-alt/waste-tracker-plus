@@ -264,7 +264,7 @@ const CyberSecurityCenter = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+          <TabsList className="flex flex-wrap w-full gap-1 h-auto p-1">
             <TabsTrigger value="monitor" className="text-xs gap-1"><Radio className="w-3.5 h-3.5" /> المراقبة الحية</TabsTrigger>
             <TabsTrigger value="zerotrust" className="text-xs gap-1"><Lock className="w-3.5 h-3.5" /> الثقة المعدومة</TabsTrigger>
             <TabsTrigger value="overview" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" /> الإحصائيات</TabsTrigger>
