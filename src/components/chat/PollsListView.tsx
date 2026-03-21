@@ -46,7 +46,7 @@ export default function PollsListView() {
                 key={poll.id}
                 poll={poll}
                 currentUserId={user?.id || ''}
-                onVote={vote}
+                onVote={(pollId, optionIndex) => vote({ pollId, optionIndex })}
                 onClose={closePoll}
               />
             ))}
