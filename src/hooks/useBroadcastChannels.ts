@@ -10,6 +10,10 @@ export interface BroadcastChannel {
   organization_id: string;
   is_active: boolean;
   subscriber_count: number;
+  avatar_url?: string | null;
+  cover_url?: string | null;
+  is_verified?: boolean;
+  channel_visibility?: string;
   created_at: string;
   is_mine?: boolean;
   is_subscribed?: boolean;

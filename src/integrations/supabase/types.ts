@@ -3387,11 +3387,14 @@ export type Database = {
       broadcast_channels: {
         Row: {
           avatar_url: string | null
+          channel_visibility: string | null
+          cover_url: string | null
           created_at: string | null
           created_by: string
           description: string | null
           id: string
           is_active: boolean | null
+          is_verified: boolean | null
           name: string
           organization_id: string
           subscriber_count: number | null
@@ -3399,11 +3402,14 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          channel_visibility?: string | null
+          cover_url?: string | null
           created_at?: string | null
           created_by: string
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_verified?: boolean | null
           name: string
           organization_id: string
           subscriber_count?: number | null
@@ -3411,11 +3417,14 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          channel_visibility?: string | null
+          cover_url?: string | null
           created_at?: string | null
           created_by?: string
           description?: string | null
           id?: string
           is_active?: boolean | null
+          is_verified?: boolean | null
           name?: string
           organization_id?: string
           subscriber_count?: number | null
@@ -3438,6 +3447,38 @@ export type Database = {
           },
         ]
       }
+      broadcast_post_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          post_id: string
+          reaction_type: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          post_id: string
+          reaction_type?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          post_id?: string
+          reaction_type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_post_reactions_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broadcast_posts: {
         Row: {
           channel_id: string
@@ -3446,8 +3487,13 @@ export type Database = {
           file_name: string | null
           file_url: string | null
           id: string
+          link_preview_image: string | null
+          link_title: string | null
+          link_url: string | null
           metadata: Json | null
           post_type: string | null
+          reactions_count: number | null
+          reactions_summary: Json | null
           sender_id: string
           views_count: number | null
         }
@@ -3458,8 +3504,13 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          link_preview_image?: string | null
+          link_title?: string | null
+          link_url?: string | null
           metadata?: Json | null
           post_type?: string | null
+          reactions_count?: number | null
+          reactions_summary?: Json | null
           sender_id: string
           views_count?: number | null
         }
@@ -3470,8 +3521,13 @@ export type Database = {
           file_name?: string | null
           file_url?: string | null
           id?: string
+          link_preview_image?: string | null
+          link_title?: string | null
+          link_url?: string | null
           metadata?: Json | null
           post_type?: string | null
+          reactions_count?: number | null
+          reactions_summary?: Json | null
           sender_id?: string
           views_count?: number | null
         }
