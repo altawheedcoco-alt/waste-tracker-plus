@@ -160,9 +160,9 @@ const OwnerSettings = memo(({ channel }: { channel: BroadcastChannel }) => {
       {/* Images */}
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <Avatar className="w-14 h-14 cursor-pointer ring-2 ring-border" onClick={() => avatarRef.current?.click()}>
+          <Avatar className="w-7 h-7 cursor-pointer ring-2 ring-border" onClick={() => avatarRef.current?.click()}>
             {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-            <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
               {channel.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
@@ -935,10 +935,10 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
       </div>
 
       {/* Avatar & Name */}
-      <div className="flex flex-col items-center -mt-10 relative z-10 px-4">
-        <Avatar className="w-20 h-20 border-4 border-background shadow-lg">
+      <div className="flex flex-col items-center -mt-5 relative z-10 px-4">
+        <Avatar className="w-10 h-10 border-2 border-background shadow-md">
           {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
+          <AvatarFallback className="bg-primary/10 text-primary text-base font-bold">
             {channel.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
