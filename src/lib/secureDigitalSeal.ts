@@ -23,22 +23,41 @@
 // Seal Style Types
 // ═══════════════════════════════════════════════════════════════
 
-export type SealStyle = 'classic' | 'royal' | 'modern' | 'holographic' | 'corporate';
+export type SealStyle = 
+  | 'classic' | 'royal' | 'modern' | 'holographic' | 'corporate'
+  | 'emerald' | 'ruby' | 'sapphire' | 'amber' | 'obsidian'
+  | 'pharaonic' | 'islamic' | 'ottoman' | 'celtic' | 'japanese'
+  | 'military' | 'diplomatic' | 'scientific' | 'maritime' | 'heritage';
 
 export interface SealStyleOption {
   id: SealStyle;
   nameAr: string;
   nameEn: string;
   description: string;
-  preview: string; // emoji/icon identifier
+  preview: string;
 }
 
 export const SEAL_STYLES: SealStyleOption[] = [
-  { id: 'classic', nameAr: 'كلاسيكي', nameEn: 'Classic', description: 'تصميم تقليدي أنيق مع جيلوشي متعدد الطبقات', preview: '🏛️' },
-  { id: 'royal', nameAr: 'ملكي', nameEn: 'Royal', description: 'تصميم فخم بألوان ذهبية ونقوش ملكية مزخرفة', preview: '👑' },
-  { id: 'modern', nameAr: 'عصري', nameEn: 'Modern', description: 'تصميم هندسي بسيط وخطوط نظيفة ومعاصرة', preview: '💎' },
-  { id: 'holographic', nameAr: 'هولوغرافي', nameEn: 'Holographic', description: 'تأثيرات قزحية متغيرة الألوان مضادة للتزوير', preview: '🌈' },
-  { id: 'corporate', nameAr: 'رسمي', nameEn: 'Corporate', description: 'تصميم مؤسسي رسمي للاستخدام القانوني', preview: '📜' },
+  { id: 'classic', nameAr: 'كلاسيكي', nameEn: 'Classic', description: 'تصميم تقليدي أنيق', preview: '🏛️' },
+  { id: 'royal', nameAr: 'ملكي', nameEn: 'Royal', description: 'ذهبي فخم بنقوش ملكية', preview: '👑' },
+  { id: 'modern', nameAr: 'عصري', nameEn: 'Modern', description: 'هندسي بسيط ومعاصر', preview: '💎' },
+  { id: 'holographic', nameAr: 'هولوغرافي', nameEn: 'Holographic', description: 'قزحي متغير الألوان', preview: '🌈' },
+  { id: 'corporate', nameAr: 'رسمي', nameEn: 'Corporate', description: 'مؤسسي للاستخدام القانوني', preview: '📜' },
+  { id: 'emerald', nameAr: 'زمردي', nameEn: 'Emerald', description: 'أخضر زمردي فاخر', preview: '💚' },
+  { id: 'ruby', nameAr: 'ياقوتي', nameEn: 'Ruby', description: 'أحمر ياقوتي عميق', preview: '❤️' },
+  { id: 'sapphire', nameAr: 'ياقوت أزرق', nameEn: 'Sapphire', description: 'أزرق ملكي صافي', preview: '💙' },
+  { id: 'amber', nameAr: 'كهرماني', nameEn: 'Amber', description: 'برتقالي كهرماني دافئ', preview: '🧡' },
+  { id: 'obsidian', nameAr: 'سبج أسود', nameEn: 'Obsidian', description: 'أسود فحمي أنيق', preview: '🖤' },
+  { id: 'pharaonic', nameAr: 'فرعوني', nameEn: 'Pharaonic', description: 'ذهبي مصري قديم', preview: '𓂀' },
+  { id: 'islamic', nameAr: 'إسلامي', nameEn: 'Islamic', description: 'زخارف هندسية إسلامية', preview: '🕌' },
+  { id: 'ottoman', nameAr: 'عثماني', nameEn: 'Ottoman', description: 'طغراء عثمانية كلاسيكية', preview: '🏰' },
+  { id: 'celtic', nameAr: 'كلتي', nameEn: 'Celtic', description: 'عقد كلتية متشابكة', preview: '☘️' },
+  { id: 'japanese', nameAr: 'ياباني', nameEn: 'Japanese', description: 'هانكو ياباني تقليدي', preview: '🎌' },
+  { id: 'military', nameAr: 'عسكري', nameEn: 'Military', description: 'نجوم وشارات عسكرية', preview: '⭐' },
+  { id: 'diplomatic', nameAr: 'دبلوماسي', nameEn: 'Diplomatic', description: 'رسمي بإطار غار', preview: '🕊️' },
+  { id: 'scientific', nameAr: 'علمي', nameEn: 'Scientific', description: 'ذري بأنماط جزيئية', preview: '⚛️' },
+  { id: 'maritime', nameAr: 'بحري', nameEn: 'Maritime', description: 'أزرق بحري بحبال ومراسي', preview: '⚓' },
+  { id: 'heritage', nameAr: 'تراثي', nameEn: 'Heritage', description: 'تراث عربي أصيل', preview: '🏺' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
