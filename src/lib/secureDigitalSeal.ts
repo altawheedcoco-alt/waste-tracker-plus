@@ -540,6 +540,9 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   // Style-specific extra elements
   const styleExtras = generateStyleExtras(style, hash, palette, uid);
 
+  // NEW: Optical Illusion Layer - appears to move while static
+  const opticalIllusion = generateOpticalIllusion(hash, palette, uid);
+
   // NEW Layer 14: Thick Outer Border Band with Multi-Language Text
   const outerBorderBand = generateOuterBorderBand(hash, palette, uid);
 
