@@ -1233,7 +1233,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
 
       {/* Composer: Owner or System Admin */}
       {(channel.is_mine || isSystemAdmin) && (
-        <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} />
+        <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} onUploadMultiple={uploadMultipleFiles} />
       )}
     </div>
   );
