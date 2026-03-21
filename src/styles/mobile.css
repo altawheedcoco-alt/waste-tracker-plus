@@ -80,12 +80,25 @@ html {
   overflow-x: hidden;
   overflow-y: auto;
   max-width: 100vw;
+  max-width: 100dvw;
 }
 
 body {
   overflow-x: hidden;
   overflow-y: visible;
   max-width: 100vw;
+  max-width: 100dvw;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  max-width: 100dvw;
+}
+
+img, video, iframe, svg, canvas {
+  max-width: 100%;
+  height: auto;
 }
 
 /* ——— Small phones (≤ 360px) ——— */
