@@ -360,18 +360,16 @@ function generateOuterBorderBand(hash: string, palette: StylePalette, uid: strin
   // Syriac (approximate rendering)
   const textSYR = 'ܐܝܪܝܣܝܟܠ ⬥ ܡܢܨܬ ܬܬܒܥ ܡܚܠܦܬ ⬥ ܢܛܡ ܐܕܪܬ ܡܚܠܦܬ ⬥';
 
-  // Thick outer band structure (radius 97 outer, 88 inner = 9px band)
-  // Outer edge
-  svg += `<circle cx="100" cy="100" r="99" fill="none" stroke="${palette.borderOuter}" stroke-width="2" opacity="0.8"/>`;
-  // Inner edge of band
-  svg += `<circle cx="100" cy="100" r="88" fill="none" stroke="${palette.borderOuter}" stroke-width="1.8" opacity="0.6"/>`;
-  // Band fill (hollow ring between 88 and 99)
-  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="${palette.bg}" stroke-width="11" opacity="0.85"/>`;
+  // Thick outer band structure — white/ivory background with clear black text
+  svg += `<circle cx="100" cy="100" r="99" fill="none" stroke="#1a1a1a" stroke-width="2.5" opacity="0.9"/>`;
+  svg += `<circle cx="100" cy="100" r="88" fill="none" stroke="#1a1a1a" stroke-width="2" opacity="0.75"/>`;
+  // Band fill (hollow ring — ivory/cream background for contrast)
+  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="#FFFFF0" stroke-width="11" opacity="0.95"/>`;
   // Thin decorative lines within the band
-  svg += `<circle cx="100" cy="100" r="97.5" fill="none" stroke="${palette.borderOuter}" stroke-width="0.3" opacity="0.4"/>`;
-  svg += `<circle cx="100" cy="100" r="89.5" fill="none" stroke="${palette.borderOuter}" stroke-width="0.3" opacity="0.4"/>`;
+  svg += `<circle cx="100" cy="100" r="97.5" fill="none" stroke="#333333" stroke-width="0.4" opacity="0.5"/>`;
+  svg += `<circle cx="100" cy="100" r="89.5" fill="none" stroke="#333333" stroke-width="0.4" opacity="0.5"/>`;
   // Dashed security line mid-band
-  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="${palette.primary}" stroke-width="0.15" stroke-dasharray="1,2,0.5,2" opacity="0.2"/>`;
+  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="#555555" stroke-width="0.2" stroke-dasharray="1,2,0.5,2" opacity="0.3"/>`;
 
   // Text paths for the 4 language rings within the thick band
   svg += `
@@ -384,22 +382,22 @@ function generateOuterBorderBand(hash: string, palette: StylePalette, uid: strin
   `;
 
   // Arabic text ring (outermost in band, clockwise)
-  svg += `<text font-size="3.2" fill="#000000" opacity="0.75" font-family="'Cairo','Amiri','Scheherazade New',sans-serif" font-weight="700" direction="rtl" letter-spacing="0.3">
+  svg += `<text font-size="3.5" fill="#000000" opacity="0.9" font-family="'Cairo','Amiri','Scheherazade New',sans-serif" font-weight="800" direction="rtl" letter-spacing="0.2">
     <textPath href="#ob_ar_${uid}" startOffset="0%">${textAR} ${textAR} ${textAR}</textPath>
   </text>`;
 
   // English text ring
-  svg += `<text font-size="2.6" fill="#000000" opacity="0.6" font-family="'Courier New','OCR-B',monospace" font-weight="600" letter-spacing="0.8">
+  svg += `<text font-size="2.8" fill="#000000" opacity="0.85" font-family="'Courier New','OCR-B',monospace" font-weight="700" letter-spacing="0.6">
     <textPath href="#ob_en_${uid}" startOffset="0%">${textEN} ${textEN} ${textEN}</textPath>
   </text>`;
 
   // Hieroglyphic text ring
-  svg += `<text font-size="3" fill="#000000" opacity="0.55" font-family="'Segoe UI Historic','Noto Sans Egyptian Hieroglyphs','Segoe UI Symbol',sans-serif" letter-spacing="0.5">
+  svg += `<text font-size="3.2" fill="#000000" opacity="0.8" font-family="'Segoe UI Historic','Noto Sans Egyptian Hieroglyphs','Segoe UI Symbol',sans-serif" letter-spacing="0.4">
     <textPath href="#ob_hi_${uid}" startOffset="0%">${textHIERO} ${textHIERO}</textPath>
   </text>`;
 
   // Syriac text ring (innermost in band)
-  svg += `<text font-size="2.8" fill="#000000" opacity="0.55" font-family="'Estrangelo Edessa','Serto Jerusalem','Noto Sans Syriac',serif" font-weight="500" direction="rtl" letter-spacing="0.4">
+  svg += `<text font-size="3" fill="#000000" opacity="0.8" font-family="'Estrangelo Edessa','Serto Jerusalem','Noto Sans Syriac',serif" font-weight="600" direction="rtl" letter-spacing="0.3">
     <textPath href="#ob_sy_${uid}" startOffset="0%">${textSYR} ${textSYR} ${textSYR}</textPath>
   </text>`;
 
