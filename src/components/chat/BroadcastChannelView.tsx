@@ -758,7 +758,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
         {/* === LEGACY SINGLE: Video === */}
         {!isMultiMedia && isVideoPost && (
           <div className="relative mt-1 bg-black">
-            <video src={post.file_url!} className="w-full object-contain" controls preload="metadata" />
+            <AutoPlayVideo src={post.file_url!} />
           </div>
         )}
 
