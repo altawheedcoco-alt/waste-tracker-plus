@@ -174,7 +174,7 @@ const TransporterCommandCenter = () => {
         supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', weekAgo.toISOString()),
         supabase.from('accounting_ledger').select('amount, entry_type, entry_category, created_at').eq('organization_id', organization!.id),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['new'] as any),
-        supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled","completed")'),
+        supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled")'),
         supabase.from('shipments').select('id, status, quantity').eq('transporter_id', organization!.id).gte('created_at', monthAgo.toISOString()),
         supabase.from('external_partners').select('id').eq('organization_id', organization!.id),
         // NEW: Full org data

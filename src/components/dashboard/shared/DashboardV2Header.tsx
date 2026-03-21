@@ -15,7 +15,7 @@ import {
   CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
   CloudFog, Sunrise, Sunset, Clock, ThermometerSun,
   FileSignature, Wallet, Users, ScrollText, Package, Lock, RefreshCw, HardDrive,
-  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain,
+  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain, FileCheck,
 } from 'lucide-react';
 import type { RealWeatherData, HourlyForecast } from '@/hooks/useRealWeather';
 import { cn } from '@/lib/utils';
@@ -355,6 +355,9 @@ const ALERT_TYPE_FILTERS = [
   { type: 'notification', icon: Bell, label: 'إشعارات' },
   { type: 'partner', icon: Users, label: 'شركاء' },
   { type: 'vehicle', icon: Truck, label: 'مركبات' },
+  { type: 'activity', icon: Activity, label: 'النشاط' },
+  { type: 'log', icon: ScrollText, label: 'السجل' },
+  { type: 'approval', icon: FileCheck, label: 'الموافقات' },
 ];
 
 const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAlertClick?: (alert: AlertItem) => void }) => {
