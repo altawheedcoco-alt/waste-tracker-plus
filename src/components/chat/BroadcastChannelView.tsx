@@ -1504,6 +1504,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           title: channel.name,
           preview: channel.description || 'قناة بث داخلية على المنصة',
           message: `📡 تمت مشاركة قناة بث\n\n${channel.name}\n${channel.description ? `\n${channel.description}\n` : '\n'}${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
+          link: `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
         }}
       />
     </div>
