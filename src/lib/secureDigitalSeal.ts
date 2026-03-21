@@ -639,6 +639,11 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
 
   ${styleExtras}
 
+  <!-- Layer 17: Optical Illusion - Peripheral Drift Motion -->
+  <g clip-path="url(#cc_${uid})">
+    ${opticalIllusion}
+  </g>
+
   <!-- Center: Shield verification icon -->
   <g transform="translate(88, 66)">
     <path d="M12 1L3 5.5v7c0 6.1 4.2 11.8 9 13.5 4.8-1.7 9-7.4 9-13.5v-7L12 1z" 
