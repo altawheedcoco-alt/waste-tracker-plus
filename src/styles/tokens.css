@@ -89,6 +89,18 @@
   }
 
   .dark {
+    --landing-background: 225 16% 8%;
+    --landing-foreground: 210 15% 95%;
+    --landing-primary: 160 64% 48%;
+    --landing-primary-foreground: 0 0% 100%;
+    --landing-muted: 225 12% 15%;
+    --landing-muted-foreground: 215 8% 68%;
+    --landing-accent: 175 60% 42%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-border: 225 10% 22%;
+    --landing-card: 225 14% 11%;
+    --landing-card-foreground: 210 15% 95%;
+
     --background: 225 16% 8%;
     --foreground: 210 15% 95%;
     --card: 225 14% 11%;
@@ -122,6 +134,24 @@
     --chart-4: 42 90% 62%;
     --chart-5: 0 0% 55%;
     --sidebar: 225 16% 9%;
+
+    /* v4.0 Dark eco palette */
+    --eco-green: 160 64% 48%;
+    --eco-green-dark: 160 70% 36%;
+    --eco-green-light: 160 55% 58%;
+    --eco-emerald: 168 65% 42%;
+    --eco-teal: 178 55% 44%;
+    --eco-cream: 225 12% 12%;
+    --eco-sand: 225 10% 18%;
+    --eco-ocean: 205 70% 50%;
+    --eco-gold: 42 85% 58%;
+
+    /* v4.0 Dark Gradients */
+    --gradient-eco: linear-gradient(135deg, hsl(160, 64%, 48%) 0%, hsl(178, 55%, 44%) 50%, hsl(205, 70%, 50%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(225, 16%, 8%) 0%, hsl(225, 14%, 11%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(225, 14%, 11%) 0%, hsl(225, 12%, 13%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(160, 64%, 48%) 0%, hsl(205, 70%, 50%) 100%);
+
     --shadow-2xs: 0 1px 2px hsl(0 0% 0% / 0.25);
     --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.25);
     --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.3), 0 1px 2px hsl(0 0% 0% / 0.25);
@@ -130,5 +160,8 @@
     --shadow-lg: 0 8px 20px hsl(0 0% 0% / 0.35), 0 4px 8px hsl(0 0% 0% / 0.25);
     --shadow-xl: 0 16px 32px hsl(0 0% 0% / 0.4), 0 6px 12px hsl(0 0% 0% / 0.25);
     --shadow-2xl: 0 24px 48px hsl(0 0% 0% / 0.5);
+    --shadow-glow: 0 0 32px hsl(160, 64%, 48%, 0.2);
+    --shadow-hero: 0 4px 24px hsl(0 0% 0% / 0.3), 0 8px 48px hsl(160, 64%, 48%, 0.06);
+    --shadow-premium: 0 4px 20px hsl(160, 64%, 48%, 0.1), 0 1px 4px hsl(205, 70%, 50%, 0.08);
   }
 }
