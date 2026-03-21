@@ -139,6 +139,7 @@ import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 import ViewModeToolbar from './ViewModeToolbar';
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
+const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -1071,7 +1072,8 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating actions moved to FloatingSidePanel */}
+          {/* Smart Floating Action Button */}
+          <Suspense fallback={null}><UnifiedFloatingMenu /></Suspense>
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />
