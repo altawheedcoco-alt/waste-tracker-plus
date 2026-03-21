@@ -10,9 +10,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import {
   Brain, Shield, AlertTriangle, CheckCircle2, XCircle, Clock,
   FileText, Loader2, RefreshCw, TrendingUp, Scale, Leaf, BarChart3,
-  DollarSign, Truck, Activity, Gavel, FileWarning, Users
+  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 
 interface License {
   name: string; number: string; issuing_authority?: string; status: string;
