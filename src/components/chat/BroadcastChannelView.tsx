@@ -222,17 +222,36 @@ const OwnerSettings = memo(({ channel }: { channel: BroadcastChannel }) => {
             onCheckedChange={v => updateSettings({ allow_reactions: v })}
           />
         </div>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-medium">رؤية القناة</p>
-            <p className="text-[10px] text-muted-foreground">
-              {(channel as any).channel_visibility === 'private' ? 'خاصة — بالدعوة فقط' : 'عامة — يمكن للجميع اكتشافها'}
-            </p>
+        <div className="space-y-2">
+          <p className="text-xs font-medium">رؤية القناة</p>
+          <p className="text-[10px] text-muted-foreground mb-2">تحديد من يمكنه رؤية القناة واكتشافها</p>
+          <div className="space-y-2">
+            {[
+              { value: 'public', label: 'عامة', desc: 'يمكن للجميع اكتشافها ومتابعتها', icon: '🌍' },
+              { value: 'internal', label: 'خاصة — جميع الجهات', desc: 'مرئية لجميع الجهات داخل المنصة فقط', icon: '🏢' },
+              { value: 'partners_only', label: 'خاصة — الجهات المرتبطة', desc: 'مرئية فقط للجهات المرتبطة بكم', icon: '🤝' },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => updateSettings({ channel_visibility: opt.value })}
+                className={cn(
+                  "w-full flex items-center gap-3 p-2.5 rounded-xl border text-right transition-all",
+                  ((channel as any).channel_visibility || 'public') === opt.value
+                    ? "border-primary bg-primary/5 ring-1 ring-primary/20"
+                    : "border-border/50 hover:bg-muted/50"
+                )}
+              >
+                <span className="text-lg">{opt.icon}</span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-medium">{opt.label}</p>
+                  <p className="text-[10px] text-muted-foreground">{opt.desc}</p>
+                </div>
+                {((channel as any).channel_visibility || 'public') === opt.value && (
+                  <Check className="w-4 h-4 text-primary shrink-0" />
+                )}
+              </button>
+            ))}
           </div>
-          <Switch
-            checked={(channel as any).channel_visibility !== 'private'}
-            onCheckedChange={v => updateSettings({ channel_visibility: v ? 'public' : 'private' })}
-          />
         </div>
       </div>
 
