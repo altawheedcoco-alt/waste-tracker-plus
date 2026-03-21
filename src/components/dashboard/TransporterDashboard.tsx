@@ -111,7 +111,13 @@ const TransporterDashboard = () => {
 
   useTransporterRealtime();
   const realWeather = useRealWeather();
+  const navigate = useNavigate();
   const handleRefresh = () => refetchShipments();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+
+  const handleAlertClick = useCallback((alert: any) => {
+    if (alert.route) navigate(alert.route);
+  }, [navigate]);
 
   // Build real heatmap from shipment locations
   const heatmapRegions = useMemo(() => {
