@@ -1,4 +1,4 @@
-import { useState, memo, useRef, useCallback } from 'react';
+import { useState, memo, useRef, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Radio, Plus, Send, Users, ChevronRight, Search,
@@ -539,6 +539,41 @@ const CommentSection = memo(({ postId, isOpen }: { postId: string; isOpen: boole
 CommentSection.displayName = 'CommentSection';
 
 // ═══════════════════════════════════════════════════════════════
+// AutoPlay Video — plays on scroll into view, pauses when out
+const AutoPlayVideo = ({ src }: { src: string }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="relative group">
+      <video ref={ref} src={src} className="w-full object-contain" muted={muted} loop playsInline preload="auto" controls />
+      <button
+        onClick={() => setMuted(m => !m)}
+        className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2.5"
+      >
+        {muted ? '🔇 كتم' : '🔊 صوت'}
+      </button>
+    </div>
+  );
+};
+
 // Post Card (Shared — adapts per role) — Enhanced Design
 // ═══════════════════════════════════════════════════════════════
 const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport }: {
@@ -706,7 +741,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
           <div className="space-y-1 mt-1">
             {mediaVideos.map((url, i) => (
               <div key={`vid-${i}`} className="relative bg-black">
-                <video src={url} className="w-full object-contain" controls preload="metadata" />
+                <AutoPlayVideo src={url} />
               </div>
             ))}
           </div>
@@ -758,7 +793,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
         {/* === LEGACY SINGLE: Video === */}
         {!isMultiMedia && isVideoPost && (
           <div className="relative mt-1 bg-black">
-            <video src={post.file_url!} className="w-full object-contain" controls preload="metadata" />
+            <AutoPlayVideo src={post.file_url!} />
           </div>
         )}
 
