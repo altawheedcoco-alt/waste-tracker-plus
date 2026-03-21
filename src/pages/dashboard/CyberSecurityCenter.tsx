@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import {
   useCyberThreats, useDefenseRules, useThreatPatterns, useRunThreatScan,
-  useResolveThreat, useCyberStats, useCyberAdvancedStats, CyberThreat,
+  useResolveThreat, useCyberStats, useCyberAdvancedStats, useZeroTrustCheck,
+  useSystemHeartbeat, CyberThreat,
 } from '@/hooks/useCyberSecurity';
 import { useSecurityReports, useGenerateSecurityReport, SecurityReport } from '@/hooks/useSecurityReports';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
@@ -150,12 +151,16 @@ const CyberSecurityCenter = () => {
   const resolveMutation = useResolveThreat();
   const { data: reports = [], isLoading: reportsLoading } = useSecurityReports();
   const generateReport = useGenerateSecurityReport();
+  const { data: zeroTrustData, isLoading: ztLoading, refresh: ztRefresh } = useZeroTrustCheck();
 
   // Live monitoring state
   const [monitorPulse, setMonitorPulse] = useState(0);
   const [lastScanTime, setLastScanTime] = useState<Date>(new Date());
   const [autoMonitorEnabled, setAutoMonitorEnabled] = useState(true);
   const [monitorInterval, setMonitorInterval] = useState(30); // seconds
+
+  // Real system heartbeat
+  const { data: heartbeat } = useSystemHeartbeat(autoMonitorEnabled, monitorInterval);
 
   // Auto-monitoring: continuous scan
   useEffect(() => {
@@ -259,8 +264,9 @@ const CyberSecurityCenter = () => {
         </div>
 
         <Tabs value={tab} onValueChange={setTab}>
-          <TabsList className="grid grid-cols-4 md:grid-cols-8 w-full">
+          <TabsList className="flex flex-wrap w-full gap-1 h-auto p-1">
             <TabsTrigger value="monitor" className="text-xs gap-1"><Radio className="w-3.5 h-3.5" /> المراقبة الحية</TabsTrigger>
+            <TabsTrigger value="zerotrust" className="text-xs gap-1"><Lock className="w-3.5 h-3.5" /> الثقة المعدومة</TabsTrigger>
             <TabsTrigger value="overview" className="text-xs gap-1"><BarChart3 className="w-3.5 h-3.5" /> الإحصائيات</TabsTrigger>
             <TabsTrigger value="threats" className="text-xs gap-1"><ShieldAlert className="w-3.5 h-3.5" /> التهديدات</TabsTrigger>
             <TabsTrigger value="rules" className="text-xs gap-1"><Shield className="w-3.5 h-3.5" /> قواعد الدفاع</TabsTrigger>
@@ -305,6 +311,7 @@ const CyberSecurityCenter = () => {
                       </p>
                       <p className="text-xs text-muted-foreground mt-1">
                         نبضة #{monitorPulse} · المراقبة {autoMonitorEnabled ? 'نشطة' : 'متوقفة'} · كل {monitorInterval} ثانية
+                        {heartbeat && ` · مستخدمون نشطون: ${heartbeat.active_users_5m} · أحداث الساعة: ${heartbeat.security_events_1h}`}
                       </p>
                     </div>
                   </div>
@@ -329,6 +336,28 @@ const CyberSecurityCenter = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Real-time Heartbeat KPIs */}
+            {heartbeat && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: 'مستخدمون نشطون', value: heartbeat.active_users_5m, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/20' },
+                  { label: 'أحداث أمنية (ساعة)', value: heartbeat.security_events_1h, icon: Activity, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-950/20' },
+                  { label: 'تسجيلات دخول (ساعة)', value: heartbeat.logins_1h, icon: Fingerprint, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
+                  { label: 'تهديدات حديثة (5 دقائق)', value: heartbeat.recent_threats, icon: ShieldAlert, color: heartbeat.recent_threats > 0 ? 'text-red-500' : 'text-emerald-500', bg: heartbeat.recent_threats > 0 ? 'bg-red-50 dark:bg-red-950/20' : 'bg-emerald-50 dark:bg-emerald-950/20' },
+                ].map(k => (
+                  <Card key={k.label} className="border-0 shadow-sm">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${k.bg}`}><k.icon className={`w-5 h-5 ${k.color}`} /></div>
+                      <div>
+                        <p className="text-lg font-bold">{k.value}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{k.label}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
 
             {/* Monitor Channels Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -444,6 +473,106 @@ const CyberSecurityCenter = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* ===================== ZERO TRUST ===================== */}
+          <TabsContent value="zerotrust" className="mt-4 space-y-4">
+            <Card className="border-2 border-primary/20 bg-gradient-to-l from-primary/5 to-background">
+              <CardContent className="p-6">
+                <div className="flex items-center justify-between flex-wrap gap-4">
+                  <div className="flex items-center gap-4">
+                    <div className="relative">
+                      <div className={`w-20 h-20 rounded-full border-4 flex items-center justify-center ${
+                        (zeroTrustData?.score ?? 0) >= 80 ? 'border-emerald-500 text-emerald-600' :
+                        (zeroTrustData?.score ?? 0) >= 50 ? 'border-amber-500 text-amber-600' : 'border-red-500 text-red-600'
+                      }`}>
+                        <span className="text-2xl font-black">{zeroTrustData?.score ?? '—'}</span>
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-lg font-bold flex items-center gap-2">
+                        <Lock className="w-5 h-5 text-primary" />
+                        نقاط الثقة المعدومة (Zero Trust Score)
+                      </h3>
+                      <p className="text-sm text-muted-foreground">
+                        {(zeroTrustData?.score ?? 0) >= 80 ? 'مستوى أمان ممتاز — كافة الضوابط مفعّلة' :
+                         (zeroTrustData?.score ?? 0) >= 50 ? 'مستوى متوسط — يوجد ضوابط بحاجة لتفعيل' : 'مستوى ضعيف — يجب تفعيل الضوابط فوراً'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {zeroTrustData ? `${zeroTrustData.passed} من ${zeroTrustData.total} فحص ناجح` : 'جاري التحميل...'}
+                      </p>
+                    </div>
+                  </div>
+                  <Button variant="outline" size="sm" onClick={() => ztRefresh.mutate()} disabled={ztRefresh.isPending}>
+                    {ztRefresh.isPending ? <Loader2 className="w-4 h-4 animate-spin ml-1" /> : <RefreshCw className="w-4 h-4 ml-1" />}
+                    إعادة الفحص
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {ztLoading && <div className="flex justify-center py-8"><Loader2 className="w-6 h-6 animate-spin" /></div>}
+            
+            {zeroTrustData?.checks && (
+              <div className="grid sm:grid-cols-2 gap-3">
+                {zeroTrustData.checks.map((check: any) => {
+                  const statusConfig = {
+                    pass: { icon: CheckCircle2, color: 'text-emerald-600', bg: 'bg-emerald-50 dark:bg-emerald-950/20', border: 'border-emerald-200 dark:border-emerald-800', label: 'ناجح' },
+                    warn: { icon: AlertTriangle, color: 'text-amber-600', bg: 'bg-amber-50 dark:bg-amber-950/20', border: 'border-amber-200 dark:border-amber-800', label: 'تحذير' },
+                    fail: { icon: XCircle, color: 'text-red-600', bg: 'bg-red-50 dark:bg-red-950/20', border: 'border-red-200 dark:border-red-800', label: 'فشل' },
+                  }[check.status] || { icon: AlertTriangle, color: 'text-muted-foreground', bg: 'bg-muted', border: 'border-border', label: '—' };
+                  const StatusIcon = statusConfig.icon;
+                  return (
+                    <Card key={check.id} className={`border ${statusConfig.border} transition-all`}>
+                      <CardContent className="p-4">
+                        <div className="flex items-start gap-3">
+                          <div className={`p-2 rounded-lg ${statusConfig.bg} shrink-0`}>
+                            <StatusIcon className={`w-5 h-5 ${statusConfig.color}`} />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <span className="font-semibold text-sm">{check.label}</span>
+                              {check.critical && <Badge variant="destructive" className="text-[9px]">حرج</Badge>}
+                              <Badge variant="outline" className={`${statusConfig.bg} ${statusConfig.color} border-0 text-[10px]`}>{statusConfig.label}</Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground">{check.detail}</p>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Zero Trust Principles */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base flex items-center gap-2"><Shield className="w-5 h-5 text-primary" /> مبادئ الثقة المعدومة المطبّقة</CardTitle>
+                <CardDescription className="text-xs">القاعدة الذهبية: "لا تثق بأحد أبداً، وتحقق دائماً"</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    { title: 'التحقق المستمر', desc: 'كل طلب يتم التحقق من هوية المستخدم والجهاز والموقع', icon: Fingerprint, active: true },
+                    { title: 'أقل صلاحيات ممكنة', desc: 'كل مستخدم يحصل فقط على الحد الأدنى من الصلاحيات اللازمة', icon: Key, active: true },
+                    { title: 'تقسيم الشبكة', desc: 'عزل البيانات الحساسة في مناطق آمنة مع سياسات RLS', icon: Database, active: true },
+                    { title: 'التشفير الشامل', desc: 'كل البيانات مشفرة أثناء النقل والتخزين مع E2E للرسائل', icon: Lock, active: true },
+                    { title: 'المراقبة اللحظية', desc: 'رصد كل نشاط مشبوه فوراً مع استجابة تلقائية', icon: Eye, active: true },
+                    { title: 'الاستجابة الآلية', desc: 'حظر وعزل تلقائي عند اكتشاف تهديدات حرجة', icon: Zap, active: true },
+                  ].map(p => (
+                    <div key={p.title} className="p-4 rounded-xl border bg-card">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="p-1.5 rounded-lg bg-primary/10"><p.icon className="w-4 h-4 text-primary" /></div>
+                        <span className="font-semibold text-sm">{p.title}</span>
+                        {p.active && <span className="w-2 h-2 rounded-full bg-emerald-500" />}
+                      </div>
+                      <p className="text-[11px] text-muted-foreground">{p.desc}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* ===================== OVERVIEW / STATS ===================== */}
