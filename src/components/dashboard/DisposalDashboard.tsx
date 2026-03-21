@@ -21,6 +21,7 @@ const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnu
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
+const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
