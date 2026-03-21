@@ -243,7 +243,7 @@ export const useOperationalAlerts = () => {
           severity: v.status === 'maintenance' ? 'warning' : 'info',
           type: 'vehicle',
           icon: v.status === 'maintenance' ? Wrench : Car,
-          route: '/dashboard/fleet',
+          route: '/dashboard/drivers',
         });
       }
 
