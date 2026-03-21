@@ -100,6 +100,7 @@ const EnhancedChatMessages = ({
   scrollToMessageId,
   firstUnreadMessageId,
 }: EnhancedChatMessagesProps) => {
+  const navigate = useAppNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useDisplayMode();
