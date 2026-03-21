@@ -68,6 +68,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: MessageCircle, labelAr: 'الدردشة', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
       { icon: Users, labelAr: 'المجموعات', labelEn: 'Group Chats', path: '/dashboard/chat?view=groups', key: 'group-chats', bindingType: 'partner' as const },
+      { icon: Radio, labelAr: 'قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'broadcast-channels', badgeKey: 'broadcastChannels', bindingType: 'internal' as const },
       { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
     ],
   },
