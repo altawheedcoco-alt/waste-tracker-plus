@@ -1040,11 +1040,12 @@ ChannelProfileView.displayName = 'ChannelProfileView';
 // ═══════════════════════════════════════════════════════════════
 // Channel Feed View
 // ═══════════════════════════════════════════════════════════════
-const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
+const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isSystemAdmin }: {
   channel: BroadcastChannel;
   onBack: () => void;
   onShowProfile: () => void;
   onShowAdmin: () => void;
+  isSystemAdmin?: boolean;
 }) => {
   const { subscribe, unsubscribe } = useBroadcastChannels();
   const { report } = useBroadcastNotificationSettings(channel.id);
