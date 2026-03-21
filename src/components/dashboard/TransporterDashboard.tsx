@@ -189,7 +189,7 @@ const TransporterDashboard = () => {
           { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10), trend: 'stable' as const, route: '/dashboard/partners' },
         ]}
         alerts={[
-          ...(notifications.filter(n => !n.is_read).slice(0, 3).map(n => ({ id: n.id, message: n.title || n.message, severity: 'info' as const }))),
+          ...(notifications.filter((n: any) => !n.is_read).slice(0, 3).map((n: any) => ({ id: n.id, message: n.title || n.message, severity: 'info' as const }))),
           ...(shipments.filter(s => s.status === 'new').length > 5 ? [{ id: 'pending-high', message: `تحذير: ${shipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج مراجعة عاجلة`, severity: 'warning' as const }] : []),
           ...(stats?.active && stats.active > 10 ? [{ id: 'active-load', message: `${stats.active} شحنة نشطة حالياً - حمولة تشغيلية مرتفعة`, severity: 'info' as const }] : []),
           { id: 'system-ok', message: 'جميع أنظمة التتبع والمراقبة تعمل بكفاءة', severity: 'info' as const },
