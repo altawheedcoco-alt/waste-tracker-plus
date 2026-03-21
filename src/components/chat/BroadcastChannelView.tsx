@@ -603,56 +603,25 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
 };
 
 // ═══════════════════════════════════════════════════════════════
-// Inline PDF Viewer — with mobile fallback
-const InlinePdfViewer = ({ url, name, height = '400px' }: { url: string; name: string; height?: string }) => {
-  const [iframeLoaded, setIframeLoaded] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
-  const isMobile = typeof window !== 'undefined' && /Android|iPhone|iPad/i.test(navigator.userAgent);
-
-  // Timeout fallback: if iframe doesn't load in 3s, show link
-  useEffect(() => {
-    if (isMobile) return;
-    const t = setTimeout(() => {
-      if (!iframeLoaded) setShowFallback(true);
-    }, 3000);
-    return () => clearTimeout(t);
-  }, [isMobile, iframeLoaded]);
-
-  const fallbackCard = (
-    <div className="rounded-xl border border-border/50 overflow-hidden">
-      <a href={url} target="_blank" rel="noreferrer"
-        className="flex items-center gap-3 p-3 bg-gradient-to-l from-red-500/5 to-transparent hover:from-red-500/10 transition-colors">
-        <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-          <FileText className="w-6 h-6 text-red-500" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{name || 'ملف PDF'}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5">PDF • اضغط لفتح المستند</p>
-        </div>
-        <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-          <Forward className="w-4 h-4 text-primary rotate-90" />
-        </div>
-      </a>
-    </div>
-  );
-
-  if (isMobile || showFallback) return fallbackCard;
+// Inline PDF Viewer — uses Google Docs viewer for universal compatibility (mobile + desktop)
+const InlinePdfViewer = ({ url, name, height = '500px' }: { url: string; name: string; height?: string }) => {
+  const googleViewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(url)}`;
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
       <iframe
-        src={`${url}#toolbar=0`}
+        src={googleViewerUrl}
         className="w-full border-0"
         style={{ height }}
-        title={name}
-        onLoad={() => setIframeLoaded(true)}
-        onError={() => setShowFallback(true)}
+        title={name || 'PDF'}
+        allow="autoplay"
+        sandbox="allow-scripts allow-same-origin allow-popups"
       />
       <a href={url} target="_blank" rel="noreferrer"
         className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
         <FileText className="w-4 h-4 text-red-500" />
-        <span className="text-xs font-medium truncate flex-1">{name}</span>
-        <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
+        <span className="text-xs font-medium truncate flex-1">{name || 'ملف PDF'}</span>
+        <span className="text-[10px] text-muted-foreground">فتح في نافذة جديدة</span>
       </a>
     </div>
   );
