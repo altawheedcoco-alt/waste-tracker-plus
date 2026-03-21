@@ -590,7 +590,6 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
         playsInline
         preload="metadata"
         controls
-        crossOrigin="anonymous"
         onError={() => setHasError(true)}
       />
       <button
