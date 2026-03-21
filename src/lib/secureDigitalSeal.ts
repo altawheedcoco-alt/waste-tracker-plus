@@ -346,6 +346,81 @@ function generateExtraGuillocheLines(hash: string, palette: StylePalette): strin
 }
 
 // ═══════════════════════════════════════════════════════════════
+// Thick Outer Border Band with Multi-Language Security Text
+// ═══════════════════════════════════════════════════════════════
+
+function generateOuterBorderBand(hash: string, palette: StylePalette, uid: string): string {
+  let svg = '';
+
+  // --- The phrases in 4 languages (anti-forgery fonts) ---
+  const textAR = 'منصة اي ريسايكل لتتبع المخلفات الذكية ⬥ نظام إدارة المخلفات الذكي ⬥';
+  const textEN = 'iRecycle Smart Waste Tracking Platform ⬥ Intelligent Waste Management System ⬥';
+  // Hieroglyphic transliteration (Egyptian symbols approximation)
+  const textHIERO = '𓂀𓇋𓂋𓇌𓋴𓇋𓎡𓃭 𓊪𓃭𓄿𓏏𓆑𓂋𓅓 ⬥ 𓈖𓇌𓊤𓄿𓅓 𓂧𓄿𓂋𓏏 𓅓𓈖𓃭𓇋𓆑𓄿𓏏 ⬥';
+  // Syriac (approximate rendering)
+  const textSYR = 'ܐܝܪܝܣܝܟܠ ⬥ ܡܢܨܬ ܬܬܒܥ ܡܚܠܦܬ ⬥ ܢܛܡ ܐܕܪܬ ܡܚܠܦܬ ⬥';
+
+  // Thick outer band structure (radius 97 outer, 88 inner = 9px band)
+  // Outer edge
+  svg += `<circle cx="100" cy="100" r="99" fill="none" stroke="${palette.borderOuter}" stroke-width="2" opacity="0.8"/>`;
+  // Inner edge of band
+  svg += `<circle cx="100" cy="100" r="88" fill="none" stroke="${palette.borderOuter}" stroke-width="1.8" opacity="0.6"/>`;
+  // Band fill (hollow ring between 88 and 99)
+  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="${palette.bg}" stroke-width="11" opacity="0.85"/>`;
+  // Thin decorative lines within the band
+  svg += `<circle cx="100" cy="100" r="97.5" fill="none" stroke="${palette.borderOuter}" stroke-width="0.3" opacity="0.4"/>`;
+  svg += `<circle cx="100" cy="100" r="89.5" fill="none" stroke="${palette.borderOuter}" stroke-width="0.3" opacity="0.4"/>`;
+  // Dashed security line mid-band
+  svg += `<circle cx="100" cy="100" r="93.5" fill="none" stroke="${palette.primary}" stroke-width="0.15" stroke-dasharray="1,2,0.5,2" opacity="0.2"/>`;
+
+  // Text paths for the 4 language rings within the thick band
+  svg += `
+    <defs>
+      <path id="ob_ar_${uid}" d="M 100,100 m -96,0 a 96,96 0 1,1 192,0 a 96,96 0 1,1 -192,0" fill="none"/>
+      <path id="ob_en_${uid}" d="M 100,100 m -91,0 a 91,91 0 1,0 182,0 a 91,91 0 1,0 -182,0" fill="none"/>
+      <path id="ob_hi_${uid}" d="M 100,100 m -93.5,0 a 93.5,93.5 0 1,1 187,0 a 93.5,93.5 0 1,1 -187,0" fill="none"/>
+      <path id="ob_sy_${uid}" d="M 100,100 m -89.8,0 a 89.8,89.8 0 1,0 179.6,0 a 89.8,89.8 0 1,0 -179.6,0" fill="none"/>
+    </defs>
+  `;
+
+  // Arabic text ring (outermost in band, clockwise)
+  svg += `<text font-size="3.2" fill="${palette.primary}" opacity="0.65" font-family="'Cairo','Amiri','Scheherazade New',sans-serif" font-weight="700" direction="rtl" letter-spacing="0.3">
+    <textPath href="#ob_ar_${uid}" startOffset="0%">${textAR} ${textAR} ${textAR}</textPath>
+  </text>`;
+
+  // English text ring (counter-clockwise via reversed path)
+  svg += `<text font-size="2.6" fill="${palette.accent}" opacity="0.5" font-family="'Courier New','OCR-B',monospace" font-weight="600" letter-spacing="0.8">
+    <textPath href="#ob_en_${uid}" startOffset="0%">${textEN} ${textEN} ${textEN}</textPath>
+  </text>`;
+
+  // Hieroglyphic text ring
+  svg += `<text font-size="3" fill="${palette.primary}" opacity="0.4" font-family="'Segoe UI Historic','Noto Sans Egyptian Hieroglyphs','Segoe UI Symbol',sans-serif" letter-spacing="0.5">
+    <textPath href="#ob_hi_${uid}" startOffset="0%">${textHIERO} ${textHIERO}</textPath>
+  </text>`;
+
+  // Syriac text ring (innermost in band)
+  svg += `<text font-size="2.8" fill="${palette.accent}" opacity="0.45" font-family="'Estrangelo Edessa','Serto Jerusalem','Noto Sans Syriac',serif" font-weight="500" direction="rtl" letter-spacing="0.4">
+    <textPath href="#ob_sy_${uid}" startOffset="0%">${textSYR} ${textSYR} ${textSYR}</textPath>
+  </text>`;
+
+  // Guilloche-style connecting lines within the band (decorative)
+  const bandGuilloche = 48 + (parseInt(hash.slice(0, 2), 16) % 24);
+  for (let i = 0; i < bandGuilloche; i++) {
+    const angle = (i / bandGuilloche) * Math.PI * 2;
+    const innerR = 89;
+    const outerR = 98;
+    const wave = Math.sin(angle * 12) * 1.5;
+    const x1 = 100 + (innerR + wave) * Math.cos(angle);
+    const y1 = 100 + (innerR + wave) * Math.sin(angle);
+    const x2 = 100 + (outerR - wave) * Math.cos(angle);
+    const y2 = 100 + (outerR - wave) * Math.sin(angle);
+    svg += `<line x1="${x1.toFixed(2)}" y1="${y1.toFixed(2)}" x2="${x2.toFixed(2)}" y2="${y2.toFixed(2)}" stroke="${palette.primary}" stroke-width="0.15" opacity="0.12"/>`;
+  }
+
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Style-Specific Color Palettes
 // ═══════════════════════════════════════════════════════════════
 
