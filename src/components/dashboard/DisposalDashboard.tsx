@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList, Building2, Route, CheckCircle2 } from 'lucide-react';
 import StoryCircles from '@/components/stories/StoryCircles';

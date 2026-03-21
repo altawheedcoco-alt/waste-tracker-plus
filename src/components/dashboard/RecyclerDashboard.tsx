@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import StoryCircles from '@/components/stories/StoryCircles';
