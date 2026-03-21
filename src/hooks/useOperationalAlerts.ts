@@ -8,15 +8,22 @@ import {
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
+export interface AlertDetail {
+  label: string;
+  value: string;
+}
+
 export interface OperationalAlert {
   id: string;
   message: string;
+  subtitle?: string;
   severity: 'info' | 'warning' | 'critical';
   type: 'notification' | 'shipment' | 'driver' | 'vehicle' | 'message' | 'partner' | 'signature' | 'contract' | 'receipt' | 'work_order' | 'system' | 'activity' | 'log' | 'approval';
   icon: LucideIcon;
   timestamp?: string;
   route?: string;
   isRead?: boolean;
+  details?: AlertDetail[];
 }
 
 const STATUS_AR: Record<string, string> = {
@@ -190,60 +197,92 @@ export const useOperationalAlerts = () => {
         alerts.push({
           id: `notif-${n.id}`,
           message: `${n.title || n.message}`,
+          subtitle: n.title && n.message ? n.message : undefined,
           severity: n.is_read ? 'info' : 'warning',
           type: 'notification',
           icon: Bell,
           timestamp: n.created_at,
           route: '/dashboard/notifications',
           isRead: n.is_read,
+          details: [
+            { label: 'النوع', value: n.type || 'عام' },
+            ...(n.title ? [{ label: 'العنوان', value: n.title }] : []),
+            ...(n.message ? [{ label: 'الرسالة', value: n.message }] : []),
+            { label: 'الحالة', value: n.is_read ? 'مقروء ✓' : 'غير مقروء ●' },
+          ],
         });
       }
 
-      // 2. Shipments
+      // 2. Drivers (declared before shipments to allow reference)
+      const drivers = getData(driversRes);
+
+      // 3. Shipments
       const ships = getData(shipmentsRes);
       for (const s of ships) {
-        const wasteLabel = WASTE_AR[s.waste_type] || s.waste_type;
+        const wasteLabel = WASTE_AR[s.waste_type] || s.waste_type || 'غير محدد';
         const statusLabel = STATUS_AR[s.status] || s.status;
         const severity = ['new', 'pending'].includes(s.status) ? 'warning' : 'info';
         alerts.push({
           id: `ship-${s.id}`,
-          message: `شحنة ${s.shipment_number} - ${wasteLabel} ${s.quantity} ${s.unit} - ${statusLabel}`,
+          message: `شحنة ${s.shipment_number} — ${wasteLabel} ${s.quantity || ''} ${s.unit || ''} — ${statusLabel}`,
+          subtitle: s.pickup_address || s.delivery_address ? `من: ${s.pickup_address || '—'} → إلى: ${s.delivery_address || '—'}` : undefined,
           severity: severity as any,
           type: 'shipment',
           icon: s.status === 'in_transit' ? Route : s.status === 'new' ? Clock : Package,
           timestamp: s.created_at,
           route: `/dashboard/transporter-shipments`,
+          details: [
+            { label: 'رقم الشحنة', value: s.shipment_number || '—' },
+            { label: 'الحالة', value: statusLabel },
+            { label: 'نوع النفاية', value: wasteLabel },
+            { label: 'الكمية', value: `${s.quantity || '—'} ${s.unit || ''}` },
+            ...(s.pickup_address ? [{ label: 'عنوان التحميل', value: s.pickup_address }] : []),
+            ...(s.delivery_address ? [{ label: 'عنوان التسليم', value: s.delivery_address }] : []),
+            ...(s.driver_id ? [{ label: 'السائق', value: drivers.find((d: any) => d.id === s.driver_id)?.profile?.full_name || 'معيّن' }] : []),
+          ],
         });
       }
 
-      // 3. Drivers
-      const drivers = getData(driversRes);
+      // 4. Drivers alerts
       for (const d of drivers) {
         const name = d.profile?.full_name || 'سائق';
-        const statusMsg = d.is_available ? 'متاح للعمل' : 'مشغول حالياً';
+        const statusMsg = d.is_available ? 'متاح للعمل ✅' : 'مشغول حالياً 🔴';
         const activeShip = ships.find((s: any) => s.driver_id === d.id && ['in_transit', 'approved', 'collecting'].includes(s.status));
-        const extra = activeShip ? ` - يقود شحنة ${activeShip.shipment_number}` : '';
+        const extra = activeShip ? ` — يقود شحنة ${activeShip.shipment_number}` : '';
         alerts.push({
           id: `driver-${d.id}`,
-          message: `السائق ${name} - ${statusMsg}${extra}`,
+          message: `السائق ${name} — ${statusMsg}${extra}`,
           severity: 'info',
           type: 'driver',
           icon: Users,
           route: '/dashboard/transporter-drivers',
+          details: [
+            { label: 'الاسم', value: name },
+            { label: 'الحالة', value: d.is_available ? 'متاح' : 'مشغول' },
+            ...(activeShip ? [
+              { label: 'الشحنة الحالية', value: activeShip.shipment_number },
+              { label: 'حالة الشحنة', value: STATUS_AR[activeShip.status] || activeShip.status },
+            ] : []),
+          ],
         });
       }
 
       // 4. Vehicles
       const vehicles = getData(vehiclesRes);
       for (const v of vehicles) {
-        const statusMsg = v.status === 'active' ? 'نشطة' : v.status === 'maintenance' ? '⚠️ في الصيانة' : v.status || 'غير محدد';
+        const statusMsg = v.status === 'active' ? 'نشطة ✅' : v.status === 'maintenance' ? '⚠️ في الصيانة' : v.status || 'غير محدد';
         alerts.push({
           id: `vehicle-${v.id}`,
-          message: `مركبة ${v.plate_number || v.vehicle_type} - ${statusMsg}`,
+          message: `مركبة ${v.plate_number || '—'} (${v.vehicle_type || 'غير محدد'}) — ${statusMsg}`,
           severity: v.status === 'maintenance' ? 'warning' : 'info',
           type: 'vehicle',
           icon: v.status === 'maintenance' ? Wrench : Car,
           route: '/dashboard/transporter-drivers',
+          details: [
+            { label: 'رقم اللوحة', value: v.plate_number || '—' },
+            { label: 'النوع', value: v.vehicle_type || '—' },
+            { label: 'الحالة', value: statusMsg },
+          ],
         });
       }
 
@@ -251,30 +290,43 @@ export const useOperationalAlerts = () => {
       const messages = getData(messagesRes);
       for (const m of messages) {
         const senderName = m.sender_org?.name || 'مجهول';
+        const contentPreview = (m.content || '').slice(0, 80);
         alerts.push({
           id: `msg-${m.id}`,
-          message: `💬 رسالة جديدة من ${senderName}: ${(m.content || '').slice(0, 50)}`,
+          message: `💬 رسالة من ${senderName}`,
+          subtitle: contentPreview || undefined,
           severity: 'warning',
           type: 'message',
           icon: MessageSquare,
           timestamp: m.created_at,
           route: '/dashboard/chat',
           isRead: m.is_read,
+          details: [
+            { label: 'المرسل', value: senderName },
+            { label: 'المحتوى', value: m.content || '—' },
+            { label: 'الحالة', value: m.is_read ? 'مقروءة' : 'غير مقروءة ●' },
+          ],
         });
       }
 
       // 6. Partners
       const partners = getData(partnersRes);
       if (partners.length > 0) {
-        const names = partners.map((p: any) => p.name).filter(Boolean).join('، ');
-        alerts.push({
-          id: 'partners-summary',
-          message: `لديك ${partners.length} شريك نشط: ${names || 'غير محدد'}`,
-          severity: 'info',
-          type: 'partner',
-          icon: Handshake,
-          route: '/dashboard/partners',
-        });
+        // One alert per partner for detailed view
+        for (const p of partners) {
+          alerts.push({
+            id: `partner-${p.id}`,
+            message: `🤝 شريك نشط: ${p.name || 'غير محدد'}`,
+            severity: 'info',
+            type: 'partner',
+            icon: Handshake,
+            route: '/dashboard/partners',
+            details: [
+              { label: 'اسم الشريك', value: p.name || '—' },
+              { label: 'إجمالي الشركاء', value: `${partners.length} شريك` },
+            ],
+          });
+        }
       }
 
       // 7. Signatures
@@ -282,11 +334,16 @@ export const useOperationalAlerts = () => {
       for (const s of sigs) {
         alerts.push({
           id: `sig-${s.id}`,
-          message: `✍️ توقيع معلق: ${s.signer_name || 'بانتظار التوقيع'}`,
+          message: `✍️ توقيع معلق — ${s.signer_name || 'بانتظار التوقيع'}`,
           severity: 'warning',
           type: 'signature',
           icon: FileSignature,
           route: '/dashboard/signing-inbox',
+          details: [
+            { label: 'الموقّع', value: s.signer_name || '—' },
+            { label: 'الحالة', value: 'بانتظار التوقيع ⏳' },
+            { label: 'معرّف السلسلة', value: s.chain_id || '—' },
+          ],
         });
       }
 
@@ -294,26 +351,39 @@ export const useOperationalAlerts = () => {
       const contracts = getData(contractsRes);
       for (const c of contracts) {
         const isExpired = c.end_date && new Date(c.end_date) < new Date();
+        const daysLeft = c.end_date ? Math.ceil((new Date(c.end_date).getTime() - Date.now()) / 86400000) : null;
         alerts.push({
           id: `contract-${c.id}`,
           message: `${isExpired ? '⚠️ عقد منتهي' : '📄 عقد ساري'}: ${c.title || 'بدون عنوان'}`,
-          severity: isExpired ? 'critical' : 'info',
+          subtitle: daysLeft !== null ? (isExpired ? `انتهى منذ ${Math.abs(daysLeft)} يوم` : `متبقي ${daysLeft} يوم`) : undefined,
+          severity: isExpired ? 'critical' : daysLeft !== null && daysLeft <= 30 ? 'warning' : 'info',
           type: 'contract',
           icon: ScrollText,
           route: '/dashboard/contracts',
+          details: [
+            { label: 'العنوان', value: c.title || '—' },
+            { label: 'الحالة', value: c.status || '—' },
+            ...(c.end_date ? [{ label: 'تاريخ الانتهاء', value: new Date(c.end_date).toLocaleDateString('ar-EG') }] : []),
+            ...(daysLeft !== null ? [{ label: isExpired ? 'منتهي منذ' : 'متبقي', value: `${Math.abs(daysLeft)} يوم` }] : []),
+          ],
         });
       }
 
-      // 9. Pending receipts
+      // 9. Pending receipts — one per receipt for detail
       const pendingReceipts = getData(receiptsRes);
-      if (pendingReceipts.length > 0) {
+      for (const r of pendingReceipts) {
         alerts.push({
-          id: 'receipts-pending',
-          message: `📋 ${pendingReceipts.length} إيصال بانتظار التأكيد`,
+          id: `receipt-${r.id}`,
+          message: `📋 إيصال بانتظار التأكيد`,
           severity: 'warning',
           type: 'receipt',
           icon: ClipboardCheck,
+          timestamp: r.created_at,
           route: '/dashboard/transporter-receipts',
+          details: [
+            { label: 'الحالة', value: 'معلق ⏳' },
+            ...(r.created_at ? [{ label: 'تاريخ الإنشاء', value: new Date(r.created_at).toLocaleDateString('ar-EG') }] : []),
+          ],
         });
       }
 
@@ -322,57 +392,84 @@ export const useOperationalAlerts = () => {
       for (const w of workOrders) {
         alerts.push({
           id: `wo-${w.id}`,
-          message: `📦 أمر عمل ${w.order_number}: ${w.waste_description || 'بدون وصف'}`,
+          message: `📦 أمر عمل ${w.order_number || '—'}`,
+          subtitle: w.waste_description || undefined,
           severity: 'warning',
           type: 'work_order',
           icon: Truck,
           timestamp: w.created_at,
           route: '/dashboard/my-requests',
+          details: [
+            { label: 'رقم الأمر', value: w.order_number || '—' },
+            { label: 'الوصف', value: w.waste_description || '—' },
+            { label: 'الحالة', value: w.status || '—' },
+          ],
         });
       }
 
-      // 11. Activity Logs (NEW)
+      // 11. Activity Logs
       const activityLogs = getData(activityLogsRes);
       for (const log of activityLogs) {
         const actionLabel = ACTION_AR[log.action_type] || log.action_type;
         const resourceLabel = log.resource_type || '';
         alerts.push({
           id: `activity-${log.id}`,
-          message: `📝 ${actionLabel} ${resourceLabel}: ${log.action}`,
+          message: `📝 ${actionLabel} ${resourceLabel}`,
+          subtitle: log.action || undefined,
           severity: 'info',
           type: 'activity',
           icon: Activity,
           timestamp: log.created_at,
+          details: [
+            { label: 'الإجراء', value: actionLabel },
+            { label: 'نوع المورد', value: resourceLabel || '—' },
+            ...(log.resource_id ? [{ label: 'معرّف المورد', value: log.resource_id }] : []),
+            ...(log.action ? [{ label: 'التفاصيل', value: log.action }] : []),
+          ],
         });
       }
 
-      // 12. Shipment Logs (NEW)
+      // 12. Shipment Logs
       const shipLogs = getData(shipmentLogsRes);
       for (const log of shipLogs) {
         const oldStatus = STATUS_AR[log.old_status] || log.old_status || '—';
         const newStatus = STATUS_AR[log.new_status] || log.new_status || '—';
         alerts.push({
           id: `shiplog-${log.id}`,
-          message: `🔄 شحنة تحولت من "${oldStatus}" إلى "${newStatus}": ${log.action || ''}`,
+          message: `🔄 تغيير حالة شحنة: ${oldStatus} → ${newStatus}`,
+          subtitle: log.action || undefined,
           severity: 'info',
           type: 'log',
           icon: Route,
           timestamp: log.created_at,
           route: '/dashboard/transporter-shipments',
+          details: [
+            { label: 'الحالة السابقة', value: oldStatus },
+            { label: 'الحالة الجديدة', value: newStatus },
+            ...(log.action ? [{ label: 'الإجراء', value: log.action }] : []),
+            ...(log.shipment_id ? [{ label: 'معرّف الشحنة', value: log.shipment_id }] : []),
+          ],
         });
       }
 
-      // 13. Approval Requests (NEW)
+      // 13. Approval Requests
       const approvalReqs = getData(approvalRequestsRes);
       for (const req of approvalReqs) {
         const isPending = req.status === 'pending';
         alerts.push({
           id: `approval-${req.id}`,
-          message: `${isPending ? '🔔' : '✅'} طلب ${req.request_title || req.request_type}${isPending ? ' - بانتظار الموافقة' : ''}`,
+          message: `${isPending ? '🔔' : '✅'} طلب ${req.request_title || req.request_type}`,
+          subtitle: isPending ? 'بانتظار الموافقة' : `الحالة: ${req.status}`,
           severity: isPending ? 'warning' : 'info',
           type: 'approval',
           icon: FileCheck,
           timestamp: req.created_at,
+          details: [
+            { label: 'العنوان', value: req.request_title || '—' },
+            { label: 'النوع', value: req.request_type || '—' },
+            { label: 'الحالة', value: isPending ? 'معلق ⏳' : req.status },
+            ...(req.priority ? [{ label: 'الأولوية', value: req.priority }] : []),
+          ],
         });
       }
 
