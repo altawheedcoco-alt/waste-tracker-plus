@@ -1,15 +1,16 @@
 import { memo, useState, useCallback, useRef, useEffect } from 'react';
-import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { 
   ChevronLeft, ChevronRight, Bot, Headphones, Sparkles, MessageCircle,
-  Truck, Users, PenTool, FileText, Phone, Plus, ArrowUp, X
+  Truck, Users, PenTool, FileText, Phone, ArrowUp, X
 } from 'lucide-react';
 import { openWidget, type WidgetId } from '@/lib/widgetBus';
 import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useNotificationCounts } from '@/hooks/useNotificationCounts';
 import CallLogDialog from '@/components/calls/CallLogDialog';
 
 interface PanelAction {
@@ -20,6 +21,7 @@ interface PanelAction {
   onClick: () => void;
   visible: boolean;
   category: 'assistant' | 'operations' | 'navigation' | 'utility';
+  badgeKey?: string; // key to look up in notification counts
 }
 
 const PANEL_WIDTH = 260;
@@ -27,17 +29,37 @@ const TAB_WIDTH = 28;
 
 const FloatingSidePanel = memo(() => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isScrollShrunk, setIsScrollShrunk] = useState(false);
   const [showCallDialog, setShowCallDialog] = useState(false);
   const { isMobile } = useDisplayMode();
   const { organization, roles } = useAuth();
   const navigate = useNavigate();
   const { t } = useLanguage();
   const panelRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<ReturnType<typeof setTimeout>>();
+  const notifCounts = useNotificationCounts();
 
   const isAdmin = roles.includes('admin');
   const isTransporter = organization?.organization_type === 'transporter';
   const isDriver = roles.includes('driver');
   const iconSize = 18;
+
+  // Auto-shrink on scroll
+  useEffect(() => {
+    if (isOpen) return; // Don't shrink when panel is open
+    const handleScroll = () => {
+      setIsScrollShrunk(true);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrollShrunk(false);
+      }, 1500);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) clearTimeout(scrollTimeoutRef.current);
+    };
+  }, [isOpen]);
 
   const handleWidgetOpen = useCallback((id: WidgetId) => {
     openWidget(id);
@@ -87,6 +109,7 @@ const FloatingSidePanel = memo(() => {
       onClick: () => handleWidgetOpen('team-chat'),
       visible: true,
       category: 'operations',
+      badgeKey: 'chat',
     },
     {
       id: 'create-shipment',
@@ -96,6 +119,7 @@ const FloatingSidePanel = memo(() => {
       onClick: () => handleNavigate('/dashboard/shipments/new'),
       visible: isTransporter || isDriver,
       category: 'operations',
+      badgeKey: 'transporter-shipments',
     },
     {
       id: 'driver-conversations',
@@ -105,6 +129,7 @@ const FloatingSidePanel = memo(() => {
       onClick: () => handleNavigate('/dashboard/chat?filter=drivers'),
       visible: isTransporter && !isDriver,
       category: 'operations',
+      badgeKey: 'messages',
     },
     {
       id: 'call-log',
@@ -124,6 +149,7 @@ const FloatingSidePanel = memo(() => {
       onClick: () => handleNavigate('/dashboard/signing-inbox'),
       visible: true,
       category: 'navigation',
+      badgeKey: 'company-approvals',
     },
     {
       id: 'permits',
@@ -148,6 +174,14 @@ const FloatingSidePanel = memo(() => {
 
   const visibleActions = actions.filter(a => a.visible);
 
+  // Total badge count for the tab indicator
+  const totalBadge = visibleActions.reduce((sum, a) => {
+    if (a.badgeKey && notifCounts[a.badgeKey]) {
+      return sum + notifCounts[a.badgeKey];
+    }
+    return sum;
+  }, 0);
+
   const categories = [
     { key: 'assistant', label: 'المساعدين' },
     { key: 'operations', label: 'العمليات' },
@@ -157,7 +191,6 @@ const FloatingSidePanel = memo(() => {
 
   // Handle drag to open/close
   const handleDragEnd = useCallback((_: any, info: PanInfo) => {
-    // RTL: pulling right (positive offset) = open, pulling left (negative) = close
     if (info.offset.x > 40) {
       setIsOpen(false);
     } else if (info.offset.x < -40) {
@@ -235,26 +268,41 @@ const FloatingSidePanel = memo(() => {
                       {cat.label}
                     </p>
                     <div className="space-y-1">
-                      {catActions.map(action => (
-                        <button
-                          key={action.id}
-                          onClick={action.onClick}
-                          className={cn(
-                            'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl',
-                            'text-sm font-medium text-foreground',
-                            'hover:bg-muted/60 active:scale-[0.98] transition-all',
-                            'touch-manipulation'
-                          )}
-                        >
-                          <span className={cn(
-                            'w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0',
-                            `bg-gradient-to-br ${action.gradient}`
-                          )}>
-                            {action.icon}
-                          </span>
-                          <span className="truncate text-start">{action.label}</span>
-                        </button>
-                      ))}
+                      {catActions.map(action => {
+                        const badge = action.badgeKey ? (notifCounts[action.badgeKey] || 0) : 0;
+                        return (
+                          <button
+                            key={action.id}
+                            onClick={action.onClick}
+                            className={cn(
+                              'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl',
+                              'text-sm font-medium text-foreground',
+                              'hover:bg-muted/60 active:scale-[0.98] transition-all',
+                              'touch-manipulation'
+                            )}
+                          >
+                            <span className={cn(
+                              'w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 relative',
+                              `bg-gradient-to-br ${action.gradient}`
+                            )}>
+                              {action.icon}
+                              {/* Notification badge on icon */}
+                              {badge > 0 && (
+                                <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                                  {badge > 99 ? '99+' : badge}
+                                </span>
+                              )}
+                            </span>
+                            <span className="truncate text-start flex-1">{action.label}</span>
+                            {/* Inline badge count */}
+                            {badge > 0 && (
+                              <span className="text-[10px] font-bold text-destructive bg-destructive/10 px-1.5 py-0.5 rounded-full">
+                                {badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   </div>
                 );
@@ -262,19 +310,34 @@ const FloatingSidePanel = memo(() => {
             </div>
           </div>
 
-          {/* Pull Tab */}
+          {/* Pull Tab — shrinks on scroll */}
           <motion.button
-            onClick={() => setIsOpen(prev => !prev)}
+            onClick={() => { setIsOpen(prev => !prev); setIsScrollShrunk(false); }}
+            animate={{
+              height: isScrollShrunk ? 24 : 64,
+              width: isScrollShrunk ? 12 : TAB_WIDTH,
+              opacity: isScrollShrunk ? 0.5 : 1,
+            }}
+            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className={cn(
               'flex items-center justify-center rounded-r-xl shadow-lg border border-l-0 border-border/50',
-              'bg-card/90 backdrop-blur-md text-muted-foreground hover:text-foreground',
-              'transition-colors touch-manipulation cursor-grab active:cursor-grabbing'
+              'bg-card/90 backdrop-blur-md text-muted-foreground hover:text-foreground hover:opacity-100',
+              'transition-colors touch-manipulation cursor-grab active:cursor-grabbing relative'
             )}
-            style={{ width: TAB_WIDTH, height: 64 }}
             whileTap={{ scale: 0.95 }}
             aria-label={isOpen ? 'إغلاق لوحة الإجراءات' : 'فتح لوحة الإجراءات'}
           >
-            {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            {!isScrollShrunk && (
+              <>
+                {isOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+                {/* Total badge on tab */}
+                {!isOpen && totalBadge > 0 && (
+                  <span className="absolute -top-2 -right-2 min-w-[18px] h-[18px] px-1 rounded-full bg-destructive text-destructive-foreground text-[9px] font-bold flex items-center justify-center leading-none animate-pulse">
+                    {totalBadge > 99 ? '99+' : totalBadge}
+                  </span>
+                )}
+              </>
+            )}
           </motion.button>
         </div>
       </motion.div>
