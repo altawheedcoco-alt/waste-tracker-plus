@@ -117,11 +117,11 @@ const GeneratorCommandCenter = () => {
 
   const metrics = [
     { label: 'شحنات اليوم', value: stats?.todayShipments || 0, icon: Package, gradient: 'from-blue-500 to-cyan-500', trend, trendLabel: trend >= 0 ? `+${trend} عن أمس` : `${trend} عن أمس`, link: '/dashboard/shipments' },
-    { label: 'بانتظار الموافقة', value: stats?.pendingApproval || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', alert: (stats?.pendingApproval || 0) > 5, link: '/dashboard/shipments?status=pending' },
-    { label: 'رحلات نشطة', value: stats?.activeTrips || 0, icon: Truck, gradient: 'from-purple-500 to-pink-500', pulse: (stats?.activeTrips || 0) > 0, link: '/dashboard/shipments?status=in_transit' },
-    { label: 'مكتملة اليوم', value: stats?.todayCompleted || 0, icon: CheckCircle2, gradient: 'from-emerald-500 to-teal-500', link: '/dashboard/shipments?status=completed' },
+    { label: 'بانتظار الموافقة', value: stats?.pendingApproval || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', alert: (stats?.pendingApproval || 0) > 5, link: '/dashboard/shipments' },
+    { label: 'رحلات نشطة', value: stats?.activeTrips || 0, icon: Truck, gradient: 'from-purple-500 to-pink-500', pulse: (stats?.activeTrips || 0) > 0, link: '/dashboard/tracking-center' },
+    { label: 'مكتملة اليوم', value: stats?.todayCompleted || 0, icon: CheckCircle2, gradient: 'from-emerald-500 to-teal-500', link: '/dashboard/shipments' },
     { label: 'كمية اليوم (طن)', value: stats?.todayQuantity || 0, decimals: 1, icon: Weight, gradient: 'from-teal-500 to-cyan-600', trend: qtyTrend, trendLabel: qtyTrend >= 0 ? `+${qtyTrend.toFixed(1)}` : `${qtyTrend.toFixed(1)}`, link: '/dashboard/shipments' },
-    { label: 'شهادات معلّقة', value: stats?.pendingCertificates || 0, icon: FileText, gradient: 'from-orange-500 to-red-500', alert: (stats?.pendingCertificates || 0) > 0, link: '/dashboard/receipts' },
+    { label: 'شهادات معلّقة', value: stats?.pendingCertificates || 0, icon: FileText, gradient: 'from-orange-500 to-red-500', alert: (stats?.pendingCertificates || 0) > 0, link: '/dashboard/generator-receipts' },
   ];
 
   return (
