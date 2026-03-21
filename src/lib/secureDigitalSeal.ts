@@ -453,57 +453,29 @@ interface StylePalette {
 
 function getStylePalette(style: SealStyle, hash: string): StylePalette {
   const baseHSL = hashToHSL(hash, 0);
-  
-  switch (style) {
-    case 'royal':
-      return {
-        primary: `hsl(43, 85%, 35%)`,
-        accent: `hsl(35, 90%, 45%)`,
-        gradient1: `hsl(43, 85%, 30%)`,
-        gradient2: `hsl(35, 90%, 50%)`,
-        gradient3: `hsl(48, 80%, 40%)`,
-        bg: `hsl(43, 30%, 97%)`,
-        borderOuter: `hsl(43, 85%, 35%)`,
-      };
-    case 'modern':
-      return {
-        primary: `hsl(220, 70%, 40%)`,
-        accent: `hsl(200, 80%, 50%)`,
-        gradient1: `hsl(220, 70%, 35%)`,
-        gradient2: `hsl(200, 80%, 55%)`,
-        bg: `hsl(220, 20%, 98%)`,
-        borderOuter: `hsl(220, 70%, 40%)`,
-      };
-    case 'holographic':
-      return {
-        primary: `hsl(${baseHSL.h}, 75%, 40%)`,
-        accent: `hsl(${(baseHSL.h + 120) % 360}, 80%, 45%)`,
-        gradient1: `hsl(${baseHSL.h}, 80%, 35%)`,
-        gradient2: `hsl(${(baseHSL.h + 60) % 360}, 85%, 50%)`,
-        gradient3: `hsl(${(baseHSL.h + 180) % 360}, 75%, 45%)`,
-        bg: `hsl(${baseHSL.h}, 15%, 98%)`,
-        borderOuter: `hsl(${baseHSL.h}, 75%, 40%)`,
-      };
-    case 'corporate':
-      return {
-        primary: `hsl(210, 25%, 30%)`,
-        accent: `hsl(210, 35%, 45%)`,
-        gradient1: `hsl(210, 25%, 25%)`,
-        gradient2: `hsl(210, 35%, 50%)`,
-        bg: `hsl(210, 10%, 98%)`,
-        borderOuter: `hsl(210, 25%, 30%)`,
-      };
-    case 'classic':
-    default:
-      return {
-        primary: hashToColor(hash, 0),
-        accent: hashToColor(hash, 6),
-        gradient1: hashToColor(hash, 0),
-        gradient2: hashToColor(hash, 6),
-        bg: 'white',
-        borderOuter: hashToColor(hash, 0),
-      };
-  }
+  const palettes: Record<SealStyle, StylePalette> = {
+    classic: { primary: hashToColor(hash, 0), accent: hashToColor(hash, 6), gradient1: hashToColor(hash, 0), gradient2: hashToColor(hash, 6), bg: 'white', borderOuter: hashToColor(hash, 0) },
+    royal: { primary: 'hsl(43,85%,35%)', accent: 'hsl(35,90%,45%)', gradient1: 'hsl(43,85%,30%)', gradient2: 'hsl(35,90%,50%)', gradient3: 'hsl(48,80%,40%)', bg: 'hsl(43,30%,97%)', borderOuter: 'hsl(43,85%,35%)' },
+    modern: { primary: 'hsl(220,70%,40%)', accent: 'hsl(200,80%,50%)', gradient1: 'hsl(220,70%,35%)', gradient2: 'hsl(200,80%,55%)', bg: 'hsl(220,20%,98%)', borderOuter: 'hsl(220,70%,40%)' },
+    holographic: { primary: `hsl(${baseHSL.h},75%,40%)`, accent: `hsl(${(baseHSL.h+120)%360},80%,45%)`, gradient1: `hsl(${baseHSL.h},80%,35%)`, gradient2: `hsl(${(baseHSL.h+60)%360},85%,50%)`, gradient3: `hsl(${(baseHSL.h+180)%360},75%,45%)`, bg: `hsl(${baseHSL.h},15%,98%)`, borderOuter: `hsl(${baseHSL.h},75%,40%)` },
+    corporate: { primary: 'hsl(210,25%,30%)', accent: 'hsl(210,35%,45%)', gradient1: 'hsl(210,25%,25%)', gradient2: 'hsl(210,35%,50%)', bg: 'hsl(210,10%,98%)', borderOuter: 'hsl(210,25%,30%)' },
+    emerald: { primary: 'hsl(152,80%,28%)', accent: 'hsl(160,70%,38%)', gradient1: 'hsl(152,80%,22%)', gradient2: 'hsl(160,70%,42%)', bg: 'hsl(150,25%,97%)', borderOuter: 'hsl(152,80%,28%)' },
+    ruby: { primary: 'hsl(348,80%,35%)', accent: 'hsl(355,70%,45%)', gradient1: 'hsl(348,80%,28%)', gradient2: 'hsl(355,70%,50%)', bg: 'hsl(348,20%,97%)', borderOuter: 'hsl(348,80%,35%)' },
+    sapphire: { primary: 'hsl(225,80%,38%)', accent: 'hsl(215,75%,50%)', gradient1: 'hsl(225,80%,30%)', gradient2: 'hsl(215,75%,55%)', bg: 'hsl(225,20%,97%)', borderOuter: 'hsl(225,80%,38%)' },
+    amber: { primary: 'hsl(30,90%,40%)', accent: 'hsl(40,85%,50%)', gradient1: 'hsl(30,90%,32%)', gradient2: 'hsl(40,85%,55%)', bg: 'hsl(35,30%,97%)', borderOuter: 'hsl(30,90%,40%)' },
+    obsidian: { primary: 'hsl(0,0%,18%)', accent: 'hsl(0,0%,35%)', gradient1: 'hsl(0,0%,12%)', gradient2: 'hsl(0,0%,30%)', bg: 'hsl(0,0%,96%)', borderOuter: 'hsl(0,0%,18%)' },
+    pharaonic: { primary: 'hsl(45,90%,38%)', accent: 'hsl(25,80%,35%)', gradient1: 'hsl(45,90%,30%)', gradient2: 'hsl(25,80%,45%)', gradient3: 'hsl(50,85%,42%)', bg: 'hsl(45,25%,97%)', borderOuter: 'hsl(45,90%,38%)' },
+    islamic: { primary: 'hsl(165,75%,30%)', accent: 'hsl(45,80%,45%)', gradient1: 'hsl(165,75%,25%)', gradient2: 'hsl(45,80%,50%)', bg: 'hsl(165,15%,97%)', borderOuter: 'hsl(165,75%,30%)' },
+    ottoman: { primary: 'hsl(0,75%,35%)', accent: 'hsl(45,85%,40%)', gradient1: 'hsl(0,75%,28%)', gradient2: 'hsl(45,85%,48%)', bg: 'hsl(0,15%,97%)', borderOuter: 'hsl(0,75%,35%)' },
+    celtic: { primary: 'hsl(140,60%,30%)', accent: 'hsl(35,70%,40%)', gradient1: 'hsl(140,60%,24%)', gradient2: 'hsl(35,70%,48%)', bg: 'hsl(140,15%,97%)', borderOuter: 'hsl(140,60%,30%)' },
+    japanese: { primary: 'hsl(0,70%,40%)', accent: 'hsl(0,0%,20%)', gradient1: 'hsl(0,70%,32%)', gradient2: 'hsl(0,0%,30%)', bg: 'hsl(40,30%,97%)', borderOuter: 'hsl(0,70%,40%)' },
+    military: { primary: 'hsl(90,40%,28%)', accent: 'hsl(45,50%,35%)', gradient1: 'hsl(90,40%,20%)', gradient2: 'hsl(45,50%,42%)', bg: 'hsl(90,15%,97%)', borderOuter: 'hsl(90,40%,28%)' },
+    diplomatic: { primary: 'hsl(220,50%,30%)', accent: 'hsl(45,75%,42%)', gradient1: 'hsl(220,50%,22%)', gradient2: 'hsl(45,75%,50%)', bg: 'hsl(220,15%,98%)', borderOuter: 'hsl(220,50%,30%)' },
+    scientific: { primary: 'hsl(195,80%,35%)', accent: 'hsl(280,60%,45%)', gradient1: 'hsl(195,80%,28%)', gradient2: 'hsl(280,60%,52%)', bg: 'hsl(195,15%,98%)', borderOuter: 'hsl(195,80%,35%)' },
+    maritime: { primary: 'hsl(205,75%,32%)', accent: 'hsl(190,65%,45%)', gradient1: 'hsl(205,75%,25%)', gradient2: 'hsl(190,65%,52%)', bg: 'hsl(200,20%,97%)', borderOuter: 'hsl(205,75%,32%)' },
+    heritage: { primary: 'hsl(25,70%,35%)', accent: 'hsl(15,65%,45%)', gradient1: 'hsl(25,70%,28%)', gradient2: 'hsl(15,65%,50%)', bg: 'hsl(30,20%,97%)', borderOuter: 'hsl(25,70%,35%)' },
+  };
+  return palettes[style] || palettes.classic;
 }
 
 // ═══════════════════════════════════════════════════════════════
