@@ -140,13 +140,13 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'تحسين المسارات وتحليل ربحية الشركاء',
   },
 
-  // ── الشركاء: شركاء ──
+  // ── الشركاء: شركاء (فصل الرقابي عن التجاري) ──
   partners: {
-    type: 'hybrid',
-    involvedParties: ['self', 'generator', 'recycler', 'disposal', 'admin'],
+    type: 'partner',
+    involvedParties: ['self', 'generator', 'recycler', 'disposal'],
     adminVisible: true,
     requiresPartner: true,
-    contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة بما فيها الجهات الرقابية',
+    contextHint: 'إدارة العلاقات والتقييمات مع الشركاء التجاريين فقط - منفصل عن الجهات الرقابية',
   },
 
   // ── التتبع: هجين (تتبع السائقين مع ربط بالتراخيص الجغرافية) ──
