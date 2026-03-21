@@ -88,7 +88,7 @@ const EnhancedDriverPerformance = () => {
         const onTimeScore = delivered.length > 0 ? Math.round((onTime.length / delivered.length) * 100) : 100;
         
         // Safety score based on cancelled/rejected shipments ratio
-        const cancelledShipments = driverShipments.filter(s => s.status === 'cancelled' || s.status === 'rejected').length;
+        const cancelledShipments = driverShipments.filter(s => s.status === 'cancelled' as any || s.status === 'registered').length;
         const safetyScore = driverShipments.length > 0 
           ? Math.max(0, Math.min(100, 100 - Math.round((cancelledShipments / driverShipments.length) * 100)))
           : 100;
