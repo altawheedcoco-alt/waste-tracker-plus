@@ -233,7 +233,12 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
                 <Progress value={analysis.compliance_score} className="w-24 mt-1" />
               </div>
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="default" size="sm" onClick={saveAndShareWithAdmin} disabled={saving} className="gap-1">
+                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                {saving ? 'جاري الحفظ...' : 'حفظ ومشاركة مع المدير'}
+                <Share2 className="h-3 w-3" />
+              </Button>
               <Button variant="outline" size="sm" onClick={runAnalysis} className="gap-1">
                 <RefreshCw className="h-3 w-3" />إعادة التحليل
               </Button>
