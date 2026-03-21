@@ -71,6 +71,9 @@ const RecyclerDashboard = () => {
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const realWeather = useRealWeather();
+  const navigate = useNavigate();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+  const handleAlertClick = useCallback((alert: any) => { if (alert.route) navigate(alert.route); }, [navigate]);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);

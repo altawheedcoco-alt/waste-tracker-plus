@@ -117,6 +117,8 @@ const GeneratorDashboard = () => {
   const { t } = useLanguage();
   const { isMobile } = useDisplayMode();
   const realWeather = useRealWeather();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+  const handleAlertClick = useCallback((alert: any) => { if (alert.route) navigate(alert.route); }, [navigate]);
   const [selectedShipment, setSelectedShipment] = useState<RecentShipment | null>(null);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
   const [showDocumentVerification, setShowDocumentVerification] = useState(false);
