@@ -974,7 +974,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           {channel.is_verified && <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500/20" />}
         </div>
         <p className="text-[11px] text-muted-foreground mt-0.5">
-          قناة • {channel.subscriber_count?.toLocaleString('ar-EG')} متابعًا
+          قناة {((channel as any).channel_visibility === 'internal' ? '🏢 خاصة' : (channel as any).channel_visibility === 'partners_only' ? '🤝 شركاء' : '🌍 عامة')} • {channel.subscriber_count?.toLocaleString('ar-EG')} متابعًا
         </p>
       </div>
 
