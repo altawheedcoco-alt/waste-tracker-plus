@@ -507,7 +507,7 @@ const TransporterCommandCenter = () => {
               {/* Row 1: Operations */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-emerald-500"
-                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/accounting')} />
+                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5}
                   onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
                 <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
