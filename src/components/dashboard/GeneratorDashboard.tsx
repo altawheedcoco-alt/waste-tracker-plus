@@ -247,19 +247,8 @@ const GeneratorDashboard = () => {
             { label: 'ناقلون', value: transporters, icon: Building2, color: 'text-primary', max: transporters || 1, trend: 'stable' as const },
           ];
         })()}
-        alerts={[
-          ...(recentShipments.filter(s => s.status === 'new').length > 0 ? [{ id: 'pending-gen', message: `⏳ ${recentShipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج موافقة وتعيين ناقل`, severity: recentShipments.filter(s => s.status === 'new').length > 5 ? 'critical' as const : 'warning' as const, icon: Clock }] : []),
-          ...(recentShipments.filter(s => s.status === 'in_transit').length > 0 ? [{ id: 'in-transit', message: `🚛 ${recentShipments.filter(s => s.status === 'in_transit').length} شحنة في الطريق — تتبع مباشر`, severity: 'info' as const, icon: Truck }] : []),
-          ...(recentShipments.filter(s => s.status === 'delivered' && !s.has_report).length > 0 ? [{ id: 'no-report', message: `📋 ${recentShipments.filter(s => s.status === 'delivered' && !s.has_report).length} شحنة مُسلَّمة بدون تقرير تدوير — متابعة مطلوبة`, severity: 'warning' as const, icon: FileCheck }] : []),
-          ...(recentShipments.filter(s => s.status === 'approved').length > 0 ? [{ id: 'approved-waiting', message: `✅ ${recentShipments.filter(s => s.status === 'approved').length} شحنة موافق عليها بانتظار بدء الجمع`, severity: 'info' as const, icon: CheckCircle2 }] : []),
-          ...(recentShipments.filter(s => s.status === 'collecting').length > 0 ? [{ id: 'collecting', message: `📦 ${recentShipments.filter(s => s.status === 'collecting').length} شحنة قيد الجمع الآن`, severity: 'info' as const, icon: Package }] : []),
-          ...(recentShipments.filter(s => !s.has_receipt && ['delivered', 'confirmed'].includes(s.status)).length > 0 ? [{ id: 'no-receipt', message: `🧾 ${recentShipments.filter(s => !s.has_receipt && ['delivered', 'confirmed'].includes(s.status)).length} شحنة بدون إيصال استلام`, severity: 'warning' as const, icon: AlertCircle }] : []),
-          ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-high', message: `⚠️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة — إجراءات سلامة مشددة`, severity: 'critical' as const, icon: AlertCircle }] : []),
-          ...(new Set(recentShipments.map(s => s.transporter?.name).filter(Boolean)).size === 0 ? [{ id: 'no-partners', message: '🔗 لا يوجد ناقلون مرتبطون — أضف شركاء نقل لتفعيل الشحنات', severity: 'warning' as const, icon: Building2 }] : []),
-          { id: 'compliance-monthly', message: '📊 تذكير: مراجعة الامتثال البيئي الشهري وتحديث السجلات', severity: 'warning' as const, icon: FileCheck },
-          { id: 'waste-declaration', message: '📝 تذكير: تحديث إقرار المخلفات الربع سنوي', severity: 'info' as const, icon: ClipboardList },
-          { id: 'system-ok', message: '✅ جميع أنظمة التتبع والمراقبة تعمل بكفاءة', severity: 'info' as const },
-        ]}
+        alerts={operationalAlerts}
+        onAlertClick={handleAlertClick}
         weather={{
           temp: realWeather.temp,
           condition: realWeather.condition,
