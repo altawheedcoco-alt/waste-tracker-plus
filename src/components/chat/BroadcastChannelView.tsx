@@ -813,21 +813,38 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
 
         {/* === LEGACY SINGLE: Document === */}
         {!isMultiMedia && isDocPost && (
-          <div className="mx-4 my-2 rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
-            <a href={post.file_url!} target="_blank" rel="noreferrer"
-              className="flex items-center gap-3 p-3 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
-              <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
-                isPdf ? "bg-red-500/10" : isDocFile ? "bg-blue-500/10" : "bg-primary/10")}>
-                <FileText className={cn("w-6 h-6", isPdf ? "text-red-500" : isDocFile ? "text-blue-500" : "text-primary")} />
+          <div className="mx-4 my-2 rounded-xl border border-border/50 overflow-hidden">
+            {isPdf ? (
+              <div>
+                <iframe
+                  src={`${post.file_url!}#toolbar=0`}
+                  className="w-full border-0"
+                  style={{ height: '400px' }}
+                  title={post.file_name || 'PDF'}
+                />
+                <a href={post.file_url!} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
+                  <FileText className="w-4 h-4 text-red-500" />
+                  <span className="text-xs font-medium truncate flex-1">{post.file_name || 'ملف PDF'}</span>
+                  <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
+                </a>
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{post.file_name || 'ملف مرفق'}</p>
-                <p className="text-[10px] text-muted-foreground mt-0.5 uppercase" dir="ltr">{fileExt.toUpperCase()} • اضغط للتحميل</p>
-              </div>
-              <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <Forward className="w-4 h-4 text-primary rotate-90" />
-              </div>
-            </a>
+            ) : (
+              <a href={post.file_url!} target="_blank" rel="noreferrer"
+                className="flex items-center gap-3 p-3 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
+                <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
+                  isDocFile ? "bg-blue-500/10" : "bg-primary/10")}>
+                  <FileText className={cn("w-6 h-6", isDocFile ? "text-blue-500" : "text-primary")} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{post.file_name || 'ملف مرفق'}</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5 uppercase" dir="ltr">{fileExt.toUpperCase()} • اضغط للتحميل</p>
+                </div>
+                <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Forward className="w-4 h-4 text-primary rotate-90" />
+                </div>
+              </a>
+            )}
           </div>
         )}
 
