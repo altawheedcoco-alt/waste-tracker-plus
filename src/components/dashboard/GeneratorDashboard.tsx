@@ -23,6 +23,7 @@ import V2TabsNav, { TabItem } from './shared/V2TabsNav';
 import UnifiedShipmentPrint from '@/components/shipments/unified-print/UnifiedShipmentPrint';
 import ShipmentCard from '@/components/shipments/ShipmentCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
 import SmartDailyBrief from './shared/SmartDailyBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';

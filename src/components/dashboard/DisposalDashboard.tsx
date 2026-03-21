@@ -19,6 +19,7 @@ const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/Reg
 const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
