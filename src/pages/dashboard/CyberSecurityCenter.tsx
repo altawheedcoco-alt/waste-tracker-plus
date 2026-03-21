@@ -151,12 +151,16 @@ const CyberSecurityCenter = () => {
   const resolveMutation = useResolveThreat();
   const { data: reports = [], isLoading: reportsLoading } = useSecurityReports();
   const generateReport = useGenerateSecurityReport();
+  const { data: zeroTrustData, isLoading: ztLoading, refresh: ztRefresh } = useZeroTrustCheck();
 
   // Live monitoring state
   const [monitorPulse, setMonitorPulse] = useState(0);
   const [lastScanTime, setLastScanTime] = useState<Date>(new Date());
   const [autoMonitorEnabled, setAutoMonitorEnabled] = useState(true);
   const [monitorInterval, setMonitorInterval] = useState(30); // seconds
+
+  // Real system heartbeat
+  const { data: heartbeat } = useSystemHeartbeat(autoMonitorEnabled, monitorInterval);
 
   // Auto-monitoring: continuous scan
   useEffect(() => {
