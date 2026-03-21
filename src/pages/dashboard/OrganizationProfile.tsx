@@ -256,6 +256,44 @@ const OrganizationProfile = () => {
             ai_extracted: true,
           });
           toast.success('✅ تم استخراج البيانات بالذكاء الاصطناعي وحفظها', { duration: 4000 });
+
+          // === AUTO DEEP ANALYSIS PIPELINE ===
+          try {
+            toast.info('🔄 جاري التحليل العميق التلقائي للجهة...', { duration: 3000 });
+            const { data: analysisData, error: analysisError } = await supabase.functions.invoke('analyze-organization', {
+              body: { organization_id: organization.id },
+            });
+            
+            if (analysisData && !analysisError) {
+              const orgName = organization.name || 'جهة';
+              const reportTitle = `تقرير تحليل تلقائي - ${orgName} - ${new Date().toLocaleDateString('ar-EG')}`;
+              
+              await supabase.from('entity_documents').insert({
+                organization_id: organization.id,
+                document_type: 'report',
+                document_category: 'analysis',
+                title: reportTitle,
+                file_name: `${reportTitle}.json`,
+                file_url: '',
+                ai_extracted: true,
+                ocr_extracted_data: analysisData as any,
+                ocr_confidence: analysisData.compliance_score || 0,
+                uploaded_by: user?.id,
+                tags: ['ai-analysis', 'auto-generated', 'deep-analysis'],
+              });
+
+              const { notifyAdmins } = await import('@/services/unifiedNotifier');
+              const riskEmoji = analysisData.risk_level === 'high' ? '🔴' : analysisData.risk_level === 'medium' ? '🟡' : '🟢';
+              await notifyAdmins(
+                `📊 تقرير تحليل تلقائي: ${orgName}`,
+                `${riskEmoji} مستوى المخاطرة: ${analysisData.risk_level || 'N/A'}\n📈 الامتثال: ${analysisData.compliance_score || 0}%\n📄 مستند: ${file.name}`,
+                { type: 'auto_analysis', organization_id: organization.id }
+              );
+              toast.success('✅ تم التحليل العميق وحفظ التقرير وإبلاغ المدير تلقائياً', { duration: 5000 });
+            }
+          } catch (deepErr) {
+            console.warn('Auto deep analysis (non-blocking):', deepErr);
+          }
         }
       } catch (aiErr) {
         console.error('AI extraction error (non-blocking):', aiErr);
