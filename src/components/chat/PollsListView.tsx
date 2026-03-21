@@ -57,8 +57,8 @@ export default function PollsListView() {
       <CreatePollDialog
         open={showCreate}
         onOpenChange={setShowCreate}
-        onCreatePoll={(q, opts) => {
-          createPoll({ question: q, options: opts });
+        onCreatePoll={(data) => {
+          createPoll({ question: data.question, options: data.options });
           setShowCreate(false);
         }}
       />
