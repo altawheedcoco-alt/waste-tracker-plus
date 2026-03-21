@@ -283,3 +283,61 @@ export function useCyberAdvancedStats(threats: CyberThreat[]) {
     };
   }, [threats]);
 }
+
+// Zero Trust live check
+export function useZeroTrustCheck() {
+  const qc = useQueryClient();
+
+  const query = useQuery({
+    queryKey: ['zero-trust-check'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('cyber-threat-analyzer', {
+        body: { action: 'zero-trust-check' },
+      });
+      if (error) throw error;
+      return data as { checks: any[]; score: number; total: number; passed: number };
+    },
+    staleTime: 60000,
+  });
+
+  const refresh = useMutation({
+    mutationFn: async () => {
+      const { data, error } = await supabase.functions.invoke('cyber-threat-analyzer', {
+        body: { action: 'zero-trust-check' },
+      });
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['zero-trust-check'] });
+      toast.success('تم تحديث فحص الثقة المعدومة');
+    },
+  });
+
+  return { ...query, refresh };
+}
+
+// System heartbeat
+export function useSystemHeartbeat(enabled = true, intervalSec = 30) {
+  const query = useQuery({
+    queryKey: ['system-heartbeat'],
+    queryFn: async () => {
+      const { data, error } = await supabase.functions.invoke('cyber-threat-analyzer', {
+        body: { action: 'heartbeat' },
+      });
+      if (error) throw error;
+      return data as {
+        timestamp: string;
+        recent_threats: number;
+        security_events_1h: number;
+        logins_1h: number;
+        active_users_5m: number;
+        status: string;
+      };
+    },
+    enabled,
+    refetchInterval: enabled ? intervalSec * 1000 : false,
+  });
+
+  return query;
+}
