@@ -523,14 +523,17 @@ const TransporterCommandCenter = () => {
                   sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
                   onClick={() => navigate('/dashboard/accounting')} />
                 <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
-                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined} />
+                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
+                  onClick={() => navigate('/dashboard/transporter-receipts')} />
                 <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-violet-500"
                   sub={`${stats?.activeMembers || 0} نشط`}
                   onClick={() => navigate('/dashboard/employees')} />
                 <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
-                  sub={`${stats?.activeVehicles || 0} فعّال`} />
+                  sub={`${stats?.activeVehicles || 0} فعّال`}
+                  onClick={() => navigate('/dashboard/fleet')} />
                 <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-indigo-500"
-                  sub={`${stats?.activeContracts || 0} سارٍ`} />
+                  sub={`${stats?.activeContracts || 0} سارٍ`}
+                  onClick={() => navigate('/dashboard/contracts')} />
                 <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
                   sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
                   alert={(stats?.expiringDocs || 0) > 0}
