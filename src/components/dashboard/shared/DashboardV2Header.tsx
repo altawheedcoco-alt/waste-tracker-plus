@@ -34,15 +34,22 @@ export interface RadarStat {
   route?: string;
 }
 
+export interface AlertDetailItem {
+  label: string;
+  value: string;
+}
+
 export interface AlertItem {
   id: string;
   message: string;
+  subtitle?: string;
   severity: 'info' | 'warning' | 'critical';
   timestamp?: string;
   icon?: LucideIcon;
   type?: string;
   route?: string;
   isRead?: boolean;
+  details?: AlertDetailItem[];
 }
 
 export interface WeatherData {
