@@ -421,6 +421,34 @@ const EnhancedChatMessages = ({
                                         );
                                       }
                                     } catch { /* not JSON, render as text */ }
+                                    // Check for broadcast channel links
+                                    const bcMatch = text.match(/\/dashboard\/broadcast-channels\?channel=([a-f0-9-]+)(?:&post=([a-f0-9-]+))?/);
+                                    if (bcMatch) {
+                                      const linkChannelId = bcMatch[1];
+                                      const linkPostId = bcMatch[2];
+                                      const textWithoutLink = text.replace(/https?:\/\/[^\s]+\/dashboard\/broadcast-channels[^\s]*/g, '').trim();
+                                      return (
+                                        <div>
+                                          {textWithoutLink && (
+                                            <p className="whitespace-pre-wrap text-[13px] leading-relaxed mb-2">
+                                              <ChatMentionRenderer text={textWithoutLink} isOwn={isOwn} />
+                                            </p>
+                                          )}
+                                          <button
+                                            onClick={() => navigate(`/dashboard/broadcast-channels?channel=${linkChannelId}${linkPostId ? `&post=${linkPostId}` : ''}`)}
+                                            className="w-full flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-muted/30 hover:bg-muted/60 transition-colors text-right"
+                                          >
+                                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                                              <Radio className="w-5 h-5 text-primary" />
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <p className="text-[13px] font-semibold text-foreground">📡 {linkPostId ? 'منشور من قناة البث' : 'قناة بث'}</p>
+                                              <p className="text-[11px] text-muted-foreground">اضغط لفتح القناة</p>
+                                            </div>
+                                          </button>
+                                        </div>
+                                      );
+                                    }
                                     return (
                                       <p className="whitespace-pre-wrap text-[13px] leading-relaxed">
                                         <ChatMentionRenderer text={text} isOwn={isOwn} />
