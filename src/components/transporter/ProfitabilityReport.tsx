@@ -103,7 +103,7 @@ const ProfitabilityReport = () => {
       const route = `${from} → ${to}`;
       const existing = map.get(route) || { count: 0, revenue: 0 };
       existing.count++;
-      existing.revenue += s.total_cost || 0;
+      existing.revenue += s.total_value || 0;
       map.set(route, existing);
     });
     return Array.from(map.entries())
