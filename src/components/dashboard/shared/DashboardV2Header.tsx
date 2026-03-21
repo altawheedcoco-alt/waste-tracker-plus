@@ -355,6 +355,9 @@ const ALERT_TYPE_FILTERS = [
   { type: 'notification', icon: Bell, label: 'إشعارات' },
   { type: 'partner', icon: Users, label: 'شركاء' },
   { type: 'vehicle', icon: Truck, label: 'مركبات' },
+  { type: 'activity', icon: Activity, label: 'النشاط' },
+  { type: 'log', icon: ScrollText, label: 'السجل' },
+  { type: 'approval', icon: FileCheck, label: 'الموافقات' },
 ];
 
 const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAlertClick?: (alert: AlertItem) => void }) => {
