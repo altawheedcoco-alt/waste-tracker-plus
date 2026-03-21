@@ -202,15 +202,7 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
 
   return (
     <div className="space-y-6" dir="rtl">
-      <SmartDailyBrief
-        role="disposal"
-        stats={{
-          pending: operationsStats?.pending || 0,
-          active: operationsStats?.processing || 0,
-          completed: operationsStats?.completed || 0,
-          total: operationsStats?.total || 0,
-        }}
-      />
+      <ConnectedSmartBrief role="disposal" />
       <StoryCircles />
 
       <DashboardV2Header

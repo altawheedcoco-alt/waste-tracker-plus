@@ -187,7 +187,7 @@ const RecyclerDashboard = () => {
 
   return (
     <div className="space-y-6">
-      <SmartDailyBrief role="recycler" stats={{ pending: stats.incoming, active: stats.processing, completed: stats.completed, total: stats.total }} />
+      <ConnectedSmartBrief role="recycler" />
       <StoryCircles />
 
       <DashboardV2Header

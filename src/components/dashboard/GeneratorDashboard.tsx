@@ -212,15 +212,7 @@ const GeneratorDashboard = () => {
 
   return (
     <div className="space-y-4 sm:space-y-6">
-      <SmartDailyBrief
-        role="generator"
-        stats={{
-          pending: recentShipments.filter(s => s.status === 'new').length,
-          active: recentShipments.filter(s => ['approved', 'in_transit', 'collecting'].includes(s.status)).length,
-          completed: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-          total: recentShipments.length,
-        }}
-      />
+      <ConnectedSmartBrief role="generator" />
       <StoryCircles />
 
       {/* V2.0 Header */}

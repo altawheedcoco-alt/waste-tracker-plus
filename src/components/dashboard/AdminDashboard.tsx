@@ -193,15 +193,7 @@ const AdminDashboard = () => {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       <motion.div variants={itemVariants}>
-        <SmartDailyBrief
-          role="admin"
-          stats={{
-            pending: recentShipments.filter(s => s.status === 'new').length,
-            active: recentShipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-            completed: recentShipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-            total: stats.totalShipments,
-          }}
-        />
+        <ConnectedSmartBrief role="admin" />
       </motion.div>
 
       <motion.div variants={itemVariants}>

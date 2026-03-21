@@ -231,15 +231,7 @@ const DriverDashboard = () => {
   return (
     <div className="space-y-3 pb-20">
       {/* Smart Daily Brief */}
-      <SmartDailyBrief
-        role="driver"
-        stats={{
-          pending: shipments.filter(s => s.status === 'new').length,
-          active: activeShipments.length,
-          completed: completedShipments.length,
-          total: shipments.length,
-        }}
-      />
+      <ConnectedSmartBrief role="driver" />
 
 
       {/* Compact Header with Status */}
