@@ -351,11 +351,27 @@ const AIExtractedDataViewer = () => {
                 </div>
               )}
 
+              {/* Obligations / Conditions */}
+              {(selectedDoc.ocr_extracted_data?.obligations?.length > 0 ||
+                selectedDoc.ocr_extracted_data?.structured_fields?.['الاشتراطات والالتزامات']?.length > 0) && (
+                <div>
+                  <h4 className="text-sm font-medium mb-2">📋 الاشتراطات والالتزامات</h4>
+                  <ScrollArea className="max-h-[250px]">
+                    <ol className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 rounded-lg p-3 space-y-2 list-decimal list-inside text-xs" dir="rtl">
+                      {(selectedDoc.ocr_extracted_data?.obligations ||
+                        selectedDoc.ocr_extracted_data?.structured_fields?.['الاشتراطات والالتزامات'] || []).map((item: string, i: number) => (
+                        <li key={i} className="text-foreground leading-relaxed">{item}</li>
+                      ))}
+                    </ol>
+                  </ScrollArea>
+                </div>
+              )}
+
               {/* Raw Text */}
               {selectedDoc.ocr_extracted_data?.raw_text && (
                 <div>
-                  <h4 className="text-sm font-medium mb-2">النص الخام المستخرج</h4>
-                  <ScrollArea className="max-h-[300px]">
+                  <h4 className="text-sm font-medium mb-2">النص الخام المستخرج الكامل</h4>
+                  <ScrollArea className="max-h-[400px]">
                     <pre className="bg-muted/30 rounded-lg p-3 text-xs whitespace-pre-wrap font-mono leading-relaxed" dir="rtl">
                       {selectedDoc.ocr_extracted_data.raw_text}
                     </pre>

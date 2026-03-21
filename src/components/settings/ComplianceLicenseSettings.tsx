@@ -240,6 +240,7 @@ export default function ComplianceLicenseSettings() {
       if (f.issuing_authority) structuredFields['الجهة المصدرة'] = f.issuing_authority;
       if (f.document_type) structuredFields['نوع المستند'] = f.document_type;
       if (f.waste_types?.length) structuredFields['أنواع المخلفات'] = f.waste_types;
+      if (extractedResult.obligations?.length) structuredFields['الاشتراطات والالتزامات'] = extractedResult.obligations;
 
       const { error: docErr } = await supabase
         .from('entity_documents')
@@ -257,6 +258,7 @@ export default function ComplianceLicenseSettings() {
           ocr_extracted_data: {
             structured_fields: structuredFields,
             raw_text: extractedResult.raw_text,
+            obligations: extractedResult.obligations || [],
             confidence: extractedResult.confidence,
             pages_count: extractedResult.pages_count,
             detected_fields: extractedResult.detected_fields,

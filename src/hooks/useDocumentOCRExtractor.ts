@@ -24,6 +24,7 @@ export interface OCRExtractedData {
     waste_types?: string[];
     document_type?: string;
   };
+  obligations?: string[];
   confidence: number;
   pages_count?: number;
 }
@@ -133,6 +134,7 @@ export function useDocumentOCRExtractor() {
         waste_types: r.detected_fields?.waste_types || undefined,
         document_type: r.document_type || undefined,
       },
+      obligations: r.obligations || undefined,
       confidence: r.confidence || 90,
     };
   };
@@ -175,6 +177,7 @@ export function useDocumentOCRExtractor() {
 
       let allText = '';
       let allFields: OCRExtractedData['detected_fields'] = {};
+      let allObligations: string[] = [];
       let totalConfidence = 0;
       let analyzedPages = 0;
 
@@ -203,6 +206,9 @@ export function useDocumentOCRExtractor() {
           if (f.waste_types?.length) {
             allFields.waste_types = [...new Set([...(allFields.waste_types || []), ...f.waste_types])];
           }
+          if (pageResult.obligations?.length) {
+            allObligations = [...allObligations, ...pageResult.obligations];
+          }
         } else if (nativePageText) {
           allText += `--- صفحة ${i} ---\n${nativePageText}\n\n`;
         }
@@ -212,6 +218,7 @@ export function useDocumentOCRExtractor() {
       const result: OCRExtractedData = {
         raw_text: allText.trim(),
         detected_fields: allFields,
+        obligations: allObligations.length > 0 ? allObligations : undefined,
         confidence: avgConfidence,
         pages_count: totalPages,
       };
