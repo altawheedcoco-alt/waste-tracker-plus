@@ -191,7 +191,7 @@ export function useSmartBriefData(role: Role) {
         collecting: 'جاري التجميع', registered: 'مسجلة',
       };
 
-      const { data: lastShipment } = await supabase
+      const { data: lastShipment } = await (supabase as any)
         .from('shipments')
         .select('status, created_at')
         .eq('sender_id', orgId)
