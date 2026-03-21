@@ -57,9 +57,10 @@ interface AnalysisResult {
 interface Props { organizationId: string; }
 
 const OrganizationAnalysis = ({ organizationId }: Props) => {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [docsCount, setDocsCount] = useState(0);
 
   useEffect(() => {
