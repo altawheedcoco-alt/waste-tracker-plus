@@ -521,7 +521,7 @@ export const useOperationalAlerts = () => {
       const activityLogs = getData(activityLogsRes);
       for (const log of activityLogs) {
         const actionLabel = ACTION_AR[log.action_type] || log.action_type;
-        const resourceLabel = log.resource_type || '';
+        const resourceLabel = RESOURCE_AR[log.resource_type] || log.resource_type || '';
         alerts.push({
           id: `activity-${log.id}`,
           message: `📝 ${actionLabel} ${resourceLabel}`,
