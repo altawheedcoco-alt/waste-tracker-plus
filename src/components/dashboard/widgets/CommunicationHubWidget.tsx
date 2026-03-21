@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   MessageCircle, Bell, FileText, CircleDot, Video, Send, 
-  Hash, BarChart3, Bot, Timer, PenTool, Radio, 
+  Hash, BarChart3, Bot, PenTool, Radio, 
   TrendingUp, Clock
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useCommHubCounts } from '@/hooks/useCommHubCounts';
 import { cn } from '@/lib/utils';
 
 interface QuickLink {
@@ -18,23 +19,27 @@ interface QuickLink {
   badgeCount?: number;
   color: string;
   bgColor: string;
+  comingSoon?: boolean;
 }
 
 export default function CommunicationHubWidget() {
   const navigate = useNavigate();
   const { unreadCount } = useNotifications();
+  const { data: counts } = useCommHubCounts();
+
+  const totalBadges = (counts?.unreadMessages ?? 0) + unreadCount + (counts?.pendingSignatures ?? 0) + (counts?.pendingRequests ?? 0);
 
   const links: QuickLink[] = [
-    { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', badgeCount: counts?.unreadMessages, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: unreadCount, color: 'text-destructive', bgColor: 'bg-destructive/10' },
-    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/chat?tab=notes', color: 'text-accent-foreground', bgColor: 'bg-accent/30' },
-    { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', color: 'text-primary', bgColor: 'bg-primary/10' },
-    { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', color: 'text-muted-foreground', bgColor: 'bg-muted' },
-    { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', color: 'text-primary', bgColor: 'bg-primary/10' },
-    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/chat?tab=signing', color: 'text-amber-600', bgColor: 'bg-amber-500/10' },
+    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/chat?tab=notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30' },
+    { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },
+    { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/chat?tab=signing', badgeCount: counts?.pendingSignatures, color: 'text-amber-600', bgColor: 'bg-amber-500/10' },
     { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-sky-600', bgColor: 'bg-sky-500/10' },
-    { icon: Radio, labelAr: 'البث', path: '/dashboard/chat?tab=broadcast', color: 'text-green-600', bgColor: 'bg-green-500/10' },
-    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
+    { icon: Radio, labelAr: 'البث', path: '/dashboard/chat?tab=broadcast', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
+    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', badgeCount: counts?.activePolls, color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
     { icon: Bot, labelAr: 'المساعد', path: '/dashboard/chat?tab=ai', color: 'text-purple-600', bgColor: 'bg-purple-500/10' },
     { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/chat?tab=analytics', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10' },
   ];
@@ -49,9 +54,9 @@ export default function CommunicationHubWidget() {
             <MessageCircle className="w-4 h-4 text-primary" />
             مركز التواصل والعمليات
           </h3>
-          {unreadCount > 0 && (
+          {totalBadges > 0 && (
             <Badge variant="destructive" className="text-[10px] h-5">
-              {unreadCount > 99 ? '99+' : unreadCount} جديد
+              {totalBadges > 99 ? '99+' : totalBadges} جديد
             </Badge>
           )}
         </div>

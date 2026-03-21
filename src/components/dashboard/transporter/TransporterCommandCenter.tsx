@@ -508,9 +508,11 @@ const TransporterCommandCenter = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-emerald-500"
                   sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/accounting')} />
-                <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5} />
+                <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5}
+                  onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
                 <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
-                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-emerald-500'} alert={(stats?.overdueCount || 0) > 0} />
+                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-emerald-500'} alert={(stats?.overdueCount || 0) > 0}
+                  onClick={() => navigate('/dashboard/transporter-shipments?status=overdue')} />
                 <StatMicro icon={Activity} label="شحنات نشطة" value={a.active} color="text-primary"
                   onClick={() => navigate('/dashboard/tracking-center')} />
               </div>
@@ -521,14 +523,17 @@ const TransporterCommandCenter = () => {
                   sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
                   onClick={() => navigate('/dashboard/accounting')} />
                 <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
-                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined} />
+                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
+                  onClick={() => navigate('/dashboard/transporter-receipts')} />
                 <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-violet-500"
                   sub={`${stats?.activeMembers || 0} نشط`}
                   onClick={() => navigate('/dashboard/employees')} />
                 <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
-                  sub={`${stats?.activeVehicles || 0} فعّال`} />
+                  sub={`${stats?.activeVehicles || 0} فعّال`}
+                  onClick={() => navigate('/dashboard/fleet')} />
                 <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-indigo-500"
-                  sub={`${stats?.activeContracts || 0} سارٍ`} />
+                  sub={`${stats?.activeContracts || 0} سارٍ`}
+                  onClick={() => navigate('/dashboard/contracts')} />
                 <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
                   sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
                   alert={(stats?.expiringDocs || 0) > 0}
@@ -539,7 +544,8 @@ const TransporterCommandCenter = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
                 <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
-                  sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined} />
+                  sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
+                  onClick={() => navigate('/dashboard/deposits')} />
                 <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
