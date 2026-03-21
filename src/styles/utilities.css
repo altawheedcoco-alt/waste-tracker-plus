@@ -224,6 +224,36 @@
   /* v3.0 Section spacing */
   .section-padding { @apply py-12 sm:py-16 lg:py-20; }
   .section-padding-sm { @apply py-8 sm:py-12 lg:py-14; }
+
+  /* ═══ RTL/LTR Alignment Utilities ═══ */
+  .text-ltr {
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: embed;
+  }
+
+  .text-rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Auto-detect direction for mixed content */
+  .text-auto-dir {
+    unicode-bidi: plaintext;
+    text-align: start;
+  }
+
+  /* Force flex items to respect RTL ordering */
+  .flex-rtl {
+    @apply flex flex-row-reverse;
+  }
+
+  /* English numbers/values — left aligned in RTL context */
+  .num-ltr {
+    direction: ltr;
+    display: inline-block;
+    text-align: left;
+  }
 }
 
 /* ===== Dark Mode Global Text Contrast Fix ===== */
