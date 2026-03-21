@@ -382,22 +382,22 @@ function generateOuterBorderBand(hash: string, palette: StylePalette, uid: strin
   `;
 
   // Arabic text ring (outermost in band, clockwise)
-  svg += `<text font-size="3.2" fill="#000000" opacity="0.75" font-family="'Cairo','Amiri','Scheherazade New',sans-serif" font-weight="700" direction="rtl" letter-spacing="0.3">
+  svg += `<text font-size="3.5" fill="#000000" opacity="0.9" font-family="'Cairo','Amiri','Scheherazade New',sans-serif" font-weight="800" direction="rtl" letter-spacing="0.2">
     <textPath href="#ob_ar_${uid}" startOffset="0%">${textAR} ${textAR} ${textAR}</textPath>
   </text>`;
 
   // English text ring
-  svg += `<text font-size="2.6" fill="#000000" opacity="0.6" font-family="'Courier New','OCR-B',monospace" font-weight="600" letter-spacing="0.8">
+  svg += `<text font-size="2.8" fill="#000000" opacity="0.85" font-family="'Courier New','OCR-B',monospace" font-weight="700" letter-spacing="0.6">
     <textPath href="#ob_en_${uid}" startOffset="0%">${textEN} ${textEN} ${textEN}</textPath>
   </text>`;
 
   // Hieroglyphic text ring
-  svg += `<text font-size="3" fill="#000000" opacity="0.55" font-family="'Segoe UI Historic','Noto Sans Egyptian Hieroglyphs','Segoe UI Symbol',sans-serif" letter-spacing="0.5">
+  svg += `<text font-size="3.2" fill="#000000" opacity="0.8" font-family="'Segoe UI Historic','Noto Sans Egyptian Hieroglyphs','Segoe UI Symbol',sans-serif" letter-spacing="0.4">
     <textPath href="#ob_hi_${uid}" startOffset="0%">${textHIERO} ${textHIERO}</textPath>
   </text>`;
 
   // Syriac text ring (innermost in band)
-  svg += `<text font-size="2.8" fill="#000000" opacity="0.55" font-family="'Estrangelo Edessa','Serto Jerusalem','Noto Sans Syriac',serif" font-weight="500" direction="rtl" letter-spacing="0.4">
+  svg += `<text font-size="3" fill="#000000" opacity="0.8" font-family="'Estrangelo Edessa','Serto Jerusalem','Noto Sans Syriac',serif" font-weight="600" direction="rtl" letter-spacing="0.3">
     <textPath href="#ob_sy_${uid}" startOffset="0%">${textSYR} ${textSYR} ${textSYR}</textPath>
   </text>`;
 
