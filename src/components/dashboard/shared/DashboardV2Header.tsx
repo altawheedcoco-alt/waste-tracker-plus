@@ -916,7 +916,7 @@ const DashboardV2Header = memo(({
                 <div className="flex flex-col sm:flex-row gap-1.5">
                   {alerts.length > 0 && (
                     <div className="flex-1 min-w-0">
-                      <AlertTicker alerts={alerts} />
+                      <AlertTicker alerts={alerts} onAlertClick={onAlertClick} />
                     </div>
                   )}
                 </div>
