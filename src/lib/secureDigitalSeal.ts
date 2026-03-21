@@ -739,6 +739,170 @@ function generateStyleExtras(style: SealStyle, hash: string, palette: StylePalet
       }
       return corp;
     }
+    case 'emerald': {
+      let s = '';
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x = 100 + 85 * Math.cos(angle);
+        const y = 100 + 85 * Math.sin(angle);
+        s += `<path d="M ${x.toFixed(1)} ${(y-3).toFixed(1)} L ${(x+2).toFixed(1)} ${y.toFixed(1)} L ${x.toFixed(1)} ${(y+3).toFixed(1)} L ${(x-2).toFixed(1)} ${y.toFixed(1)} Z" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'ruby': {
+      let s = '';
+      for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const r = 82 + (i % 2) * 6;
+        const x = 100 + r * Math.cos(angle);
+        const y = 100 + r * Math.sin(angle);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.5" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.accent}" stroke-width="1.5" stroke-dasharray="6,3,1,3" opacity="0.2"/>`;
+      return s;
+    }
+    case 'sapphire': {
+      let s = `<circle cx="100" cy="100" r="83" fill="none" stroke="${palette.primary}" stroke-width="2" stroke-dasharray="10,2,3,2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="78" fill="none" stroke="${palette.accent}" stroke-width="0.5" opacity="0.15"/>`;
+      return s;
+    }
+    case 'amber': {
+      let s = '';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const x1 = 100 + 75 * Math.cos(angle);
+        const y1 = 100 + 75 * Math.sin(angle);
+        const x2 = 100 + 85 * Math.cos(angle + 0.1);
+        const y2 = 100 + 85 * Math.sin(angle + 0.1);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="1.5" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'obsidian': {
+      return `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="3" opacity="0.15"/>
+        <circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.8" stroke-dasharray="1,3" opacity="0.2"/>`;
+    }
+    case 'pharaonic': {
+      let s = '';
+      // Eye of Horus simplified + pyramidal rays
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x1 = 100 + 78 * Math.cos(angle);
+        const y1 = 100 + 78 * Math.sin(angle);
+        const x2 = 100 + 86 * Math.cos(angle);
+        const y2 = 100 + 86 * Math.sin(angle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="${i%3===0?'1.5':'0.5'}" opacity="0.25"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="82" fill="none" stroke="${palette.accent}" stroke-width="1.5" stroke-dasharray="8,4,2,4" opacity="0.2"/>`;
+      return s;
+    }
+    case 'islamic': {
+      // 8-pointed star pattern
+      let s = '';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const nextAngle = ((i + 3) / 8) * Math.PI * 2;
+        const x1 = 100 + 80 * Math.cos(angle);
+        const y1 = 100 + 80 * Math.sin(angle);
+        const x2 = 100 + 80 * Math.cos(nextAngle);
+        const y2 = 100 + 80 * Math.sin(nextAngle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="0.4" opacity="0.15"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.5" stroke-dasharray="2,4" opacity="0.2"/>`;
+      return s;
+    }
+    case 'ottoman': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="1" stroke-dasharray="5,2,1,2" opacity="0.2"/>`;
+      // Crescent
+      s += `<path d="M 95 60 A 15 15 0 1 1 95 75 A 10 10 0 1 0 95 60" fill="${palette.primary}" opacity="0.1"/>`;
+      return s;
+    }
+    case 'celtic': {
+      // Interlocking circles
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const cx = 100 + 30 * Math.cos(angle);
+        const cy = 100 + 30 * Math.sin(angle);
+        s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="25" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.1"/>`;
+      }
+      return s;
+    }
+    case 'japanese': {
+      // Mon (family crest) style — concentric petals
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = 100 + 50 * Math.cos(angle);
+        const y = 100 + 50 * Math.sin(angle);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.08"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.primary}" stroke-width="2.5" opacity="0.15"/>`;
+      return s;
+    }
+    case 'military': {
+      let s = '';
+      // 5-pointed stars at cardinal points
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2;
+        const cx = 100 + 82 * Math.cos(angle);
+        const cy = 100 + 82 * Math.sin(angle);
+        let star = '';
+        for (let j = 0; j < 5; j++) {
+          const sa = (j / 5) * Math.PI * 2 - Math.PI / 2;
+          const r = j % 2 === 0 ? 3 : 1.2;
+          const sx = cx + r * Math.cos(sa);
+          const sy = cy + r * Math.sin(sa);
+          star += `${j === 0 ? 'M' : 'L'} ${sx.toFixed(1)} ${sy.toFixed(1)} `;
+        }
+        star += 'Z';
+        s += `<path d="${star}" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.primary}" stroke-width="1.5" opacity="0.2"/>`;
+      return s;
+    }
+    case 'diplomatic': {
+      // Laurel wreath simplified
+      let s = '';
+      for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2;
+        const x = 100 + 83 * Math.cos(angle);
+        const y = 100 + 83 * Math.sin(angle);
+        const leafAngle = angle + Math.PI / 2;
+        s += `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="3" ry="1" transform="rotate(${(leafAngle*180/Math.PI).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})" fill="${palette.primary}" opacity="0.12"/>`;
+      }
+      return s;
+    }
+    case 'scientific': {
+      // Atomic orbits
+      let s = '';
+      for (let i = 0; i < 3; i++) {
+        const rotate = i * 60;
+        s += `<ellipse cx="100" cy="100" rx="75" ry="25" fill="none" stroke="${palette.primary}" stroke-width="0.4" opacity="0.12" transform="rotate(${rotate} 100 100)"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="5" fill="${palette.primary}" opacity="0.1"/>`;
+      return s;
+    }
+    case 'maritime': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="2" stroke-dasharray="8,3" opacity="0.2"/>`;
+      // Compass points
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const len = i % 2 === 0 ? 10 : 5;
+        const x1 = 100 + (80 - len) * Math.cos(angle);
+        const y1 = 100 + (80 - len) * Math.sin(angle);
+        const x2 = 100 + 80 * Math.cos(angle);
+        const y2 = 100 + 80 * Math.sin(angle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="${i%2===0?'1.5':'0.5'}" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'heritage': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="1.5" stroke-dasharray="6,2,2,2,2,2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.5" opacity="0.15"/>`;
+      return s;
+    }
     default:
       return '';
   }
