@@ -88,10 +88,11 @@ export function useBroadcastChannels() {
   });
 
   const createChannel = useMutation({
-    mutationFn: async ({ name, description }: { name: string; description?: string }) => {
+    mutationFn: async ({ name, description, channel_visibility }: { name: string; description?: string; channel_visibility?: string }) => {
       if (!user || !organization) throw new Error('Not authenticated');
       const { error } = await (supabase as any).from('broadcast_channels').insert({
         name, description, organization_id: organization.id, created_by: user.id,
+        channel_visibility: channel_visibility || 'public',
       });
       if (error) throw error;
     },
