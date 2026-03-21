@@ -976,6 +976,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     labelEn: 'Automation',
     visibleFor: ['admin'],
     items: [
+      { icon: Radio, labelAr: 'إدارة قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'admin-broadcast', bindingType: 'admin' as const },
       { icon: Send, labelAr: 'WaPilot', labelEn: 'WaPilot', path: '/dashboard/wapilot', key: 'wapilot', bindingType: 'admin' as const },
       { icon: Bot, labelAr: 'الوكيل الذكي', labelEn: 'Smart Agent', path: '/dashboard/smart-agent', key: 'smart-agent', bindingType: 'admin' as const },
       { icon: Inbox, labelAr: 'صندوق C2B', labelEn: 'C2B Inbox', path: '/dashboard/c2b-management', key: 'c2b-management', bindingType: 'admin' as const },
