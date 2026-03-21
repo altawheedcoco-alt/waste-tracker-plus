@@ -116,12 +116,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'حساب البصمة الكربونية من عمليات النقل المشتركة',
   },
 
-  // ── إنترنت الأشياء: داخلي ──
+  // ── إنترنت الأشياء: هجين (مرتبط بكشف الاحتيال والامتثال) ──
   iot: {
-    type: 'internal',
-    involvedParties: ['self'],
-    adminVisible: false,
-    contextHint: 'مراقبة أجهزة الاستشعار على المركبات',
+    type: 'hybrid',
+    involvedParties: ['self', 'regulator'],
+    adminVisible: true,
+    contextHint: 'مراقبة حساسات المركبات مع ربط تلقائي بمحرك كشف الاحتيال والامتثال',
   },
 
   // ── التقويم: هجين (مواعيد مع شركاء) ──
