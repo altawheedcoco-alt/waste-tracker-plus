@@ -473,11 +473,18 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
         )}
         <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setExpandedAlert(isExpanded ? null : alert.id); setIsPaused(true); }}>
           <AnimatePresence mode="wait">
-            <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate block", cfg.color, alert.isRead === false && "font-bold")}
+            <motion.div key={`${activeFilter}-${safeIdx}`}
               initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.3 }}>
-              {alert.message}
-            </motion.span>
+              <span className={cn("font-medium truncate block", cfg.color, alert.isRead === false && "font-bold")}>
+                {alert.message}
+              </span>
+              {alert.subtitle && (
+                <span className="text-[9px] text-muted-foreground truncate block mt-0.5">
+                  {alert.subtitle}
+                </span>
+              )}
+            </motion.div>
           </AnimatePresence>
         </div>
 
@@ -516,19 +523,39 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
             transition={{ duration: 0.2 }}
             className="overflow-hidden"
           >
-            <div className={cn("px-3 py-2 rounded-lg border text-[11px] space-y-1.5", cfg.bg, cfg.border)}>
+            <div className={cn("px-3 py-2.5 rounded-lg border text-[11px] space-y-2", cfg.bg, cfg.border)}>
+              {/* Header */}
               <div className="flex items-center justify-between">
-                <span className="font-bold text-foreground">{alert.message}</span>
+                <span className="font-bold text-foreground text-xs">{alert.message}</span>
                 {alert.timestamp && (
                   <span className="text-[9px] text-muted-foreground font-mono" dir="ltr">
                     {new Date(alert.timestamp).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
                   </span>
                 )}
               </div>
+
+              {/* Subtitle */}
+              {alert.subtitle && (
+                <p className="text-muted-foreground text-[10px] leading-relaxed">{alert.subtitle}</p>
+              )}
+
+              {/* Detail rows */}
+              {alert.details && alert.details.length > 0 && (
+                <div className="grid grid-cols-2 gap-x-4 gap-y-1 pt-1 border-t border-border/30">
+                  {alert.details.map((d, i) => (
+                    <div key={i} className="flex items-start gap-1">
+                      <span className="text-muted-foreground text-[9px] shrink-0">{d.label}:</span>
+                      <span className="text-foreground text-[9px] font-medium break-all">{d.value}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Tags */}
               <div className="flex items-center gap-1.5 flex-wrap">
                 <Badge variant="outline" className="text-[9px] h-5 gap-0.5">
                   <AlertIcon className="w-2.5 h-2.5" />
-                  {alert.type || 'عام'}
+                  {ALERT_TYPE_FILTERS.find(f => f.type === alert.type)?.label || alert.type || 'عام'}
                 </Badge>
                 <Badge variant={alert.severity === 'critical' ? 'destructive' : 'outline'} className="text-[9px] h-5">
                   {alert.severity === 'critical' ? 'حرج' : alert.severity === 'warning' ? 'تحذير' : 'معلومات'}
@@ -537,6 +564,8 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
                   <Badge variant="destructive" className="text-[9px] h-5">غير مقروء</Badge>
                 )}
               </div>
+
+              {/* Action button */}
               {alert.route && (
                 <button
                   onClick={() => navigate(alert.route!)}
