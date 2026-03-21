@@ -1,72 +1,78 @@
 
 
-# خطة ربط وتوحيد جميع الأزرار والمكونات المتشابهة عبر لوحة التحكم
+# خطة فحص شامل وربط الجهة الناقلة — كل زر، كل مسار، كل عداد
 
-## المشكلة الجذرية
-يوجد **5 أنظمة منفصلة** تجلب نفس البيانات لكنها غير مترابطة:
-
-| النظام | أين يُستخدم | ماذا يجلب |
-|--------|------------|-----------|
-| `useNotifications` | الهيدر، الشريط الجانبي، Mobile Nav، صفحة الإشعارات | إشعارات `notifications` |
-| `useCommHubCounts` | مركز التواصل فقط | رسائل، ملاحظات، توقيعات، طلبات |
-| `useOperationalAlerts` | شريط التنبيهات فقط (TransporterDashboard) | شحنات، سائقين، رسائل، شركاء... |
-| `useNotificationCounts` | شارات الشريط الجانبي | يعيد تصنيف إشعارات `useNotifications` حسب القسم |
-| `useChat.getPartnerUnreadCount` | صفحة الدردشة فقط | رسائل غير مقروءة لكل شريك |
-
-**النتيجة**: الرسائل غير المقروءة تظهر في مركز التواصل لكن **لا تظهر** في الشريط الجانبي. التوقيعات المعلقة تظهر في مركز التواصل لكن **لا تنعكس** في شريط التنبيهات بنفس الرقم. وهكذا.
+## المشكلة 1: خطأ البناء (عاجل)
+الملف `MobileBottomNav.tsx` على القرص **لا يحتوي** على `unreadCount` (تم التحقق بالبحث). الخطأ ناتج عن كاش بناء قديم. الحل: إعادة حفظ الملف (touch) لإجبار المترجم على إعادة القراءة.
 
 ---
 
-## الحل: طبقة بيانات موحدة (Unified Data Layer)
+## المشكلة 2: الفحص الشامل — مسارات مكسورة وأزرار غير مرتبطة
 
-### المرحلة 1: إنشاء `usePlatformCounts` — مصدر واحد للحقيقة
-Hook مركزي يجلب **كل** العدادات مرة واحدة ويُعيد استخدامها في كل مكان:
+### ❌ مسارات يُنقل إليها لكنها غير مسجلة في `DashboardRoutes.tsx`:
 
-```
-usePlatformCounts() → {
-  unreadMessages, unreadNotes, pendingSignatures,
-  pendingRequests, activeShipments, overdueShipments,
-  availableDrivers, busyDrivers, activeContracts,
-  activePartners, unreadNotifications, ...
-}
-```
+| المسار المستخدم | أين يُستخدم | المسار الصحيح الموجود |
+|---|---|---|
+| `/dashboard/drivers` | CommandCenter (السائقون) | `/dashboard/transporter-drivers` ✅ |
+| `/dashboard/fleet` | CommandCenter (المركبات) | غير موجود — الأقرب: `/dashboard?tab=fleet` |
+| `/dashboard/accounting` | CommandCenter (الإيرادات) | `/dashboard/erp/accounting` ✅ |
+| `/dashboard/deposits` | CommandCenter (الإيداعات) | `/dashboard/quick-deposit-links` أو غير موجود |
+| `/dashboard/documents` | CommandCenter (المستندات) | `/dashboard/document-center` ✅ |
 
-- يستخدم نفس `queryKey` في كل مكان → React Query يعيد نفس الكاش
-- `refetchInterval: 30s` + Realtime invalidation
-- يحل محل `useCommHubCounts` بالكامل (يُحذف)
+### ❌ عدم تطابق الأرقام بين المكونات:
 
-### المرحلة 2: ربط كل نقطة عرض بالمصدر الموحد
+| البيان | مصدر `usePlatformCounts` | مصدر `TransporterCommandCenter` | متطابق؟ |
+|---|---|---|---|
+| الشحنات النشطة | `transporter_id + in_transit/approved/collecting` | نفس الاستعلام | ✅ |
+| السائقون | `drivers.organization_id` | نفس الاستعلام | ✅ |
+| الشركاء | `external_partners` | `external_partners` | ✅ |
+| العقود | `contracts.status = 'active'` | `contracts.status in ('active','signed')` | ❌ مختلف |
+| الإيصالات المعلقة | `shipment_receipts.status = 'pending'` | يعد الإجمالي فقط | ❌ مختلف |
 
-| المكون | التغيير |
-|--------|---------|
-| `CommunicationHubWidget` | يستخدم `usePlatformCounts` بدل `useCommHubCounts` |
-| `DashboardLayout` (الشريط الجانبي) | شارات الرسائل والتوقيعات والطلبات تأتي من `usePlatformCounts` بدل `useNotificationCounts` فقط |
-| `MobileBottomNav` | يعرض شارة مجمعة (إشعارات + رسائل) من `usePlatformCounts` |
-| `NotificationDropdown` (الهيدر) | يعرض العدد الموحد |
-| `TransporterDashboard` (شريط التنبيهات) | `useOperationalAlerts` يبقى للتفاصيل، لكن العدادات تأتي من `usePlatformCounts` |
-| `useNotificationCounts` | يُوسَّع ليشمل الرسائل والتوقيعات وليس فقط `notifications` |
+### ❌ أزرار الهيدر (radarStats) تشير لمسارات مختلفة عن CommandCenter:
 
-### المرحلة 3: توحيد مسارات التنقل
-مراجعة كل زر يحمل نفس الاسم والتأكد أنه يفتح نفس الصفحة:
-- زر "الرسائل" في كل مكان → `/dashboard/chat`
-- زر "الإشعارات" في كل مكان → `/dashboard/notifications`
-- زر "التوقيعات" في كل مكان → `/dashboard/chat?tab=signing`
-- زر "الشحنات" في كل مكان → المسار الصحيح حسب نوع الجهة
-
-### المرحلة 4: إصلاح خطأ `completed` المتبقي
-- `TransporterCommandCenter.tsx` لا يزال يستخدم `"completed"` في فلتر shipment_status (خطأ 400 ظاهر في الشبكة)
+| الإحصائية | مسار الهيدر | مسار CommandCenter |
+|---|---|---|
+| السائقون | `/dashboard/transporter-drivers` ✅ | `/dashboard/drivers` ❌ |
+| الشركاء | `/dashboard/partners` | `/dashboard/partners` | ✅ |
+| نشطة | `/dashboard/tracking-center` | `/dashboard/tracking-center` | ✅ |
 
 ---
+
+## خطة التنفيذ (مقسمة لمراحل)
+
+### المرحلة 1: إصلاح خطأ البناء
+- إعادة حفظ `MobileBottomNav.tsx` لتجاوز كاش البناء القديم
+
+### المرحلة 2: تصحيح المسارات المكسورة في `TransporterCommandCenter.tsx`
+تغيير 5 مسارات:
+- `/dashboard/drivers` → `/dashboard/transporter-drivers`
+- `/dashboard/fleet` → `/dashboard?tab=fleet` 
+- `/dashboard/accounting` → `/dashboard/erp/accounting`
+- `/dashboard/deposits` → `/dashboard/quick-deposit-links`
+- `/dashboard/documents` → `/dashboard/document-center`
+
+### المرحلة 3: توحيد استعلامات العقود
+- في `usePlatformCounts`: تغيير فلتر العقود من `status = 'active'` إلى `status in ('active', 'signed')` ليتطابق مع CommandCenter
+- في `useNotificationCounts`: إضافة شارات للعقود والمركبات
+
+### المرحلة 4: ربط `useOperationalAlerts` بنفس مسارات التنقل
+- التأكد من أن كل تنبيه يحمل `route` صحيحاً يتوافق مع المسارات المسجلة فعلاً
+
+### المرحلة 5: ربط القائمة الجانبية
+- التحقق أن شارات القائمة الجانبية (badges) تعكس `usePlatformCounts` لـ:
+  - `transporter-drivers` (عدد السائقين)
+  - `fleet` (عدد المركبات)
+  - `contracts` (عدد العقود)
+  - `erp-accounting` (الفواتير المعلقة)
 
 ## الملفات المتأثرة
 | ملف | التغيير |
 |------|---------|
-| `src/hooks/usePlatformCounts.ts` | **جديد** — مصدر واحد للعدادات |
-| `src/hooks/useCommHubCounts.ts` | **يُحذف** — يُستبدل بـ `usePlatformCounts` |
-| `src/hooks/useNotificationCounts.ts` | يُوسَّع ليشمل الرسائل والتوقيعات |
-| `src/components/dashboard/widgets/CommunicationHubWidget.tsx` | يستخدم المصدر الموحد |
-| `src/components/dashboard/DashboardLayout.tsx` | شارات جانبية موحدة |
-| `src/components/layout/MobileBottomNav.tsx` | شارة مجمعة |
-| `src/components/dashboard/NotificationDropdown.tsx` | عدد موحد |
-| `src/components/dashboard/transporter/TransporterCommandCenter.tsx` | إصلاح خطأ `completed` |
+| `src/components/layout/MobileBottomNav.tsx` | إعادة حفظ (touch) لإصلاح خطأ البناء |
+| `src/components/dashboard/transporter/TransporterCommandCenter.tsx` | تصحيح 5 مسارات مكسورة |
+| `src/hooks/usePlatformCounts.ts` | توحيد فلتر العقود |
+| `src/hooks/useNotificationCounts.ts` | إضافة شارات إضافية |
+| `src/hooks/useOperationalAlerts.ts` | تصحيح مسارات التنقل |
+| `src/components/dashboard/TransporterDashboard.tsx` | التحقق من تطابق مسارات الهيدر |
 
