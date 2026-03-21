@@ -73,11 +73,7 @@ const tabKeys = [
   { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
   { value: 'geofence', labelKey: 'dashboard.tabs.geofence', icon: AlertTriangle },
   { value: 'esg', labelKey: 'dashboard.tabs.esg', icon: Leaf },
-  { value: 'compliance', labelKey: 'dashboard.tabs.compliance', icon: Shield },
-  { value: 'wmis', labelKey: 'dashboard.tabs.wmis', icon: ShieldAlert },
-  { value: 'licenses', labelKey: 'dashboard.tabs.licenses', icon: FileCheck },
-  { value: 'declarations', labelKey: 'dashboard.tabs.declarations', icon: FileText },
-  { value: 'annual_plan', labelKey: 'dashboard.tabs.annualPlan', icon: ClipboardList },
+  { value: 'regulatory_hub', labelKey: 'dashboard.tabs.regulatoryHub', icon: Shield },
   { value: 'ohs', labelKey: 'dashboard.tabs.ohs', icon: HardHat },
 ];
 

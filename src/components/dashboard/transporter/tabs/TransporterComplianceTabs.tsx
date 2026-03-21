@@ -1,10 +1,12 @@
 /**
- * تبويبات الامتثال والتقارير الحكومية
+ * المركز التنظيمي الموحد - يدمج الامتثال والتراخيص والإقرارات وWMIS
  */
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat } from 'lucide-react';
 
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const LegalArchiveWidget = lazy(() => import('@/components/dashboard/generator/LegalArchiveWidget'));
@@ -23,7 +25,7 @@ const TransporterAnnualPlan = lazy(() => import('@/components/transporter/Transp
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
 
 const TabFallback = () => (
-  <div className="space-y-4 mt-6">
+  <div className="space-y-4 mt-4">
     <Skeleton className="h-32 w-full rounded-xl" />
     <Skeleton className="h-48 w-full rounded-xl" />
   </div>
@@ -33,89 +35,123 @@ interface ComplianceTabsProps {
   organizationId?: string;
 }
 
-const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => (
-  <>
-    <TabsContent value="compliance" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <LegalComplianceWidget />
-        <LegalArchiveWidget />
-        <VehicleComplianceManager />
-        <DriverComplianceManager />
-        <IncidentReportManager />
-      </Suspense>
-    </TabsContent>
+type RegulatorySection = 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government';
 
-    <TabsContent value="government" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية">
-          <GovernmentReportingPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+const REGULATORY_SECTIONS: { id: RegulatorySection; labelAr: string; icon: React.ElementType }[] = [
+  { id: 'compliance', labelAr: 'الامتثال', icon: Shield },
+  { id: 'licenses', labelAr: 'التراخيص', icon: FileCheck },
+  { id: 'declarations', labelAr: 'الإقرارات', icon: FileText },
+  { id: 'wmis', labelAr: 'WMIS', icon: ShieldAlert },
+  { id: 'annual_plan', labelAr: 'الخطة السنوية', icon: ClipboardList },
+  { id: 'government', labelAr: 'البوابة الحكومية', icon: Building2 },
+];
 
-    <TabsContent value="carbon" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
-          <CarbonCreditsPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
+  const [activeSection, setActiveSection] = useState<RegulatorySection>('compliance');
 
-    <TabsContent value="iot" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في IoT">
-          <IoTMonitoringPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+  return (
+    <>
+      {/* المركز التنظيمي الموحد */}
+      <TabsContent value="regulatory_hub" className="space-y-4 mt-6">
+        {/* أقسام فرعية */}
+        <div className="flex gap-2 flex-wrap">
+          {REGULATORY_SECTIONS.map((section) => {
+            const Icon = section.icon;
+            const isActive = activeSection === section.id;
+            return (
+              <button
+                key={section.id}
+                onClick={() => setActiveSection(section.id)}
+                className={cn(
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  isActive
+                    ? 'bg-primary text-primary-foreground shadow-sm'
+                    : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                )}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {section.labelAr}
+              </button>
+            );
+          })}
+        </div>
 
-    <TabsContent value="esg" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ESGReportPanel />
-      </Suspense>
-    </TabsContent>
+        <Suspense fallback={<TabFallback />}>
+          {activeSection === 'compliance' && (
+            <ErrorBoundary fallbackTitle="خطأ في الامتثال">
+              <LegalComplianceWidget />
+              <LegalArchiveWidget />
+              <VehicleComplianceManager />
+              <DriverComplianceManager />
+              <IncidentReportManager />
+            </ErrorBoundary>
+          )}
 
-    <TabsContent value="wmis" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
-          {organizationId && <LicensedWasteTypesEditor organizationId={organizationId} />}
-          <WMISEventsFeed />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+          {activeSection === 'licenses' && (
+            <ErrorBoundary fallbackTitle="خطأ في التراخيص">
+              <TransporterLicenseRenewal />
+            </ErrorBoundary>
+          )}
 
-    <TabsContent value="licenses" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في التراخيص">
-          <TransporterLicenseRenewal />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+          {activeSection === 'declarations' && (
+            <ErrorBoundary fallbackTitle="خطأ في الإقرارات">
+              <TransporterDeclarations />
+            </ErrorBoundary>
+          )}
 
-    <TabsContent value="declarations" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في الإقرارات">
-          <TransporterDeclarations />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+          {activeSection === 'wmis' && (
+            <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
+              {organizationId && <LicensedWasteTypesEditor organizationId={organizationId} />}
+              <WMISEventsFeed />
+            </ErrorBoundary>
+          )}
 
-    <TabsContent value="annual_plan" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في الخطة السنوية">
-          <TransporterAnnualPlan />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
+          {activeSection === 'annual_plan' && (
+            <ErrorBoundary fallbackTitle="خطأ في الخطة السنوية">
+              <TransporterAnnualPlan />
+            </ErrorBoundary>
+          )}
 
-    <TabsContent value="ohs" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
-          <SafetyManagerDashboard />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-  </>
-);
+          {activeSection === 'government' && (
+            <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية">
+              <GovernmentReportingPanel />
+            </ErrorBoundary>
+          )}
+        </Suspense>
+      </TabsContent>
+
+      {/* التبويبات المستقلة */}
+      <TabsContent value="carbon" className="space-y-4 mt-6">
+        <Suspense fallback={<TabFallback />}>
+          <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
+            <CarbonCreditsPanel />
+          </ErrorBoundary>
+        </Suspense>
+      </TabsContent>
+
+      <TabsContent value="iot" className="space-y-4 mt-6">
+        <Suspense fallback={<TabFallback />}>
+          <ErrorBoundary fallbackTitle="خطأ في IoT">
+            <IoTMonitoringPanel />
+          </ErrorBoundary>
+        </Suspense>
+      </TabsContent>
+
+      <TabsContent value="esg" className="space-y-4 mt-6">
+        <Suspense fallback={<TabFallback />}>
+          <ESGReportPanel />
+        </Suspense>
+      </TabsContent>
+
+      <TabsContent value="ohs" className="space-y-4 mt-6">
+        <Suspense fallback={<TabFallback />}>
+          <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
+            <SafetyManagerDashboard />
+          </ErrorBoundary>
+        </Suspense>
+      </TabsContent>
+    </>
+  );
+};
 
 export default TransporterComplianceTabs;
