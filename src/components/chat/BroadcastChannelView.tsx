@@ -377,7 +377,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
     enabled: !!selectedChannel && !!user && posts.length > 0,
   });
 
-  const myReactions = new Set(myReactionsData.map((r: any) => `${r.post_id}-${r.reaction_type}`));
+  const myReactions = new Set<string>(myReactionsData.map((r: any) => `${r.post_id}-${r.reaction_type}`));
 
   // React to post
   const reactMutation = useMutation({
