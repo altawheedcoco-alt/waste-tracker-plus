@@ -169,7 +169,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
   const maxPerCriteria = Object.keys(analysis.scoring_breakdown || {}).length <= 5 ? 20 : 10;
 
   return (
-    <ScrollArea className="max-h-[calc(100vh-200px)]">
+    <div>
       <div className="space-y-4 pb-6">
         {/* Header + Score */}
         <Card className="border-primary/20 bg-gradient-to-br from-primary/5 to-transparent">
@@ -546,7 +546,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
           )}
         </Accordion>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
