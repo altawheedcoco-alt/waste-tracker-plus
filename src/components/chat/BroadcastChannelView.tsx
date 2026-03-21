@@ -1402,6 +1402,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
         onBack={handleBackToList}
         onShowProfile={() => setView('profile')}
         onShowAdmin={() => setView('admin')}
+        isSystemAdmin={isAdmin}
       />
     );
   };
