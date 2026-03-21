@@ -117,7 +117,7 @@ const ProfitabilityReport = () => {
       .slice(0, 15);
   }, [shipments]);
 
-  const totalRevenue = shipments.reduce((s, sh) => s + (sh.total_cost || 0), 0);
+  const totalRevenue = shipments.reduce((s, sh) => s + (sh.total_value || 0), 0);
   const topClient = clientData[0];
 
   const formatCurrency = (amount: number) =>
