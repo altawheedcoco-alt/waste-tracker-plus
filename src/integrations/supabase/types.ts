@@ -3338,6 +3338,79 @@ export type Database = {
         }
         Relationships: []
       }
+      broadcast_blocked_users: {
+        Row: {
+          blocked_by: string
+          channel_id: string
+          created_at: string | null
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          blocked_by: string
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          blocked_by?: string
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_blocked_users_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_channel_admins: {
+        Row: {
+          added_by: string | null
+          channel_id: string
+          created_at: string | null
+          id: string
+          permissions: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          added_by?: string | null
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: string
+          user_id: string
+        }
+        Update: {
+          added_by?: string | null
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          permissions?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_channel_admins_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broadcast_channel_subscribers: {
         Row: {
           channel_id: string
@@ -3386,6 +3459,11 @@ export type Database = {
       }
       broadcast_channels: {
         Row: {
+          admin_count: number | null
+          allow_comments: boolean | null
+          allow_reactions: boolean | null
+          allowed_reactions: string[] | null
+          auto_approve_followers: boolean | null
           avatar_url: string | null
           category: string | null
           channel_visibility: string | null
@@ -3394,6 +3472,7 @@ export type Database = {
           created_by: string
           description: string | null
           id: string
+          invite_link: string | null
           is_active: boolean | null
           is_verified: boolean | null
           last_post_at: string | null
@@ -3407,6 +3486,11 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          admin_count?: number | null
+          allow_comments?: boolean | null
+          allow_reactions?: boolean | null
+          allowed_reactions?: string[] | null
+          auto_approve_followers?: boolean | null
           avatar_url?: string | null
           category?: string | null
           channel_visibility?: string | null
@@ -3415,6 +3499,7 @@ export type Database = {
           created_by: string
           description?: string | null
           id?: string
+          invite_link?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           last_post_at?: string | null
@@ -3428,6 +3513,11 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          admin_count?: number | null
+          allow_comments?: boolean | null
+          allow_reactions?: boolean | null
+          allowed_reactions?: string[] | null
+          auto_approve_followers?: boolean | null
           avatar_url?: string | null
           category?: string | null
           channel_visibility?: string | null
@@ -3436,6 +3526,7 @@ export type Database = {
           created_by?: string
           description?: string | null
           id?: string
+          invite_link?: string | null
           is_active?: boolean | null
           is_verified?: boolean | null
           last_post_at?: string | null
@@ -3490,6 +3581,44 @@ export type Database = {
             columns: ["comment_id"]
             isOneToOne: false
             referencedRelation: "broadcast_post_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_notification_settings: {
+        Row: {
+          channel_id: string
+          created_at: string | null
+          id: string
+          is_muted: boolean | null
+          muted_until: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string | null
+          id?: string
+          is_muted?: boolean | null
+          muted_until?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string | null
+          id?: string
+          is_muted?: boolean | null
+          muted_until?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_notification_settings_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
             referencedColumns: ["id"]
           },
         ]
@@ -3670,6 +3799,54 @@ export type Database = {
             columns: ["channel_id"]
             isOneToOne: false
             referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_reports: {
+        Row: {
+          channel_id: string | null
+          created_at: string | null
+          details: string | null
+          id: string
+          post_id: string | null
+          reason: string
+          reporter_id: string
+          status: string | null
+        }
+        Insert: {
+          channel_id?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          post_id?: string | null
+          reason: string
+          reporter_id: string
+          status?: string | null
+        }
+        Update: {
+          channel_id?: string | null
+          created_at?: string | null
+          details?: string | null
+          id?: string
+          post_id?: string | null
+          reason?: string
+          reporter_id?: string
+          status?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_reports_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_channels"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broadcast_reports_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_posts"
             referencedColumns: ["id"]
           },
         ]
