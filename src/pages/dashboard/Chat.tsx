@@ -1497,11 +1497,20 @@ const ChatAndNotesPage = () => {
 
         {/* Tab Content */}
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'chat' ? (
-            <EncryptedChatInner />
-          ) : (
+          {activeTab === 'chat' && <EncryptedChatInner />}
+          {activeTab === 'notes' && (
             <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
               <NotesTab className="h-full" />
+            </Suspense>
+          )}
+          {activeTab === 'channels' && (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <ChannelListViewPage />
+            </Suspense>
+          )}
+          {activeTab === 'polls' && (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <ChatPollCard />
             </Suspense>
           )}
         </div>
