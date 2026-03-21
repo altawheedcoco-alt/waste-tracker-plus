@@ -286,7 +286,7 @@ export const useOperationalAlerts = () => {
           severity: 'warning',
           type: 'signature',
           icon: FileSignature,
-          route: '/dashboard/signing',
+          route: '/dashboard/signing-inbox',
         });
       }
 
