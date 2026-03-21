@@ -242,6 +242,7 @@ const RecyclerDashboard = () => {
       </DashboardV2Header>
 
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
       {facility && <FacilityCapacityCard facility={facility} />}
 
