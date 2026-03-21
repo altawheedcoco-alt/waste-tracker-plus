@@ -100,7 +100,7 @@ const Providers = memo(() => (
                 </ErrorBoundary>
                 <Suspense fallback={null}>
                   <OfflineBanner />
-                  <ScrollToTopButton />
+                  {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
                   <InstallPWA />
                   <PWAUpdatePrompt />
