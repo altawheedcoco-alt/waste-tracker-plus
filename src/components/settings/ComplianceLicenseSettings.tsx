@@ -16,7 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import {
   Shield, FileCheck, Truck, Recycle, Factory, Trash2, Save, Loader2,
   AlertTriangle, CheckCircle2, Plus, X, Search, ChevronDown, ChevronRight,
-  Flame, Droplets, Stethoscope, Leaf, Package, Filter, Brain
+  Flame, Droplets, Stethoscope, Leaf, Package, Filter, Brain, ExternalLink
 } from 'lucide-react';
 import { useDocumentOCRExtractor, type OCRExtractedData } from '@/hooks/useDocumentOCRExtractor';
 import {
