@@ -1097,7 +1097,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
             </DropdownMenuTrigger>
             <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={onShowProfile}>معلومات القناة</DropdownMenuItem>
-              {channel.is_mine && (
+              {(channel.is_mine || isSystemAdmin) && (
                 <DropdownMenuItem onClick={onShowAdmin}>
                   <Crown className="w-3.5 h-3.5 ml-2 text-amber-500" /> لوحة الإدارة
                 </DropdownMenuItem>
