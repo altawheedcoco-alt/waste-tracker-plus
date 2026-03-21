@@ -666,7 +666,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
               </div>
             )}
             <img src={post.file_url} alt={post.file_name || 'صورة'}
-              className={cn("w-full max-h-[400px] object-cover transition-transform", !imageLoaded && "hidden")}
+              className={cn("w-full object-contain transition-transform", !imageLoaded && "hidden")}
               onLoad={() => setImageLoaded(true)} />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
               <div className="bg-black/50 backdrop-blur-sm rounded-full p-2"><Eye className="w-5 h-5 text-white" /></div>
