@@ -114,7 +114,10 @@ const TransporterDashboard = () => {
   // Build real heatmap from shipment locations
   const heatmapRegions = useMemo(() => {
     const regionMap: Record<string, number> = {};
-    const locations = shipments.flatMap(s => [s.pickup_location, s.delivery_location].filter(Boolean));
+    const locations = shipments.flatMap(s => [
+      s.pickup_address, s.delivery_address,
+      s.generator?.city, s.recycler?.city,
+    ].filter(Boolean));
     
     const regionKeywords: Record<string, string[]> = {
       'القاهرة': ['القاهرة', 'cairo', 'مدينة نصر', 'المعادي', 'حلوان', 'شبرا', 'عين شمس'],
