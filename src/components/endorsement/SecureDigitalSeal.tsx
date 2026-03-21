@@ -179,7 +179,7 @@ const SecureDigitalSeal = ({
           </div>
 
           <p className="text-[9px] text-muted-foreground">
-            ختم رقمي مشفّر v2 • 10 طبقات أمنية • فريد وغير قابل للتكرار
+            ختم رقمي مشفّر v3 • 16 طبقة أمنية + MICR • فريد وغير قابل للتكرار
           </p>
 
           {/* Style Picker */}
