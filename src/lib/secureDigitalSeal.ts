@@ -1,8 +1,8 @@
 /**
- * منظومة الختم الرقمي المؤمّن — Secure Digital Seal System v2.0
+ * منظومة الختم الرقمي المؤمّن — Secure Digital Seal System v3.0
  * 
  * طبقات الأمان المتقدمة (World-Class Anti-Counterfeiting):
- * 1. بصمة تشفيرية مزدوجة (Dual HMAC-like hash) — FNV-1a × 3 rounds
+ * 1. بصمة تشفيرية ثلاثية (Triple HMAC-like hash) — FNV-1a × 3 rounds
  * 2. أنماط جيلوشي متعددة الطبقات (Multi-layer Guilloche) — 4 حلقات فريدة
  * 3. نمط سبيروغراف تداخلي (Spirograph Interference Pattern)
  * 4. نمط موير مضاد للنسخ (Anti-copy Moiré Pattern)
@@ -12,6 +12,9 @@
  * 8. نقاط أمنية ديناميكية (Dynamic Security Dots) — 2 طبقة
  * 9. علامة مائية غير مرئية (Invisible Watermark Layer)
  * 10. ختم زمني مشفر (Encrypted Timestamp Seal)
+ * 11. شريط MICR (حبر مغناطيسي) أمني متكرر
+ * 12. حلقات أسماء أمنية متكررة (اسم العضو + اسم الجهة)
+ * 13. خطوط جيلوشي متصلة ومتقطعة إضافية (Rose + Lissajous curves)
  * 
  * 5 أنماط تصميم: كلاسيكي، ملكي، حديث، هولوغرافي، رسمي
  */
@@ -206,6 +209,143 @@ function generateSecurityDots(hash: string, radius: number): string {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// MICR (Magnetic Ink Character Recognition) Security Band
+// ═══════════════════════════════════════════════════════════════
+
+function generateMICRBand(hash: string, entityName: string, orgName: string, radius: number, palette: StylePalette): string {
+  let svg = '';
+  const micrChars = '⑆⑇⑈⑉'; // MICR E-13B special characters
+  const micrText = `${micrChars[0]}${hash.slice(0,4)}${micrChars[1]} ${entityName} ${micrChars[2]}${hash.slice(4,8)}${micrChars[3]} ${orgName || 'iRecycle'} ${micrChars[0]}`;
+  
+  // MICR band background ring
+  svg += `<circle cx="100" cy="100" r="${radius}" fill="none" stroke="${palette.primary}" stroke-width="6" opacity="0.04"/>`;
+  svg += `<circle cx="100" cy="100" r="${radius}" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.2"/>`;
+  svg += `<circle cx="100" cy="100" r="${radius - 3}" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.15"/>`;
+  
+  // MICR encoded dots along the band
+  const dotCount = 48 + (parseInt(hash.slice(0, 2), 16) % 24);
+  for (let i = 0; i < dotCount; i++) {
+    const angle = (i / dotCount) * Math.PI * 2;
+    const x = 100 + radius * Math.cos(angle);
+    const y = 100 + radius * Math.sin(angle);
+    const charCode = hash.charCodeAt(i % hash.length);
+    const barH = 1 + (charCode % 3) * 0.5;
+    // MICR-style magnetic bars (vertical micro-bars)
+    svg += `<line x1="${x.toFixed(2)}" y1="${(y - barH).toFixed(2)}" x2="${x.toFixed(2)}" y2="${(y + barH).toFixed(2)}" stroke="${palette.primary}" stroke-width="0.4" opacity="0.3"/>`;
+  }
+  
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Name-Based Repeating Security Pattern Rings
+// ═══════════════════════════════════════════════════════════════
+
+function generateNameSecurityRings(entityName: string, orgName: string, hash: string, palette: StylePalette, uid: string): string {
+  let svg = '';
+  const safeEntityName = entityName || 'عضو';
+  const safeOrgName = orgName || 'iRecycle';
+  
+  // Build repeating name text for security rings
+  const nameRepeat = `${safeEntityName} ● ${safeEntityName} ● ${safeEntityName} ● ${safeEntityName} ● ${safeEntityName} ●`;
+  const orgRepeat = `${safeOrgName} ◆ ${safeOrgName} ◆ ${safeOrgName} ◆ ${safeOrgName} ◆ ${safeOrgName} ◆`;
+  const mixedRepeat = `${safeEntityName} ▸ ${safeOrgName} ▸ ${safeEntityName} ▸ ${safeOrgName} ▸`;
+  const micrRepeat = `⑆${hash.slice(0,4)}⑇ ${safeEntityName} ⑈${hash.slice(4,8)}⑉ ${safeOrgName} ⑆`;
+  
+  // Extra circular text paths for name rings
+  svg += `
+    <defs>
+      <path id="nr1_${uid}" d="M 100,100 m -78,0 a 78,78 0 1,1 156,0 a 78,78 0 1,1 -156,0" fill="none"/>
+      <path id="nr2_${uid}" d="M 100,100 m -62,0 a 62,62 0 1,0 124,0 a 62,62 0 1,0 -124,0" fill="none"/>
+      <path id="nr3_${uid}" d="M 100,100 m -73,0 a 73,73 0 1,1 146,0 a 73,73 0 1,1 -146,0" fill="none"/>
+      <path id="nr4_${uid}" d="M 100,100 m -57,0 a 57,57 0 1,0 114,0 a 57,57 0 1,0 -114,0" fill="none"/>
+      <path id="micr_${uid}" d="M 100,100 m -84,0 a 84,84 0 1,1 168,0 a 84,84 0 1,1 -168,0" fill="none"/>
+    </defs>
+  `;
+  
+  // Ring 1: Entity name (clockwise, outer)
+  svg += `<text font-size="2.8" fill="${palette.primary}" opacity="0.3" font-family="'Cairo','Segoe UI',sans-serif" font-weight="600" direction="rtl">
+    <textPath href="#nr1_${uid}" startOffset="0%">${nameRepeat}</textPath>
+  </text>`;
+  
+  // Ring 2: Org name (counter-clockwise, via reversed path)
+  svg += `<text font-size="2.5" fill="${palette.accent}" opacity="0.25" font-family="'Cairo','Segoe UI',sans-serif" font-weight="500" direction="rtl">
+    <textPath href="#nr2_${uid}" startOffset="0%">${orgRepeat}</textPath>
+  </text>`;
+  
+  // Ring 3: Mixed names pattern
+  svg += `<text font-size="2.2" fill="${palette.primary}" opacity="0.2" font-family="'Cairo','Segoe UI',sans-serif" direction="rtl">
+    <textPath href="#nr3_${uid}" startOffset="0%">${mixedRepeat}</textPath>
+  </text>`;
+  
+  // Ring 4: Inner name ring
+  svg += `<text font-size="2" fill="${palette.accent}" opacity="0.18" font-family="'Cairo','Segoe UI',sans-serif" direction="rtl">
+    <textPath href="#nr4_${uid}" startOffset="0%">${nameRepeat}</textPath>
+  </text>`;
+  
+  // MICR text ring (outermost, monospace for magnetic ink simulation)
+  svg += `<text font-size="3" fill="${palette.primary}" opacity="0.22" font-family="'OCR-B','Courier New',monospace" letter-spacing="0.5">
+    <textPath href="#micr_${uid}" startOffset="0%">${micrRepeat} ${micrRepeat}</textPath>
+  </text>`;
+  
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Connected & Dashed Guilloche Lines (Additional)
+// ═══════════════════════════════════════════════════════════════
+
+function generateExtraGuillocheLines(hash: string, palette: StylePalette): string {
+  let svg = '';
+  
+  // Connected flowing guilloche (rose curve variant)
+  const n1 = 3 + (parseInt(hash.slice(0, 2), 16) % 5);
+  const d1 = 2 + (parseInt(hash.slice(2, 4), 16) % 3);
+  let path1 = '';
+  for (let i = 0; i <= 2000; i++) {
+    const t = (i / 2000) * Math.PI * 2 * d1;
+    const r = 80 * Math.cos((n1 / d1) * t);
+    if (r < 0) continue;
+    const x = 100 + r * Math.cos(t);
+    const y = 100 + r * Math.sin(t);
+    path1 += `${path1 === '' ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)} `;
+  }
+  svg += `<path d="${path1}" fill="none" stroke="${palette.primary}" stroke-width="0.25" opacity="0.12"/>`;
+  
+  // Dashed concentric guilloche rings
+  for (let ring = 0; ring < 3; ring++) {
+    const baseR = 52 + ring * 14;
+    const amp = 1.5 + ring * 0.5;
+    const freq = 12 + ring * 4 + (parseInt(hash.slice(ring * 2, ring * 2 + 2), 16) % 6);
+    let ringPath = '';
+    for (let i = 0; i <= 360; i++) {
+      const angle = (i / 360) * Math.PI * 2;
+      const r = baseR + Math.sin(angle * freq) * amp;
+      const x = 100 + r * Math.cos(angle);
+      const y = 100 + r * Math.sin(angle);
+      ringPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)} `;
+    }
+    ringPath += 'Z';
+    const dashPattern = ring === 0 ? '3,1.5,1,1.5' : ring === 1 ? '2,1,0.5,1' : '4,2';
+    svg += `<path d="${ringPath}" fill="none" stroke="${palette.accent}" stroke-width="0.3" stroke-dasharray="${dashPattern}" opacity="${0.18 - ring * 0.03}"/>`;
+  }
+  
+  // Lissajous figure overlay
+  const a = 3 + (parseInt(hash.slice(6, 8), 16) % 4);
+  const b = 2 + (parseInt(hash.slice(8, 10), 16) % 3);
+  let lissPath = '';
+  for (let i = 0; i <= 1000; i++) {
+    const t = (i / 1000) * Math.PI * 2;
+    const x = 100 + 40 * Math.sin(a * t + Math.PI / 4);
+    const y = 100 + 40 * Math.sin(b * t);
+    lissPath += `${i === 0 ? 'M' : 'L'} ${x.toFixed(2)} ${y.toFixed(2)} `;
+  }
+  svg += `<path d="${lissPath}" fill="none" stroke="${palette.primary}" stroke-width="0.2" stroke-dasharray="2,3" opacity="0.08"/>`;
+  
+  return svg;
+}
+
+// ═══════════════════════════════════════════════════════════════
 // Style-Specific Color Palettes
 // ═══════════════════════════════════════════════════════════════
 
@@ -296,6 +436,7 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
     entityType,
     entityName,
     title,
+    orgName,
     documentRef,
     timestamp = new Date().toISOString(),
     size = 200,
@@ -326,6 +467,11 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   const microText1 = `iRecycle • ${hash.slice(0, 4)} • مُوثّق • ${hash.slice(4, 8)} • رقمي • ${hash.slice(8, 12)} • مؤمّن •`;
   const microText2 = `● ${sealNumber} ● V2 ● ${hash.slice(0, 8)} ● ${typeLabel} ● ${hash.slice(8, 16)} ●`;
   const microText3 = `◆ SECURE ◆ ${hash.slice(12, 18)} ◆ VERIFIED ◆ ${hash.slice(18, 24)} ◆`;
+
+  // NEW: MICR band, name security rings, extra guilloche
+  const micrBand = generateMICRBand(hash, entityName, orgName || '', 87, palette);
+  const nameRings = generateNameSecurityRings(entityName, orgName || '', hash, palette, uid);
+  const extraGuilloche = generateExtraGuillocheLines(hash, palette);
 
   // Style-specific extra elements
   const styleExtras = generateStyleExtras(style, hash, palette, uid);
@@ -400,13 +546,22 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
     ${securityDots}
   </g>
 
-  <!-- Layer 10: Decorative rings -->
+  <!-- Layer 10: MICR Magnetic Ink Security Band -->
+  ${micrBand}
+
+  <!-- Layer 11: Extra Connected & Dashed Guilloche Lines -->
+  ${extraGuilloche}
+
+  <!-- Layer 12: Decorative rings -->
   <circle cx="100" cy="100" r="92" fill="none" stroke="${palette.primary}" stroke-width="1.5" opacity="0.3"/>
   <circle cx="100" cy="100" r="90" fill="none" stroke="${palette.primary}" stroke-width="0.4" stroke-dasharray="2,2,1,2" opacity="0.35"/>
   <circle cx="100" cy="100" r="86" fill="none" stroke="${palette.accent}" stroke-width="0.3" stroke-dasharray="1,3" opacity="0.25"/>
   <circle cx="100" cy="100" r="50" fill="none" stroke="${palette.primary}" stroke-width="1" opacity="0.3"/>
   <circle cx="100" cy="100" r="48" fill="none" stroke="${palette.accent}" stroke-width="0.4" stroke-dasharray="1,2" opacity="0.25"/>
   <circle cx="100" cy="100" r="46" fill="none" stroke="${palette.primary}" stroke-width="0.2" stroke-dasharray="0.5,1.5" opacity="0.2"/>
+
+  <!-- Layer 13: Name-Based Security Rings (Entity + Org names repeated) -->
+  ${nameRings}
 
   <!-- Layer 11: Micro-text Ring 1 (outermost) -->
   <text font-size="3" fill="${palette.primary}" opacity="0.45" font-family="monospace" direction="rtl">
