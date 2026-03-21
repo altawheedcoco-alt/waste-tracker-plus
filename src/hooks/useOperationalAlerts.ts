@@ -213,7 +213,10 @@ export const useOperationalAlerts = () => {
         });
       }
 
-      // 2. Shipments
+      // 2. Drivers (declared before shipments to allow reference)
+      const drivers = getData(driversRes);
+
+      // 3. Shipments
       const ships = getData(shipmentsRes);
       for (const s of ships) {
         const wasteLabel = WASTE_AR[s.waste_type] || s.waste_type || 'غير محدد';
@@ -240,8 +243,7 @@ export const useOperationalAlerts = () => {
         });
       }
 
-      // 3. Drivers
-      const drivers = getData(driversRes);
+      // 4. Drivers alerts
       for (const d of drivers) {
         const name = d.profile?.full_name || 'سائق';
         const statusMsg = d.is_available ? 'متاح للعمل ✅' : 'مشغول حالياً 🔴';
