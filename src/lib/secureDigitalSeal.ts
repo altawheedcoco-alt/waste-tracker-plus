@@ -551,6 +551,9 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   // Style-specific extra elements
   const styleExtras = generateStyleExtras(style, hash, palette, uid);
 
+  // NEW Layer 14: Thick Outer Border Band with Multi-Language Text
+  const outerBorderBand = generateOuterBorderBand(hash, palette, uid);
+
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="${size}" height="${size}" style="filter:drop-shadow(0 2px 10px rgba(0,0,0,0.18));">
   <defs>
     <!-- Multi-stop gradient -->
@@ -580,75 +583,64 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
     <path id="tp3_${uid}" d="M 100,100 m -55,0 a 55,55 0 1,1 110,0 a 55,55 0 1,1 -110,0" fill="none"/>
     <path id="tp4_${uid}" d="M 100,100 m -42,0 a 42,42 0 1,1 84,0 a 42,42 0 1,1 -84,0" fill="none"/>
     <!-- Clip for circular content -->
-    <clipPath id="cc_${uid}"><circle cx="100" cy="100" r="96"/></clipPath>
+    <clipPath id="cc_${uid}"><circle cx="100" cy="100" r="87"/></clipPath>
   </defs>
 
-  <!-- Layer 0: Background -->
-  <circle cx="100" cy="100" r="97" fill="${palette.bg}" stroke="${palette.borderOuter}" stroke-width="2.5"/>
-  <circle cx="100" cy="100" r="95" fill="url(#sp_${uid})"/>
-  <circle cx="100" cy="100" r="95" fill="url(#rg_${uid})"/>
+  <!-- LAYER 0: THICK OUTER BORDER BAND (Multi-language security text) -->
+  ${outerBorderBand}
+
+  <!-- Layer 1: Inner Background -->
+  <circle cx="100" cy="100" r="87" fill="${palette.bg}"/>
+  <circle cx="100" cy="100" r="86" fill="url(#sp_${uid})"/>
+  <circle cx="100" cy="100" r="86" fill="url(#rg_${uid})"/>
   
-  <!-- Layer 1: Invisible Watermark -->
-  <circle cx="100" cy="100" r="94" fill="url(#wm_${uid})" clip-path="url(#cc_${uid})"/>
+  <!-- Layer 2: Invisible Watermark -->
+  <circle cx="100" cy="100" r="85" fill="url(#wm_${uid})" clip-path="url(#cc_${uid})"/>
   
-  <!-- Layer 2: Anti-copy Moiré Pattern -->
+  <!-- Layer 3: Anti-copy Moiré Pattern -->
   <g style="color:${palette.primary}" clip-path="url(#cc_${uid})">
     ${moireSVG}
   </g>
   
-  <!-- Layer 3: Cross-hatch Security Grid -->
+  <!-- Layer 4: Cross-hatch Security Grid -->
   <g style="color:${palette.accent}">
     ${crossHatch}
   </g>
 
-  <!-- Layer 4: Guilloche Ring 1 (outermost) -->
+  <!-- Layer 5: Guilloche Ring 1 -->
   <path d="${guillocheL1}" fill="none" stroke="url(#sg1_${uid})" stroke-width="1.2" opacity="0.55"/>
-
-  <!-- Layer 5: Guilloche Ring 2 -->
   <path d="${guillocheL2}" fill="none" stroke="${palette.accent}" stroke-width="0.9" opacity="0.4"/>
-
-  <!-- Layer 6: Guilloche Ring 3 -->
   <path d="${guillocheL3}" fill="none" stroke="${palette.primary}" stroke-width="0.7" opacity="0.3"/>
-
-  <!-- Layer 7: Guilloche Ring 4 (inner counter-rotation) -->
   <path d="${guillocheL4}" fill="none" stroke="${palette.accent}" stroke-width="0.5" opacity="0.25"/>
 
-  <!-- Layer 8: Spirograph Interference -->
+  <!-- Layer 6: Spirograph Interference -->
   <path d="${spirograph}" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.12"/>
 
-  <!-- Layer 9: Security Dots (dual layer) -->
-  <g style="color:${palette.primary}">
-    ${securityDots}
-  </g>
+  <!-- Layer 7: Security Dots -->
+  <g style="color:${palette.primary}">${securityDots}</g>
 
-  <!-- Layer 10: MICR Magnetic Ink Security Band -->
+  <!-- Layer 8: MICR Magnetic Ink Security Band -->
   ${micrBand}
 
-  <!-- Layer 11: Extra Connected & Dashed Guilloche Lines -->
+  <!-- Layer 9: Extra Guilloche Lines -->
   ${extraGuilloche}
 
-  <!-- Layer 12: Decorative rings -->
-  <circle cx="100" cy="100" r="92" fill="none" stroke="${palette.primary}" stroke-width="1.5" opacity="0.3"/>
-  <circle cx="100" cy="100" r="90" fill="none" stroke="${palette.primary}" stroke-width="0.4" stroke-dasharray="2,2,1,2" opacity="0.35"/>
-  <circle cx="100" cy="100" r="86" fill="none" stroke="${palette.accent}" stroke-width="0.3" stroke-dasharray="1,3" opacity="0.25"/>
+  <!-- Layer 10: Decorative rings -->
+  <circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="1" opacity="0.3"/>
+  <circle cx="100" cy="100" r="82" fill="none" stroke="${palette.primary}" stroke-width="0.4" stroke-dasharray="2,2,1,2" opacity="0.35"/>
   <circle cx="100" cy="100" r="50" fill="none" stroke="${palette.primary}" stroke-width="1" opacity="0.3"/>
   <circle cx="100" cy="100" r="48" fill="none" stroke="${palette.accent}" stroke-width="0.4" stroke-dasharray="1,2" opacity="0.25"/>
-  <circle cx="100" cy="100" r="46" fill="none" stroke="${palette.primary}" stroke-width="0.2" stroke-dasharray="0.5,1.5" opacity="0.2"/>
 
-  <!-- Layer 13: Name-Based Security Rings (Entity + Org names repeated) -->
+  <!-- Layer 11: Name-Based Security Rings -->
   ${nameRings}
 
-  <!-- Layer 11: Micro-text Ring 1 (outermost) -->
+  <!-- Layer 12: Micro-text Rings -->
   <text font-size="3" fill="${palette.primary}" opacity="0.45" font-family="monospace" direction="rtl">
     <textPath href="#tp1_${uid}" startOffset="0%">${microText1} ${microText1}</textPath>
   </text>
-
-  <!-- Layer 12: Micro-text Ring 2 -->
   <text font-size="3.5" fill="${palette.primary}" opacity="0.5" font-family="monospace" font-weight="bold">
     <textPath href="#tp2_${uid}" startOffset="0%">${microText2}</textPath>
   </text>
-
-  <!-- Layer 13: Micro-text Ring 3 (inner security) -->
   <text font-size="2.5" fill="${palette.accent}" opacity="0.35" font-family="monospace">
     <textPath href="#tp3_${uid}" startOffset="0%">${microText3} ${microText3}</textPath>
   </text>
@@ -678,21 +670,13 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   ${docProof ? `<text x="100" y="130" text-anchor="middle" font-size="2.8" font-family="monospace" fill="#9ca3af">DOC: ${docProof}</text>` : ''}
 
   <!-- Brand -->
-  <text x="100" y="140" text-anchor="middle" font-size="3" font-family="sans-serif" fill="${palette.primary}" opacity="0.45" font-weight="bold">iRecycle Platform v2</text>
+  <text x="100" y="140" text-anchor="middle" font-size="3" font-family="sans-serif" fill="${palette.primary}" opacity="0.45" font-weight="bold">iRecycle Platform v3</text>
 
   <!-- Corner alignment marks -->
   <line x1="6" y1="100" x2="14" y2="100" stroke="${palette.primary}" stroke-width="0.5" opacity="0.3"/>
   <line x1="186" y1="100" x2="194" y2="100" stroke="${palette.primary}" stroke-width="0.5" opacity="0.3"/>
   <line x1="100" y1="6" x2="100" y2="14" stroke="${palette.primary}" stroke-width="0.5" opacity="0.3"/>
   <line x1="100" y1="186" x2="100" y2="194" stroke="${palette.primary}" stroke-width="0.5" opacity="0.3"/>
-  <!-- Diagonal corner marks -->
-  <line x1="18" y1="18" x2="24" y2="24" stroke="${palette.primary}" stroke-width="0.3" opacity="0.2"/>
-  <line x1="176" y1="18" x2="182" y2="24" stroke="${palette.primary}" stroke-width="0.3" opacity="0.2"/>
-  <line x1="18" y1="182" x2="24" y2="176" stroke="${palette.primary}" stroke-width="0.3" opacity="0.2"/>
-  <line x1="176" y1="182" x2="182" y2="176" stroke="${palette.primary}" stroke-width="0.3" opacity="0.2"/>
-
-  <!-- Outer encoded border -->
-  <circle cx="100" cy="100" r="98" fill="none" stroke="${palette.primary}" stroke-width="0.4" stroke-dasharray="4,2,1,2,1,2" opacity="0.35"/>
 </svg>`;
 }
 
