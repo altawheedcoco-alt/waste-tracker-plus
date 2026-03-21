@@ -706,7 +706,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
           <div className="space-y-1 mt-1">
             {mediaVideos.map((url, i) => (
               <div key={`vid-${i}`} className="relative bg-black">
-                <video src={url} className="w-full object-contain" controls preload="metadata" />
+                <AutoPlayVideo src={url} />
               </div>
             ))}
           </div>
