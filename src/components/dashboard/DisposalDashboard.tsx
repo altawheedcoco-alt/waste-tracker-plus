@@ -277,6 +277,9 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         </Button>
       </DashboardV2Header>
 
+
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+
       {facility && <FacilityCapacityCard facility={facility} />}
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
       <DashboardWidgetCustomizer orgType="disposal" />
