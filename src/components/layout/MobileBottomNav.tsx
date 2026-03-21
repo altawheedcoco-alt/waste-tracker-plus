@@ -159,6 +159,6 @@ const MobileBottomNav = memo(() => {
   );
 });
 
-MobileBottomNav.displayName = 'MobileBottomNav';
+MobileBottomNav.displayName = 'MobileBottomNav'; // synced
 
 export default MobileBottomNav;
