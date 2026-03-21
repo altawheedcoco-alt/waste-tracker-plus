@@ -107,7 +107,7 @@ const RecyclerCommandCenter = () => {
 
   const metrics = [
     { label: 'واردات اليوم', value: stats?.todayReceived || 0, icon: Package, gradient: 'from-emerald-500 to-teal-500', trend, trendLabel: trend >= 0 ? `+${trend}` : `${trend}`, link: '/dashboard/shipments' },
-    { label: 'في الطريق', value: stats?.inTransit || 0, icon: Package, gradient: 'from-blue-500 to-indigo-500', pulse: (stats?.inTransit || 0) > 0, link: '/dashboard/shipments' },
+    { label: 'في الطريق', value: stats?.inTransit || 0, icon: Package, gradient: 'from-blue-500 to-indigo-500', pulse: (stats?.inTransit || 0) > 0, link: '/dashboard/tracking-center' },
     { label: 'بانتظار التأكيد', value: stats?.awaitingConfirmation || 0, icon: Clock, gradient: 'from-amber-500 to-orange-500', alert: (stats?.awaitingConfirmation || 0) > 3, link: '/dashboard/shipments' },
     { label: 'تم التأكيد اليوم', value: stats?.todayConfirmed || 0, icon: CheckCircle2, gradient: 'from-green-500 to-emerald-600', link: '/dashboard/shipments' },
     { label: 'كمية اليوم (طن)', value: stats?.todayQuantity || 0, decimals: 1, icon: Scale, gradient: 'from-purple-500 to-violet-600', link: '/dashboard/shipments' },

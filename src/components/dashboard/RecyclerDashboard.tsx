@@ -32,6 +32,7 @@ import RecyclerProductionTabs from './recycler/tabs/RecyclerProductionTabs';
 
 const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
+const RecyclerCommandCenter = lazy(() => import('./recycler/RecyclerCommandCenter'));
 
 interface RecentShipment {
   id: string;
@@ -241,6 +242,7 @@ const RecyclerDashboard = () => {
       </DashboardV2Header>
 
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
       {facility && <FacilityCapacityCard facility={facility} />}
 
