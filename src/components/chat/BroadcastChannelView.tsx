@@ -51,6 +51,7 @@ interface InternalSharePayload {
   title: string;
   preview: string;
   message: string;
+  link?: string;
 }
 
 const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
@@ -61,20 +62,16 @@ const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
   const { conversations, conversationsLoading, sendMessage } = usePrivateChat();
   const [search, setSearch] = useState('');
   const [sendingConversationId, setSendingConversationId] = useState<string | null>(null);
+  const [tab, setTab] = useState<'social' | 'internal'>('social');
 
   useEffect(() => {
-    if (!open) {
-      setSearch('');
-      setSendingConversationId(null);
-    }
+    if (!open) { setSearch(''); setSendingConversationId(null); setTab('social'); }
   }, [open]);
 
-  const filteredConversations = conversations.filter((conversation) => {
-    const partnerName = conversation.partner?.full_name || '';
-    const orgName = conversation.partner?.organization_name || '';
+  const filteredConversations = conversations.filter((c) => {
     const q = search.trim().toLowerCase();
     if (!q) return true;
-    return partnerName.toLowerCase().includes(q) || orgName.toLowerCase().includes(q);
+    return (c.partner?.full_name || '').toLowerCase().includes(q) || (c.partner?.organization_name || '').toLowerCase().includes(q);
   });
 
   const handleShareToConversation = async (conversationId: string) => {
@@ -84,10 +81,34 @@ const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
       await sendMessage(conversationId, payload.message);
       toast.success('تمت المشاركة داخل المحادثة');
       onOpenChange(false);
-    } catch {
-      toast.error('تعذر إرسال المشاركة');
-    } finally {
-      setSendingConversationId(null);
+    } catch { toast.error('تعذر إرسال المشاركة'); }
+    finally { setSendingConversationId(null); }
+  };
+
+  const shareLink = payload?.link || '';
+  const shareText = encodeURIComponent(payload?.message || '');
+  const shareUrl = encodeURIComponent(shareLink);
+  const shareTitle = encodeURIComponent(payload?.title || '');
+
+  const socialPlatforms = [
+    { name: 'واتساب', icon: '💬', color: 'bg-green-500', url: `https://wa.me/?text=${shareText}` },
+    { name: 'فيسبوك', icon: '📘', color: 'bg-blue-600', url: `https://www.facebook.com/sharer/sharer.php?u=${shareUrl}&quote=${shareTitle}` },
+    { name: 'تويتر / X', icon: '🐦', color: 'bg-black', url: `https://twitter.com/intent/tweet?text=${shareTitle}&url=${shareUrl}` },
+    { name: 'تيليجرام', icon: '✈️', color: 'bg-sky-500', url: `https://t.me/share/url?url=${shareUrl}&text=${shareText}` },
+    { name: 'لينكدإن', icon: '💼', color: 'bg-blue-700', url: `https://www.linkedin.com/sharing/share-offsite/?url=${shareUrl}` },
+    { name: 'بريد إلكتروني', icon: '📧', color: 'bg-amber-600', url: `mailto:?subject=${shareTitle}&body=${shareText}` },
+  ];
+
+  const handleCopyLink = () => {
+    if (!shareLink) return;
+    navigator.clipboard.writeText(shareLink).then(() => toast.success('تم نسخ الرابط')).catch(() => {
+      const ta = document.createElement('textarea'); ta.value = shareLink; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); toast.success('تم نسخ الرابط');
+    });
+  };
+
+  const handleNativeShare = () => {
+    if (navigator.share) {
+      navigator.share({ title: payload?.title, text: payload?.preview, url: shareLink }).catch(() => {});
     }
   };
 
@@ -97,75 +118,79 @@ const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-sm">
             <Share2 className="w-4 h-4 text-primary" />
-            مشاركة داخل المحادثات
+            مشاركة المنشور
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {payload && (
-            <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
-              <p className="text-[11px] text-muted-foreground mb-1">العنصر المحدد</p>
-              <p className="text-sm font-semibold line-clamp-1">{payload.title}</p>
-              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 mt-1">
-                {payload.preview}
-              </p>
-            </div>
-          )}
-
-          <Input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="ابحث عن محادثة..."
-            className="text-sm"
-          />
-
-          <div className="max-h-72 overflow-y-auto space-y-1.5">
-            {conversationsLoading ? (
-              <div className="flex items-center justify-center py-10">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-              </div>
-            ) : filteredConversations.length > 0 ? (
-              filteredConversations.map((conversation) => {
-                const partnerName = conversation.partner?.full_name || 'محادثة';
-                const orgName = conversation.partner?.organization_name || 'جهة داخل النظام';
-                const isSending = sendingConversationId === conversation.id;
-
-                return (
-                  <button
-                    key={conversation.id}
-                    type="button"
-                    onClick={() => handleShareToConversation(conversation.id)}
-                    disabled={!!sendingConversationId}
-                    className="w-full flex items-center gap-3 rounded-xl border border-border/50 p-3 text-right hover:bg-muted/40 transition-colors disabled:opacity-60"
-                  >
-                    <Avatar className="w-10 h-10 shrink-0">
-                      {conversation.partner?.avatar_url && <AvatarImage src={conversation.partner.avatar_url} />}
-                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
-                        {partnerName.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{partnerName}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{orgName}</p>
-                    </div>
-
-                    {isSending ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
-                    ) : (
-                      <Send className="w-4 h-4 text-primary shrink-0" />
-                    )}
-                  </button>
-                );
-              })
-            ) : (
-              <div className="rounded-xl border border-dashed border-border/60 p-5 text-center">
-                <p className="text-sm font-medium">لا توجد محادثات متاحة</p>
-                <p className="text-xs text-muted-foreground mt-1">ابدأ محادثة أولاً ثم أعد المشاركة داخلها</p>
-              </div>
-            )}
+        {payload && (
+          <div className="rounded-xl border border-border/50 bg-muted/30 p-3 mb-2">
+            <p className="text-sm font-semibold line-clamp-1">{payload.title}</p>
+            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2 mt-1">{payload.preview}</p>
           </div>
-        </div>
+        )}
+
+        <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 mb-3">
+            <TabsTrigger value="social" className="text-xs">مواقع التواصل</TabsTrigger>
+            <TabsTrigger value="internal" className="text-xs">محادثات داخلية</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="social" className="space-y-3">
+            <div className="grid grid-cols-3 gap-2">
+              {socialPlatforms.map((p) => (
+                <button key={p.name} onClick={() => window.open(p.url, '_blank', 'noopener,noreferrer')}
+                  className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+                  <span className="text-2xl">{p.icon}</span>
+                  <span className="text-[10px] font-medium text-muted-foreground">{p.name}</span>
+                </button>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm" className="flex-1 gap-2 text-xs" onClick={handleCopyLink}>
+                <Copy className="w-3.5 h-3.5" /> نسخ الرابط
+              </Button>
+              {typeof navigator !== 'undefined' && 'share' in navigator && (
+                <Button variant="outline" size="sm" className="flex-1 gap-2 text-xs" onClick={handleNativeShare}>
+                  <Share2 className="w-3.5 h-3.5" /> مشاركة أخرى
+                </Button>
+              )}
+            </div>
+          </TabsContent>
+
+          <TabsContent value="internal" className="space-y-3">
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="ابحث عن محادثة..." className="text-sm" />
+            <div className="max-h-60 overflow-y-auto space-y-1.5">
+              {conversationsLoading ? (
+                <div className="flex items-center justify-center py-10"><Loader2 className="w-5 h-5 animate-spin text-primary" /></div>
+              ) : filteredConversations.length > 0 ? (
+                filteredConversations.map((conversation) => {
+                  const partnerName = conversation.partner?.full_name || 'محادثة';
+                  const orgName = conversation.partner?.organization_name || '';
+                  const isSending = sendingConversationId === conversation.id;
+                  return (
+                    <button key={conversation.id} type="button" onClick={() => handleShareToConversation(conversation.id)}
+                      disabled={!!sendingConversationId}
+                      className="w-full flex items-center gap-3 rounded-xl border border-border/50 p-3 text-right hover:bg-muted/40 transition-colors disabled:opacity-60">
+                      <Avatar className="w-9 h-9 shrink-0">
+                        {conversation.partner?.avatar_url && <AvatarImage src={conversation.partner.avatar_url} />}
+                        <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{partnerName.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{partnerName}</p>
+                        {orgName && <p className="text-[11px] text-muted-foreground truncate">{orgName}</p>}
+                      </div>
+                      {isSending ? <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" /> : <Send className="w-4 h-4 text-primary shrink-0" />}
+                    </button>
+                  );
+                })
+              ) : (
+                <div className="rounded-xl border border-dashed border-border/60 p-5 text-center">
+                  <p className="text-sm font-medium">لا توجد محادثات متاحة</p>
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        </Tabs>
       </DialogContent>
     </Dialog>
   );
@@ -1087,6 +1112,7 @@ const PostCard = memo(({ post, channelId, channelName, channelAvatar, onReact, m
                 title: `منشور من ${channelName}`,
                 preview: previewText,
                 message: `📢 تمت مشاركة منشور من قناة "${channelName}"\n\n${previewText}\n\n${postLink}`,
+                link: postLink,
               });
             }}
               className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
@@ -1478,6 +1504,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           title: channel.name,
           preview: channel.description || 'قناة بث داخلية على المنصة',
           message: `📡 تمت مشاركة قناة بث\n\n${channel.name}\n${channel.description ? `\n${channel.description}\n` : '\n'}${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
+          link: `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
         }}
       />
     </div>
