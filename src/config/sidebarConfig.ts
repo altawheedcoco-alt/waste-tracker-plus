@@ -1075,6 +1075,108 @@ export const sidebarGroups: SidebarGroupConfig[] = [
 ];
 
 /**
+ * Category-based ordering — groups sorted by functional priority
+ * ترتيب فئوي: المؤسسة → العمليات → المستندات → التقارير → المالية → التواصل → السوق → AI → أدمن → إعدادات
+ */
+const CATEGORY_ORDER: string[] = [
+  // ═══ 1. المؤسسة والهوية ═══
+  'org-page',
+  'identity-attestation',
+  'org-structure',
+  'partners',
+  'governance-security',
+
+  // ═══ 2. العمليات حسب نوع الجهة ═══
+  'generator-shipments',
+  'generator-certificates',
+  'generator-tracking',
+  'transporter-shipments',
+  'transporter-records',
+  'transporter-manual',
+  'fleet-tracking',
+  'vehicles-containers',
+  'driver-management',
+  'driver-development',
+  'transporter-regulatory',
+  'recycler-shipments',
+  'recycler-production',
+  'disposal-ops',
+  'disposal-certs-facilities',
+  'driver-shipments',
+  'consultant-ops',
+  'consulting-office-ops',
+
+  // ═══ 3. لوحة العمليات والأجهزة ═══
+  'operations-board',
+  'device-settings',
+
+  // ═══ 4. المستندات ═══
+  'docs-upload-archive',
+  'docs-ai-studio',
+  'docs-signatures',
+  'docs-contracts',
+  'docs-certs-invoices',
+
+  // ═══ 5. التقارير والتحليلات ═══
+  'shipment-reports',
+  'waste-registers',
+  'waste-analysis',
+  'environmental-reports',
+
+  // ═══ 6. المالية والمحاسبة ═══
+  'accounting-core',
+  'inventory-purchasing',
+  'financial-reports',
+  'wallet-insurance',
+
+  // ═══ 7. الموارد البشرية ═══
+  'hr-core',
+  'hr-payroll-performance',
+
+  // ═══ 8. التواصل والإشعارات ═══
+  'direct-messages',
+  'notifications-notes',
+  'requests-stories',
+
+  // ═══ 9. السوق ═══
+  'b2b-marketplace',
+  'global-exchange',
+  'quotations-plans',
+
+  // ═══ 10. الخرائط والروابط ═══
+  'maps',
+  'quick-links',
+
+  // ═══ 11. AI والتعلم ═══
+  'ai-tools',
+  'learning',
+  'achievements',
+
+  // ═══ 12. الرقابة والهيئات ═══
+  'regulator-command',
+  'regulator-enforcement',
+  'regulator-licensing',
+  'wmra-tools',
+  'eeaa-tools',
+  'ltra-tools',
+  'ida-tools',
+
+  // ═══ 13. مركز القيادة (أدمن) ═══
+  'admin-command-center',
+  'admin-entity-management',
+  'admin-org-docs',
+  'admin-users-fleet',
+  'admin-communication',
+  'admin-finance',
+  'admin-content',
+  'admin-infrastructure',
+
+  // ═══ 14. الدعم والإعدادات ═══
+  'support',
+  'settings-system',
+];
+
+/**
  * Admin-only group IDs for quick lookup
  */
 const ADMIN_GROUP_IDS = new Set([
@@ -1087,6 +1189,18 @@ const ADMIN_GROUP_IDS = new Set([
   'admin-content',
   'admin-infrastructure',
 ]);
+
+/**
+ * Sort groups by CATEGORY_ORDER
+ */
+function sortByCategory(groups: SidebarGroupConfig[]): SidebarGroupConfig[] {
+  const orderMap = new Map(CATEGORY_ORDER.map((id, idx) => [id, idx]));
+  return [...groups].sort((a, b) => {
+    const aIdx = orderMap.get(a.id) ?? 999;
+    const bIdx = orderMap.get(b.id) ?? 999;
+    return aIdx - bIdx;
+  });
+}
 
 /**
  * Check if admin is currently viewing as an organization (voluntary switch).
@@ -1104,29 +1218,34 @@ export function isAdminSovereignView(isAdmin: boolean): boolean {
 }
 
 /**
- * Get visible sidebar groups for a given org type.
+ * Get visible sidebar groups for a given org type — sorted by category.
  */
 export function getGroupsForOrgType(orgType: string, isAdmin: boolean): SidebarGroupConfig[] {
+  let filtered: SidebarGroupConfig[];
+
   if (isAdmin) {
     const viewingAsOrg = getAdminViewingOrg();
     if (viewingAsOrg) {
-      return sidebarGroups.filter(g => {
+      filtered = sidebarGroups.filter(g => {
         if (ADMIN_GROUP_IDS.has(g.id)) return true;
         if (g.visibleFor.length === 0) return true;
         return g.visibleFor.includes(orgType);
       });
+    } else {
+      filtered = sidebarGroups.filter(g => {
+        if (ADMIN_GROUP_IDS.has(g.id)) return true;
+        if (g.visibleFor.length === 0) return true;
+        return false;
+      });
     }
-    return sidebarGroups.filter(g => {
-      if (ADMIN_GROUP_IDS.has(g.id)) return true;
+  } else {
+    filtered = sidebarGroups.filter(g => {
       if (g.visibleFor.length === 0) return true;
-      return false;
+      return g.visibleFor.includes(orgType);
     });
   }
 
-  return sidebarGroups.filter(g => {
-    if (g.visibleFor.length === 0) return true;
-    return g.visibleFor.includes(orgType);
-  });
+  return sortByCategory(filtered);
 }
 
 /**
