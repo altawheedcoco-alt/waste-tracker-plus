@@ -564,21 +564,25 @@ export const useOperationalAlerts = () => {
 
       // 13. Approval Requests
       const approvalReqs = getData(approvalRequestsRes);
+      const APPROVAL_STATUS_AR: Record<string, string> = { pending: 'معلق', approved: 'موافق عليه', rejected: 'مرفوض', cancelled: 'ملغى' };
+      const PRIORITY_AR: Record<string, string> = { low: 'منخفضة', medium: 'متوسطة', high: 'عالية', urgent: 'عاجلة', critical: 'حرجة' };
       for (const req of approvalReqs) {
         const isPending = req.status === 'pending';
+        const statusAr = APPROVAL_STATUS_AR[req.status] || req.status;
+        const typeAr = RESOURCE_AR[req.request_type] || req.request_type || 'طلب';
         alerts.push({
           id: `approval-${req.id}`,
-          message: `${isPending ? '🔔' : '✅'} طلب ${req.request_title || req.request_type}`,
-          subtitle: isPending ? 'بانتظار الموافقة' : `الحالة: ${req.status}`,
+          message: `${isPending ? '🔔' : '✅'} طلب ${req.request_title || typeAr}`,
+          subtitle: isPending ? 'بانتظار الموافقة' : `الحالة: ${statusAr}`,
           severity: isPending ? 'warning' : 'info',
           type: 'approval',
           icon: FileCheck,
           timestamp: req.created_at,
           details: [
             { label: 'العنوان', value: req.request_title || '—' },
-            { label: 'النوع', value: req.request_type || '—' },
-            { label: 'الحالة', value: isPending ? 'معلق ⏳' : req.status },
-            ...(req.priority ? [{ label: 'الأولوية', value: req.priority }] : []),
+            { label: 'النوع', value: typeAr },
+            { label: 'الحالة', value: isPending ? 'معلق ⏳' : statusAr },
+            ...(req.priority ? [{ label: 'الأولوية', value: PRIORITY_AR[req.priority] || req.priority }] : []),
           ],
         });
       }
