@@ -152,7 +152,7 @@ export function useDocumentOCRExtractor() {
 
     const r = data.result;
     return {
-      raw_text: r.raw_text || supplementalText || '',
+      raw_text: filterGarbageText(r.raw_text || supplementalText || ''),
       detected_fields: {
         license_number: r.detected_fields?.license_number || undefined,
         issue_date: r.detected_fields?.issue_date || undefined,
