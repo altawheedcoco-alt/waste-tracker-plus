@@ -170,9 +170,7 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <Suspense fallback={null}>
-        <TransporterSmartBrief />
-      </Suspense>
+      <ConnectedSmartBrief role="transporter" />
       <Suspense fallback={null}><StoryCircles /></Suspense>
       <DashboardV2Header
         userName={organization?.name || ''}
