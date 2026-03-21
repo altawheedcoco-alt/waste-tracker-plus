@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import { Factory, Package, Clock, CheckCircle, TrendingUp, Shield, Eye, AlertCircle, Truck, BarChart3, FileText, Leaf, HardHat, Scale, ClipboardList, Building2, Route, CheckCircle2 } from 'lucide-react';
 import StoryCircles from '@/components/stories/StoryCircles';
@@ -19,6 +19,7 @@ const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/Reg
 const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -93,10 +94,12 @@ interface RecentShipment {
 const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   const { profile, organization } = useAuth();
   const realWeather = useRealWeather();
+  const navigate = useNavigate();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+  const handleAlertClick = useCallback((alert: any) => { if (alert.route) navigate(alert.route); }, [navigate]);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const queryClient = useQueryClient();
-  const navigate = useNavigate();
 
   const { data: facility } = useQuery({
     queryKey: ['disposal-facility', organization?.id],
@@ -231,20 +234,8 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
             { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-destructive', max: 1, trend: 'stable' as const },
           ];
         })()}
-        alerts={[
-          ...(recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 0 ? [{ id: 'incoming-urgent', message: `🚛 ${recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length} شحنة واردة تحتاج استقبال ومعالجة`, severity: recentShipments.filter(s => ['new', 'in_transit'].includes(s.status)).length > 5 ? 'critical' as const : 'warning' as const, icon: Truck }] : []),
-          ...(operationsStats?.processing && operationsStats.processing > 0 ? [{ id: 'processing-ops', message: `⚙️ ${operationsStats.processing} عملية تخلص قيد التنفيذ حالياً`, severity: operationsStats.processing > 8 ? 'warning' as const : 'info' as const, icon: Clock }] : []),
-          ...(operationsStats?.pending && operationsStats.pending > 0 ? [{ id: 'pending-ops', message: `⏳ ${operationsStats.pending} عملية معلقة بانتظار بدء المعالجة`, severity: 'warning' as const, icon: Package }] : []),
-          ...(operationsStats?.completed && operationsStats.total ? [{ id: 'disposal-rate', message: `📈 معدل التخلص: ${Math.round((operationsStats.completed / operationsStats.total) * 100)}% — ${operationsStats.completed} عملية مكتملة`, severity: 'info' as const, icon: CheckCircle }] : []),
-          ...(operationsStats?.totalQuantity && operationsStats.totalQuantity > 100 ? [{ id: 'high-volume', message: `📊 حجم معالجة مرتفع: ${operationsStats.totalQuantity.toFixed(1)} طن — مراقبة السعة مطلوبة`, severity: 'warning' as const, icon: Scale }] : []),
-          ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-disposal', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة — بروتوكول التخلص الآمن مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
-          ...(!facility ? [{ id: 'no-facility', message: '🏭 لم يتم تسجيل منشأة التخلص — سجل بيانات المنشأة لتفعيل التشغيل', severity: 'critical' as const, icon: Factory }] : []),
-          ...(facility ? [{ id: 'facility-status', message: `🏭 المنشأة "${(facility as any).facility_name || 'الرئيسية'}" — تعمل بكفاءة`, severity: 'info' as const, icon: Factory }] : []),
-          { id: 'env-compliance', message: '🌍 تذكير: فحص الامتثال البيئي وتحديث تراخيص التخلص', severity: 'warning' as const, icon: Shield },
-          { id: 'safety-protocol', message: '🦺 تذكير: مراجعة بروتوكولات السلامة المهنية للعاملين', severity: 'warning' as const, icon: HardHat },
-          { id: 'annual-plan', message: '📅 تذكير: تحديث الخطة السنوية للتخلص من المخلفات', severity: 'info' as const, icon: ClipboardList },
-          { id: 'system-ok', message: '✅ أنظمة المعالجة والرصد البيئي تعمل بكفاءة', severity: 'info' as const },
-        ]}
+        alerts={operationalAlerts}
+        onAlertClick={handleAlertClick}
         weather={{
           temp: realWeather.temp,
           condition: realWeather.condition,

@@ -1,6 +1,8 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
+import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import StoryCircles from '@/components/stories/StoryCircles';
 import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText, Building2, Route, Scale } from 'lucide-react';
 import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
@@ -70,6 +72,9 @@ const RecyclerDashboard = () => {
   const { profile, organization } = useAuth();
   const queryClient = useQueryClient();
   const realWeather = useRealWeather();
+  const navigate = useNavigate();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+  const handleAlertClick = useCallback((alert: any) => { if (alert.route) navigate(alert.route); }, [navigate]);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showPrintDialog, setShowPrintDialog] = useState(false);
@@ -202,18 +207,8 @@ const RecyclerDashboard = () => {
             { label: 'المنشأة', value: facility ? 1 : 0, icon: Factory, color: 'text-emerald-500', max: 1, trend: 'stable' as const },
           ];
         })()}
-        alerts={[
-          ...(stats.incoming > 0 ? [{ id: 'incoming-shipments', message: `🚛 ${stats.incoming} شحنة واردة تحتاج استقبال وفحص`, severity: stats.incoming > 5 ? 'critical' as const : 'warning' as const, icon: Truck }] : []),
-          ...(stats.processing > 0 ? [{ id: 'processing-active', message: `⚙️ ${stats.processing} شحنة قيد المعالجة والتدوير حالياً`, severity: stats.processing > 8 ? 'warning' as const : 'info' as const, icon: Clock }] : []),
-          ...(stats.completed > 0 && stats.total > 0 ? [{ id: 'completion-rate', message: `📈 معدل الإنجاز: ${Math.round((stats.completed / stats.total) * 100)}% — ${stats.completed} شحنة مؤكدة من ${stats.total}`, severity: 'info' as const, icon: CheckCircle2 }] : []),
-          ...(recentShipments.filter(s => !s.has_report && s.status === 'delivered').length > 0 ? [{ id: 'pending-reports', message: `📋 ${recentShipments.filter(s => !s.has_report && s.status === 'delivered').length} شحنة مسلَّمة بدون تقرير تدوير — يجب إصدار التقارير`, severity: 'warning' as const, icon: FileText }] : []),
-          ...(recentShipments.filter(s => s.hazard_level === 'high').length > 0 ? [{ id: 'hazard-incoming', message: `☣️ ${recentShipments.filter(s => s.hazard_level === 'high').length} شحنة مخلفات خطرة واردة — بروتوكول سلامة مطلوب`, severity: 'critical' as const, icon: AlertCircle }] : []),
-          ...(!facility ? [{ id: 'no-facility', message: '🏭 لم يتم تسجيل منشأة التدوير — أضف بيانات المنشأة لتفعيل المراقبة', severity: 'critical' as const, icon: Factory }] : []),
-          ...(facility ? [{ id: 'facility-active', message: `🏭 المنشأة "${(facility as any).facility_name || 'الرئيسية'}" — نشطة وتعمل`, severity: 'info' as const, icon: Factory }] : []),
-          { id: 'quality-inspection', message: '🔬 تذكير: فحص جودة المخرجات الدوري وتحديث شهادات التدوير', severity: 'warning' as const, icon: Beaker },
-          { id: 'esg-report', message: '🌿 تذكير: إعداد تقرير الاستدامة ESG الشهري', severity: 'info' as const, icon: Leaf },
-          { id: 'system-ok', message: '✅ أنظمة المصنع والتتبع والجودة تعمل بكفاءة', severity: 'info' as const },
-        ]}
+        alerts={operationalAlerts}
+        onAlertClick={handleAlertClick}
         weather={{
           temp: realWeather.temp,
           condition: realWeather.condition,
