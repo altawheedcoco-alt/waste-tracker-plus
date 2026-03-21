@@ -480,7 +480,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" dir="rtl">
+            <DropdownMenuContent align="start">
               <DropdownMenuItem onClick={() => setShowProfile(true)}>
                 معلومات القناة
               </DropdownMenuItem>
