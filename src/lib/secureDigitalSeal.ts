@@ -23,22 +23,41 @@
 // Seal Style Types
 // ═══════════════════════════════════════════════════════════════
 
-export type SealStyle = 'classic' | 'royal' | 'modern' | 'holographic' | 'corporate';
+export type SealStyle = 
+  | 'classic' | 'royal' | 'modern' | 'holographic' | 'corporate'
+  | 'emerald' | 'ruby' | 'sapphire' | 'amber' | 'obsidian'
+  | 'pharaonic' | 'islamic' | 'ottoman' | 'celtic' | 'japanese'
+  | 'military' | 'diplomatic' | 'scientific' | 'maritime' | 'heritage';
 
 export interface SealStyleOption {
   id: SealStyle;
   nameAr: string;
   nameEn: string;
   description: string;
-  preview: string; // emoji/icon identifier
+  preview: string;
 }
 
 export const SEAL_STYLES: SealStyleOption[] = [
-  { id: 'classic', nameAr: 'كلاسيكي', nameEn: 'Classic', description: 'تصميم تقليدي أنيق مع جيلوشي متعدد الطبقات', preview: '🏛️' },
-  { id: 'royal', nameAr: 'ملكي', nameEn: 'Royal', description: 'تصميم فخم بألوان ذهبية ونقوش ملكية مزخرفة', preview: '👑' },
-  { id: 'modern', nameAr: 'عصري', nameEn: 'Modern', description: 'تصميم هندسي بسيط وخطوط نظيفة ومعاصرة', preview: '💎' },
-  { id: 'holographic', nameAr: 'هولوغرافي', nameEn: 'Holographic', description: 'تأثيرات قزحية متغيرة الألوان مضادة للتزوير', preview: '🌈' },
-  { id: 'corporate', nameAr: 'رسمي', nameEn: 'Corporate', description: 'تصميم مؤسسي رسمي للاستخدام القانوني', preview: '📜' },
+  { id: 'classic', nameAr: 'كلاسيكي', nameEn: 'Classic', description: 'تصميم تقليدي أنيق', preview: '🏛️' },
+  { id: 'royal', nameAr: 'ملكي', nameEn: 'Royal', description: 'ذهبي فخم بنقوش ملكية', preview: '👑' },
+  { id: 'modern', nameAr: 'عصري', nameEn: 'Modern', description: 'هندسي بسيط ومعاصر', preview: '💎' },
+  { id: 'holographic', nameAr: 'هولوغرافي', nameEn: 'Holographic', description: 'قزحي متغير الألوان', preview: '🌈' },
+  { id: 'corporate', nameAr: 'رسمي', nameEn: 'Corporate', description: 'مؤسسي للاستخدام القانوني', preview: '📜' },
+  { id: 'emerald', nameAr: 'زمردي', nameEn: 'Emerald', description: 'أخضر زمردي فاخر', preview: '💚' },
+  { id: 'ruby', nameAr: 'ياقوتي', nameEn: 'Ruby', description: 'أحمر ياقوتي عميق', preview: '❤️' },
+  { id: 'sapphire', nameAr: 'ياقوت أزرق', nameEn: 'Sapphire', description: 'أزرق ملكي صافي', preview: '💙' },
+  { id: 'amber', nameAr: 'كهرماني', nameEn: 'Amber', description: 'برتقالي كهرماني دافئ', preview: '🧡' },
+  { id: 'obsidian', nameAr: 'سبج أسود', nameEn: 'Obsidian', description: 'أسود فحمي أنيق', preview: '🖤' },
+  { id: 'pharaonic', nameAr: 'فرعوني', nameEn: 'Pharaonic', description: 'ذهبي مصري قديم', preview: '𓂀' },
+  { id: 'islamic', nameAr: 'إسلامي', nameEn: 'Islamic', description: 'زخارف هندسية إسلامية', preview: '🕌' },
+  { id: 'ottoman', nameAr: 'عثماني', nameEn: 'Ottoman', description: 'طغراء عثمانية كلاسيكية', preview: '🏰' },
+  { id: 'celtic', nameAr: 'كلتي', nameEn: 'Celtic', description: 'عقد كلتية متشابكة', preview: '☘️' },
+  { id: 'japanese', nameAr: 'ياباني', nameEn: 'Japanese', description: 'هانكو ياباني تقليدي', preview: '🎌' },
+  { id: 'military', nameAr: 'عسكري', nameEn: 'Military', description: 'نجوم وشارات عسكرية', preview: '⭐' },
+  { id: 'diplomatic', nameAr: 'دبلوماسي', nameEn: 'Diplomatic', description: 'رسمي بإطار غار', preview: '🕊️' },
+  { id: 'scientific', nameAr: 'علمي', nameEn: 'Scientific', description: 'ذري بأنماط جزيئية', preview: '⚛️' },
+  { id: 'maritime', nameAr: 'بحري', nameEn: 'Maritime', description: 'أزرق بحري بحبال ومراسي', preview: '⚓' },
+  { id: 'heritage', nameAr: 'تراثي', nameEn: 'Heritage', description: 'تراث عربي أصيل', preview: '🏺' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -434,57 +453,29 @@ interface StylePalette {
 
 function getStylePalette(style: SealStyle, hash: string): StylePalette {
   const baseHSL = hashToHSL(hash, 0);
-  
-  switch (style) {
-    case 'royal':
-      return {
-        primary: `hsl(43, 85%, 35%)`,
-        accent: `hsl(35, 90%, 45%)`,
-        gradient1: `hsl(43, 85%, 30%)`,
-        gradient2: `hsl(35, 90%, 50%)`,
-        gradient3: `hsl(48, 80%, 40%)`,
-        bg: `hsl(43, 30%, 97%)`,
-        borderOuter: `hsl(43, 85%, 35%)`,
-      };
-    case 'modern':
-      return {
-        primary: `hsl(220, 70%, 40%)`,
-        accent: `hsl(200, 80%, 50%)`,
-        gradient1: `hsl(220, 70%, 35%)`,
-        gradient2: `hsl(200, 80%, 55%)`,
-        bg: `hsl(220, 20%, 98%)`,
-        borderOuter: `hsl(220, 70%, 40%)`,
-      };
-    case 'holographic':
-      return {
-        primary: `hsl(${baseHSL.h}, 75%, 40%)`,
-        accent: `hsl(${(baseHSL.h + 120) % 360}, 80%, 45%)`,
-        gradient1: `hsl(${baseHSL.h}, 80%, 35%)`,
-        gradient2: `hsl(${(baseHSL.h + 60) % 360}, 85%, 50%)`,
-        gradient3: `hsl(${(baseHSL.h + 180) % 360}, 75%, 45%)`,
-        bg: `hsl(${baseHSL.h}, 15%, 98%)`,
-        borderOuter: `hsl(${baseHSL.h}, 75%, 40%)`,
-      };
-    case 'corporate':
-      return {
-        primary: `hsl(210, 25%, 30%)`,
-        accent: `hsl(210, 35%, 45%)`,
-        gradient1: `hsl(210, 25%, 25%)`,
-        gradient2: `hsl(210, 35%, 50%)`,
-        bg: `hsl(210, 10%, 98%)`,
-        borderOuter: `hsl(210, 25%, 30%)`,
-      };
-    case 'classic':
-    default:
-      return {
-        primary: hashToColor(hash, 0),
-        accent: hashToColor(hash, 6),
-        gradient1: hashToColor(hash, 0),
-        gradient2: hashToColor(hash, 6),
-        bg: 'white',
-        borderOuter: hashToColor(hash, 0),
-      };
-  }
+  const palettes: Record<SealStyle, StylePalette> = {
+    classic: { primary: hashToColor(hash, 0), accent: hashToColor(hash, 6), gradient1: hashToColor(hash, 0), gradient2: hashToColor(hash, 6), bg: 'white', borderOuter: hashToColor(hash, 0) },
+    royal: { primary: 'hsl(43,85%,35%)', accent: 'hsl(35,90%,45%)', gradient1: 'hsl(43,85%,30%)', gradient2: 'hsl(35,90%,50%)', gradient3: 'hsl(48,80%,40%)', bg: 'hsl(43,30%,97%)', borderOuter: 'hsl(43,85%,35%)' },
+    modern: { primary: 'hsl(220,70%,40%)', accent: 'hsl(200,80%,50%)', gradient1: 'hsl(220,70%,35%)', gradient2: 'hsl(200,80%,55%)', bg: 'hsl(220,20%,98%)', borderOuter: 'hsl(220,70%,40%)' },
+    holographic: { primary: `hsl(${baseHSL.h},75%,40%)`, accent: `hsl(${(baseHSL.h+120)%360},80%,45%)`, gradient1: `hsl(${baseHSL.h},80%,35%)`, gradient2: `hsl(${(baseHSL.h+60)%360},85%,50%)`, gradient3: `hsl(${(baseHSL.h+180)%360},75%,45%)`, bg: `hsl(${baseHSL.h},15%,98%)`, borderOuter: `hsl(${baseHSL.h},75%,40%)` },
+    corporate: { primary: 'hsl(210,25%,30%)', accent: 'hsl(210,35%,45%)', gradient1: 'hsl(210,25%,25%)', gradient2: 'hsl(210,35%,50%)', bg: 'hsl(210,10%,98%)', borderOuter: 'hsl(210,25%,30%)' },
+    emerald: { primary: 'hsl(152,80%,28%)', accent: 'hsl(160,70%,38%)', gradient1: 'hsl(152,80%,22%)', gradient2: 'hsl(160,70%,42%)', bg: 'hsl(150,25%,97%)', borderOuter: 'hsl(152,80%,28%)' },
+    ruby: { primary: 'hsl(348,80%,35%)', accent: 'hsl(355,70%,45%)', gradient1: 'hsl(348,80%,28%)', gradient2: 'hsl(355,70%,50%)', bg: 'hsl(348,20%,97%)', borderOuter: 'hsl(348,80%,35%)' },
+    sapphire: { primary: 'hsl(225,80%,38%)', accent: 'hsl(215,75%,50%)', gradient1: 'hsl(225,80%,30%)', gradient2: 'hsl(215,75%,55%)', bg: 'hsl(225,20%,97%)', borderOuter: 'hsl(225,80%,38%)' },
+    amber: { primary: 'hsl(30,90%,40%)', accent: 'hsl(40,85%,50%)', gradient1: 'hsl(30,90%,32%)', gradient2: 'hsl(40,85%,55%)', bg: 'hsl(35,30%,97%)', borderOuter: 'hsl(30,90%,40%)' },
+    obsidian: { primary: 'hsl(0,0%,18%)', accent: 'hsl(0,0%,35%)', gradient1: 'hsl(0,0%,12%)', gradient2: 'hsl(0,0%,30%)', bg: 'hsl(0,0%,96%)', borderOuter: 'hsl(0,0%,18%)' },
+    pharaonic: { primary: 'hsl(45,90%,38%)', accent: 'hsl(25,80%,35%)', gradient1: 'hsl(45,90%,30%)', gradient2: 'hsl(25,80%,45%)', gradient3: 'hsl(50,85%,42%)', bg: 'hsl(45,25%,97%)', borderOuter: 'hsl(45,90%,38%)' },
+    islamic: { primary: 'hsl(165,75%,30%)', accent: 'hsl(45,80%,45%)', gradient1: 'hsl(165,75%,25%)', gradient2: 'hsl(45,80%,50%)', bg: 'hsl(165,15%,97%)', borderOuter: 'hsl(165,75%,30%)' },
+    ottoman: { primary: 'hsl(0,75%,35%)', accent: 'hsl(45,85%,40%)', gradient1: 'hsl(0,75%,28%)', gradient2: 'hsl(45,85%,48%)', bg: 'hsl(0,15%,97%)', borderOuter: 'hsl(0,75%,35%)' },
+    celtic: { primary: 'hsl(140,60%,30%)', accent: 'hsl(35,70%,40%)', gradient1: 'hsl(140,60%,24%)', gradient2: 'hsl(35,70%,48%)', bg: 'hsl(140,15%,97%)', borderOuter: 'hsl(140,60%,30%)' },
+    japanese: { primary: 'hsl(0,70%,40%)', accent: 'hsl(0,0%,20%)', gradient1: 'hsl(0,70%,32%)', gradient2: 'hsl(0,0%,30%)', bg: 'hsl(40,30%,97%)', borderOuter: 'hsl(0,70%,40%)' },
+    military: { primary: 'hsl(90,40%,28%)', accent: 'hsl(45,50%,35%)', gradient1: 'hsl(90,40%,20%)', gradient2: 'hsl(45,50%,42%)', bg: 'hsl(90,15%,97%)', borderOuter: 'hsl(90,40%,28%)' },
+    diplomatic: { primary: 'hsl(220,50%,30%)', accent: 'hsl(45,75%,42%)', gradient1: 'hsl(220,50%,22%)', gradient2: 'hsl(45,75%,50%)', bg: 'hsl(220,15%,98%)', borderOuter: 'hsl(220,50%,30%)' },
+    scientific: { primary: 'hsl(195,80%,35%)', accent: 'hsl(280,60%,45%)', gradient1: 'hsl(195,80%,28%)', gradient2: 'hsl(280,60%,52%)', bg: 'hsl(195,15%,98%)', borderOuter: 'hsl(195,80%,35%)' },
+    maritime: { primary: 'hsl(205,75%,32%)', accent: 'hsl(190,65%,45%)', gradient1: 'hsl(205,75%,25%)', gradient2: 'hsl(190,65%,52%)', bg: 'hsl(200,20%,97%)', borderOuter: 'hsl(205,75%,32%)' },
+    heritage: { primary: 'hsl(25,70%,35%)', accent: 'hsl(15,65%,45%)', gradient1: 'hsl(25,70%,28%)', gradient2: 'hsl(15,65%,50%)', bg: 'hsl(30,20%,97%)', borderOuter: 'hsl(25,70%,35%)' },
+  };
+  return palettes[style] || palettes.classic;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -747,6 +738,170 @@ function generateStyleExtras(style: SealStyle, hash: string, palette: StylePalet
         corp += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="${i % 6 === 0 ? '1' : '0.4'}" opacity="0.3"/>`;
       }
       return corp;
+    }
+    case 'emerald': {
+      let s = '';
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x = 100 + 85 * Math.cos(angle);
+        const y = 100 + 85 * Math.sin(angle);
+        s += `<path d="M ${x.toFixed(1)} ${(y-3).toFixed(1)} L ${(x+2).toFixed(1)} ${y.toFixed(1)} L ${x.toFixed(1)} ${(y+3).toFixed(1)} L ${(x-2).toFixed(1)} ${y.toFixed(1)} Z" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'ruby': {
+      let s = '';
+      for (let i = 0; i < 16; i++) {
+        const angle = (i / 16) * Math.PI * 2;
+        const r = 82 + (i % 2) * 6;
+        const x = 100 + r * Math.cos(angle);
+        const y = 100 + r * Math.sin(angle);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="1.5" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.accent}" stroke-width="1.5" stroke-dasharray="6,3,1,3" opacity="0.2"/>`;
+      return s;
+    }
+    case 'sapphire': {
+      let s = `<circle cx="100" cy="100" r="83" fill="none" stroke="${palette.primary}" stroke-width="2" stroke-dasharray="10,2,3,2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="78" fill="none" stroke="${palette.accent}" stroke-width="0.5" opacity="0.15"/>`;
+      return s;
+    }
+    case 'amber': {
+      let s = '';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const x1 = 100 + 75 * Math.cos(angle);
+        const y1 = 100 + 75 * Math.sin(angle);
+        const x2 = 100 + 85 * Math.cos(angle + 0.1);
+        const y2 = 100 + 85 * Math.sin(angle + 0.1);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="1.5" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'obsidian': {
+      return `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="3" opacity="0.15"/>
+        <circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.8" stroke-dasharray="1,3" opacity="0.2"/>`;
+    }
+    case 'pharaonic': {
+      let s = '';
+      // Eye of Horus simplified + pyramidal rays
+      for (let i = 0; i < 12; i++) {
+        const angle = (i / 12) * Math.PI * 2;
+        const x1 = 100 + 78 * Math.cos(angle);
+        const y1 = 100 + 78 * Math.sin(angle);
+        const x2 = 100 + 86 * Math.cos(angle);
+        const y2 = 100 + 86 * Math.sin(angle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="${i%3===0?'1.5':'0.5'}" opacity="0.25"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="82" fill="none" stroke="${palette.accent}" stroke-width="1.5" stroke-dasharray="8,4,2,4" opacity="0.2"/>`;
+      return s;
+    }
+    case 'islamic': {
+      // 8-pointed star pattern
+      let s = '';
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const nextAngle = ((i + 3) / 8) * Math.PI * 2;
+        const x1 = 100 + 80 * Math.cos(angle);
+        const y1 = 100 + 80 * Math.sin(angle);
+        const x2 = 100 + 80 * Math.cos(nextAngle);
+        const y2 = 100 + 80 * Math.sin(nextAngle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="0.4" opacity="0.15"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.5" stroke-dasharray="2,4" opacity="0.2"/>`;
+      return s;
+    }
+    case 'ottoman': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="1" stroke-dasharray="5,2,1,2" opacity="0.2"/>`;
+      // Crescent
+      s += `<path d="M 95 60 A 15 15 0 1 1 95 75 A 10 10 0 1 0 95 60" fill="${palette.primary}" opacity="0.1"/>`;
+      return s;
+    }
+    case 'celtic': {
+      // Interlocking circles
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const cx = 100 + 30 * Math.cos(angle);
+        const cy = 100 + 30 * Math.sin(angle);
+        s += `<circle cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="25" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.1"/>`;
+      }
+      return s;
+    }
+    case 'japanese': {
+      // Mon (family crest) style — concentric petals
+      let s = '';
+      for (let i = 0; i < 6; i++) {
+        const angle = (i / 6) * Math.PI * 2;
+        const x = 100 + 50 * Math.cos(angle);
+        const y = 100 + 50 * Math.sin(angle);
+        s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="20" fill="none" stroke="${palette.primary}" stroke-width="0.3" opacity="0.08"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.primary}" stroke-width="2.5" opacity="0.15"/>`;
+      return s;
+    }
+    case 'military': {
+      let s = '';
+      // 5-pointed stars at cardinal points
+      for (let i = 0; i < 4; i++) {
+        const angle = (i / 4) * Math.PI * 2;
+        const cx = 100 + 82 * Math.cos(angle);
+        const cy = 100 + 82 * Math.sin(angle);
+        let star = '';
+        for (let j = 0; j < 5; j++) {
+          const sa = (j / 5) * Math.PI * 2 - Math.PI / 2;
+          const r = j % 2 === 0 ? 3 : 1.2;
+          const sx = cx + r * Math.cos(sa);
+          const sy = cy + r * Math.sin(sa);
+          star += `${j === 0 ? 'M' : 'L'} ${sx.toFixed(1)} ${sy.toFixed(1)} `;
+        }
+        star += 'Z';
+        s += `<path d="${star}" fill="${palette.primary}" opacity="0.2"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="85" fill="none" stroke="${palette.primary}" stroke-width="1.5" opacity="0.2"/>`;
+      return s;
+    }
+    case 'diplomatic': {
+      // Laurel wreath simplified
+      let s = '';
+      for (let i = 0; i < 20; i++) {
+        const angle = (i / 20) * Math.PI * 2;
+        const x = 100 + 83 * Math.cos(angle);
+        const y = 100 + 83 * Math.sin(angle);
+        const leafAngle = angle + Math.PI / 2;
+        s += `<ellipse cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" rx="3" ry="1" transform="rotate(${(leafAngle*180/Math.PI).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})" fill="${palette.primary}" opacity="0.12"/>`;
+      }
+      return s;
+    }
+    case 'scientific': {
+      // Atomic orbits
+      let s = '';
+      for (let i = 0; i < 3; i++) {
+        const rotate = i * 60;
+        s += `<ellipse cx="100" cy="100" rx="75" ry="25" fill="none" stroke="${palette.primary}" stroke-width="0.4" opacity="0.12" transform="rotate(${rotate} 100 100)"/>`;
+      }
+      s += `<circle cx="100" cy="100" r="5" fill="${palette.primary}" opacity="0.1"/>`;
+      return s;
+    }
+    case 'maritime': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="2" stroke-dasharray="8,3" opacity="0.2"/>`;
+      // Compass points
+      for (let i = 0; i < 8; i++) {
+        const angle = (i / 8) * Math.PI * 2;
+        const len = i % 2 === 0 ? 10 : 5;
+        const x1 = 100 + (80 - len) * Math.cos(angle);
+        const y1 = 100 + (80 - len) * Math.sin(angle);
+        const x2 = 100 + 80 * Math.cos(angle);
+        const y2 = 100 + 80 * Math.sin(angle);
+        s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${palette.primary}" stroke-width="${i%2===0?'1.5':'0.5'}" opacity="0.2"/>`;
+      }
+      return s;
+    }
+    case 'heritage': {
+      let s = `<circle cx="100" cy="100" r="84" fill="none" stroke="${palette.primary}" stroke-width="1.5" stroke-dasharray="6,2,2,2,2,2" opacity="0.2"/>`;
+      s += `<circle cx="100" cy="100" r="80" fill="none" stroke="${palette.accent}" stroke-width="0.5" opacity="0.15"/>`;
+      return s;
     }
     default:
       return '';

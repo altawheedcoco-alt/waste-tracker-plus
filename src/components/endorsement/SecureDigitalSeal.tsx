@@ -96,7 +96,7 @@ const SecureDigitalSeal = ({
         entityId,
         entityType,
         entityName,
-        size: 60,
+        size: 44,
         style,
       });
     }, [style]);
@@ -191,22 +191,23 @@ const SecureDigitalSeal = ({
                   تغيير نمط الختم
                 </Button>
               </PopoverTrigger>
-              <PopoverContent dir="rtl" className="w-80 p-3" align="center">
+              <PopoverContent dir="rtl" className="w-[360px] p-3" align="center">
                 <div className="space-y-3">
-                  <h4 className="font-semibold text-sm text-center">اختر نمط الختم</h4>
-                  <div className="grid grid-cols-5 gap-2">
+                  <h4 className="font-semibold text-sm text-center">اختر نمط الختم ({SEAL_STYLES.length} نمط)</h4>
+                  <div className="grid grid-cols-5 gap-1.5 max-h-[320px] overflow-y-auto pr-1">
                     {SEAL_STYLES.map((style) => (
                       <button
                         key={style.id}
                         onClick={() => handleStyleChange(style.id)}
-                        className={`flex flex-col items-center p-1.5 rounded-lg border-2 transition-all hover:scale-105 ${
+                        className={`flex flex-col items-center p-1 rounded-lg border-2 transition-all hover:scale-105 ${
                           selectedStyle === style.id
                             ? 'border-primary bg-primary/5 shadow-sm'
                             : 'border-transparent hover:border-muted-foreground/20'
                         }`}
+                        title={style.description}
                       >
                         <StylePreview style={style.id} />
-                        <span className="text-[9px] font-medium mt-1 leading-tight">{style.nameAr}</span>
+                        <span className="text-[8px] font-medium mt-0.5 leading-tight">{style.nameAr}</span>
                       </button>
                     ))}
                   </div>
