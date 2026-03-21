@@ -327,7 +327,7 @@ export const useOperationalAlerts = () => {
           type: 'work_order',
           icon: Truck,
           timestamp: w.created_at,
-          route: '/dashboard/work-orders',
+          route: '/dashboard/my-requests',
         });
       }
 
