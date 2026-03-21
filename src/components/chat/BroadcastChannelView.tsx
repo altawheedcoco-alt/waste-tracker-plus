@@ -1131,7 +1131,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
   const { report } = useBroadcastNotificationSettings(channel.id);
   const {
     posts, isLoading: postsLoading, myReactions,
-    createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, isPosting,
+    createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, uploadMultipleFiles, isPosting,
   } = useBroadcastPosts(channel.id);
 
   const allowComments = (channel as any).allow_comments !== false;
