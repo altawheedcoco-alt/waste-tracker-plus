@@ -641,9 +641,10 @@ const OrganizationProfile = () => {
                     ))}
                   </div>
                 )}
-                {uploading && (
+                {(uploading || aiExtracting) && (
                   <div className="flex items-center justify-center gap-2 py-4">
-                    <Loader2 className="w-5 h-5 animate-spin" /><span>جاري رفع الملف...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>{aiExtracting ? '🧠 جاري استخراج البيانات بالذكاء الاصطناعي...' : 'جاري رفع الملف...'}</span>
                   </div>
                 )}
                 <Separator />
