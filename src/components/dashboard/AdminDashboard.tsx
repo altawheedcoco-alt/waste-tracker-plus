@@ -28,7 +28,7 @@ import UnifiedDocumentSearch from '@/components/verification/UnifiedDocumentSear
 import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
