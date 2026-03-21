@@ -38,7 +38,16 @@ async function callGeminiDirect(
   apiKey: string,
   options: AIRequestOptions
 ): Promise<Response> {
-  const { model = DEFAULT_MODEL, ...rest } = options;
+  let { model = DEFAULT_MODEL, ...rest } = options;
+  
+  // Strip provider prefix for direct Google API (e.g. "google/gemini-2.5-pro" -> "gemini-2.5-pro")
+  if (model.startsWith("google/")) {
+    model = model.replace("google/", "");
+  }
+  // Map Lovable gateway model names to Google API names
+  if (model === "gemini-3-flash-preview") {
+    model = "gemini-2.0-flash";
+  }
   
   let lastError: Error | null = null;
   
