@@ -8,7 +8,7 @@ import {
   Link2, FileText, Heart, Pin, Trash2,
   Check, Settings, BarChart3, UserPlus, Shield,
   Copy, Flag, AlertTriangle, Crown, UserX, Edit3,
-  TrendingUp, MessageSquare, Activity, Clock
+  TrendingUp, MessageSquare, Activity, Clock, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -543,10 +543,12 @@ CommentSection.displayName = 'CommentSection';
 const AutoPlayVideo = ({ src }: { src: string }) => {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
+    setHasError(false);
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -555,21 +557,94 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
           el.pause();
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.3 }
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [src]);
+
+  if (hasError) {
+    return (
+      <a href={src} target="_blank" rel="noreferrer"
+        className="flex items-center gap-3 p-4 bg-muted/20 rounded-xl border border-border/30 hover:bg-muted/40 transition-colors">
+        <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+          <Play className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium">فيديو مرفق</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">اضغط لتشغيل الفيديو في نافذة جديدة</p>
+        </div>
+        <Forward className="w-4 h-4 text-primary rotate-90 shrink-0" />
+      </a>
+    );
+  }
 
   return (
     <div className="relative group">
-      <video ref={ref} src={src} className="w-full object-contain" muted={muted} loop playsInline preload="auto" controls />
+      <video
+        ref={ref}
+        src={src}
+        className="w-full object-contain max-h-[500px]"
+        muted={muted}
+        loop
+        playsInline
+        preload="metadata"
+        controls
+        crossOrigin="anonymous"
+        onError={() => setHasError(true)}
+      />
       <button
         onClick={() => setMuted(m => !m)}
         className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2.5"
       >
         {muted ? '🔇 كتم' : '🔊 صوت'}
       </button>
+    </div>
+  );
+};
+
+// ═══════════════════════════════════════════════════════════════
+// Inline PDF Viewer — with mobile fallback
+const InlinePdfViewer = ({ url, name, height = '400px' }: { url: string; name: string; height?: string }) => {
+  const [iframeError, setIframeError] = useState(false);
+  const isMobile = typeof window !== 'undefined' && /Android|iPhone|iPad/i.test(navigator.userAgent);
+
+  // On mobile, iframe PDF usually fails — show a preview card instead
+  if (isMobile || iframeError) {
+    return (
+      <div className="rounded-xl border border-border/50 overflow-hidden">
+        <a href={url} target="_blank" rel="noreferrer"
+          className="flex items-center gap-3 p-3 bg-gradient-to-l from-red-500/5 to-transparent hover:from-red-500/10 transition-colors">
+          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+            <FileText className="w-6 h-6 text-red-500" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium truncate">{name || 'ملف PDF'}</p>
+            <p className="text-[10px] text-muted-foreground mt-0.5">PDF • اضغط لفتح المستند</p>
+          </div>
+          <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+            <Forward className="w-4 h-4 text-primary rotate-90" />
+          </div>
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-xl border border-border/50 overflow-hidden">
+      <iframe
+        src={`${url}#toolbar=0`}
+        className="w-full border-0"
+        style={{ height }}
+        title={name}
+        onError={() => setIframeError(true)}
+      />
+      <a href={url} target="_blank" rel="noreferrer"
+        className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
+        <FileText className="w-4 h-4 text-red-500" />
+        <span className="text-xs font-medium truncate flex-1">{name}</span>
+        <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
+      </a>
     </div>
   );
 };
@@ -770,25 +845,12 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
               const docIsPdf = ext === 'pdf';
               const docIsOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
               return (
-                <div key={`doc-${i}`} className="rounded-xl border border-border/50 overflow-hidden">
+                <div key={`doc-${i}`}>
                   {docIsPdf ? (
-                    <div>
-                      <iframe
-                        src={`${url}#toolbar=0`}
-                        className="w-full border-0"
-                        style={{ height: '350px' }}
-                        title={name}
-                      />
-                      <a href={url} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
-                        <FileText className="w-4 h-4 text-red-500" />
-                        <span className="text-xs font-medium truncate flex-1">{name}</span>
-                        <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
-                      </a>
-                    </div>
+                    <InlinePdfViewer url={url} name={name} height="350px" />
                   ) : (
                     <a href={url} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2.5 p-2.5 hover:border-primary/30 bg-muted/10 transition-colors">
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/30 bg-muted/10 transition-colors">
                       <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
                         docIsOffice ? "bg-blue-500/10" : "bg-primary/10")}>
                         <FileText className={cn("w-5 h-5", docIsOffice ? "text-blue-500" : "text-primary")} />
@@ -832,25 +894,12 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
 
         {/* === LEGACY SINGLE: Document === */}
         {!isMultiMedia && isDocPost && (
-          <div className="mx-4 my-2 rounded-xl border border-border/50 overflow-hidden">
+          <div className="mx-4 my-2">
             {isPdf ? (
-              <div>
-                <iframe
-                  src={`${post.file_url!}#toolbar=0`}
-                  className="w-full border-0"
-                  style={{ height: '400px' }}
-                  title={post.file_name || 'PDF'}
-                />
-                <a href={post.file_url!} target="_blank" rel="noreferrer"
-                  className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
-                  <FileText className="w-4 h-4 text-red-500" />
-                  <span className="text-xs font-medium truncate flex-1">{post.file_name || 'ملف PDF'}</span>
-                  <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
-                </a>
-              </div>
+              <InlinePdfViewer url={post.file_url!} name={post.file_name || 'ملف PDF'} height="400px" />
             ) : (
               <a href={post.file_url!} target="_blank" rel="noreferrer"
-                className="flex items-center gap-3 p-3 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
+                className="flex items-center gap-3 p-3 rounded-xl border border-border/50 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
                 <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
                   isDocFile ? "bg-blue-500/10" : "bg-primary/10")}>
                   <FileText className={cn("w-6 h-6", isDocFile ? "text-blue-500" : "text-primary")} />
