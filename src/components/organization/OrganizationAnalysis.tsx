@@ -546,7 +546,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
           )}
         </Accordion>
       </div>
-    </ScrollArea>
+    </div>
   );
 };
 
