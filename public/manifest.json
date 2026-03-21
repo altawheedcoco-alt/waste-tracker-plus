@@ -1,7 +1,7 @@
 {
-  "name": "آي ريسايكل - iRecycle",
+  "name": "آي ريسايكل - iRecycle v3.0",
   "short_name": "iRecycle",
-  "description": "نظام متكامل لإدارة النفايات والحفاظ على البيئة في مصر",
+  "description": "منصة iRecycle لتتبع وإدارة المخلفات الذكية — نظام متكامل لإدارة المخلفات والنفايات والحفاظ على البيئة في مصر",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -43,14 +43,14 @@
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",
-      "label": "لوحة التحكم الرئيسية"
+      "label": "لوحة التحكم — إدارة شاملة للمخلفات والشحنات"
     },
     {
       "src": "/screenshots/dashboard-mobile.png",
       "sizes": "390x844",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "لوحة التحكم - موبايل"
+      "label": "لوحة التحكم — تتبع ذكي من الموبايل"
     }
   ],
   "shortcuts": [
