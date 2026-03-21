@@ -37,6 +37,7 @@ const StampSignatureUpload = lazy(() => import('@/components/organization/StampS
 const BiometricManager = lazy(() => import('@/components/biometric/BiometricManager'));
 const OrganizationSignatureSettings = lazy(() => import('@/components/signature').then(m => ({ default: m.OrganizationSignatureSettings })));
 const LMSProfileCertificates = lazy(() => import('@/components/lms/LMSProfileCertificates'));
+const OrganizationAnalysis = lazy(() => import('@/components/organization/OrganizationAnalysis'));
 const AttestationTabContent = lazy(() => import('@/components/attestation/AttestationTabContent'));
 
 interface OrganizationDocument {
