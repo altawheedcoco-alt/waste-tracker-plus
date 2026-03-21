@@ -19,8 +19,45 @@
   body {
     @apply bg-background text-foreground font-cairo antialiased;
     direction: rtl;
+    text-align: right;
     line-height: 1.6;
     letter-spacing: -0.01em;
+  }
+
+  /* ═══ RTL/LTR Text Alignment System ═══ */
+
+  /* Inputs & form elements — right-aligned for Arabic */
+  input, textarea, select {
+    text-align: right;
+    direction: rtl;
+  }
+
+  /* Override for explicitly English inputs (email, url, code) */
+  input[type="email"],
+  input[type="url"],
+  input[type="tel"],
+  input[dir="ltr"],
+  textarea[dir="ltr"],
+  .input-ltr {
+    direction: ltr;
+    text-align: left;
+  }
+
+  /* Table alignment */
+  table {
+    direction: rtl;
+    text-align: right;
+  }
+
+  th, td {
+    text-align: right;
+  }
+
+  /* Code blocks & monospace — always LTR */
+  code, pre, kbd, samp, .font-mono {
+    direction: ltr;
+    text-align: left;
+    unicode-bidi: embed;
   }
 
   /* v3.0 Headings — tighter, more authoritative */
@@ -28,6 +65,7 @@
     @apply font-cairo font-bold;
     line-height: 1.2;
     letter-spacing: -0.025em;
+    text-align: right;
   }
 
   h1 { @apply text-2xl sm:text-3xl lg:text-4xl; }
@@ -37,6 +75,7 @@
 
   p {
     line-height: 1.7;
+    text-align: right;
   }
 
   /* v3.0 selection color */
@@ -59,9 +98,9 @@
     }
   }
 
-  /* v3.0 Smooth focus transitions */
-  :focus-visible {
-    @apply outline-none ring-2 ring-primary/40 ring-offset-2 ring-offset-background;
-    transition: box-shadow 0.2s ease;
+  /* ═══ Shadcn component RTL defaults ═══ */
+  [role="dialog"],
+  [role="alertdialog"] {
+    text-align: right;
   }
 }
