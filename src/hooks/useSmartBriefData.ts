@@ -260,7 +260,7 @@ export function useSmartBriefData(role: Role) {
         .select('id', { count: 'exact', head: true })
         .gte('created_at', `${today}T00:00:00`);
 
-      const { count: pendingVerifications } = await supabase
+      const { count: pendingVerifications } = await (supabase as any)
         .from('organizations')
         .select('id', { count: 'exact', head: true })
         .eq('verification_status', 'pending');
