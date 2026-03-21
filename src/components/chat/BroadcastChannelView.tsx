@@ -160,9 +160,9 @@ const OwnerSettings = memo(({ channel }: { channel: BroadcastChannel }) => {
       {/* Images */}
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <Avatar className="w-14 h-14 cursor-pointer ring-2 ring-border" onClick={() => avatarRef.current?.click()}>
+          <Avatar className="w-7 h-7 cursor-pointer ring-2 ring-border" onClick={() => avatarRef.current?.click()}>
             {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-            <AvatarFallback className="bg-primary/10 text-primary text-xl font-bold">
+            <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
               {channel.name.charAt(0)}
             </AvatarFallback>
           </Avatar>
