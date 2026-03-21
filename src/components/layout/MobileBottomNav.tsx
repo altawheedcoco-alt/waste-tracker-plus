@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
+import { usePlatformCounts } from '@/hooks/usePlatformCounts';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 
 interface NavTab {
