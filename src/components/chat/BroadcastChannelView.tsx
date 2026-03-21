@@ -1676,6 +1676,16 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const [view, setView] = useState<'feed' | 'profile' | 'admin'>('feed');
   const [isMobileListView, setIsMobileListView] = useState(true);
 
+  // Keep selectedChannel in sync with fresh data from channels query
+  useEffect(() => {
+    if (selectedChannel) {
+      const fresh = channels.find(c => c.id === selectedChannel.id);
+      if (fresh && (fresh.is_subscribed !== selectedChannel.is_subscribed || fresh.subscriber_count !== selectedChannel.subscriber_count)) {
+        setSelectedChannel(fresh);
+      }
+    }
+  }, [channels, selectedChannel]);
+
   const handleSelectChannel = useCallback((ch: BroadcastChannel) => {
     setSelectedChannel(ch);
     setView('feed');
