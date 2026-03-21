@@ -1072,26 +1072,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
           </main>
 
-          {/* Floating Actions: Permits + Quick Sign — positioned above bottom nav on mobile */}
-          <FloatingActionsStack
-            actions={[
-              {
-                id: 'quick-sign',
-                icon: <PenTool size={isMobile ? 18 : 20} />,
-                onClick: () => navigate('/dashboard/signing-inbox'),
-                label: t('dashboard.quickSign'),
-                variant: 'accent',
-              },
-              {
-                id: 'permits',
-                icon: <FileText size={isMobile ? 18 : 20} />,
-                onClick: () => navigate('/dashboard/driver-permits'),
-                label: t('dashboard.generalPermits'),
-                variant: 'primary',
-              },
-            ]}
-            position="bottom-left"
-          />
+          {/* Floating actions moved to FloatingSidePanel */}
 
           {/* Mobile Bottom Navigation */}
           <MobileBottomNav />

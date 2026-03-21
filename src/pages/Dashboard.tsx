@@ -172,13 +172,12 @@ const Dashboard = () => {
             {showWidgets && (
               <ErrorBoundary fallbackTitle="خطأ في الأدوات المساعدة">
                 <Suspense fallback={null}>
-                  {/* Core widgets — all roles */}
-                  <UnifiedFloatingMenu />
+                  {/* Unified Side Panel — replaces all floating buttons */}
+                  <FloatingSidePanel />
                   <UnifiedSupportWidget />
                   <BetaBanner />
                   
                   {/* Role-specific widgets */}
-                  {(isAdmin || orgType === 'transporter' || orgType === 'recycler') && <CallLogWidget />}
                   {showAIAssistant && <AIOperationsAssistant />}
                   {!isDriver && <AIChatbot />}
                   {!isDriver && <EnhancedChatWidget />}
