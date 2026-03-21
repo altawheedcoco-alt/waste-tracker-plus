@@ -123,7 +123,7 @@ const FraudDetectionPanel = () => {
           {scanning ? <RefreshCw className="w-4 h-4 ml-1 animate-spin" /> : <Search className="w-4 h-4 ml-1" />}
           {scanning ? 'جاري الفحص...' : 'فحص الآن'}
         </Button>
-        <Button variant="outline" size="sm" onClick={fetchAlerts}>
+        <Button variant="outline" size="sm" onClick={() => fetchAlerts()}>
           <RefreshCw className="w-4 h-4 ml-1" />
           تحديث
         </Button>
