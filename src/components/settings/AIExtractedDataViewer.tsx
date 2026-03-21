@@ -79,14 +79,8 @@ const AIExtractedDataViewer = () => {
     const fields = JSON.stringify(data?.detected_fields || {}).toLowerCase();
     return rawText.includes(q) || docType.includes(q) || fields.includes(q);
   });
-    if (!searchQuery.trim()) return true;
-    const q = searchQuery.toLowerCase();
-    const data = doc.ocr_extracted_data;
-    const rawText = data?.raw_text?.toLowerCase() || '';
-    const docType = doc.document_type?.toLowerCase() || '';
-    const fields = JSON.stringify(data?.detected_fields || {}).toLowerCase();
-    return rawText.includes(q) || docType.includes(q) || fields.includes(q);
-  });
+
+
 
   const getConfidenceColor = (c: number | null) => {
     if (!c) return 'bg-muted text-muted-foreground';
