@@ -467,7 +467,7 @@ const TransporterCommandCenter = () => {
                   label: 'السائقون', value: a.drivers, raw: stats?.totalDrivers || 0,
                   icon: Users, gradient: 'from-violet-500 to-purple-400', color: '#8B5CF6',
                   sub: `${stats?.availableDrivers || 0} متاح · ${stats?.activeDrivers || 0} نشط`,
-                  sparkData: null, onClick: () => navigate('/dashboard/drivers'),
+                  sparkData: null, onClick: () => navigate('/dashboard/transporter-drivers'),
                 },
               ].map((m, index) => (
                 <motion.div key={m.label}
@@ -507,7 +507,7 @@ const TransporterCommandCenter = () => {
               {/* Row 1: Operations */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
                 <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-emerald-500"
-                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/accounting')} />
+                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5}
                   onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
                 <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
@@ -521,7 +521,7 @@ const TransporterCommandCenter = () => {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
                 <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-blue-500"
                   sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
-                  onClick={() => navigate('/dashboard/accounting')} />
+                  onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
                   sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
                   onClick={() => navigate('/dashboard/transporter-receipts')} />
@@ -530,14 +530,14 @@ const TransporterCommandCenter = () => {
                   onClick={() => navigate('/dashboard/employees')} />
                 <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
                   sub={`${stats?.activeVehicles || 0} فعّال`}
-                  onClick={() => navigate('/dashboard/fleet')} />
+                  onClick={() => navigate('/dashboard/drivers')} />
                 <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-indigo-500"
                   sub={`${stats?.activeContracts || 0} سارٍ`}
                   onClick={() => navigate('/dashboard/contracts')} />
                 <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
                   sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
                   alert={(stats?.expiringDocs || 0) > 0}
-                  onClick={() => navigate('/dashboard/documents')} />
+                  onClick={() => navigate('/dashboard/document-center')} />
               </div>
 
               {/* Row 3: Financial & Compliance Bar */}
@@ -545,7 +545,7 @@ const TransporterCommandCenter = () => {
                 <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
                 <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
                   sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
-                  onClick={() => navigate('/dashboard/deposits')} />
+                  onClick={() => navigate('/dashboard/quick-deposit-links')} />
                 <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
