@@ -100,6 +100,22 @@ const TransporterPerformanceCharts = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Summary KPIs */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/5 border text-center">
+            <p className="text-lg font-bold text-primary">{data.totalShipments}</p>
+            <p className="text-[10px] text-muted-foreground">{t('transporterCharts.shipments')} (30 يوم)</p>
+          </div>
+          <div className="p-2 rounded-lg bg-emerald-500/5 border text-center">
+            <p className="text-lg font-bold text-emerald-600">{data.totalRevenue.toLocaleString('ar-EG')}</p>
+            <p className="text-[10px] text-muted-foreground">إجمالي الإيراد</p>
+          </div>
+          <div className="p-2 rounded-lg bg-blue-500/5 border text-center">
+            <p className="text-lg font-bold text-blue-600">{data.totalQuantity.toLocaleString('ar-EG')}</p>
+            <p className="text-[10px] text-muted-foreground">إجمالي الكمية (طن)</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Daily shipments bar chart */}
           <div>

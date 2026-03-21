@@ -62,11 +62,12 @@ const EnhancedDriverPerformance = () => {
       const driverIds = drivers.map(d => d.id);
       const today = new Date().toISOString().split('T')[0];
 
-      // Batch fetch
-      const [shipmentsRes, tripCostsRes, ratingsRes] = await Promise.all([
+      // Batch fetch including incidents for safety score
+      const [shipmentsRes, tripCostsRes, ratingsRes, incidentsRes] = await Promise.all([
         supabase.from('shipments').select('driver_id, status, delivered_at, expected_delivery_date').in('driver_id', driverIds),
         supabase.from('trip_costs').select('driver_id, distance_km, fuel_cost, revenue').eq('organization_id', organization.id).in('driver_id', driverIds),
         supabase.from('partner_ratings').select('overall_rating').eq('rated_organization_id', organization.id),
+        supabase.from('incident_reports').select('reported_by, severity').eq('organization_id', organization.id),
       ]);
 
       const avgRating = ratingsRes.data?.length
@@ -86,7 +87,13 @@ const EnhancedDriverPerformance = () => {
         const totalFuel = driverTrips.reduce((s, t) => s + (Number(t.fuel_cost) || 0), 0);
 
         const onTimeScore = delivered.length > 0 ? Math.round((onTime.length / delivered.length) * 100) : 100;
-        const safetyScore = 85 + Math.random() * 15; // Placeholder - would use incident data
+        
+        // Safety score based on real incident data
+        const driverIncidents = incidentsRes.data?.filter(i => i.reported_by === driver.id) || [];
+        const criticalIncidents = driverIncidents.filter(i => i.severity === 'critical' || i.severity === 'high').length;
+        const minorIncidents = driverIncidents.filter(i => i.severity === 'low' || i.severity === 'medium').length;
+        const safetyScore = Math.max(0, Math.min(100, 100 - (criticalIncidents * 20) - (minorIncidents * 5)));
+        
         const customerScore = Math.round(avgRating * 20); // 5-star to 100
         const efficiencyScore = totalDist > 0 && totalFuel > 0 ? Math.min(100, Math.round((totalDist / totalFuel) * 10)) : 75;
 
