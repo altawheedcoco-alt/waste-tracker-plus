@@ -1407,7 +1407,7 @@ const EncryptedChatInner = () => {
 // ─── Lazy load NotesTab ─────────────────────────────────
 const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
 const ChannelListViewPage = lazy(() => import('@/components/chat/ChannelListView'));
-const ChatPollCard = lazy(() => import('@/components/chat/ChatPollCard'));
+const PollsListView = lazy(() => import('@/components/chat/PollsListView'));
 
 type ChatTabType = 'chat' | 'notes' | 'channels' | 'polls';
 
