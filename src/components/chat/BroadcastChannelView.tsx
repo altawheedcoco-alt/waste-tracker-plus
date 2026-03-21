@@ -659,7 +659,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
 
   return (
     <>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      <motion.div ref={postRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className={cn(
           "bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-shadow",
           post.is_pinned ? "border-primary/40 ring-2 ring-primary/10" : "border-border/30"
