@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -38,32 +39,24 @@ const severityColors: Record<string, string> = {
 
 const FraudDetectionPanel = () => {
   const { organization } = useAuth();
-  const [alerts, setAlerts] = useState<FraudAlert[]>([]);
-  const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
 
-  useEffect(() => {
-    if (organization?.id) fetchAlerts();
-  }, [organization?.id]);
-
-  const fetchAlerts = async () => {
-    setLoading(true);
-    try {
+  const { data: alerts = [], isLoading: loading, refetch: fetchAlerts } = useQuery({
+    queryKey: ['fraud-alerts', organization?.id],
+    queryFn: async () => {
+      if (!organization?.id) return [];
       const { data, error } = await supabase
         .from('fraud_alerts')
         .select('*')
-        .eq('organization_id', organization!.id)
+        .eq('organization_id', organization.id)
         .order('created_at', { ascending: false })
         .limit(50);
-
       if (error) throw error;
-      setAlerts(data || []);
-    } catch (e) {
-      console.error('Error fetching fraud alerts:', e);
-    } finally {
-      setLoading(false);
-    }
-  };
+      return (data || []) as FraudAlert[];
+    },
+    enabled: !!organization?.id,
+    refetchInterval: 60_000,
+  });
 
   const runScan = async () => {
     setScanning(true);
@@ -130,7 +123,7 @@ const FraudDetectionPanel = () => {
           {scanning ? <RefreshCw className="w-4 h-4 ml-1 animate-spin" /> : <Search className="w-4 h-4 ml-1" />}
           {scanning ? 'جاري الفحص...' : 'فحص الآن'}
         </Button>
-        <Button variant="outline" size="sm" onClick={fetchAlerts}>
+        <Button variant="outline" size="sm" onClick={() => fetchAlerts()}>
           <RefreshCw className="w-4 h-4 ml-1" />
           تحديث
         </Button>

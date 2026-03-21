@@ -25,6 +25,7 @@ const CarbonCreditsPanel = () => {
       return data || [];
     },
     enabled: !!organization?.id,
+    refetchInterval: 60_000, // Auto-refresh every 60s
   });
 
   const totalCredits = credits.reduce((s: number, c: any) => s + (c.carbon_tons || 0), 0);

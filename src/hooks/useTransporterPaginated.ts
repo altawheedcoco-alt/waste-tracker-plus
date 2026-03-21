@@ -186,6 +186,7 @@ export const useTransporterStatsDB = () => {
     },
     enabled: !!orgId,
     staleTime: 30_000,
+    refetchInterval: 60_000, // Auto-refresh every 60s
   });
 };
 

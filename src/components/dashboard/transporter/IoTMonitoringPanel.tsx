@@ -20,6 +20,7 @@ const IoTMonitoringPanel = () => {
       return data || [];
     },
     enabled: !!organization?.id,
+    refetchInterval: 30_000, // Auto-refresh every 30s
   });
 
   const deviceTypeIcons: Record<string, any> = {
