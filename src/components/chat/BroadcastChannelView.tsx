@@ -1380,7 +1380,7 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
       );
     }
 
-    if (view === 'admin' && selectedChannel.is_mine) {
+    if (view === 'admin' && (selectedChannel.is_mine || isAdmin)) {
       return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
     }
 
