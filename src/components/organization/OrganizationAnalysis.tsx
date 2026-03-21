@@ -100,12 +100,13 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
         document_type: 'report',
         document_category: 'analysis',
         title: reportTitle,
+        file_name: `${reportTitle}.json`,
+        file_url: '',
         ai_extracted: true,
         ocr_extracted_data: analysis as any,
         ocr_confidence: analysis.compliance_score,
         uploaded_by: profile.id,
         tags: ['ai-analysis', 'deep-analysis', 'saved-report'],
-        status: 'active',
       });
       if (saveError) throw saveError;
 
@@ -128,6 +129,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
     } finally { setSaving(false); }
   };
 
+  const getScoreColor = (score: number) => {
 
     if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
     if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
