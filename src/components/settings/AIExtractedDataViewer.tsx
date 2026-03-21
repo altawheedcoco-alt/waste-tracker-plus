@@ -27,11 +27,21 @@ interface ExtractedDocument {
   tags: string[] | null;
 }
 
+const CATEGORY_FILTERS = [
+  { value: 'all', label: 'الكل' },
+  { value: 'license', label: 'تراخيص' },
+  { value: 'certificate', label: 'موافقات بيئية' },
+  { value: 'contract', label: 'عقود' },
+  { value: 'invoice', label: 'فواتير' },
+  { value: 'other', label: 'أخرى' },
+];
+
 const AIExtractedDataViewer = () => {
   const { profile } = useAuth();
   const [documents, setDocuments] = useState<ExtractedDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedDoc, setSelectedDoc] = useState<ExtractedDocument | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
