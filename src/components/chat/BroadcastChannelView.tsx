@@ -539,6 +539,41 @@ const CommentSection = memo(({ postId, isOpen }: { postId: string; isOpen: boole
 CommentSection.displayName = 'CommentSection';
 
 // ═══════════════════════════════════════════════════════════════
+// AutoPlay Video — plays on scroll into view, pauses when out
+const AutoPlayVideo = ({ src }: { src: string }) => {
+  const ref = useRef<HTMLVideoElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.play().catch(() => {});
+        } else {
+          el.pause();
+        }
+      },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div className="relative group">
+      <video ref={ref} src={src} className="w-full object-contain" muted={muted} loop playsInline preload="auto" controls />
+      <button
+        onClick={() => setMuted(m => !m)}
+        className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2.5"
+      >
+        {muted ? '🔇 كتم' : '🔊 صوت'}
+      </button>
+    </div>
+  );
+};
+
 // Post Card (Shared — adapts per role) — Enhanced Design
 // ═══════════════════════════════════════════════════════════════
 const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport }: {
