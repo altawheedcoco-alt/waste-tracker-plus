@@ -68,6 +68,7 @@ const ORG_PROFILE_TABS: TabItem[] = [
   { value: 'location', label: 'الموقع والصور', icon: MapPin },
   // الوثائق والتوثيق
   { value: 'documents', label: 'الوثائق', icon: FileText },
+  { value: 'doc-analysis', label: 'تحليل الوثائق', icon: FileSearch },
   { value: 'analysis', label: 'تحليل الجهة', icon: Brain },
   { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp },
   { value: 'certificates', label: 'الشهادات', icon: Award },
