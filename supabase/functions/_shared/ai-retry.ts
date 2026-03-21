@@ -27,7 +27,21 @@ export async function callAIWithRetry(
   const geminiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
   
   if (geminiKey) {
-    return callGeminiDirect(geminiKey, options);
+    try {
+      const response = await callGeminiDirect(geminiKey, options);
+      // If Gemini returned rate limit after all retries, fallback to Lovable Gateway
+      if (response.status === 429 && apiKeyOrLovableKey) {
+        console.warn("Gemini exhausted all retries (429), falling back to Lovable AI Gateway");
+        return callLovableGateway(apiKeyOrLovableKey, options);
+      }
+      return response;
+    } catch (err) {
+      console.warn("Gemini failed completely, falling back to Lovable AI Gateway:", err);
+      if (apiKeyOrLovableKey) {
+        return callLovableGateway(apiKeyOrLovableKey, options);
+      }
+      throw err;
+    }
   }
   
   // Fallback to Lovable AI Gateway
