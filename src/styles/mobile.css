@@ -80,12 +80,25 @@ html {
   overflow-x: hidden;
   overflow-y: auto;
   max-width: 100vw;
+  max-width: 100dvw;
 }
 
 body {
   overflow-x: hidden;
   overflow-y: visible;
   max-width: 100vw;
+  max-width: 100dvw;
+}
+
+#root {
+  overflow-x: hidden;
+  max-width: 100vw;
+  max-width: 100dvw;
+}
+
+img, video, iframe, svg, canvas {
+  max-width: 100%;
+  height: auto;
 }
 
 /* ——— Small phones (≤ 360px) ——— */
@@ -344,9 +357,25 @@ body {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
   }
 
+  /* PWA header safe area */
+  header, nav:first-of-type {
+    padding-top: env(safe-area-inset-top, 0px);
+  }
+
   /* Hide browser-specific UI hints */
   .browser-only {
     display: none !important;
+  }
+
+  /* Full-height layout in PWA */
+  html, body, #root {
+    height: 100%;
+    height: 100dvh;
+  }
+
+  /* Bottom nav in PWA needs extra padding */
+  .fixed.bottom-0 {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
@@ -371,6 +400,24 @@ body {
   input, textarea, select {
     font-size: 16px; /* prevents zoom on focus */
   }
+
+  /* iOS rubber-band fix for fixed elements */
+  .fixed {
+    -webkit-transform: translateZ(0);
+    transform: translateZ(0);
+  }
+}
+
+/* ========================================
+   Android PWA specific fixes
+   ======================================== */
+@media all and (display-mode: standalone) {
+  /* Android status bar overlap fix */
+  @supports not (-webkit-touch-callout: none) {
+    header, nav:first-of-type {
+      padding-top: max(0.5rem, env(safe-area-inset-top, 0px));
+    }
+  }
 }
 
 /* ========================================
@@ -385,4 +432,63 @@ body {
   .has-bottom-nav {
     padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
   }
+}
+
+/* ========================================
+   Extra-large screens (≥ 1440px)
+   ======================================== */
+@media (min-width: 1440px) {
+  .container {
+    max-width: 1400px;
+    margin-inline: auto;
+  }
+}
+
+/* ========================================
+   Ultra-wide screens (≥ 1920px)
+   ======================================== */
+@media (min-width: 1920px) {
+  .container {
+    max-width: 1600px;
+  }
+
+  h1 { font-size: 2.5rem !important; }
+  h2 { font-size: 2rem !important; }
+}
+
+/* ========================================
+   Very small phones (≤ 320px)
+   ======================================== */
+@media (max-width: 320px) {
+  :root { font-size: 13px; }
+  
+  .container { padding-left: 0.5rem; padding-right: 0.5rem; }
+  
+  h1 { font-size: 1.2rem !important; }
+  h2 { font-size: 1rem !important; }
+  h3 { font-size: 0.9rem !important; }
+  
+  [role="dialog"] > div,
+  [data-radix-dialog-content] {
+    margin: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
+  }
+
+  .grid-cols-2 { grid-template-columns: 1fr !important; }
+}
+
+/* ========================================
+   Foldable / Dual-screen support
+   ======================================== */
+@media (spanning: single-fold-vertical) {
+  .container { max-width: 100%; }
+}
+
+/* ========================================
+   Print-safe responsive
+   ======================================== */
+@media print {
+  .fixed, .sticky { position: static !important; }
+  nav.fixed { display: none !important; }
+  main { padding-bottom: 0 !important; }
 }

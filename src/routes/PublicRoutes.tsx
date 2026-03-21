@@ -1,54 +1,76 @@
 import { lazy } from "react";
 import { Route } from "react-router-dom";
 
-const Index = lazy(() => import("@/pages/Index"));
-const Auth = lazy(() => import("@/pages/Auth"));
-const GoogleSetup = lazy(() => import("@/pages/GoogleSetup"));
-const NotFound = lazy(() => import("@/pages/NotFound"));
-const News = lazy(() => import("@/pages/News"));
-const FullBrochure = lazy(() => import("@/pages/Brochure"));
-const PublicTrackingPage = lazy(() => import("@/pages/PublicTracking"));
-const PublicPermitView = lazy(() => import("@/pages/PublicPermitView"));
-const PublicOrgProfile = lazy(() => import("@/pages/PublicOrgProfile"));
-const PublicClientPortal = lazy(() => import("@/pages/PublicClientPortal"));
-const Verify = lazy(() => import("@/pages/Verify"));
-const QRVerify = lazy(() => import("@/pages/QRVerify"));
-const VerifySignatory = lazy(() => import("@/pages/VerifySignatory"));
-const InviteAccept = lazy(() => import("@/pages/InviteAccept"));
-const ConsultantPortal = lazy(() => import("@/pages/ConsultantPortal"));
-const AuditPortalPage = lazy(() => import("@/pages/AuditPortal"));
-const QuickDeposit = lazy(() => import("@/pages/QuickDeposit"));
-const QuickShipment = lazy(() => import("@/pages/QuickShipment"));
-const QuickDriver = lazy(() => import("@/pages/QuickDriver"));
-const QuickShip = lazy(() => import("@/pages/QuickShip"));
-const ScopedAccessPortal = lazy(() => import("@/pages/ScopedAccessPortal"));
-const Terms = lazy(() => import("@/pages/Terms"));
-const Privacy = lazy(() => import("@/pages/Privacy"));
-const Help = lazy(() => import("@/pages/Help"));
-const MapPage = lazy(() => import("@/pages/MapPage"));
-const Blog = lazy(() => import("@/pages/Blog"));
-const BlogPost = lazy(() => import("@/pages/BlogPost"));
-const C2BPublicView = lazy(() => import("@/pages/C2BPublicView"));
-const Academy = lazy(() => import("@/pages/Academy"));
-const Partnerships = lazy(() => import("@/pages/Partnerships"));
-const Legislation = lazy(() => import("@/pages/Legislation"));
-const About = lazy(() => import("@/pages/About"));
-const Journey = lazy(() => import("@/pages/Journey"));
-const Laws = lazy(() => import("@/pages/Laws"));
-const Policies = lazy(() => import("@/pages/Policies"));
-const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
-const SharedDocumentView = lazy(() => import("@/pages/SharedDocumentView"));
-const RecyclingHistory = lazy(() => import("@/pages/RecyclingHistory"));
-const SharedResourcePage = lazy(() => import("@/pages/SharedResourcePage"));
-const SharedShipmentEdit = lazy(() => import("@/pages/SharedShipmentEdit"));
-const AccountPendingPage = lazy(() => import("@/pages/AccountPendingPage"));
-const VerifySeal = lazy(() => import("@/pages/VerifySeal"));
+// Retry wrapper for lazy imports — handles stale chunk errors after deploys
+function lazyRetry<T extends React.ComponentType<any>>(
+  factory: () => Promise<{ default: T }>,
+  retries = 2
+): React.LazyExoticComponent<T> {
+  return lazy(async () => {
+    for (let i = 0; i <= retries; i++) {
+      try {
+        return await factory();
+      } catch (err) {
+        if (i < retries) {
+          await new Promise(r => setTimeout(r, 500 * (i + 1)));
+        } else {
+          window.location.reload();
+          throw err;
+        }
+      }
+    }
+    throw new Error('lazyRetry exhausted');
+  });
+}
 
-const GeneratorGuide = lazy(() => import("@/pages/guide/GeneratorGuide"));
-const TransporterGuide = lazy(() => import("@/pages/guide/TransporterGuide"));
-const RecyclerGuide = lazy(() => import("@/pages/guide/RecyclerGuide"));
-const DriverGuide = lazy(() => import("@/pages/guide/DriverGuide"));
-const AdminGuide = lazy(() => import("@/pages/guide/AdminGuide"));
+const Index = lazyRetry(() => import("@/pages/Index"));
+const Auth = lazyRetry(() => import("@/pages/Auth"));
+const GoogleSetup = lazyRetry(() => import("@/pages/GoogleSetup"));
+const NotFound = lazyRetry(() => import("@/pages/NotFound"));
+const News = lazyRetry(() => import("@/pages/News"));
+const FullBrochure = lazyRetry(() => import("@/pages/Brochure"));
+const PublicTrackingPage = lazyRetry(() => import("@/pages/PublicTracking"));
+const PublicPermitView = lazyRetry(() => import("@/pages/PublicPermitView"));
+const PublicOrgProfile = lazyRetry(() => import("@/pages/PublicOrgProfile"));
+const PublicClientPortal = lazyRetry(() => import("@/pages/PublicClientPortal"));
+const Verify = lazyRetry(() => import("@/pages/Verify"));
+const QRVerify = lazyRetry(() => import("@/pages/QRVerify"));
+const VerifySignatory = lazyRetry(() => import("@/pages/VerifySignatory"));
+const InviteAccept = lazyRetry(() => import("@/pages/InviteAccept"));
+const ConsultantPortal = lazyRetry(() => import("@/pages/ConsultantPortal"));
+const AuditPortalPage = lazyRetry(() => import("@/pages/AuditPortal"));
+const QuickDeposit = lazyRetry(() => import("@/pages/QuickDeposit"));
+const QuickShipment = lazyRetry(() => import("@/pages/QuickShipment"));
+const QuickDriver = lazyRetry(() => import("@/pages/QuickDriver"));
+const QuickShip = lazyRetry(() => import("@/pages/QuickShip"));
+const ScopedAccessPortal = lazyRetry(() => import("@/pages/ScopedAccessPortal"));
+const Terms = lazyRetry(() => import("@/pages/Terms"));
+const Privacy = lazyRetry(() => import("@/pages/Privacy"));
+const Help = lazyRetry(() => import("@/pages/Help"));
+const MapPage = lazyRetry(() => import("@/pages/MapPage"));
+const Blog = lazyRetry(() => import("@/pages/Blog"));
+const BlogPost = lazyRetry(() => import("@/pages/BlogPost"));
+const C2BPublicView = lazyRetry(() => import("@/pages/C2BPublicView"));
+const Academy = lazyRetry(() => import("@/pages/Academy"));
+const Partnerships = lazyRetry(() => import("@/pages/Partnerships"));
+const Legislation = lazyRetry(() => import("@/pages/Legislation"));
+const About = lazyRetry(() => import("@/pages/About"));
+const Journey = lazyRetry(() => import("@/pages/Journey"));
+const Laws = lazyRetry(() => import("@/pages/Laws"));
+const Policies = lazyRetry(() => import("@/pages/Policies"));
+const ResetPassword = lazyRetry(() => import("@/pages/ResetPassword"));
+const SharedDocumentView = lazyRetry(() => import("@/pages/SharedDocumentView"));
+const RecyclingHistory = lazyRetry(() => import("@/pages/RecyclingHistory"));
+const SharedResourcePage = lazyRetry(() => import("@/pages/SharedResourcePage"));
+const SharedShipmentEdit = lazyRetry(() => import("@/pages/SharedShipmentEdit"));
+const AccountPendingPage = lazyRetry(() => import("@/pages/AccountPendingPage"));
+const VerifySeal = lazyRetry(() => import("@/pages/VerifySeal"));
+
+const GeneratorGuide = lazyRetry(() => import("@/pages/guide/GeneratorGuide"));
+const TransporterGuide = lazyRetry(() => import("@/pages/guide/TransporterGuide"));
+const RecyclerGuide = lazyRetry(() => import("@/pages/guide/RecyclerGuide"));
+const DriverGuide = lazyRetry(() => import("@/pages/guide/DriverGuide"));
+const AdminGuide = lazyRetry(() => import("@/pages/guide/AdminGuide"));
 
 export const publicRoutes = (
   <>
