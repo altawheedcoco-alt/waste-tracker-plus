@@ -14,7 +14,7 @@ interface ShipmentRevenue {
   recycler_id: string | null;
   pickup_location: string | null;
   delivery_location: string | null;
-  total_cost: number | null;
+  total_value: number | null;
   status: string;
   created_at: string;
 }
