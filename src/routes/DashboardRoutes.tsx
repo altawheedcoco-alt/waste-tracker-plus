@@ -47,6 +47,7 @@ const DriverOffers = lazy(() => import("@/pages/dashboard/DriverOffers"));
 const RegulatoryUpdates = lazy(() => import("@/pages/dashboard/RegulatoryUpdates"));
 const OperationalPlans = lazy(() => import("@/pages/dashboard/OperationalPlans"));
 const Chat = lazy(() => import("@/pages/dashboard/Chat"));
+const BroadcastChannels = lazy(() => import("@/pages/dashboard/BroadcastChannels"));
 const TeamCredentials = lazy(() => import("@/pages/dashboard/TeamCredentials"));
 const PartnersTimeline = lazy(() => import("@/pages/dashboard/PartnersTimeline"));
 const AddOrganization = lazy(() => import("@/pages/dashboard/AddOrganization"));
@@ -289,6 +290,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/regulatory-updates" element={<RegulatoryUpdates />} />
     <Route path="/dashboard/operational-plans" element={<OperationalPlans />} />
     <Route path="/dashboard/chat" element={<Chat />} />
+    <Route path="/dashboard/broadcast-channels" element={<BroadcastChannels />} />
     <Route path="/dashboard/team-credentials" element={<Navigate to="/dashboard/org-structure" replace />} />
     <Route path="/dashboard/partners-timeline" element={<PartnersTimeline />} />
     <Route path="/dashboard/restrictions-monitor" element={<RestrictionsMonitor />} />

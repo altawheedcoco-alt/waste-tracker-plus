@@ -39,7 +39,7 @@ export default function CommunicationHubWidget() {
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'work_order' },
     { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-amber-600', bgColor: 'bg-amber-500/10', previewType: 'signature' },
     { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat', color: 'text-sky-600', bgColor: 'bg-sky-500/10' },
-    { icon: Radio, labelAr: 'البث', path: '/dashboard/chat', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
+    { icon: Radio, labelAr: 'البث', path: '/dashboard/broadcast-channels', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
     { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat', badgeCount: counts?.activePolls, color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
     { icon: Bot, labelAr: 'المساعد', path: '/dashboard/ai-tools', color: 'text-purple-600', bgColor: 'bg-purple-500/10' },
     { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/reports', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10' },
