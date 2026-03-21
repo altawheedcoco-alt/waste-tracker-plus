@@ -25,20 +25,20 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'ملخص شامل يضم بيانات داخلية وخارجية ورقابية',
   },
 
-  // ── ذكاء اصطناعي: تحليلات داخلية ──
+  // ── ذكاء اصطناعي: هجين (مرئي للرقيب لتحسين الانبعاثات والمسارات) ──
   ai: {
     type: 'hybrid',
-    involvedParties: ['self', 'generator', 'recycler'],
-    adminVisible: false,
-    contextHint: 'تحليلات ذكية تعتمد على بيانات الناقل والشركاء لتحسين المسارات والعمليات',
+    involvedParties: ['self', 'generator', 'recycler', 'regulator'],
+    adminVisible: true,
+    contextHint: 'تحليلات ذكية تعتمد على بيانات الناقل والشركاء لتحسين المسارات وتقليل الانبعاثات - مرئية للجهات الرقابية',
   },
 
-  // ── أداء السائقين: داخلي ──
+  // ── أداء السائقين: هجين (بيانات من تطبيق السائق الخارجي + مراقبة IoT) ──
   performance: {
-    type: 'internal',
+    type: 'hybrid',
     involvedParties: ['self', 'driver'],
-    adminVisible: false,
-    contextHint: 'أداء السائقين وتكاليف الرحلات والصيانة',
+    adminVisible: true,
+    contextHint: 'أداء السائقين وتكاليف الرحلات مع تدفق بيانات من تطبيق السائق المستقل وحساسات IoT',
   },
 
   // ── مساعد السائق: داخلي ──
@@ -116,12 +116,12 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'حساب البصمة الكربونية من عمليات النقل المشتركة',
   },
 
-  // ── إنترنت الأشياء: داخلي ──
+  // ── إنترنت الأشياء: هجين (مرتبط بكشف الاحتيال والامتثال) ──
   iot: {
-    type: 'internal',
-    involvedParties: ['self'],
-    adminVisible: false,
-    contextHint: 'مراقبة أجهزة الاستشعار على المركبات',
+    type: 'hybrid',
+    involvedParties: ['self', 'regulator'],
+    adminVisible: true,
+    contextHint: 'مراقبة حساسات المركبات مع ربط تلقائي بمحرك كشف الاحتيال والامتثال',
   },
 
   // ── التقويم: هجين (مواعيد مع شركاء) ──
@@ -140,13 +140,13 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'تحسين المسارات وتحليل ربحية الشركاء',
   },
 
-  // ── الشركاء: شركاء ──
+  // ── الشركاء: شركاء (فصل الرقابي عن التجاري) ──
   partners: {
-    type: 'hybrid',
-    involvedParties: ['self', 'generator', 'recycler', 'disposal', 'admin'],
+    type: 'partner',
+    involvedParties: ['self', 'generator', 'recycler', 'disposal'],
     adminVisible: true,
     requiresPartner: true,
-    contextHint: 'إدارة العلاقات والتقييمات مع الجهات المرتبطة بما فيها الجهات الرقابية',
+    contextHint: 'إدارة العلاقات والتقييمات مع الشركاء التجاريين فقط - منفصل عن الجهات الرقابية',
   },
 
   // ── التتبع: هجين (تتبع السائقين مع ربط بالتراخيص الجغرافية) ──
@@ -173,47 +173,47 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'تقارير الحوكمة البيئية والاجتماعية',
   },
 
-  // ── الامتثال: رقابي ──
+  // ── المركز التنظيمي الموحد: رقابي (يجمع الامتثال، التراخيص، الإقرارات، WMIS، الخطة السنوية، البوابة الحكومية) ──
+  regulatory_hub: {
+    type: 'admin',
+    involvedParties: ['self', 'regulator', 'admin'],
+    adminVisible: true,
+    contextHint: 'مركز تنظيمي موحد: امتثال، تراخيص، إقرارات، WMIS، خطة سنوية، بوابة حكومية',
+  },
+
+  // ── (إبقاء المفاتيح القديمة كـ aliases للتوافقية) ──
   compliance: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'امتثال قانوني وتراخيص ومركبات وسائقين',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── WMIS: رقابي ──
   wmis: {
     type: 'admin',
     involvedParties: ['self', 'regulator', 'admin'],
     adminVisible: true,
-    contextHint: 'نظام إدارة معلومات المخلفات الرقابي',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── التراخيص: رقابي ──
   licenses: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'تجديد التراخيص والتصاريح التنظيمية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── الإقرارات: رقابي ──
   declarations: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'إقرارات رسمية للجهات الرقابية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── الخطة السنوية: رقابي (التزام تقريري موجه للجهة التنظيمية) ──
   annual_plan: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
 
-  // ── السلامة المهنية: هجين (عمليات يومية داخلية + رفع للجهات الرقابية) ──
+  // ── السلامة المهنية: هجين ──
   ohs: {
     type: 'hybrid',
     involvedParties: ['self', 'driver', 'regulator'],

@@ -448,6 +448,7 @@ export const ar = {
       licenses: 'التراخيص',
       declarations: 'الإقرارات',
       annualPlan: 'الخطة السنوية',
+      regulatoryHub: 'المركز التنظيمي',
       twin: 'التوأم الرقمي',
       production: 'الإنتاج',
       quality: 'فحص الجودة',
