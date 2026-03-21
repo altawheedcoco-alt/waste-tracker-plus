@@ -1,4 +1,5 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
@@ -59,6 +60,21 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
   const [selectedParty, setSelectedParty] = useState<Party | null>(null);
   const [selectedParties, setSelectedParties] = useState<Set<string>>(new Set());
   const [groupMode, setGroupMode] = useState(false);
+  const [driverOrgId, setDriverOrgId] = useState<string | null>(null);
+
+  // Fetch driver's organization_id from drivers table
+  useEffect(() => {
+    if (shipment.driver_id) {
+      supabase
+        .from('drivers')
+        .select('organization_id')
+        .eq('id', shipment.driver_id)
+        .single()
+        .then(({ data }) => {
+          if (data?.organization_id) setDriverOrgId(data.organization_id);
+        });
+    }
+  }, [shipment.driver_id]);
 
   const parties: Party[] = [];
   if (shipment.generator?.id && shipment.generator.id !== organization?.id) {
@@ -71,7 +87,10 @@ const ShipmentChatTab = ({ shipment, compact = false }: ShipmentChatTabProps) =>
     parties.push({ id: shipment.recycler.id, name: shipment.recycler.name, type: 'recycler' });
   }
   if (shipment.driver_id && shipment.driver?.profile?.full_name) {
-    parties.push({ id: shipment.driver_id, name: shipment.driver.profile.full_name!, type: 'driver' });
+    const driverChatOrgId = driverOrgId || shipment.transporter_id;
+    if (driverChatOrgId) {
+      parties.push({ id: driverChatOrgId, name: shipment.driver.profile.full_name!, type: 'driver' });
+    }
   }
 
   const openInlineChat = useCallback((party: Party) => {
