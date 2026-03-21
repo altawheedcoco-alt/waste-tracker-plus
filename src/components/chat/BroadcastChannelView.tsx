@@ -27,6 +27,7 @@ import { useBroadcastChannels, type BroadcastChannel } from '@/hooks/useBroadcas
 import { useBroadcastPosts } from '@/hooks/useBroadcastPosts';
 import { useBroadcastComments } from '@/hooks/useBroadcastComments';
 import { useBroadcastAdmin, useBroadcastNotificationSettings } from '@/hooks/useBroadcastAdmin';
+import { usePrivateChat } from '@/hooks/usePrivateChat';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -45,6 +46,131 @@ const REACTIONS = [
 interface BroadcastChannelViewProps {
   onBack?: () => void;
 }
+
+interface InternalSharePayload {
+  title: string;
+  preview: string;
+  message: string;
+}
+
+const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  payload: InternalSharePayload | null;
+}) => {
+  const { conversations, conversationsLoading, sendMessage } = usePrivateChat();
+  const [search, setSearch] = useState('');
+  const [sendingConversationId, setSendingConversationId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!open) {
+      setSearch('');
+      setSendingConversationId(null);
+    }
+  }, [open]);
+
+  const filteredConversations = conversations.filter((conversation) => {
+    const partnerName = conversation.partner?.full_name || '';
+    const orgName = conversation.partner?.organization_name || '';
+    const q = search.trim().toLowerCase();
+    if (!q) return true;
+    return partnerName.toLowerCase().includes(q) || orgName.toLowerCase().includes(q);
+  });
+
+  const handleShareToConversation = async (conversationId: string) => {
+    if (!payload) return;
+    setSendingConversationId(conversationId);
+    try {
+      await sendMessage(conversationId, payload.message);
+      toast.success('تمت المشاركة داخل المحادثة');
+      onOpenChange(false);
+    } catch {
+      toast.error('تعذر إرسال المشاركة');
+    } finally {
+      setSendingConversationId(null);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-md" dir="rtl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-sm">
+            <Share2 className="w-4 h-4 text-primary" />
+            مشاركة داخل المحادثات
+          </DialogTitle>
+        </DialogHeader>
+
+        <div className="space-y-3">
+          {payload && (
+            <div className="rounded-xl border border-border/50 bg-muted/30 p-3">
+              <p className="text-[11px] text-muted-foreground mb-1">العنصر المحدد</p>
+              <p className="text-sm font-semibold line-clamp-1">{payload.title}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3 mt-1">
+                {payload.preview}
+              </p>
+            </div>
+          )}
+
+          <Input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="ابحث عن محادثة..."
+            className="text-sm"
+          />
+
+          <div className="max-h-72 overflow-y-auto space-y-1.5">
+            {conversationsLoading ? (
+              <div className="flex items-center justify-center py-10">
+                <Loader2 className="w-5 h-5 animate-spin text-primary" />
+              </div>
+            ) : filteredConversations.length > 0 ? (
+              filteredConversations.map((conversation) => {
+                const partnerName = conversation.partner?.full_name || 'محادثة';
+                const orgName = conversation.partner?.organization_name || 'جهة داخل النظام';
+                const isSending = sendingConversationId === conversation.id;
+
+                return (
+                  <button
+                    key={conversation.id}
+                    type="button"
+                    onClick={() => handleShareToConversation(conversation.id)}
+                    disabled={!!sendingConversationId}
+                    className="w-full flex items-center gap-3 rounded-xl border border-border/50 p-3 text-right hover:bg-muted/40 transition-colors disabled:opacity-60"
+                  >
+                    <Avatar className="w-10 h-10 shrink-0">
+                      {conversation.partner?.avatar_url && <AvatarImage src={conversation.partner.avatar_url} />}
+                      <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">
+                        {partnerName.charAt(0)}
+                      </AvatarFallback>
+                    </Avatar>
+
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{partnerName}</p>
+                      <p className="text-[11px] text-muted-foreground truncate">{orgName}</p>
+                    </div>
+
+                    {isSending ? (
+                      <Loader2 className="w-4 h-4 animate-spin text-primary shrink-0" />
+                    ) : (
+                      <Send className="w-4 h-4 text-primary shrink-0" />
+                    )}
+                  </button>
+                );
+              })
+            ) : (
+              <div className="rounded-xl border border-dashed border-border/60 p-5 text-center">
+                <p className="text-sm font-medium">لا توجد محادثات متاحة</p>
+                <p className="text-xs text-muted-foreground mt-1">ابدأ محادثة أولاً ثم أعد المشاركة داخلها</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+});
+ShareToChatDialog.displayName = 'ShareToChatDialog';
 
 // ═══════════════════════════════════════════════════════════════
 // 🔵 OWNER SECTION: Analytics Dashboard
@@ -629,8 +755,9 @@ const InlinePdfViewer = ({ url, name, height = '500px' }: { url: string; name: s
 
 // Post Card (Shared — adapts per role) — Enhanced Design
 // ═══════════════════════════════════════════════════════════════
-const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport, onView }: {
+const PostCard = memo(({ post, channelId, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport, onView, onShare }: {
   post: any;
+  channelId: string;
   channelName: string;
   channelAvatar?: string | null;
   onReact: (postId: string, type: string) => void;
@@ -642,6 +769,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   onDelete?: (postId: string) => void;
   onReport?: (postId: string) => void;
   onView?: (postId: string) => void;
+  onShare?: (payload: InternalSharePayload) => void;
 }) => {
   const [showReactions, setShowReactions] = useState(false);
   const [showComments, setShowComments] = useState(false);
@@ -713,6 +841,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   return (
     <>
       <motion.div ref={postRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+        data-post-id={post.id}
         className={cn(
           "bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-shadow",
           post.is_pinned ? "border-primary/40 ring-2 ring-primary/10" : "border-border/30"
@@ -951,30 +1080,14 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
                 <MessageCircle className={cn("w-[18px] h-[18px]", showComments && "fill-primary/20")} /><span>تعليق</span>
               </button>
             )}
-            <button onClick={async () => {
-              try {
-                const postLink = `${window.location.origin}/dashboard/broadcast-channels?post=${post.id}`;
-                if (navigator.share) {
-                  await navigator.share({ title: channelName || 'منشور', text: post.content?.slice(0, 100) || '', url: postLink });
-                } else if (navigator.clipboard && navigator.clipboard.writeText) {
-                  await navigator.clipboard.writeText(postLink);
-                  toast.success('تم نسخ رابط المنشور');
-                } else {
-                  // Fallback for older browsers
-                  const textarea = document.createElement('textarea');
-                  textarea.value = postLink;
-                  textarea.style.position = 'fixed';
-                  textarea.style.opacity = '0';
-                  document.body.appendChild(textarea);
-                  textarea.select();
-                  document.execCommand('copy');
-                  document.body.removeChild(textarea);
-                  toast.success('تم نسخ رابط المنشور');
-                }
-              } catch (e) {
-                // User cancelled share or error
-                console.log('Share cancelled or failed:', e);
-              }
+            <button onClick={() => {
+              const postLink = `${window.location.origin}/dashboard/broadcast-channels?channel=${channelId}&post=${post.id}`;
+              const previewText = post.content?.trim() || post.file_name || 'منشور من قناة البث';
+              onShare?.({
+                title: `منشور من ${channelName}`,
+                preview: previewText,
+                message: `📢 تمت مشاركة منشور من قناة "${channelName}"\n\n${previewText}\n\n${postLink}`,
+              });
             }}
               className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
               <Share2 className="w-[18px] h-[18px]" /><span>مشاركة</span>
@@ -1203,6 +1316,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [showSearch, setShowSearch] = useState(false);
+  const [showShareDialog, setShowShareDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const { posts } = useBroadcastPosts(channel.id);
 
@@ -1255,23 +1369,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           <Search className={cn("w-5 h-5", showSearch ? "text-primary" : "text-muted-foreground")} />
           <span className="text-[11px] font-medium">بحث</span>
         </button>
-        <button onClick={async () => {
-          try {
-            const link = `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`;
-            if (navigator.share) {
-              await navigator.share({ title: channel.name, url: link });
-            } else if (navigator.clipboard?.writeText) {
-              await navigator.clipboard.writeText(link);
-              toast.success('تم نسخ رابط القناة');
-            } else {
-              const ta = document.createElement('textarea');
-              ta.value = link; ta.style.position = 'fixed'; ta.style.opacity = '0';
-              document.body.appendChild(ta); ta.select(); document.execCommand('copy');
-              document.body.removeChild(ta);
-              toast.success('تم نسخ رابط القناة');
-            }
-          } catch { /* user cancelled */ }
-        }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+        <button onClick={() => setShowShareDialog(true)} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Share2 className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">مشاركة</span>
         </button>
@@ -1372,6 +1470,16 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
           </div>
         </DialogContent>
       </Dialog>
+
+      <ShareToChatDialog
+        open={showShareDialog}
+        onOpenChange={setShowShareDialog}
+        payload={{
+          title: channel.name,
+          preview: channel.description || 'قناة بث داخلية على المنصة',
+          message: `📡 تمت مشاركة قناة بث\n\n${channel.name}\n${channel.description ? `\n${channel.description}\n` : '\n'}${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`,
+        }}
+      />
     </div>
   );
 });
@@ -1389,6 +1497,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
 }) => {
   const { subscribe, unsubscribe } = useBroadcastChannels();
   const { report } = useBroadcastNotificationSettings(channel.id);
+  const [sharePayload, setSharePayload] = useState<InternalSharePayload | null>(null);
   const {
     posts, isLoading: postsLoading, myReactions,
     createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, uploadMultipleFiles, isPosting,
@@ -1477,7 +1586,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
         ) : (
           posts.map((p: any) => (
             <PostCard
-              key={p.id} post={p} channelName={channel.name}
+              key={p.id} post={p} channelId={channel.id} channelName={channel.name}
               channelAvatar={channel.avatar_url}
               onReact={(postId, type) => toggleReaction({ postId, type })}
               myReactions={myReactions}
@@ -1487,6 +1596,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
               onPin={togglePin} onDelete={deletePost}
               onReport={(postId) => report({ postId, reason: 'محتوى مسيء' })}
               onView={recordView}
+              onShare={setSharePayload}
             />
           ))
         )}
@@ -1496,6 +1606,12 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
       {(channel.is_mine || isSystemAdmin) && (
         <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} onUploadMultiple={uploadMultipleFiles} />
       )}
+
+      <ShareToChatDialog
+        open={!!sharePayload}
+        onOpenChange={(open) => { if (!open) setSharePayload(null); }}
+        payload={sharePayload}
+      />
     </div>
   );
 });
@@ -1728,6 +1844,21 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
       }
     }
   }, [channels, selectedChannel]);
+
+  useEffect(() => {
+    if (!channels.length) return;
+
+    const params = new URLSearchParams(window.location.search);
+    const channelId = params.get('channel');
+    if (!channelId) return;
+
+    const linkedChannel = channels.find((channel) => channel.id === channelId);
+    if (linkedChannel && selectedChannel?.id !== linkedChannel.id) {
+      setSelectedChannel(linkedChannel);
+      setView('feed');
+      setIsMobileListView(false);
+    }
+  }, [channels, selectedChannel?.id]);
 
   const handleSelectChannel = useCallback((ch: BroadcastChannel) => {
     setSelectedChannel(ch);
