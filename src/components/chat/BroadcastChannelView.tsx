@@ -1339,6 +1339,8 @@ CreateBroadcastDialog.displayName = 'CreateBroadcastDialog';
 // ═══════════════════════════════════════════════════════════════
 const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const { channels, isLoading, createChannel, subscribe, unsubscribe } = useBroadcastChannels();
+  const { roles } = useAuth();
+  const isAdmin = roles.includes('admin');
   const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [view, setView] = useState<'feed' | 'profile' | 'admin'>('feed');
