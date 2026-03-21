@@ -22,8 +22,9 @@ const MobileBottomNav = memo(() => {
   const location = useLocation();
   const navigate = useNavigate();
   const { organization, roles } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { data: platformCounts } = usePlatformCounts();
   const { isMobile } = useDisplayMode();
+  const combinedBadge = (platformCounts?.unreadNotifications ?? 0) + (platformCounts?.unreadMessages ?? 0);
 
   const isDriver = roles.includes('driver');
   const isAdmin = roles.includes('admin');
