@@ -449,6 +449,7 @@ export const en = {
       licenses: 'Licenses',
       declarations: 'Declarations',
       annualPlan: 'Annual Plan',
+      regulatoryHub: 'Regulatory Hub',
       twin: 'Digital Twin',
       production: 'Production',
       quality: 'Quality Inspection',
