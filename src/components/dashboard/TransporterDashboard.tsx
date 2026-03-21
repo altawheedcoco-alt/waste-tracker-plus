@@ -1,4 +1,5 @@
-import { useState, Suspense, lazy, useMemo, useEffect } from 'react';
+import { useState, Suspense, lazy, useMemo, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
 import { Tabs } from '@/components/ui/tabs';
