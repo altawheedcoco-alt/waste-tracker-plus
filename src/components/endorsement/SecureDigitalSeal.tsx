@@ -96,7 +96,7 @@ const SecureDigitalSeal = ({
         entityId,
         entityType,
         entityName,
-        size: 60,
+        size: 44,
         style,
       });
     }, [style]);
