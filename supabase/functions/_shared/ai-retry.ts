@@ -7,8 +7,8 @@ const GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/openai/
 const LOVABLE_GATEWAY_URL = "https://ai.gateway.lovable.dev/v1/chat/completions";
 const DEFAULT_MODEL = "gemini-2.0-flash";
 const LOVABLE_DEFAULT_MODEL = "google/gemini-3-flash-preview";
-const MAX_RETRIES = 3;
-const BASE_DELAY_MS = 1000;
+const MAX_RETRIES = 5;
+const BASE_DELAY_MS = 2000;
 
 interface AIRequestOptions {
   messages: Array<{ role: string; content: any }>;
