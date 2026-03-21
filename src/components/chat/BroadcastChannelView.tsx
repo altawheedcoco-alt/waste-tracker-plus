@@ -1060,7 +1060,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
     <div className="flex flex-col h-full" dir="rtl">
       {/* Header */}
       <div className="flex items-center gap-2 p-2.5 border-b border-border/50 bg-background sticky top-0 z-10">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden" onClick={onBack}>
           <ChevronRight className="w-4 h-4" />
         </Button>
 
@@ -1335,17 +1335,19 @@ const CreateBroadcastDialog = memo(({ open, onOpenChange, onCreate }: {
 CreateBroadcastDialog.displayName = 'CreateBroadcastDialog';
 
 // ═══════════════════════════════════════════════════════════════
-// 🎯 MAIN ORCHESTRATOR
+// 🎯 MAIN ORCHESTRATOR — Split Panel Layout
 // ═══════════════════════════════════════════════════════════════
 const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
   const { channels, isLoading, createChannel, subscribe, unsubscribe } = useBroadcastChannels();
   const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
   const [showCreate, setShowCreate] = useState(false);
-  const [view, setView] = useState<'list' | 'feed' | 'profile' | 'admin'>('list');
+  const [view, setView] = useState<'feed' | 'profile' | 'admin'>('feed');
+  const [isMobileListView, setIsMobileListView] = useState(true);
 
   const handleSelectChannel = useCallback((ch: BroadcastChannel) => {
     setSelectedChannel(ch);
     setView('feed');
+    setIsMobileListView(false);
   }, []);
 
   const handleSubscribeToggle = useCallback(() => {
@@ -1354,45 +1356,89 @@ const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
     else subscribe(selectedChannel.id);
   }, [selectedChannel, subscribe, unsubscribe]);
 
-  // Admin panel (owner only)
-  if (view === 'admin' && selectedChannel?.is_mine) {
-    return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
-  }
+  const handleBackToList = useCallback(() => {
+    setSelectedChannel(null);
+    setView('feed');
+    setIsMobileListView(true);
+  }, []);
 
-  // Profile view
-  if (view === 'profile' && selectedChannel) {
-    return (
-      <ChannelProfileView
-        channel={selectedChannel}
-        onBack={() => setView('feed')}
-        onSubscribeToggle={handleSubscribeToggle}
-        isMine={!!selectedChannel.is_mine}
-      />
-    );
-  }
+  // Right panel content
+  const renderRightPanel = () => {
+    if (!selectedChannel) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full text-center px-6">
+          <div className="w-20 h-20 rounded-3xl bg-primary/5 flex items-center justify-center mb-4">
+            <Radio className="w-10 h-10 text-primary/30" />
+          </div>
+          <h3 className="text-base font-bold text-foreground/70 mb-1">اختر قناة للعرض</h3>
+          <p className="text-xs text-muted-foreground max-w-[220px]">
+            اختر قناة من القائمة لعرض المنشورات والتفاعل معها
+          </p>
+        </div>
+      );
+    }
 
-  // Feed view
-  if (view === 'feed' && selectedChannel) {
+    if (view === 'admin' && selectedChannel.is_mine) {
+      return <OwnerAdminPanel channel={selectedChannel} onBack={() => setView('feed')} />;
+    }
+
+    if (view === 'profile') {
+      return (
+        <ChannelProfileView
+          channel={selectedChannel}
+          onBack={() => setView('feed')}
+          onSubscribeToggle={handleSubscribeToggle}
+          isMine={!!selectedChannel.is_mine}
+        />
+      );
+    }
+
     return (
       <ChannelFeedView
         channel={selectedChannel}
-        onBack={() => { setSelectedChannel(null); setView('list'); }}
+        onBack={handleBackToList}
         onShowProfile={() => setView('profile')}
         onShowAdmin={() => setView('admin')}
       />
     );
-  }
+  };
 
-  // List view
   return (
     <>
-      <ChannelListView
-        channels={channels}
-        isLoading={isLoading}
-        onSelect={handleSelectChannel}
-        onBack={onBack}
-        onCreate={() => setShowCreate(true)}
-      />
+      {/* Desktop: Split Panel (30% list / 70% content) */}
+      <div className="hidden md:flex h-full w-full overflow-hidden border border-border/30 rounded-xl bg-card/50">
+        {/* Channel List — 30% */}
+        <div className="w-[320px] lg:w-[360px] xl:w-[380px] shrink-0 border-l border-border/40 h-full overflow-hidden">
+          <ChannelListView
+            channels={channels}
+            isLoading={isLoading}
+            onSelect={handleSelectChannel}
+            onBack={onBack}
+            onCreate={() => setShowCreate(true)}
+          />
+        </div>
+
+        {/* Content Area — 70% */}
+        <div className="flex-1 h-full overflow-hidden bg-background/50">
+          {renderRightPanel()}
+        </div>
+      </div>
+
+      {/* Mobile: Single View Toggle */}
+      <div className="md:hidden h-full w-full overflow-hidden">
+        {isMobileListView ? (
+          <ChannelListView
+            channels={channels}
+            isLoading={isLoading}
+            onSelect={handleSelectChannel}
+            onBack={onBack}
+            onCreate={() => setShowCreate(true)}
+          />
+        ) : (
+          renderRightPanel()
+        )}
+      </div>
+
       <CreateBroadcastDialog open={showCreate} onOpenChange={setShowCreate} onCreate={createChannel} />
     </>
   );
