@@ -1442,6 +1442,14 @@ const ChatAndNotesPage = () => {
     if (activeTab === 'notes') setNotesUnread(0);
   }, [activeTab]);
 
+  // Sync tab with URL param changes
+  useEffect(() => {
+    const t = searchParamsPage.get('tab') as ChatTabType | null;
+    if (t && ['chat', 'notes', 'channels', 'polls'].includes(t)) {
+      setActiveTab(t);
+    }
+  }, [searchParamsPage]);
+
   return (
     <DashboardLayout>
       <ChatAppearanceProvider>
