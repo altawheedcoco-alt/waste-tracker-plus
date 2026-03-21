@@ -173,47 +173,47 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'تقارير الحوكمة البيئية والاجتماعية',
   },
 
-  // ── الامتثال: رقابي ──
+  // ── المركز التنظيمي الموحد: رقابي (يجمع الامتثال، التراخيص، الإقرارات، WMIS، الخطة السنوية، البوابة الحكومية) ──
+  regulatory_hub: {
+    type: 'admin',
+    involvedParties: ['self', 'regulator', 'admin'],
+    adminVisible: true,
+    contextHint: 'مركز تنظيمي موحد: امتثال، تراخيص، إقرارات، WMIS، خطة سنوية، بوابة حكومية',
+  },
+
+  // ── (إبقاء المفاتيح القديمة كـ aliases للتوافقية) ──
   compliance: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'امتثال قانوني وتراخيص ومركبات وسائقين',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── WMIS: رقابي ──
   wmis: {
     type: 'admin',
     involvedParties: ['self', 'regulator', 'admin'],
     adminVisible: true,
-    contextHint: 'نظام إدارة معلومات المخلفات الرقابي',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── التراخيص: رقابي ──
   licenses: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'تجديد التراخيص والتصاريح التنظيمية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── الإقرارات: رقابي ──
   declarations: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'إقرارات رسمية للجهات الرقابية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
-
-  // ── الخطة السنوية: رقابي (التزام تقريري موجه للجهة التنظيمية) ──
   annual_plan: {
     type: 'admin',
     involvedParties: ['self', 'regulator'],
     adminVisible: true,
-    contextHint: 'خطة تشغيلية سنوية إلزامية مقدمة للجهة الرقابية',
+    contextHint: 'مدمج في المركز التنظيمي',
   },
 
-  // ── السلامة المهنية: هجين (عمليات يومية داخلية + رفع للجهات الرقابية) ──
+  // ── السلامة المهنية: هجين ──
   ohs: {
     type: 'hybrid',
     involvedParties: ['self', 'driver', 'regulator'],
