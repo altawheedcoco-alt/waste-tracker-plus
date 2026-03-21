@@ -1406,12 +1406,17 @@ const EncryptedChatInner = () => {
 
 // ─── Lazy load NotesTab ─────────────────────────────────
 const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
+const ChannelListViewPage = lazy(() => import('@/components/chat/ChannelListView'));
+const ChatPollCard = lazy(() => import('@/components/chat/ChatPollCard'));
+
+type ChatTabType = 'chat' | 'notes' | 'channels' | 'polls';
 
 // ─── Main Page with Chat + Notes Tabs ───────────────────
 const ChatAndNotesPage = () => {
   const [searchParamsPage] = useSearchParams();
-  const initialTab = searchParamsPage.get('tab') === 'notes' ? 'notes' : 'chat';
-  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>(initialTab);
+  const paramTab = searchParamsPage.get('tab') as ChatTabType | null;
+  const initialTab: ChatTabType = paramTab && ['chat', 'notes', 'channels', 'polls'].includes(paramTab) ? paramTab : 'chat';
+  const [activeTab, setActiveTab] = useState<ChatTabType>(initialTab);
   const [notesUnread, setNotesUnread] = useState(0);
 
   // Listen for new notes to update badge
