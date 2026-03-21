@@ -1452,9 +1452,7 @@ const ChatAndNotesPage = () => {
             onClick={() => setActiveTab('chat')}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
-              activeTab === 'chat'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              activeTab === 'chat' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <MessageCircle className="w-4 h-4" />
@@ -1464,9 +1462,7 @@ const ChatAndNotesPage = () => {
             onClick={() => setActiveTab('notes')}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors relative",
-              activeTab === 'notes'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              activeTab === 'notes' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <StickyNote className="w-4 h-4" />
@@ -1476,6 +1472,26 @@ const ChatAndNotesPage = () => {
                 {notesUnread}
               </Badge>
             )}
+          </button>
+          <button
+            onClick={() => setActiveTab('channels')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'channels' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Hash className="w-4 h-4" />
+            القنوات
+          </button>
+          <button
+            onClick={() => setActiveTab('polls')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'polls' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <BarChart3 className="w-4 h-4" />
+            التصويت
           </button>
         </div>
 
