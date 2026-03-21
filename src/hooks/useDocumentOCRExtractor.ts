@@ -222,10 +222,6 @@ export function useDocumentOCRExtractor() {
         confidence: avgConfidence,
         pages_count: totalPages,
       };
-        detected_fields: allFields,
-        confidence: avgConfidence,
-        pages_count: totalPages,
-      };
 
       setExtractedResult(result);
       setProgress(100);
