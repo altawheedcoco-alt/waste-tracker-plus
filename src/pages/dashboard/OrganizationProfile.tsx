@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { 
   Building2, User, FileText, Upload, Trash2, Download,
   Phone, Mail, MapPin, Shield, Users, Loader2, Save,
-  Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2
+  Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
@@ -39,6 +39,7 @@ const OrganizationSignatureSettings = lazy(() => import('@/components/signature'
 const LMSProfileCertificates = lazy(() => import('@/components/lms/LMSProfileCertificates'));
 const OrganizationAnalysis = lazy(() => import('@/components/organization/OrganizationAnalysis'));
 const AttestationTabContent = lazy(() => import('@/components/attestation/AttestationTabContent'));
+const DocumentAnalysisTab = lazy(() => import('@/components/organization/DocumentAnalysisTab'));
 
 interface OrganizationDocument {
   id: string;
@@ -68,6 +69,7 @@ const ORG_PROFILE_TABS: TabItem[] = [
   { value: 'location', label: 'الموقع والصور', icon: MapPin },
   // الوثائق والتوثيق
   { value: 'documents', label: 'الوثائق', icon: FileText },
+  { value: 'doc-analysis', label: 'تحليل الوثائق', icon: FileSearch },
   { value: 'analysis', label: 'تحليل الجهة', icon: Brain },
   { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp },
   { value: 'certificates', label: 'الشهادات', icon: Award },
@@ -716,6 +718,15 @@ const OrganizationProfile = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* تحليل الوثائق */}
+          <TabsContent value="doc-analysis">
+            <ErrorBoundary fallbackTitle="خطأ في تحليل الوثائق">
+              <Suspense fallback={<TabFallback />}>
+                <DocumentAnalysisTab organizationId={organization.id} />
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
           {/* تحليل الجهة */}
