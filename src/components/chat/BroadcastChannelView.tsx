@@ -51,6 +51,7 @@ interface InternalSharePayload {
   title: string;
   preview: string;
   message: string;
+  link?: string;
 }
 
 const ShareToChatDialog = memo(({ open, onOpenChange, payload }: {
