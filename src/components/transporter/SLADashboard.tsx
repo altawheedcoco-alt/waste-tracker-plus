@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -27,22 +27,19 @@ const SLADashboard = () => {
   const { organization } = useAuth();
   const { language } = useLanguage();
   const isAr = language === 'ar';
-  const [metrics, setMetrics] = useState<SLAMetric[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  const fetchSLA = useCallback(async () => {
-    if (!organization?.id) return;
-    setLoading(true);
+  const { data: metrics = [], isLoading: loading } = useQuery({
+    queryKey: ['sla-metrics', organization?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('partner_sla_metrics')
+        .select('*')
+        .eq('organization_id', organization!.id)
+        .order('period_month', { ascending: false })
+        .limit(20);
 
-    const { data } = await supabase
-      .from('partner_sla_metrics')
-      .select('*')
-      .eq('organization_id', organization.id)
-      .order('period_month', { ascending: false })
-      .limit(20);
+      if (!data?.length) return [];
 
-    if (data && data.length > 0) {
-      // Fetch partner names
       const partnerIds = [...new Set((data as any[]).map(d => d.partner_organization_id))];
       const { data: orgs } = await supabase
         .from('organizations')
@@ -50,17 +47,14 @@ const SLADashboard = () => {
         .in('id', partnerIds);
 
       const nameMap = new Map((orgs || []).map(o => [o.id, o.name]));
-      setMetrics((data as any[]).map(d => ({
+      return (data as any[]).map(d => ({
         ...d,
         partner: { name: nameMap.get(d.partner_organization_id) || d.partner_organization_id.slice(0, 8) },
-      })));
-    } else {
-      setMetrics([]);
-    }
-    setLoading(false);
-  }, [organization?.id]);
-
-  useEffect(() => { fetchSLA(); }, [fetchSLA]);
+      })) as SLAMetric[];
+    },
+    enabled: !!organization?.id,
+    refetchInterval: 60_000,
+  });
 
   // Aggregate stats
   const avgScore = metrics.length > 0

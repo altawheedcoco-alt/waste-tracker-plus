@@ -86,7 +86,13 @@ const EnhancedDriverPerformance = () => {
         const totalFuel = driverTrips.reduce((s, t) => s + (Number(t.fuel_cost) || 0), 0);
 
         const onTimeScore = delivered.length > 0 ? Math.round((onTime.length / delivered.length) * 100) : 100;
-        const safetyScore = 85 + Math.random() * 15; // Placeholder - would use incident data
+        
+        // Safety score based on cancelled/rejected shipments ratio
+        const cancelledShipments = driverShipments.filter(s => s.status === 'cancelled' as any || s.status === 'registered').length;
+        const safetyScore = driverShipments.length > 0 
+          ? Math.max(0, Math.min(100, 100 - Math.round((cancelledShipments / driverShipments.length) * 100)))
+          : 100;
+        
         const customerScore = Math.round(avgRating * 20); // 5-star to 100
         const efficiencyScore = totalDist > 0 && totalFuel > 0 ? Math.min(100, Math.round((totalDist / totalFuel) * 10)) : 75;
 

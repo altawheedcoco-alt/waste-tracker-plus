@@ -15,17 +15,29 @@ const TransporterPerformanceCharts = () => {
   const { data, isLoading } = useQuery({
     queryKey: ['transporter-charts', organization?.id],
     queryFn: async () => {
-      // Get last 7 days shipments
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      // Get last 30 days shipments for richer historical data
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('status, waste_type, created_at')
+        .select('status, waste_type, created_at, total_value, quantity')
         .eq('transporter_id', organization!.id)
-        .gte('created_at', sevenDaysAgo.toISOString());
+        .gte('created_at', thirtyDaysAgo.toISOString())
+        .order('created_at', { ascending: true });
 
-      // Daily shipment counts
+      // Weekly shipment counts (last 4 weeks)
+      const weeklyMap: Record<string, number> = {};
+      for (let i = 3; i >= 0; i--) {
+        const weekStart = new Date();
+        weekStart.setDate(weekStart.getDate() - (i * 7 + 6));
+        const weekEnd = new Date();
+        weekEnd.setDate(weekEnd.getDate() - (i * 7));
+        const label = `${weekStart.getDate()}/${weekStart.getMonth() + 1}`;
+        weeklyMap[label] = 0;
+      }
+
+      // Also daily for last 7 days
       const dailyMap: Record<string, number> = {};
       const days = [
         t('transporterCharts.sunday'), t('transporterCharts.monday'), t('transporterCharts.tuesday'),
@@ -59,10 +71,14 @@ const TransporterPerformanceCharts = () => {
       });
       const statusData = Object.entries(statusMap).map(([name, value]) => ({ name, value }));
 
-      return { dailyData, statusData };
+      // Monthly revenue trend
+      const totalRevenue = shipments?.reduce((s, sh) => s + (sh.total_value || 0), 0) || 0;
+      const totalQuantity = shipments?.reduce((s, sh) => s + (sh.quantity || 0), 0) || 0;
+
+      return { dailyData, statusData, totalShipments: shipments?.length || 0, totalRevenue, totalQuantity };
     },
     enabled: !!organization?.id,
-    refetchInterval: 120000,
+    refetchInterval: 60_000,
   });
 
   if (isLoading || !data) {
@@ -84,6 +100,22 @@ const TransporterPerformanceCharts = () => {
         </CardTitle>
       </CardHeader>
       <CardContent>
+        {/* Summary KPIs */}
+        <div className="grid grid-cols-3 gap-3 mb-4">
+          <div className="p-2 rounded-lg bg-primary/5 border text-center">
+            <p className="text-lg font-bold text-primary">{data.totalShipments}</p>
+            <p className="text-[10px] text-muted-foreground">{t('transporterCharts.shipments')} (30 يوم)</p>
+          </div>
+          <div className="p-2 rounded-lg bg-emerald-500/5 border text-center">
+            <p className="text-lg font-bold text-emerald-600">{data.totalRevenue.toLocaleString('ar-EG')}</p>
+            <p className="text-[10px] text-muted-foreground">إجمالي الإيراد</p>
+          </div>
+          <div className="p-2 rounded-lg bg-blue-500/5 border text-center">
+            <p className="text-lg font-bold text-blue-600">{data.totalQuantity.toLocaleString('ar-EG')}</p>
+            <p className="text-[10px] text-muted-foreground">إجمالي الكمية (طن)</p>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Daily shipments bar chart */}
           <div>

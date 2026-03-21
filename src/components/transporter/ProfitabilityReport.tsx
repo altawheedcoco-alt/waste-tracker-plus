@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,7 +14,7 @@ interface ShipmentRevenue {
   recycler_id: string | null;
   pickup_location: string | null;
   delivery_location: string | null;
-  total_cost: number | null;
+  total_value: number | null;
   status: string;
   created_at: string;
 }
@@ -38,42 +39,41 @@ const ProfitabilityReport = () => {
   const { language } = useLanguage();
   const isAr = language === 'ar';
 
-  const [shipments, setShipments] = useState<ShipmentRevenue[]>([]);
-  const [orgNames, setOrgNames] = useState<Map<string, string>>(new Map());
-  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<'client' | 'route'>('client');
 
-  const fetchData = useCallback(async () => {
-    if (!organization?.id) return;
-    setLoading(true);
+  const { data: fetchedData, isLoading: loading } = useQuery({
+    queryKey: ['profitability-report', organization?.id],
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('shipments')
+        .select('id, generator_id, recycler_id, pickup_location, delivery_location, total_value, status, created_at')
+        .eq('transporter_id', organization!.id)
+        .in('status', ['delivered', 'confirmed'])
+        .order('created_at', { ascending: false })
+        .limit(500);
 
-    const { data } = await supabase
-      .from('shipments')
-      .select('id, generator_id, recycler_id, pickup_location, delivery_location, total_cost, status, created_at')
-      .eq('transporter_id', organization.id)
-      .in('status', ['delivered', 'confirmed'])
-      .order('created_at', { ascending: false })
-      .limit(500);
-
-    if (data) {
-      setShipments(data as any);
-      // Fetch org names
+      const shipments = (data || []) as any[];
       const orgIds = [...new Set([
-        ...(data as any[]).map(d => d.generator_id).filter(Boolean),
-        ...(data as any[]).map(d => d.recycler_id).filter(Boolean),
+        ...shipments.map(d => d.generator_id).filter(Boolean),
+        ...shipments.map(d => d.recycler_id).filter(Boolean),
       ])];
+      
+      let orgNames = new Map<string, string>();
       if (orgIds.length > 0) {
         const { data: orgs } = await supabase
           .from('organizations')
           .select('id, name')
           .in('id', orgIds);
-        setOrgNames(new Map((orgs || []).map(o => [o.id, o.name])));
+        orgNames = new Map((orgs || []).map(o => [o.id, o.name]));
       }
-    }
-    setLoading(false);
-  }, [organization?.id]);
+      return { shipments, orgNames };
+    },
+    enabled: !!organization?.id,
+    refetchInterval: 60_000,
+  });
 
-  useEffect(() => { fetchData(); }, [fetchData]);
+  const shipments = fetchedData?.shipments || [];
+  const orgNames = fetchedData?.orgNames || new Map<string, string>();
 
   const clientData = useMemo((): ClientProfitability[] => {
     const map = new Map<string, { count: number; revenue: number }>();
@@ -81,7 +81,7 @@ const ProfitabilityReport = () => {
       const clientId = s.generator_id || 'unknown';
       const existing = map.get(clientId) || { count: 0, revenue: 0 };
       existing.count++;
-      existing.revenue += s.total_cost || 0;
+      existing.revenue += s.total_value || 0;
       map.set(clientId, existing);
     });
     return Array.from(map.entries())
@@ -103,7 +103,7 @@ const ProfitabilityReport = () => {
       const route = `${from} → ${to}`;
       const existing = map.get(route) || { count: 0, revenue: 0 };
       existing.count++;
-      existing.revenue += s.total_cost || 0;
+      existing.revenue += s.total_value || 0;
       map.set(route, existing);
     });
     return Array.from(map.entries())
@@ -117,7 +117,7 @@ const ProfitabilityReport = () => {
       .slice(0, 15);
   }, [shipments]);
 
-  const totalRevenue = shipments.reduce((s, sh) => s + (sh.total_cost || 0), 0);
+  const totalRevenue = shipments.reduce((s, sh) => s + (sh.total_value || 0), 0);
   const topClient = clientData[0];
 
   const formatCurrency = (amount: number) =>
