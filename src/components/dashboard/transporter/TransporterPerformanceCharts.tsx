@@ -72,7 +72,7 @@ const TransporterPerformanceCharts = () => {
       const statusData = Object.entries(statusMap).map(([name, value]) => ({ name, value }));
 
       // Monthly revenue trend
-      const totalRevenue = shipments?.reduce((s, sh) => s + (sh.total_cost || 0), 0) || 0;
+      const totalRevenue = shipments?.reduce((s, sh) => s + (sh.total_value || 0), 0) || 0;
       const totalQuantity = shipments?.reduce((s, sh) => s + (sh.quantity || 0), 0) || 0;
 
       return { dailyData, statusData, totalShipments: shipments?.length || 0, totalRevenue, totalQuantity };
