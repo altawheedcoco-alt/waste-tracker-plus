@@ -576,7 +576,7 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
 
 // Post Card (Shared — adapts per role) — Enhanced Design
 // ═══════════════════════════════════════════════════════════════
-const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport }: {
+const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport, onView }: {
   post: any;
   channelName: string;
   channelAvatar?: string | null;
@@ -588,12 +588,26 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   onPin?: (postId: string) => void;
   onDelete?: (postId: string) => void;
   onReport?: (postId: string) => void;
+  onView?: (postId: string) => void;
 }) => {
   const [showReactions, setShowReactions] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(false);
   const [fullscreenUrl, setFullscreenUrl] = useState('');
+  const postRef = useRef<HTMLDivElement>(null);
+
+  // Track view via IntersectionObserver
+  useEffect(() => {
+    const el = postRef.current;
+    if (!el || !onView) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { onView(post.id); observer.disconnect(); } },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [post.id, onView]);
   const reactionsData: Record<string, number> = post.reactions_summary || {};
   const totalReactions = post.reactions_count || 0;
   const topReactions = Object.entries(reactionsData)
@@ -645,7 +659,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
 
   return (
     <>
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
+      <motion.div ref={postRef} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}
         className={cn(
           "bg-card rounded-2xl border overflow-hidden shadow-sm hover:shadow-md transition-shadow",
           post.is_pinned ? "border-primary/40 ring-2 ring-primary/10" : "border-border/30"
@@ -1149,13 +1163,21 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
 
       {/* Action buttons — differ by role */}
       <div className="grid grid-cols-4 gap-2 px-4 mt-4">
-        <button onClick={() => {}} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
+        <button onClick={() => {
+          onBack();
+          toast.info('استخدم شريط البحث في قائمة المنشورات');
+        }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Search className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">بحث</span>
         </button>
         <button onClick={() => {
-          navigator.clipboard.writeText(`${window.location.origin}/dashboard/broadcast-channels`);
-          toast.success('تم نسخ رابط القناة');
+          const link = `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`;
+          if (navigator.share) {
+            navigator.share({ title: channel.name, url: link }).catch(() => {});
+          } else {
+            navigator.clipboard.writeText(link);
+            toast.success('تم نسخ رابط القناة');
+          }
         }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Share2 className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">مشاركة</span>
@@ -1342,6 +1364,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
               allowReactions={allowReactions}
               onPin={togglePin} onDelete={deletePost}
               onReport={(postId) => report({ postId, reason: 'محتوى مسيء' })}
+              onView={recordView}
             />
           ))
         )}
