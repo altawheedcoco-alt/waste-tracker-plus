@@ -25,20 +25,20 @@ export const TRANSPORTER_TAB_BINDINGS: Record<string, BindingMeta> = {
     contextHint: 'ملخص شامل يضم بيانات داخلية وخارجية ورقابية',
   },
 
-  // ── ذكاء اصطناعي: تحليلات داخلية ──
+  // ── ذكاء اصطناعي: هجين (مرئي للرقيب لتحسين الانبعاثات والمسارات) ──
   ai: {
     type: 'hybrid',
-    involvedParties: ['self', 'generator', 'recycler'],
-    adminVisible: false,
-    contextHint: 'تحليلات ذكية تعتمد على بيانات الناقل والشركاء لتحسين المسارات والعمليات',
+    involvedParties: ['self', 'generator', 'recycler', 'regulator'],
+    adminVisible: true,
+    contextHint: 'تحليلات ذكية تعتمد على بيانات الناقل والشركاء لتحسين المسارات وتقليل الانبعاثات - مرئية للجهات الرقابية',
   },
 
-  // ── أداء السائقين: داخلي ──
+  // ── أداء السائقين: هجين (بيانات من تطبيق السائق الخارجي + مراقبة IoT) ──
   performance: {
-    type: 'internal',
+    type: 'hybrid',
     involvedParties: ['self', 'driver'],
-    adminVisible: false,
-    contextHint: 'أداء السائقين وتكاليف الرحلات والصيانة',
+    adminVisible: true,
+    contextHint: 'أداء السائقين وتكاليف الرحلات مع تدفق بيانات من تطبيق السائق المستقل وحساسات IoT',
   },
 
   // ── مساعد السائق: داخلي ──
