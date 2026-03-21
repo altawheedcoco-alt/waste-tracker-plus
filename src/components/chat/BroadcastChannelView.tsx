@@ -1202,6 +1202,13 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
   const { isMuted, toggleMute, report } = useBroadcastNotificationSettings(channel.id);
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const { posts } = useBroadcastPosts(channel.id);
+
+  const filteredPosts = searchQuery.trim()
+    ? posts.filter(p => p.content?.toLowerCase().includes(searchQuery.toLowerCase()))
+    : [];
 
   return (
     <div className="flex flex-col h-full overflow-y-auto" dir="rtl">
@@ -1240,39 +1247,75 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
         </p>
       </div>
 
-      {/* Action buttons — differ by role */}
+      {/* Action buttons */}
       <div className="grid grid-cols-4 gap-2 px-4 mt-4">
-        <button onClick={() => {
-          onBack();
-          toast.info('استخدم شريط البحث في قائمة المنشورات');
-        }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-          <Search className="w-5 h-5 text-muted-foreground" />
+        <button onClick={() => setShowSearch(!showSearch)}
+          className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors",
+            showSearch ? "border-primary/30 bg-primary/5" : "border-border/50 hover:bg-muted/50")}>
+          <Search className={cn("w-5 h-5", showSearch ? "text-primary" : "text-muted-foreground")} />
           <span className="text-[11px] font-medium">بحث</span>
         </button>
-        <button onClick={() => {
-          const link = `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`;
-          if (navigator.share) {
-            navigator.share({ title: channel.name, url: link }).catch(() => {});
-          } else {
-            navigator.clipboard.writeText(link);
-            toast.success('تم نسخ رابط القناة');
-          }
+        <button onClick={async () => {
+          try {
+            const link = `${window.location.origin}/dashboard/broadcast-channels?channel=${channel.id}`;
+            if (navigator.share) {
+              await navigator.share({ title: channel.name, url: link });
+            } else if (navigator.clipboard?.writeText) {
+              await navigator.clipboard.writeText(link);
+              toast.success('تم نسخ رابط القناة');
+            } else {
+              const ta = document.createElement('textarea');
+              ta.value = link; ta.style.position = 'fixed'; ta.style.opacity = '0';
+              document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+              document.body.removeChild(ta);
+              toast.success('تم نسخ رابط القناة');
+            }
+          } catch { /* user cancelled */ }
         }} className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
           <Share2 className="w-5 h-5 text-muted-foreground" />
           <span className="text-[11px] font-medium">مشاركة</span>
         </button>
         <button onClick={() => toggleMute(!isMuted)}
-          className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-border/50 hover:bg-muted/50 transition-colors">
-          {isMuted ? <BellOff className="w-5 h-5 text-muted-foreground" /> : <Bell className="w-5 h-5 text-muted-foreground" />}
+          className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors",
+            isMuted ? "border-amber-500/30 bg-amber-50 dark:bg-amber-500/10" : "border-border/50 hover:bg-muted/50")}>
+          {isMuted ? <BellOff className="w-5 h-5 text-amber-600" /> : <Bell className="w-5 h-5 text-muted-foreground" />}
           <span className="text-[11px] font-medium">{isMuted ? 'مكتومة' : 'كتم'}</span>
         </button>
         <button onClick={onSubscribeToggle}
           className={cn("flex flex-col items-center gap-1.5 p-3 rounded-xl border transition-colors",
             channel.is_subscribed ? "border-primary/30 bg-primary/5" : "border-border/50 hover:bg-muted/50")}>
           {channel.is_subscribed ? <Check className="w-5 h-5 text-primary" /> : <UserPlus className="w-5 h-5 text-muted-foreground" />}
-          <span className="text-[11px] font-medium">{channel.is_subscribed ? 'متابَعة' : 'متابعة'}</span>
+          <span className="text-[11px] font-medium">{channel.is_subscribed ? 'متابَعة ✓' : 'متابعة'}</span>
         </button>
       </div>
+
+      {/* Search panel */}
+      <AnimatePresence>
+        {showSearch && (
+          <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+            className="px-4 mt-3 overflow-hidden">
+            <Input
+              placeholder="ابحث في منشورات القناة..."
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
+              className="text-sm"
+              autoFocus
+            />
+            {searchQuery.trim() && (
+              <div className="mt-2 space-y-2 max-h-60 overflow-y-auto">
+                {filteredPosts.length > 0 ? filteredPosts.map(p => (
+                  <div key={p.id} className="p-2.5 rounded-lg bg-muted/50 text-xs border border-border/30">
+                    <p className="line-clamp-2">{p.content}</p>
+                    <p className="text-[10px] text-muted-foreground mt-1">{format(new Date(p.created_at), 'yyyy/M/d', { locale: ar })}</p>
+                  </div>
+                )) : (
+                  <p className="text-xs text-muted-foreground text-center py-4">لا توجد نتائج</p>
+                )}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Description */}
       {channel.description && (
