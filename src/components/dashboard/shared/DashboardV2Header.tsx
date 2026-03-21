@@ -11,7 +11,7 @@ import {
   Globe2, CloudRain, Sun, CloudSun, Wind, Thermometer, AlertCircle, Bell,
   MapPin, Navigation, Truck, CloudLightning, Snowflake, Cloud, BellRing,
   ShieldAlert, CircleAlert, Info, XCircle, ChevronLeft, ChevronRight,
-  Radar, Waves, Fingerprint, ScanLine, MonitorCheck, ServerCrash, BatteryCharging,
+  Radar, Waves, Fingerprint, ScanLine, MonitorCheck, ServerCrash, BatteryCharging, ChevronUp, ChevronDown,
   CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
   CloudFog, Sunrise, Sunset, Clock, ThermometerSun,
   FileSignature, Wallet, Users, ScrollText, Package, Lock, RefreshCw, HardDrive,
