@@ -537,7 +537,7 @@ const TransporterCommandCenter = () => {
                 <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
                   sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
                   alert={(stats?.expiringDocs || 0) > 0}
-                  onClick={() => navigate('/dashboard/documents')} />
+                  onClick={() => navigate('/dashboard/document-center')} />
               </div>
 
               {/* Row 3: Financial & Compliance Bar */}
