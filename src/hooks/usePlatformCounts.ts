@@ -156,7 +156,7 @@ export const usePlatformCounts = () => {
         (supabase as any)
           .from('approval_requests')
           .select('id', { count: 'exact', head: true })
-          .eq('organization_id', orgId!)
+          .eq('requester_organization_id', orgId!)
           .eq('status', 'pending'),
 
         // Active vehicles

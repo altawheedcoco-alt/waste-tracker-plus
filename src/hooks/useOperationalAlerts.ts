@@ -286,7 +286,7 @@ export const useOperationalAlerts = () => {
           severity: 'warning',
           type: 'signature',
           icon: FileSignature,
-          route: '/dashboard/signing',
+          route: '/dashboard/signing-inbox',
         });
       }
 
@@ -327,7 +327,7 @@ export const useOperationalAlerts = () => {
           type: 'work_order',
           icon: Truck,
           timestamp: w.created_at,
-          route: '/dashboard/work-orders',
+          route: '/dashboard/my-requests',
         });
       }
 
