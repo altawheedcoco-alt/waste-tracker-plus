@@ -204,11 +204,115 @@ export function useEntityDocuments(filters: DocumentFilters = {}) {
       queryClient.invalidateQueries({ queryKey: ['entity-timeline'] });
       toast.success('تم رفع المستند بنجاح');
 
+      // ═══ 1. استخراج إلزامي بالذكاء الاصطناعي ═══
+      if (data?.id && organization?.id) {
+        try {
+          toast.info('🤖 جاري تحليل المستند بالذكاء الاصطناعي...', { id: `ai-extract-${data.id}`, duration: 30000 });
+          
+          // Convert file to base64
+          const base64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onloadend = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(params.file);
+          });
+
+          const { data: aiResult, error: aiError } = await supabase.functions.invoke('analyze-document', {
+            body: {
+              imageBase64: base64,
+              fileName: params.file.name,
+              mimeType: params.file.type,
+              context: `نوع المستند: ${params.documentType}, الفئة: ${params.documentCategory}`,
+            },
+          });
+
+          if (!aiError && aiResult?.success && aiResult.result) {
+            const r = aiResult.result;
+            const structuredFields: Record<string, any> = {};
+            if (r.extracted_data) {
+              if (r.extracted_data.reference_number) structuredFields['رقم مرجعي'] = r.extracted_data.reference_number;
+              if (r.extracted_data.date) structuredFields['التاريخ'] = r.extracted_data.date;
+              if (r.extracted_data.amount) structuredFields['المبلغ'] = r.extracted_data.amount;
+              if (r.extracted_data.parties?.length) structuredFields['الأطراف'] = r.extracted_data.parties;
+              if (r.extracted_data.weights?.length) structuredFields['الأوزان'] = r.extracted_data.weights;
+              if (r.extracted_data.other_fields) Object.assign(structuredFields, r.extracted_data.other_fields);
+            }
+
+            // حفظ البيانات المستخرجة في entity_documents
+            await supabase.from('entity_documents').update({
+              ai_extracted: true,
+              ocr_confidence: r.classification?.confidence || 0,
+              ocr_extracted_data: {
+                structured_fields: structuredFields,
+                classification: r.classification,
+                summary: r.summary,
+                risk_analysis: r.risk_analysis,
+                tags: r.tags,
+                extracted_data: r.extracted_data,
+              } as any,
+              tags: [...(params.tags || []), 'ai-extracted', ...(r.tags || [])].filter((v, i, a) => a.indexOf(v) === i),
+            }).eq('id', data.id);
+
+            toast.success(`✅ تم تحليل المستند: ${r.classification?.document_type || 'مستند'} (ثقة ${r.classification?.confidence || 0}%)`, { id: `ai-extract-${data.id}` });
+
+            // ═══ 2. تحليل الجهة الشامل التلقائي ═══
+            try {
+              toast.info('📊 جاري تحليل الجهة الشامل تلقائياً...', { id: `org-analysis-${organization.id}`, duration: 60000 });
+              
+              const { data: analysisResult, error: analysisError } = await supabase.functions.invoke('analyze-organization', {
+                body: { organization_id: organization.id },
+              });
+
+              if (!analysisError && analysisResult?.success && analysisResult.result) {
+                // حفظ التقرير في entity_documents كتقرير تحليلي
+                await supabase.from('entity_documents').insert({
+                  organization_id: organization.id,
+                  document_type: 'report',
+                  document_category: 'analysis',
+                  title: `تقرير تحليل شامل - ${new Date().toLocaleDateString('ar-EG')}`,
+                  file_url: data.file_url, // reference
+                  file_name: `analysis-report-${Date.now()}.json`,
+                  file_type: 'application/json',
+                  file_size: 0,
+                  tags: ['ai-analysis', 'auto-generated', 'compliance-report'],
+                  ai_extracted: true,
+                  ocr_extracted_data: analysisResult.result as any,
+                  ocr_confidence: analysisResult.result.compliance_score || 0,
+                  uploaded_by: user?.id,
+                  uploaded_by_role: 'system',
+                });
+
+                const score = analysisResult.result.compliance_score || 0;
+                const riskLevel = analysisResult.result.risk_level || 'unknown';
+                const riskEmoji = riskLevel === 'low' ? '🟢' : riskLevel === 'medium' ? '🟡' : '🔴';
+                
+                toast.success(
+                  `📊 تقرير الجهة: درجة الامتثال ${score}% ${riskEmoji} مستوى المخاطرة: ${riskLevel}`,
+                  { id: `org-analysis-${organization.id}`, duration: 8000 }
+                );
+
+                queryClient.invalidateQueries({ queryKey: ['entity-documents'] });
+              } else {
+                toast.dismiss(`org-analysis-${organization.id}`);
+              }
+            } catch (analysisErr) {
+              console.warn('[EntityDocs] تحليل الجهة فشل (غير مؤثر):', analysisErr);
+              toast.dismiss(`org-analysis-${organization.id}`);
+            }
+          } else {
+            console.warn('[EntityDocs] AI extraction failed:', aiError);
+            toast.warning('⚠️ لم يتمكن الذكاء الاصطناعي من تحليل المستند', { id: `ai-extract-${data.id}` });
+          }
+        } catch (aiErr) {
+          console.warn('[EntityDocs] AI extraction error (non-blocking):', aiErr);
+          toast.dismiss(`ai-extract-${data?.id}`);
+        }
+      }
+
       // إشعار الأطراف المرتبطة فورياً
       try {
         const partnerOrgId = params.partnerId;
         if (partnerOrgId) {
-          // جلب أعضاء الجهة المرتبطة
           const { data: members } = await supabase
             .from('profiles')
             .select('id')
