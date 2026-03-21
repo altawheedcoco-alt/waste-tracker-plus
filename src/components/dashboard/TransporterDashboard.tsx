@@ -171,15 +171,7 @@ const TransporterDashboard = () => {
   return (
     <div className="space-y-3 sm:space-y-6">
       <Suspense fallback={null}>
-        <SmartDailyBrief
-          role="transporter"
-          stats={{
-            pending: shipments.filter(s => s.status === 'new').length,
-            active: shipments.filter(s => ['approved', 'in_transit'].includes(s.status)).length,
-            completed: shipments.filter(s => ['delivered', 'confirmed'].includes(s.status)).length,
-            total: shipments.length,
-          }}
-        />
+        <TransporterSmartBrief />
       </Suspense>
       <Suspense fallback={null}><StoryCircles /></Suspense>
       <DashboardV2Header
