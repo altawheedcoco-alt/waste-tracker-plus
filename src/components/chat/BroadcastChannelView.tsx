@@ -590,7 +590,6 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
         playsInline
         preload="metadata"
         controls
-        crossOrigin="anonymous"
         onError={() => setHasError(true)}
       />
       <button
@@ -606,29 +605,38 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
 // ═══════════════════════════════════════════════════════════════
 // Inline PDF Viewer — with mobile fallback
 const InlinePdfViewer = ({ url, name, height = '400px' }: { url: string; name: string; height?: string }) => {
-  const [iframeError, setIframeError] = useState(false);
+  const [iframeLoaded, setIframeLoaded] = useState(false);
+  const [showFallback, setShowFallback] = useState(false);
   const isMobile = typeof window !== 'undefined' && /Android|iPhone|iPad/i.test(navigator.userAgent);
 
-  // On mobile, iframe PDF usually fails — show a preview card instead
-  if (isMobile || iframeError) {
-    return (
-      <div className="rounded-xl border border-border/50 overflow-hidden">
-        <a href={url} target="_blank" rel="noreferrer"
-          className="flex items-center gap-3 p-3 bg-gradient-to-l from-red-500/5 to-transparent hover:from-red-500/10 transition-colors">
-          <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
-            <FileText className="w-6 h-6 text-red-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{name || 'ملف PDF'}</p>
-            <p className="text-[10px] text-muted-foreground mt-0.5">PDF • اضغط لفتح المستند</p>
-          </div>
-          <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-            <Forward className="w-4 h-4 text-primary rotate-90" />
-          </div>
-        </a>
-      </div>
-    );
-  }
+  // Timeout fallback: if iframe doesn't load in 3s, show link
+  useEffect(() => {
+    if (isMobile) return;
+    const t = setTimeout(() => {
+      if (!iframeLoaded) setShowFallback(true);
+    }, 3000);
+    return () => clearTimeout(t);
+  }, [isMobile, iframeLoaded]);
+
+  const fallbackCard = (
+    <div className="rounded-xl border border-border/50 overflow-hidden">
+      <a href={url} target="_blank" rel="noreferrer"
+        className="flex items-center gap-3 p-3 bg-gradient-to-l from-red-500/5 to-transparent hover:from-red-500/10 transition-colors">
+        <div className="w-12 h-12 rounded-xl bg-red-500/10 flex items-center justify-center shrink-0">
+          <FileText className="w-6 h-6 text-red-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{name || 'ملف PDF'}</p>
+          <p className="text-[10px] text-muted-foreground mt-0.5">PDF • اضغط لفتح المستند</p>
+        </div>
+        <div className="shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+          <Forward className="w-4 h-4 text-primary rotate-90" />
+        </div>
+      </a>
+    </div>
+  );
+
+  if (isMobile || showFallback) return fallbackCard;
 
   return (
     <div className="rounded-xl border border-border/50 overflow-hidden">
@@ -637,7 +645,8 @@ const InlinePdfViewer = ({ url, name, height = '400px' }: { url: string; name: s
         className="w-full border-0"
         style={{ height }}
         title={name}
-        onError={() => setIframeError(true)}
+        onLoad={() => setIframeLoaded(true)}
+        onError={() => setShowFallback(true)}
       />
       <a href={url} target="_blank" rel="noreferrer"
         className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
