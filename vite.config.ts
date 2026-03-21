@@ -94,9 +94,9 @@ export default defineConfig(({ mode }) => ({
       workbox: {
         navigateFallbackDenylist: [/^\/~oauth/],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
-        // Skip waiting — تفعيل التحديث فوراً بدون انتظار إغلاق التبويبات
         skipWaiting: true,
         clientsClaim: true,
+        cleanupOutdatedCaches: true,
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -123,42 +123,30 @@ export default defineConfig(({ mode }) => ({
             },
           },
           {
-            // API calls — always network first for fresh data
-            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/rest\/v1\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'api-cache',
-              expiration: {
-                maxEntries: 50,
-                maxAgeSeconds: 60 * 2, // 2 minutes (shorter for fresher data)
-              },
-              cacheableResponse: { statuses: [0, 200] },
-              networkTimeoutSeconds: 8,
-            },
-          },
-          {
-            // Realtime/WebSocket — NEVER cache
-            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/realtime\/.*/i,
+            // ALL Supabase API calls — NEVER cache
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
             handler: 'NetworkOnly',
           },
           {
-            // Auth endpoints — NEVER cache
-            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/auth\/.*/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/realtime\/.*/i,
             handler: 'NetworkOnly',
           },
           {
-            // Edge functions — NEVER cache
-            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/functions\/.*/i,
+            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
             handler: 'NetworkOnly',
           },
           {
-            urlPattern: /^https:\/\/jejwizkssmqzxwseqsre\.supabase\.co\/storage\/.*/i,
-            handler: 'CacheFirst',
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/.*/i,
+            handler: 'NetworkOnly',
+          },
+          {
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+            handler: 'StaleWhileRevalidate',
             options: {
               cacheName: 'storage-cache',
               expiration: {
                 maxEntries: 100,
-                maxAgeSeconds: 60 * 60 * 24 * 30,
+                maxAgeSeconds: 60 * 60 * 24 * 7,
               },
               cacheableResponse: { statuses: [0, 200] },
             },

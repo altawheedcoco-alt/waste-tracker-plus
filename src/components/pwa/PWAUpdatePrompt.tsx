@@ -8,16 +8,22 @@ export const PWAUpdatePrompt = () => {
     needRefresh: [needRefresh, setNeedRefresh],
     updateServiceWorker,
   } = useRegisterSW({
+    immediate: true,
     onRegisteredSW(swUrl, r) {
       if (r) {
-        // فحص التحديثات كل 10 دقائق (بدلاً من ساعة) لضمان مزامنة أسرع
-        setInterval(() => r.update(), 10 * 60 * 1000);
+        // فحص التحديثات كل 2 دقيقة
+        setInterval(() => r.update(), 2 * 60 * 1000);
 
         // فحص فوري عند العودة من الخلفية
         document.addEventListener('visibilitychange', () => {
           if (document.visibilityState === 'visible') {
             r.update();
           }
+        });
+
+        // فحص فوري عند استعادة الاتصال
+        window.addEventListener('online', () => {
+          r.update();
         });
       }
     },
