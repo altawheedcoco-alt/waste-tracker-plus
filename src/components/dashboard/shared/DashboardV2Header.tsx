@@ -766,7 +766,7 @@ const statusColors: Record<string, string> = {
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
   userName, orgName, orgLabel, icon: Icon, gradient = 'from-primary to-primary/70',
-  children, radarStats, alerts = [], weather, heatmapData, onRefresh
+  children, radarStats, alerts = [], weather, heatmapData, onRefresh, onAlertClick
 }: DashboardV2HeaderProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefreshClick = useCallback(() => {
