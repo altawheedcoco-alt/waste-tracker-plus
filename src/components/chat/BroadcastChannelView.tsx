@@ -845,25 +845,12 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
               const docIsPdf = ext === 'pdf';
               const docIsOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
               return (
-                <div key={`doc-${i}`} className="rounded-xl border border-border/50 overflow-hidden">
+                <div key={`doc-${i}`}>
                   {docIsPdf ? (
-                    <div>
-                      <iframe
-                        src={`${url}#toolbar=0`}
-                        className="w-full border-0"
-                        style={{ height: '350px' }}
-                        title={name}
-                      />
-                      <a href={url} target="_blank" rel="noreferrer"
-                        className="flex items-center gap-2 p-2 bg-muted/20 border-t border-border/30 hover:bg-muted/40 transition-colors">
-                        <FileText className="w-4 h-4 text-red-500" />
-                        <span className="text-xs font-medium truncate flex-1">{name}</span>
-                        <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
-                      </a>
-                    </div>
+                    <InlinePdfViewer url={url} name={name} height="350px" />
                   ) : (
                     <a href={url} target="_blank" rel="noreferrer"
-                      className="flex items-center gap-2.5 p-2.5 hover:border-primary/30 bg-muted/10 transition-colors">
+                      className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/30 bg-muted/10 transition-colors">
                       <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
                         docIsOffice ? "bg-blue-500/10" : "bg-primary/10")}>
                         <FileText className={cn("w-5 h-5", docIsOffice ? "text-blue-500" : "text-primary")} />
