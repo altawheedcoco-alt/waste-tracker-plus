@@ -4,12 +4,11 @@ import { motion } from 'framer-motion';
 import { 
   MessageCircle, Bell, FileText, CircleDot, Video, Send, 
   Hash, BarChart3, Bot, PenTool, Radio, 
-  TrendingUp, Clock
+  TrendingUp
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { useNotifications } from '@/hooks/useNotifications';
-import { useCommHubCounts } from '@/hooks/useCommHubCounts';
+import { usePlatformCounts } from '@/hooks/usePlatformCounts';
 import { cn } from '@/lib/utils';
 
 interface QuickLink {
@@ -19,19 +18,17 @@ interface QuickLink {
   badgeCount?: number;
   color: string;
   bgColor: string;
-  comingSoon?: boolean;
 }
 
 export default function CommunicationHubWidget() {
   const navigate = useNavigate();
-  const { unreadCount } = useNotifications();
-  const { data: counts } = useCommHubCounts();
+  const { data: counts } = usePlatformCounts();
 
-  const totalBadges = (counts?.unreadMessages ?? 0) + unreadCount + (counts?.pendingSignatures ?? 0) + (counts?.pendingRequests ?? 0);
+  const totalBadges = (counts?.unreadMessages ?? 0) + (counts?.unreadNotifications ?? 0) + (counts?.pendingSignatures ?? 0) + (counts?.pendingRequests ?? 0);
 
   const links: QuickLink[] = [
     { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', badgeCount: counts?.unreadMessages, color: 'text-primary', bgColor: 'bg-primary/10' },
-    { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: unreadCount, color: 'text-destructive', bgColor: 'bg-destructive/10' },
+    { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: counts?.unreadNotifications, color: 'text-destructive', bgColor: 'bg-destructive/10' },
     { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/chat?tab=notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30' },
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },

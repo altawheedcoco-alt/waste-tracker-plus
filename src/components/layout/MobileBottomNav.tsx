@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
-import { useNotifications } from '@/hooks/useNotifications';
+import { usePlatformCounts } from '@/hooks/usePlatformCounts';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 
 interface NavTab {
@@ -22,8 +22,9 @@ const MobileBottomNav = memo(() => {
   const location = useLocation();
   const navigate = useNavigate();
   const { organization, roles } = useAuth();
-  const { unreadCount } = useNotifications();
+  const { data: platformCounts } = usePlatformCounts();
   const { isMobile } = useDisplayMode();
+  const combinedBadge = (platformCounts?.unreadNotifications ?? 0) + (platformCounts?.unreadMessages ?? 0);
 
   const isDriver = roles.includes('driver');
   const isAdmin = roles.includes('admin');
@@ -35,7 +36,7 @@ const MobileBottomNav = memo(() => {
         { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
         { id: 'shipments', icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments' },
         { id: 'location', icon: MapPin, label: 'موقعي', path: '/dashboard/my-location' },
-        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: unreadCount },
+        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: combinedBadge },
         { id: 'profile', icon: User, label: 'حسابي', path: '/dashboard/driver-profile' },
       ];
     }
@@ -44,7 +45,7 @@ const MobileBottomNav = memo(() => {
       return [
         { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
         { id: 'shipments', icon: Package, label: 'الشحنات', path: '/dashboard/shipments' },
-        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: unreadCount },
+        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: combinedBadge },
         { id: 'settings', icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
       ];
     }
@@ -57,7 +58,7 @@ const MobileBottomNav = memo(() => {
       return [
         { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
         { id: 'team', icon: Users, label: 'الفريق', path: '/dashboard/environmental-consultants' },
-        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: unreadCount },
+        { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: combinedBadge },
         { id: 'org', icon: Building2, label: 'المكتب', path: '/dashboard/organization-profile' },
         { id: 'settings', icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
       ];
@@ -72,11 +73,11 @@ const MobileBottomNav = memo(() => {
     return [
       { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
       { id: 'shipments', icon: Package, label: 'الشحنات', path: shipmentsPath },
-      { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: unreadCount },
+      { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: combinedBadge },
       { id: 'org', icon: orgIcon, label: 'المنظمة', path: '/dashboard/organization-profile' },
       { id: 'settings', icon: Settings, label: 'الإعدادات', path: '/dashboard/settings' },
     ];
-  }, [isDriver, isAdmin, orgType, unreadCount]);
+  }, [isDriver, isAdmin, orgType, combinedBadge]);
 
   if (!isMobile) return null;
 
