@@ -25,7 +25,7 @@ import ShipmentCard from '@/components/shipments/ShipmentCard';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import GeneratorCommandCenter from './generator/GeneratorCommandCenter';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DailyOperationsSummary from './operations/DailyOperationsSummary';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import DocumentVerificationWidget from './DocumentVerificationWidget';
