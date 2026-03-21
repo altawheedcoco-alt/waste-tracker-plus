@@ -340,7 +340,7 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
 });
 PerformanceGauge.displayName = 'PerformanceGauge';
 
-/* ═══════════ SMART ALERT TICKER (ENHANCED) ═══════════ */
+/* ═══════════ SMART ALERT TICKER (MULTI-PURPOSE) ═══════════ */
 const SEVERITY_CONFIG = {
   info: { icon: Info, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
   warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
@@ -364,11 +364,23 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
   const [idx, setIdx] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [activeFilter, setActiveFilter] = useState('all');
+  const [expandedAlert, setExpandedAlert] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const filteredAlerts = useMemo(() => {
     if (activeFilter === 'all') return alerts;
     return alerts.filter(a => a.type === activeFilter);
   }, [alerts, activeFilter]);
+
+  // Group similar alerts for summary
+  const groupedSummary = useMemo(() => {
+    const groups: Record<string, number> = {};
+    for (const a of alerts) {
+      const key = a.type || 'other';
+      groups[key] = (groups[key] || 0) + 1;
+    }
+    return groups;
+  }, [alerts]);
 
   useEffect(() => {
     if (filteredAlerts.length <= 1 || isPaused) return;
@@ -376,7 +388,6 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
     return () => clearInterval(t);
   }, [filteredAlerts.length, isPaused]);
 
-  // Reset idx when filter changes
   useEffect(() => { setIdx(0); }, [activeFilter]);
 
   if (!alerts.length) return null;
@@ -386,12 +397,25 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
   if (!alert) return null;
   const cfg = SEVERITY_CONFIG[alert.severity];
   const AlertIcon = alert.icon || cfg.icon;
-
   const warningCount = alerts.filter(a => a.severity === 'warning' || a.severity === 'critical').length;
+  const unreadCount = alerts.filter(a => a.isRead === false).length;
+  const isExpanded = expandedAlert === alert.id;
+
+  const handleQuickAction = (e: React.MouseEvent, action: string) => {
+    e.stopPropagation();
+    if (action === 'navigate' && alert.route) {
+      navigate(alert.route);
+    } else if (action === 'expand') {
+      setExpandedAlert(isExpanded ? null : alert.id);
+      setIsPaused(true);
+    } else if (action === 'markRead' && onAlertClick) {
+      onAlertClick(alert);
+    }
+  };
 
   return (
     <div className="space-y-1">
-      {/* Filter chips */}
+      {/* Filter chips + summary */}
       <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-0.5">
         {ALERT_TYPE_FILTERS.map(f => {
           const count = f.type === 'all' ? alerts.length : alerts.filter(a => a.type === f.type).length;
@@ -414,6 +438,12 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
             </button>
           );
         })}
+        {unreadCount > 0 && (
+          <span className="mr-1 text-[8px] font-mono text-destructive flex items-center gap-0.5">
+            <BellRing className="w-2.5 h-2.5" />
+            {unreadCount} غير مقروء
+          </span>
+        )}
         {warningCount > 0 && (
           <span className="mr-auto text-[8px] font-mono text-amber-500 flex items-center gap-0.5">
             <AlertTriangle className="w-2.5 h-2.5" />
@@ -424,37 +454,94 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
 
       {/* Main ticker */}
       <motion.div
-        className={cn("flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-[10px] cursor-pointer", cfg.bg, cfg.border)}
+        className={cn("flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-[10px]", cfg.bg, cfg.border)}
         layout
-        onClick={() => {
-          if (alert.route && onAlertClick) onAlertClick(alert);
-          else setIsPaused(p => !p);
-        }}
       >
         <motion.div animate={alert.severity === 'critical' ? { scale: [1, 1.2, 1] } : {}}
           transition={{ duration: 0.6, repeat: Infinity }}>
           <AlertIcon className={cn("w-3.5 h-3.5 shrink-0", cfg.color)} />
         </motion.div>
-        {/* Unread indicator dot */}
         {alert.isRead === false && (
           <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 animate-pulse" />
         )}
-        <AnimatePresence mode="wait">
-          <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate flex-1", cfg.color, alert.isRead === false && "font-bold")}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-            transition={{ duration: 0.3 }}>
-            {alert.message}
-          </motion.span>
-        </AnimatePresence>
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setExpandedAlert(isExpanded ? null : alert.id); setIsPaused(true); }}>
+          <AnimatePresence mode="wait">
+            <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate block", cfg.color, alert.isRead === false && "font-bold")}
+              initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.3 }}>
+              {alert.message}
+            </motion.span>
+          </AnimatePresence>
+        </div>
+
+        {/* Quick action buttons */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          {alert.route && (
+            <button onClick={(e) => handleQuickAction(e, 'navigate')}
+              className="p-0.5 rounded hover:bg-muted/50 transition-colors" title="فتح">
+              <Eye className="w-3 h-3 text-muted-foreground hover:text-primary" />
+            </button>
+          )}
+          <button onClick={(e) => handleQuickAction(e, 'expand')}
+            className="p-0.5 rounded hover:bg-muted/50 transition-colors" title="تفاصيل">
+            {isExpanded ? <ChevronUp className="w-3 h-3 text-muted-foreground" /> : <ChevronDown className="w-3 h-3 text-muted-foreground" />}
+          </button>
+        </div>
+
+        {/* Navigation */}
         <div className="flex items-center gap-0.5 shrink-0 mr-auto">
           {isPaused && <span className="text-[7px] text-muted-foreground">⏸</span>}
-          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p - 1 + filteredAlerts.length) % filteredAlerts.length); }}
+          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p - 1 + filteredAlerts.length) % filteredAlerts.length); setExpandedAlert(null); }}
             className="hover:bg-muted/50 rounded p-0.5"><ChevronRight className="w-3 h-3 text-muted-foreground" /></button>
           <span className="text-[8px] font-mono text-muted-foreground tabular-nums" dir="ltr">{safeIdx + 1}/{filteredAlerts.length}</span>
-          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p + 1) % filteredAlerts.length); }}
+          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p + 1) % filteredAlerts.length); setExpandedAlert(null); }}
             className="hover:bg-muted/50 rounded p-0.5"><ChevronLeft className="w-3 h-3 text-muted-foreground" /></button>
         </div>
       </motion.div>
+
+      {/* Expanded detail panel */}
+      <AnimatePresence>
+        {isExpanded && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="overflow-hidden"
+          >
+            <div className={cn("px-3 py-2 rounded-lg border text-[11px] space-y-1.5", cfg.bg, cfg.border)}>
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-foreground">{alert.message}</span>
+                {alert.timestamp && (
+                  <span className="text-[9px] text-muted-foreground font-mono" dir="ltr">
+                    {new Date(alert.timestamp).toLocaleString('ar-EG', { hour: '2-digit', minute: '2-digit', day: 'numeric', month: 'short' })}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1.5 flex-wrap">
+                <Badge variant="outline" className="text-[9px] h-5 gap-0.5">
+                  <AlertIcon className="w-2.5 h-2.5" />
+                  {alert.type || 'عام'}
+                </Badge>
+                <Badge variant={alert.severity === 'critical' ? 'destructive' : 'outline'} className="text-[9px] h-5">
+                  {alert.severity === 'critical' ? 'حرج' : alert.severity === 'warning' ? 'تحذير' : 'معلومات'}
+                </Badge>
+                {alert.isRead === false && (
+                  <Badge variant="destructive" className="text-[9px] h-5">غير مقروء</Badge>
+                )}
+              </div>
+              {alert.route && (
+                <button
+                  onClick={() => navigate(alert.route!)}
+                  className="w-full text-center py-1.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold hover:bg-primary/20 transition-colors"
+                >
+                  فتح التفاصيل الكاملة →
+                </button>
+              )}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 });
