@@ -34,14 +34,14 @@ export const useCommHubCounts = () => {
         pollsR,
       ] = await Promise.all([
         // Unread messages for this org
-        supabase
+        (supabase as any)
           .from('direct_messages')
           .select('id', { count: 'exact', head: true })
           .eq('receiver_organization_id', orgId!)
           .eq('is_read', false),
 
         // Unread notes
-        supabase
+        (supabase as any)
           .from('notes')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', orgId!)
