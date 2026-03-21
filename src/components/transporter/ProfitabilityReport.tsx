@@ -81,7 +81,7 @@ const ProfitabilityReport = () => {
       const clientId = s.generator_id || 'unknown';
       const existing = map.get(clientId) || { count: 0, revenue: 0 };
       existing.count++;
-      existing.revenue += s.total_cost || 0;
+      existing.revenue += s.total_value || 0;
       map.set(clientId, existing);
     });
     return Array.from(map.entries())
