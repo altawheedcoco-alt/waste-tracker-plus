@@ -10,9 +10,10 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import {
   Brain, Shield, AlertTriangle, CheckCircle2, XCircle, Clock,
   FileText, Loader2, RefreshCw, TrendingUp, Scale, Leaf, BarChart3,
-  DollarSign, Truck, Activity, Gavel, FileWarning, Users
+  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2
 } from 'lucide-react';
 import { toast } from 'sonner';
+import { notifyAdmins } from '@/services/unifiedNotifier';
 
 interface License {
   name: string; number: string; issuing_authority?: string; status: string;
@@ -56,9 +57,10 @@ interface AnalysisResult {
 interface Props { organizationId: string; }
 
 const OrganizationAnalysis = ({ organizationId }: Props) => {
-  const { profile } = useAuth();
+  const { profile, organization } = useAuth();
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [docsCount, setDocsCount] = useState(0);
 
   useEffect(() => {
@@ -86,7 +88,47 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
     } finally { setLoading(false); }
   };
 
-  const getScoreColor = (score: number) => {
+  const saveAndShareWithAdmin = async () => {
+    if (!analysis || !profile) return;
+    setSaving(true);
+    try {
+      const orgName = organization?.name || 'جهة';
+      const reportTitle = `تقرير تحليل شامل - ${orgName} - ${new Date().toLocaleDateString('ar-EG')}`;
+      
+      const { error: saveError } = await supabase.from('entity_documents').insert({
+        organization_id: organizationId,
+        document_type: 'report',
+        document_category: 'analysis',
+        title: reportTitle,
+        ai_extracted: true,
+        ocr_extracted_data: analysis as any,
+        ocr_confidence: analysis.compliance_score,
+        uploaded_by: profile.id,
+        tags: ['ai-analysis', 'deep-analysis', 'saved-report'],
+        status: 'active',
+      });
+      if (saveError) throw saveError;
+
+      const riskEmoji = analysis.risk_level === 'low' ? '🟢' : analysis.risk_level === 'medium' ? '🟡' : '🔴';
+      await notifyAdmins(
+        `📊 تقرير تحليل جهة: ${orgName}`,
+        `${riskEmoji} مستوى المخاطرة: ${analysis.risk_level}\n📈 درجة الامتثال: ${analysis.compliance_score}%\n📝 الملخص: ${(analysis.executive_summary || '').slice(0, 300)}`,
+        {
+          type: 'org_analysis',
+          reference_id: organizationId,
+          reference_type: 'organization',
+          organization_id: organizationId,
+        }
+      );
+
+      toast.success('✅ تم حفظ التقرير ومشاركته مع مدير النظام');
+    } catch (err: any) {
+      console.error(err);
+      toast.error('فشل حفظ التقرير: ' + (err.message || ''));
+    } finally { setSaving(false); }
+  };
+
+
     if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
     if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-destructive';
@@ -191,7 +233,12 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
                 <Progress value={analysis.compliance_score} className="w-24 mt-1" />
               </div>
             </div>
-            <div className="mt-4 flex justify-end">
+            <div className="mt-4 flex justify-end gap-2">
+              <Button variant="default" size="sm" onClick={saveAndShareWithAdmin} disabled={saving} className="gap-1">
+                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                {saving ? 'جاري الحفظ...' : 'حفظ ومشاركة مع المدير'}
+                <Share2 className="h-3 w-3" />
+              </Button>
               <Button variant="outline" size="sm" onClick={runAnalysis} className="gap-1">
                 <RefreshCw className="h-3 w-3" />إعادة التحليل
               </Button>
