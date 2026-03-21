@@ -15,7 +15,7 @@ import {
   CircuitBoard, Antenna, LocateFixed, Siren, HeartPulse, Droplets, Eye as EyeIcon,
   CloudFog, Sunrise, Sunset, Clock, ThermometerSun,
   FileSignature, Wallet, Users, ScrollText, Package, Lock, RefreshCw, HardDrive,
-  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain,
+  MessageSquare, ClipboardCheck, Cog, PlugZap, Brain, Activity, FileCheck,
 } from 'lucide-react';
 import type { RealWeatherData, HourlyForecast } from '@/hooks/useRealWeather';
 import { cn } from '@/lib/utils';
