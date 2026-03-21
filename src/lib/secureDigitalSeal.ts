@@ -433,6 +433,7 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
     entityType,
     entityName,
     title,
+    orgName,
     documentRef,
     timestamp = new Date().toISOString(),
     size = 200,
@@ -463,6 +464,11 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   const microText1 = `iRecycle • ${hash.slice(0, 4)} • مُوثّق • ${hash.slice(4, 8)} • رقمي • ${hash.slice(8, 12)} • مؤمّن •`;
   const microText2 = `● ${sealNumber} ● V2 ● ${hash.slice(0, 8)} ● ${typeLabel} ● ${hash.slice(8, 16)} ●`;
   const microText3 = `◆ SECURE ◆ ${hash.slice(12, 18)} ◆ VERIFIED ◆ ${hash.slice(18, 24)} ◆`;
+
+  // NEW: MICR band, name security rings, extra guilloche
+  const micrBand = generateMICRBand(hash, entityName, orgName || '', 87, palette);
+  const nameRings = generateNameSecurityRings(entityName, orgName || '', hash, palette, uid);
+  const extraGuilloche = generateExtraGuillocheLines(hash, palette);
 
   // Style-specific extra elements
   const styleExtras = generateStyleExtras(style, hash, palette, uid);
