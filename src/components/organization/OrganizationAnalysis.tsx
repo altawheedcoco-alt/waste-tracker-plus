@@ -88,7 +88,47 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
     } finally { setLoading(false); }
   };
 
-  const getScoreColor = (score: number) => {
+  const saveAndShareWithAdmin = async () => {
+    if (!analysis || !profile) return;
+    setSaving(true);
+    try {
+      const orgName = organization?.name || 'جهة';
+      const reportTitle = `تقرير تحليل شامل - ${orgName} - ${new Date().toLocaleDateString('ar-EG')}`;
+      
+      const { error: saveError } = await supabase.from('entity_documents').insert({
+        organization_id: organizationId,
+        document_type: 'report',
+        document_category: 'analysis',
+        title: reportTitle,
+        ai_extracted: true,
+        ocr_extracted_data: analysis as any,
+        ocr_confidence: analysis.compliance_score,
+        uploaded_by: profile.id,
+        tags: ['ai-analysis', 'deep-analysis', 'saved-report'],
+        status: 'active',
+      });
+      if (saveError) throw saveError;
+
+      const riskEmoji = analysis.risk_level === 'low' ? '🟢' : analysis.risk_level === 'medium' ? '🟡' : '🔴';
+      await notifyAdmins(
+        `📊 تقرير تحليل جهة: ${orgName}`,
+        `${riskEmoji} مستوى المخاطرة: ${analysis.risk_level}\n📈 درجة الامتثال: ${analysis.compliance_score}%\n📝 الملخص: ${(analysis.executive_summary || '').slice(0, 300)}`,
+        {
+          type: 'org_analysis',
+          reference_id: organizationId,
+          reference_type: 'organization',
+          organization_id: organizationId,
+        }
+      );
+
+      toast.success('✅ تم حفظ التقرير ومشاركته مع مدير النظام');
+    } catch (err: any) {
+      console.error(err);
+      toast.error('فشل حفظ التقرير: ' + (err.message || ''));
+    } finally { setSaving(false); }
+  };
+
+
     if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
     if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
     return 'text-destructive';
