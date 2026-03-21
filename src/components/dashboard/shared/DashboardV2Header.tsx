@@ -40,6 +40,8 @@ export interface AlertItem {
   severity: 'info' | 'warning' | 'critical';
   timestamp?: string;
   icon?: LucideIcon;
+  type?: string;
+  route?: string;
 }
 
 export interface WeatherData {
