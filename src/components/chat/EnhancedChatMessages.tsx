@@ -12,6 +12,7 @@ import {
   ChevronDown,
   ArrowDown,
   Loader2,
+  Radio,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -28,6 +29,7 @@ import { useChatReactions } from '@/hooks/useChatReactions';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { useAppNavigate } from '@/hooks/useAppNavigate';
 import { cn } from '@/lib/utils';
 
 interface EnhancedChatMessagesProps {
