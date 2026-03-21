@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { Users, Briefcase, MapPin, ArrowLeft, TrendingUp } from 'lucide-react';
+import { Users, Briefcase, MapPin, ArrowLeft, ArrowRight, TrendingUp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage } from '@/contexts/LanguageContext';
 import { withTimeout, logNetworkError } from '@/lib/networkGuard';
 
 interface FeaturedJob {
@@ -20,30 +21,31 @@ interface FeaturedJob {
   organization: { name: string } | null;
 }
 
-const sectorLabels: Record<string, string> = {
-  waste_management: 'إدارة المخلفات',
-  recycling: 'إعادة التدوير',
-  transportation: 'النقل',
-  manufacturing: 'التصنيع',
-  construction: 'البناء',
-  technology: 'التكنولوجيا',
-  healthcare: 'الرعاية الصحية',
-  education: 'التعليم',
-  other: 'أخرى',
+const sectorLabels: Record<string, { ar: string; en: string }> = {
+  waste_management: { ar: 'إدارة المخلفات', en: 'Waste Management' },
+  recycling: { ar: 'إعادة التدوير', en: 'Recycling' },
+  transportation: { ar: 'النقل', en: 'Transportation' },
+  manufacturing: { ar: 'التصنيع', en: 'Manufacturing' },
+  construction: { ar: 'البناء', en: 'Construction' },
+  technology: { ar: 'التكنولوجيا', en: 'Technology' },
+  healthcare: { ar: 'الرعاية الصحية', en: 'Healthcare' },
+  education: { ar: 'التعليم', en: 'Education' },
+  other: { ar: 'أخرى', en: 'Other' },
 };
 
-const typeLabels: Record<string, string> = {
-  full_time: 'دوام كامل',
-  part_time: 'دوام جزئي',
-  contract: 'عقد',
-  temporary: 'مؤقت',
-  freelance: 'حر',
+const typeLabels: Record<string, { ar: string; en: string }> = {
+  full_time: { ar: 'دوام كامل', en: 'Full-time' },
+  part_time: { ar: 'دوام جزئي', en: 'Part-time' },
+  contract: { ar: 'عقد', en: 'Contract' },
+  temporary: { ar: 'مؤقت', en: 'Temporary' },
+  freelance: { ar: 'حر', en: 'Freelance' },
 };
 
 const OmalunaSection = () => {
   const navigate = useNavigate();
+  const { language } = useLanguage();
+  const isAr = language === 'ar';
 
-  // Use react-query with proper caching instead of raw useEffect
   const { data: jobs = [], isLoading } = useQuery({
     queryKey: ['omaluna-featured-jobs'],
     queryFn: async () => {
@@ -56,7 +58,6 @@ const OmalunaSection = () => {
             .order('created_at', { ascending: false })
             .limit(4);
         });
-
         if (error) throw error;
         return (data || []) as unknown as FeaturedJob[];
       } catch (error) {
@@ -64,13 +65,11 @@ const OmalunaSection = () => {
         return [];
       }
     },
-    staleTime: 15 * 60 * 1000, // 15 min cache
+    staleTime: 15 * 60 * 1000,
     gcTime: 60 * 60 * 1000,
     retry: 1,
   });
 
-  // Use simple count from the jobs query length instead of separate HEAD requests
-  // The HEAD requests were failing (ERR_ABORTED) and blocking page load
   const { data: stats } = useQuery({
     queryKey: ['omaluna-stats'],
     queryFn: async () => {
@@ -105,25 +104,27 @@ const OmalunaSection = () => {
         <div className="text-center mb-10 animate-fade-up">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-sm font-medium mb-4">
             <Users className="h-4 w-4" />
-            عُمالنا
+            {isAr ? 'عُمالنا' : 'Omaluna'}
           </div>
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-3">
-            منصة التوظيف المتكاملة
+            {isAr ? 'منصة التوظيف المتكاملة' : 'Integrated Recruitment Platform'}
           </h2>
           <p className="text-muted-foreground max-w-xl mx-auto">
-            اعثر على الوظيفة المناسبة أو الكفاءة المطلوبة — عرض وطلب في مكان واحد
+            {isAr
+              ? 'اعثر على الوظيفة المناسبة أو الكفاءة المطلوبة — عرض وطلب في مكان واحد'
+              : 'Find the right job or the right talent — supply and demand in one place'}
           </p>
         </div>
 
         <div className="flex justify-center gap-8 mb-10 animate-fade-up" style={{ animationDelay: '0.1s' }}>
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{stats?.totalJobs ?? 0}</div>
-            <div className="text-sm text-muted-foreground">وظيفة متاحة</div>
+            <div className="text-sm text-muted-foreground">{isAr ? 'وظيفة متاحة' : 'Available jobs'}</div>
           </div>
           <div className="h-10 w-px bg-border" />
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{stats?.totalWorkers ?? 0}</div>
-            <div className="text-sm text-muted-foreground">عامل مسجل</div>
+            <div className="text-sm text-muted-foreground">{isAr ? 'عامل مسجل' : 'Registered workers'}</div>
           </div>
         </div>
 
@@ -139,7 +140,9 @@ const OmalunaSection = () => {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground truncate">{job.title}</h3>
-                    <p className="text-sm text-muted-foreground mt-0.5">{(job.organization as any)?.name || 'جهة غير محددة'}</p>
+                    <p className="text-sm text-muted-foreground mt-0.5">
+                      {(job.organization as any)?.name || (isAr ? 'جهة غير محددة' : 'Unspecified entity')}
+                    </p>
                   </div>
                   <Briefcase className="h-5 w-5 text-primary/50 shrink-0 mt-0.5" />
                 </div>
@@ -147,12 +150,12 @@ const OmalunaSection = () => {
                 <div className="flex flex-wrap gap-2 mb-3">
                   {job.sector && (
                     <Badge variant="outline" className="text-[11px] bg-primary/5">
-                      {sectorLabels[job.sector] || job.sector}
+                      {sectorLabels[job.sector]?.[language] || job.sector}
                     </Badge>
                   )}
                   {job.job_type && (
                     <Badge variant="secondary" className="text-[11px]">
-                      {typeLabels[job.job_type] || job.job_type}
+                      {typeLabels[job.job_type]?.[language] || job.job_type}
                     </Badge>
                   )}
                 </div>
@@ -161,17 +164,17 @@ const OmalunaSection = () => {
                   {(job.city || job.governorate) && (
                     <span className="flex items-center gap-1">
                       <MapPin className="h-3 w-3" />
-                      {[job.city, job.governorate].filter(Boolean).join('، ')}
+                      {[job.city, job.governorate].filter(Boolean).join(isAr ? '، ' : ', ')}
                     </span>
                   )}
                   {(job.salary_min || job.salary_max) && (
                     <span className="flex items-center gap-1 text-primary font-medium">
                       <TrendingUp className="h-3 w-3" />
                       {job.salary_min && job.salary_max
-                        ? `${job.salary_min} - ${job.salary_max} ج.م`
+                        ? isAr ? `${job.salary_min} - ${job.salary_max} ج.م` : `${job.salary_min} - ${job.salary_max} EGP`
                         : job.salary_min
-                        ? `من ${job.salary_min} ج.م`
-                        : `حتى ${job.salary_max} ج.م`}
+                        ? isAr ? `من ${job.salary_min} ج.م` : `From ${job.salary_min} EGP`
+                        : isAr ? `حتى ${job.salary_max} ج.م` : `Up to ${job.salary_max} EGP`}
                     </span>
                   )}
                 </div>
@@ -181,18 +184,18 @@ const OmalunaSection = () => {
         ) : (
           <div className="text-center py-8 text-muted-foreground mb-8">
             <Briefcase className="h-10 w-10 mx-auto mb-3 text-muted-foreground/40" />
-            <p>لا توجد وظائف متاحة حالياً — كن أول من ينشر!</p>
+            <p>{isAr ? 'لا توجد وظائف متاحة حالياً — كن أول من ينشر!' : 'No jobs available yet — be the first to post!'}</p>
           </div>
         )}
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3 animate-fade-up" style={{ animationDelay: '0.3s' }}>
           <Button onClick={() => navigate('/dashboard/omaluna')} className="gap-2">
             <Users className="h-4 w-4" />
-            تصفح جميع الوظائف
+            {isAr ? 'تصفح جميع الوظائف' : 'Browse all jobs'}
           </Button>
           <Button variant="outline" onClick={() => navigate('/dashboard/omaluna/post-job')} className="gap-2">
-            أنشر وظيفة
-            <ArrowLeft className="h-4 w-4" />
+            {isAr ? 'أنشر وظيفة' : 'Post a job'}
+            {isAr ? <ArrowLeft className="h-4 w-4" /> : <ArrowRight className="h-4 w-4" />}
           </Button>
         </div>
       </div>
