@@ -32,14 +32,13 @@ const ISOBodyDashboard = lazy(() => import('@/components/dashboard/ISOBodyDashbo
 const RegulatorDashboardNew = lazy(() => import('@/pages/dashboard/RegulatorDashboardNew'));
 
 // Deferred widgets — loaded after main dashboard renders
-const CallLogWidget = lazy(() => import('@/components/calls/CallLogWidget'));
 const AIOperationsAssistant = lazy(() => import('@/components/ai/AIOperationsAssistant'));
 const AIChatbot = lazy(() => import('@/components/ai/AIChatbot'));
 const EnhancedChatWidget = lazy(() => import('@/components/chat/EnhancedChatWidget'));
 const UnifiedSupportWidget = lazy(() => import('@/components/ai/UnifiedSupportWidget'));
 const BetaBanner = lazy(() => import('@/components/BetaBanner'));
 const AccessibilityPanel = lazy(() => import('@/components/accessibility/AccessibilityPanel').then(m => ({ default: m.AccessibilityPanel })));
-const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
+const FloatingSidePanel = lazy(() => import('@/components/layout/FloatingSidePanel'));
 const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizations'));
 
 const DashboardLoader = () => (
@@ -173,13 +172,12 @@ const Dashboard = () => {
             {showWidgets && (
               <ErrorBoundary fallbackTitle="خطأ في الأدوات المساعدة">
                 <Suspense fallback={null}>
-                  {/* Core widgets — all roles */}
-                  <UnifiedFloatingMenu />
+                  {/* Unified Side Panel — replaces all floating buttons */}
+                  <FloatingSidePanel />
                   <UnifiedSupportWidget />
                   <BetaBanner />
                   
                   {/* Role-specific widgets */}
-                  {(isAdmin || orgType === 'transporter' || orgType === 'recycler') && <CallLogWidget />}
                   {showAIAssistant && <AIOperationsAssistant />}
                   {!isDriver && <AIChatbot />}
                   {!isDriver && <EnhancedChatWidget />}
