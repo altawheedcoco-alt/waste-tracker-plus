@@ -39,7 +39,7 @@ import V2TabsNav from './shared/V2TabsNav';
 const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
 const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
-import { useSmartBriefData } from '@/hooks/useSmartBriefData';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
