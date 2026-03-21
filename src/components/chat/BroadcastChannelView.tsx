@@ -882,7 +882,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
             className="absolute top-3 right-3 z-50 bg-black/60 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/80">
             <X className="w-5 h-5" />
           </button>
-          {isImagePost && <img src={post.file_url} alt="" className="w-full h-full object-contain max-h-[90vh]" />}
+          {fullscreenUrl && <img src={fullscreenUrl} alt="" className="w-full h-full object-contain max-h-[90vh]" />}
         </DialogContent>
       </Dialog>
     </>
