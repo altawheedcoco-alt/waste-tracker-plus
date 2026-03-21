@@ -389,7 +389,6 @@ export const useOperationalAlerts = () => {
     },
   });
 };
-  const { organization, profile } = useAuth();
   const orgId = organization?.id;
   const userId = profile?.id;
 
