@@ -147,15 +147,30 @@ const AIExtractedDataViewer = () => {
         </CardHeader>
       </Card>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="ابحث في البيانات المستخرجة..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="pr-10"
-        />
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="ابحث في البيانات المستخرجة..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pr-10"
+          />
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {CATEGORY_FILTERS.map(f => (
+            <Button
+              key={f.value}
+              variant={categoryFilter === f.value ? 'default' : 'outline'}
+              size="sm"
+              className="text-xs"
+              onClick={() => setCategoryFilter(f.value)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Documents List */}
