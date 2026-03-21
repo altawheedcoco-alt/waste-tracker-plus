@@ -521,7 +521,7 @@ const TransporterCommandCenter = () => {
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
                 <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-blue-500"
                   sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
-                  onClick={() => navigate('/dashboard/accounting')} />
+                  onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
                   sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
                   onClick={() => navigate('/dashboard/transporter-receipts')} />
