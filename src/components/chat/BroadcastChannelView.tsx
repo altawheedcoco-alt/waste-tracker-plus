@@ -576,7 +576,7 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
 
 // Post Card (Shared — adapts per role) — Enhanced Design
 // ═══════════════════════════════════════════════════════════════
-const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport }: {
+const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions, isMine, allowComments, allowReactions, onPin, onDelete, onReport, onView }: {
   post: any;
   channelName: string;
   channelAvatar?: string | null;
@@ -588,12 +588,26 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   onPin?: (postId: string) => void;
   onDelete?: (postId: string) => void;
   onReport?: (postId: string) => void;
+  onView?: (postId: string) => void;
 }) => {
   const [showReactions, setShowReactions] = useState(false);
   const [showComments, setShowComments] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(false);
   const [fullscreenUrl, setFullscreenUrl] = useState('');
+  const postRef = useRef<HTMLDivElement>(null);
+
+  // Track view via IntersectionObserver
+  useEffect(() => {
+    const el = postRef.current;
+    if (!el || !onView) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { onView(post.id); observer.disconnect(); } },
+      { threshold: 0.5 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [post.id, onView]);
   const reactionsData: Record<string, number> = post.reactions_summary || {};
   const totalReactions = post.reactions_count || 0;
   const topReactions = Object.entries(reactionsData)
