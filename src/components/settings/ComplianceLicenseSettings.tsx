@@ -54,6 +54,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function ComplianceLicenseSettings() {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const { extractFromFile, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
   const [showOCRPreview, setShowOCRPreview] = useState(false);
