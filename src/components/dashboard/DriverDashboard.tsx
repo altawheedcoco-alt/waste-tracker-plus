@@ -28,7 +28,7 @@ import DriverLinkedOrganizations from '@/components/driver/DriverLinkedOrganizat
 import DriverCredentialsEditor from '@/components/driver/DriverCredentialsEditor';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
-import SmartDailyBrief from './shared/SmartDailyBrief';
+import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DriverDailySummary from '@/components/driver/DriverDailySummary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
