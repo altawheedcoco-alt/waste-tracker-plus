@@ -8,7 +8,7 @@ import {
   Link2, FileText, Heart, Pin, Trash2,
   Check, Settings, BarChart3, UserPlus, Shield,
   Copy, Flag, AlertTriangle, Crown, UserX, Edit3,
-  TrendingUp, MessageSquare, Activity, Clock
+  TrendingUp, MessageSquare, Activity, Clock, Play
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
