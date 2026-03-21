@@ -33,16 +33,16 @@ export default function CommunicationHubWidget() {
   const links: QuickLink[] = [
     { icon: MessageCircle, labelAr: 'الرسائل', path: '/dashboard/chat', badgeCount: counts?.unreadMessages, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'message' },
     { icon: Bell, labelAr: 'الإشعارات', path: '/dashboard/notifications', badgeCount: counts?.unreadNotifications, color: 'text-destructive', bgColor: 'bg-destructive/10', previewType: 'notification' },
-    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/chat?tab=notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'note' },
+    { icon: FileText, labelAr: 'الملاحظات', path: '/dashboard/notes', badgeCount: counts?.unreadNotes, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'note' },
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'work_order' },
-    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/chat?tab=signing', badgeCount: counts?.pendingSignatures, color: 'text-amber-600', bgColor: 'bg-amber-500/10', previewType: 'signature' },
-    { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-sky-600', bgColor: 'bg-sky-500/10' },
-    { icon: Radio, labelAr: 'البث', path: '/dashboard/chat?tab=broadcast', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
-    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', badgeCount: counts?.activePolls, color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
-    { icon: Bot, labelAr: 'المساعد', path: '/dashboard/chat?tab=ai', color: 'text-purple-600', bgColor: 'bg-purple-500/10' },
-    { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/chat?tab=analytics', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10' },
+    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-amber-600', bgColor: 'bg-amber-500/10', previewType: 'signature' },
+    { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat', color: 'text-sky-600', bgColor: 'bg-sky-500/10' },
+    { icon: Radio, labelAr: 'البث', path: '/dashboard/chat', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
+    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat', badgeCount: counts?.activePolls, color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
+    { icon: Bot, labelAr: 'المساعد', path: '/dashboard/ai-tools', color: 'text-purple-600', bgColor: 'bg-purple-500/10' },
+    { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/reports', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10' },
   ];
 
   const goTo = (path: string) => startTransition(() => navigate(path));
