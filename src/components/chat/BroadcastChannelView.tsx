@@ -951,13 +951,29 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
                 <MessageCircle className={cn("w-[18px] h-[18px]", showComments && "fill-primary/20")} /><span>تعليق</span>
               </button>
             )}
-            <button onClick={() => {
-              const postLink = `${window.location.origin}/dashboard/broadcast-channels?post=${post.id}`;
-              if (navigator.share) {
-                navigator.share({ title: channelName, text: post.content?.slice(0, 100) || '', url: postLink }).catch(() => {});
-              } else {
-                navigator.clipboard.writeText(postLink);
-                toast.success('تم نسخ رابط المنشور');
+            <button onClick={async () => {
+              try {
+                const postLink = `${window.location.origin}/dashboard/broadcast-channels?post=${post.id}`;
+                if (navigator.share) {
+                  await navigator.share({ title: channelName || 'منشور', text: post.content?.slice(0, 100) || '', url: postLink });
+                } else if (navigator.clipboard && navigator.clipboard.writeText) {
+                  await navigator.clipboard.writeText(postLink);
+                  toast.success('تم نسخ رابط المنشور');
+                } else {
+                  // Fallback for older browsers
+                  const textarea = document.createElement('textarea');
+                  textarea.value = postLink;
+                  textarea.style.position = 'fixed';
+                  textarea.style.opacity = '0';
+                  document.body.appendChild(textarea);
+                  textarea.select();
+                  document.execCommand('copy');
+                  document.body.removeChild(textarea);
+                  toast.success('تم نسخ رابط المنشور');
+                }
+              } catch (e) {
+                // User cancelled share or error
+                console.log('Share cancelled or failed:', e);
               }
             }}
               className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
