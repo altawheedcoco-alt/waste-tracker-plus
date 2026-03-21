@@ -20,6 +20,7 @@ import {
   useDriversSummary,
 } from '@/hooks/useTransporterExtended';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import TransporterHeader from './transporter/TransporterHeader';
 import TransporterNotifications from './transporter/TransporterNotifications';
 import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
