@@ -40,6 +40,8 @@ export interface AlertItem {
   severity: 'info' | 'warning' | 'critical';
   timestamp?: string;
   icon?: LucideIcon;
+  type?: string;
+  route?: string;
 }
 
 export interface WeatherData {
@@ -78,6 +80,7 @@ interface DashboardV2HeaderProps {
   weather?: WeatherData;
   heatmapData?: HeatmapCell[];
   onRefresh?: () => void;
+  onAlertClick?: (alert: AlertItem) => void;
 }
 
 /* ── English animated counter ── */
@@ -336,50 +339,115 @@ const PerformanceGauge = memo(({ score, label, radarStats }: { score: number; la
 });
 PerformanceGauge.displayName = 'PerformanceGauge';
 
-/* ═══════════ SMART ALERT TICKER ═══════════ */
+/* ═══════════ SMART ALERT TICKER (ENHANCED) ═══════════ */
 const SEVERITY_CONFIG = {
   info: { icon: Info, color: 'text-primary', bg: 'bg-primary/10', border: 'border-primary/20' },
   warning: { icon: AlertTriangle, color: 'text-amber-500', bg: 'bg-amber-500/10', border: 'border-amber-500/20' },
   critical: { icon: XCircle, color: 'text-destructive', bg: 'bg-destructive/10', border: 'border-destructive/20' },
 };
 
-const AlertTicker = memo(({ alerts }: { alerts: AlertItem[] }) => {
+const ALERT_TYPE_FILTERS = [
+  { type: 'all', icon: Bell, label: 'الكل' },
+  { type: 'shipment', icon: Package, label: 'شحنات' },
+  { type: 'driver', icon: Users, label: 'سائقين' },
+  { type: 'message', icon: MessageSquare, label: 'رسائل' },
+  { type: 'notification', icon: Bell, label: 'إشعارات' },
+  { type: 'partner', icon: Users, label: 'شركاء' },
+  { type: 'vehicle', icon: Truck, label: 'مركبات' },
+];
+
+const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAlertClick?: (alert: AlertItem) => void }) => {
   const [idx, setIdx] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('all');
+
+  const filteredAlerts = useMemo(() => {
+    if (activeFilter === 'all') return alerts;
+    return alerts.filter(a => a.type === activeFilter);
+  }, [alerts, activeFilter]);
+
   useEffect(() => {
-    if (alerts.length <= 1) return;
-    const t = setInterval(() => setIdx(p => (p + 1) % alerts.length), 4000);
+    if (filteredAlerts.length <= 1 || isPaused) return;
+    const t = setInterval(() => setIdx(p => (p + 1) % filteredAlerts.length), 3000);
     return () => clearInterval(t);
-  }, [alerts.length]);
+  }, [filteredAlerts.length, isPaused]);
+
+  // Reset idx when filter changes
+  useEffect(() => { setIdx(0); }, [activeFilter]);
 
   if (!alerts.length) return null;
-  const alert = alerts[idx];
+
+  const safeIdx = idx % Math.max(filteredAlerts.length, 1);
+  const alert = filteredAlerts[safeIdx];
+  if (!alert) return null;
   const cfg = SEVERITY_CONFIG[alert.severity];
   const AlertIcon = alert.icon || cfg.icon;
 
+  const warningCount = alerts.filter(a => a.severity === 'warning' || a.severity === 'critical').length;
+
   return (
-    <motion.div className={cn("flex items-center gap-2 px-2.5 py-1 rounded-lg border text-[10px]", cfg.bg, cfg.border)}
-      layout>
-      <motion.div animate={alert.severity === 'critical' ? { scale: [1, 1.2, 1] } : {}}
-        transition={{ duration: 0.6, repeat: Infinity }}>
-        <AlertIcon className={cn("w-3.5 h-3.5 shrink-0", cfg.color)} />
-      </motion.div>
-      <AnimatePresence mode="wait">
-        <motion.span key={idx} className={cn("font-medium truncate", cfg.color)}
-          initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.3 }}>
-          {alert.message}
-        </motion.span>
-      </AnimatePresence>
-      {alerts.length > 1 && (
+    <div className="space-y-1">
+      {/* Filter chips */}
+      <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide pb-0.5">
+        {ALERT_TYPE_FILTERS.map(f => {
+          const count = f.type === 'all' ? alerts.length : alerts.filter(a => a.type === f.type).length;
+          if (count === 0 && f.type !== 'all') return null;
+          const FIcon = f.icon;
+          return (
+            <button
+              key={f.type}
+              onClick={() => setActiveFilter(f.type)}
+              className={cn(
+                "flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[8px] font-medium whitespace-nowrap transition-colors border",
+                activeFilter === f.type
+                  ? "bg-primary/15 text-primary border-primary/30"
+                  : "bg-muted/30 text-muted-foreground border-border/30 hover:bg-muted/50"
+              )}
+            >
+              <FIcon className="w-2.5 h-2.5" />
+              <span>{f.label}</span>
+              <span className="font-mono text-[7px] opacity-70">{count}</span>
+            </button>
+          );
+        })}
+        {warningCount > 0 && (
+          <span className="mr-auto text-[8px] font-mono text-amber-500 flex items-center gap-0.5">
+            <AlertTriangle className="w-2.5 h-2.5" />
+            {warningCount} تحذير
+          </span>
+        )}
+      </div>
+
+      {/* Main ticker */}
+      <motion.div
+        className={cn("flex items-center gap-2 px-2.5 py-1.5 rounded-lg border text-[10px] cursor-pointer", cfg.bg, cfg.border)}
+        layout
+        onClick={() => {
+          if (alert.route && onAlertClick) onAlertClick(alert);
+          else setIsPaused(p => !p);
+        }}
+      >
+        <motion.div animate={alert.severity === 'critical' ? { scale: [1, 1.2, 1] } : {}}
+          transition={{ duration: 0.6, repeat: Infinity }}>
+          <AlertIcon className={cn("w-3.5 h-3.5 shrink-0", cfg.color)} />
+        </motion.div>
+        <AnimatePresence mode="wait">
+          <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate flex-1", cfg.color)}
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.3 }}>
+            {alert.message}
+          </motion.span>
+        </AnimatePresence>
         <div className="flex items-center gap-0.5 shrink-0 mr-auto">
-          <button onClick={() => setIdx(p => (p - 1 + alerts.length) % alerts.length)}
+          {isPaused && <span className="text-[7px] text-muted-foreground">⏸</span>}
+          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p - 1 + filteredAlerts.length) % filteredAlerts.length); }}
             className="hover:bg-muted/50 rounded p-0.5"><ChevronRight className="w-3 h-3 text-muted-foreground" /></button>
-          <span className="text-[8px] font-mono text-muted-foreground tabular-nums" dir="ltr">{idx + 1}/{alerts.length}</span>
-          <button onClick={() => setIdx(p => (p + 1) % alerts.length)}
+          <span className="text-[8px] font-mono text-muted-foreground tabular-nums" dir="ltr">{safeIdx + 1}/{filteredAlerts.length}</span>
+          <button onClick={(e) => { e.stopPropagation(); setIdx(p => (p + 1) % filteredAlerts.length); }}
             className="hover:bg-muted/50 rounded p-0.5"><ChevronLeft className="w-3 h-3 text-muted-foreground" /></button>
         </div>
-      )}
-    </motion.div>
+      </motion.div>
+    </div>
   );
 });
 AlertTicker.displayName = 'AlertTicker';
@@ -698,7 +766,7 @@ const statusColors: Record<string, string> = {
 /* ══════════════════════════════ MAIN COMPONENT ══════════════════════════════ */
 const DashboardV2Header = memo(({
   userName, orgName, orgLabel, icon: Icon, gradient = 'from-primary to-primary/70',
-  children, radarStats, alerts = [], weather, heatmapData, onRefresh
+  children, radarStats, alerts = [], weather, heatmapData, onRefresh, onAlertClick
 }: DashboardV2HeaderProps) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const handleRefreshClick = useCallback(() => {
@@ -848,7 +916,7 @@ const DashboardV2Header = memo(({
                 <div className="flex flex-col sm:flex-row gap-1.5">
                   {alerts.length > 0 && (
                     <div className="flex-1 min-w-0">
-                      <AlertTicker alerts={alerts} />
+                      <AlertTicker alerts={alerts} onAlertClick={onAlertClick} />
                     </div>
                   )}
                 </div>

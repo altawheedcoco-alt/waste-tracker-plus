@@ -1,4 +1,5 @@
-import { useState, Suspense, lazy, useMemo, useEffect } from 'react';
+import { useState, Suspense, lazy, useMemo, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
 import { Tabs } from '@/components/ui/tabs';
@@ -19,6 +20,7 @@ import {
   useDriversSummary,
 } from '@/hooks/useTransporterExtended';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import TransporterHeader from './transporter/TransporterHeader';
 import TransporterNotifications from './transporter/TransporterNotifications';
 import TransporterSLAAlerts from './transporter/TransporterSLAAlerts';
@@ -109,7 +111,13 @@ const TransporterDashboard = () => {
 
   useTransporterRealtime();
   const realWeather = useRealWeather();
+  const navigate = useNavigate();
   const handleRefresh = () => refetchShipments();
+  const { data: operationalAlerts = [] } = useOperationalAlerts();
+
+  const handleAlertClick = useCallback((alert: any) => {
+    if (alert.route) navigate(alert.route);
+  }, [navigate]);
 
   // Build real heatmap from shipment locations
   const heatmapRegions = useMemo(() => {
@@ -188,12 +196,8 @@ const TransporterDashboard = () => {
           { label: 'معلقة', value: shipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const, route: '/dashboard/transporter-shipments?status=new' },
           { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10), trend: 'stable' as const, route: '/dashboard/partners' },
         ]}
-        alerts={[
-          ...(notifications.filter((n: any) => !n.is_read).slice(0, 3).map((n: any) => ({ id: n.id, message: n.title || n.message, severity: 'info' as const }))),
-          ...(shipments.filter(s => s.status === 'new').length > 5 ? [{ id: 'pending-high', message: `تحذير: ${shipments.filter(s => s.status === 'new').length} شحنة معلقة تحتاج مراجعة عاجلة`, severity: 'warning' as const }] : []),
-          ...(stats?.active && stats.active > 10 ? [{ id: 'active-load', message: `${stats.active} شحنة نشطة حالياً - حمولة تشغيلية مرتفعة`, severity: 'info' as const }] : []),
-          { id: 'system-ok', message: 'جميع أنظمة التتبع والمراقبة تعمل بكفاءة', severity: 'info' as const },
-        ]}
+        alerts={operationalAlerts}
+        onAlertClick={handleAlertClick}
         weather={{
           temp: realWeather.temp,
           condition: realWeather.condition,
