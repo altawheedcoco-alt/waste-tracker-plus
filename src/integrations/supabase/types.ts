@@ -3387,6 +3387,7 @@ export type Database = {
       broadcast_channels: {
         Row: {
           avatar_url: string | null
+          category: string | null
           channel_visibility: string | null
           cover_url: string | null
           created_at: string | null
@@ -3395,13 +3396,19 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_verified: boolean | null
+          last_post_at: string | null
           name: string
           organization_id: string
+          pinned_post_id: string | null
+          rules: string | null
           subscriber_count: number | null
+          tags: string[] | null
+          total_posts: number | null
           updated_at: string | null
         }
         Insert: {
           avatar_url?: string | null
+          category?: string | null
           channel_visibility?: string | null
           cover_url?: string | null
           created_at?: string | null
@@ -3410,13 +3417,19 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          last_post_at?: string | null
           name: string
           organization_id: string
+          pinned_post_id?: string | null
+          rules?: string | null
           subscriber_count?: number | null
+          tags?: string[] | null
+          total_posts?: number | null
           updated_at?: string | null
         }
         Update: {
           avatar_url?: string | null
+          category?: string | null
           channel_visibility?: string | null
           cover_url?: string | null
           created_at?: string | null
@@ -3425,9 +3438,14 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_verified?: boolean | null
+          last_post_at?: string | null
           name?: string
           organization_id?: string
+          pinned_post_id?: string | null
+          rules?: string | null
           subscriber_count?: number | null
+          tags?: string[] | null
+          total_posts?: number | null
           updated_at?: string | null
         }
         Relationships: [
@@ -3443,6 +3461,80 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_comment_likes: {
+        Row: {
+          comment_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_comment_likes_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_post_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      broadcast_post_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          parent_comment_id: string | null
+          post_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_comment_id?: string | null
+          post_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          parent_comment_id?: string | null
+          post_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_post_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_post_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "broadcast_post_comments_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -3479,14 +3571,47 @@ export type Database = {
           },
         ]
       }
+      broadcast_post_views: {
+        Row: {
+          id: string
+          post_id: string
+          user_id: string
+          viewed_at: string | null
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          user_id: string
+          viewed_at?: string | null
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          user_id?: string
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "broadcast_post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "broadcast_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       broadcast_posts: {
         Row: {
           channel_id: string
+          comments_count: number | null
           content: string
           created_at: string | null
+          edited_at: string | null
           file_name: string | null
           file_url: string | null
+          forward_count: number | null
           id: string
+          is_pinned: boolean | null
           link_preview_image: string | null
           link_title: string | null
           link_url: string | null
@@ -3499,11 +3624,15 @@ export type Database = {
         }
         Insert: {
           channel_id: string
+          comments_count?: number | null
           content: string
           created_at?: string | null
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
+          forward_count?: number | null
           id?: string
+          is_pinned?: boolean | null
           link_preview_image?: string | null
           link_title?: string | null
           link_url?: string | null
@@ -3516,11 +3645,15 @@ export type Database = {
         }
         Update: {
           channel_id?: string
+          comments_count?: number | null
           content?: string
           created_at?: string | null
+          edited_at?: string | null
           file_name?: string | null
           file_url?: string | null
+          forward_count?: number | null
           id?: string
+          is_pinned?: boolean | null
           link_preview_image?: string | null
           link_title?: string | null
           link_url?: string | null
