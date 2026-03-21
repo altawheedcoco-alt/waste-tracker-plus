@@ -1112,6 +1112,7 @@ const PostCard = memo(({ post, channelId, channelName, channelAvatar, onReact, m
                 title: `منشور من ${channelName}`,
                 preview: previewText,
                 message: `📢 تمت مشاركة منشور من قناة "${channelName}"\n\n${previewText}\n\n${postLink}`,
+                link: postLink,
               });
             }}
               className="flex items-center gap-1.5 text-[11px] font-medium text-muted-foreground hover:text-foreground py-2 px-3 rounded-lg hover:bg-muted/50 transition-all">
