@@ -24,6 +24,7 @@ export interface OCRExtractedData {
     waste_types?: string[];
     document_type?: string;
   };
+  obligations?: string[];
   confidence: number;
   pages_count?: number;
 }
