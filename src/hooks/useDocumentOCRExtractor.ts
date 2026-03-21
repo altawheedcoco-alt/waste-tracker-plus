@@ -134,6 +134,7 @@ export function useDocumentOCRExtractor() {
         waste_types: r.detected_fields?.waste_types || undefined,
         document_type: r.document_type || undefined,
       },
+      obligations: r.obligations || undefined,
       confidence: r.confidence || 90,
     };
   };
