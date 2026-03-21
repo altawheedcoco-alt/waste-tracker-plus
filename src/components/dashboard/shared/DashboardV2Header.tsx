@@ -432,8 +432,12 @@ const AlertTicker = memo(({ alerts, onAlertClick }: { alerts: AlertItem[]; onAle
           transition={{ duration: 0.6, repeat: Infinity }}>
           <AlertIcon className={cn("w-3.5 h-3.5 shrink-0", cfg.color)} />
         </motion.div>
+        {/* Unread indicator dot */}
+        {alert.isRead === false && (
+          <span className="w-1.5 h-1.5 rounded-full bg-destructive shrink-0 animate-pulse" />
+        )}
         <AnimatePresence mode="wait">
-          <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate flex-1", cfg.color)}
+          <motion.span key={`${activeFilter}-${safeIdx}`} className={cn("font-medium truncate flex-1", cfg.color, alert.isRead === false && "font-bold")}
             initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
             transition={{ duration: 0.3 }}>
             {alert.message}
