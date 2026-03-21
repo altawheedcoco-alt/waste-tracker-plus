@@ -337,6 +337,28 @@ const CyberSecurityCenter = () => {
               </CardContent>
             </Card>
 
+            {/* Real-time Heartbeat KPIs */}
+            {heartbeat && (
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                {[
+                  { label: 'مستخدمون نشطون', value: heartbeat.active_users_5m, icon: Users, color: 'text-blue-500', bg: 'bg-blue-50 dark:bg-blue-950/20' },
+                  { label: 'أحداث أمنية (ساعة)', value: heartbeat.security_events_1h, icon: Activity, color: 'text-amber-500', bg: 'bg-amber-50 dark:bg-amber-950/20' },
+                  { label: 'تسجيلات دخول (ساعة)', value: heartbeat.logins_1h, icon: Fingerprint, color: 'text-emerald-500', bg: 'bg-emerald-50 dark:bg-emerald-950/20' },
+                  { label: 'تهديدات حديثة (5 دقائق)', value: heartbeat.recent_threats, icon: ShieldAlert, color: heartbeat.recent_threats > 0 ? 'text-red-500' : 'text-emerald-500', bg: heartbeat.recent_threats > 0 ? 'bg-red-50 dark:bg-red-950/20' : 'bg-emerald-50 dark:bg-emerald-950/20' },
+                ].map(k => (
+                  <Card key={k.label} className="border-0 shadow-sm">
+                    <CardContent className="p-4 flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${k.bg}`}><k.icon className={`w-5 h-5 ${k.color}`} /></div>
+                      <div>
+                        <p className="text-lg font-bold">{k.value}</p>
+                        <p className="text-[10px] text-muted-foreground leading-tight">{k.label}</p>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+
             {/* Monitor Channels Grid */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {MONITOR_CHANNELS.map(ch => {
