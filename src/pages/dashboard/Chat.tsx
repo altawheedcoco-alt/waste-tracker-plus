@@ -6,7 +6,7 @@ import {
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Reply, Forward, SmilePlus, Paintbrush, Info, BarChart3
+  Reply, Forward, SmilePlus, Paintbrush, Info, BarChart3, Radio
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import VoiceMessagePlayer from '@/components/chat/VoiceMessagePlayer';
@@ -27,6 +27,7 @@ import { useChatReactions } from '@/hooks/useChatReactions';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
+import { useAppNavigate } from '@/hooks/useAppNavigate';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import { cn } from '@/lib/utils';
 import { format, isToday, isYesterday, isSameDay } from 'date-fns';
@@ -170,6 +171,7 @@ const MessageBubble = memo(({
   allMessages: DecryptedMessage[];
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
+  const appNavigate = useAppNavigate();
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
@@ -183,6 +185,14 @@ const MessageBubble = memo(({
   const repliedMessage = message.reply_to_id
     ? allMessages.find(m => m.id === message.reply_to_id)
     : null;
+
+  const broadcastLinkMatch = message.message_type === 'text'
+    ? message.content.match(/https?:\/\/[^\s]+\/dashboard\/broadcast-channels\?channel=([a-f0-9-]+)(?:&post=([a-f0-9-]+))?/i)
+    : null;
+
+  const messageTextWithoutBroadcastLink = broadcastLinkMatch
+    ? message.content.replace(/https?:\/\/[^\s]+\/dashboard\/broadcast-channels[^\s]*/gi, '').trim()
+    : message.content;
 
   if (message.is_deleted) {
     return (
@@ -270,7 +280,32 @@ const MessageBubble = memo(({
             </div>
           )}
           
-          <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+          {broadcastLinkMatch ? (
+            <div className="space-y-2">
+              {messageTextWithoutBroadcastLink && (
+                <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>
+                  {messageTextWithoutBroadcastLink}
+                </p>
+              )}
+              <button
+                type="button"
+                onClick={() => appNavigate(`/dashboard/broadcast-channels?channel=${broadcastLinkMatch[1]}${broadcastLinkMatch[2] ? `&post=${broadcastLinkMatch[2]}` : ''}`)}
+                className="w-full flex items-center gap-3 rounded-xl border border-border/50 bg-muted/40 px-3 py-3 text-right transition-colors hover:bg-muted/70"
+              >
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                  <Radio className="w-5 h-5" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold text-foreground">
+                    {broadcastLinkMatch[2] ? '📡 منشور من قناة البث' : '📡 قناة بث'}
+                  </p>
+                  <p className="text-xs text-muted-foreground">اضغط لفتح القناة مباشرة</p>
+                </div>
+              </button>
+            </div>
+          ) : (
+            <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+          )}
           
           {showTimestamp && (
             <div className={cn(
