@@ -128,6 +128,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
     } finally { setSaving(false); }
   };
 
+  const getScoreColor = (score: number) => {
 
     if (score >= 80) return 'text-emerald-600 dark:text-emerald-400';
     if (score >= 60) return 'text-yellow-600 dark:text-yellow-400';
