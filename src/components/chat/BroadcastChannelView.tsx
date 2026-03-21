@@ -932,7 +932,7 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
       </div>
 
       {/* Cover */}
-      <div className="relative w-full aspect-[3/1] bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
+      <div className="relative w-full aspect-[2.8/1] bg-gradient-to-br from-primary/20 to-primary/5 overflow-hidden">
         {channel.cover_url ? (
           <img src={channel.cover_url} alt="غلاف" className="w-full h-full object-cover" />
         ) : (
@@ -943,18 +943,18 @@ const ChannelProfileView = memo(({ channel, onBack, onSubscribeToggle, isMine }:
       </div>
 
       {/* Avatar & Name */}
-      <div className="flex flex-col items-center -mt-5 relative z-10 px-4">
-        <Avatar className="w-10 h-10 border-2 border-background shadow-md">
-          {channel.avatar_url && <AvatarImage src={channel.avatar_url} />}
-          <AvatarFallback className="bg-primary/10 text-primary text-base font-bold">
+      <div className="flex flex-col items-center -mt-10 relative z-10 px-4">
+        <Avatar className="w-20 h-20 border-[3px] border-background shadow-lg ring-2 ring-primary/10">
+          {channel.avatar_url && <AvatarImage src={channel.avatar_url} className="object-cover" />}
+          <AvatarFallback className="bg-primary/10 text-primary text-2xl font-bold">
             {channel.name.charAt(0)}
           </AvatarFallback>
         </Avatar>
-        <div className="flex items-center gap-1.5 mt-2">
-          <h2 className="text-lg font-bold">{channel.name}</h2>
+        <div className="flex items-center gap-1.5 mt-2.5">
+          <h2 className="text-base font-bold">{channel.name}</h2>
           {channel.is_verified && <BadgeCheck className="w-5 h-5 text-blue-500 fill-blue-500/20" />}
         </div>
-        <p className="text-xs text-muted-foreground mt-0.5">
+        <p className="text-[11px] text-muted-foreground mt-0.5">
           قناة • {channel.subscriber_count?.toLocaleString('ar-EG')} متابعًا
         </p>
       </div>
