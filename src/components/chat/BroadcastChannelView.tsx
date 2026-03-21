@@ -1356,6 +1356,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
               allowReactions={allowReactions}
               onPin={togglePin} onDelete={deletePost}
               onReport={(postId) => report({ postId, reason: 'محتوى مسيء' })}
+              onView={recordView}
             />
           ))
         )}
