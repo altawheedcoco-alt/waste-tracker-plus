@@ -21,7 +21,7 @@ const TransporterPerformanceCharts = () => {
 
       const { data: shipments } = await supabase
         .from('shipments')
-        .select('status, waste_type, created_at, total_cost, quantity')
+        .select('status, waste_type, created_at, total_value, quantity')
         .eq('transporter_id', organization!.id)
         .gte('created_at', thirtyDaysAgo.toISOString())
         .order('created_at', { ascending: true });
