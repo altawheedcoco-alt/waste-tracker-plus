@@ -12,6 +12,9 @@ export interface BroadcastPost {
   post_type: string;
   file_url: string | null;
   file_name: string | null;
+  media_urls: string[];
+  media_types: string[];
+  media_names: string[];
   link_url: string | null;
   link_title: string | null;
   link_preview_image: string | null;
@@ -42,7 +45,12 @@ export function useBroadcastPosts(channelId: string | undefined) {
         .order('is_pinned', { ascending: false })
         .order('created_at', { ascending: false })
         .limit(50);
-      return (data || []) as BroadcastPost[];
+      return (data || []).map((p: any) => ({
+        ...p,
+        media_urls: p.media_urls || [],
+        media_types: p.media_types || [],
+        media_names: p.media_names || [],
+      })) as BroadcastPost[];
     },
     enabled: !!channelId,
   });
@@ -86,16 +94,31 @@ export function useBroadcastPosts(channelId: string | undefined) {
     myReactionsData.map((r: any) => `${r.post_id}-${r.reaction_type}`)
   );
 
-  // ─── Create post ───
+  // ─── Create post (supports multiple media) ───
   const createPost = useMutation({
-    mutationFn: async ({ content, postType, fileUrl, fileName }: {
+    mutationFn: async ({ content, postType, fileUrl, fileName, mediaUrls, mediaTypes, mediaNames }: {
       content: string; postType?: string; fileUrl?: string; fileName?: string;
+      mediaUrls?: string[]; mediaTypes?: string[]; mediaNames?: string[];
     }) => {
       if (!user || !channelId) throw new Error('Not authenticated');
-      const { error } = await (supabase as any).from('broadcast_posts').insert({
+      const insertData: Record<string, any> = {
         channel_id: channelId, sender_id: user.id, content,
-        post_type: postType || 'text', file_url: fileUrl, file_name: fileName,
-      });
+        post_type: postType || 'text',
+      };
+      // Support multi-media
+      if (mediaUrls && mediaUrls.length > 0) {
+        insertData.media_urls = mediaUrls;
+        insertData.media_types = mediaTypes || [];
+        insertData.media_names = mediaNames || [];
+        insertData.post_type = 'multi_media';
+        // Keep first file in legacy columns for backward compat
+        insertData.file_url = mediaUrls[0];
+        insertData.file_name = mediaNames?.[0] || null;
+      } else if (fileUrl) {
+        insertData.file_url = fileUrl;
+        insertData.file_name = fileName;
+      }
+      const { error } = await (supabase as any).from('broadcast_posts').insert(insertData);
       if (error) throw error;
     },
     onSuccess: () => {
@@ -164,13 +187,25 @@ export function useBroadcastPosts(channelId: string | undefined) {
   const uploadFile = async (file: File): Promise<{ url: string; name: string; type: string } | null> => {
     if (!channelId) return null;
     const ext = file.name.split('.').pop();
-    const path = `broadcast/${channelId}/${Date.now()}.${ext}`;
+    const path = `broadcast/${channelId}/${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
     const { error } = await supabase.storage.from('public-assets').upload(path, file);
     if (error) { toast.error('فشل رفع الملف'); return null; }
     const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(path);
     const isImage = file.type.startsWith('image/');
     const isVideo = file.type.startsWith('video/');
     return { url: urlData.publicUrl, name: file.name, type: isImage ? 'image' : isVideo ? 'video' : 'document' };
+  };
+
+  // ─── Upload multiple files ───
+  const uploadMultipleFiles = async (files: File[]): Promise<{ url: string; name: string; type: string }[]> => {
+    const results: { url: string; name: string; type: string }[] = [];
+    // Upload in batches of 5 for performance
+    for (let i = 0; i < files.length; i += 5) {
+      const batch = files.slice(i, i + 5);
+      const batchResults = await Promise.all(batch.map(f => uploadFile(f)));
+      results.push(...batchResults.filter(Boolean) as { url: string; name: string; type: string }[]);
+    }
+    return results;
   };
 
   return {
@@ -181,6 +216,7 @@ export function useBroadcastPosts(channelId: string | undefined) {
     deletePost: deletePost.mutate,
     recordView: recordView.mutate,
     uploadFile,
+    uploadMultipleFiles,
     isPosting: createPost.isPending,
   };
 }

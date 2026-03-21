@@ -558,6 +558,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   const [showComments, setShowComments] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(false);
+  const [fullscreenUrl, setFullscreenUrl] = useState('');
   const reactionsData: Record<string, number> = post.reactions_summary || {};
   const totalReactions = post.reactions_count || 0;
   const topReactions = Object.entries(reactionsData)
@@ -576,12 +577,36 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
     );
   };
 
-  const isImagePost = post.post_type === 'image' && post.file_url;
-  const isVideoPost = post.post_type === 'video' && post.file_url;
-  const isDocPost = post.file_url && !isImagePost && !isVideoPost;
+  // Collect all media (support both legacy single file and new multi-media)
+  const allMediaUrls: string[] = (post as any).media_urls?.length > 0 ? (post as any).media_urls : (post.file_url ? [post.file_url] : []);
+  const allMediaTypes: string[] = (post as any).media_types?.length > 0 ? (post as any).media_types : (post.file_url ? [post.post_type] : []);
+  const allMediaNames: string[] = (post as any).media_names?.length > 0 ? (post as any).media_names : (post.file_name ? [post.file_name] : []);
+
+  const mediaImages = allMediaUrls.filter((_, i) => allMediaTypes[i] === 'image');
+  const mediaVideos = allMediaUrls.filter((_, i) => allMediaTypes[i] === 'video');
+  const mediaDocs = allMediaUrls.filter((_, i) => allMediaTypes[i] !== 'image' && allMediaTypes[i] !== 'video');
+  const mediaDocNames = allMediaNames.filter((_, i) => allMediaTypes[i] !== 'image' && allMediaTypes[i] !== 'video');
+
+  const openFullscreen = (url: string) => {
+    setFullscreenUrl(url);
+    setFullscreenMedia(true);
+  };
+
+  const isMultiMedia = allMediaUrls.length > 1;
+  const isImagePost = !isMultiMedia && post.post_type === 'image' && post.file_url;
+  const isVideoPost = !isMultiMedia && post.post_type === 'video' && post.file_url;
+  const isDocPost = !isMultiMedia && post.file_url && !isImagePost && !isVideoPost;
   const fileExt = post.file_name?.split('.').pop()?.toLowerCase() || '';
   const isPdf = fileExt === 'pdf';
   const isDocFile = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExt);
+
+  const getImageGridClass = (count: number) => {
+    if (count === 1) return 'grid-cols-1';
+    if (count === 2) return 'grid-cols-2';
+    if (count <= 4) return 'grid-cols-2';
+    if (count <= 9) return 'grid-cols-3';
+    return 'grid-cols-4';
+  };
 
   return (
     <>
@@ -657,15 +682,71 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
           </div>
         )}
 
-        {/* Image */}
-        {isImagePost && (
-          <div className="relative group cursor-pointer mt-1" onClick={() => setFullscreenMedia(true)}>
+        {/* === MULTI-MEDIA: Images Gallery === */}
+        {isMultiMedia && mediaImages.length > 0 && (
+          <div className={cn("grid gap-0.5 mt-1", getImageGridClass(mediaImages.length))}>
+            {mediaImages.map((url, i) => (
+              <div key={`img-${i}`} className="relative group cursor-pointer overflow-hidden" onClick={() => openFullscreen(url)}>
+                <img src={url} alt={`صورة ${i + 1}`} className="w-full object-cover aspect-square" loading="lazy" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="bg-black/50 backdrop-blur-sm rounded-full p-1.5"><Eye className="w-4 h-4 text-white" /></div>
+                </div>
+                {i === 0 && mediaImages.length > 1 && (
+                  <Badge className="absolute top-1.5 right-1.5 text-[9px] bg-black/60 text-white border-0">
+                    📷 {mediaImages.length}
+                  </Badge>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* === MULTI-MEDIA: Videos === */}
+        {isMultiMedia && mediaVideos.length > 0 && (
+          <div className="space-y-1 mt-1">
+            {mediaVideos.map((url, i) => (
+              <div key={`vid-${i}`} className="relative bg-black">
+                <video src={url} className="w-full object-contain" controls preload="metadata" />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* === MULTI-MEDIA: Documents === */}
+        {isMultiMedia && mediaDocs.length > 0 && (
+          <div className="px-4 mt-2 space-y-1.5">
+            {mediaDocs.map((url, i) => {
+              const name = mediaDocNames[i] || 'ملف مرفق';
+              const ext = name.split('.').pop()?.toLowerCase() || '';
+              const docIsPdf = ext === 'pdf';
+              const docIsOffice = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(ext);
+              return (
+                <a key={`doc-${i}`} href={url} target="_blank" rel="noreferrer"
+                  className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/50 hover:border-primary/30 bg-muted/10 transition-colors">
+                  <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
+                    docIsPdf ? "bg-red-500/10" : docIsOffice ? "bg-blue-500/10" : "bg-primary/10")}>
+                    <FileText className={cn("w-5 h-5", docIsPdf ? "text-red-500" : docIsOffice ? "text-blue-500" : "text-primary")} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-medium truncate">{name}</p>
+                    <p className="text-[9px] text-muted-foreground uppercase" dir="ltr">{ext.toUpperCase()}</p>
+                  </div>
+                  <Forward className="w-3.5 h-3.5 text-primary rotate-90 shrink-0" />
+                </a>
+              );
+            })}
+          </div>
+        )}
+
+        {/* === LEGACY SINGLE: Image === */}
+        {!isMultiMedia && isImagePost && (
+          <div className="relative group cursor-pointer mt-1" onClick={() => openFullscreen(post.file_url!)}>
             {!imageLoaded && (
               <div className="aspect-video bg-muted/30 animate-pulse flex items-center justify-center">
                 <ImageIcon className="w-8 h-8 text-muted-foreground/30" />
               </div>
             )}
-            <img src={post.file_url} alt={post.file_name || 'صورة'}
+            <img src={post.file_url!} alt={post.file_name || 'صورة'}
               className={cn("w-full object-contain transition-transform", !imageLoaded && "hidden")}
               onLoad={() => setImageLoaded(true)} />
             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center opacity-0 group-hover:opacity-100">
@@ -674,17 +755,17 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
           </div>
         )}
 
-        {/* Video */}
-        {isVideoPost && (
+        {/* === LEGACY SINGLE: Video === */}
+        {!isMultiMedia && isVideoPost && (
           <div className="relative mt-1 bg-black">
-            <video src={post.file_url} className="w-full max-h-[400px] object-contain" controls preload="metadata" />
+            <video src={post.file_url!} className="w-full object-contain" controls preload="metadata" />
           </div>
         )}
 
-        {/* Document */}
-        {isDocPost && (
+        {/* === LEGACY SINGLE: Document === */}
+        {!isMultiMedia && isDocPost && (
           <div className="mx-4 my-2 rounded-xl border border-border/50 overflow-hidden hover:border-primary/30 transition-colors">
-            <a href={post.file_url} target="_blank" rel="noreferrer"
+            <a href={post.file_url!} target="_blank" rel="noreferrer"
               className="flex items-center gap-3 p-3 bg-gradient-to-l from-muted/30 to-transparent hover:from-muted/50 transition-colors">
               <div className={cn("w-12 h-12 rounded-xl flex items-center justify-center shrink-0",
                 isPdf ? "bg-red-500/10" : isDocFile ? "bg-blue-500/10" : "bg-primary/10")}>
@@ -801,7 +882,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
             className="absolute top-3 right-3 z-50 bg-black/60 backdrop-blur-sm rounded-full p-2 text-white hover:bg-black/80">
             <X className="w-5 h-5" />
           </button>
-          {isImagePost && <img src={post.file_url} alt="" className="w-full h-full object-contain max-h-[90vh]" />}
+          {fullscreenUrl && <img src={fullscreenUrl} alt="" className="w-full h-full object-contain max-h-[90vh]" />}
         </DialogContent>
       </Dialog>
     </>
@@ -810,86 +891,134 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
 PostCard.displayName = 'PostCard';
 
 // ═══════════════════════════════════════════════════════════════
-// Post Composer (Owner only) — Enhanced
+// Post Composer (Owner only) — Multi-Media Enhanced
 // ═══════════════════════════════════════════════════════════════
-const PostComposer = memo(({ channelId, onPost, isPosting, onUpload }: {
+const PostComposer = memo(({ channelId, onPost, isPosting, onUpload, onUploadMultiple }: {
   channelId: string;
-  onPost: (data: { content: string; postType?: string; fileUrl?: string; fileName?: string }) => void;
+  onPost: (data: { content: string; postType?: string; fileUrl?: string; fileName?: string; mediaUrls?: string[]; mediaTypes?: string[]; mediaNames?: string[] }) => void;
   isPosting: boolean;
   onUpload: (file: File) => Promise<{ url: string; name: string; type: string } | null>;
+  onUploadMultiple: (files: File[]) => Promise<{ url: string; name: string; type: string }[]>;
 }) => {
   const [content, setContent] = useState('');
-  const [attachedFile, setAttachedFile] = useState<{ url: string; name: string; type: string } | null>(null);
+  const [attachedFiles, setAttachedFiles] = useState<{ url: string; name: string; type: string }[]>([]);
   const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState('');
   const [expanded, setExpanded] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imgInputRef = useRef<HTMLInputElement>(null);
   const vidInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
-    if (!content.trim() && !attachedFile) return;
-    onPost({ content, postType: attachedFile?.type || 'text', fileUrl: attachedFile?.url, fileName: attachedFile?.name });
+    if (!content.trim() && attachedFiles.length === 0) return;
+    if (attachedFiles.length <= 1) {
+      onPost({
+        content,
+        postType: attachedFiles[0]?.type || 'text',
+        fileUrl: attachedFiles[0]?.url,
+        fileName: attachedFiles[0]?.name,
+      });
+    } else {
+      onPost({
+        content,
+        mediaUrls: attachedFiles.map(f => f.url),
+        mediaTypes: attachedFiles.map(f => f.type),
+        mediaNames: attachedFiles.map(f => f.name),
+      });
+    }
     setContent('');
-    setAttachedFile(null);
+    setAttachedFiles([]);
     setExpanded(false);
   };
 
-  const handleFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleMultipleFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (!files.length) return;
     setUploading(true);
-    const result = await onUpload(file);
-    if (result) setAttachedFile(result);
+    setUploadProgress(`جاري رفع ${files.length} ملف...`);
+
+    const results = await onUploadMultiple(files);
+    if (results.length > 0) {
+      setAttachedFiles(prev => [...prev, ...results]);
+    }
     setUploading(false);
+    setUploadProgress('');
     e.target.value = '';
   };
+
+  const removeFile = (index: number) => {
+    setAttachedFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const images = attachedFiles.filter(f => f.type === 'image');
+  const videos = attachedFiles.filter(f => f.type === 'video');
+  const docs = attachedFiles.filter(f => f.type === 'document');
 
   return (
     <div className="border-t border-border/50 bg-card/80 backdrop-blur-sm">
       <AnimatePresence>
-        {attachedFile && (
+        {attachedFiles.length > 0 && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-            className="px-4 pt-3">
-            <div className="relative rounded-xl overflow-hidden border border-border/40 bg-muted/20">
-              {attachedFile.type === 'image' ? (
-                <div className="relative">
-                  <img src={attachedFile.url} alt="" className="w-full max-h-48 object-cover rounded-xl" />
-                  <button onClick={() => setAttachedFile(null)}
-                    className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-black/80">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ) : attachedFile.type === 'video' ? (
-                <div className="relative">
-                  <video src={attachedFile.url} className="w-full max-h-48 object-cover rounded-xl" />
-                  <button onClick={() => setAttachedFile(null)}
-                    className="absolute top-2 left-2 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white hover:bg-black/80">
-                    <X className="w-3.5 h-3.5" />
-                  </button>
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="w-10 h-10 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center">
-                      <Video className="w-5 h-5 text-white" />
+            className="px-3 pt-2 max-h-60 overflow-y-auto custom-scrollbar">
+            {/* Images grid */}
+            {images.length > 0 && (
+              <div className="mb-2">
+                <p className="text-[10px] text-muted-foreground mb-1">📷 {images.length} صورة</p>
+                <div className="grid grid-cols-4 gap-1.5">
+                  {images.map((f, i) => (
+                    <div key={`img-${i}`} className="relative aspect-square rounded-lg overflow-hidden border border-border/30">
+                      <img src={f.url} alt="" className="w-full h-full object-cover" />
+                      <button onClick={() => removeFile(attachedFiles.indexOf(f))}
+                        className="absolute top-0.5 left-0.5 bg-black/60 rounded-full p-0.5 text-white">
+                        <X className="w-2.5 h-2.5" />
+                      </button>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ) : (
-                <div className="flex items-center gap-3 p-3">
-                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                    <FileText className="w-5 h-5 text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs font-medium truncate">{attachedFile.name}</p>
-                    <p className="text-[10px] text-muted-foreground">جاهز للرفع</p>
-                  </div>
-                  <button onClick={() => setAttachedFile(null)} className="text-muted-foreground hover:text-destructive">
-                    <X className="w-4 h-4" />
-                  </button>
+              </div>
+            )}
+            {/* Videos */}
+            {videos.length > 0 && (
+              <div className="mb-2">
+                <p className="text-[10px] text-muted-foreground mb-1">🎬 {videos.length} فيديو</p>
+                <div className="flex gap-1.5 overflow-x-auto">
+                  {videos.map((f, i) => (
+                    <div key={`vid-${i}`} className="relative w-20 h-14 rounded-lg overflow-hidden border border-border/30 shrink-0 bg-muted/30 flex items-center justify-center">
+                      <Video className="w-5 h-5 text-muted-foreground" />
+                      <button onClick={() => removeFile(attachedFiles.indexOf(f))}
+                        className="absolute top-0.5 left-0.5 bg-black/60 rounded-full p-0.5 text-white">
+                        <X className="w-2.5 h-2.5" />
+                      </button>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
+              </div>
+            )}
+            {/* Documents */}
+            {docs.length > 0 && (
+              <div className="mb-2 space-y-1">
+                <p className="text-[10px] text-muted-foreground">📄 {docs.length} مستند</p>
+                {docs.map((f, i) => (
+                  <div key={`doc-${i}`} className="flex items-center gap-2 p-1.5 rounded-lg border border-border/30 bg-muted/10">
+                    <FileText className="w-3.5 h-3.5 text-primary shrink-0" />
+                    <span className="text-[10px] truncate flex-1">{f.name}</span>
+                    <button onClick={() => removeFile(attachedFiles.indexOf(f))} className="text-muted-foreground hover:text-destructive">
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {uploading && (
+        <div className="px-3 py-1.5 flex items-center gap-2">
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
+          <span className="text-[10px] text-muted-foreground">{uploadProgress}</span>
+        </div>
+      )}
 
       <div className="p-3" dir="rtl">
         <div className="flex items-end gap-2">
@@ -901,14 +1030,14 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload }: {
               onKeyDown={e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) handleSubmit(); }} />
           </div>
           <Button size="icon" className="h-10 w-10 rounded-full bg-primary hover:bg-primary/90 shadow-md shadow-primary/20"
-            onClick={handleSubmit} disabled={(!content.trim() && !attachedFile) || isPosting}>
+            onClick={handleSubmit} disabled={(!content.trim() && attachedFiles.length === 0) || isPosting || uploading}>
             {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
           </Button>
         </div>
         <div className="flex items-center gap-1 mt-2">
           <button onClick={() => imgInputRef.current?.click()} disabled={uploading}
             className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-emerald-600 px-2.5 py-1.5 rounded-lg hover:bg-emerald-500/10 transition-colors">
-            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}<span>صورة</span>
+            {uploading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}<span>صور</span>
           </button>
           <button onClick={() => vidInputRef.current?.click()} disabled={uploading}
             className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-blue-600 px-2.5 py-1.5 rounded-lg hover:bg-blue-500/10 transition-colors">
@@ -918,11 +1047,16 @@ const PostComposer = memo(({ channelId, onPost, isPosting, onUpload }: {
             className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-amber-600 px-2.5 py-1.5 rounded-lg hover:bg-amber-500/10 transition-colors">
             <FileText className="w-3.5 h-3.5" /><span>مستند</span>
           </button>
+          {attachedFiles.length > 0 && (
+            <Badge variant="secondary" className="text-[9px] h-5 mr-auto">
+              {attachedFiles.length} مرفق
+            </Badge>
+          )}
         </div>
       </div>
-      <input ref={imgInputRef} type="file" accept="image/*" className="hidden" onChange={handleFile} />
-      <input ref={vidInputRef} type="file" accept="video/*" className="hidden" onChange={handleFile} />
-      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" className="hidden" onChange={handleFile} />
+      <input ref={imgInputRef} type="file" accept="image/*" multiple className="hidden" onChange={handleMultipleFiles} />
+      <input ref={vidInputRef} type="file" accept="video/*" multiple className="hidden" onChange={handleMultipleFiles} />
+      <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip,.rar" multiple className="hidden" onChange={handleMultipleFiles} />
     </div>
   );
 });
@@ -1078,7 +1212,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
   const { report } = useBroadcastNotificationSettings(channel.id);
   const {
     posts, isLoading: postsLoading, myReactions,
-    createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, isPosting,
+    createPost, toggleReaction, togglePin, deletePost, recordView, uploadFile, uploadMultipleFiles, isPosting,
   } = useBroadcastPosts(channel.id);
 
   const allowComments = (channel as any).allow_comments !== false;
@@ -1180,7 +1314,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
 
       {/* Composer: Owner or System Admin */}
       {(channel.is_mine || isSystemAdmin) && (
-        <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} />
+        <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} onUploadMultiple={uploadMultipleFiles} />
       )}
     </div>
   );

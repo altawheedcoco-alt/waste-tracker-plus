@@ -3744,6 +3744,9 @@ export type Database = {
           link_preview_image: string | null
           link_title: string | null
           link_url: string | null
+          media_names: string[] | null
+          media_types: string[] | null
+          media_urls: string[] | null
           metadata: Json | null
           post_type: string | null
           reactions_count: number | null
@@ -3765,6 +3768,9 @@ export type Database = {
           link_preview_image?: string | null
           link_title?: string | null
           link_url?: string | null
+          media_names?: string[] | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
           metadata?: Json | null
           post_type?: string | null
           reactions_count?: number | null
@@ -3786,6 +3792,9 @@ export type Database = {
           link_preview_image?: string | null
           link_title?: string | null
           link_url?: string | null
+          media_names?: string[] | null
+          media_types?: string[] | null
+          media_urls?: string[] | null
           metadata?: Json | null
           post_type?: string | null
           reactions_count?: number | null
