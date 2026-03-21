@@ -114,6 +114,7 @@ const VoiceMessagePlayer = ({ url, isOwn }: { url: string; isOwn: boolean }) => 
 };
 
 const ChatMessages = ({ messages, currentUserId, roomName }: ChatMessagesProps) => {
+  const navigate = useAppNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { isMobile } = useDisplayMode();
   const [previewImage, setPreviewImage] = useState<string | null>(null);
