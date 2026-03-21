@@ -258,7 +258,7 @@ export const useOperationalAlerts = () => {
           type: 'message',
           icon: MessageSquare,
           timestamp: m.created_at,
-          route: '/dashboard/messages',
+          route: '/dashboard/chat',
           isRead: m.is_read,
         });
       }

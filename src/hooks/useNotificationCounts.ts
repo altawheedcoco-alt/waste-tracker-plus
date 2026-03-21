@@ -71,6 +71,26 @@ export const useNotificationCounts = (): SectionNotificationCounts => {
       if (platformCounts.pendingReceipts > 0) {
         counts['transporter-receipts'] = (counts['transporter-receipts'] || 0) + platformCounts.pendingReceipts;
       }
+      // Drivers
+      if (platformCounts.totalDrivers > 0) {
+        counts['transporter-drivers'] = platformCounts.availableDrivers;
+      }
+      // Vehicles
+      if (platformCounts.activeVehicles > 0) {
+        counts['fleet'] = platformCounts.activeVehicles;
+      }
+      // Contracts
+      if (platformCounts.activeContracts > 0) {
+        counts['contracts'] = platformCounts.activeContracts;
+      }
+      // Active shipments
+      if (platformCounts.activeShipments > 0) {
+        counts['transporter-shipments'] = (counts['transporter-shipments'] || 0) + platformCounts.activeShipments;
+      }
+      // Pending shipments
+      if (platformCounts.pendingShipments > 0) {
+        counts['transporter-shipments'] = (counts['transporter-shipments'] || 0) + platformCounts.pendingShipments;
+      }
     }
 
     return counts;

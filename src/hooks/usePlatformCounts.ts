@@ -139,12 +139,12 @@ export const usePlatformCounts = () => {
           .select('id, is_available')
           .eq('organization_id', orgId!),
 
-        // Active contracts
+        // Active contracts (active + signed)
         supabase
           .from('contracts')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', orgId!)
-          .eq('status', 'active'),
+          .in('status', ['active', 'signed'] as any),
 
         // Active partners
         supabase

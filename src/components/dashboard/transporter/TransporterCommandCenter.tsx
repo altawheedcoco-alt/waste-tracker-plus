@@ -545,7 +545,7 @@ const TransporterCommandCenter = () => {
                 <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
                 <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
                   sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
-                  onClick={() => navigate('/dashboard/deposits')} />
+                  onClick={() => navigate('/dashboard/quick-deposit-links')} />
                 <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
