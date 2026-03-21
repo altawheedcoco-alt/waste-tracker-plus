@@ -540,6 +540,9 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   // Style-specific extra elements
   const styleExtras = generateStyleExtras(style, hash, palette, uid);
 
+  // NEW: Optical Illusion Layer - appears to move while static
+  const opticalIllusion = generateOpticalIllusion(hash, palette, uid);
+
   // NEW Layer 14: Thick Outer Border Band with Multi-Language Text
   const outerBorderBand = generateOuterBorderBand(hash, palette, uid);
 
@@ -635,6 +638,11 @@ export function generateDigitalSealSVG(data: DigitalSealData): string {
   </text>
 
   ${styleExtras}
+
+  <!-- Layer 17: Optical Illusion - Peripheral Drift Motion -->
+  <g clip-path="url(#cc_${uid})">
+    ${opticalIllusion}
+  </g>
 
   <!-- Center: Shield verification icon -->
   <g transform="translate(88, 66)">
@@ -906,6 +914,93 @@ function generateStyleExtras(style: SealStyle, hash: string, palette: StylePalet
     default:
       return '';
   }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OPTICAL ILLUSION LAYER - Static patterns that appear to move
+// ═══════════════════════════════════════════════════════════════
+
+function generateOpticalIllusion(hash: string, palette: StylePalette, uid: string): string {
+  let svg = '';
+  const seed = parseInt(hash.slice(0, 4), 16);
+  
+  // === 1. "Rotating Snakes" Illusion ===
+  // Concentric rings of alternating dark/light/dark/white segments with angular offset
+  // Creates powerful peripheral drift illusion - appears to rotate when not looking directly at it
+  const snakeRings = [62, 70, 78];
+  snakeRings.forEach((radius, ringIdx) => {
+    const segmentCount = 16 + ringIdx * 4;
+    const offset = ringIdx * (360 / segmentCount / 2); // Half-segment offset per ring = drift
+    for (let i = 0; i < segmentCount; i++) {
+      const startAngle = ((i / segmentCount) * 360 + offset) * Math.PI / 180;
+      const endAngle = (((i + 0.85) / segmentCount) * 360 + offset) * Math.PI / 180;
+      const x1 = 100 + radius * Math.cos(startAngle);
+      const y1 = 100 + radius * Math.sin(startAngle);
+      const x2 = 100 + radius * Math.cos(endAngle);
+      const y2 = 100 + radius * Math.sin(endAngle);
+      // Alternating: dark, medium, light, white cycle creates the motion
+      const phase = i % 4;
+      const opacities = [0.18, 0.1, 0.04, 0.01];
+      const widths = [1.8, 1.4, 1.0, 0.6];
+      const color = phase < 2 ? palette.primary : palette.accent;
+      svg += `<path d="M ${x1.toFixed(2)} ${y1.toFixed(2)} A ${radius} ${radius} 0 0 1 ${x2.toFixed(2)} ${y2.toFixed(2)}" fill="none" stroke="${color}" stroke-width="${widths[phase]}" opacity="${opacities[phase]}" stroke-linecap="round"/>`;
+    }
+  });
+
+  // === 2. Café Wall / Münsterberg Illusion ===
+  // Offset checkerboard squares in concentric rings - lines appear to tilt/bulge
+  const cafeRadius = [55, 58];
+  cafeRadius.forEach((r, rIdx) => {
+    const count = 24;
+    const offsetShift = rIdx * (360 / count / 2);
+    for (let i = 0; i < count; i++) {
+      if (i % 2 === 0) {
+        const a1 = ((i / count) * 360 + offsetShift) * Math.PI / 180;
+        const a2 = (((i + 1) / count) * 360 + offsetShift) * Math.PI / 180;
+        const mid = (a1 + a2) / 2;
+        const x = 100 + r * Math.cos(mid);
+        const y = 100 + r * Math.sin(mid);
+        svg += `<rect x="${(x - 1.2).toFixed(1)}" y="${(y - 1.2).toFixed(1)}" width="2.4" height="2.4" fill="${palette.primary}" opacity="0.06" transform="rotate(${(mid * 180 / Math.PI).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+      }
+    }
+  });
+
+  // === 3. Pinna's Illusory Motion ===
+  // Micro-rectangles arranged radially with slight angular tilt - creates expansion illusion
+  for (let ring = 0; ring < 3; ring++) {
+    const r = 42 + ring * 5;
+    const count = 20 + ring * 6;
+    const tilt = (ring % 2 === 0) ? 8 : -8;
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const x = 100 + r * Math.cos(angle);
+      const y = 100 + r * Math.sin(angle);
+      const rotDeg = (angle * 180 / Math.PI) + tilt;
+      svg += `<rect x="${(x - 0.8).toFixed(1)}" y="${(y - 1.5).toFixed(1)}" width="1.6" height="3" rx="0.3" fill="${ring % 2 === 0 ? palette.primary : palette.accent}" opacity="0.07" transform="rotate(${rotDeg.toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})"/>`;
+    }
+  }
+
+  // === 4. Fraser Spiral Illusion ===
+  // Concentric circles with tilted segments that appear as spirals
+  for (let ring = 0; ring < 4; ring++) {
+    const r = 34 + ring * 3;
+    const dashLen = 3 + ring * 0.5;
+    const tiltOffset = ring * 15;
+    svg += `<circle cx="100" cy="100" r="${r}" fill="none" stroke="${palette.primary}" stroke-width="0.5" stroke-dasharray="${dashLen},${dashLen}" stroke-dashoffset="${tiltOffset}" opacity="0.06"/>`;
+  }
+
+  // === 5. Peripheral Shimmer Dots ===
+  // High-contrast alternating dots at periphery - shimmer when not focused
+  for (let i = 0; i < 32; i++) {
+    const angle = (i / 32) * Math.PI * 2;
+    const r = 86 + (i % 2) * 2;
+    const x = 100 + r * Math.cos(angle);
+    const y = 100 + r * Math.sin(angle);
+    const sz = i % 2 === 0 ? 0.8 : 0.5;
+    svg += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${sz}" fill="${i % 2 === 0 ? palette.primary : palette.accent}" opacity="${i % 2 === 0 ? '0.12' : '0.06'}"/>`;
+  }
+
+  return svg;
 }
 
 // ═══════════════════════════════════════════════════════════════
