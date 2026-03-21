@@ -6,7 +6,7 @@ import {
   MoreVertical, Send, Lock, Download, VolumeX, Ban,
   FileText, Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Reply, Forward, SmilePlus, Paintbrush, Info
+  Reply, Forward, SmilePlus, Paintbrush, Info, BarChart3
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import VoiceMessagePlayer from '@/components/chat/VoiceMessagePlayer';
@@ -1406,12 +1406,17 @@ const EncryptedChatInner = () => {
 
 // ─── Lazy load NotesTab ─────────────────────────────────
 const NotesTab = lazy(() => import('@/components/chat/NotesTab'));
+const ChannelListViewPage = lazy(() => import('@/components/chat/ChannelListView'));
+const PollsListView = lazy(() => import('@/components/chat/PollsListView'));
+
+type ChatTabType = 'chat' | 'notes' | 'channels' | 'polls';
 
 // ─── Main Page with Chat + Notes Tabs ───────────────────
 const ChatAndNotesPage = () => {
   const [searchParamsPage] = useSearchParams();
-  const initialTab = searchParamsPage.get('tab') === 'notes' ? 'notes' : 'chat';
-  const [activeTab, setActiveTab] = useState<'chat' | 'notes'>(initialTab);
+  const paramTab = searchParamsPage.get('tab') as ChatTabType | null;
+  const initialTab: ChatTabType = paramTab && ['chat', 'notes', 'channels', 'polls'].includes(paramTab) ? paramTab : 'chat';
+  const [activeTab, setActiveTab] = useState<ChatTabType>(initialTab);
   const [notesUnread, setNotesUnread] = useState(0);
 
   // Listen for new notes to update badge
@@ -1437,6 +1442,14 @@ const ChatAndNotesPage = () => {
     if (activeTab === 'notes') setNotesUnread(0);
   }, [activeTab]);
 
+  // Sync tab with URL param changes
+  useEffect(() => {
+    const t = searchParamsPage.get('tab') as ChatTabType | null;
+    if (t && ['chat', 'notes', 'channels', 'polls'].includes(t)) {
+      setActiveTab(t);
+    }
+  }, [searchParamsPage]);
+
   return (
     <DashboardLayout>
       <ChatAppearanceProvider>
@@ -1447,9 +1460,7 @@ const ChatAndNotesPage = () => {
             onClick={() => setActiveTab('chat')}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
-              activeTab === 'chat'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              activeTab === 'chat' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <MessageCircle className="w-4 h-4" />
@@ -1459,9 +1470,7 @@ const ChatAndNotesPage = () => {
             onClick={() => setActiveTab('notes')}
             className={cn(
               "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors relative",
-              activeTab === 'notes'
-                ? "border-primary text-primary"
-                : "border-transparent text-muted-foreground hover:text-foreground"
+              activeTab === 'notes' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
             )}
           >
             <StickyNote className="w-4 h-4" />
@@ -1472,15 +1481,44 @@ const ChatAndNotesPage = () => {
               </Badge>
             )}
           </button>
+          <button
+            onClick={() => setActiveTab('channels')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'channels' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <Hash className="w-4 h-4" />
+            القنوات
+          </button>
+          <button
+            onClick={() => setActiveTab('polls')}
+            className={cn(
+              "flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors",
+              activeTab === 'polls' ? "border-primary text-primary" : "border-transparent text-muted-foreground hover:text-foreground"
+            )}
+          >
+            <BarChart3 className="w-4 h-4" />
+            التصويت
+          </button>
         </div>
 
         {/* Tab Content */}
         <div className="flex-1 overflow-hidden">
-          {activeTab === 'chat' ? (
-            <EncryptedChatInner />
-          ) : (
+          {activeTab === 'chat' && <EncryptedChatInner />}
+          {activeTab === 'notes' && (
             <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
               <NotesTab className="h-full" />
+            </Suspense>
+          )}
+          {activeTab === 'channels' && (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <ChannelListViewPage />
+            </Suspense>
+          )}
+          {activeTab === 'polls' && (
+            <Suspense fallback={<div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>}>
+              <PollsListView />
             </Suspense>
           )}
         </div>
