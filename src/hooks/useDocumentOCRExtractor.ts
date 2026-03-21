@@ -52,6 +52,31 @@ async function pdfPageToImage(page: any, scale = 2): Promise<Blob> {
   });
 }
 
+/**
+ * Filter out garbage/corrupted OCR lines.
+ * A line is considered garbage if it has very few Arabic/English words
+ * relative to symbol/punctuation density.
+ */
+function filterGarbageText(text: string): string {
+  if (!text) return '';
+  const lines = text.split('\n');
+  const cleaned = lines.filter((line) => {
+    const trimmed = line.trim();
+    if (!trimmed) return false;
+    // Keep page separator lines
+    if (trimmed.startsWith('---') && trimmed.includes('صفحة')) return true;
+    // Count meaningful characters (Arabic, English letters, digits, common punctuation)
+    const meaningful = (trimmed.match(/[\u0600-\u06FF\u0750-\u077Fa-zA-Z0-9\s.,،:؛!؟\-()\/٪%]/g) || []).length;
+    const ratio = meaningful / trimmed.length;
+    // If less than 40% meaningful characters, it's garbage
+    if (ratio < 0.4) return false;
+    // If line is very short and mostly symbols, skip
+    if (trimmed.length < 4) return false;
+    return true;
+  });
+  return cleaned.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+}
+
 /** Extract verbatim text from a PDF page text layer when available */
 async function pdfPageToText(page: any): Promise<string> {
   try {
@@ -76,12 +101,15 @@ async function pdfPageToText(page: any): Promise<string> {
       }
     }
 
-    return lines
+    const rawText = lines
       .sort((a, b) => b.y - a.y)
       .map((line) => line.parts.join(' ').replace(/\s+/g, ' ').trim())
       .filter(Boolean)
       .join('\n')
       .trim();
+
+    // Filter out garbage lines from PDF text layer
+    return filterGarbageText(rawText);
   } catch {
     return '';
   }
