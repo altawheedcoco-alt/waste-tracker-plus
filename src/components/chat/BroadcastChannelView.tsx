@@ -884,14 +884,13 @@ ChannelListView.displayName = 'ChannelListView';
 // Main Broadcast Channel View (Orchestrator)
 // ═══════════════════════════════════════════════════════════════
 const BroadcastChannelView = memo(({ onBack }: BroadcastChannelViewProps) => {
-  const { channels, isLoading, createChannel } = useBroadcastChannels();
+  const { channels, isLoading, createChannel, subscribe, unsubscribe } = useBroadcastChannels();
   const [selectedChannel, setSelectedChannel] = useState<BroadcastChannel | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
 
   const handleSubscribeToggle = () => {
     if (!selectedChannel) return;
-    const { subscribe, unsubscribe } = useBroadcastChannels();
     if (selectedChannel.is_subscribed) unsubscribe(selectedChannel.id);
     else subscribe(selectedChannel.id);
   };
