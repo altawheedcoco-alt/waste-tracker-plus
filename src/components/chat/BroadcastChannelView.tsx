@@ -558,6 +558,7 @@ const PostCard = memo(({ post, channelName, channelAvatar, onReact, myReactions,
   const [showComments, setShowComments] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(false);
+  const [fullscreenUrl, setFullscreenUrl] = useState('');
   const reactionsData: Record<string, number> = post.reactions_summary || {};
   const totalReactions = post.reactions_count || 0;
   const topReactions = Object.entries(reactionsData)
