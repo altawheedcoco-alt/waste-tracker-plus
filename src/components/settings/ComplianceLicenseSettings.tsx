@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -15,7 +16,7 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import {
   Shield, FileCheck, Truck, Recycle, Factory, Trash2, Save, Loader2,
   AlertTriangle, CheckCircle2, Plus, X, Search, ChevronDown, ChevronRight,
-  Flame, Droplets, Stethoscope, Leaf, Package, Filter, Brain
+  Flame, Droplets, Stethoscope, Leaf, Package, Filter, Brain, ExternalLink
 } from 'lucide-react';
 import { useDocumentOCRExtractor, type OCRExtractedData } from '@/hooks/useDocumentOCRExtractor';
 import {
@@ -53,6 +54,7 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 export default function ComplianceLicenseSettings() {
+  const navigate = useNavigate();
   const { organization } = useAuth();
   const { extractFromFile, applyToOrganization, extracting, progress, extractedResult, setExtractedResult } = useDocumentOCRExtractor();
   const [showOCRPreview, setShowOCRPreview] = useState(false);
@@ -398,6 +400,13 @@ export default function ComplianceLicenseSettings() {
                 >
                   <Brain className="h-3.5 w-3.5" />
                   عرض البيانات المستخرجة
+                </Button>
+                <Button
+                  variant="ghost" size="sm" className="gap-1.5 text-xs"
+                  onClick={() => navigate('/dashboard/organization-profile')}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  عرض الوثائق في ملف الجهة
                 </Button>
               </div>
             </div>

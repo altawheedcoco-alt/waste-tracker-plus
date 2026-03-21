@@ -15,7 +15,7 @@ import { toast } from 'sonner';
 import { 
   Building2, User, FileText, Upload, Trash2, Download,
   Phone, Mail, MapPin, Shield, Users, Loader2, Save,
-  Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2
+  Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
@@ -37,6 +37,7 @@ const StampSignatureUpload = lazy(() => import('@/components/organization/StampS
 const BiometricManager = lazy(() => import('@/components/biometric/BiometricManager'));
 const OrganizationSignatureSettings = lazy(() => import('@/components/signature').then(m => ({ default: m.OrganizationSignatureSettings })));
 const LMSProfileCertificates = lazy(() => import('@/components/lms/LMSProfileCertificates'));
+const OrganizationAnalysis = lazy(() => import('@/components/organization/OrganizationAnalysis'));
 const AttestationTabContent = lazy(() => import('@/components/attestation/AttestationTabContent'));
 
 interface OrganizationDocument {
@@ -67,6 +68,7 @@ const ORG_PROFILE_TABS: TabItem[] = [
   { value: 'location', label: 'الموقع والصور', icon: MapPin },
   // الوثائق والتوثيق
   { value: 'documents', label: 'الوثائق', icon: FileText },
+  { value: 'analysis', label: 'تحليل الجهة', icon: Brain },
   { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp },
   { value: 'certificates', label: 'الشهادات', icon: Award },
   { value: 'attestation', label: 'الإفادة', icon: Shield },
@@ -81,6 +83,7 @@ const OrganizationProfile = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [aiExtracting, setAiExtracting] = useState(false);
   const [documents, setDocuments] = useState<OrganizationDocument[]>([]);
   const [orgData, setOrgData] = useState<any>(null);
 
@@ -181,6 +184,11 @@ const OrganizationProfile = () => {
       const filePath = `${organization.id}/${fileName}`;
       const { error: uploadError } = await supabase.storage.from('organization-documents').upload(filePath, file);
       if (uploadError) throw uploadError;
+      
+      // Get public URL for AI extraction
+      const { data: urlData } = supabase.storage.from('organization-documents').getPublicUrl(filePath);
+      const fileUrl = urlData?.publicUrl || '';
+
       const { error: dbError } = await supabase.from('organization_documents').insert({
         organization_id: organization.id, document_type: documentType,
         file_name: file.name, file_path: filePath, file_size: file.size, uploaded_by: user.id,
@@ -188,6 +196,73 @@ const OrganizationProfile = () => {
       if (dbError) throw dbError;
       toast.success(t('orgProfile.fileUploaded'));
       fetchOrganizationData();
+
+      // AI Extraction (async, non-blocking)
+      setAiExtracting(true);
+      try {
+        const { useDocumentOCRExtractor } = await import('@/hooks/useDocumentOCRExtractor');
+        // Use direct function call approach
+        const toBase64 = (blob: Blob): Promise<string> => new Promise((res, rej) => {
+          const r = new FileReader();
+          r.onloadend = () => res(r.result as string);
+          r.onerror = rej;
+          r.readAsDataURL(blob);
+        });
+        
+        const base64 = await toBase64(file);
+        const { data: aiData } = await supabase.functions.invoke('ocr-extract', {
+          body: { imageBase64: base64, fileName: file.name, mimeType: file.type },
+        });
+        
+        if (aiData?.result) {
+          const result = aiData.result;
+          const fields = result.detected_fields || {};
+          const structuredFields: Record<string, string | string[]> = {};
+          if (fields.license_number) structuredFields['رقم الترخيص'] = fields.license_number;
+          if (fields.issue_date) structuredFields['تاريخ الإصدار'] = fields.issue_date;
+          if (fields.expiry_date) structuredFields['تاريخ الانتهاء'] = fields.expiry_date;
+          if (fields.holder_name) structuredFields['اسم صاحب الترخيص'] = fields.holder_name;
+          if (fields.issuing_authority) structuredFields['الجهة المصدرة'] = fields.issuing_authority;
+          if (fields.document_type) structuredFields['نوع المستند'] = fields.document_type;
+          if (fields.waste_types?.length) structuredFields['أنواع المخلفات'] = fields.waste_types;
+          if (result.obligations?.length) structuredFields['الاشتراطات والالتزامات'] = result.obligations;
+
+          const typeMap: Record<string, string> = {
+            wmra_license: 'license', environmental_approval: 'certificate',
+            transport_license: 'license', compliance_document: 'certificate',
+          };
+          const docType = typeMap[fields.document_type] || 'other';
+
+          await supabase.from('entity_documents').insert({
+            organization_id: organization.id,
+            document_type: docType,
+            document_category: 'legal',
+            title: `${fields.document_type || documentType} - ${file.name}`,
+            file_url: fileUrl,
+            file_name: file.name,
+            file_type: file.type,
+            file_size: file.size,
+            reference_number: fields.license_number || null,
+            tags: ['ai-extracted', documentType, docType],
+            ocr_extracted_data: {
+              structured_fields: structuredFields,
+              raw_text: result.raw_text || '',
+              obligations: result.obligations || [],
+              confidence: result.confidence || 0,
+              pages_count: result.pages_count,
+              detected_fields: fields,
+            } as any,
+            ocr_confidence: result.confidence || 0,
+            ai_extracted: true,
+          });
+          toast.success('✅ تم استخراج البيانات بالذكاء الاصطناعي وحفظها', { duration: 4000 });
+        }
+      } catch (aiErr) {
+        console.error('AI extraction error (non-blocking):', aiErr);
+        // Non-blocking: don't show error to user since upload succeeded
+      } finally {
+        setAiExtracting(false);
+      }
     } catch (error) {
       console.error('Error uploading file:', error);
       toast.error(t('orgProfile.fileUploadError'));
@@ -566,9 +641,10 @@ const OrganizationProfile = () => {
                     ))}
                   </div>
                 )}
-                {uploading && (
+                {(uploading || aiExtracting) && (
                   <div className="flex items-center justify-center gap-2 py-4">
-                    <Loader2 className="w-5 h-5 animate-spin" /><span>جاري رفع الملف...</span>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span>{aiExtracting ? '🧠 جاري استخراج البيانات بالذكاء الاصطناعي...' : 'جاري رفع الملف...'}</span>
                   </div>
                 )}
                 <Separator />
@@ -602,6 +678,15 @@ const OrganizationProfile = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* تحليل الجهة */}
+          <TabsContent value="analysis">
+            <ErrorBoundary fallbackTitle="خطأ في تحليل الجهة">
+              <Suspense fallback={<TabFallback />}>
+                <OrganizationAnalysis organizationId={organization.id} />
+              </Suspense>
+            </ErrorBoundary>
           </TabsContent>
 
           {/* الختم والتوقيع */}

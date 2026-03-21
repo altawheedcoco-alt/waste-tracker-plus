@@ -27,11 +27,21 @@ interface ExtractedDocument {
   tags: string[] | null;
 }
 
+const CATEGORY_FILTERS = [
+  { value: 'all', label: 'الكل' },
+  { value: 'license', label: 'تراخيص' },
+  { value: 'certificate', label: 'موافقات بيئية' },
+  { value: 'contract', label: 'عقود' },
+  { value: 'invoice', label: 'فواتير' },
+  { value: 'other', label: 'أخرى' },
+];
+
 const AIExtractedDataViewer = () => {
   const { profile } = useAuth();
   const [documents, setDocuments] = useState<ExtractedDocument[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedDoc, setSelectedDoc] = useState<ExtractedDocument | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -59,6 +69,8 @@ const AIExtractedDataViewer = () => {
   }, [orgId]);
 
   const filteredDocs = documents.filter(doc => {
+    // Category filter
+    if (categoryFilter !== 'all' && doc.document_type !== categoryFilter) return false;
     if (!searchQuery.trim()) return true;
     const q = searchQuery.toLowerCase();
     const data = doc.ocr_extracted_data;
@@ -67,6 +79,8 @@ const AIExtractedDataViewer = () => {
     const fields = JSON.stringify(data?.detected_fields || {}).toLowerCase();
     return rawText.includes(q) || docType.includes(q) || fields.includes(q);
   });
+
+
 
   const getConfidenceColor = (c: number | null) => {
     if (!c) return 'bg-muted text-muted-foreground';
@@ -133,15 +147,30 @@ const AIExtractedDataViewer = () => {
         </CardHeader>
       </Card>
 
-      {/* Search */}
-      <div className="relative">
-        <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder="ابحث في البيانات المستخرجة..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          className="pr-10"
-        />
+      {/* Search + Filter */}
+      <div className="flex flex-col sm:flex-row gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder="ابحث في البيانات المستخرجة..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pr-10"
+          />
+        </div>
+        <div className="flex gap-1 flex-wrap">
+          {CATEGORY_FILTERS.map(f => (
+            <Button
+              key={f.value}
+              variant={categoryFilter === f.value ? 'default' : 'outline'}
+              size="sm"
+              className="text-xs"
+              onClick={() => setCategoryFilter(f.value)}
+            >
+              {f.label}
+            </Button>
+          ))}
+        </div>
       </div>
 
       {/* Documents List */}
