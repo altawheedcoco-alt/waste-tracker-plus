@@ -1060,7 +1060,7 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin }: {
     <div className="flex flex-col h-full" dir="rtl">
       {/* Header */}
       <div className="flex items-center gap-2 p-2.5 border-b border-border/50 bg-background sticky top-0 z-10">
-        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={onBack}>
+        <Button variant="ghost" size="icon" className="h-8 w-8 md:hidden" onClick={onBack}>
           <ChevronRight className="w-4 h-4" />
         </Button>
 
