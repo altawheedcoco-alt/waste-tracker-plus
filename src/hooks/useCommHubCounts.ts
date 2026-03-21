@@ -14,7 +14,7 @@ export interface CommHubCounts {
 }
 
 export const useCommHubCounts = () => {
-  const { organization, profile } = useAuth();
+  const { organization } = useAuth();
   const orgId = organization?.id;
 
   return useQuery({
@@ -40,12 +40,12 @@ export const useCommHubCounts = () => {
           .eq('receiver_organization_id', orgId!)
           .eq('is_read', false),
 
-        // Unread notes
+        // Unresolved notes (no is_read column, use is_resolved)
         (supabase as any)
           .from('notes')
           .select('id', { count: 'exact', head: true })
           .eq('organization_id', orgId!)
-          .eq('is_read', false),
+          .eq('is_resolved', false),
 
         // Pending signatures
         supabase
@@ -68,11 +68,11 @@ export const useCommHubCounts = () => {
           .eq('organization_id', orgId!)
           .eq('is_active', true),
 
-        // Pending work orders
+        // Pending work orders — use organization_id
         supabase
           .from('work_orders')
           .select('id', { count: 'exact', head: true })
-          .or(`sender_org_id.eq.${orgId},recipient_org_id.eq.${orgId}`)
+          .eq('organization_id', orgId!)
           .eq('status', 'pending'),
 
         // Upcoming meetings
