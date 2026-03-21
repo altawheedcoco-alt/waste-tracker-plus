@@ -1182,39 +1182,37 @@ const ChannelListView = memo(({ channels, isLoading, onSelect, onBack, onCreate 
   const discoverChannels = filtered.filter(ch => !ch.is_mine && !ch.is_subscribed);
 
   const renderChannel = (ch: BroadcastChannel, i: number) => (
-    <motion.button key={ch.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: i * 0.03 }} onClick={() => onSelect(ch)}
-      className="w-full flex items-center gap-3 p-3.5 rounded-2xl border border-border/30 hover:bg-muted/30 hover:border-primary/20 transition-all group">
+    <motion.button key={ch.id} initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: i * 0.02 }} onClick={() => onSelect(ch)}
+      className="w-full flex items-center gap-2.5 p-2.5 rounded-xl border border-border/30 hover:bg-muted/30 hover:border-primary/20 transition-all group">
       <div className="relative shrink-0">
-        <Avatar className="w-13 h-13 ring-2 ring-primary/10">
+        <Avatar className="w-9 h-9 ring-1 ring-primary/10">
           {ch.avatar_url && <AvatarImage src={ch.avatar_url} />}
-          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-bold text-lg">{ch.name.charAt(0)}</AvatarFallback>
+          <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-bold text-sm">{ch.name.charAt(0)}</AvatarFallback>
         </Avatar>
         {ch.is_verified && (
-          <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-0.5">
-            <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500/20" />
+          <div className="absolute -bottom-0.5 -right-0.5 bg-background rounded-full p-px">
+            <BadgeCheck className="w-3.5 h-3.5 text-blue-500 fill-blue-500/20" />
           </div>
         )}
       </div>
       <div className="flex-1 min-w-0 text-right">
         <div className="flex items-center justify-between gap-1">
-          <p className="text-[13px] font-bold truncate">{ch.name}</p>
+          <p className="text-xs font-bold truncate">{ch.name}</p>
           {ch.is_mine ? (
-            <Badge variant="outline" className="text-[8px] h-4 bg-amber-500/10 border-amber-500/20 text-amber-700 gap-0.5 shrink-0">
-              <Crown className="w-2.5 h-2.5" /> مالك
+            <Badge variant="outline" className="text-[8px] h-3.5 bg-amber-500/10 border-amber-500/20 text-amber-700 gap-0.5 shrink-0 px-1">
+              <Crown className="w-2 h-2" /> مالك
             </Badge>
           ) : ch.is_subscribed ? (
-            <Badge className="text-[8px] h-4 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shrink-0">متابَع</Badge>
+            <Badge className="text-[8px] h-3.5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20 shrink-0 px-1">متابَع</Badge>
           ) : null}
         </div>
-        <p className="text-[11px] text-muted-foreground truncate mt-0.5">{ch.description || 'قناة بث رسمية'}</p>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="text-[10px] text-muted-foreground flex items-center gap-0.5">
-            <Users className="w-3 h-3" /> {ch.subscriber_count?.toLocaleString('ar-EG')} متابع
-          </span>
-        </div>
+        <p className="text-[10px] text-muted-foreground truncate mt-0.5">{ch.description || 'قناة بث رسمية'}</p>
+        <span className="text-[9px] text-muted-foreground/70 flex items-center gap-0.5 mt-0.5">
+          <Users className="w-2.5 h-2.5" /> {ch.subscriber_count?.toLocaleString('ar-EG')} متابع
+        </span>
       </div>
-      <ChevronRight className="w-4 h-4 text-muted-foreground/40 group-hover:text-primary/60 transition-colors shrink-0 rotate-180" />
+      <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-primary/60 transition-colors shrink-0 rotate-180" />
     </motion.button>
   );
 
