@@ -1151,8 +1151,8 @@ const ChannelFeedView = memo(({ channel, onBack, onShowProfile, onShowAdmin, isS
         )}
       </div>
 
-      {/* Composer: Owner only */}
-      {channel.is_mine && (
+      {/* Composer: Owner or System Admin */}
+      {(channel.is_mine || isSystemAdmin) && (
         <PostComposer channelId={channel.id} onPost={createPost} isPosting={isPosting} onUpload={uploadFile} />
       )}
     </div>
