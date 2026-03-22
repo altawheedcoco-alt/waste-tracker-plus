@@ -745,8 +745,9 @@ const OrganizationProfile = () => {
                       {documents.map((doc) => {
                         const isPdf = doc.file_name?.match(/\.pdf$/i);
                         const isImage = doc.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        const isProtected = (doc as any)?.protection_enabled;
                         return (
-                          <div key={doc.id} className="border rounded-lg overflow-hidden">
+                          <div key={doc.id} className={`border rounded-lg overflow-hidden transition-all ${isProtected ? 'border-2 border-blue-500 ring-1 ring-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10' : ''}`}>
                             <div className="flex items-center justify-between p-3">
                               <div className="flex items-center gap-3">
                                 <FileText className="w-8 h-8 text-primary" />
