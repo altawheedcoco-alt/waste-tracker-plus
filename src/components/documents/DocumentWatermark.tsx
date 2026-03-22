@@ -52,7 +52,7 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
 
   return (
     <div
-      className="absolute inset-0 pointer-events-none z-20"
+      className="absolute inset-0 pointer-events-none z-50"
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
