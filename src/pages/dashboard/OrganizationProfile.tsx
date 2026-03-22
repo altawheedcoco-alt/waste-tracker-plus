@@ -18,6 +18,7 @@ import {
   Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import ProfileHeader from '@/components/organization/ProfileHeader';
