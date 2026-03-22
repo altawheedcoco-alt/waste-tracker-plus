@@ -26,13 +26,13 @@ interface DriverRatingDialogProps {
   ratedByOrgId?: string;
 }
 
-const CRITERIA = [
+const CRITERIA: { key: string; label: string; icon: typeof Star; required?: boolean }[] = [
   { key: 'overall', label: 'التقييم العام', icon: Star, required: true },
   { key: 'punctuality', label: 'الالتزام بالمواعيد', icon: Clock },
   { key: 'safety', label: 'السلامة والأمان', icon: Shield },
   { key: 'communication', label: 'التواصل', icon: MessageCircle },
   { key: 'professionalism', label: 'الاحترافية', icon: Award },
-] as const;
+];
 
 const StarRating = ({ value, onChange, size = 'md' }: {
   value: number;
