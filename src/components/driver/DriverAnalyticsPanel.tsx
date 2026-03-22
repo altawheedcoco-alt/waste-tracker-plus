@@ -1,6 +1,7 @@
 /**
- * لوحة تحليلات أداء السائق مع رسوم بيانية ورؤى ذكية
+ * لوحة تحليلات أداء السائق مع رسوم بيانية ورؤى ذكية + تحليل AI
  */
+import { lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -14,6 +15,8 @@ import {
 } from 'recharts';
 import { useDriverAnalytics } from '@/hooks/useDriverAnalytics';
 import { motion } from 'framer-motion';
+
+const DriverAIInsights = lazy(() => import('@/components/driver/DriverAIInsights'));
 
 interface DriverAnalyticsPanelProps {
   driverId: string;
@@ -253,6 +256,11 @@ const DriverAnalyticsPanel = ({ driverId, driverType }: DriverAnalyticsPanelProp
           </CardContent>
         </Card>
       )}
+
+      {/* AI Deep Analysis */}
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+        <DriverAIInsights driverId={driverId} />
+      </Suspense>
     </div>
   );
 };
