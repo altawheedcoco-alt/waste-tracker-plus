@@ -57,7 +57,7 @@ const Hero = memo(() => {
           {...{ fetchpriority: "high" } as any}
           decoding="async"
         />
-        {/* v3.0 — Multi-layer cinematic overlay */}
+        {/* v5.1 — Multi-layer cinematic overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-[hsl(222,14%,5%)]/55 via-[hsl(222,14%,5%)]/30 to-[hsl(222,14%,5%)]/60" />
         <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent" />
         {/* Sunlight reflection — strong warm glow */}
