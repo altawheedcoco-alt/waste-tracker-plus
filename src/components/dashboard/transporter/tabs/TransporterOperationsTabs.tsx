@@ -1,5 +1,6 @@
 /**
- * تبويبات العمليات الميدانية للناقل
+ * تبويبات العمليات الميدانية للناقل (مدمجة)
+ * overview | operations (calendar) | fleet (+ iot) | tracking (+ geofence) | performance (+ copilot)
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -12,7 +13,6 @@ import TransporterShipmentsList from '@/components/dashboard/transporter/Transpo
 import TransporterAggregateReport from '@/components/dashboard/transporter/TransporterAggregateReport';
 import TransporterPerformanceCharts from '@/components/dashboard/transporter/TransporterPerformanceCharts';
 import FleetUtilizationWidget from '@/components/dashboard/operations/FleetUtilizationWidget';
-import QuickActionsGrid from '@/components/dashboard/QuickActionsGrid';
 import type { TransporterShipment } from '@/hooks/useTransporterDashboard';
 
 const LiveOperationsBoard = lazy(() => import('@/components/dashboard/transporter/LiveOperationsBoard'));
@@ -37,6 +37,7 @@ const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/Org
 const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
 const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 const TransporterSectionsSummary = lazy(() => import('@/components/dashboard/transporter/TransporterSectionsSummary'));
+const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -73,13 +74,11 @@ const TransporterOperationsTabs = ({
   shipmentStatusFilter,
 }: OperationsTabsProps) => (
   <>
+    {/* ══════ 1. نظرة عامة ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
-
-      {/* ═══ القسم 1: الإحصائيات والأرقام الأساسية ═══ */}
       <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
       <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
-      {/* ═══ القسم 2: لوحة العمليات الحية + حالة الأسطول + الإيرادات ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-2">
           <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
@@ -90,77 +89,83 @@ const TransporterOperationsTabs = ({
         </div>
         <div className="space-y-4">
           <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
-            <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول">
-              <FleetStatusMini />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول"><FleetStatusMini /></ErrorBoundary>
           </Suspense>
           <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
-            <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
-              <RevenueSnapshotMini />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في الملخص المالي"><RevenueSnapshotMini /></ErrorBoundary>
           </Suspense>
         </div>
       </div>
 
-      {/* ═══ القسم 3: مؤشرات البيئة والتراخيص ═══ */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Suspense fallback={<Skeleton className="h-[280px]" />}>
-          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
-            <EnvironmentalKPIWidget />
-          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة"><EnvironmentalKPIWidget /></ErrorBoundary>
         </Suspense>
         <Suspense fallback={<Skeleton className="h-[280px]" />}>
-          <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص">
-            <LicenseExpiryWidget />
-          </ErrorBoundary>
+          <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص"><LicenseExpiryWidget /></ErrorBoundary>
         </Suspense>
       </div>
 
-      {/* ═══ القسم 4: استخدام الأسطول والأداء ═══ */}
-      <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول">
-        <FleetUtilizationWidget />
-      </ErrorBoundary>
-      <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
-        <TransporterPerformanceCharts />
-      </ErrorBoundary>
+      <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول"><FleetUtilizationWidget /></ErrorBoundary>
+      <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية"><TransporterPerformanceCharts /></ErrorBoundary>
 
-      {/* ═══ القسم 5: الأولويات والشركاء ═══ */}
-      <Suspense fallback={<TabFallback />}>
-        <SmartPriorityQueue shipments={shipments} />
-      </Suspense>
+      <Suspense fallback={<TabFallback />}><SmartPriorityQueue shipments={shipments} /></Suspense>
       <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
-          <OrgPerformanceRadar />
-        </Suspense>
+        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}><OrgPerformanceRadar /></Suspense>
       </ErrorBoundary>
       <TransporterPartnerSummary />
 
-
-
-
-      {/* ═══ القسم 7: قائمة الشحنات والتقرير التجميعي ═══ */}
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
         <TransporterShipmentsList
-          shipments={shipments}
-          isLoading={shipmentsLoading}
-          onRefresh={onRefresh}
-          statusFilter={shipmentStatusFilter}
-          onPrintShipment={onPrintShipment}
-          onChangeStatus={onChangeStatus}
+          shipments={shipments} isLoading={shipmentsLoading} onRefresh={onRefresh}
+          statusFilter={shipmentStatusFilter} onPrintShipment={onPrintShipment} onChangeStatus={onChangeStatus}
         />
       </ErrorBoundary>
       <ErrorBoundary fallbackTitle="خطأ في التقرير التجميعي">
         <TransporterAggregateReport shipments={shipments} />
       </ErrorBoundary>
 
-      {/* ═══ القسم 8: دليل الأقسام الشامل — جميع عناصر القائمة الجانبية ═══ */}
       <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-        <ErrorBoundary fallbackTitle="خطأ في دليل الأقسام">
-          <TransporterSectionsSummary />
+        <ErrorBoundary fallbackTitle="خطأ في دليل الأقسام"><TransporterSectionsSummary /></ErrorBoundary>
+      </Suspense>
+    </TabsContent>
+
+    {/* ══════ 2. العمليات (calendar مدمج) ══════ */}
+    <TabsContent value="operations" className="space-y-4 mt-6">
+      <Suspense fallback={<TabFallback />}>
+        <ShipmentCalendarWidget />
+      </Suspense>
+    </TabsContent>
+
+    {/* ══════ 3. الأسطول والصيانة (+ IoT مدمج) ══════ */}
+    <TabsContent value="fleet" className="space-y-4 mt-6">
+      <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
+          <PredictiveFleetMaintenance />
+          <ContainerManagement />
+          <VehicleReassignment />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في IoT">
+          <IoTMonitoringPanel />
         </ErrorBoundary>
       </Suspense>
     </TabsContent>
 
+    {/* ══════ 4. التتبع (+ geofence مدمج) ══════ */}
+    <TabsContent value="tracking" className="space-y-4 mt-6">
+      <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في مراقبة الإشارات"><SignalMonitorWidget /></ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في ربط السائقين"><DriverLinkingCode /></ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
+          <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تنبيهات السياج الجغرافي">
+          <GeofenceAlertsPanel />
+        </ErrorBoundary>
+      </Suspense>
+    </TabsContent>
+
+    {/* ══════ 5. الأداء والتحليلات (+ copilot مدمج) ══════ */}
     <TabsContent value="performance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
@@ -170,50 +175,9 @@ const TransporterOperationsTabs = ({
           <SmartDriverNotifications />
           <MaintenanceScheduler />
         </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="copilot" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في مساعد السائق">
           <DriverCopilot />
         </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="fleet" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
-          <PredictiveFleetMaintenance />
-          <ContainerManagement />
-          <VehicleReassignment />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="tracking" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في مراقبة الإشارات">
-          <SignalMonitorWidget />
-        </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في ربط السائقين">
-          <DriverLinkingCode />
-        </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
-          <TransporterDriverTracking drivers={driversSummary} isLoading={driversLoading} />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="geofence" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <GeofenceAlertsPanel />
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="calendar" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ShipmentCalendarWidget />
       </Suspense>
     </TabsContent>
   </>

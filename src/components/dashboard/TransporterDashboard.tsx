@@ -30,7 +30,7 @@ import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf, Truck, Route, CheckCircle2, Users, Package, Clock, Building2 } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
@@ -55,26 +55,15 @@ const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/Transpor
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
-  { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
-  { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
-  { value: 'copilot', labelKey: 'dashboard.tabs.copilot', icon: Navigation },
-  { value: 'pricing', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
-  { value: 'marketplace', labelKey: 'dashboard.tabs.marketplace', icon: Store },
+  { value: 'operations', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
   { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
-  { value: 'fraud', labelKey: 'dashboard.tabs.fraud', icon: AlertTriangle },
-  { value: 'risk', labelKey: 'dashboard.tabs.risk', icon: ShieldAlert },
-  { value: 'custody', labelKey: 'dashboard.tabs.custody', icon: Link2 },
-  { value: 'government', labelKey: 'dashboard.tabs.government', icon: Building2 },
-  { value: 'carbon', labelKey: 'dashboard.tabs.carbon', icon: Leaf },
-  { value: 'iot', labelKey: 'dashboard.tabs.iot', icon: Wifi },
-  { value: 'calendar', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
-  { value: 'intelligence', labelKey: 'dashboard.tabs.intelligence', icon: Cpu },
-  { value: 'partners', labelKey: 'dashboard.tabs.partners', icon: Handshake },
   { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
-  { value: 'geofence', labelKey: 'dashboard.tabs.geofence', icon: AlertTriangle },
-  { value: 'esg', labelKey: 'dashboard.tabs.esg', icon: Leaf },
-  { value: 'regulatory_hub', labelKey: 'dashboard.tabs.regulatoryHub', icon: Shield },
-  { value: 'ohs', labelKey: 'dashboard.tabs.ohs', icon: HardHat },
+  { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
+  { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
+  { value: 'finance', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
+  { value: 'compliance', labelKey: 'dashboard.tabs.regulatoryHub', icon: Shield },
+  { value: 'sustainability', labelKey: 'dashboard.tabs.carbon', icon: Leaf },
+  { value: 'partners', labelKey: 'dashboard.tabs.partners', icon: Handshake },
 ];
 
 const TransporterDashboard = () => {

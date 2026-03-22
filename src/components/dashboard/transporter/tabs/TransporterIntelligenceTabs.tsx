@@ -1,5 +1,6 @@
 /**
- * تبويبات الذكاء الاصطناعي والتحليلات والتسعير
+ * تبويبات الذكاء والمالية والشركاء (مدمجة)
+ * ai (+ intelligence) | finance (+ pricing + fraud) | partners (+ marketplace)
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -10,8 +11,6 @@ const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIIn
 const DynamicPricingEngine = lazy(() => import('@/components/dashboard/transporter/DynamicPricingEngine'));
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
 const FraudDetectionPanel = lazy(() => import('@/components/dashboard/transporter/FraudDetectionPanel'));
-const PartnerRiskPanel = lazy(() => import('@/components/dashboard/transporter/PartnerRiskPanel'));
-const ChainOfCustodyPanel = lazy(() => import('@/components/dashboard/transporter/ChainOfCustodyPanel'));
 const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
 const PartnerProfitabilityPanel = lazy(() => import('@/components/dashboard/transporter/PartnerProfitabilityPanel'));
 const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
@@ -30,56 +29,12 @@ const TabFallback = () => (
 
 const TransporterIntelligenceTabs = () => (
   <>
+    {/* ══════ 6. الذكاء الاصطناعي (+ intelligence مدمج) ══════ */}
     <TabsContent value="ai" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
           <TransporterAIInsights />
         </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="pricing" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
-          <DynamicPricingEngine />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="marketplace" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في السوق">
-          <WasteMarketplace />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="fraud" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
-          <FraudDetectionPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="risk" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في تحليل المخاطر">
-          <PartnerRiskPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="custody" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
-        <ErrorBoundary fallbackTitle="خطأ في سلسلة الحفظ">
-          <ChainOfCustodyPanel />
-        </ErrorBoundary>
-      </Suspense>
-    </TabsContent>
-
-    <TabsContent value="intelligence" className="space-y-4 mt-6">
-      <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في الجدولة الذكية">
           <ShiftScheduler />
           <SmartSchedulerPanel />
@@ -90,8 +45,24 @@ const TransporterIntelligenceTabs = () => (
       </Suspense>
     </TabsContent>
 
+    {/* ══════ 7. المالية والتسعير (+ fraud مدمج) ══════ */}
+    <TabsContent value="finance" className="space-y-4 mt-6">
+      <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
+          <DynamicPricingEngine />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
+          <FraudDetectionPanel />
+        </ErrorBoundary>
+      </Suspense>
+    </TabsContent>
+
+    {/* ══════ 10. الشركاء والسوق (+ marketplace مدمج) ══════ */}
     <TabsContent value="partners" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في السوق">
+          <WasteMarketplace />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تقارير الاستدامة">
           <SustainabilityReportGenerator />
         </ErrorBoundary>
