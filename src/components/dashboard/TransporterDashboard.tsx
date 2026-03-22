@@ -146,12 +146,8 @@ const TransporterDashboard = () => {
     return entries.map(([region, value]) => ({ region, value, max: Math.ceil(maxVal * 1.2) }));
   }, [shipments]);
 
-  // Defer secondary sections for faster initial paint
-  const [showSecondary, setShowSecondary] = useState(false);
-  useEffect(() => {
-    const id = requestAnimationFrame(() => setShowSecondary(true));
-    return () => cancelAnimationFrame(id);
-  }, []);
+
+
 
   return (
     <div className="space-y-3 sm:space-y-6">
