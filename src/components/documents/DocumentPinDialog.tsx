@@ -66,13 +66,15 @@ const DocumentPinDialog = ({ open, onOpenChange, documentId, actionType, onSucce
         // Log successful access
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-          await supabase.from('document_access_log').insert({
-            document_id: documentId,
-            user_id: user.id,
-            action_type: `pin_verified_${actionType}`,
-            success: true,
-            user_agent: navigator.userAgent?.slice(0, 200),
-          } as any).catch(() => {});
+          try {
+            await supabase.from('document_access_log').insert({
+              document_id: documentId,
+              user_id: user.id,
+              action_type: `pin_verified_${actionType}`,
+              success: true,
+              user_agent: navigator.userAgent?.slice(0, 200),
+            } as any);
+          } catch {}
         }
 
         toast.success(`تم التحقق — يمكنك الآن ${ACTION_LABELS[actionType]} المستند`);
