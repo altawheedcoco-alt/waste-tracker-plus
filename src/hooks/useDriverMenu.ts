@@ -42,6 +42,8 @@ export function getDriverMenuItems(
       return [
         common[0], // dashboard
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
+        { icon: PlusCircle, label: lang === 'ar' ? 'إنشاء شحنة' : 'Create Shipment', path: '/dashboard/create-shipment', key: 'driver-create-shipment' },
+        { icon: Map, label: lang === 'ar' ? 'خريطة المسارات' : 'Routes Map', path: '/dashboard/shipment-routes', key: 'driver-routes' },
         common[1], // location
         { icon: User, label: lang === 'ar' ? 'ملفي' : 'Profile', path: '/dashboard/driver-profile', key: 'driver-profile' },
         { icon: FileText, label: lang === 'ar' ? 'بياناتي' : 'My Data', path: '/dashboard/driver-data', key: 'driver-data' },
