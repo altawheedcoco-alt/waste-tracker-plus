@@ -694,26 +694,34 @@ const OrganizationProfile = () => {
                   {documents.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">لا توجد ملفات مرفوعة</p>
                   ) : (
-                    <div className="divide-y">
-                      {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between py-3">
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-8 h-8 text-primary" />
-                            <div>
-                              <p className="font-medium">{doc.file_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {getDocumentTypeLabel(doc.document_type)} • {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
-                              </p>
+                    <div className="space-y-4">
+                      {documents.map((doc) => {
+                        const isPdf = doc.file_name?.match(/\.pdf$/i);
+                        const isImage = doc.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        return (
+                          <div key={doc.id} className="border rounded-lg overflow-hidden">
+                            <div className="flex items-center justify-between p-3">
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-8 h-8 text-primary" />
+                                <div>
+                                  <p className="font-medium">{doc.file_name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {getDocumentTypeLabel(doc.document_type)} • {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
+                                {isCompanyAdmin && (
+                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                                )}
+                              </div>
                             </div>
+                            {/* Inline preview */}
+                            <DocumentInlinePreview doc={doc} isPdf={!!isPdf} isImage={!!isImage} />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
-                            {isCompanyAdmin && (
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
