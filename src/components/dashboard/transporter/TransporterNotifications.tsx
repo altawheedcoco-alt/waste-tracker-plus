@@ -82,8 +82,8 @@ const TransporterNotifications = ({ notifications }: TransporterNotificationsPro
               exit={{ opacity: 0, height: 0 }}
               className={`p-4 rounded-lg border ${config.bgColor}`}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div className="flex items-center gap-2">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-center gap-2 justify-end sm:justify-start">
                   <Badge variant="outline" className="text-[10px]">{config.label}</Badge>
                   <Button
                     variant="ghost"
@@ -94,12 +94,12 @@ const TransporterNotifications = ({ notifications }: TransporterNotificationsPro
                     إخفاء
                   </Button>
                 </div>
-                <div className="flex-1 text-right">
-                  <div className="flex items-center gap-2 justify-end">
+                <div className="flex-1 text-right min-w-0">
+                  <div className="flex items-center gap-2 justify-end flex-wrap">
                     <IconComponent className={`w-4 h-4 ${config.color}`} />
-                    <span className="font-medium text-sm">{notification.shipment_number}</span>
+                    <span className="font-medium text-sm break-words whitespace-normal">{notification.shipment_number}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1">{notification.message}</p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words whitespace-normal">{notification.message}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {notification.created_at && format(new Date(notification.created_at), 'PPp', { locale: ar })}
                   </p>

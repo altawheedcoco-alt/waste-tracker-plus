@@ -534,18 +534,18 @@ const OperationalAlertsWidget = () => {
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, x: 50, height: 0 }}
-                    className={`rounded-xl border transition-all relative overflow-hidden ${config.bgColor}`}
+                    className={`rounded-xl border transition-all relative ${config.bgColor}`}
                   >
                     {/* Header */}
-                    <div className="flex items-start gap-3 p-3 cursor-pointer relative" onClick={() => setExpandedId(isExpanded ? null : alert.id)}>
-                      <div className="flex-1 text-right min-w-0 space-y-1.5">
-                        <p className="text-sm font-semibold truncate">{alert.message}</p>
-                        <p className="text-xs text-muted-foreground line-clamp-1">{alert.detail}</p>
+                    <div className="flex flex-col gap-2 p-3 cursor-pointer relative sm:flex-row sm:items-start sm:gap-3" onClick={() => setExpandedId(isExpanded ? null : alert.id)}>
+                      <div className="flex-1 text-right min-w-0 space-y-1.5 order-2 sm:order-1">
+                        <p className="text-sm font-semibold leading-relaxed break-words whitespace-normal">{alert.message}</p>
+                        <p className="text-xs text-muted-foreground leading-relaxed break-words whitespace-normal">{alert.detail}</p>
                         {alert.solutions && alert.solutions.length > 0 && !isExpanded && (
-                          <div className="flex items-center gap-1.5 flex-wrap mt-1">
+                          <div className="flex items-center gap-1.5 flex-wrap mt-1 justify-end">
                             <Sparkles className="w-3 h-3 text-primary shrink-0" />
                             {alert.solutions.slice(0, 2).map((sol, idx) => (
-                              <Badge key={idx} variant="outline" className="text-[10px] px-1.5 py-0 h-5 bg-accent text-primary border-primary/20" onClick={(e) => e.stopPropagation()}>
+                              <Badge key={idx} variant="outline" className="text-[10px] px-1.5 py-0 min-h-5 max-w-full whitespace-normal break-words text-right bg-accent text-primary border-primary/20" onClick={(e) => e.stopPropagation()}>
                                 {sol.length > 35 ? sol.slice(0, 35) + '…' : sol}
                               </Badge>
                             ))}
@@ -553,9 +553,9 @@ const OperationalAlertsWidget = () => {
                           </div>
                         )}
                       </div>
-                      <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
-                        <Badge variant="outline" className="text-[10px] gap-0.5"><TypeIcon className="w-3 h-3" />{typeConfig.label}</Badge>
-                        <Badge variant={config.badge} className="text-[10px]">{config.label}</Badge>
+                      <div className="flex flex-wrap items-center justify-end gap-1.5 shrink-0 order-1 sm:order-2">
+                        <Badge variant="outline" className="text-[10px] gap-0.5 whitespace-normal break-words text-right"><TypeIcon className="w-3 h-3" />{typeConfig.label}</Badge>
+                        <Badge variant={config.badge} className="text-[10px] whitespace-normal break-words text-right">{config.label}</Badge>
                         <SeverityIcon className={`w-4 h-4 ${config.color}`} />
                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />}
                       </div>
