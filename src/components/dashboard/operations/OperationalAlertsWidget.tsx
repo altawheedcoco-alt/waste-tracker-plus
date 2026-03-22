@@ -544,12 +544,12 @@ const OperationalAlertsWidget = () => {
                         {alert.solutions && alert.solutions.length > 0 && !isExpanded && (
                           <div className="flex items-center gap-1.5 flex-wrap mt-1 justify-end">
                             <Sparkles className="w-3 h-3 text-primary shrink-0" />
-                            {alert.solutions.slice(0, 2).map((sol, idx) => (
-                              <Badge key={idx} variant="outline" className="text-[10px] px-1.5 py-0 min-h-5 max-w-full whitespace-normal break-words text-right bg-accent text-primary border-primary/20" onClick={(e) => e.stopPropagation()}>
-                                {sol.length > 35 ? sol.slice(0, 35) + '…' : sol}
+                            {alert.solutions.slice(0, 3).map((sol, idx) => (
+                              <Badge key={idx} variant="outline" className="text-[10px] px-1.5 py-0.5 min-h-5 max-w-full whitespace-normal break-words text-right bg-accent text-primary border-primary/20" onClick={(e) => e.stopPropagation()}>
+                                {sol}
                               </Badge>
                             ))}
-                            {alert.solutions.length > 2 && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">+{alert.solutions.length - 2}</Badge>}
+                            {alert.solutions.length > 3 && <Badge variant="outline" className="text-[10px] px-1.5 py-0 h-5">+{alert.solutions.length - 3}</Badge>}
                           </div>
                         )}
                       </div>
