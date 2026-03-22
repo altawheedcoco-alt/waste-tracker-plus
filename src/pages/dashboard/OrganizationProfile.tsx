@@ -849,6 +849,18 @@ const OrganizationProfile = () => {
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
+
+        {/* PIN Dialog */}
+        {pendingAction && (
+          <DocumentPinDialog
+            open={pinDialogOpen}
+            onOpenChange={setPinDialogOpen}
+            documentId={pendingAction.documentId}
+            actionType={pendingAction.actionType}
+            onSuccess={handlePinSuccess}
+            organizationId={pendingAction.organizationId}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
