@@ -137,6 +137,7 @@ const OrganizationProfile = () => {
 
   const isCompanyAdmin = roles.includes('company_admin') || roles.includes('admin');
   const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'page');
+  const { checkAccess, pinDialogOpen, setPinDialogOpen, pendingAction, handlePinSuccess } = useDocumentProtection();
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
