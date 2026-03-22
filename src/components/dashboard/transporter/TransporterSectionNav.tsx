@@ -2,7 +2,7 @@ import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Target, Zap, Activity, Bell, MessageSquare, FileSearch,
-  Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf, Truck
+  Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf
 } from 'lucide-react';
 
 interface SectionItem {
@@ -13,7 +13,7 @@ interface SectionItem {
   tabValue?: string;
 }
 
-const SECTIONS: SectionItem[] = [
+const FIXED_SECTIONS: SectionItem[] = [
   { id: 'section-header', label: 'الهيدر', icon: LayoutDashboard },
   { id: 'section-command', label: 'القيادة', icon: Target },
   { id: 'section-actions', label: 'الإجراءات', icon: Zap },
@@ -21,7 +21,9 @@ const SECTIONS: SectionItem[] = [
   { id: 'section-alerts', label: 'التنبيهات', icon: Bell },
   { id: 'section-comms', label: 'التواصل', icon: MessageSquare },
   { id: 'section-docs', label: 'التوثيق', icon: FileSearch },
-  // Tabs
+];
+
+const TAB_SECTIONS: SectionItem[] = [
   { id: 'section-tabs', label: 'نظرة عامة', icon: LayoutDashboard, isTab: true, tabValue: 'overview' },
   { id: 'section-tabs', label: 'العمليات', icon: CalendarDays, isTab: true, tabValue: 'operations' },
   { id: 'section-tabs', label: 'الأسطول', icon: Wrench, isTab: true, tabValue: 'fleet' },
@@ -34,49 +36,77 @@ const SECTIONS: SectionItem[] = [
   { id: 'section-tabs', label: 'الشركاء', icon: Handshake, isTab: true, tabValue: 'partners' },
 ];
 
+const ALL_SECTIONS = [...FIXED_SECTIONS, ...TAB_SECTIONS];
+
 interface TransporterSectionNavProps {
+  activeTab?: string;
   onTabChange?: (tabValue: string) => void;
 }
 
-const TransporterSectionNav = memo(({ onTabChange }: TransporterSectionNavProps) => {
-  const [activeSection, setActiveSection] = useState('section-header');
+const TransporterSectionNav = memo(({ activeTab, onTabChange }: TransporterSectionNavProps) => {
+  const [visibleSectionId, setVisibleSectionId] = useState('section-header');
   const navRef = useRef<HTMLDivElement>(null);
   const btnRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const isTabsVisible = visibleSectionId === 'section-tabs';
 
-  // Track visible section
+  // IntersectionObserver to track which section is in viewport
   useEffect(() => {
-    const sectionIds = [...new Set(SECTIONS.map(s => s.id))];
-    const elements = sectionIds.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
+    const uniqueIds = [...new Set(ALL_SECTIONS.map(s => s.id))];
+    const elements = uniqueIds.map(id => document.getElementById(id)).filter(Boolean) as HTMLElement[];
     if (elements.length === 0) return;
+
+    const visibleSet = new Map<string, number>();
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
-          .filter(e => e.isIntersecting)
-          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) {
-          setActiveSection(visible[0].target.id);
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            visibleSet.set(entry.target.id, entry.boundingClientRect.top);
+          } else {
+            visibleSet.delete(entry.target.id);
+          }
+        });
+
+        if (visibleSet.size > 0) {
+          // Pick the one closest to top
+          let closest = '';
+          let closestTop = Infinity;
+          visibleSet.forEach((top, id) => {
+            if (Math.abs(top) < Math.abs(closestTop)) {
+              closestTop = top;
+              closest = id;
+            }
+          });
+          if (closest) setVisibleSectionId(closest);
         }
       },
-      { rootMargin: '-80px 0px -60% 0px', threshold: 0.1 }
+      { rootMargin: '-60px 0px -50% 0px', threshold: [0, 0.1, 0.3] }
     );
 
     elements.forEach(el => observer.observe(el));
     return () => observer.disconnect();
   }, []);
 
-  // Auto-scroll active button into view
+  // Auto-scroll the active nav button into view horizontally
   useEffect(() => {
-    const key = SECTIONS.find(s => s.id === activeSection && !s.isTab)?.id || activeSection;
+    let key: string;
+    if (isTabsVisible && activeTab) {
+      key = `tab-${activeTab}`;
+    } else {
+      key = visibleSectionId;
+    }
     const btn = btnRefs.current[key];
     if (btn && navRef.current) {
-      btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      const navRect = navRef.current.getBoundingClientRect();
+      const btnRect = btn.getBoundingClientRect();
+      if (btnRect.left < navRect.left || btnRect.right > navRect.right) {
+        btn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     }
-  }, [activeSection]);
+  }, [visibleSectionId, isTabsVisible, activeTab]);
 
   const handleClick = useCallback((section: SectionItem) => {
     if (section.isTab && section.tabValue) {
-      // Scroll to tabs area + change tab
       const tabsEl = document.getElementById('section-tabs');
       if (tabsEl) tabsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       onTabChange?.(section.tabValue);
@@ -86,58 +116,48 @@ const TransporterSectionNav = memo(({ onTabChange }: TransporterSectionNavProps)
     }
   }, [onTabChange]);
 
+  const getIsActive = (section: SectionItem): boolean => {
+    if (section.isTab) {
+      return isTabsVisible && activeTab === section.tabValue;
+    }
+    return !isTabsVisible && visibleSectionId === section.id;
+  };
+
+  const renderButton = (section: SectionItem) => {
+    const Icon = section.icon;
+    const active = getIsActive(section);
+    const uniqueKey = section.isTab ? `tab-${section.tabValue}` : section.id;
+
+    return (
+      <button
+        key={uniqueKey}
+        ref={el => { btnRefs.current[uniqueKey] = el; }}
+        onClick={() => handleClick(section)}
+        className={cn(
+          'flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[10px] sm:text-xs whitespace-nowrap transition-all duration-200 shrink-0 touch-manipulation',
+          active
+            ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20 font-medium'
+            : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+        )}
+      >
+        <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
+        <span>{section.label}</span>
+      </button>
+    );
+  };
+
   return (
     <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/30 shadow-sm">
       <div
         ref={navRef}
-        className="flex items-center gap-1 px-2 py-1.5 overflow-x-auto scrollbar-hide"
+        className="flex items-center gap-0.5 px-2 py-1.5 overflow-x-auto scrollbar-hide"
       >
-        {SECTIONS.map((section, i) => {
-          const Icon = section.icon;
-          const isActive = section.isTab
-            ? false // tabs highlight handled differently
-            : activeSection === section.id;
-          const uniqueKey = section.isTab ? `tab-${section.tabValue}` : section.id;
+        {FIXED_SECTIONS.map(s => renderButton(s))}
 
-          // Separator before tabs
-          if (i === 7) {
-            return (
-              <div key="sep" className="flex items-center gap-1">
-                <div className="w-px h-6 bg-border/50 mx-1 shrink-0" />
-                <button
-                  ref={el => { btnRefs.current[uniqueKey] = el; }}
-                  onClick={() => handleClick(section)}
-                  className={cn(
-                    'flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs whitespace-nowrap transition-all duration-200 shrink-0 touch-manipulation',
-                    isActive
-                      ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                      : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-                  )}
-                >
-                  <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-                  <span>{section.label}</span>
-                </button>
-              </div>
-            );
-          }
+        {/* Separator */}
+        <div className="w-px h-6 bg-border/50 mx-1.5 shrink-0" />
 
-          return (
-            <button
-              key={uniqueKey}
-              ref={el => { btnRefs.current[uniqueKey] = el; }}
-              onClick={() => handleClick(section)}
-              className={cn(
-                'flex items-center gap-1 px-2 py-1.5 rounded-lg text-[10px] sm:text-xs whitespace-nowrap transition-all duration-200 shrink-0 touch-manipulation',
-                isActive
-                  ? 'bg-primary text-primary-foreground shadow-sm shadow-primary/20'
-                  : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
-              )}
-            >
-              <Icon className="w-3 h-3 sm:w-3.5 sm:h-3.5 shrink-0" />
-              <span>{section.label}</span>
-            </button>
-          );
-        })}
+        {TAB_SECTIONS.map(s => renderButton(s))}
       </div>
     </div>
   );
