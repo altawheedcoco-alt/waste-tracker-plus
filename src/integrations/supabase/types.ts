@@ -25243,6 +25243,9 @@ export type Database = {
         Row: {
           ai_confidence_score: number | null
           ai_verification_result: Json | null
+          allow_download: boolean | null
+          allow_print: boolean | null
+          allow_view: boolean | null
           auto_verified: boolean | null
           created_at: string | null
           document_type: string
@@ -25250,7 +25253,10 @@ export type Database = {
           file_path: string
           file_size: number | null
           id: string
+          notify_on_download: boolean | null
           organization_id: string
+          protection_enabled: boolean | null
+          protection_pin: string | null
           rejection_reason: string | null
           updated_at: string | null
           uploaded_by: string | null
@@ -25258,10 +25264,14 @@ export type Database = {
           verification_status: string | null
           verified_at: string | null
           verified_by: string | null
+          watermark_enabled: boolean | null
         }
         Insert: {
           ai_confidence_score?: number | null
           ai_verification_result?: Json | null
+          allow_download?: boolean | null
+          allow_print?: boolean | null
+          allow_view?: boolean | null
           auto_verified?: boolean | null
           created_at?: string | null
           document_type: string
@@ -25269,7 +25279,10 @@ export type Database = {
           file_path: string
           file_size?: number | null
           id?: string
+          notify_on_download?: boolean | null
           organization_id: string
+          protection_enabled?: boolean | null
+          protection_pin?: string | null
           rejection_reason?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
@@ -25277,10 +25290,14 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          watermark_enabled?: boolean | null
         }
         Update: {
           ai_confidence_score?: number | null
           ai_verification_result?: Json | null
+          allow_download?: boolean | null
+          allow_print?: boolean | null
+          allow_view?: boolean | null
           auto_verified?: boolean | null
           created_at?: string | null
           document_type?: string
@@ -25288,7 +25305,10 @@ export type Database = {
           file_path?: string
           file_size?: number | null
           id?: string
+          notify_on_download?: boolean | null
           organization_id?: string
+          protection_enabled?: boolean | null
+          protection_pin?: string | null
           rejection_reason?: string | null
           updated_at?: string | null
           uploaded_by?: string | null
@@ -25296,6 +25316,7 @@ export type Database = {
           verification_status?: string | null
           verified_at?: string | null
           verified_by?: string | null
+          watermark_enabled?: boolean | null
         }
         Relationships: [
           {
