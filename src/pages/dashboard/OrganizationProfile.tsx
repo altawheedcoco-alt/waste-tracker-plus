@@ -87,14 +87,17 @@ const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocum
         {expanded ? 'إخفاء المعاينة' : 'معاينة المستند'}
       </Button>
       {expanded && previewUrl && (
-        <div className="border-t relative">
-          <DocumentWatermark enabled={(doc as any)?.watermark_enabled} />
+        <div className="border-t relative" style={{ isolation: 'isolate' }}>
           {isPdf ? (
             <GoogleDocsPdfViewer url={previewUrl} title={doc.file_name} height="450px" />
           ) : (
             <div className="p-4 flex justify-center bg-muted/30">
               <img src={previewUrl} alt={doc.file_name} className="max-w-full max-h-[400px] object-contain rounded" />
             </div>
+          )}
+          {/* Watermark on top of iframe — covers entire visible area */}
+          {(doc as any)?.watermark_enabled && (
+            <DocumentWatermark enabled={true} />
           )}
         </div>
       )}
