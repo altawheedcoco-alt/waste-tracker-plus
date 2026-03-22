@@ -196,37 +196,40 @@ const TransporterDashboard = () => {
         <TransporterHeader organizationName={organization?.name || ''} />
       </DashboardV2Header>
 
-      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      {/* 2. مركز القيادة */}
       <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
+
+      {/* 3. الإجراءات السريعة */}
       <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
 
-      {showSecondary && (
-        <>
-          <Suspense fallback={null}><DashboardWidgetCustomizer orgType="transporter" /></Suspense>
+      {/* 4. النبض اليومي + ملخص العمليات */}
+      <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
+        <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
+      </ErrorBoundary>
+      <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+        <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
+      </ErrorBoundary>
 
-          <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
-            <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
-          </ErrorBoundary>
+      {/* 5. التنبيهات والإشعارات */}
+      <Suspense fallback={null}>
+        <DashboardAlertsHub
+          orgType="transporter"
+          notificationsComponent={<TransporterNotifications notifications={notifications} />}
+          slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+          incomingRequestsComponent={<TransporterIncomingRequests />}
+        />
+      </Suspense>
 
-          <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-            <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
-          </ErrorBoundary>
+      {/* 6. التواصل */}
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
 
-          <Suspense fallback={null}><AutomationSettingsDialog organizationType="transporter" /></Suspense>
+      {/* 7. التوثيق والبحث */}
+      <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
+      <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
 
-          <Suspense fallback={null}>
-            <DashboardAlertsHub
-              orgType="transporter"
-              notificationsComponent={<TransporterNotifications notifications={notifications} />}
-              slaComponent={<TransporterSLAAlerts shipments={shipments} />}
-              incomingRequestsComponent={<TransporterIncomingRequests />}
-            />
-          </Suspense>
-
-          <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
-          <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
-        </>
-      )}
+      {/* أدوات مساعدة */}
+      <Suspense fallback={null}><DashboardWidgetCustomizer orgType="transporter" /></Suspense>
+      <Suspense fallback={null}><AutomationSettingsDialog organizationType="transporter" /></Suspense>
 
       {/* ★ Modular Tabs */}
       <div>
