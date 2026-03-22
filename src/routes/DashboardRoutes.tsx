@@ -44,6 +44,9 @@ const HazardousWasteRegister = lazy(() => import("@/pages/dashboard/HazardousWas
 const WasteTypesClassification = lazy(() => import("@/pages/dashboard/WasteTypesClassification"));
 const MyRequests = lazy(() => import("@/pages/dashboard/MyRequests"));
 const DriverOffers = lazy(() => import("@/pages/dashboard/DriverOffers"));
+const ShipmentMarket = lazy(() => import("@/pages/dashboard/ShipmentMarket"));
+const DriverWallet = lazy(() => import("@/pages/dashboard/DriverWallet"));
+const DriverAnalytics = lazy(() => import("@/pages/dashboard/DriverAnalytics"));
 const RegulatoryUpdates = lazy(() => import("@/pages/dashboard/RegulatoryUpdates"));
 const OperationalPlans = lazy(() => import("@/pages/dashboard/OperationalPlans"));
 const Chat = lazy(() => import("@/pages/dashboard/Chat"));
