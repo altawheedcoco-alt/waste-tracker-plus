@@ -11,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   Popover, PopoverContent, PopoverTrigger,
 } from '@/components/ui/popover';
-import { Shield, Lock, Eye, Download, Printer, Droplets, Bell, Save, Loader2 } from 'lucide-react';
+import { Shield, Lock, Eye, Download, Printer, Droplets, Bell, Save, Loader2, ShieldCheck, ShieldOff } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -50,40 +50,55 @@ const DocumentProtectionSettings = ({ documentId, initialSettings, onSaved }: Do
 
     setSaving(true);
     try {
+      const updateData: Record<string, any> = {
+        protection_enabled: settings.protection_enabled,
+        protection_pin: settings.protection_pin || null,
+        allow_view: settings.allow_view,
+        allow_download: settings.allow_download,
+        allow_print: settings.allow_print,
+        watermark_enabled: settings.watermark_enabled,
+        notify_on_download: settings.notify_on_download,
+      };
+
       const { error } = await supabase
         .from('organization_documents')
-        .update({
-          protection_enabled: settings.protection_enabled,
-          protection_pin: settings.protection_pin || null,
-          allow_view: settings.allow_view,
-          allow_download: settings.allow_download,
-          allow_print: settings.allow_print,
-          watermark_enabled: settings.watermark_enabled,
-          notify_on_download: settings.notify_on_download,
-        } as any)
+        .update(updateData as any)
         .eq('id', documentId);
 
       if (error) throw error;
-      toast.success('تم حفظ إعدادات الحماية');
+      toast.success('تم حفظ إعدادات الحماية بنجاح ✅');
       onSaved?.();
       setOpen(false);
     } catch (err: any) {
-      toast.error('فشل في حفظ الإعدادات');
-      console.error(err);
+      console.error('Protection save error:', err);
+      toast.error('فشل في حفظ الإعدادات: ' + (err?.message || 'خطأ غير معروف'));
     } finally {
       setSaving(false);
     }
   };
 
   const isProtected = settings.protection_enabled;
+  const protectionCount = [
+    settings.protection_pin,
+    !settings.allow_download,
+    !settings.allow_print,
+    settings.watermark_enabled,
+    settings.notify_on_download,
+  ].filter(Boolean).length;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
-          <Shield className={`w-4 h-4 ${isProtected ? 'text-primary' : 'text-muted-foreground'}`} />
-          {isProtected && (
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full" />
+        <Button variant="ghost" size="icon" className="relative" title="إعدادات الحماية">
+          {isProtected ? (
+            <ShieldCheck className="w-4 h-4 text-primary" />
+          ) : (
+            <ShieldOff className="w-4 h-4 text-muted-foreground" />
+          )}
+          {protectionCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-primary text-primary-foreground rounded-full text-[9px] flex items-center justify-center font-bold">
+              {protectionCount}
+            </span>
           )}
         </Button>
       </PopoverTrigger>
