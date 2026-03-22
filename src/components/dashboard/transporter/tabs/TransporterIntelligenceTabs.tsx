@@ -8,6 +8,7 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const TransporterAIInsights = lazy(() => import('@/components/ai/TransporterAIInsights'));
+const AIDocumentAnalyzer = lazy(() => import('@/components/ai/AIDocumentAnalyzer'));
 const DynamicPricingEngine = lazy(() => import('@/components/dashboard/transporter/DynamicPricingEngine'));
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
 const FraudDetectionPanel = lazy(() => import('@/components/dashboard/transporter/FraudDetectionPanel'));
