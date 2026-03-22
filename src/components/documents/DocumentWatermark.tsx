@@ -1,6 +1,7 @@
 /**
  * Document Watermark Overlay — طبقة العلامة المائية المتقدمة
  * تغطي كامل صفحات المستند بغض النظر عن الطول
+ * تتضمن بيانات المستخدم + التحذيرات القانونية الثلاثة
  */
 import { memo, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,47 +24,59 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
   }, [userName, orgName, profile?.full_name, user?.email, organization?.name]);
 
   const legalLines = [
-    'يُحظر الاستخدام بدون موافقة كتابية من صاحب الشأن أو ممثله القانوني',
-    'يُمنع التداول أو الطباعة لدى أي جهات حكومية أو خاصة بدون إذن',
-    'iRecycle تُخلي مسؤوليتها عن أي تصرف غير قانوني بالمستند',
+    '⚠ يُحظر الاستخدام بدون موافقة كتابية من صاحب الشأن أو ممثله القانوني',
+    '⚠ يُمنع التداول أو الطباعة لدى أي جهات حكومية أو خاصة بدون إذن',
+    '⚠ iRecycle تُخلي مسؤوليتها عن أي تصرف غير قانوني بالمستند',
   ];
 
-  // Generate a repeating tile via canvas for infinite coverage
   const tileUrl = useMemo(() => {
     if (!enabled) return null;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const w = 700;
-    const h = 420;
-    canvas.width = w;
-    canvas.height = h;
+    const dpr = 2; // High-res tile
+    const w = 800;
+    const h = 500;
+    canvas.width = w * dpr;
+    canvas.height = h * dpr;
+    ctx.scale(dpr, dpr);
 
     ctx.clearRect(0, 0, w, h);
-    
-    // Draw user info watermark (diagonal)
+
+    // === Row 1: User info (bold, distinctive) ===
     ctx.save();
-    ctx.translate(w / 2, 100);
-    ctx.rotate(-35 * Math.PI / 180);
-    ctx.font = 'bold 13px system-ui, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
+    ctx.translate(w / 2, 80);
+    ctx.rotate(-30 * Math.PI / 180);
+    ctx.font = 'bold 16px "Courier New", "Lucida Console", monospace';
+    ctx.fillStyle = 'rgba(0, 80, 180, 0.22)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(watermarkText, 0, 0);
+    ctx.fillText(`🔒 ${watermarkText}`, 0, 0);
     ctx.restore();
 
-    // Draw legal lines (diagonal, smaller)
+    // === Row 2: Legal warning lines (red-tinted, spaced) ===
     ctx.save();
-    ctx.translate(w / 2, 260);
-    ctx.rotate(-35 * Math.PI / 180);
-    ctx.font = '10px system-ui, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(180, 0, 0, 0.12)';
+    ctx.translate(w / 2, 220);
+    ctx.rotate(-30 * Math.PI / 180);
+    ctx.font = 'bold 11px "Courier New", "Lucida Console", monospace';
+    ctx.fillStyle = 'rgba(180, 20, 20, 0.16)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     legalLines.forEach((line, i) => {
-      ctx.fillText(`⚠ ${line}`, 0, i * 18);
+      ctx.fillText(line, 0, i * 22);
     });
+    ctx.restore();
+
+    // === Row 3: Repeat user info offset ===
+    ctx.save();
+    ctx.translate(w / 2, 400);
+    ctx.rotate(-30 * Math.PI / 180);
+    ctx.font = 'italic 12px "Courier New", "Lucida Console", monospace';
+    ctx.fillStyle = 'rgba(0, 80, 180, 0.14)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(`محمي — ${watermarkText}`, 0, 0);
     ctx.restore();
 
     return canvas.toDataURL('image/png');
@@ -80,7 +93,7 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
         MozUserSelect: 'none',
         backgroundImage: `url(${tileUrl})`,
         backgroundRepeat: 'repeat',
-        backgroundSize: '700px 420px',
+        backgroundSize: '800px 500px',
         width: '100%',
         height: '100%',
         minHeight: '100%',

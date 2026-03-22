@@ -98,53 +98,62 @@ Deno.serve(async (req) => {
     // Embed watermark into PDF
     const pdfBytes = await fileData.arrayBuffer();
     const pdfDoc = await PDFDocument.load(pdfBytes);
-    const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
+    const font = await pdfDoc.embedFont(StandardFonts.Courier);
+    const fontBold = await pdfDoc.embedFont(StandardFonts.CourierBold);
 
     const userName = profile?.full_name || user.email || "User";
     const orgName = org?.name || "";
     const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
-    const watermarkText = [userName, orgName, timestamp].filter(Boolean).join(" - ");
+    const watermarkLine1 = `[PROTECTED] ${userName} - ${orgName} - ${timestamp}`;
 
     const legalLines = [
-      "Unauthorized use prohibited without written consent",
-      "Distribution or printing without permission is forbidden",
-      "iRecycle disclaims liability for any illegal use",
+      "! Unauthorized use prohibited without written consent",
+      "! Distribution or printing without permission is forbidden", 
+      "! iRecycle disclaims liability for any illegal use of this document",
     ];
 
     const pages = pdfDoc.getPages();
     for (const page of pages) {
       const { width, height } = page.getSize();
-      const fontSize = 10;
-      const legalFontSize = 8;
 
-      // Tile user watermark diagonally
-      const stepX = 350;
-      const stepY = 120;
+      const stepX = 400;
+      const stepY = 150;
 
       for (let y = -height; y < height * 2; y += stepY) {
         for (let x = -width; x < width * 2; x += stepX) {
-          // User info line
-          page.drawText(watermarkText, {
+          // User info (blue-tinted, bold courier)
+          page.drawText(watermarkLine1, {
             x,
             y,
-            size: fontSize,
-            font,
-            color: rgb(0.7, 0.7, 0.7),
-            opacity: 0.15,
-            rotate: degrees(-35),
+            size: 10,
+            font: fontBold,
+            color: rgb(0.3, 0.4, 0.7),
+            opacity: 0.18,
+            rotate: degrees(-30),
           });
 
-          // Legal lines below
+          // Legal lines (red-tinted, courier)
           legalLines.forEach((line, i) => {
             page.drawText(line, {
-              x: x + 10,
-              y: y - 16 - i * 12,
-              size: legalFontSize,
+              x: x + 5,
+              y: y - 15 - i * 11,
+              size: 7,
               font,
-              color: rgb(0.8, 0.3, 0.3),
-              opacity: 0.1,
-              rotate: degrees(-35),
+              color: rgb(0.7, 0.2, 0.2),
+              opacity: 0.13,
+              rotate: degrees(-30),
             });
+          });
+
+          // Repeated user marker offset
+          page.drawText(`-- Protected: ${userName} --`, {
+            x: x + 20,
+            y: y - 60,
+            size: 8,
+            font,
+            color: rgb(0.3, 0.4, 0.7),
+            opacity: 0.12,
+            rotate: degrees(-30),
           });
         }
       }
