@@ -30,7 +30,7 @@ import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Cpu, Handshake, MapPin, Shield, DollarSign, Navigation, Store, Wrench, AlertTriangle, ShieldAlert, Link2, Building2, Leaf, Wifi, HardHat, FileCheck, FileText, ClipboardList, Truck, Route, CheckCircle2, Users, Package, Clock } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf, Truck, Route, CheckCircle2, Users, Package, Clock, Building2 } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
