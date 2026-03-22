@@ -10,6 +10,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { ViewModeProvider } from "@/contexts/ViewModeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { shouldEnablePWA } from "@/lib/pwaRuntime";
 
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
@@ -102,8 +103,8 @@ const Providers = memo(() => (
                   <OfflineBanner />
                   {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
-                  <InstallPWA />
-                  <PWAUpdatePrompt />
+                  {shouldEnablePWA() ? <InstallPWA /> : null}
+                  {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
                   <ProductionReadiness />
                 </Suspense>
               </AuthProvider>
