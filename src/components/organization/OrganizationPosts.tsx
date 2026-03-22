@@ -338,7 +338,7 @@ const OrganizationPosts = ({
     return (
       <div className="mt-3 rounded-lg overflow-hidden">
         <img 
-          src={post.media_urls[0]} 
+          src={fixStorageUrl(post.media_urls[0])} 
           alt="" 
           className="w-full max-h-[500px] object-cover"
         />
