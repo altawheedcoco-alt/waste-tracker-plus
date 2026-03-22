@@ -26,6 +26,8 @@ import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 import DriverLinkedOrganizations from '@/components/driver/DriverLinkedOrganizations';
 import DriverCredentialsEditor from '@/components/driver/DriverCredentialsEditor';
+import DriverTypeBadge from '@/components/drivers/DriverTypeBadge';
+import type { DriverType } from '@/types/driver-types';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
@@ -66,6 +68,9 @@ interface DriverInfo {
   vehicle_type: string | null;
   vehicle_plate: string | null;
   is_available: boolean;
+  driver_type: DriverType;
+  rating: number;
+  total_trips: number;
   organization: {
     name: string;
     phone: string;
@@ -164,9 +169,9 @@ const DriverDashboard = () => {
     try {
       const { data: driver } = await supabase
         .from('drivers')
-        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, organization:organizations(name, phone)`)
+        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, organization:organizations(name, phone)`)
         .eq('profile_id', profile?.id)
-        .single();
+        .maybeSingle();
 
       if (driver) {
         setDriverInfo(driver as unknown as DriverInfo);
@@ -247,9 +252,12 @@ const DriverDashboard = () => {
             <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${driverInfo?.is_available ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
           </div>
           <div>
-            <span className="text-xs font-medium">
-              {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-medium">
+                {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
+              </span>
+              {driverInfo && <DriverTypeBadge type={driverInfo.driver_type || 'company'} size="sm" />}
+            </div>
             {driverInfo?.vehicle_plate && (
               <p className="text-[10px] text-muted-foreground">{driverInfo.vehicle_plate}</p>
             )}

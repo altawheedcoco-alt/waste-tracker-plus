@@ -42,6 +42,9 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
+import DriverTypeBadge from '@/components/drivers/DriverTypeBadge';
+import type { DriverType } from '@/types/driver-types';
+
 interface Driver {
   id: string;
   license_number: string;
@@ -50,6 +53,9 @@ interface Driver {
   license_expiry: string | null;
   is_available: boolean;
   created_at: string;
+  driver_type: DriverType;
+  rating: number;
+  total_trips: number;
   profile: {
     id: string;
     full_name: string;
@@ -106,6 +112,9 @@ const TransporterDrivers = () => {
           license_expiry,
           is_available,
           created_at,
+          driver_type,
+          rating,
+          total_trips,
           profile:profiles(id, full_name, email, phone, user_id)
         `)
         .eq('organization_id', organization?.id)
@@ -641,16 +650,24 @@ const TransporterDrivers = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 p-3 sm:p-6 pt-0 sm:pt-0">
-                  <div className="flex items-center justify-between">
-                    <Badge variant={driver.is_available ? 'default' : 'secondary'}>
-                      {driver.is_available ? 'متاح' : 'غير متاح'}
-                    </Badge>
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={driver.is_available ? 'default' : 'secondary'}>
+                        {driver.is_available ? 'متاح' : 'غير متاح'}
+                      </Badge>
+                      <DriverTypeBadge type={driver.driver_type || 'company'} />
+                    </div>
                     {driver.activeShipments > 0 && (
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Package className="w-3 h-3" />
                         {driver.activeShipments} شحنات نشطة
                       </Badge>
                     )}
+                  </div>
+                  {/* Rating & Trips */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>⭐ {(driver.rating || 5).toFixed(1)}</span>
+                    <span>🚛 {driver.total_trips || 0} رحلة</span>
                   </div>
 
                   <div className="space-y-2 text-sm">
