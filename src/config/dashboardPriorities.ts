@@ -203,9 +203,9 @@ export const PRIORITY_PROFILES: Record<string, OrgPriorityProfile> = {
     ],
   },
 
-  // ─── السائق (Driver) ───
+  // ─── السائق (Driver) — كيان مستقل وليس جهة ───
   driver: {
-    orgType: 'driver',
+    orgType: 'driver', // ملاحظة: السائق ليس جهة، لكنه يستخدم نفس البنية للأولويات
     labelAr: 'السائق',
     priorities: [
       { widgetId: 'kpi_cards', baseWeight: 100 },
