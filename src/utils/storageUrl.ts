@@ -102,3 +102,28 @@ export const refreshStorageUrl = async (url: string): Promise<string | null> => 
  * مسح كاش الروابط
  */
 export const clearUrlCache = () => urlCache.clear();
+
+/**
+ * إصلاح روابط التخزين القديمة التي تشير لمشروع Supabase سابق
+ * يستبدل الدومين القديم بالدومين الحالي
+ */
+const CURRENT_SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || '';
+const OLD_SUPABASE_PATTERNS = [
+  'jejwizkssmqzxwseqsre.supabase.co',
+  // أضف أي دومينات قديمة أخرى هنا
+];
+
+export const fixStorageUrl = (url: string): string => {
+  if (!url) return url;
+  try {
+    const currentHost = new URL(CURRENT_SUPABASE_URL).host;
+    for (const oldPattern of OLD_SUPABASE_PATTERNS) {
+      if (url.includes(oldPattern)) {
+        return url.replace(oldPattern, currentHost);
+      }
+    }
+  } catch {
+    // ignore
+  }
+  return url;
+};
