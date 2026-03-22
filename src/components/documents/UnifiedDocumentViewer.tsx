@@ -7,6 +7,8 @@ import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import DocumentWatermark from '@/components/documents/DocumentWatermark';
+import DocumentPinDialog from '@/components/documents/DocumentPinDialog';
+import { useDocumentProtection, type DocumentProtection } from '@/hooks/useDocumentProtection';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
