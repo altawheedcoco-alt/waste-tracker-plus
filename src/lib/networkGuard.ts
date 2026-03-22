@@ -8,7 +8,7 @@ export class RequestTimeoutError extends Error {
 export const withTimeout = async <T>(
   operation: string,
   request: () => Promise<T>,
-  timeoutMs: number = 5000
+  timeoutMs: number = 15000
 ): Promise<T> => {
   const timeoutPromise = new Promise<never>((_, reject) => {
     setTimeout(() => reject(new RequestTimeoutError(operation, timeoutMs)), timeoutMs);
