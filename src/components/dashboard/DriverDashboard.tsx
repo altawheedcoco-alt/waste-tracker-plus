@@ -660,7 +660,6 @@ const DriverDashboard = () => {
             </Suspense>
           </TabsContent>
 
-          </TabsContent>
         </Tabs>
           );
         })()}
