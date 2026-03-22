@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { fixStorageUrl } from '@/utils/storageUrl';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -285,16 +286,20 @@ const OrganizationPosts = ({
     if (!post.media_urls || post.media_urls.length === 0) return null;
 
     if (post.post_type === 'video') {
+      const videoUrl = fixStorageUrl(post.media_urls[0]);
       return (
         <div className="mt-3 rounded-lg overflow-hidden bg-black">
           <video 
             ref={(el) => {
               if (el) videoRefs.current.set(post.id, el);
             }}
-            src={post.media_urls[0]} 
+            src={videoUrl} 
             controls 
+            playsInline
+            preload="metadata"
             className="w-full max-h-[500px] object-contain"
             onPlay={(e) => handleVideoPlay(post.id, e.currentTarget)}
+            onError={(e) => console.error('Video load error:', videoUrl, e)}
           />
         </div>
       );
@@ -315,9 +320,9 @@ const OrganizationPosts = ({
               }`}
             >
               {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
-                <video src={url} className="w-full h-48 object-cover" />
+                <video src={fixStorageUrl(url)} className="w-full h-48 object-cover" playsInline preload="metadata" />
               ) : (
-                <img src={url} alt="" className="w-full h-48 object-cover" />
+                <img src={fixStorageUrl(url)} alt="" className="w-full h-48 object-cover" />
               )}
               {index === 3 && post.media_urls.length > 4 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -333,7 +338,7 @@ const OrganizationPosts = ({
     return (
       <div className="mt-3 rounded-lg overflow-hidden">
         <img 
-          src={post.media_urls[0]} 
+          src={fixStorageUrl(post.media_urls[0])} 
           alt="" 
           className="w-full max-h-[500px] object-cover"
         />
