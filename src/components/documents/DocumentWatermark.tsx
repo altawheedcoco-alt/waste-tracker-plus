@@ -39,7 +39,7 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
     ctx.translate(w / 2, h / 2);
     ctx.rotate(-35 * Math.PI / 180);
     ctx.font = 'bold 13px system-ui, Arial, sans-serif';
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(watermarkText, 0, 0);
