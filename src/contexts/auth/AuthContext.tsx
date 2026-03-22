@@ -372,8 +372,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Only re-fetch on actual auth changes (sign in, token refresh, etc.)
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          // Only re-fetch on actual sign-in, skip TOKEN_REFRESHED to avoid conflicts
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
             setTimeout(() => {
               if (mounted) {
                 fetchUserData(session.user.id);
