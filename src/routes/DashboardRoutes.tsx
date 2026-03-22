@@ -491,7 +491,9 @@ export const dashboardRoutes = (
     <Route path="/dashboard/ai-extracted-data" element={<AIExtractedDataPage />} />
     <Route path="/dashboard/driver-onboarding" element={<IndependentDriverOnboarding />} />
     <Route path="/dashboard/driver-contracts" element={<DriverOffers />} />
-    <Route path="/dashboard/shipment-market" element={<DriverOffers />} />
+    <Route path="/dashboard/shipment-market" element={<ShipmentMarket />} />
+    <Route path="/dashboard/driver-wallet" element={<DriverWallet />} />
+    <Route path="/dashboard/driver-analytics" element={<DriverAnalytics />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
