@@ -406,6 +406,7 @@ const TransporterDrivers = () => {
           </DialogContent>
         </Dialog>
         </div>
+      </div>
 
       {/* Credentials Dialog - shown after successful creation */}
       <Dialog open={!!credentialsDialog?.open} onOpenChange={(open) => !open && setCredentialsDialog(null)}>
