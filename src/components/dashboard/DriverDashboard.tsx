@@ -629,7 +629,7 @@ const DriverDashboard = () => {
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: العروض الواردة (مستقل فقط) */}
+          {/* TAB: العروض الواردة (مستقل + مؤجر حر) */}
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="offers" className="mt-4">
             <Suspense fallback={<TabFallback />}>

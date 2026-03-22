@@ -57,9 +57,11 @@ const HiredContractsPanel = ({ driverId }: HiredContractsPanelProps) => {
       <Card className="border-dashed">
         <CardContent className="p-8 text-center">
           <Briefcase className="h-12 w-12 mx-auto mb-3 text-muted-foreground/30" />
-          <h3 className="font-semibold text-sm mb-1">لا توجد عقود تأجير</h3>
+          <h3 className="font-semibold text-sm mb-1">لا توجد عقود حالياً</h3>
           <p className="text-xs text-muted-foreground">
-            ستظهر هنا عقود التأجير عندما يتم استئجارك من قبل جهات النقل
+            العقود اختيارية — يمكنك العمل كسائق مؤجر حر بدون عقود رسمية.
+            <br />
+            ستظهر هنا العقود إن تم الاتفاق مع جهة نقل على عقد محدد.
           </p>
         </CardContent>
       </Card>

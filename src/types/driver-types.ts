@@ -89,29 +89,37 @@ export interface HireContract {
 }
 
 /** تسميات الأنواع بالعربية */
-export const DRIVER_TYPE_LABELS: Record<DriverType, { ar: string; en: string; icon: string; color: string }> = {
+export const DRIVER_TYPE_LABELS: Record<DriverType, { ar: string; en: string; icon: string; color: string; description: string }> = {
   company: {
     ar: 'سائق تابع',
     en: 'Company Driver',
     icon: 'Building2',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+    description: 'سائق مرتبط بجهة نقل محددة',
   },
   hired: {
-    ar: 'سائق مؤجر',
-    en: 'Hired Driver',
+    ar: 'سائق حر مؤجر',
+    en: 'Freelance Hired Driver',
     icon: 'Briefcase',
     color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+    description: 'سائق حر يقبل مهام من جهات مختلفة — العقود اختيارية',
   },
   independent: {
     ar: 'سائق مستقل',
     en: 'Independent Driver',
     icon: 'UserCheck',
     color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+    description: 'سائق حر يتلقى شحنات عبر التوزيع الذكي',
   },
 };
 
-/** هل السائق حر (مؤجر أو مستقل)؟ */
+/** هل السائق حر (مؤجر أو مستقل)؟ — كلاهما لا يشترط عقد */
 export function isFreelanceDriver(type: DriverType): boolean {
+  return type === 'hired' || type === 'independent';
+}
+
+/** هل السائق يستقبل عروض؟ (المؤجر الحر + المستقل) */
+export function canReceiveOffers(type: DriverType): boolean {
   return type === 'hired' || type === 'independent';
 }
 
