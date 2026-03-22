@@ -51,7 +51,6 @@ const DocumentPinDialog = ({ open, onOpenChange, documentId, actionType, onSucce
     setError('');
 
     try {
-      // Fetch the document's PIN
       const { data, error: fetchError } = await supabase
         .from('organization_documents')
         .select('protection_pin, organization_id')
@@ -60,21 +59,26 @@ const DocumentPinDialog = ({ open, onOpenChange, documentId, actionType, onSucce
 
       if (fetchError) throw fetchError;
 
-      if ((data as any)?.protection_pin === pin) {
+      const docPin = (data as any)?.protection_pin;
+      const docOrgId = (data as any)?.organization_id || organizationId;
+
+      if (docPin === pin) {
         // Log successful access
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
           await supabase.from('document_access_log').insert({
             document_id: documentId,
             user_id: user.id,
-            organization_id: organizationId || (data as any)?.organization_id,
-            action_type: actionType,
-          } as any);
+            action_type: `pin_verified_${actionType}`,
+            success: true,
+            user_agent: navigator.userAgent?.slice(0, 200),
+          } as any).catch(() => {});
         }
 
         toast.success(`تم التحقق — يمكنك الآن ${ACTION_LABELS[actionType]} المستند`);
         onSuccess();
         onOpenChange(false);
+        setAttempts(0);
       } else {
         const newAttempts = attempts + 1;
         setAttempts(newAttempts);
@@ -85,13 +89,14 @@ const DocumentPinDialog = ({ open, onOpenChange, documentId, actionType, onSucce
           await supabase.from('document_access_log').insert({
             document_id: documentId,
             user_id: user.id,
-            organization_id: organizationId || (data as any)?.organization_id,
             action_type: 'pin_attempt_failed',
-          } as any);
+            success: false,
+            user_agent: navigator.userAgent?.slice(0, 200),
+          } as any).catch(() => {});
         }
 
         if (newAttempts >= 5) {
-          setError('تم تجاوز الحد الأقصى للمحاولات. يُرجى التواصل مع مدير الجهة.');
+          setError('تم تجاوز الحد الأقصى للمحاولات (5). يُرجى التواصل مع مدير الجهة.');
           toast.error('تم حظر المحاولات — تواصل مع المدير');
         } else {
           setError(`رمز خاطئ. المحاولة ${newAttempts}/5`);
