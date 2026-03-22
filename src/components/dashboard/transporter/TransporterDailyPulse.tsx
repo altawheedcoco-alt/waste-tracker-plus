@@ -1,16 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { Activity, ArrowUpRight, ArrowDownRight, Minus, Sparkles, Target, Zap, BarChart3 } from 'lucide-react';
+import { useEffect } from 'react';
 
 const TransporterDailyPulse = () => {
   const { organization } = useAuth();
+  const queryClient = useQueryClient();
+  const queryKey = ['transporter-daily-pulse', organization?.id];
 
   const { data, isLoading } = useQuery({
-    queryKey: ['transporter-daily-pulse', organization?.id],
+    queryKey,
     queryFn: async () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -31,7 +34,6 @@ const TransporterDailyPulse = () => {
       const weekQty = weekData.reduce((acc, s) => acc + (Number(s.quantity) || 0), 0);
       const avgQty = weekData.length > 0 ? Math.round(weekQty / 7) : 0;
 
-      // Calculate a "health score" 0-100
       const delivered = todayData.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
       const healthScore = todayData.length > 0 ? Math.round((delivered / todayData.length) * 100) : 100;
 
@@ -46,8 +48,20 @@ const TransporterDailyPulse = () => {
       };
     },
     enabled: !!organization?.id,
-    refetchInterval: 60000,
+    refetchInterval: 30000,
   });
+
+  // Realtime: invalidate on shipment changes
+  useEffect(() => {
+    if (!organization?.id) return;
+    const channel = supabase
+      .channel('daily-pulse-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments' }, () => {
+        queryClient.invalidateQueries({ queryKey });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [organization?.id, queryClient]);
 
   if (isLoading || !data) return null;
 

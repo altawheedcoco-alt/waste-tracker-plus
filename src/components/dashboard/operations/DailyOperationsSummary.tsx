@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { CalendarDays, TrendingUp, TrendingDown, Package, Truck, CheckCircle2, Clock, ArrowUpRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import { useEffect } from 'react';
 
 interface DailyStats {
   todayShipments: number;
@@ -19,9 +20,11 @@ interface DailyStats {
 const DailyOperationsSummary = () => {
   const { organization } = useAuth();
   const orgType = organization?.organization_type;
+  const queryClient = useQueryClient();
+  const queryKey = ['daily-operations', organization?.id];
 
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['daily-operations', organization?.id],
+    queryKey,
     queryFn: async (): Promise<DailyStats> => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
@@ -60,8 +63,20 @@ const DailyOperationsSummary = () => {
       };
     },
     enabled: !!organization?.id,
-    refetchInterval: 60000,
+    refetchInterval: 30000,
   });
+
+  // Realtime: invalidate on shipment changes
+  useEffect(() => {
+    if (!organization?.id) return;
+    const channel = supabase
+      .channel('daily-ops-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'shipments' }, () => {
+        queryClient.invalidateQueries({ queryKey });
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [organization?.id, queryClient]);
 
   if (isLoading) {
     return (
