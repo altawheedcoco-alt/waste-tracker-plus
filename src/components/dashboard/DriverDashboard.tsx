@@ -340,16 +340,20 @@ const DriverDashboard = () => {
         driverName={profile?.full_name || 'السائق'} 
       />
 
-      {/* 5 Core Tabs */}
+      {/* Dynamic Tabs based on driver_type */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Tabs defaultValue="tasks" className="w-full" dir="rtl">
+        {(() => {
+          const currentTabs = getTabsForType(driverInfo?.driver_type);
+          const defaultTab = currentTabs[0]?.value || 'tasks';
+          return (
+        <Tabs defaultValue={defaultTab} className="w-full" dir="rtl">
           <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
             <TabsList className="w-full justify-center bg-transparent gap-0.5 sm:gap-1 h-auto p-0">
-              {tabItems.map((tab) => (
+              {currentTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
