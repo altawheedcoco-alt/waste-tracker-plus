@@ -12,7 +12,7 @@ import {
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
-  Briefcase, Zap, Star, BarChart3,
+  Briefcase, Zap, Star, BarChart3, ShoppingCart, CreditCard,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +58,8 @@ const IndependentOffersPanel = lazy(() => import('@/components/driver/Independen
 const HiredContractsPanel = lazy(() => import('@/components/driver/HiredContractsPanel'));
 const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicProfile'));
 const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyticsPanel'));
+const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
+const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -117,10 +119,11 @@ const companyTabs = [
 const hiredTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
-  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
@@ -128,10 +131,11 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'offers', label: 'العروض', icon: Zap },
+  { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
-  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
@@ -658,6 +662,23 @@ const DriverDashboard = () => {
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: سوق الشحنات (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="marketplace" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <ShipmentMarketplace />
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: المحفظة المالية (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="wallet" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverFinancialWallet driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
           {/* TAB: الملف المهني (مؤجر + مستقل) */}
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="profile" className="mt-4">
