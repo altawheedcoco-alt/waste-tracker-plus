@@ -12,7 +12,7 @@ import {
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
-  Briefcase, Zap, Star, BarChart3,
+  Briefcase, Zap, Star, BarChart3, ShoppingCart, CreditCard,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
