@@ -59,7 +59,7 @@ export function useDriverAnalytics(driverId: string | undefined) {
         const entry = monthlyMap.get(key);
         if (entry) {
           entry.trips++;
-          entry.earnings += (s.actual_weight || 0) * (s.price_per_ton || 0);
+          entry.earnings += (s.actual_weight || 0) * (s.price_per_unit || 0);
         }
       });
 
@@ -102,7 +102,7 @@ export function useDriverAnalytics(driverId: string | undefined) {
         : 0;
 
       const totalEarnings = completed.reduce(
-        (sum, s) => sum + (s.actual_weight || 0) * (s.price_per_ton || 0), 0
+        (sum, s) => sum + (s.actual_weight || 0) * (s.price_per_unit || 0), 0
       );
 
       return {
