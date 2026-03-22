@@ -53,6 +53,9 @@ const DriverAcademy = lazy(() => import('@/components/driver/DriverAcademy'));
 const SmartRouteOptimizer = lazy(() => import('@/components/driver/SmartRouteOptimizer'));
 const DriverOfferPopup = lazy(() => import('@/components/driver/DriverOfferPopup'));
 const EnhancedDestinationPicker = lazy(() => import('@/components/driver/DestinationPicker'));
+const IndependentOffersPanel = lazy(() => import('@/components/driver/IndependentOffersPanel'));
+const HiredContractsPanel = lazy(() => import('@/components/driver/HiredContractsPanel'));
+const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicProfile'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
