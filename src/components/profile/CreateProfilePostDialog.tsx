@@ -287,6 +287,8 @@ export default function CreateProfilePostDialog({
                     <video
                       src={previewUrl}
                       controls
+                      playsInline
+                      preload="metadata"
                       className="max-h-[200px] w-full"
                     />
                   )}

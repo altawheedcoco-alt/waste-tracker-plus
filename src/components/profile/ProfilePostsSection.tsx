@@ -362,10 +362,12 @@ export default function ProfilePostsSection({
                 )}
 
                 {post.content_type === 'video' && post.media_url && (
-                  <div className="mt-2 rounded-lg overflow-hidden">
+                  <div className="mt-2 rounded-lg overflow-hidden bg-black">
                     <video
                       src={post.media_url}
                       controls
+                      playsInline
+                      preload="metadata"
                       className="max-w-full max-h-[400px] mx-auto"
                     />
                   </div>
