@@ -2,7 +2,7 @@ import { memo } from "react";
 import { motion } from "framer-motion";
 import {
   Code2, Cloud, Cpu, Lock, Fingerprint, Satellite, Binary,
-  MonitorSmartphone, Layers, GitBranch, Server, Wifi
+  MonitorSmartphone, Layers, GitBranch, Server, Wifi, Zap, Route
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
