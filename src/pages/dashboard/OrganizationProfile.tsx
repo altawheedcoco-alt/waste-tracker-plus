@@ -87,7 +87,8 @@ const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocum
         {expanded ? 'إخفاء المعاينة' : 'معاينة المستند'}
       </Button>
       {expanded && previewUrl && (
-        <div className="border-t">
+        <div className="border-t relative">
+          <DocumentWatermark enabled={(doc as any)?.watermark_enabled} />
           {isPdf ? (
             <GoogleDocsPdfViewer url={previewUrl} title={doc.file_name} height="450px" />
           ) : (
