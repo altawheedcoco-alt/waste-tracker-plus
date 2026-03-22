@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
   Building2, User, FileText, Upload, Trash2, Download, Eye,
-  Phone, Mail, MapPin, Shield, Users, Loader2, Save,
+  Phone, Mail, MapPin, Shield, Users, Loader2, Save, Printer,
   Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
