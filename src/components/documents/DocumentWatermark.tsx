@@ -14,10 +14,6 @@ interface DocumentWatermarkProps {
 
 const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermarkProps) => {
   const { user, profile, organization } = useAuth();
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [bgImage, setBgImage] = useMemo(() => {
-    return [null as string | null, () => {}];
-  }, []);
 
   const watermarkText = useMemo(() => {
     const name = userName || profile?.full_name || user?.email || 'مستخدم';
