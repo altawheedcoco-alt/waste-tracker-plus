@@ -57,6 +57,7 @@ const EnhancedDestinationPicker = lazy(() => import('@/components/driver/Destina
 const IndependentOffersPanel = lazy(() => import('@/components/driver/IndependentOffersPanel'));
 const HiredContractsPanel = lazy(() => import('@/components/driver/HiredContractsPanel'));
 const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicProfile'));
+const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyticsPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
