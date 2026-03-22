@@ -378,15 +378,67 @@ const OrganizationProfile = () => {
 
   const handleDownloadDocument = async (doc: OrganizationDocument) => {
     try {
-      const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
-      if (error) throw error;
-      const url = URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url; a.download = doc.file_name; a.click();
-      URL.revokeObjectURL(url);
+      const isWatermarked = (doc as any)?.watermark_enabled;
+      const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
+
+      if (isWatermarked && isPdf) {
+        // Use edge function to get watermarked PDF
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/watermark-pdf`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ documentId: doc.id }),
+        });
+        if (!res.ok) throw new Error('Watermark failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = doc.file_name; a.click();
+        URL.revokeObjectURL(url);
+      } else {
+        const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
+        if (error) throw error;
+        const url = URL.createObjectURL(data);
+        const a = document.createElement('a');
+        a.href = url; a.download = doc.file_name; a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error('Error downloading document:', error);
       toast.error(t('orgProfile.fileDownloadError'));
+    }
+  };
+
+  const handlePrintDocument = async (doc: OrganizationDocument) => {
+    try {
+      const isWatermarked = (doc as any)?.watermark_enabled;
+      const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
+
+      if (isWatermarked && isPdf) {
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/watermark-pdf`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ documentId: doc.id }),
+        });
+        if (!res.ok) throw new Error('Watermark failed');
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        window.open(url, '_blank');
+      } else {
+        const { data, error } = await supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600);
+        if (error) throw error;
+        window.open(data.signedUrl, '_blank');
+      }
+    } catch (error) {
+      console.error('Error printing document:', error);
+      toast.error('فشل في فتح المستند للطباعة');
     }
   };
 
@@ -770,11 +822,7 @@ const OrganizationProfile = () => {
                                   />
                                 )}
                                 <Button variant="ghost" size="icon" onClick={() => {
-                                  checkAccess(doc.id, 'print', () => {
-                                    supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600).then(({ data }) => {
-                                      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-                                    });
-                                  }, organization?.id);
+                                  checkAccess(doc.id, 'print', () => handlePrintDocument(doc), organization?.id);
                                 }}><Printer className="w-4 h-4" /></Button>
                                 <Button variant="ghost" size="icon" onClick={() => {
                                   checkAccess(doc.id, 'download', () => handleDownloadDocument(doc), organization?.id);
