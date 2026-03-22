@@ -2,7 +2,7 @@
  * Document Watermark Overlay — طبقة العلامة المائية المتقدمة
  * تغطي كامل صفحات المستند بغض النظر عن الطول
  */
-import { memo, useMemo, useRef, useEffect } from 'react';
+import { memo, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
