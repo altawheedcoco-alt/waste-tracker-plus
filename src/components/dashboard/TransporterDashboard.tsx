@@ -34,6 +34,7 @@ import { LayoutDashboard, Brain, BarChart3, CalendarDays, Handshake, MapPin, Shi
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
+import TransporterSectionNav from './transporter/TransporterSectionNav';
 
 // ★ Lazy-load ALL heavy secondary components
 const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
