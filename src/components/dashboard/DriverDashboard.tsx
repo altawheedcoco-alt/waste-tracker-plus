@@ -121,6 +121,7 @@ const hiredTabs = [
   { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
@@ -131,6 +132,7 @@ const independentTabs = [
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
