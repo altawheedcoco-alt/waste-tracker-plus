@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
+import DocumentProtectionSettings from '@/components/documents/DocumentProtectionSettings';
+import DocumentPinDialog from '@/components/documents/DocumentPinDialog';
+import DocumentWatermark from '@/components/documents/DocumentWatermark';
+import { useDocumentProtection } from '@/hooks/useDocumentProtection';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import ProfileHeader from '@/components/organization/ProfileHeader';
