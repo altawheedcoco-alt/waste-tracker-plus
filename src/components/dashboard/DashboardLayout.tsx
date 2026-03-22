@@ -138,6 +138,8 @@ import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereig
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 import ViewModeToolbar from './ViewModeToolbar';
+import { useDriverType } from '@/hooks/useDriverType';
+import { getDriverMenuItems } from '@/hooks/useDriverMenu';
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
 
