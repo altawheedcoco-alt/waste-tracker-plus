@@ -12319,6 +12319,76 @@ export type Database = {
           },
         ]
       }
+      driver_hire_contracts: {
+        Row: {
+          agreed_rate: number
+          contract_type: string
+          created_at: string | null
+          driver_id: string
+          end_date: string | null
+          hiring_org_id: string
+          id: string
+          start_date: string
+          status: string
+          terms: string | null
+          total_earnings: number | null
+          total_trips_completed: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          agreed_rate: number
+          contract_type?: string
+          created_at?: string | null
+          driver_id: string
+          end_date?: string | null
+          hiring_org_id: string
+          id?: string
+          start_date?: string
+          status?: string
+          terms?: string | null
+          total_earnings?: number | null
+          total_trips_completed?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          agreed_rate?: number
+          contract_type?: string
+          created_at?: string | null
+          driver_id?: string
+          end_date?: string | null
+          hiring_org_id?: string
+          id?: string
+          start_date?: string
+          status?: string
+          terms?: string | null
+          total_earnings?: number | null
+          total_trips_completed?: number | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_hire_contracts_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_hire_contracts_hiring_org_id_fkey"
+            columns: ["hiring_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_hire_contracts_hiring_org_id_fkey"
+            columns: ["hiring_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_location_logs: {
         Row: {
           accuracy: number | null
@@ -12359,6 +12429,89 @@ export type Database = {
             columns: ["driver_id"]
             isOneToOne: false
             referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_mission_offers: {
+        Row: {
+          created_at: string | null
+          distance_km: number | null
+          driver_id: string
+          expires_at: string
+          final_price: number | null
+          id: string
+          notes: string | null
+          offer_type: string
+          offered_by_org_id: string | null
+          offered_price: number | null
+          rejection_reason: string | null
+          response_at: string | null
+          shipment_id: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          distance_km?: number | null
+          driver_id: string
+          expires_at?: string
+          final_price?: number | null
+          id?: string
+          notes?: string | null
+          offer_type?: string
+          offered_by_org_id?: string | null
+          offered_price?: number | null
+          rejection_reason?: string | null
+          response_at?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          distance_km?: number | null
+          driver_id?: string
+          expires_at?: string
+          final_price?: number | null
+          id?: string
+          notes?: string | null
+          offer_type?: string
+          offered_by_org_id?: string | null
+          offered_price?: number | null
+          rejection_reason?: string | null
+          response_at?: string | null
+          shipment_id?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_mission_offers_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_mission_offers_offered_by_org_id_fkey"
+            columns: ["offered_by_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_mission_offers_offered_by_org_id_fkey"
+            columns: ["offered_by_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_mission_offers_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
             referencedColumns: ["id"]
           },
         ]
@@ -13180,40 +13333,73 @@ export type Database = {
       }
       drivers: {
         Row: {
+          acceptance_rate: number | null
+          bio: string | null
           created_at: string | null
           declaration_visible_to_generator: boolean | null
+          driver_type: Database["public"]["Enums"]["driver_type"]
+          hourly_rate: number | null
           id: string
           is_available: boolean | null
+          is_verified: boolean | null
           license_expiry: string | null
           license_number: string
           organization_id: string | null
+          per_trip_rate: number | null
+          preferred_waste_types: string[] | null
           profile_id: string
+          rating: number | null
+          rejection_count: number | null
+          service_area_km: number | null
+          total_trips: number | null
           updated_at: string | null
           vehicle_plate: string | null
           vehicle_type: string | null
         }
         Insert: {
+          acceptance_rate?: number | null
+          bio?: string | null
           created_at?: string | null
           declaration_visible_to_generator?: boolean | null
+          driver_type?: Database["public"]["Enums"]["driver_type"]
+          hourly_rate?: number | null
           id?: string
           is_available?: boolean | null
+          is_verified?: boolean | null
           license_expiry?: string | null
           license_number: string
           organization_id?: string | null
+          per_trip_rate?: number | null
+          preferred_waste_types?: string[] | null
           profile_id: string
+          rating?: number | null
+          rejection_count?: number | null
+          service_area_km?: number | null
+          total_trips?: number | null
           updated_at?: string | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
         }
         Update: {
+          acceptance_rate?: number | null
+          bio?: string | null
           created_at?: string | null
           declaration_visible_to_generator?: boolean | null
+          driver_type?: Database["public"]["Enums"]["driver_type"]
+          hourly_rate?: number | null
           id?: string
           is_available?: boolean | null
+          is_verified?: boolean | null
           license_expiry?: string | null
           license_number?: string
           organization_id?: string | null
+          per_trip_rate?: number | null
+          preferred_waste_types?: string[] | null
           profile_id?: string
+          rating?: number | null
+          rejection_count?: number | null
+          service_area_km?: number | null
+          total_trips?: number | null
           updated_at?: string | null
           vehicle_plate?: string | null
           vehicle_type?: string | null
@@ -43515,6 +43701,7 @@ export type Database = {
         | "failed"
         | "canceled"
       crisis_severity: "level_1" | "level_2" | "level_3" | "level_4"
+      driver_type: "company" | "hired" | "independent"
       employee_permission_type:
         | "create_deposits"
         | "view_deposits"
@@ -43761,6 +43948,7 @@ export const Constants = {
         "canceled",
       ],
       crisis_severity: ["level_1", "level_2", "level_3", "level_4"],
+      driver_type: ["company", "hired", "independent"],
       employee_permission_type: [
         "create_deposits",
         "view_deposits",
