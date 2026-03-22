@@ -1,10 +1,10 @@
-import { MapPin, FileBarChart, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, FileBarChart, Clock, CheckCircle2, Truck, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const Services = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
@@ -20,6 +20,26 @@ const Services = () => {
     {
       icon: Clock, title: t('services.scheduling'), description: t('services.schedulingDesc'),
       features: [t('services.schedFeature1'), t('services.schedFeature2'), t('services.schedFeature3')],
+    },
+    {
+      icon: Truck,
+      title: language === 'ar' ? 'إدارة أسطول السائقين' : 'Driver Fleet Management',
+      description: language === 'ar' ? 'إدارة ثلاثة أنواع من السائقين (تابع/مؤجر/مستقل) مع تتبع الأداء والتقييم' : 'Manage three driver types with performance tracking & rating',
+      features: [
+        language === 'ar' ? 'سائق تابع + مؤجر + مستقل' : 'Company + Hired + Independent',
+        language === 'ar' ? 'تتبع GPS لحظي للمركبات' : 'Real-time vehicle GPS tracking',
+        language === 'ar' ? 'محفظة مالية لكل سائق' : 'Digital wallet per driver',
+      ],
+    },
+    {
+      icon: Zap,
+      title: language === 'ar' ? 'التوزيع الذكي' : 'Smart Dispatch',
+      description: language === 'ar' ? 'خوارزمية ذكية توزع الشحنات تلقائياً لأقرب سائق متاح ضمن نطاق الخدمة' : 'Smart algorithm auto-dispatches shipments to nearest available driver',
+      features: [
+        language === 'ar' ? 'توزيع تلقائي حسب القرب' : 'Auto-dispatch by proximity',
+        language === 'ar' ? 'ترتيب بالتقييم والقبول' : 'Ranked by rating & acceptance',
+        language === 'ar' ? 'إشعارات فورية للسائق' : 'Instant driver notifications',
+      ],
     },
   ];
 
@@ -39,7 +59,7 @@ const Services = () => {
           <h2 className="text-xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">{t('services.title')} <span className="text-gradient-eco">{t('services.titleHighlight')}</span> {t('services.titleSuffix')}</h2>
           <p className="text-xs sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">{t('services.desc')}</p>
         </motion.div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
           {services.map((service, i) => (
             <motion.div 
               key={service.title} 

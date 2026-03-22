@@ -156,8 +156,8 @@ const Header = memo(() => {
 
   return (
     <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/30 animate-fade-in">
-      {/* v3.0 Gradient top accent line — bolder */}
-      <div className="absolute top-0 left-0 right-0 h-[2px] sm:h-[2.5px] bg-gradient-to-r from-eco-ocean via-primary to-eco-emerald opacity-90" />
+      {/* v5.1 Gradient top accent line */}
+      <div className="absolute top-0 left-0 right-0 h-[2.5px] sm:h-[3px] bg-gradient-to-r from-eco-ocean via-primary to-amber-500 opacity-90" />
       
       <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
         <div className="w-full mx-auto px-3 sm:px-4 max-w-[1400px]">

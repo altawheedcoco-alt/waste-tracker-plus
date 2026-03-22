@@ -2,7 +2,7 @@ import { memo } from "react";
 import { motion } from "framer-motion";
 import {
   Code2, Cloud, Cpu, Lock, Fingerprint, Satellite, Binary,
-  MonitorSmartphone, Layers, GitBranch, Server, Wifi
+  MonitorSmartphone, Layers, GitBranch, Server, Wifi, Zap, Route
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
@@ -54,6 +54,22 @@ const techPillars = [
     descAr: "سجل مراجعة غير قابل للتعديل (Immutable Audit Trail) يوثق كل عملية بتسلسل تشفيري",
     descEn: "Immutable audit trail documenting every operation with cryptographic chaining",
     tags: ["Chain Hash", "Immutable", "Audit Trail"],
+  },
+  {
+    icon: Zap,
+    titleAr: "توزيع ذكي تلقائي",
+    titleEn: "Smart Dispatch Engine",
+    descAr: "خوارزمية توزيع تختار أقرب ٥ سائقين متاحين ضمن نطاق ١٠٠ كم — مرتبين بالتقييم والقبول",
+    descEn: "Algorithm selects nearest 5 available drivers within 100km — ranked by rating & acceptance",
+    tags: ["Algorithm", "Geo-Query", "Auto-Assign"],
+  },
+  {
+    icon: Route,
+    titleAr: "تحسين المسارات الجماعي",
+    titleEn: "Batch Route Optimization",
+    descAr: "تجميع شحنات متعددة في رحلة واحدة مع حساب المسار الأمثل — خفض التكاليف ٤٠٪",
+    descEn: "Bundle multiple shipments into one trip with optimal routing — 40% cost reduction",
+    tags: ["Multi-Stop", "Optimization", "Cost Save"],
   },
 ];
 

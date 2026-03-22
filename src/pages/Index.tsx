@@ -59,6 +59,13 @@ const SaaSTechSection = lazyRetry(() => import("@/components/landing/SaaSTechSec
 const VisitorCounter = lazyRetry(() => import("@/components/landing/VisitorCounter"));
 const C2BSubmissionForm = lazyRetry(() => import("@/components/c2b/C2BSubmissionForm"));
 
+// v5.1 — New showcase sections
+const DriverEcosystemShowcase = lazyRetry(() => import("@/components/landing/DriverEcosystemShowcase"));
+const MarketplacePreview = lazyRetry(() => import("@/components/landing/MarketplacePreview"));
+const WalletFinanceShowcase = lazyRetry(() => import("@/components/landing/WalletFinanceShowcase"));
+const RatingTrustSection = lazyRetry(() => import("@/components/landing/RatingTrustSection"));
+const RegulatorShowcase = lazyRetry(() => import("@/components/landing/RegulatorShowcase"));
+
 /** Renders children when the container scrolls into view — with proper placeholder height */
 const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -204,6 +211,31 @@ const Index = () => {
           {/* Platform Showcase - immediately after tech section */}
           <LazySection minH={600}>
             <PlatformShowcase />
+          </LazySection>
+
+          {/* v5.1 — Driver Ecosystem Showcase */}
+          <LazySection minH={500}>
+            <DriverEcosystemShowcase />
+          </LazySection>
+
+          {/* v5.1 — Marketplace & Auction */}
+          <LazySection minH={400}>
+            <MarketplacePreview />
+          </LazySection>
+
+          {/* v5.1 — Wallet & Finance */}
+          <LazySection minH={400}>
+            <WalletFinanceShowcase />
+          </LazySection>
+
+          {/* v5.1 — Rating & Trust */}
+          <LazySection minH={400}>
+            <RatingTrustSection />
+          </LazySection>
+
+          {/* v5.1 — Regulator Showcase */}
+          <LazySection minH={400}>
+            <RegulatorShowcase />
           </LazySection>
 
           {/* Custom blocks: top position */}

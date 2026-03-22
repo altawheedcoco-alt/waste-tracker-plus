@@ -118,13 +118,18 @@ const Footer = () => {
 
         {/* Bottom bar */}
         <div className="border-t border-background/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <p className="text-background/50 text-sm">© {new Date().getFullYear()} {t('footer.allRightsReserved')}</p>
+          <div className="flex items-center gap-3">
+            <p className="text-background/50 text-sm">© {new Date().getFullYear()} {t('footer.allRightsReserved')}</p>
+            <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-[10px] font-black tracking-wide">v5.1</span>
+          </div>
           <div className="flex gap-4 text-background/40 text-xs">
             <button onClick={() => handleNavigate('/terms')} className="hover:text-primary transition-colors">{t('footerExtra.terms')}</button>
             <span>·</span>
             <button onClick={() => handleNavigate('/privacy')} className="hover:text-primary transition-colors">{t('footerExtra.privacy')}</button>
             <span>·</span>
             <button onClick={() => handleNavigate('/policies')} className="hover:text-primary transition-colors">{language === 'ar' ? 'السياسات' : 'Policies'}</button>
+            <span>·</span>
+            <button onClick={() => handleNavigate('/journey')} className="hover:text-primary transition-colors">{language === 'ar' ? 'رحلة المنصة' : 'Journey'}</button>
             <span>·</span>
             <button onClick={() => handleNavigate('/help')} className="hover:text-primary transition-colors">{t('footerExtra.help')}</button>
           </div>
