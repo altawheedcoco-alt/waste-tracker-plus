@@ -1,6 +1,7 @@
 /**
- * لوحة تحليلات أداء السائق مع رسوم بيانية ورؤى ذكية
+ * لوحة تحليلات أداء السائق مع رسوم بيانية ورؤى ذكية + تحليل AI
  */
+import { lazy, Suspense } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
