@@ -12319,6 +12319,101 @@ export type Database = {
           },
         ]
       }
+      driver_financial_transactions: {
+        Row: {
+          amount: number
+          balance_after: number | null
+          created_at: string
+          description: string | null
+          driver_id: string
+          id: string
+          reference_id: string | null
+          shipment_id: string | null
+          transaction_type: string
+        }
+        Insert: {
+          amount: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string | null
+          driver_id: string
+          id?: string
+          reference_id?: string | null
+          shipment_id?: string | null
+          transaction_type?: string
+        }
+        Update: {
+          amount?: number
+          balance_after?: number | null
+          created_at?: string
+          description?: string | null
+          driver_id?: string
+          id?: string
+          reference_id?: string | null
+          shipment_id?: string | null
+          transaction_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_financial_transactions_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_financial_transactions_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_financial_wallet: {
+        Row: {
+          balance: number
+          created_at: string
+          currency: string
+          driver_id: string
+          id: string
+          pending_balance: number
+          total_earned: number
+          total_withdrawn: number
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          driver_id: string
+          id?: string
+          pending_balance?: number
+          total_earned?: number
+          total_withdrawn?: number
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          currency?: string
+          driver_id?: string
+          id?: string
+          pending_balance?: number
+          total_earned?: number
+          total_withdrawn?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_financial_wallet_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: true
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_hire_contracts: {
         Row: {
           agreed_rate: number
@@ -13064,6 +13159,57 @@ export type Database = {
           },
           {
             foreignKeyName: "driver_shipment_assignments_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      driver_shipment_bids: {
+        Row: {
+          bid_amount: number
+          created_at: string
+          driver_id: string
+          estimated_arrival_minutes: number | null
+          id: string
+          note: string | null
+          responded_at: string | null
+          shipment_id: string
+          status: string
+        }
+        Insert: {
+          bid_amount: number
+          created_at?: string
+          driver_id: string
+          estimated_arrival_minutes?: number | null
+          id?: string
+          note?: string | null
+          responded_at?: string | null
+          shipment_id: string
+          status?: string
+        }
+        Update: {
+          bid_amount?: number
+          created_at?: string
+          driver_id?: string
+          estimated_arrival_minutes?: number | null
+          id?: string
+          note?: string | null
+          responded_at?: string | null
+          shipment_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_shipment_bids_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_shipment_bids_shipment_id_fkey"
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
