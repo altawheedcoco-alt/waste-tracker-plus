@@ -4,7 +4,7 @@ import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
 
 const Services = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-80px' });
 
