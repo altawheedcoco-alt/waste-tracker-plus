@@ -13,7 +13,7 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
-  Building2, User, FileText, Upload, Trash2, Download,
+  Building2, User, FileText, Upload, Trash2, Download, Eye,
   Phone, Mail, MapPin, Shield, Users, Loader2, Save,
   Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
