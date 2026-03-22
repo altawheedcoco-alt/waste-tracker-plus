@@ -30,8 +30,9 @@ export interface LiveBoostCondition {
   boostAmount: number;
 }
 
-/** أولويات جهة واحدة */
+/** أولويات كيان واحد (جهة أو سائق أو مدير) */
 export interface OrgPriorityProfile {
+  /** نوع الكيان — السائق كيان مستقل وليس جهة */
   orgType: string;
   labelAr: string;
   /** الودجات مرتبة حسب الأولوية الافتراضية */
@@ -202,9 +203,9 @@ export const PRIORITY_PROFILES: Record<string, OrgPriorityProfile> = {
     ],
   },
 
-  // ─── السائق (Driver) ───
+  // ─── السائق (Driver) — كيان مستقل وليس جهة ───
   driver: {
-    orgType: 'driver',
+    orgType: 'driver', // ملاحظة: السائق ليس جهة، لكنه يستخدم نفس البنية للأولويات
     labelAr: 'السائق',
     priorities: [
       { widgetId: 'kpi_cards', baseWeight: 100 },
