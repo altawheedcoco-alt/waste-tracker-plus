@@ -1,12 +1,13 @@
 /**
- * المركز التنظيمي الموحد - يدمج الامتثال والتراخيص والإقرارات وWMIS
+ * تبويبات المخاطر والامتثال والاستدامة (مدمجة)
+ * compliance (regulatory_hub + ohs + risk + custody) | sustainability (carbon + esg)
  */
 import { lazy, Suspense, useState } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat } from 'lucide-react';
+import { Shield, FileCheck, FileText, Globe, ClipboardList, ShieldAlert, Building2, HardHat, AlertTriangle, Link2 } from 'lucide-react';
 
 const LegalComplianceWidget = lazy(() => import('@/components/dashboard/generator/LegalComplianceWidget'));
 const LegalArchiveWidget = lazy(() => import('@/components/dashboard/generator/LegalArchiveWidget'));
@@ -14,15 +15,16 @@ const VehicleComplianceManager = lazy(() => import('@/components/compliance/Vehi
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
 const GovernmentReportingPanel = lazy(() => import('@/components/dashboard/transporter/GovernmentReportingPanel'));
-const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
-const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
 const TransporterDeclarations = lazy(() => import('@/components/transporter/TransporterDeclarations'));
 const TransporterAnnualPlan = lazy(() => import('@/components/transporter/TransporterAnnualPlan'));
 const SafetyManagerDashboard = lazy(() => import('@/components/safety/SafetyManagerDashboard'));
+const PartnerRiskPanel = lazy(() => import('@/components/dashboard/transporter/PartnerRiskPanel'));
+const ChainOfCustodyPanel = lazy(() => import('@/components/dashboard/transporter/ChainOfCustodyPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-4">
@@ -35,27 +37,29 @@ interface ComplianceTabsProps {
   organizationId?: string;
 }
 
-type RegulatorySection = 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government';
+type ComplianceSection = 'compliance' | 'licenses' | 'declarations' | 'wmis' | 'annual_plan' | 'government' | 'ohs' | 'risk' | 'custody';
 
-const REGULATORY_SECTIONS: { id: RegulatorySection; labelAr: string; icon: React.ElementType }[] = [
+const COMPLIANCE_SECTIONS: { id: ComplianceSection; labelAr: string; icon: React.ElementType }[] = [
   { id: 'compliance', labelAr: 'الامتثال', icon: Shield },
   { id: 'licenses', labelAr: 'التراخيص', icon: FileCheck },
   { id: 'declarations', labelAr: 'الإقرارات', icon: FileText },
   { id: 'wmis', labelAr: 'WMIS', icon: ShieldAlert },
   { id: 'annual_plan', labelAr: 'الخطة السنوية', icon: ClipboardList },
   { id: 'government', labelAr: 'البوابة الحكومية', icon: Building2 },
+  { id: 'ohs', labelAr: 'السلامة المهنية', icon: HardHat },
+  { id: 'risk', labelAr: 'المخاطر', icon: AlertTriangle },
+  { id: 'custody', labelAr: 'سلسلة الحيازة', icon: Link2 },
 ];
 
 const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
-  const [activeSection, setActiveSection] = useState<RegulatorySection>('compliance');
+  const [activeSection, setActiveSection] = useState<ComplianceSection>('compliance');
 
   return (
     <>
-      {/* المركز التنظيمي الموحد */}
-      <TabsContent value="regulatory_hub" className="space-y-4 mt-6">
-        {/* أقسام فرعية */}
+      {/* ══════ 8. المخاطر والامتثال (regulatory_hub + ohs + risk + custody) ══════ */}
+      <TabsContent value="compliance" className="space-y-4 mt-6">
         <div className="flex gap-2 flex-wrap">
-          {REGULATORY_SECTIONS.map((section) => {
+          {COMPLIANCE_SECTIONS.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;
             return (
@@ -86,68 +90,43 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
               <IncidentReportManager />
             </ErrorBoundary>
           )}
-
           {activeSection === 'licenses' && (
-            <ErrorBoundary fallbackTitle="خطأ في التراخيص">
-              <TransporterLicenseRenewal />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في التراخيص"><TransporterLicenseRenewal /></ErrorBoundary>
           )}
-
           {activeSection === 'declarations' && (
-            <ErrorBoundary fallbackTitle="خطأ في الإقرارات">
-              <TransporterDeclarations />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في الإقرارات"><TransporterDeclarations /></ErrorBoundary>
           )}
-
           {activeSection === 'wmis' && (
             <ErrorBoundary fallbackTitle="خطأ في نظام WMIS">
               {organizationId && <LicensedWasteTypesEditor organizationId={organizationId} />}
               <WMISEventsFeed />
             </ErrorBoundary>
           )}
-
           {activeSection === 'annual_plan' && (
-            <ErrorBoundary fallbackTitle="خطأ في الخطة السنوية">
-              <TransporterAnnualPlan />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في الخطة السنوية"><TransporterAnnualPlan /></ErrorBoundary>
           )}
-
           {activeSection === 'government' && (
-            <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية">
-              <GovernmentReportingPanel />
-            </ErrorBoundary>
+            <ErrorBoundary fallbackTitle="خطأ في البوابة الحكومية"><GovernmentReportingPanel /></ErrorBoundary>
+          )}
+          {activeSection === 'ohs' && (
+            <ErrorBoundary fallbackTitle="خطأ في السلامة المهنية"><SafetyManagerDashboard /></ErrorBoundary>
+          )}
+          {activeSection === 'risk' && (
+            <ErrorBoundary fallbackTitle="خطأ في تحليل المخاطر"><PartnerRiskPanel /></ErrorBoundary>
+          )}
+          {activeSection === 'custody' && (
+            <ErrorBoundary fallbackTitle="خطأ في سلسلة الحفظ"><ChainOfCustodyPanel /></ErrorBoundary>
           )}
         </Suspense>
       </TabsContent>
 
-      {/* التبويبات المستقلة */}
-      <TabsContent value="carbon" className="space-y-4 mt-6">
+      {/* ══════ 9. البيئة والاستدامة (carbon + esg) ══════ */}
+      <TabsContent value="sustainability" className="space-y-4 mt-6">
         <Suspense fallback={<TabFallback />}>
           <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
             <CarbonCreditsPanel />
           </ErrorBoundary>
-        </Suspense>
-      </TabsContent>
-
-      <TabsContent value="iot" className="space-y-4 mt-6">
-        <Suspense fallback={<TabFallback />}>
-          <ErrorBoundary fallbackTitle="خطأ في IoT">
-            <IoTMonitoringPanel />
-          </ErrorBoundary>
-        </Suspense>
-      </TabsContent>
-
-      <TabsContent value="esg" className="space-y-4 mt-6">
-        <Suspense fallback={<TabFallback />}>
           <ESGReportPanel />
-        </Suspense>
-      </TabsContent>
-
-      <TabsContent value="ohs" className="space-y-4 mt-6">
-        <Suspense fallback={<TabFallback />}>
-          <ErrorBoundary fallbackTitle="خطأ في تقارير السلامة المهنية">
-            <SafetyManagerDashboard />
-          </ErrorBoundary>
         </Suspense>
       </TabsContent>
     </>
