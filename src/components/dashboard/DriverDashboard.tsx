@@ -114,9 +114,10 @@ const companyTabs = [
 ];
 
 const hiredTabs = [
-  { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'offers', label: 'العروض', icon: Zap },
+  { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
@@ -628,7 +629,7 @@ const DriverDashboard = () => {
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: العروض الواردة (مستقل فقط) */}
+          {/* TAB: العروض الواردة (مستقل + مؤجر حر) */}
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="offers" className="mt-4">
             <Suspense fallback={<TabFallback />}>
