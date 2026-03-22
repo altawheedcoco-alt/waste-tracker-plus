@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import CreateExternalMission from '@/components/transporter/CreateExternalMission';
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -312,13 +313,17 @@ const TransporterDrivers = () => {
           <h1 className="text-lg sm:text-2xl font-bold">إدارة السائقين</h1>
           <p className="text-xs sm:text-sm text-muted-foreground">عرض وإدارة سائقي الشركة</p>
         </div>
-        <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-          <DialogTrigger asChild>
-            <Button variant="eco" size="sm" className="w-full sm:w-auto">
-              <Plus className="ml-2 h-4 w-4" />
-              إضافة سائق
-            </Button>
-          </DialogTrigger>
+        <div className="flex gap-2 w-full sm:w-auto">
+          {organization?.id && (
+            <CreateExternalMission organizationId={organization.id} />
+          )}
+          <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+            <DialogTrigger asChild>
+              <Button variant="eco" size="sm" className="flex-1 sm:flex-none">
+                <Plus className="ml-2 h-4 w-4" />
+                إضافة سائق تابع
+              </Button>
+            </DialogTrigger>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>إضافة سائق جديد</DialogTitle>
@@ -400,6 +405,7 @@ const TransporterDrivers = () => {
             </div>
           </DialogContent>
         </Dialog>
+        </div>
       </div>
 
       {/* Credentials Dialog - shown after successful creation */}
