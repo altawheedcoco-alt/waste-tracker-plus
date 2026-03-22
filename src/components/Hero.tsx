@@ -78,8 +78,8 @@ const Hero = memo(() => {
             transition={{ duration: 0.4, delay: 0.1 }}
           >
             <span className="inline-flex items-center gap-1.5 sm:gap-2 px-4 sm:px-5 py-2.5 sm:py-2.5 rounded-full bg-white/12 backdrop-blur-xl text-white font-semibold text-[11px] sm:text-sm border border-white/20 shadow-xl">
-              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400" />
-              <span className="text-amber-400 font-bold">v3.0</span>
+              <Sparkles className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-amber-400 animate-pulse" />
+              <span className="text-amber-400 font-black tracking-wide" style={{ textShadow: '0 0 12px rgba(251,191,36,0.5)' }}>v5.1</span>
               <span className="w-px h-3.5 sm:h-4 bg-white/25" />
               <Globe className="w-3.5 h-3.5 sm:w-4 sm:h-4" />{t('landing.tagline')}
             </span>
