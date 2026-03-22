@@ -103,14 +103,42 @@ interface Shipment {
   transporter: { name: string } | null;
 }
 
-// 5 focused tabs matching driver workflow
-const tabItems = [
+// Tab configuration per driver type
+const companyTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
   { value: 'account', label: 'حسابي', icon: User },
 ];
+
+const hiredTabs = [
+  { value: 'contracts', label: 'العقود', icon: Briefcase },
+  { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'account', label: 'حسابي', icon: User },
+];
+
+const independentTabs = [
+  { value: 'offers', label: 'العروض', icon: Zap },
+  { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'account', label: 'حسابي', icon: User },
+];
+
+function getTabsForType(type: DriverType | undefined): typeof companyTabs {
+  switch (type) {
+    case 'hired': return hiredTabs;
+    case 'independent': return independentTabs;
+    default: return companyTabs;
+  }
+}
 
 const DriverDashboard = () => {
   const { profile } = useAuth();
