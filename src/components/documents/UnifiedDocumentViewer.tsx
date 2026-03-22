@@ -179,10 +179,12 @@ const DocumentPreview = ({
 
   if (isPDF) {
     return (
-      <iframe
-        src={resolvedUrl}
-        className="w-full h-full min-h-[500px] border-0"
+      <GoogleDocsPdfViewer
+        url={resolvedUrl}
         title={title}
+        height="100%"
+        className="w-full h-full min-h-[500px] border-0"
+        showFooter={false}
       />
     );
   }

@@ -203,10 +203,11 @@ const DocumentReviewDialog = ({
                       onError={() => setPreviewError('فشل في عرض الصورة')}
                     />
                   ) : document.file_path.match(/\.pdf$/i) ? (
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-full min-h-[400px]"
+                    <GoogleDocsPdfViewer
+                      url={previewUrl}
                       title={document.file_name}
+                      height="400px"
+                      className="w-full"
                     />
                   ) : (
                     <div className="text-center text-muted-foreground">

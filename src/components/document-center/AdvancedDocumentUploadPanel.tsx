@@ -701,7 +701,7 @@ const AdvancedDocumentUploadPanel = () => {
               {previewUrl.match(/\.(jpg|jpeg|png|webp|gif)/i) ? (
                 <img src={previewUrl} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-lg" />
               ) : (
-                <iframe src={previewUrl} className="w-full h-[70vh] rounded-lg border" />
+                <GoogleDocsPdfViewer url={previewUrl} title="معاينة المستند" height="70vh" className="w-full rounded-lg" />
               )}
             </div>
           )}
