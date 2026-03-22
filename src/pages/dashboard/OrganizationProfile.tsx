@@ -56,6 +56,47 @@ const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
 const PREF_KEY_ACTIVE_TAB = 'org_profile_active_tab';
 
+/** Inline preview for uploaded documents — PDF uses Google Docs Viewer, images shown directly */
+const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocument; isPdf: boolean; isImage: boolean }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const loadPreview = useCallback(async () => {
+    if (previewUrl) { setExpanded(e => !e); return; }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600);
+      if (error) throw error;
+      setPreviewUrl(data.signedUrl);
+      setExpanded(true);
+    } catch { toast.error('فشل في تحميل المعاينة'); }
+    finally { setLoading(false); }
+  }, [doc.file_path, previewUrl]);
+
+  if (!isPdf && !isImage) return null;
+
+  return (
+    <div>
+      <Button variant="ghost" size="sm" className="w-full gap-2 text-xs h-8 rounded-none border-t" onClick={loadPreview} disabled={loading}>
+        {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+        {expanded ? 'إخفاء المعاينة' : 'معاينة المستند'}
+      </Button>
+      {expanded && previewUrl && (
+        <div className="border-t">
+          {isPdf ? (
+            <GoogleDocsPdfViewer url={previewUrl} title={doc.file_name} height="450px" />
+          ) : (
+            <div className="p-4 flex justify-center bg-muted/30">
+              <img src={previewUrl} alt={doc.file_name} className="max-w-full max-h-[400px] object-contain rounded" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
+
 // Tab configuration — ordered by logical groups
 const ORG_PROFILE_TABS: TabItem[] = [
   // الهوية والعرض
