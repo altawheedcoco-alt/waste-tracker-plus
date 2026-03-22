@@ -320,9 +320,9 @@ const OrganizationPosts = ({
               }`}
             >
               {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
-                <video src={url} className="w-full h-48 object-cover" />
+                <video src={fixStorageUrl(url)} className="w-full h-48 object-cover" playsInline preload="metadata" />
               ) : (
-                <img src={url} alt="" className="w-full h-48 object-cover" />
+                <img src={fixStorageUrl(url)} alt="" className="w-full h-48 object-cover" />
               )}
               {index === 3 && post.media_urls.length > 4 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
