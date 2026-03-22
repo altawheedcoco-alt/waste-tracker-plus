@@ -1,4 +1,4 @@
-import { useState, useEffect, lazy, Suspense } from 'react';
+import { useState, useEffect, lazy, Suspense, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -13,11 +13,12 @@ import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
-  Building2, User, FileText, Upload, Trash2, Download,
+  Building2, User, FileText, Upload, Trash2, Download, Eye,
   Phone, Mail, MapPin, Shield, Users, Loader2, Save,
   Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import ProfileHeader from '@/components/organization/ProfileHeader';
@@ -54,6 +55,47 @@ interface OrganizationDocument {
 const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
 const PREF_KEY_ACTIVE_TAB = 'org_profile_active_tab';
+
+/** Inline preview for uploaded documents — PDF uses Google Docs Viewer, images shown directly */
+const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocument; isPdf: boolean; isImage: boolean }) => {
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const loadPreview = useCallback(async () => {
+    if (previewUrl) { setExpanded(e => !e); return; }
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600);
+      if (error) throw error;
+      setPreviewUrl(data.signedUrl);
+      setExpanded(true);
+    } catch { toast.error('فشل في تحميل المعاينة'); }
+    finally { setLoading(false); }
+  }, [doc.file_path, previewUrl]);
+
+  if (!isPdf && !isImage) return null;
+
+  return (
+    <div>
+      <Button variant="ghost" size="sm" className="w-full gap-2 text-xs h-8 rounded-none border-t" onClick={loadPreview} disabled={loading}>
+        {loading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Eye className="w-3 h-3" />}
+        {expanded ? 'إخفاء المعاينة' : 'معاينة المستند'}
+      </Button>
+      {expanded && previewUrl && (
+        <div className="border-t">
+          {isPdf ? (
+            <GoogleDocsPdfViewer url={previewUrl} title={doc.file_name} height="450px" />
+          ) : (
+            <div className="p-4 flex justify-center bg-muted/30">
+              <img src={previewUrl} alt={doc.file_name} className="max-w-full max-h-[400px] object-contain rounded" />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 // Tab configuration — ordered by logical groups
 const ORG_PROFILE_TABS: TabItem[] = [
@@ -693,26 +735,34 @@ const OrganizationProfile = () => {
                   {documents.length === 0 ? (
                     <p className="text-muted-foreground text-center py-8">لا توجد ملفات مرفوعة</p>
                   ) : (
-                    <div className="divide-y">
-                      {documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between py-3">
-                          <div className="flex items-center gap-3">
-                            <FileText className="w-8 h-8 text-primary" />
-                            <div>
-                              <p className="font-medium">{doc.file_name}</p>
-                              <p className="text-sm text-muted-foreground">
-                                {getDocumentTypeLabel(doc.document_type)} • {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
-                              </p>
+                    <div className="space-y-4">
+                      {documents.map((doc) => {
+                        const isPdf = doc.file_name?.match(/\.pdf$/i);
+                        const isImage = doc.file_name?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
+                        return (
+                          <div key={doc.id} className="border rounded-lg overflow-hidden">
+                            <div className="flex items-center justify-between p-3">
+                              <div className="flex items-center gap-3">
+                                <FileText className="w-8 h-8 text-primary" />
+                                <div>
+                                  <p className="font-medium">{doc.file_name}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {getDocumentTypeLabel(doc.document_type)} • {doc.file_size ? ` ${(doc.file_size / 1024).toFixed(1)} KB` : ''}
+                                  </p>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
+                                {isCompanyAdmin && (
+                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
+                                )}
+                              </div>
                             </div>
+                            {/* Inline preview */}
+                            <DocumentInlinePreview doc={doc} isPdf={!!isPdf} isImage={!!isImage} />
                           </div>
-                          <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
-                            {isCompanyAdmin && (
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
-                            )}
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
