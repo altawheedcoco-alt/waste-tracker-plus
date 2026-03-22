@@ -14,7 +14,6 @@ export const PWAUpdatePrompt = () => {
     updateServiceWorker,
   } = useRegisterSW({
     immediate: pwaEnabled,
-    immediate: true,
     onRegisteredSW(swUrl, r) {
       if (!pwaEnabled) return;
 
