@@ -852,15 +852,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                   <div className="px-3 py-3 space-y-2">
                     <p className="text-xs text-muted-foreground">{getEntityTypeLabel()}</p>
                     <div className="flex items-center gap-2">
-                      {resolvedLogoUrl ? (
-                        <img src={resolvedLogoUrl} alt={getEntityName()} className="w-8 h-8 rounded-lg object-cover shrink-0" />
+                      {(isStandaloneDriver ? resolvedAvatarUrl : resolvedLogoUrl) ? (
+                        <img src={(isStandaloneDriver ? resolvedAvatarUrl : resolvedLogoUrl) || ''} alt={getEntityName()} className="w-8 h-8 rounded-lg object-cover shrink-0" />
                       ) : (
                         <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                          <Building2 className="w-4 h-4 text-muted-foreground" />
+                          <OrgIcon className="w-4 h-4 text-muted-foreground" />
                         </div>
                       )}
                       <p className="font-semibold text-foreground">{getEntityName()}</p>
-                      {organization?.is_verified && (
+                      {!isStandaloneDriver && organization?.is_verified && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <BadgeCheck className="w-4 h-4 text-primary" />
@@ -871,39 +871,57 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                         </Tooltip>
                       )}
                     </div>
-                    <p className="text-sm text-muted-foreground">{profile?.full_name}</p>
-                    
-                    {/* Verification Badges */}
+                    <p className="text-sm text-muted-foreground">
+                      {isStandaloneDriver
+                        ? (driverType === 'company'
+                            ? 'سائق تابع'
+                            : driverType === 'hired'
+                              ? 'سائق حر مؤجر'
+                              : driverType === 'independent'
+                                ? 'سائق مستقل'
+                                : t('dashboard.orgTypes.driver'))
+                        : profile?.full_name}
+                    </p>
+
                     <div className="flex flex-wrap gap-1.5 pt-1">
-                      {organization?.is_verified && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-primary/10 text-primary">
-                          <BadgeCheck className="w-3 h-3" />
-                          {t('dashboard.verifiedEntity')}
+                      {isStandaloneDriver ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground">
+                          <Car className="w-3 h-3 text-primary" />
+                          كيان مستقل
                         </span>
-                      )}
-                      {isLegalDataComplete && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                          <Scale className="w-3 h-3" />
-                          {t('dashboard.legalData')}
-                        </span>
-                      )}
-                      {isDocumentsComplete && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                          <FolderCheck className="w-3 h-3" />
-                          {t('dashboard.docsComplete')}
-                        </span>
-                      )}
-                      {!organization?.is_verified && !isLegalDataComplete && !isDocumentsComplete && (
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400">
-                          {t('dashboard.pleaseCompleteData')}
-                        </span>
+                      ) : (
+                        <>
+                          {organization?.is_verified && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">
+                              <BadgeCheck className="w-3 h-3" />
+                              {t('dashboard.verifiedEntity')}
+                            </span>
+                          )}
+                          {isLegalDataComplete && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground">
+                              <Scale className="w-3 h-3 text-primary" />
+                              {t('dashboard.legalData')}
+                            </span>
+                          )}
+                          {isDocumentsComplete && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-foreground">
+                              <FolderCheck className="w-3 h-3 text-primary" />
+                              {t('dashboard.docsComplete')}
+                            </span>
+                          )}
+                          {!organization?.is_verified && !isLegalDataComplete && !isDocumentsComplete && (
+                            <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                              {t('dashboard.pleaseCompleteData')}
+                            </span>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/organization-profile'))} className="cursor-pointer">
-                    <Building2 className="ml-2 h-4 w-4" />
-                    {t('sidebar.orgProfile')}
+                  <DropdownMenuItem onClick={() => startTransition(() => navigate(isStandaloneDriver ? '/dashboard/driver-profile' : '/dashboard/organization-profile'))} className="cursor-pointer">
+                    <OrgIcon className="ml-2 h-4 w-4" />
+                    {isStandaloneDriver ? 'الملف التشغيلي للسائق' : t('sidebar.orgProfile')}
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => startTransition(() => navigate('/dashboard/settings?tab=profile'))} className="cursor-pointer">
                     <User className="ml-2 h-4 w-4" />
@@ -913,17 +931,21 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     <Settings className="ml-2 h-4 w-4" />
                     {t('nav.settings')}
                   </DropdownMenuItem>
-                  <DropdownMenuSeparator />
-                  <CreateRequestButton
-                    buttonVariant="ghost"
-                    buttonSize="sm"
-                    className="w-full justify-start px-2 py-1.5 h-auto font-normal"
-                  >
-                    <div className="flex items-center w-full cursor-pointer text-primary">
-                      <Send className="ml-2 h-4 w-4" />
-                      {t('dashboard.sendRequestToAdmin')}
-                    </div>
-                  </CreateRequestButton>
+                  {!isStandaloneDriver && (
+                    <>
+                      <DropdownMenuSeparator />
+                      <CreateRequestButton
+                        buttonVariant="ghost"
+                        buttonSize="sm"
+                        className="w-full justify-start px-2 py-1.5 h-auto font-normal"
+                      >
+                        <div className="flex items-center w-full cursor-pointer text-primary">
+                          <Send className="ml-2 h-4 w-4" />
+                          {t('dashboard.sendRequestToAdmin')}
+                        </div>
+                      </CreateRequestButton>
+                    </>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={handleSignOut} className="text-destructive cursor-pointer">
                     <LogOut className="ml-2 h-4 w-4" />
