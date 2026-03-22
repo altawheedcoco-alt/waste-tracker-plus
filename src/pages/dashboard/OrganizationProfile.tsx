@@ -791,6 +791,20 @@ const OrganizationProfile = () => {
                   </div>
                 )}
                 <Separator />
+
+                {/* إخطار حماية المستندات */}
+                <div className="rounded-lg border border-amber-500/30 bg-amber-50/50 dark:bg-amber-950/20 p-4 space-y-3 text-sm leading-relaxed" dir="rtl">
+                  <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-400">
+                    <Shield className="w-5 h-5" />
+                    <span>⚠️ تحذير قانوني — حماية المستندات والوثائق</span>
+                  </div>
+                  <div className="space-y-2 text-amber-900/80 dark:text-amber-300/80">
+                    <p><strong>أولاً:</strong> يُحظر حظراً تاماً استخدام أو نسخ أو تصوير أو إعادة إنتاج أي مستند أو ملف أو وثيقة من وثائق الشركة أو الجهة أو المؤسسة إلا بموافقة كتابية صريحة من صاحب الشأن أو ممثله القانوني أو وكيله أو المفوض تفويضاً رسمياً منه.</p>
+                    <p><strong>ثانياً:</strong> يُمنع ويُحظر تداول المستند أو طباعته أو التعامل به لدى أي جهات حكومية أو غير حكومية، سواء كانت قطاع عام أو قطاع خاص، وكذلك الشركات بجميع أنواعها (قطاع عام أو خاص)، دون الحصول على إذن مسبق من الجهة المالكة.</p>
+                    <p><strong>ثالثاً:</strong> تُخلي منصة <strong>iRecycle</strong> مسؤوليتها الكاملة عن أي تصرف من قِبل أي شخص بالمستند تصرفاً غير قانوني أو غير أخلاقي، كما تُخلي مسؤوليتها عن صحة أو دقة المعلومات الواردة في المستندات المرفوعة، إذ تقع المسؤولية الكاملة على الجهة الرافعة للمستند.</p>
+                  </div>
+                </div>
+
                 <div className="space-y-2">
                   <h4 className="font-medium">الملفات المرفوعة</h4>
                   {documents.length === 0 ? (
