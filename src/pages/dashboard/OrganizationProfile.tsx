@@ -447,6 +447,7 @@ const OrganizationProfile = () => {
 
   const handlePrintDocument = async (doc: OrganizationDocument) => {
     const printWindow = window.open('about:blank', '_blank');
+    let objectUrl: string | null = null;
 
     try {
       if (!printWindow) {
@@ -456,7 +457,7 @@ const OrganizationProfile = () => {
 
       const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
       const blob = await getDocumentBlob(doc);
-      const fileUrl = URL.createObjectURL(blob);
+      objectUrl = URL.createObjectURL(blob);
 
       if (isPdf) {
         printWindow.document.write(`
@@ -512,13 +513,7 @@ const OrganizationProfile = () => {
           pagesRoot.appendChild(pageWrap);
         });
 
-        printWindow.document.write(`
-          <script>
-            window.addEventListener('load', () => {
-              setTimeout(() => window.focus(), 50);
-            });
-          <\/script>
-        `);
+        printWindow.focus();
         return;
       }
 
@@ -546,7 +541,7 @@ const OrganizationProfile = () => {
             </div>
           </div>
           <div class="content">
-            <img src="${fileUrl}" alt="${doc.file_name}" />
+            <img src="${objectUrl}" alt="${doc.file_name}" />
           </div>
         </body>
         </html>
@@ -556,6 +551,10 @@ const OrganizationProfile = () => {
       printWindow?.close();
       console.error('Error printing document:', error);
       toast.error('فشل في فتح المستند للطباعة');
+    } finally {
+      if (objectUrl) {
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl as string), 60_000);
+      }
     }
   };
 
