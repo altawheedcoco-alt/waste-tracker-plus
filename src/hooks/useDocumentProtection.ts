@@ -129,13 +129,15 @@ export function useDocumentProtection() {
 
         if ((doc as any)?.notify_on_download) {
           // Create notification for org admins
-          await supabase.from('notifications').insert({
-            user_id: user.id,
-            organization_id: (doc as any)?.organization_id,
-            title: `🔔 ${actionType === 'download' ? 'تم تحميل' : 'تم طباعة'} مستند محمي`,
-            message: `قام مستخدم بـ${actionType === 'download' ? 'تحميل' : 'طباعة'} الملف: ${(doc as any)?.file_name}`,
-            type: 'security',
-          } as any).catch(() => { /* silent */ });
+          try {
+            await supabase.from('notifications').insert({
+              user_id: user.id,
+              organization_id: (doc as any)?.organization_id,
+              title: `🔔 ${actionType === 'download' ? 'تم تحميل' : 'تم طباعة'} مستند محمي`,
+              message: `قام مستخدم بـ${actionType === 'download' ? 'تحميل' : 'طباعة'} الملف: ${(doc as any)?.file_name}`,
+              type: 'security',
+            } as any);
+          } catch { /* silent */ }
         }
       }
     } catch { /* silent */ }
