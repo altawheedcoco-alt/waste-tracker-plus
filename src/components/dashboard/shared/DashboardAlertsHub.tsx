@@ -45,7 +45,7 @@ const DashboardAlertsHub = ({
   const { getPref, setPref, togglePref } = useUserPreferences();
 
   const isHidden = getPref(PREF_KEY_HIDDEN, false);
-  const isOpen = !getPref(PREF_KEY_COLLAPSED, false) || true; // always start expanded
+  const isOpen = !getPref(PREF_KEY_COLLAPSED, false);
   const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'alerts');
 
   const showDeliveryApproval = orgType === 'transporter';
