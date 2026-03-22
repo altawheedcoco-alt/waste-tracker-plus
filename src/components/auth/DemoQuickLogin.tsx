@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Factory, Recycle, Truck, ShieldCheck, Car, UserCog, Shield,
   Loader2, ChevronDown, ChevronUp, Building2, Briefcase, Award,
-  ClipboardCheck, Users, Landmark, Leaf, HardHat, User,
+  ClipboardCheck, Users, Landmark, Leaf, HardHat, User, Zap,
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,7 @@ interface DemoAccount {
   color: string;
 }
 
-const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccount[] }[] = [
+const accountGroups: { id: string; label: string; icon: any; hint?: string; accounts: DemoAccount[] }[] = [
   {
     id: 'abdullah',
     label: 'عبدالله',
@@ -35,14 +35,15 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
       { email: 'abdullah-generator@irecycle.test', label: 'عبدالله المولد', desc: 'جهة توليد', icon: Factory, color: 'from-orange-500 to-amber-700' },
       { email: 'abdullah-transporter@irecycle.test', label: 'عبدالله الناقل', desc: 'جهة نقل', icon: Truck, color: 'from-blue-500 to-indigo-700' },
       { email: 'abdullah-recycler@irecycle.test', label: 'عبدالله المدور', desc: 'جهة تدوير', icon: Recycle, color: 'from-green-500 to-emerald-700' },
-      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
+      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق ⚡ كيان مستقل', icon: Car, color: 'from-pink-500 to-rose-700' },
       { email: 'abdullah.abdelnasser@irecycle.test', label: 'عبدالله عبدالناصر', desc: 'إدارة → جهة عبدالله الناقل', icon: Shield, color: 'from-indigo-500 to-violet-700' },
     ],
   },
   {
     id: 'operators',
-    label: 'الشركات',
+    label: 'الجهات',
     icon: Building2,
+    hint: 'المنظمات التشغيلية',
     accounts: [
       { email: 'generator@demo.com', label: 'شركة التوليد', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
       { email: 'demo-generator@irecycle.test', label: 'المولد التجريبية', desc: 'مولد', icon: Factory, color: 'from-amber-500 to-orange-600' },
@@ -60,6 +61,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     id: 'transporter-leadership',
     label: 'إدارة الناقل',
     icon: Shield,
+    hint: 'الهيكل الإداري لجهة النقل',
     accounts: [
       { email: 'ceo@transporter.demo', label: 'أحمد محمد السيد', desc: 'الرئيس التنفيذي 👑', icon: Shield, color: 'from-amber-500 to-yellow-700' },
       { email: 'deputy@transporter.demo', label: 'محمود عبدالرحمن', desc: 'نائب المدير العام ⭐', icon: Shield, color: 'from-amber-400 to-orange-600' },
@@ -78,6 +80,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     id: 'transporter-members',
     label: 'أعضاء الناقل',
     icon: User,
+    hint: 'يُوجَّهون لمساحة العمل الشخصية',
     accounts: [
       { email: 'assistant@transporter.demo', label: 'سارة أحمد', desc: 'مساعد تنفيذي → مساحة العمل', icon: ClipboardCheck, color: 'from-pink-400 to-rose-600' },
       { email: 'fleet.supervisor@transporter.demo', label: 'حسام فاروق', desc: 'مشرف الحركة → مساحة العمل', icon: Truck, color: 'from-blue-400 to-sky-600' },
@@ -94,10 +97,11 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     id: 'drivers',
     label: 'السائقون',
     icon: Car,
+    hint: 'كيان مستقل — ليس جهة تشغيلية',
     accounts: [
-      { email: 'company-driver@irecycle.test', label: 'سائق تابع', desc: 'سائق تابع لجهة نقل 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
-      { email: 'hired-driver@irecycle.test', label: 'سائق حر مؤجر', desc: 'سائق حر يقبل مهام 💼', icon: Briefcase, color: 'from-amber-500 to-orange-700' },
-      { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'سائق حر يتلقى شحنات 🟢', icon: Car, color: 'from-emerald-500 to-green-700' },
+      { email: 'company-driver@irecycle.test', label: 'سائق تابع', desc: 'تابع لجهة نقل 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'hired-driver@irecycle.test', label: 'سائق حر مؤجر', desc: 'حر يقبل مهام وعقود 💼', icon: Briefcase, color: 'from-amber-500 to-orange-700' },
+      { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'حر يتلقى عروض وشحنات 🟢', icon: Zap, color: 'from-emerald-500 to-green-700' },
       { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق تابع', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'driver@demo.com', label: 'سائق - النقل السريع', desc: 'سائق تابع', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
@@ -117,6 +121,7 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     id: 'regulators',
     label: 'رقابة',
     icon: Landmark,
+    hint: 'الجهات الحكومية الرقابية',
     accounts: [
       { email: 'wmra@irecycle.demo', label: 'WMRA', desc: 'تنظيم المخلفات', icon: Shield, color: 'from-red-600 to-red-800' },
       { email: 'eeaa@irecycle.demo', label: 'EEAA', desc: 'شؤون البيئة', icon: Leaf, color: 'from-green-600 to-green-800' },
@@ -126,10 +131,10 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
   },
   {
     id: 'staff',
-    label: 'موظفون',
+    label: 'النظام',
     icon: UserCog,
     accounts: [
-      { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+      { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin سيادي', icon: Shield, color: 'from-yellow-500 to-amber-700' },
       { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
@@ -152,26 +157,19 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
 
   const waitForSession = async (email: string) => {
     const startedAt = Date.now();
-
     while (Date.now() - startedAt < SESSION_WAIT_MS) {
       const { data } = await supabase.auth.getSession();
-      if (data.session?.user?.email?.toLowerCase() === email.toLowerCase()) {
-        return true;
-      }
-
+      if (data.session?.user?.email?.toLowerCase() === email.toLowerCase()) return true;
       await new Promise((resolve) => setTimeout(resolve, SESSION_POLL_MS));
     }
-
     return false;
   };
 
   const handleQuickLogin = async (email: string, label: string) => {
     setLoading(email);
     onLoginStart?.();
-
     try {
       await supabase.auth.signOut({ scope: 'local' }).catch(() => undefined);
-
       const { error } = await signIn(email, DEMO_PASSWORD);
       if (error) {
         if (error.message?.includes('Invalid login credentials')) {
@@ -181,12 +179,8 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         }
         return;
       }
-
       const sessionReady = await waitForSession(email);
-      if (!sessionReady) {
-        throw new Error('تم تسجيل الدخول لكن الجلسة لم تكتمل بعد، حاول مرة أخرى خلال ثوانٍ.');
-      }
-
+      if (!sessionReady) throw new Error('تم تسجيل الدخول لكن الجلسة لم تكتمل بعد، حاول مرة أخرى خلال ثوانٍ.');
       toast({ title: 'تم الدخول ✅', description: `تم الدخول كـ ${label}` });
       navigate('/dashboard', { replace: true });
     } catch (err: any) {
@@ -213,6 +207,7 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
         className="w-full flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors py-2"
       >
         <span>🔑 الدخول السريع</span>
+        <Badge variant="outline" className="text-[9px] px-1.5 py-0 border-primary/30 text-primary">v5.1</Badge>
         {expanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
 
@@ -254,11 +249,11 @@ const DemoQuickLogin = ({ onLoginStart, onLoginEnd }: DemoQuickLoginProps) => {
 
                   {accountGroups.map(group => (
                     <TabsContent key={group.id} value={group.id} className="mt-2">
-                      {group.id === 'transporter-members' && (
+                      {group.hint && (
                         <div className="flex items-center gap-2 mb-2 px-1">
                           <Badge variant="outline" className="text-[10px] gap-1 border-primary/30 text-primary">
-                            <User className="w-2.5 h-2.5" />
-                            يُوجَّهون لمساحة العمل الشخصية
+                            {group.id === 'drivers' ? <Zap className="w-2.5 h-2.5" /> : <User className="w-2.5 h-2.5" />}
+                            {group.hint}
                           </Badge>
                         </div>
                       )}
