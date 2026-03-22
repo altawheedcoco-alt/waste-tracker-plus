@@ -40,7 +40,7 @@ const LiveOperationsBoard = () => {
         .from('shipments')
         .select('id, shipment_number, status, waste_type, quantity, unit, driver_id, created_at, expected_delivery_date, updated_at')
         .eq('transporter_id', organization!.id)
-        .not('status', 'in', '("cancelled","completed")' as any)
+        .not('status', 'in', '("cancelled")' as any)
         .order('updated_at', { ascending: false })
         .limit(12);
 

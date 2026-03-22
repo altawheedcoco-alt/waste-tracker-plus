@@ -138,20 +138,21 @@ const OrgPerformanceRadar = () => {
     queryKey: ['org-radar-compliance', orgId],
     queryFn: async () => {
       if (!orgId) return { score: 65 };
-      // Use mv_organization_summary if available
-      const { data } = await supabase
-        .from('mv_organization_summary')
-        .select('total_shipments, completed_shipments')
-        .eq('organization_id', orgId)
-        .maybeSingle();
-      if (!data) return { score: 65 };
-      const d = data as any;
-      const total = d.total_shipments || 0;
-      const completed = d.completed_shipments || 0;
+      // Query shipments directly since mv_organization_summary may not exist
+      const [totalRes, completedRes] = await Promise.all([
+        supabase.from('shipments').select('id', { count: 'exact', head: true })
+          .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId}`),
+        supabase.from('shipments').select('id', { count: 'exact', head: true })
+          .or(`generator_id.eq.${orgId},transporter_id.eq.${orgId},recycler_id.eq.${orgId}`)
+          .in('status', ['delivered', 'confirmed']),
+      ]);
+      const total = totalRes.count || 0;
+      const completed = completedRes.count || 0;
       return { score: total > 0 ? Math.min(100, Math.round((completed / total) * 100)) : 65 };
     },
     enabled: !!orgId,
     staleTime: 300000,
+    refetchInterval: 60000,
   });
 
   const isLoading = l1 || l2 || l3 || l4 || l5 || l6;

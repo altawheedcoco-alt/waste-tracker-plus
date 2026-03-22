@@ -297,8 +297,8 @@ const OperationalAlertsWidget = () => {
         // Fleet: vehicles with expiring insurance/license
         supabase.from('fleet_vehicles').select('id, plate_number, insurance_expiry, license_expiry').eq('organization_id', organization!.id).eq('status', 'active')
           .not('insurance_expiry', 'is', null).lt('insurance_expiry', new Date(now.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString()).gte('insurance_expiry', now.toISOString()).limit(5),
-        // Licenses expiring
-        supabase.from('organization_documents').select('id, document_type, expiry_date').eq('organization_id', organization!.id).eq('verification_status', 'verified')
+        // Licenses expiring - use legal_licenses which has expiry_date
+        supabase.from('legal_licenses' as any).select('id, license_name, expiry_date').eq('organization_id', organization!.id)
           .not('expiry_date', 'is', null).lt('expiry_date', new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000).toISOString()).gte('expiry_date', now.toISOString()).limit(3),
       ]);
 
