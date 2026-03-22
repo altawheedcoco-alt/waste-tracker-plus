@@ -324,9 +324,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const initializeAuth = async () => {
       try {
-        // Fast timeout — 3s max to prevent hanging
+        // Generous timeout — 10s to accommodate slow mobile networks
         const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000));
         
         const result = await Promise.race([sessionPromise, timeoutPromise]);
         
@@ -338,8 +338,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            // Fire immediately — don't await, loading=false fires right after
-            fetchUserData(session.user.id).catch(console.error);
+            // Await user data before releasing loading state
+            await fetchUserData(session.user.id).catch(console.error);
           }
           initialSessionHandled = true;
         } else {
@@ -372,8 +372,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session?.user ?? null);
 
         if (session?.user) {
-          // Only re-fetch on actual auth changes (sign in, token refresh, etc.)
-          if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+          // Only re-fetch on actual sign-in, skip TOKEN_REFRESHED to avoid conflicts
+          if (event === 'SIGNED_IN' || event === 'USER_UPDATED') {
             setTimeout(() => {
               if (mounted) {
                 fetchUserData(session.user.id);
