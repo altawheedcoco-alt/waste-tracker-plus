@@ -213,6 +213,31 @@ const Index = () => {
             <PlatformShowcase />
           </LazySection>
 
+          {/* v5.1 — Driver Ecosystem Showcase */}
+          <LazySection minH={500}>
+            <DriverEcosystemShowcase />
+          </LazySection>
+
+          {/* v5.1 — Marketplace & Auction */}
+          <LazySection minH={400}>
+            <MarketplacePreview />
+          </LazySection>
+
+          {/* v5.1 — Wallet & Finance */}
+          <LazySection minH={400}>
+            <WalletFinanceShowcase />
+          </LazySection>
+
+          {/* v5.1 — Rating & Trust */}
+          <LazySection minH={400}>
+            <RatingTrustSection />
+          </LazySection>
+
+          {/* v5.1 — Regulator Showcase */}
+          <LazySection minH={400}>
+            <RegulatorShowcase />
+          </LazySection>
+
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (
             <LazySection key={block.id} minH={150}>
