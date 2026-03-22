@@ -112,6 +112,9 @@ const TransporterDrivers = () => {
           license_expiry,
           is_available,
           created_at,
+          driver_type,
+          rating,
+          total_trips,
           profile:profiles(id, full_name, email, phone, user_id)
         `)
         .eq('organization_id', organization?.id)
