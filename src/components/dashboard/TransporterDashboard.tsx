@@ -153,85 +153,102 @@ const TransporterDashboard = () => {
 
   return (
     <div className="space-y-3 sm:space-y-6">
-      <ConnectedSmartBrief role="transporter" />
-      <Suspense fallback={null}><StoryCircles /></Suspense>
-      <DashboardV2Header
-        userName={organization?.name || ''}
-        orgName={organization?.name || ''}
-        orgLabel={t('dashboard.orgTypes.certifiedTransporter')}
-        icon={Truck}
-        gradient="from-primary to-primary/70"
-        onRefresh={handleRefresh}
-        radarStats={[
-          { label: 'إجمالي الشحنات', value: stats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(stats?.total || 1, 50), trend: 'up' as const, route: '/dashboard/transporter-shipments' },
-          { label: 'نشطة', value: stats?.active || 0, icon: Route, color: 'text-amber-500', max: Math.max(stats?.total || 1, 20), trend: 'up' as const, route: '/dashboard/tracking-center' },
-          { label: 'السائقون', value: stats?.drivers || 0, icon: Users, color: 'text-violet-500', max: Math.max(stats?.drivers || 1, 20), trend: 'stable' as const, route: '/dashboard/transporter-drivers' },
-          { label: 'مكتملة', value: (stats?.total || 0) - (stats?.active || 0), icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats?.total || 1, 50), trend: 'up' as const, route: '/dashboard/transporter-shipments?status=delivered' },
-          { label: 'معلقة', value: shipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const, route: '/dashboard/transporter-shipments?status=new' },
-          { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10), trend: 'stable' as const, route: '/dashboard/partners' },
-        ]}
-        alerts={operationalAlerts}
-        onAlertClick={handleAlertClick}
-        weather={{
-          temp: realWeather.temp,
-          condition: realWeather.condition,
-          conditionLabel: realWeather.conditionLabel,
-          humidity: realWeather.humidity,
-          windSpeed: realWeather.windSpeed,
-          roadWarning: realWeather.roadWarning,
-          feelsLike: realWeather.feelsLike,
-          uvIndex: realWeather.uvIndex,
-          precipProb: realWeather.precipProb,
-          pressure: realWeather.pressure,
-          locationName: realWeather.locationName,
-          hourlyForecast: realWeather.hourlyForecast,
-          isLoading: realWeather.isLoading,
-          refreshFromGPS: realWeather.refreshFromGPS,
-          isLocating: realWeather.isLocating,
-        }}
-        heatmapData={heatmapRegions}
-      >
-        <TransporterHeader organizationName={organization?.name || ''} />
-      </DashboardV2Header>
+      {/* Sticky Section Nav */}
+      <TransporterSectionNav onTabChange={setActiveTab} />
+
+      <div id="section-header">
+        <ConnectedSmartBrief role="transporter" />
+        <Suspense fallback={null}><StoryCircles /></Suspense>
+        <DashboardV2Header
+          userName={organization?.name || ''}
+          orgName={organization?.name || ''}
+          orgLabel={t('dashboard.orgTypes.certifiedTransporter')}
+          icon={Truck}
+          gradient="from-primary to-primary/70"
+          onRefresh={handleRefresh}
+          radarStats={[
+            { label: 'إجمالي الشحنات', value: stats?.total || 0, icon: Package, color: 'text-primary', max: Math.max(stats?.total || 1, 50), trend: 'up' as const, route: '/dashboard/transporter-shipments' },
+            { label: 'نشطة', value: stats?.active || 0, icon: Route, color: 'text-amber-500', max: Math.max(stats?.total || 1, 20), trend: 'up' as const, route: '/dashboard/tracking-center' },
+            { label: 'السائقون', value: stats?.drivers || 0, icon: Users, color: 'text-violet-500', max: Math.max(stats?.drivers || 1, 20), trend: 'stable' as const, route: '/dashboard/transporter-drivers' },
+            { label: 'مكتملة', value: (stats?.total || 0) - (stats?.active || 0), icon: CheckCircle2, color: 'text-emerald-500', max: Math.max(stats?.total || 1, 50), trend: 'up' as const, route: '/dashboard/transporter-shipments?status=delivered' },
+            { label: 'معلقة', value: shipments.filter(s => s.status === 'new').length, icon: Clock, color: 'text-amber-500', max: 20, trend: 'down' as const, route: '/dashboard/transporter-shipments?status=new' },
+            { label: 'الشركاء', value: stats?.partnerCompanies || 0, icon: Building2, color: 'text-primary', max: Math.max(stats?.partnerCompanies || 1, 10), trend: 'stable' as const, route: '/dashboard/partners' },
+          ]}
+          alerts={operationalAlerts}
+          onAlertClick={handleAlertClick}
+          weather={{
+            temp: realWeather.temp,
+            condition: realWeather.condition,
+            conditionLabel: realWeather.conditionLabel,
+            humidity: realWeather.humidity,
+            windSpeed: realWeather.windSpeed,
+            roadWarning: realWeather.roadWarning,
+            feelsLike: realWeather.feelsLike,
+            uvIndex: realWeather.uvIndex,
+            precipProb: realWeather.precipProb,
+            pressure: realWeather.pressure,
+            locationName: realWeather.locationName,
+            hourlyForecast: realWeather.hourlyForecast,
+            isLoading: realWeather.isLoading,
+            refreshFromGPS: realWeather.refreshFromGPS,
+            isLocating: realWeather.isLocating,
+          }}
+          heatmapData={heatmapRegions}
+        >
+          <TransporterHeader organizationName={organization?.name || ''} />
+        </DashboardV2Header>
+      </div>
 
       {/* 2. مركز القيادة */}
-      <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
+      <div id="section-command">
+        <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
+      </div>
 
       {/* 3. الإجراءات السريعة */}
-      <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
+      <div id="section-actions">
+        <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
+      </div>
 
       {/* 4. النبض اليومي + ملخص العمليات */}
-      <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
-        <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
-      </ErrorBoundary>
-      <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-        <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
-      </ErrorBoundary>
+      <div id="section-pulse">
+        <ErrorBoundary fallbackTitle="خطأ في النبض اليومي">
+          <Suspense fallback={null}><TransporterDailyPulse /></Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
+          <Suspense fallback={null}><DailyOperationsSummary /></Suspense>
+        </ErrorBoundary>
+      </div>
 
       {/* 5. التنبيهات والإشعارات */}
-      <Suspense fallback={null}>
-        <DashboardAlertsHub
-          orgType="transporter"
-          notificationsComponent={<TransporterNotifications notifications={notifications} />}
-          slaComponent={<TransporterSLAAlerts shipments={shipments} />}
-          incomingRequestsComponent={<TransporterIncomingRequests />}
-        />
-      </Suspense>
+      <div id="section-alerts">
+        <Suspense fallback={null}>
+          <DashboardAlertsHub
+            orgType="transporter"
+            notificationsComponent={<TransporterNotifications notifications={notifications} />}
+            slaComponent={<TransporterSLAAlerts shipments={shipments} />}
+            incomingRequestsComponent={<TransporterIncomingRequests />}
+          />
+        </Suspense>
+      </div>
 
       {/* 6. التواصل */}
-      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      <div id="section-comms">
+        <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      </div>
 
       {/* 7. التوثيق والبحث */}
-      <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
-      <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
+      <div id="section-docs">
+        <Suspense fallback={null}><UnifiedDocumentSearch /></Suspense>
+        <Suspense fallback={null}><DocumentVerificationWidget /></Suspense>
+      </div>
 
       {/* أدوات مساعدة */}
       <Suspense fallback={null}><DashboardWidgetCustomizer orgType="transporter" /></Suspense>
       <Suspense fallback={null}><AutomationSettingsDialog organizationType="transporter" /></Suspense>
 
       {/* ★ Modular Tabs */}
-      <div>
-        <Tabs defaultValue="overview" className="w-full" dir="rtl">
+      <div id="section-tabs">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full" dir="rtl">
           <V2TabsNav tabs={tabKeys.map(tab => ({ ...tab, label: t(tab.labelKey), bindingType: TRANSPORTER_TAB_BINDINGS[tab.value]?.type }))} />
 
           <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
