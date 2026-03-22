@@ -59,7 +59,7 @@ const Services = () => {
           <h2 className="text-xl sm:text-3xl md:text-4xl font-bold mb-3 sm:mb-4 px-2">{t('services.title')} <span className="text-gradient-eco">{t('services.titleHighlight')}</span> {t('services.titleSuffix')}</h2>
           <p className="text-xs sm:text-base text-muted-foreground max-w-2xl mx-auto px-4">{t('services.desc')}</p>
         </motion.div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-8">
           {services.map((service, i) => (
             <motion.div 
               key={service.title} 
