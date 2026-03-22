@@ -12,6 +12,7 @@ import {
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
+  Briefcase, Zap, Star,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -53,6 +54,9 @@ const DriverAcademy = lazy(() => import('@/components/driver/DriverAcademy'));
 const SmartRouteOptimizer = lazy(() => import('@/components/driver/SmartRouteOptimizer'));
 const DriverOfferPopup = lazy(() => import('@/components/driver/DriverOfferPopup'));
 const EnhancedDestinationPicker = lazy(() => import('@/components/driver/DestinationPicker'));
+const IndependentOffersPanel = lazy(() => import('@/components/driver/IndependentOffersPanel'));
+const HiredContractsPanel = lazy(() => import('@/components/driver/HiredContractsPanel'));
+const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicProfile'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -100,14 +104,42 @@ interface Shipment {
   transporter: { name: string } | null;
 }
 
-// 5 focused tabs matching driver workflow
-const tabItems = [
+// Tab configuration per driver type
+const companyTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
   { value: 'account', label: 'حسابي', icon: User },
 ];
+
+const hiredTabs = [
+  { value: 'contracts', label: 'العقود', icon: Briefcase },
+  { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'account', label: 'حسابي', icon: User },
+];
+
+const independentTabs = [
+  { value: 'offers', label: 'العروض', icon: Zap },
+  { value: 'tasks', label: 'المهام', icon: ListTodo },
+  { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'account', label: 'حسابي', icon: User },
+];
+
+function getTabsForType(type: DriverType | undefined): typeof companyTabs {
+  switch (type) {
+    case 'hired': return hiredTabs;
+    case 'independent': return independentTabs;
+    default: return companyTabs;
+  }
+}
 
 const DriverDashboard = () => {
   const { profile } = useAuth();
@@ -308,16 +340,20 @@ const DriverDashboard = () => {
         driverName={profile?.full_name || 'السائق'} 
       />
 
-      {/* 5 Core Tabs */}
+      {/* Dynamic Tabs based on driver_type */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <Tabs defaultValue="tasks" className="w-full" dir="rtl">
+        {(() => {
+          const currentTabs = getTabsForType(driverInfo?.driver_type);
+          const defaultTab = currentTabs[0]?.value || 'tasks';
+          return (
+        <Tabs defaultValue={defaultTab} className="w-full" dir="rtl">
           <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
             <TabsList className="w-full justify-center bg-transparent gap-0.5 sm:gap-1 h-auto p-0">
-              {tabItems.map((tab) => (
+              {currentTabs.map((tab) => (
                 <TabsTrigger
                   key={tab.value}
                   value={tab.value}
@@ -590,7 +626,45 @@ const DriverDashboard = () => {
               subtitle="الوظائف المستخدمة بكثرة"
             />
           </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العروض الواردة (مستقل فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="offers" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <IndependentOffersPanel driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العقود (مؤجر فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="contracts" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <HiredContractsPanel driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: الملف المهني (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="profile" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && (
+                <DriverPublicProfile
+                  driverType={driverInfo.driver_type || 'company'}
+                  rating={driverInfo.rating || 0}
+                  totalTrips={driverInfo.total_trips || 0}
+                  acceptanceRate={0.85}
+                  isVerified={false}
+                />
+              )}
+            </Suspense>
+          </TabsContent>
+
         </Tabs>
+          );
+        })()}
       </motion.div>
 
       {/* Dialogs */}
