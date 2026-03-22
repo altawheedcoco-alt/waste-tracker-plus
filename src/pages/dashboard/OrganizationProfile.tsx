@@ -756,8 +756,17 @@ const OrganizationProfile = () => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
+                              <div className="flex items-center gap-1">
+                                {isCompanyAdmin && (
+                                  <DocumentProtectionSettings
+                                    documentId={doc.id}
+                                    initialSettings={doc as any}
+                                    onSaved={() => fetchOrganizationData()}
+                                  />
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => {
+                                  checkAccess(doc.id, 'download', () => handleDownloadDocument(doc), organization?.id);
+                                }}><Download className="w-4 h-4" /></Button>
                                 {isCompanyAdmin && (
                                   <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                                 )}
