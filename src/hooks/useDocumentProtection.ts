@@ -96,13 +96,15 @@ export function useDocumentProtection() {
           .single();
 
         if ((doc as any)?.notify_on_download && orgId) {
-          await supabase.from('notifications').insert({
-            user_id: user.id,
-            organization_id: orgId,
-            title: `🔔 ${actionType === 'download' ? 'تم تحميل' : 'تم طباعة'} مستند محمي`,
-            message: `قام مستخدم بـ${actionType === 'download' ? 'تحميل' : 'طباعة'} الملف: ${(doc as any)?.file_name || 'مستند'}`,
-            type: 'security',
-          } as any).catch(() => {});
+          try {
+            await supabase.from('notifications').insert({
+              user_id: user.id,
+              organization_id: orgId,
+              title: `🔔 ${actionType === 'download' ? 'تم تحميل' : 'تم طباعة'} مستند محمي`,
+              message: `قام مستخدم بـ${actionType === 'download' ? 'تحميل' : 'طباعة'} الملف: ${(doc as any)?.file_name || 'مستند'}`,
+              type: 'security',
+            } as any);
+          } catch {}
         }
       }
     } catch {
