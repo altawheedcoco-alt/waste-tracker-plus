@@ -304,7 +304,9 @@ const PartnersTimeline = () => {
                                   if (el) videoRefs.current.set(`${post.id}-${idx}`, el);
                                 }}
                                 src={url} 
-                                controls 
+                                controls
+                                playsInline
+                                preload="metadata"
                                 className="w-full h-full object-cover"
                                 onPlay={(e) => handleVideoPlay(`${post.id}-${idx}`, e.currentTarget)}
                               />

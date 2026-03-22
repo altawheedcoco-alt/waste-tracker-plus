@@ -36,7 +36,7 @@ export default function SocialFeedPage() {
     if (post.post_type === 'video' || (urls.length === 1 && (urls[0]?.includes('.mp4') || urls[0]?.includes('.webm')))) {
       return (
         <div className="mt-3 rounded-lg overflow-hidden bg-black">
-          <video src={urls[0]} controls className="w-full max-h-[500px] object-contain" />
+          <video src={urls[0]} controls playsInline preload="metadata" className="w-full max-h-[500px] object-contain" />
         </div>
       );
     }
