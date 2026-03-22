@@ -12,7 +12,7 @@ import {
   Clock, Loader2, Shield, Map, Navigation, ListTodo,
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
-  Briefcase, Zap, Star,
+  Briefcase, Zap, Star, BarChart3,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -57,6 +57,7 @@ const EnhancedDestinationPicker = lazy(() => import('@/components/driver/Destina
 const IndependentOffersPanel = lazy(() => import('@/components/driver/IndependentOffersPanel'));
 const HiredContractsPanel = lazy(() => import('@/components/driver/HiredContractsPanel'));
 const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicProfile'));
+const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyticsPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -120,6 +121,7 @@ const hiredTabs = [
   { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
@@ -130,6 +132,7 @@ const independentTabs = [
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
@@ -620,6 +623,14 @@ const DriverDashboard = () => {
               </Card>
             </div>
 
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: التحليلات (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="analytics" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverAnalyticsPanel driverId={driverInfo.id} driverType={driverInfo.driver_type} />}
+            </Suspense>
+          </TabsContent>
 
             <QuickActionsGrid
               actions={quickActions}
