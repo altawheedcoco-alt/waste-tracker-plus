@@ -42,6 +42,7 @@ const AuditPortalPage = lazyRetry(() => import("@/pages/AuditPortal"));
 const QuickDeposit = lazyRetry(() => import("@/pages/QuickDeposit"));
 const QuickShipment = lazyRetry(() => import("@/pages/QuickShipment"));
 const QuickDriver = lazyRetry(() => import("@/pages/QuickDriver"));
+const MissionLink = lazyRetry(() => import("@/pages/MissionLink"));
 const QuickShip = lazyRetry(() => import("@/pages/QuickShip"));
 const ScopedAccessPortal = lazyRetry(() => import("@/pages/ScopedAccessPortal"));
 const Terms = lazyRetry(() => import("@/pages/Terms"));
