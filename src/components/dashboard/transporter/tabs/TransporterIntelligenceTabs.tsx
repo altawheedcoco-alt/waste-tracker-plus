@@ -33,6 +33,9 @@ const TransporterIntelligenceTabs = () => (
     {/* ══════ 6. الذكاء الاصطناعي (+ intelligence مدمج) ══════ */}
     <TabsContent value="ai" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في تحليل المستندات">
+          <AIDocumentAnalyzer />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تحليلات الذكاء الاصطناعي">
           <TransporterAIInsights />
         </ErrorBoundary>
