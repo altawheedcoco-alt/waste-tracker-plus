@@ -1,4 +1,4 @@
-import { MapPin, FileBarChart, Clock, CheckCircle2 } from "lucide-react";
+import { MapPin, FileBarChart, Clock, CheckCircle2, Truck, Zap } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useRef } from "react";
 import { motion, useInView } from "framer-motion";
