@@ -485,6 +485,9 @@ export const dashboardRoutes = (
     <Route path="/dashboard/call-center" element={<SupportCenter />} />
     <Route path="/dashboard/ai-document-studio" element={<AIDocumentStudioPage />} />
     <Route path="/dashboard/ai-extracted-data" element={<AIExtractedDataPage />} />
+    <Route path="/dashboard/driver-onboarding" element={<IndependentDriverOnboarding />} />
+    <Route path="/dashboard/driver-contracts" element={<DriverOffers />} />
+    <Route path="/dashboard/shipment-market" element={<DriverOffers />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
