@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { motion } from "framer-motion";
-import { Building2, Briefcase, UserCheck, Truck, Zap, ArrowLeftRight, Star, MapPin } from "lucide-react";
+import { Building2, Briefcase, UserCheck, Truck, Zap, ArrowLeftRight, Star, MapPin, Link2 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
 const driverTypes = [
@@ -8,26 +8,26 @@ const driverTypes = [
     icon: Building2,
     titleAr: "سائق تابع للجهة",
     titleEn: "Company Driver",
-    descAr: "سائق مرتبط بجهة نقل محددة — ينفّذ مهام الجهة فقط ويتبع نظامها التشغيلي بالكامل",
-    descEn: "Driver bound to a specific transport company — executes company missions only",
+    descAr: "موظف دائم مرتبط بجهة نقل — له حساب كامل وصلاحيات تشغيلية شاملة، ينفّذ مهام الجهة ويتبع نظامها",
+    descEn: "Permanent employee bound to a transport company — full account with complete operational permissions",
     features: [
-      { ar: "مهام من الجهة مباشرة", en: "Direct company missions" },
-      { ar: "تتبع GPS لحظي", en: "Real-time GPS tracking" },
-      { ar: "أدوات ميدانية متكاملة", en: "Full field tools" },
+      { ar: "حساب كامل + لوحة تحكم", en: "Full account + dashboard" },
+      { ar: "إنشاء وإغلاق شحنات", en: "Create & close shipments" },
+      { ar: "تتبع GPS + خرائط ميدانية", en: "GPS tracking + field maps" },
     ],
     gradient: "from-blue-500 to-cyan-600",
     bgGlow: "bg-blue-500/10",
   },
   {
     icon: Briefcase,
-    titleAr: "سائق حر مؤجر",
-    titleEn: "Freelance Hired",
-    descAr: "سائق مستقل يقبل مهام من جهات مختلفة بعقود اختيارية — مرونة كاملة مع ضمان الدخل",
-    descEn: "Independent driver accepting missions from various companies — full flexibility",
+    titleAr: "سائق خارجي مؤقت",
+    titleEn: "External Temporary",
+    descAr: "سائق خارجي يستلم رابط لمرة واحدة فقط من الجهة لتنفيذ شحنة محددة — لا يملك حساب ودوره ينتهي بانتهاء المهمة",
+    descEn: "External driver receives a one-time link to execute a single shipment — no account, role ends with the mission",
     features: [
-      { ar: "عروض مهام متعددة", en: "Multiple mission offers" },
-      { ar: "عقود اختيارية مرنة", en: "Optional flexible contracts" },
-      { ar: "تسعيرة شخصية", en: "Personal pricing" },
+      { ar: "رابط مؤقت لمرة واحدة", en: "One-time mission link" },
+      { ar: "لا يملك حساب في النظام", en: "No system account" },
+      { ar: "دوره ينتهي بالتسليم", en: "Role ends on delivery" },
     ],
     gradient: "from-amber-500 to-orange-600",
     bgGlow: "bg-amber-500/10",
@@ -36,12 +36,12 @@ const driverTypes = [
     icon: UserCheck,
     titleAr: "سائق مستقل",
     titleEn: "Independent Driver",
-    descAr: "سائق حر يتلقى شحنات عبر التوزيع الذكي ويتصفح سوق الشحنات — ريادة أعمال حقيقية",
-    descEn: "Free driver receiving shipments via Smart Dispatch & browsing the marketplace",
+    descAr: "سائق حر يسجل نفسه ويتلقى طلبات شحن عبر نظام شبيه بـ Uber — يحدد أجرته ويقبل أو يرفض حسب العرض والطلب",
+    descEn: "Free driver who self-registers and receives shipment requests via an Uber-like system — sets own rates",
     features: [
-      { ar: "التوزيع الذكي التلقائي", en: "Smart auto-dispatch" },
-      { ar: "سوق الشحنات والمزايدة", en: "Shipment marketplace" },
-      { ar: "نظام سمعة وتقييم", en: "Rating & reputation" },
+      { ar: "نظام عرض وطلب (Uber model)", en: "Supply & demand (Uber model)" },
+      { ar: "تسعير ذاتي ومزايدة", en: "Self-pricing & bidding" },
+      { ar: "سوق شحنات + توزيع ذكي", en: "Marketplace + Smart Dispatch" },
     ],
     gradient: "from-emerald-500 to-green-600",
     bgGlow: "bg-emerald-500/10",
@@ -77,8 +77,8 @@ const DriverEcosystemShowcase = memo(() => {
           </h2>
           <p className="text-sm sm:text-lg text-muted-foreground max-w-2xl mx-auto">
             {isAr
-              ? "أول منصة عربية تفصل بين السائقين حسب طبيعة العمل — كل نوع له واجهته وأدواته وصلاحياته الخاصة"
-              : "The first Arabic platform to differentiate drivers by work nature — each type has its own UI, tools & permissions"}
+              ? "أول منصة عربية تفصل بين السائقين حسب طبيعة العمل — كل نوع له واجهته وآلية عمله الخاصة"
+              : "The first Arabic platform to differentiate drivers by work nature — each type has its own interface and workflow"}
           </p>
         </motion.div>
 
@@ -93,7 +93,6 @@ const DriverEcosystemShowcase = memo(() => {
               transition={{ delay: i * 0.12, duration: 0.5 }}
               className="group relative bg-card border border-border/50 rounded-2xl p-5 sm:p-7 hover:border-primary/30 hover:shadow-xl transition-all duration-300 hover:-translate-y-1 overflow-hidden"
             >
-              {/* Background glow */}
               <div className={`absolute -top-20 -right-20 w-40 h-40 ${type.bgGlow} rounded-full blur-3xl group-hover:scale-150 transition-transform duration-500`} />
 
               <div className="relative z-10">
@@ -128,8 +127,9 @@ const DriverEcosystemShowcase = memo(() => {
         >
           {[
             { icon: ArrowLeftRight, labelAr: "توزيع ذكي تلقائي", labelEn: "Smart Auto-Dispatch" },
+            { icon: Link2, labelAr: "روابط مؤقتة للمؤجرين", labelEn: "One-Time Mission Links" },
             { icon: Star, labelAr: "تقييم ثنائي الاتجاه", labelEn: "Dual Rating System" },
-            { icon: MapPin, labelAr: "تتبع نطاق الخدمة", labelEn: "Service Area Tracking" },
+            { icon: MapPin, labelAr: "نظام عرض وطلب", labelEn: "Supply & Demand Model" },
           ].map((item) => (
             <div key={item.labelAr} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-card border border-border/50">
               <item.icon className="w-4 h-4 text-primary" />

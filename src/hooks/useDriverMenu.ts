@@ -1,5 +1,6 @@
 /**
  * Hook لتحديد عناصر القائمة الجانبية حسب نوع السائق
+ * ملاحظة: السائق المؤجر (hired) لا يملك حساب — لا يصل للوحة التحكم أصلاً
  */
 import {
   LayoutDashboard, Package, MapPin, User, FileText,
@@ -17,7 +18,7 @@ export interface DriverMenuItem {
   badge?: number;
 }
 
-// عناصر مشتركة لجميع السائقين
+// عناصر مشتركة لجميع السائقين (الذين لديهم حساب)
 const commonItems = (lang: string, notifCount?: number): DriverMenuItem[] => [
   { icon: LayoutDashboard, label: lang === 'ar' ? 'لوحة التحكم' : 'Dashboard', path: '/dashboard', key: 'driver-dashboard' },
   { icon: MapPin, label: lang === 'ar' ? 'موقعي' : 'My Location', path: '/dashboard/my-location', key: 'driver-location' },
@@ -36,6 +37,7 @@ export function getDriverMenuItems(
 
   switch (driverType) {
     case 'company':
+      // سائق تابع — موظف دائم بصلاحيات كاملة
       return [
         common[0], // dashboard
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
@@ -46,20 +48,13 @@ export function getDriverMenuItems(
       ];
 
     case 'hired':
-      return [
-        common[0],
-        { icon: Package, label: lang === 'ar' ? 'مهامي' : 'My Tasks', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
-        { icon: ShoppingCart, label: lang === 'ar' ? 'سوق الشحنات' : 'Marketplace', path: '/dashboard/shipment-market', key: 'driver-market' },
-        { icon: Zap, label: lang === 'ar' ? 'العروض' : 'Offers', path: '/dashboard/driver-offers', key: 'driver-offers', badge: badges?.offers },
-        { icon: Briefcase, label: lang === 'ar' ? 'العقود' : 'Contracts', path: '/dashboard/driver-contracts', key: 'driver-contracts', badge: badges?.contracts },
-        { icon: CreditCard, label: lang === 'ar' ? 'المحفظة' : 'Wallet', path: '/dashboard/driver-wallet', key: 'driver-wallet' },
-        { icon: BarChart3, label: lang === 'ar' ? 'التحليلات' : 'Analytics', path: '/dashboard/driver-analytics', key: 'driver-analytics' },
-        common[1],
-        { icon: Star, label: lang === 'ar' ? 'ملفي المهني' : 'Public Profile', path: '/dashboard/driver-profile', key: 'driver-profile' },
-        ...common.slice(2),
-      ];
+      // السائق المؤجر لا يملك حساب — لا يصل أصلاً للوحة التحكم
+      // يستخدم رابط مؤقت /mission/:token فقط
+      // هذا fallback نظري فقط
+      return [];
 
     case 'independent':
+      // سائق مستقل — نموذج Uber/InDriver
       return [
         common[0],
         { icon: Zap, label: lang === 'ar' ? 'العروض الواردة' : 'Incoming Offers', path: '/dashboard/driver-offers', key: 'driver-offers', badge: badges?.offers },
