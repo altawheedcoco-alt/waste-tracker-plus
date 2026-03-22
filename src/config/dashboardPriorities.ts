@@ -30,8 +30,9 @@ export interface LiveBoostCondition {
   boostAmount: number;
 }
 
-/** أولويات جهة واحدة */
+/** أولويات كيان واحد (جهة أو سائق أو مدير) */
 export interface OrgPriorityProfile {
+  /** نوع الكيان — السائق كيان مستقل وليس جهة */
   orgType: string;
   labelAr: string;
   /** الودجات مرتبة حسب الأولوية الافتراضية */

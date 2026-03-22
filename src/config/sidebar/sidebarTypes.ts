@@ -22,4 +22,14 @@ export interface SidebarItemConfig {
   bindingType?: BindingType;
 }
 
-export type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office' | 'admin' | 'driver';
+/**
+ * أنواع الجهات (المنظمات) الفعلية فقط
+ * السائق ليس جهة — هو كيان مستقل بطبيعة خاصة
+ */
+export type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office';
+
+/**
+ * جميع أنواع الكيانات في لوحة التحكم
+ * يشمل الجهات + الكيانات الخاصة (سائق، مدير، موظف)
+ */
+export type DashboardEntityType = OrgType | 'admin' | 'driver' | 'employee';

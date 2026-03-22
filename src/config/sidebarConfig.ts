@@ -41,7 +41,15 @@ export interface SidebarItemConfig {
   requiredPermissions?: string[];
 }
 
-type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office' | 'admin' | 'driver';
+/**
+ * أنواع الجهات الفعلية — السائق كيان مستقل وليس جهة
+ */
+type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'regulator' | 'consultant' | 'consulting_office';
+
+/**
+ * جميع كيانات لوحة التحكم (جهات + كيانات خاصة)
+ */
+type DashboardEntityType = OrgType | 'admin' | 'driver' | 'employee';
 
 /**
  * Top-level standalone items (always visible, not in groups)
