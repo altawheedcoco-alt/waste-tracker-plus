@@ -285,16 +285,20 @@ const OrganizationPosts = ({
     if (!post.media_urls || post.media_urls.length === 0) return null;
 
     if (post.post_type === 'video') {
+      const videoUrl = fixStorageUrl(post.media_urls[0]);
       return (
         <div className="mt-3 rounded-lg overflow-hidden bg-black">
           <video 
             ref={(el) => {
               if (el) videoRefs.current.set(post.id, el);
             }}
-            src={post.media_urls[0]} 
+            src={videoUrl} 
             controls 
+            playsInline
+            preload="metadata"
             className="w-full max-h-[500px] object-contain"
             onPlay={(e) => handleVideoPlay(post.id, e.currentTarget)}
+            onError={(e) => console.error('Video load error:', videoUrl, e)}
           />
         </div>
       );
