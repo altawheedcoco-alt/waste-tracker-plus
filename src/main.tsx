@@ -28,6 +28,10 @@ const renderFatalError = (rootElement: HTMLElement) => {
 };
 
 const bootstrapApp = async () => {
+  // تنظيف الكاش القديم قبل أي شيء
+  const { bustStaleCaches } = await import('./lib/cacheBuster');
+  await bustStaleCaches();
+
   const rootElement = document.getElementById("root");
   if (!rootElement) return;
 
