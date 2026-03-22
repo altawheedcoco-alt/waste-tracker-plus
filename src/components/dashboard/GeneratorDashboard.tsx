@@ -211,7 +211,8 @@ const GeneratorDashboard = () => {
   });
 
   return (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-3 sm:space-y-6">
+      {/* 1. الهيدر والهوية */}
       <ConnectedSmartBrief role="generator" />
       <StoryCircles />
 
@@ -281,26 +282,33 @@ const GeneratorDashboard = () => {
         </Button>
       </DashboardV2Header>
 
-
-      {/* ★ مركز التواصل والمشاركة */}
-      <Suspense fallback={<TabFallback />}>
-        <CommunicationHubWidget />
-      </Suspense>
-
-      {/* ★ مركز القيادة */}
+      {/* 2. مركز القيادة */}
       <GeneratorCommandCenter />
 
-      {/* ★ Daily Operations */}
+      {/* 3. الإجراءات السريعة */}
+      <QuickActionsGrid
+        actions={quickActions}
+        title={t('dashboard.quickActions')}
+        subtitle={t('dashboard.quickActionsSubtitle')}
+      />
+
+      {/* 4. ملخص العمليات اليومية */}
       <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
         <DailyOperationsSummary />
       </ErrorBoundary>
 
-      <AutomationSettingsDialog organizationType="generator" />
-
+      {/* 5. التنبيهات والإشعارات */}
       <DashboardAlertsHub orgType="generator" />
 
+      {/* 6. التواصل */}
+      <Suspense fallback={null}>
+        <CommunicationHubWidget />
+      </Suspense>
+
+      {/* 7. التوثيق والبحث */}
       <PendingApprovalsWidget />
       <UnifiedDocumentSearch />
+      <AutomationSettingsDialog organizationType="generator" />
 
       {/* ★ Tabbed Sections — same pattern as Transporter */}
       <Tabs defaultValue="overview" className="w-full" dir="rtl">
