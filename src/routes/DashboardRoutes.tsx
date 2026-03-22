@@ -44,6 +44,9 @@ const HazardousWasteRegister = lazy(() => import("@/pages/dashboard/HazardousWas
 const WasteTypesClassification = lazy(() => import("@/pages/dashboard/WasteTypesClassification"));
 const MyRequests = lazy(() => import("@/pages/dashboard/MyRequests"));
 const DriverOffers = lazy(() => import("@/pages/dashboard/DriverOffers"));
+const ShipmentMarket = lazy(() => import("@/pages/dashboard/ShipmentMarket"));
+const DriverWallet = lazy(() => import("@/pages/dashboard/DriverWallet"));
+const DriverAnalytics = lazy(() => import("@/pages/dashboard/DriverAnalytics"));
 const RegulatoryUpdates = lazy(() => import("@/pages/dashboard/RegulatoryUpdates"));
 const OperationalPlans = lazy(() => import("@/pages/dashboard/OperationalPlans"));
 const Chat = lazy(() => import("@/pages/dashboard/Chat"));
@@ -488,7 +491,9 @@ export const dashboardRoutes = (
     <Route path="/dashboard/ai-extracted-data" element={<AIExtractedDataPage />} />
     <Route path="/dashboard/driver-onboarding" element={<IndependentDriverOnboarding />} />
     <Route path="/dashboard/driver-contracts" element={<DriverOffers />} />
-    <Route path="/dashboard/shipment-market" element={<DriverOffers />} />
+    <Route path="/dashboard/shipment-market" element={<ShipmentMarket />} />
+    <Route path="/dashboard/driver-wallet" element={<DriverWallet />} />
+    <Route path="/dashboard/driver-analytics" element={<DriverAnalytics />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
