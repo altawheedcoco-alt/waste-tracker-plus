@@ -6,6 +6,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
+import DocumentWatermark from '@/components/documents/DocumentWatermark';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -430,11 +431,12 @@ const UnifiedDocumentViewer = ({
         {/* Preview */}
         <div
           className={cn(
-            'flex-1 bg-muted rounded-lg overflow-hidden flex items-center justify-center',
+            'flex-1 bg-muted rounded-lg overflow-hidden flex items-center justify-center relative',
             inline ? '' : 'min-h-[300px]'
           )}
           style={inline ? { height: inlineHeight } : undefined}
         >
+          <DocumentWatermark enabled={!!(source as any)?.watermarkEnabled} />
           <DocumentPreview
             resolvedUrl={resolvedUrl}
             loading={loading}

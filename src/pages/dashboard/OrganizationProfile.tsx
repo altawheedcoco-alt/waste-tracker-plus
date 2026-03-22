@@ -19,6 +19,10 @@ import {
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
+import DocumentProtectionSettings from '@/components/documents/DocumentProtectionSettings';
+import DocumentPinDialog from '@/components/documents/DocumentPinDialog';
+import DocumentWatermark from '@/components/documents/DocumentWatermark';
+import { useDocumentProtection } from '@/hooks/useDocumentProtection';
 import V2TabsNav, { TabItem } from '@/components/dashboard/shared/V2TabsNav';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import ProfileHeader from '@/components/organization/ProfileHeader';
@@ -83,7 +87,8 @@ const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocum
         {expanded ? 'إخفاء المعاينة' : 'معاينة المستند'}
       </Button>
       {expanded && previewUrl && (
-        <div className="border-t">
+        <div className="border-t relative">
+          <DocumentWatermark enabled={(doc as any)?.watermark_enabled} />
           {isPdf ? (
             <GoogleDocsPdfViewer url={previewUrl} title={doc.file_name} height="450px" />
           ) : (
@@ -133,6 +138,7 @@ const OrganizationProfile = () => {
 
   const isCompanyAdmin = roles.includes('company_admin') || roles.includes('admin');
   const activeTab = getPref(PREF_KEY_ACTIVE_TAB, 'page');
+  const { checkAccess, pinDialogOpen, setPinDialogOpen, pendingAction, handlePinSuccess } = useDocumentProtection();
 
   useEffect(() => {
     if (!user) { navigate('/auth'); return; }
@@ -751,8 +757,17 @@ const OrganizationProfile = () => {
                                   </p>
                                 </div>
                               </div>
-                              <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="icon" onClick={() => handleDownloadDocument(doc)}><Download className="w-4 h-4" /></Button>
+                              <div className="flex items-center gap-1">
+                                {isCompanyAdmin && (
+                                  <DocumentProtectionSettings
+                                    documentId={doc.id}
+                                    initialSettings={doc as any}
+                                    onSaved={() => fetchOrganizationData()}
+                                  />
+                                )}
+                                <Button variant="ghost" size="icon" onClick={() => {
+                                  checkAccess(doc.id, 'download', () => handleDownloadDocument(doc), organization?.id);
+                                }}><Download className="w-4 h-4" /></Button>
                                 {isCompanyAdmin && (
                                   <Button variant="ghost" size="icon" onClick={() => handleDeleteDocument(doc)}><Trash2 className="w-4 h-4 text-destructive" /></Button>
                                 )}
@@ -834,6 +849,18 @@ const OrganizationProfile = () => {
             </ErrorBoundary>
           </TabsContent>
         </Tabs>
+
+        {/* PIN Dialog */}
+        {pendingAction && (
+          <DocumentPinDialog
+            open={pinDialogOpen}
+            onOpenChange={setPinDialogOpen}
+            documentId={pendingAction.documentId}
+            actionType={pendingAction.actionType}
+            onSuccess={handlePinSuccess}
+            organizationId={pendingAction.organizationId}
+          />
+        )}
       </div>
     </DashboardLayout>
   );
