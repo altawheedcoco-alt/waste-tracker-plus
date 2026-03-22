@@ -24,8 +24,11 @@ function isTyping(e: KeyboardEvent): boolean {
 }
 
 function matchesShortcut(e: KeyboardEvent, s: KeyboardShortcut): boolean {
-  const key = s.key.toLowerCase();
-  if (e.key.toLowerCase() !== key && e.code.toLowerCase() !== key) return false;
+  const key = s.key?.toLowerCase();
+  if (!key) return false;
+  const eventKey = e.key?.toLowerCase() ?? '';
+  const eventCode = e.code?.toLowerCase() ?? '';
+  if (eventKey !== key && eventCode !== key) return false;
   if (!!s.ctrl !== (e.ctrlKey || e.metaKey)) return false;
   if (!!s.alt !== e.altKey) return false;
   if (!!s.shift !== e.shiftKey) return false;
