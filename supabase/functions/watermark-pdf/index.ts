@@ -103,20 +103,27 @@ Deno.serve(async (req) => {
     const userName = profile?.full_name || user.email || "User";
     const orgName = org?.name || "";
     const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
-    const watermarkText = [userName, orgName, timestamp].filter(Boolean).join(" • ");
+    const watermarkText = [userName, orgName, timestamp].filter(Boolean).join(" - ");
+
+    const legalLines = [
+      "Unauthorized use prohibited without written consent",
+      "Distribution or printing without permission is forbidden",
+      "iRecycle disclaims liability for any illegal use",
+    ];
 
     const pages = pdfDoc.getPages();
     for (const page of pages) {
       const { width, height } = page.getSize();
       const fontSize = 10;
-      const textWidth = font.widthOfTextAtSize(watermarkText, fontSize);
+      const legalFontSize = 8;
 
-      // Tile watermark diagonally across the page
-      const stepX = textWidth + 60;
-      const stepY = 80;
+      // Tile user watermark diagonally
+      const stepX = 350;
+      const stepY = 120;
 
       for (let y = -height; y < height * 2; y += stepY) {
         for (let x = -width; x < width * 2; x += stepX) {
+          // User info line
           page.drawText(watermarkText, {
             x,
             y,
@@ -125,6 +132,19 @@ Deno.serve(async (req) => {
             color: rgb(0.7, 0.7, 0.7),
             opacity: 0.15,
             rotate: degrees(-35),
+          });
+
+          // Legal lines below
+          legalLines.forEach((line, i) => {
+            page.drawText(line, {
+              x: x + 10,
+              y: y - 16 - i * 12,
+              size: legalFontSize,
+              font,
+              color: rgb(0.8, 0.3, 0.3),
+              opacity: 0.1,
+              rotate: degrees(-35),
+            });
           });
         }
       }
