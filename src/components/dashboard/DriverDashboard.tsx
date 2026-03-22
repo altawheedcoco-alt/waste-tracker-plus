@@ -119,10 +119,11 @@ const companyTabs = [
 const hiredTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
+  { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'contracts', label: 'العقود', icon: Briefcase },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
-  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
@@ -130,10 +131,11 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'offers', label: 'العروض', icon: Zap },
+  { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
   { value: 'field', label: 'أدوات الميدان', icon: Wrench },
-  { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
   { value: 'profile', label: 'ملفي المهني', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
