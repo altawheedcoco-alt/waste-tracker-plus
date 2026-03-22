@@ -81,23 +81,21 @@ const DriverRatingDialog = ({
     mutationFn: async () => {
       if (!ratings.overall) throw new Error('التقييم العام مطلوب');
 
-      const payload: Record<string, any> = {
-        driver_id: driverId,
-        shipment_id: shipmentId,
-        rated_by_user_id: user?.id,
-        rated_by_org_id: ratedByOrgId || null,
-        rating_direction: direction,
-        overall_rating: ratings.overall,
-        punctuality_rating: ratings.punctuality || null,
-        safety_rating: ratings.safety || null,
-        communication_rating: ratings.communication || null,
-        professionalism_rating: ratings.professionalism || null,
-        comment: comment.trim() || null,
-      };
-
       const { error } = await supabase
         .from('driver_ratings')
-        .insert(payload);
+        .insert([{
+          driver_id: driverId,
+          shipment_id: shipmentId,
+          rated_by_user_id: user?.id,
+          rated_by_org_id: ratedByOrgId || null,
+          rating_direction: direction,
+          overall_rating: ratings.overall,
+          punctuality_rating: ratings.punctuality || null,
+          safety_rating: ratings.safety || null,
+          communication_rating: ratings.communication || null,
+          professionalism_rating: ratings.professionalism || null,
+          comment: comment.trim() || null,
+        }]);
       if (error) throw error;
     },
     onSuccess: () => {
