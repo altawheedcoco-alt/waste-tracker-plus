@@ -65,6 +65,8 @@ export function getDriverMenuItems(
         { icon: Zap, label: lang === 'ar' ? 'العروض الواردة' : 'Incoming Offers', path: '/dashboard/driver-offers', key: 'driver-offers', badge: badges?.offers },
         { icon: ShoppingCart, label: lang === 'ar' ? 'سوق الشحنات' : 'Shipment Market', path: '/dashboard/shipment-market', key: 'driver-market' },
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
+        { icon: CreditCard, label: lang === 'ar' ? 'المحفظة' : 'Wallet', path: '/dashboard/driver-wallet', key: 'driver-wallet' },
+        { icon: BarChart3, label: lang === 'ar' ? 'التحليلات' : 'Analytics', path: '/dashboard/driver-analytics', key: 'driver-analytics' },
         common[1],
         { icon: Star, label: lang === 'ar' ? 'ملفي المهني' : 'Public Profile', path: '/dashboard/driver-profile', key: 'driver-public-profile' },
         ...common.slice(2),
