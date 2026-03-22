@@ -42,6 +42,9 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 
+import DriverTypeBadge from '@/components/drivers/DriverTypeBadge';
+import type { DriverType } from '@/types/driver-types';
+
 interface Driver {
   id: string;
   license_number: string;
@@ -50,6 +53,9 @@ interface Driver {
   license_expiry: string | null;
   is_available: boolean;
   created_at: string;
+  driver_type: DriverType;
+  rating: number;
+  total_trips: number;
   profile: {
     id: string;
     full_name: string;
