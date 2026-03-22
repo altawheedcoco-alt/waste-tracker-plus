@@ -750,7 +750,7 @@ const OrganizationProfile = () => {
                           <div key={doc.id} className={`border rounded-lg overflow-hidden transition-all ${isProtected ? 'border-2 border-blue-500 ring-1 ring-blue-500/20 bg-blue-50/30 dark:bg-blue-950/10' : ''}`}>
                             <div className="flex items-center justify-between p-3">
                               <div className="flex items-center gap-3">
-                                <FileText className="w-8 h-8 text-primary" />
+                                {isProtected ? <Shield className="w-8 h-8 text-blue-500" /> : <FileText className="w-8 h-8 text-primary" />}
                                 <div>
                                   <p className="font-medium">{doc.file_name}</p>
                                   <p className="text-sm text-muted-foreground">
