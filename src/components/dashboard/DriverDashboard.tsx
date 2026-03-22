@@ -68,6 +68,9 @@ interface DriverInfo {
   vehicle_type: string | null;
   vehicle_plate: string | null;
   is_available: boolean;
+  driver_type: DriverType;
+  rating: number;
+  total_trips: number;
   organization: {
     name: string;
     phone: string;
