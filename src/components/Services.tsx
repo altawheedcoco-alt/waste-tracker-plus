@@ -21,6 +21,26 @@ const Services = () => {
       icon: Clock, title: t('services.scheduling'), description: t('services.schedulingDesc'),
       features: [t('services.schedFeature1'), t('services.schedFeature2'), t('services.schedFeature3')],
     },
+    {
+      icon: Truck,
+      title: language === 'ar' ? 'إدارة أسطول السائقين' : 'Driver Fleet Management',
+      description: language === 'ar' ? 'إدارة ثلاثة أنواع من السائقين (تابع/مؤجر/مستقل) مع تتبع الأداء والتقييم' : 'Manage three driver types with performance tracking & rating',
+      features: [
+        language === 'ar' ? 'سائق تابع + مؤجر + مستقل' : 'Company + Hired + Independent',
+        language === 'ar' ? 'تتبع GPS لحظي للمركبات' : 'Real-time vehicle GPS tracking',
+        language === 'ar' ? 'محفظة مالية لكل سائق' : 'Digital wallet per driver',
+      ],
+    },
+    {
+      icon: Zap,
+      title: language === 'ar' ? 'التوزيع الذكي' : 'Smart Dispatch',
+      description: language === 'ar' ? 'خوارزمية ذكية توزع الشحنات تلقائياً لأقرب سائق متاح ضمن نطاق الخدمة' : 'Smart algorithm auto-dispatches shipments to nearest available driver',
+      features: [
+        language === 'ar' ? 'توزيع تلقائي حسب القرب' : 'Auto-dispatch by proximity',
+        language === 'ar' ? 'ترتيب بالتقييم والقبول' : 'Ranked by rating & acceptance',
+        language === 'ar' ? 'إشعارات فورية للسائق' : 'Instant driver notifications',
+      ],
+    },
   ];
 
   return (
