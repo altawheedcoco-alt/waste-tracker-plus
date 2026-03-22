@@ -25,6 +25,8 @@ import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import QuickActionsGrid from './QuickActionsGrid';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 
 // Modular tab groups
 import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
@@ -186,7 +188,8 @@ const RecyclerDashboard = () => {
   }});
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3 sm:space-y-6">
+      {/* 1. الهيدر والهوية */}
       <ConnectedSmartBrief role="recycler" />
       <StoryCircles />
 
@@ -241,10 +244,26 @@ const RecyclerDashboard = () => {
         </Button>
       </DashboardV2Header>
 
-      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+      {/* 2. مركز القيادة */}
       <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
+      {/* 3. الإجراءات السريعة */}
+      <QuickActionsGrid
+        actions={quickActions}
+        title={t('dashboard.quickActions')}
+        subtitle="وظائف التدوير والإنتاج"
+      />
+
+      {/* 4. التنبيهات والإشعارات */}
+      <DashboardAlertsHub orgType="recycler" />
+
+      {/* 5. التواصل */}
+      <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
+
+      {/* 6. المنشأة */}
       {facility && <FacilityCapacityCard facility={facility} />}
+
+      {/* 7. التبويبات */}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
         <V2TabsNav tabs={[

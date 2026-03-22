@@ -201,7 +201,8 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
   }});
 
   return (
-    <div className="space-y-6" dir="rtl">
+    <div className="space-y-3 sm:space-y-6" dir="rtl">
+      {/* 1. الهيدر والهوية */}
       <ConnectedSmartBrief role="disposal" />
       <StoryCircles />
 
@@ -269,18 +270,34 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
         </Button>
       </DashboardV2Header>
 
+      {/* 2. الإجراءات السريعة */}
+      <QuickActionsGrid
+        actions={quickActions}
+        title="الإجراءات السريعة"
+        subtitle="وظائف التخلص النهائي"
+      />
 
+      {/* 3. التنبيهات والإشعارات */}
+      <DashboardAlertsHub orgType="disposal" />
+
+      {/* 4. التواصل */}
       <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
 
+      {/* 5. المنشأة */}
       {facility && <FacilityCapacityCard facility={facility} />}
       <StatsCardsGrid stats={statsCards} isLoading={statsLoading} />
-      <DashboardWidgetCustomizer orgType="disposal" />
       <AutomationSettingsDialog organizationType="disposal" />
 
-      {/* Main Tabs — 6 optimized tabs */}
+      {/* 6. العمليات اليومية */}
+      <DisposalDailyOperations />
+      <DisposalIncomingPanel facilityId={facility?.id} />
+      <PendingApprovalsWidget />
+      <DisposalRecentOperations />
+
+      {/* 7. التبويبات */}
       <Tabs defaultValue="operations" className="w-full">
         <V2TabsNav tabs={[
-          { value: 'operations', label: 'العمليات', icon: Package, bindingType: DISPOSAL_TAB_BINDINGS['operations']?.type },
+          { value: 'operations', label: 'التحليلات', icon: Package, bindingType: DISPOSAL_TAB_BINDINGS['operations']?.type },
           { value: 'shipments', label: 'الشحنات الواردة', icon: Truck, bindingType: DISPOSAL_TAB_BINDINGS['shipments']?.type },
           { value: 'compliance', label: 'الامتثال والسلامة', icon: Shield, bindingType: DISPOSAL_TAB_BINDINGS['compliance']?.type },
           { value: 'regulatory', label: 'المستندات التنظيمية', icon: Scale, bindingType: DISPOSAL_TAB_BINDINGS['regulatory']?.type },
@@ -289,9 +306,8 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           { value: 'annual_plan', label: 'الخطة السنوية', icon: ClipboardList, bindingType: DISPOSAL_TAB_BINDINGS['annual_plan']?.type },
         ] as TabItem[]} />
 
-        {/* 1. Operations Tab */}
+        {/* 1. Operations/Analytics Tab */}
         <TabsContent value="operations" className="mt-4 space-y-4">
-          {/* Environmental KPIs & License Alerts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Suspense fallback={<Skeleton className="h-[280px]" />}>
               <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
@@ -305,23 +321,11 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
             </Suspense>
           </div>
 
-          <DisposalDailyOperations />
-          <DashboardAlertsHub orgType="disposal" />
-
           <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
             <Suspense fallback={<Skeleton className="h-[400px] w-full" />}>
               <OrgPerformanceRadar />
             </Suspense>
           </ErrorBoundary>
-
-          <DisposalIncomingPanel facilityId={facility?.id} />
-          <PendingApprovalsWidget />
-          <QuickActionsGrid
-            actions={quickActions}
-            title="الإجراءات السريعة"
-            subtitle="وظائف التخلص النهائي"
-          />
-          <DisposalRecentOperations />
         </TabsContent>
 
         {/* 2. Incoming Shipments Tab */}
