@@ -431,11 +431,12 @@ const UnifiedDocumentViewer = ({
         {/* Preview */}
         <div
           className={cn(
-            'flex-1 bg-muted rounded-lg overflow-hidden flex items-center justify-center',
+            'flex-1 bg-muted rounded-lg overflow-hidden flex items-center justify-center relative',
             inline ? '' : 'min-h-[300px]'
           )}
           style={inline ? { height: inlineHeight } : undefined}
         >
+          <DocumentWatermark enabled={!!(source as any)?.watermarkEnabled} />
           <DocumentPreview
             resolvedUrl={resolvedUrl}
             loading={loading}
