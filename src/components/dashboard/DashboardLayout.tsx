@@ -261,10 +261,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   const isConsultingOffice = (organization?.organization_type as string) === 'consulting_office';
   const isDriver = roles.includes('driver');
 
+  const isStandaloneDriver = isDriver;
+
   const getOrganizationIcon = () => {
-    if (isAdmin) {
-      return Settings;
-    }
+    if (isAdmin) return Settings;
+    if (isStandaloneDriver) return Car;
     switch (organization?.organization_type as string) {
       case 'generator':
         return Building2;
@@ -287,6 +288,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   const getOrganizationLabel = () => {
     if (isAdmin) return t('dashboard.orgTypes.admin');
+    if (isStandaloneDriver) return t('dashboard.orgTypes.driver');
     switch (organization?.organization_type as string) {
       case 'generator': return t('dashboard.orgTypes.generator');
       case 'transporter': return t('dashboard.orgTypes.transporter');
@@ -301,7 +303,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   const getEntityTypeLabel = () => {
     if (isAdmin) return t('dashboard.orgTypes.admin');
-    if (isDriver && !organization) return t('dashboard.orgTypes.driver');
+    if (isStandaloneDriver) return t('dashboard.orgTypes.driver');
     switch (organization?.organization_type as string) {
       case 'generator': return t('dashboard.orgTypes.generator');
       case 'transporter': return t('dashboard.orgTypes.transporter');
@@ -316,7 +318,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
   const getEntityName = () => {
     if (isAdmin) return t('dashboard.orgTypes.systemAdmin');
-    if (isDriver && !organization) return profile?.full_name || t('dashboard.orgTypes.driver');
+    if (isStandaloneDriver) return profile?.full_name || t('dashboard.orgTypes.driver');
     return organization?.name || profile?.full_name || t('dashboard.orgTypes.user');
   };
 
