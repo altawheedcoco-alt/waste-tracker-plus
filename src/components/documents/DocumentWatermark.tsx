@@ -80,7 +80,7 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
         MozUserSelect: 'none',
         backgroundImage: `url(${tileUrl})`,
         backgroundRepeat: 'repeat',
-        backgroundSize: '500px 200px',
+        backgroundSize: '700px 420px',
         width: '100%',
         height: '100%',
         minHeight: '100%',
