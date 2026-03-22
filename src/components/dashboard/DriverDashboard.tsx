@@ -252,9 +252,12 @@ const DriverDashboard = () => {
             <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full border-2 border-card ${driverInfo?.is_available ? 'bg-emerald-500' : 'bg-muted-foreground/50'}`} />
           </div>
           <div>
-            <span className="text-xs font-medium">
-              {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-xs font-medium">
+                {driverInfo?.is_available ? '🟢 متاح للمهام' : '⚫ غير متاح'}
+              </span>
+              {driverInfo && <DriverTypeBadge type={driverInfo.driver_type || 'company'} size="sm" />}
+            </div>
             {driverInfo?.vehicle_plate && (
               <p className="text-[10px] text-muted-foreground">{driverInfo.vehicle_plate}</p>
             )}

@@ -650,16 +650,24 @@ const TransporterDrivers = () => {
                   </div>
                 </CardHeader>
                 <CardContent className="space-y-3 p-3 sm:p-6 pt-0 sm:pt-0">
-                  <div className="flex items-center justify-between">
-                    <Badge variant={driver.is_available ? 'default' : 'secondary'}>
-                      {driver.is_available ? 'متاح' : 'غير متاح'}
-                    </Badge>
+                  <div className="flex items-center justify-between flex-wrap gap-1">
+                    <div className="flex items-center gap-1.5">
+                      <Badge variant={driver.is_available ? 'default' : 'secondary'}>
+                        {driver.is_available ? 'متاح' : 'غير متاح'}
+                      </Badge>
+                      <DriverTypeBadge type={driver.driver_type || 'company'} />
+                    </div>
                     {driver.activeShipments > 0 && (
                       <Badge variant="outline" className="flex items-center gap-1">
                         <Package className="w-3 h-3" />
                         {driver.activeShipments} شحنات نشطة
                       </Badge>
                     )}
+                  </div>
+                  {/* Rating & Trips */}
+                  <div className="flex items-center gap-3 text-xs text-muted-foreground">
+                    <span>⭐ {(driver.rating || 5).toFixed(1)}</span>
+                    <span>🚛 {driver.total_trips || 0} رحلة</span>
                   </div>
 
                   <div className="space-y-2 text-sm">
