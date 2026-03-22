@@ -87,6 +87,36 @@ const showcaseItems = [
     statEn: "Digital hiring",
     gradient: "from-sky-500 to-blue-500",
   },
+  {
+    icon: Car,
+    titleAr: "منظومة السائقين الثلاثية",
+    titleEn: "Triple Driver Ecosystem",
+    descAr: "ثلاثة أنواع سائقين (تابع/مؤجر/مستقل) — كل نوع بواجهة وصلاحيات وأدوات مخصصة",
+    descEn: "Three driver types (Company/Hired/Independent) — each with dedicated UI & permissions",
+    statAr: "Smart Dispatch",
+    statEn: "Smart Dispatch",
+    gradient: "from-rose-500 to-red-600",
+  },
+  {
+    icon: ShoppingCart,
+    titleAr: "سوق الشحنات والمزايدة",
+    titleEn: "Shipment Marketplace",
+    descAr: "سوق مفتوح للشحنات مع نظام مزايدة عكسية — تنافسية شفافة وتسعير ديناميكي",
+    descEn: "Open shipment marketplace with reverse auction — transparent competition & dynamic pricing",
+    statAr: "مزايدة حية",
+    statEn: "Live auction",
+    gradient: "from-fuchsia-500 to-pink-600",
+  },
+  {
+    icon: Star,
+    titleAr: "نظام السمعة والتقييم",
+    titleEn: "Rating & Reputation",
+    descAr: "تقييم ثنائي الاتجاه مع مستويات سمعة تراكمية (جديد → نخبة) — ثقة مبنية على البيانات",
+    descEn: "Dual-direction rating with cumulative reputation levels — data-driven trust",
+    statAr: "٤ مستويات",
+    statEn: "4 levels",
+    gradient: "from-amber-500 to-yellow-600",
+  },
 ];
 
 const PlatformShowcase = memo(() => {
