@@ -230,6 +230,7 @@ const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const PlatformFeaturesDoc = lazy(() => import("@/pages/dashboard/PlatformFeaturesDoc"));
 const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMonitor"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
+const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
 /**
  * All dashboard routes wrapped inside a single DashboardRouteGuard layout route.
