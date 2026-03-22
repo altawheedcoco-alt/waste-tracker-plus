@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
           });
 
           // Repeated user marker offset
-          page.drawText(`-- Protected: ${userName} --`, {
+          page.drawText(`-- Protected: ${userName} - ${timestamp} --`, {
             x: x + 20,
             y: y - 60,
             size: 8,
