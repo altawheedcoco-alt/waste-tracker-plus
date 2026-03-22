@@ -1,8 +1,8 @@
 /**
  * Document Watermark Overlay — طبقة العلامة المائية المتقدمة
- * تُعرض فوق المستند لمنع النسخ والتصوير
+ * تغطي كامل صفحات المستند بغض النظر عن الطول
  */
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useRef, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { format } from 'date-fns';
 
@@ -14,6 +14,10 @@ interface DocumentWatermarkProps {
 
 const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermarkProps) => {
   const { user, profile, organization } = useAuth();
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [bgImage, setBgImage] = useMemo(() => {
+    return [null as string | null, () => {}];
+  }, []);
 
   const watermarkText = useMemo(() => {
     const name = userName || profile?.full_name || user?.email || 'مستخدم';
@@ -22,51 +26,50 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
     return [name, org, time].filter(Boolean).join(' • ');
   }, [userName, orgName, profile?.full_name, user?.email, organization?.name]);
 
-  if (!enabled) return null;
+  // Generate a repeating tile via canvas for infinite coverage
+  const tileUrl = useMemo(() => {
+    if (!enabled) return null;
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return null;
+
+    const w = 500;
+    const h = 200;
+    canvas.width = w;
+    canvas.height = h;
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.save();
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(-35 * Math.PI / 180);
+    ctx.font = 'bold 13px system-ui, Arial, sans-serif';
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.07)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(watermarkText, 0, 0);
+    ctx.restore();
+
+    return canvas.toDataURL('image/png');
+  }, [enabled, watermarkText]);
+
+  if (!enabled || !tileUrl) return null;
 
   return (
     <div
-      className="absolute inset-0 pointer-events-none z-20 overflow-hidden"
+      className="absolute inset-0 pointer-events-none z-20"
       style={{
         userSelect: 'none',
         WebkitUserSelect: 'none',
         MozUserSelect: 'none',
+        backgroundImage: `url(${tileUrl})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '500px 200px',
+        width: '100%',
+        height: '100%',
+        minHeight: '100%',
       }}
       onContextMenu={(e) => e.preventDefault()}
-    >
-      {/* Dense repeating watermark grid */}
-      {Array.from({ length: 12 }).map((_, row) => (
-        <div key={row} className="flex justify-center">
-          {Array.from({ length: 3 }).map((_, col) => (
-            <div
-              key={`${row}-${col}`}
-              className="whitespace-nowrap font-bold"
-              style={{
-                position: 'absolute',
-                fontSize: '12px',
-                color: 'rgba(0,0,0,0.06)',
-                transform: 'rotate(-35deg)',
-                top: `${row * 90 - 40}px`,
-                left: `${col * 350 - 100}px`,
-                letterSpacing: '1px',
-                userSelect: 'none',
-                pointerEvents: 'none',
-              }}
-            >
-              {watermarkText}
-            </div>
-          ))}
-        </div>
-      ))}
-      {/* Anti-screenshot gradient overlay */}
-      <div
-        className="absolute inset-0"
-        style={{
-          background: 'repeating-linear-gradient(-45deg, transparent, transparent 150px, rgba(128,128,128,0.015) 150px, rgba(128,128,128,0.015) 151px)',
-          pointerEvents: 'none',
-        }}
-      />
-    </div>
+    />
   );
 });
 
