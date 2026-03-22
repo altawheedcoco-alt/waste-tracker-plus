@@ -3,6 +3,7 @@
  * دعم السحب والإفلات، الرفع المتعدد، التصنيف الذكي، ومعاينة الملفات
  */
 import { useState, useRef, useCallback, useMemo } from 'react';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
