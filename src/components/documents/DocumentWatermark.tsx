@@ -22,6 +22,12 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
     return [name, org, time].filter(Boolean).join(' • ');
   }, [userName, orgName, profile?.full_name, user?.email, organization?.name]);
 
+  const legalLines = [
+    'يُحظر الاستخدام بدون موافقة كتابية من صاحب الشأن أو ممثله القانوني',
+    'يُمنع التداول أو الطباعة لدى أي جهات حكومية أو خاصة بدون إذن',
+    'iRecycle تُخلي مسؤوليتها عن أي تصرف غير قانوني بالمستند',
+  ];
+
   // Generate a repeating tile via canvas for infinite coverage
   const tileUrl = useMemo(() => {
     if (!enabled) return null;
@@ -29,20 +35,35 @@ const DocumentWatermark = memo(({ enabled, userName, orgName }: DocumentWatermar
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
 
-    const w = 500;
-    const h = 200;
+    const w = 700;
+    const h = 420;
     canvas.width = w;
     canvas.height = h;
 
     ctx.clearRect(0, 0, w, h);
+    
+    // Draw user info watermark (diagonal)
     ctx.save();
-    ctx.translate(w / 2, h / 2);
+    ctx.translate(w / 2, 100);
     ctx.rotate(-35 * Math.PI / 180);
     ctx.font = 'bold 13px system-ui, Arial, sans-serif';
     ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(watermarkText, 0, 0);
+    ctx.restore();
+
+    // Draw legal lines (diagonal, smaller)
+    ctx.save();
+    ctx.translate(w / 2, 260);
+    ctx.rotate(-35 * Math.PI / 180);
+    ctx.font = '10px system-ui, Arial, sans-serif';
+    ctx.fillStyle = 'rgba(180, 0, 0, 0.12)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    legalLines.forEach((line, i) => {
+      ctx.fillText(`⚠ ${line}`, 0, i * 18);
+    });
     ctx.restore();
 
     return canvas.toDataURL('image/png');
