@@ -154,7 +154,7 @@ const TransporterDashboard = () => {
   return (
     <div className="space-y-3 sm:space-y-6">
       {/* Sticky Section Nav */}
-      <TransporterSectionNav onTabChange={setActiveTab} />
+      <TransporterSectionNav activeTab={activeTab} onTabChange={setActiveTab} />
 
       <div id="section-header">
         <ConnectedSmartBrief role="transporter" />
