@@ -25,6 +25,8 @@ import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import EnhancedShipmentPrintView from '@/components/shipments/EnhancedShipmentPrintView';
 import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificateDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
+import QuickActionsGrid from './QuickActionsGrid';
+import DashboardAlertsHub from './shared/DashboardAlertsHub';
 
 // Modular tab groups
 import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
