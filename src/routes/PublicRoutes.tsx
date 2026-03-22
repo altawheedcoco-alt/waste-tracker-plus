@@ -79,6 +79,7 @@ export const publicRoutes = (
     <Route path="/deposit/:token" element={<QuickDeposit />} />
     <Route path="/shipment/:token" element={<QuickShipment />} />
     <Route path="/driver/:token" element={<QuickDriver />} />
+    <Route path="/mission/:token" element={<MissionLink />} />
     <Route path="/quick-ship/:code" element={<QuickShip />} />
     <Route path="/shared-shipment/:code" element={<SharedShipmentEdit />} />
     <Route path="/verify" element={<Verify />} />
