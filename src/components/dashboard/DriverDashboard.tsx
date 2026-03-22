@@ -623,6 +623,14 @@ const DriverDashboard = () => {
               </Card>
             </div>
 
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: التحليلات (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="analytics" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverAnalyticsPanel driverId={driverInfo.id} driverType={driverInfo.driver_type} />}
+            </Suspense>
+          </TabsContent>
 
             <QuickActionsGrid
               actions={quickActions}
