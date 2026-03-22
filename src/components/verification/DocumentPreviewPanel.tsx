@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Loader2, FileText, FileWarning, ExternalLink, Gavel } from 'lucide-react';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { OrganizationDocument } from './types';
 import SecureImage from '@/components/ui/SecureImage';
 
