@@ -1,17 +1,22 @@
 import { useRegisterSW } from 'virtual:pwa-register/react';
 import { useEffect } from 'react';
+import { shouldEnablePWA } from '@/lib/pwaRuntime';
 
 /**
  * PWA Auto-Updater — يفرض التحديث فورياً بدون تدخل المستخدم
  * يحل مشكلة عرض النسخ القديمة نهائياً
  */
 export const PWAUpdatePrompt = () => {
+  const pwaEnabled = shouldEnablePWA();
+
   const {
     needRefresh: [needRefresh],
     updateServiceWorker,
   } = useRegisterSW({
-    immediate: true,
+    immediate: pwaEnabled,
     onRegisteredSW(swUrl, r) {
+      if (!pwaEnabled) return;
+
       if (r) {
         // فحص التحديثات كل 30 ثانية
         setInterval(() => r.update(), 30 * 1000);
@@ -30,11 +35,13 @@ export const PWAUpdatePrompt = () => {
 
   // تحديث تلقائي فوري بدون انتظار المستخدم
   useEffect(() => {
+    if (!pwaEnabled) return;
+
     if (needRefresh) {
       console.log('[PWA] Auto-updating to new version...');
       updateServiceWorker(true);
     }
-  }, [needRefresh, updateServiceWorker]);
+  }, [needRefresh, pwaEnabled, updateServiceWorker]);
 
   return null; // لا حاجة لواجهة — التحديث تلقائي
 };
