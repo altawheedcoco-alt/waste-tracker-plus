@@ -28,42 +28,30 @@ import { motion } from 'framer-motion';
 // ============== Types ==============
 
 export interface DocumentSource {
-  /** رابط مباشر (public URL أو signed URL) */
   url?: string;
-  /** مسار في باكت التخزين (يحتاج bucket) */
   storagePath?: string;
-  /** اسم الباكت */
   bucket?: string;
-  /** نوع الملف MIME */
   fileType?: string;
-  /** اسم الملف */
   fileName?: string;
-  /** حجم الملف */
   fileSize?: number;
-  /** عنوان المستند */
   title?: string;
-  /** وصف */
   description?: string;
-  /** نوع المستند */
   documentType?: string;
-  /** تصنيف المستند */
   documentCategory?: string;
-  /** رقم مرجعي */
   referenceNumber?: string;
-  /** تاريخ المستند */
   documentDate?: string;
-  /** تاريخ الرفع */
   uploadedAt?: string;
-  /** اسم الرافع */
   uploadedBy?: string;
-  /** وسوم */
   tags?: string[];
-  /** معرف السجل في entity_documents (للربط) */
   entityDocumentId?: string;
-  /** حالة التوقيع */
   signingStatus?: 'unsigned' | 'pending' | 'signed' | 'rejected';
-  /** تاريخ التوقيع */
   signedAt?: string;
+  /** معرف المستند في organization_documents (للحماية) */
+  organizationDocumentId?: string;
+  /** معرف الجهة */
+  organizationId?: string;
+  /** هل العلامة المائية مفعّلة */
+  watermarkEnabled?: boolean;
 }
 
 interface UnifiedDocumentViewerProps {
