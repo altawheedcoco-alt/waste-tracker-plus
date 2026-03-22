@@ -2,7 +2,7 @@ import { memo } from "react";
 import { motion } from "framer-motion";
 import { 
   BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, 
-  Headphones, Database, Truck, Users, Zap, Globe 
+  Headphones, Database, Truck, Users, Zap, Globe, Car, ShoppingCart, Star
 } from "lucide-react";
 import { useLanguage } from "@/contexts/LanguageContext";
 
