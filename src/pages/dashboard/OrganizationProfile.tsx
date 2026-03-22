@@ -14,7 +14,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { 
   Building2, User, FileText, Upload, Trash2, Download, Eye,
-  Phone, Mail, MapPin, Shield, Users, Loader2, Save,
+  Phone, Mail, MapPin, Shield, Users, Loader2, Save, Printer,
   Stamp, PenSquare, Target, Briefcase, Award, Globe, Share2, Brain, CheckCircle2, FileSearch
 } from 'lucide-react';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -769,6 +769,13 @@ const OrganizationProfile = () => {
                                     onSaved={() => fetchOrganizationData()}
                                   />
                                 )}
+                                <Button variant="ghost" size="icon" onClick={() => {
+                                  checkAccess(doc.id, 'print', () => {
+                                    supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600).then(({ data }) => {
+                                      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                                    });
+                                  }, organization?.id);
+                                }}><Printer className="w-4 h-4" /></Button>
                                 <Button variant="ghost" size="icon" onClick={() => {
                                   checkAccess(doc.id, 'download', () => handleDownloadDocument(doc), organization?.id);
                                 }}><Download className="w-4 h-4" /></Button>
