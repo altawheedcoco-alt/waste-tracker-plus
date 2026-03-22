@@ -33,7 +33,7 @@ export function useDriverAnalytics(driverId: string | undefined) {
       // Fetch shipments assigned to this driver
       const { data: shipments, error } = await supabase
         .from('shipments')
-        .select('id, status, created_at, actual_weight, price_per_ton, waste_type')
+        .select('id, status, created_at, actual_weight, price_per_unit, waste_type')
         .eq('driver_id', driverId!)
         .order('created_at', { ascending: false })
         .limit(500);
