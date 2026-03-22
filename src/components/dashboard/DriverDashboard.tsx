@@ -658,6 +658,7 @@ const DriverDashboard = () => {
                   totalTrips={driverInfo.total_trips || 0}
                   acceptanceRate={0.85}
                   isVerified={false}
+                  driverId={driverInfo.id}
                 />
               )}
             </Suspense>

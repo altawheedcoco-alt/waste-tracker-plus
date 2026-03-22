@@ -1,11 +1,13 @@
 /**
- * بطاقة الملف العام للسائق (التقييم والأداء)
+ * بطاقة الملف العام للسائق مع تحليل السمعة التفصيلي
  */
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Star, Route, TrendingUp, Shield } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Star, Route, TrendingUp, Shield, Clock, MessageCircle, Award } from 'lucide-react';
 import DriverTypeBadge from '@/components/drivers/DriverTypeBadge';
 import type { DriverType } from '@/types/driver-types';
+import { useDriverRatings, type ReputationScore } from '@/hooks/useDriverRatings';
 
 interface DriverPublicProfileProps {
   driverType: DriverType;
@@ -14,57 +16,100 @@ interface DriverPublicProfileProps {
   acceptanceRate: number;
   isVerified: boolean;
   serviceAreaKm?: number;
+  driverId?: string;
 }
 
-const DriverPublicProfile = ({
-  driverType,
-  rating,
-  totalTrips,
-  acceptanceRate,
-  isVerified,
-  serviceAreaKm,
-}: DriverPublicProfileProps) => {
-  return (
-    <Card className="border border-primary/20 bg-gradient-to-br from-card to-primary/5">
-      <CardContent className="p-4 space-y-3">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-bold">ملفك المهني</h3>
-          <div className="flex items-center gap-1.5">
-            <DriverTypeBadge type={driverType} size="sm" />
-            {isVerified && (
-              <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border-0 text-[10px] gap-0.5">
-                <Shield className="w-3 h-3" /> موثّق
-              </Badge>
-            )}
-          </div>
-        </div>
+const LEVEL_COLORS: Record<ReputationScore['reputationLevel'], string> = {
+  new: 'bg-muted text-muted-foreground',
+  rising: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+  trusted: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
+  elite: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
+};
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <div className="text-center p-2 rounded-lg bg-card border border-border/30">
-            <Star className="w-4 h-4 mx-auto mb-1 text-amber-500" />
-            <p className="text-lg font-bold">{rating.toFixed(1)}</p>
-            <p className="text-[10px] text-muted-foreground">التقييم</p>
+const CriteriaBar = ({ label, icon: Icon, value }: { label: string; icon: typeof Star; value: number }) => (
+  <div className="flex items-center gap-2 text-xs">
+    <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+    <span className="w-20 shrink-0">{label}</span>
+    <Progress value={value * 20} className="h-1.5 flex-1" />
+    <span className="w-6 text-left font-medium">{value > 0 ? value.toFixed(1) : '—'}</span>
+  </div>
+);
+
+const DriverPublicProfile = ({
+  driverType, rating, totalTrips, acceptanceRate,
+  isVerified, serviceAreaKm, driverId,
+}: DriverPublicProfileProps) => {
+  const { reputation } = useDriverRatings(driverId);
+
+  const displayRating = reputation.totalRatings > 0 ? reputation.avgOverall : rating;
+
+  return (
+    <div className="space-y-3">
+      {/* Stats Card */}
+      <Card className="border border-primary/20 bg-gradient-to-br from-card to-primary/5">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold">ملفك المهني</h3>
+            <div className="flex items-center gap-1.5">
+              <DriverTypeBadge type={driverType} size="sm" />
+              {isVerified && (
+                <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 border-0 text-[10px] gap-0.5">
+                  <Shield className="w-3 h-3" /> موثّق
+                </Badge>
+              )}
+            </div>
           </div>
-          <div className="text-center p-2 rounded-lg bg-card border border-border/30">
-            <Route className="w-4 h-4 mx-auto mb-1 text-primary" />
-            <p className="text-lg font-bold">{totalTrips}</p>
-            <p className="text-[10px] text-muted-foreground">الرحلات</p>
-          </div>
-          <div className="text-center p-2 rounded-lg bg-card border border-border/30">
-            <TrendingUp className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
-            <p className="text-lg font-bold">{(acceptanceRate * 100).toFixed(0)}%</p>
-            <p className="text-[10px] text-muted-foreground">معدل القبول</p>
-          </div>
-          {serviceAreaKm && (
-            <div className="text-center p-2 rounded-lg bg-card border border-border/30">
-              <Shield className="w-4 h-4 mx-auto mb-1 text-blue-500" />
-              <p className="text-lg font-bold">{serviceAreaKm}</p>
-              <p className="text-[10px] text-muted-foreground">نطاق كم</p>
+
+          {/* Reputation Level */}
+          {reputation.totalRatings > 0 && (
+            <div className="flex items-center justify-between p-2 rounded-lg bg-card border border-border/30">
+              <span className="text-xs text-muted-foreground">مستوى السمعة</span>
+              <Badge className={`${LEVEL_COLORS[reputation.reputationLevel]} border-0 text-xs`}>
+                {reputation.reputationLabel}
+              </Badge>
             </div>
           )}
-        </div>
-      </CardContent>
-    </Card>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="text-center p-2 rounded-lg bg-card border border-border/30">
+              <Star className="w-4 h-4 mx-auto mb-1 text-amber-500" />
+              <p className="text-lg font-bold">{displayRating.toFixed(1)}</p>
+              <p className="text-[10px] text-muted-foreground">التقييم</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-card border border-border/30">
+              <Route className="w-4 h-4 mx-auto mb-1 text-primary" />
+              <p className="text-lg font-bold">{totalTrips}</p>
+              <p className="text-[10px] text-muted-foreground">الرحلات</p>
+            </div>
+            <div className="text-center p-2 rounded-lg bg-card border border-border/30">
+              <TrendingUp className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
+              <p className="text-lg font-bold">{(acceptanceRate * 100).toFixed(0)}%</p>
+              <p className="text-[10px] text-muted-foreground">معدل القبول</p>
+            </div>
+            {serviceAreaKm && (
+              <div className="text-center p-2 rounded-lg bg-card border border-border/30">
+                <Shield className="w-4 h-4 mx-auto mb-1 text-blue-500" />
+                <p className="text-lg font-bold">{serviceAreaKm}</p>
+                <p className="text-[10px] text-muted-foreground">نطاق كم</p>
+              </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Criteria Breakdown */}
+      {reputation.totalRatings > 0 && (
+        <Card>
+          <CardContent className="p-4 space-y-2.5">
+            <h4 className="text-xs font-bold text-muted-foreground">تحليل الأداء ({reputation.totalRatings} تقييم)</h4>
+            <CriteriaBar label="المواعيد" icon={Clock} value={reputation.avgPunctuality} />
+            <CriteriaBar label="السلامة" icon={Shield} value={reputation.avgSafety} />
+            <CriteriaBar label="التواصل" icon={MessageCircle} value={reputation.avgCommunication} />
+            <CriteriaBar label="الاحترافية" icon={Award} value={reputation.avgProfessionalism} />
+          </CardContent>
+        </Card>
+      )}
+    </div>
   );
 };
 

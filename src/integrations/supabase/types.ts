@@ -12805,6 +12805,93 @@ export type Database = {
           },
         ]
       }
+      driver_ratings: {
+        Row: {
+          comment: string | null
+          communication_rating: number | null
+          created_at: string
+          driver_id: string
+          id: string
+          is_anonymous: boolean | null
+          overall_rating: number
+          professionalism_rating: number | null
+          punctuality_rating: number | null
+          rated_by_org_id: string | null
+          rated_by_user_id: string | null
+          rating_direction: string
+          safety_rating: number | null
+          shipment_id: string | null
+        }
+        Insert: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          driver_id: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating: number
+          professionalism_rating?: number | null
+          punctuality_rating?: number | null
+          rated_by_org_id?: string | null
+          rated_by_user_id?: string | null
+          rating_direction?: string
+          safety_rating?: number | null
+          shipment_id?: string | null
+        }
+        Update: {
+          comment?: string | null
+          communication_rating?: number | null
+          created_at?: string
+          driver_id?: string
+          id?: string
+          is_anonymous?: boolean | null
+          overall_rating?: number
+          professionalism_rating?: number | null
+          punctuality_rating?: number | null
+          rated_by_org_id?: string | null
+          rated_by_user_id?: string | null
+          rating_direction?: string
+          safety_rating?: number | null
+          shipment_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_ratings_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "drivers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_ratings_rated_by_org_id_fkey"
+            columns: ["rated_by_org_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_ratings_rated_by_org_id_fkey"
+            columns: ["rated_by_org_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_ratings_rated_by_user_id_fkey"
+            columns: ["rated_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_ratings_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_shifts: {
         Row: {
           actual_shipments: number | null
