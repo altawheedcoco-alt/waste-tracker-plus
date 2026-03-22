@@ -1,9 +1,9 @@
 /**
  * أنواع السائقين الثلاثة في المنصة
  * ─────────────────────────────────
- * 1. company    — سائق تابع لجهة نقل
- * 2. hired      — سائق حر مؤجر لمهمة محددة
- * 3. independent — سائق حر مستقل يتلقى شحنات
+ * 1. company      — سائق تابع لجهة نقل (موظف دائم بحساب كامل)
+ * 2. hired        — سائق خارجي مؤقت (لا يملك حساب — رابط لمرة واحدة فقط)
+ * 3. independent  — سائق مستقل يسجل نفسه (نموذج Uber/InDriver)
  */
 
 export type DriverType = 'company' | 'hired' | 'independent';
@@ -12,6 +12,7 @@ export type MissionOfferStatus = 'pending' | 'accepted' | 'rejected' | 'expired'
 export type MissionOfferType = 'smart_dispatch' | 'direct_hire' | 'marketplace';
 export type HireContractType = 'per_trip' | 'hourly' | 'daily' | 'weekly' | 'monthly';
 export type HireContractStatus = 'draft' | 'active' | 'completed' | 'cancelled' | 'expired';
+export type ExternalMissionStatus = 'pending' | 'sent' | 'opened' | 'in_progress' | 'completed' | 'expired' | 'cancelled';
 
 export interface DriverProfile {
   id: string;
@@ -34,7 +35,6 @@ export interface DriverProfile {
   hourly_rate: number | null;
   per_trip_rate: number | null;
   created_at: string;
-  // Joined
   profile?: {
     full_name: string;
     phone: string | null;
@@ -57,7 +57,6 @@ export interface MissionOffer {
   rejection_reason: string | null;
   notes: string | null;
   created_at: string;
-  // Joined
   shipment?: {
     pickup_address: string | null;
     delivery_address: string | null;
@@ -82,10 +81,35 @@ export interface HireContract {
   total_earnings: number;
   terms: string | null;
   created_at: string;
-  // Joined
   hiring_org?: {
     name: string;
   };
+}
+
+/** المهمة الخارجية — رابط لمرة واحدة للسائق المؤجر */
+export interface ExternalMission {
+  id: string;
+  token: string;
+  organization_id: string;
+  created_by: string;
+  pickup_address: string;
+  delivery_address: string;
+  waste_type: string | null;
+  estimated_weight: number | null;
+  notes: string | null;
+  driver_name: string | null;
+  driver_phone: string | null;
+  driver_vehicle_plate: string | null;
+  status: ExternalMissionStatus;
+  actual_weight: number | null;
+  execution_notes: string | null;
+  completion_photo_url: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+  expires_at: string;
+  linked_shipment_id: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 /** تسميات الأنواع بالعربية */
@@ -95,35 +119,45 @@ export const DRIVER_TYPE_LABELS: Record<DriverType, { ar: string; en: string; ic
     en: 'Company Driver',
     icon: 'Building2',
     color: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-    description: 'سائق مرتبط بجهة نقل محددة',
+    description: 'موظف دائم مرتبط بجهة نقل — له حساب كامل وصلاحيات تشغيلية',
   },
   hired: {
-    ar: 'سائق حر مؤجر',
-    en: 'Freelance Hired Driver',
+    ar: 'سائق خارجي مؤقت',
+    en: 'External Temporary Driver',
     icon: 'Briefcase',
     color: 'bg-amber-100 text-amber-800 dark:bg-amber-900 dark:text-amber-200',
-    description: 'سائق حر يقبل مهام من جهات مختلفة — العقود اختيارية',
+    description: 'سائق خارجي يستلم رابط لمرة واحدة لتنفيذ شحنة محددة — لا يملك حساب',
   },
   independent: {
     ar: 'سائق مستقل',
     en: 'Independent Driver',
     icon: 'UserCheck',
     color: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200',
-    description: 'سائق حر يتلقى شحنات عبر التوزيع الذكي',
+    description: 'سائق حر يسجل نفسه ويتلقى طلبات عبر نظام شبيه بـ Uber/InDriver',
   },
 };
 
-/** هل السائق حر (مؤجر أو مستقل)؟ — كلاهما لا يشترط عقد */
+/** هل السائق حر (مستقل)؟ — المؤجر ليس له حساب أصلاً */
 export function isFreelanceDriver(type: DriverType): boolean {
-  return type === 'hired' || type === 'independent';
+  return type === 'independent';
 }
 
-/** هل السائق يستقبل عروض؟ (المؤجر الحر + المستقل) */
+/** هل السائق يستقبل عروض؟ (المستقل فقط — المؤجر لا يملك حساب) */
 export function canReceiveOffers(type: DriverType): boolean {
-  return type === 'hired' || type === 'independent';
+  return type === 'independent';
 }
 
 /** هل السائق مرتبط بمنظمة حالياً؟ */
 export function isBoundToOrg(driver: Pick<DriverProfile, 'driver_type' | 'organization_id'>): boolean {
   return driver.driver_type === 'company' && !!driver.organization_id;
+}
+
+/** هل السائق له حساب في النظام؟ */
+export function hasSystemAccount(type: DriverType): boolean {
+  return type === 'company' || type === 'independent';
+}
+
+/** هل هذا سائق خارجي مؤقت (بدون حساب)؟ */
+export function isExternalTemporary(type: DriverType): boolean {
+  return type === 'hired';
 }

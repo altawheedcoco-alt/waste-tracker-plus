@@ -17279,6 +17279,110 @@ export type Database = {
           },
         ]
       }
+      external_missions: {
+        Row: {
+          actual_weight: number | null
+          completed_at: string | null
+          completion_photo_url: string | null
+          created_at: string
+          created_by: string
+          delivery_address: string
+          driver_name: string | null
+          driver_phone: string | null
+          driver_vehicle_plate: string | null
+          estimated_weight: number | null
+          execution_notes: string | null
+          expires_at: string
+          id: string
+          linked_shipment_id: string | null
+          notes: string | null
+          organization_id: string
+          pickup_address: string
+          started_at: string | null
+          status: string
+          token: string
+          updated_at: string
+          waste_type: string | null
+        }
+        Insert: {
+          actual_weight?: number | null
+          completed_at?: string | null
+          completion_photo_url?: string | null
+          created_at?: string
+          created_by: string
+          delivery_address: string
+          driver_name?: string | null
+          driver_phone?: string | null
+          driver_vehicle_plate?: string | null
+          estimated_weight?: number | null
+          execution_notes?: string | null
+          expires_at?: string
+          id?: string
+          linked_shipment_id?: string | null
+          notes?: string | null
+          organization_id: string
+          pickup_address: string
+          started_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Update: {
+          actual_weight?: number | null
+          completed_at?: string | null
+          completion_photo_url?: string | null
+          created_at?: string
+          created_by?: string
+          delivery_address?: string
+          driver_name?: string | null
+          driver_phone?: string | null
+          driver_vehicle_plate?: string | null
+          estimated_weight?: number | null
+          execution_notes?: string | null
+          expires_at?: string
+          id?: string
+          linked_shipment_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          pickup_address?: string
+          started_at?: string | null
+          status?: string
+          token?: string
+          updated_at?: string
+          waste_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "external_missions_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_missions_linked_shipment_id_fkey"
+            columns: ["linked_shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "external_missions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "external_missions_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       external_partners: {
         Row: {
           address: string | null
