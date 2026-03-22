@@ -101,8 +101,10 @@ Deno.serve(async (req) => {
     const font = await pdfDoc.embedFont(StandardFonts.Courier);
     const fontBold = await pdfDoc.embedFont(StandardFonts.CourierBold);
 
-    const userName = profile?.full_name || user.email || "User";
-    const orgName = org?.name || "";
+    // pdf-lib standard fonts only support WinAnsi (Latin). Strip non-Latin chars.
+    const toAscii = (s: string) => s.replace(/[^\x20-\x7E]/g, '').trim() || 'User';
+    const userName = toAscii(profile?.full_name || user.email || "User");
+    const orgName = toAscii(org?.name || "");
     const timestamp = new Date().toISOString().replace("T", " ").slice(0, 19);
     const watermarkLine1 = `[PROTECTED] ${userName} - ${orgName} - ${timestamp}`;
 
@@ -146,7 +148,7 @@ Deno.serve(async (req) => {
           });
 
           // Repeated user marker offset
-          page.drawText(`-- Protected: ${userName} --`, {
+          page.drawText(`-- Protected: ${userName} - ${timestamp} --`, {
             x: x + 20,
             y: y - 60,
             size: 8,
