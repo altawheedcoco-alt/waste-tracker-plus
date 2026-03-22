@@ -16,6 +16,8 @@ import {
 import { useDriverAnalytics } from '@/hooks/useDriverAnalytics';
 import { motion } from 'framer-motion';
 
+const DriverAIInsights = lazy(() => import('@/components/driver/DriverAIInsights'));
+
 interface DriverAnalyticsPanelProps {
   driverId: string;
   driverType?: string;
