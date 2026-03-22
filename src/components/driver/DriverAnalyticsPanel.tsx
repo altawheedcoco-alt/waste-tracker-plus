@@ -256,6 +256,11 @@ const DriverAnalyticsPanel = ({ driverId, driverType }: DriverAnalyticsPanelProp
           </CardContent>
         </Card>
       )}
+
+      {/* AI Deep Analysis */}
+      <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+        <DriverAIInsights driverId={driverId} />
+      </Suspense>
     </div>
   );
 };
