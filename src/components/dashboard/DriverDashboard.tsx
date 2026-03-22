@@ -625,8 +625,45 @@ const DriverDashboard = () => {
               title="الإجراءات السريعة"
               subtitle="الوظائف المستخدمة بكثرة"
             />
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العروض الواردة (مستقل فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="offers" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <IndependentOffersPanel driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العقود (مؤجر فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="contracts" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <HiredContractsPanel driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: الملف المهني (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="profile" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && (
+                <DriverPublicProfile
+                  driverType={driverInfo.driver_type || 'company'}
+                  rating={driverInfo.rating || 0}
+                  totalTrips={driverInfo.total_trips || 0}
+                  acceptanceRate={0.85}
+                  isVerified={false}
+                />
+              )}
+            </Suspense>
+          </TabsContent>
+
           </TabsContent>
         </Tabs>
+          );
+        })()}
       </motion.div>
 
       {/* Dialogs */}
