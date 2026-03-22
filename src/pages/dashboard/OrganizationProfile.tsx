@@ -770,6 +770,17 @@ const OrganizationProfile = () => {
                                   />
                                 )}
                                 <Button variant="ghost" size="icon" onClick={() => {
+                                  checkAccess(doc.id, 'print', () => {
+                                    const url = previewUrls[doc.id];
+                                    if (url) { window.open(url, '_blank'); }
+                                    else {
+                                      supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600).then(({ data }) => {
+                                        if (data?.signedUrl) window.open(data.signedUrl, '_blank');
+                                      });
+                                    }
+                                  }, organization?.id);
+                                }}><Printer className="w-4 h-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => {
                                   checkAccess(doc.id, 'download', () => handleDownloadDocument(doc), organization?.id);
                                 }}><Download className="w-4 h-4" /></Button>
                                 {isCompanyAdmin && (
