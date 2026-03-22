@@ -91,6 +91,19 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     ],
   },
   {
+    id: 'drivers',
+    label: 'السائقون',
+    icon: Car,
+    accounts: [
+      { email: 'company-driver@irecycle.test', label: 'سائق تابع', desc: 'سائق تابع لجهة نقل 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
+      { email: 'hired-driver@irecycle.test', label: 'سائق حر مؤجر', desc: 'سائق حر يقبل مهام 💼', icon: Briefcase, color: 'from-amber-500 to-orange-700' },
+      { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'سائق حر يتلقى شحنات 🟢', icon: Car, color: 'from-emerald-500 to-green-700' },
+      { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق تابع', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'driver@demo.com', label: 'سائق - النقل السريع', desc: 'سائق تابع', icon: Car, color: 'from-rose-500 to-red-600' },
+      { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق', icon: Car, color: 'from-pink-500 to-rose-700' },
+    ],
+  },
+  {
     id: 'consultants',
     label: 'استشاريون',
     icon: Briefcase,
@@ -117,8 +130,6 @@ const accountGroups: { id: string; label: string; icon: any; accounts: DemoAccou
     icon: UserCog,
     accounts: [
       { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin', icon: Shield, color: 'from-yellow-500 to-amber-700' },
-      { email: 'demo-driver@irecycle.test', label: 'سائق - التوحيد', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
-      { email: 'driver@demo.com', label: 'سائق - النقل السريع', desc: 'سائق', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
