@@ -376,36 +376,37 @@ const OrganizationProfile = () => {
     }
   };
 
+  const getWatermarkedBlob = async (doc: OrganizationDocument): Promise<Blob> => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/watermark-pdf`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ documentId: doc.id }),
+    });
+    if (!res.ok) throw new Error('Watermark failed');
+    return res.blob();
+  };
+
   const handleDownloadDocument = async (doc: OrganizationDocument) => {
     try {
       const isWatermarked = (doc as any)?.watermark_enabled;
       const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
 
+      let blob: Blob;
       if (isWatermarked && isPdf) {
-        // Use edge function to get watermarked PDF
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/watermark-pdf`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ documentId: doc.id }),
-        });
-        if (!res.ok) throw new Error('Watermark failed');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url; a.download = doc.file_name; a.click();
-        URL.revokeObjectURL(url);
+        blob = await getWatermarkedBlob(doc);
       } else {
         const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
         if (error) throw error;
-        const url = URL.createObjectURL(data);
-        const a = document.createElement('a');
-        a.href = url; a.download = doc.file_name; a.click();
-        URL.revokeObjectURL(url);
+        blob = data;
       }
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = doc.file_name; a.click();
+      URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Error downloading document:', error);
       toast.error(t('orgProfile.fileDownloadError'));
@@ -417,25 +418,88 @@ const OrganizationProfile = () => {
       const isWatermarked = (doc as any)?.watermark_enabled;
       const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
 
+      let blobUrl: string;
       if (isWatermarked && isPdf) {
-        const { data: { session } } = await supabase.auth.getSession();
-        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/watermark-pdf`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token}`,
-          },
-          body: JSON.stringify({ documentId: doc.id }),
-        });
-        if (!res.ok) throw new Error('Watermark failed');
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank');
+        const blob = await getWatermarkedBlob(doc);
+        blobUrl = URL.createObjectURL(blob);
       } else {
         const { data, error } = await supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600);
         if (error) throw error;
-        window.open(data.signedUrl, '_blank');
+        blobUrl = data.signedUrl;
       }
+
+      // Open in about:blank window for secure print
+      const printWindow = window.open('about:blank', '_blank');
+      if (!printWindow) {
+        toast.error('يرجى السماح بالنوافذ المنبثقة لطباعة المستند');
+        return;
+      }
+
+      if (isPdf) {
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html dir="rtl">
+          <head>
+            <title>طباعة: ${doc.file_name}</title>
+            <style>
+              * { margin: 0; padding: 0; }
+              body { background: #f5f5f5; display: flex; flex-direction: column; height: 100vh; font-family: system-ui, sans-serif; }
+              .toolbar { background: #1e293b; color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-shrink: 0; }
+              .toolbar h3 { font-size: 14px; font-weight: 600; }
+              .toolbar button { background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; }
+              .toolbar button:hover { background: #2563eb; }
+              .toolbar .close-btn { background: #ef4444; }
+              .toolbar .close-btn:hover { background: #dc2626; }
+              iframe { flex: 1; border: none; width: 100%; }
+              .watermark-notice { background: #fef3c7; color: #92400e; padding: 4px 16px; font-size: 11px; text-align: center; }
+            </style>
+          </head>
+          <body>
+            <div class="toolbar">
+              <h3>📄 ${doc.file_name}</h3>
+              <div style="display:flex;gap:8px;">
+                <button onclick="document.getElementById('pdf-frame').contentWindow.print()">🖨️ طباعة</button>
+                <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
+              </div>
+            </div>
+            ${isWatermarked ? '<div class="watermark-notice">⚠ هذا المستند محمي بعلامة مائية مدمجة</div>' : ''}
+            <iframe id="pdf-frame" src="${blobUrl}"></iframe>
+          </body>
+          </html>
+        `);
+      } else {
+        // Image files
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html dir="rtl">
+          <head>
+            <title>طباعة: ${doc.file_name}</title>
+            <style>
+              body { margin: 0; display: flex; flex-direction: column; min-height: 100vh; background: #f5f5f5; font-family: system-ui; }
+              .toolbar { background: #1e293b; color: white; padding: 8px 16px; display: flex; align-items: center; justify-content: space-between; }
+              .toolbar button { background: #3b82f6; color: white; border: none; padding: 6px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+              .toolbar .close-btn { background: #ef4444; }
+              .content { flex: 1; display: flex; align-items: center; justify-content: center; padding: 20px; }
+              img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); }
+              @media print { .toolbar { display: none; } img { max-height: none; box-shadow: none; } }
+            </style>
+          </head>
+          <body>
+            <div class="toolbar">
+              <h3>📄 ${doc.file_name}</h3>
+              <div style="display:flex;gap:8px;">
+                <button onclick="window.print()">🖨️ طباعة</button>
+                <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
+              </div>
+            </div>
+            <div class="content">
+              <img src="${blobUrl}" alt="${doc.file_name}" />
+            </div>
+          </body>
+          </html>
+        `);
+      }
+      printWindow.document.close();
     } catch (error) {
       console.error('Error printing document:', error);
       toast.error('فشل في فتح المستند للطباعة');
