@@ -314,11 +314,23 @@ const UnifiedDocumentViewer = ({
   const [error, setError] = useState(false);
   const [zoom, setZoom] = useState(1);
   const [rotation, setRotation] = useState(0);
+  const [protection, setProtection] = useState<DocumentProtection | null>(null);
+
+  const { checkAccess, getProtection, pinDialogOpen, setPinDialogOpen, pendingAction, handlePinSuccess } = useDocumentProtection();
+
+  const docId = source.organizationDocumentId;
 
   const isImage = !!(source.fileType?.startsWith('image/') ||
     source.fileName?.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i));
   const isPDF = !!(source.fileType === 'application/pdf' ||
     source.fileName?.match(/\.pdf$/i));
+
+  // Load protection settings
+  useEffect(() => {
+    if (docId) {
+      getProtection(docId).then(setProtection);
+    }
+  }, [docId, getProtection]);
 
   // Resolve URL
   useEffect(() => {
@@ -357,7 +369,7 @@ const UnifiedDocumentViewer = ({
     return () => { cancelled = true; };
   }, [source.url, source.storagePath, source.bucket]);
 
-  const handleDownload = useCallback(() => {
+  const doDownload = useCallback(() => {
     if (!resolvedUrl) return;
     const a = document.createElement('a');
     a.href = resolvedUrl;
@@ -366,11 +378,32 @@ const UnifiedDocumentViewer = ({
     a.click();
   }, [resolvedUrl, source.fileName]);
 
-  const handlePrint = useCallback(() => {
+  const doPrint = useCallback(() => {
     if (!resolvedUrl) return;
     const w = window.open(resolvedUrl, '_blank');
     w?.addEventListener('load', () => w.print());
   }, [resolvedUrl]);
+
+  // Protected handlers
+  const handleDownload = useCallback(() => {
+    if (!resolvedUrl) return;
+    if (docId) {
+      checkAccess(docId, 'download', doDownload, source.organizationId);
+    } else {
+      doDownload();
+    }
+  }, [resolvedUrl, docId, checkAccess, doDownload, source.organizationId]);
+
+  const handlePrint = useCallback(() => {
+    if (!resolvedUrl) return;
+    if (docId) {
+      checkAccess(docId, 'print', doPrint, source.organizationId);
+    } else {
+      doPrint();
+    }
+  }, [resolvedUrl, docId, checkAccess, doPrint, source.organizationId]);
+
+  const showWatermark = source.watermarkEnabled || protection?.watermark_enabled || false;
 
   // Toolbar
   const toolbar = (
@@ -386,6 +419,11 @@ const UnifiedDocumentViewer = ({
           <ExternalLink className="w-4 h-4" />
         </a>
       </Button>
+      {protection?.protection_enabled && (
+        <Badge variant="secondary" className="text-[10px] gap-1 mr-2">
+          <Shield className="w-3 h-3" /> محمي
+        </Badge>
+      )}
       {isImage && (
         <>
           <Separator orientation="vertical" className="h-6 mx-1" />
@@ -425,8 +463,9 @@ const UnifiedDocumentViewer = ({
             inline ? '' : 'min-h-[300px]'
           )}
           style={inline ? { height: inlineHeight } : undefined}
+          onContextMenu={showWatermark ? (e) => e.preventDefault() : undefined}
         >
-          <DocumentWatermark enabled={!!(source as any)?.watermarkEnabled} />
+          <DocumentWatermark enabled={showWatermark} />
           <DocumentPreview
             resolvedUrl={resolvedUrl}
             loading={loading}
@@ -442,6 +481,18 @@ const UnifiedDocumentViewer = ({
         {/* Sidebar */}
         {!hideSidebar && <DocumentSidebar source={source} />}
       </div>
+
+      {/* PIN Dialog */}
+      {pendingAction && (
+        <DocumentPinDialog
+          open={pinDialogOpen}
+          onOpenChange={setPinDialogOpen}
+          documentId={pendingAction.documentId}
+          actionType={pendingAction.actionType}
+          onSuccess={handlePinSuccess}
+          organizationId={pendingAction.organizationId}
+        />
+      )}
     </div>
   );
 
@@ -458,6 +509,11 @@ const UnifiedDocumentViewer = ({
           <DialogTitle className="flex items-center gap-2">
             <Eye className="h-5 w-5" />
             {source.title || source.fileName || 'معاينة المستند'}
+            {protection?.protection_enabled && (
+              <Badge variant="secondary" className="text-xs gap-1">
+                <Shield className="w-3 h-3" /> محمي
+              </Badge>
+            )}
           </DialogTitle>
         </DialogHeader>
         {content}
@@ -465,7 +521,6 @@ const UnifiedDocumentViewer = ({
     </Dialog>
   );
 };
-
 export default UnifiedDocumentViewer;
 
 // ============== Helper: Convert EntityDocument to DocumentSource ==============
