@@ -390,19 +390,51 @@ const OrganizationProfile = () => {
     return res.blob();
   };
 
+  const getDocumentBlob = async (doc: OrganizationDocument): Promise<Blob> => {
+    const isWatermarked = (doc as any)?.watermark_enabled;
+    const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
+
+    if (isWatermarked && isPdf) {
+      return getWatermarkedBlob(doc);
+    }
+
+    const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
+    if (error) throw error;
+    return data;
+  };
+
+  const renderPdfToDataUrls = async (blob: Blob): Promise<string[]> => {
+    const pdfjsLib = await import('pdfjs-dist');
+    const workerUrl = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url);
+    pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl.href;
+
+    const pdfData = await blob.arrayBuffer();
+    const pdf = await pdfjsLib.getDocument({ data: pdfData }).promise;
+    const pageImages: string[] = [];
+
+    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum += 1) {
+      const page = await pdf.getPage(pageNum);
+      const viewport = page.getViewport({ scale: 1.8 });
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+
+      if (!context) {
+        throw new Error('Canvas context unavailable');
+      }
+
+      canvas.width = Math.ceil(viewport.width);
+      canvas.height = Math.ceil(viewport.height);
+
+      await page.render({ canvasContext: context, viewport }).promise;
+      pageImages.push(canvas.toDataURL('image/png', 1));
+    }
+
+    return pageImages;
+  };
+
   const handleDownloadDocument = async (doc: OrganizationDocument) => {
     try {
-      const isWatermarked = (doc as any)?.watermark_enabled;
-      const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
-
-      let blob: Blob;
-      if (isWatermarked && isPdf) {
-        blob = await getWatermarkedBlob(doc);
-      } else {
-        const { data, error } = await supabase.storage.from('organization-documents').download(doc.file_path);
-        if (error) throw error;
-        blob = data;
-      }
+      const blob = await getDocumentBlob(doc);
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url; a.download = doc.file_name; a.click();
@@ -422,29 +454,71 @@ const OrganizationProfile = () => {
         return;
       }
 
-      const isWatermarked = (doc as any)?.watermark_enabled;
       const isPdf = doc.file_name?.toLowerCase().endsWith('.pdf');
-
-      let fileUrl: string;
-      if (isWatermarked && isPdf) {
-        const blob = await getWatermarkedBlob(doc);
-        fileUrl = URL.createObjectURL(blob);
-      } else {
-        const { data, error } = await supabase.storage.from('organization-documents').createSignedUrl(doc.file_path, 3600);
-        if (error) throw error;
-        fileUrl = data.signedUrl;
-      }
+      const blob = await getDocumentBlob(doc);
+      const fileUrl = URL.createObjectURL(blob);
 
       if (isPdf) {
         printWindow.document.write(`
           <!DOCTYPE html>
-          <html><head><title>طباعة: ${doc.file_name}</title>
-          <style>*{margin:0;padding:0}body,html{height:100%;overflow:hidden}embed{width:100%;height:100%}</style>
-          </head><body>
-          <embed src="${fileUrl}" type="application/pdf" width="100%" height="100%" />
-          </body></html>
+          <html dir="rtl">
+          <head>
+            <title>طباعة: ${doc.file_name}</title>
+            <style>
+              body { margin: 0; background: #eef2f7; font-family: system-ui; }
+              .toolbar { position: sticky; top: 0; z-index: 10; background: #0f172a; color: white; padding: 10px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+              .toolbar button { background: #2563eb; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+              .toolbar .close-btn { background: #dc2626; }
+              .status { padding: 24px; text-align: center; color: #334155; }
+              @media print { .toolbar { display: none; } body { background: white; } }
+            </style>
+          </head>
+          <body>
+            <div class="toolbar">
+              <strong>📄 ${doc.file_name}</strong>
+              <div style="display:flex;gap:8px;">
+                <button onclick="window.print()">🖨️ طباعة</button>
+                <button class="close-btn" onclick="window.close()">✕ إغلاق</button>
+              </div>
+            </div>
+            <div class="status" id="status">جاري تجهيز صفحات المستند للطباعة...</div>
+            <div id="pages"></div>
+          </body>
+          </html>
         `);
         printWindow.document.close();
+
+        const pageImages = await renderPdfToDataUrls(blob);
+        const pagesRoot = printWindow.document.getElementById('pages');
+        const statusEl = printWindow.document.getElementById('status');
+
+        if (!pagesRoot || !statusEl) {
+          throw new Error('Print window initialization failed');
+        }
+
+        statusEl.remove();
+
+        pageImages.forEach((src, index) => {
+          const pageWrap = printWindow.document.createElement('div');
+          pageWrap.style.cssText = 'display:flex;justify-content:center;padding:24px 0;';
+          pageWrap.style.pageBreakAfter = index === pageImages.length - 1 ? 'auto' : 'always';
+
+          const img = printWindow.document.createElement('img');
+          img.src = src;
+          img.alt = `${doc.file_name} - ${index + 1}`;
+          img.style.cssText = 'width:min(100%, 210mm); height:auto; box-shadow:0 10px 30px rgba(15,23,42,0.18); background:white;';
+
+          pageWrap.appendChild(img);
+          pagesRoot.appendChild(pageWrap);
+        });
+
+        printWindow.document.write(`
+          <script>
+            window.addEventListener('load', () => {
+              setTimeout(() => window.focus(), 50);
+            });
+          <\/script>
+        `);
         return;
       }
 
