@@ -5,6 +5,7 @@
  */
 import { useState, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -178,10 +179,12 @@ const DocumentPreview = ({
 
   if (isPDF) {
     return (
-      <iframe
-        src={resolvedUrl}
-        className="w-full h-full min-h-[500px] border-0"
+      <GoogleDocsPdfViewer
+        url={resolvedUrl}
         title={title}
+        height="100%"
+        className="w-full h-full min-h-[500px] border-0"
+        showFooter={false}
       />
     );
   }

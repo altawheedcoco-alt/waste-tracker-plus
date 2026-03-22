@@ -1,3 +1,4 @@
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -71,10 +72,11 @@ export default function DocumentPreviewDialog({
                 className="max-w-full max-h-full object-contain"
               />
             ) : isPDF ? (
-              <iframe
-                src={doc.file_url}
-                className="w-full h-full min-h-[400px]"
+              <GoogleDocsPdfViewer
+                url={doc.file_url}
                 title={doc.title}
+                height="400px"
+                className="w-full"
               />
             ) : (
               <div className="text-center p-8">

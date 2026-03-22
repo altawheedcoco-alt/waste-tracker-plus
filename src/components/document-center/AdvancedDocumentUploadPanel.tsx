@@ -3,6 +3,7 @@
  * دعم السحب والإفلات، الرفع المتعدد، التصنيف الذكي، ومعاينة الملفات
  */
 import { useState, useRef, useCallback, useMemo } from 'react';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -701,7 +702,7 @@ const AdvancedDocumentUploadPanel = () => {
               {previewUrl.match(/\.(jpg|jpeg|png|webp|gif)/i) ? (
                 <img src={previewUrl} alt="Preview" className="max-w-full max-h-[70vh] object-contain rounded-lg" />
               ) : (
-                <iframe src={previewUrl} className="w-full h-[70vh] rounded-lg border" />
+                <GoogleDocsPdfViewer url={previewUrl} title="معاينة المستند" height="70vh" className="w-full rounded-lg" />
               )}
             </div>
           )}

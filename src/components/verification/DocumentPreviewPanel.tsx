@@ -1,5 +1,6 @@
 import { Button } from '@/components/ui/button';
 import { Loader2, FileText, FileWarning, ExternalLink, Gavel } from 'lucide-react';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { OrganizationDocument } from './types';
 import SecureImage from '@/components/ui/SecureImage';
 
@@ -79,10 +80,11 @@ const DocumentPreviewPanel = ({
               zoomable={true}
             />
           ) : document.file_path.match(/\.pdf$/i) ? (
-            <iframe
-              src={previewUrl}
-              className="w-full h-full min-h-[400px]"
+            <GoogleDocsPdfViewer
+              url={previewUrl}
               title={document.file_name}
+              height="400px"
+              className="w-full"
             />
           ) : (
             <div className="text-center text-muted-foreground">

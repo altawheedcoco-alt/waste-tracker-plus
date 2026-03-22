@@ -1,4 +1,5 @@
 import { useState, useCallback } from 'react';
+import GoogleDocsPdfViewer from '@/components/shared/GoogleDocsPdfViewer';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -203,10 +204,11 @@ const DocumentReviewDialog = ({
                       onError={() => setPreviewError('فشل في عرض الصورة')}
                     />
                   ) : document.file_path.match(/\.pdf$/i) ? (
-                    <iframe
-                      src={previewUrl}
-                      className="w-full h-full min-h-[400px]"
+                    <GoogleDocsPdfViewer
+                      url={previewUrl}
                       title={document.file_name}
+                      height="400px"
+                      className="w-full"
                     />
                   ) : (
                     <div className="text-center text-muted-foreground">
