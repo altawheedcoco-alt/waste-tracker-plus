@@ -436,7 +436,15 @@ const OrganizationProfile = () => {
       }
 
       if (isPdf) {
-        printWindow.location.replace(fileUrl);
+        printWindow.document.write(`
+          <!DOCTYPE html>
+          <html><head><title>طباعة: ${doc.file_name}</title>
+          <style>*{margin:0;padding:0}body,html{height:100%;overflow:hidden}embed{width:100%;height:100%}</style>
+          </head><body>
+          <embed src="${fileUrl}" type="application/pdf" width="100%" height="100%" />
+          </body></html>
+        `);
+        printWindow.document.close();
         return;
       }
 
