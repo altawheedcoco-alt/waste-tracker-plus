@@ -662,6 +662,23 @@ const DriverDashboard = () => {
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: سوق الشحنات (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="marketplace" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <ShipmentMarketplace />
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: المحفظة المالية (مؤجر + مستقل) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="wallet" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && <DriverFinancialWallet driverId={driverInfo.id} />}
+            </Suspense>
+          </TabsContent>
+
           {/* TAB: الملف المهني (مؤجر + مستقل) */}
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="profile" className="mt-4">
