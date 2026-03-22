@@ -26,6 +26,8 @@ import { useQuickActions } from '@/hooks/useQuickActions';
 import DriverOwnLinkingCode from '@/components/drivers/DriverOwnLinkingCode';
 import DriverLinkedOrganizations from '@/components/driver/DriverLinkedOrganizations';
 import DriverCredentialsEditor from '@/components/driver/DriverCredentialsEditor';
+import DriverTypeBadge from '@/components/drivers/DriverTypeBadge';
+import type { DriverType } from '@/types/driver-types';
 import DriverAssignmentAlert from '@/components/driver/DriverAssignmentAlert';
 import DriverDailyTasks from '@/components/driver/DriverDailyTasks';
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
