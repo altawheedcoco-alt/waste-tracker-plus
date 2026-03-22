@@ -327,18 +327,24 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     </svg>
   );
 
-  // Driver-specific menu items - only essentials for fieldwork
-  const driverMenuItems: SidebarMenuItem[] = [
-    { icon: LayoutDashboard, label: t('nav.dashboard'), path: '/dashboard', key: 'driver-dashboard' },
-    { icon: Package, label: t('sidebar.myShipments'), path: '/dashboard/transporter-shipments', badge: sectionBadges['driver-shipments'], key: 'driver-shipments' },
-    { icon: MapPin, label: language === 'ar' ? 'موقعي' : 'My Location', path: '/dashboard/my-location', key: 'driver-location' },
-    { icon: User, label: t('sidebar.driverProfile'), path: '/dashboard/driver-profile', key: 'driver-profile' },
-    { icon: FileText, label: t('sidebar.driverData'), path: '/dashboard/driver-data', key: 'driver-data' },
-    { icon: GraduationCap, label: language === 'ar' ? 'الأكاديمية' : 'Academy', path: '/dashboard/driver-academy', key: 'driver-academy' },
-    { icon: Trophy, label: language === 'ar' ? 'المكافآت' : 'Rewards', path: '/dashboard/driver-rewards', key: 'driver-rewards' },
-    { icon: Bell, label: t('nav.notifications'), path: '/dashboard/notifications', badge: notificationCount, key: 'driver-notifications' },
-    { icon: Settings, label: t('nav.settings'), path: '/dashboard/settings', key: 'driver-settings' },
-  ];
+  // Driver-specific menu items — differentiated by driver_type
+  const { driverType } = useDriverType();
+  const driverMenuFromType = useMemo(() => {
+    return getDriverMenuItems(driverType, language, {
+      shipments: sectionBadges['driver-shipments'],
+      notifications: notificationCount,
+      offers: sectionBadges['driver-offers'],
+      contracts: sectionBadges['driver-contracts'],
+    });
+  }, [driverType, language, sectionBadges, notificationCount]);
+
+  const driverMenuItems: SidebarMenuItem[] = driverMenuFromType.map(item => ({
+    icon: item.icon,
+    label: item.label,
+    path: item.path,
+    key: item.key,
+    badge: item.badge,
+  }));
 
   // Use config-based sidebar groups via preferences hook
   const { orderedGroups: sidebarConfigGroups } = useSidebarPreferences();
