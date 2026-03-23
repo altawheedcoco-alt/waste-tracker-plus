@@ -106,7 +106,7 @@ const DriverTripSchedule = () => {
 
   const updateStatus = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
-      const { error } = await supabase.from('driver_trip_schedules').update({ status }).eq('id', id);
+      const { error } = await (supabase as any).from('driver_trip_schedules').update({ status }).eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
