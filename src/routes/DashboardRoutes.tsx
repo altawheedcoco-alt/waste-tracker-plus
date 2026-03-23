@@ -60,6 +60,7 @@ const VideoGenerator = lazy(() => import("@/pages/dashboard/VideoGenerator"));
 const WoodMarketIntelligence = lazy(() => import("@/pages/dashboard/WoodMarketIntelligence"));
 const OrgStructure = lazy(() => import("@/pages/dashboard/OrgStructure"));
 const MyLocation = lazy(() => import("@/pages/dashboard/MyLocation"));
+const DriverMyRoute = lazy(() => import("@/pages/dashboard/DriverMyRoute"));
 const RecyclingCertificates = lazy(() => import("@/pages/dashboard/RecyclingCertificates"));
 const IssueRecyclingCertificates = lazy(() => import("@/pages/dashboard/IssueRecyclingCertificates"));
 const Settings = lazy(() => import("@/pages/dashboard/Settings"));
