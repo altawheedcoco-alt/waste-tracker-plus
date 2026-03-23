@@ -41,8 +41,8 @@ export function usePushNotifications() {
     
     try {
       new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
+        icon: '/favicon.png',
+        badge: '/favicon.png',
         dir: 'rtl',
         lang: 'ar',
         ...options,
