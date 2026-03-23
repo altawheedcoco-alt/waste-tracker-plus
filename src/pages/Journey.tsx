@@ -114,7 +114,7 @@ const achievements = [
   { icon: Users, value: '+500', label: 'جهة مسجلة', color: 'text-blue-500', bg: 'bg-blue-500/10' },
   { icon: Trophy, value: '+10K', label: 'شحنة مُتتبعة', color: 'text-amber-500', bg: 'bg-amber-500/10' },
   { icon: Shield, value: '+5K', label: 'شهادة تخلص آمن', color: 'text-emerald-500', bg: 'bg-emerald-500/10' },
-  { icon: Star, value: '3', label: 'إصدارات رئيسية', color: 'text-purple-500', bg: 'bg-purple-500/10' },
+  { icon: Star, value: '5', label: 'إصدارات رئيسية', color: 'text-purple-500', bg: 'bg-purple-500/10' },
   { icon: Target, value: '27', label: 'محافظة مُغطاة', color: 'text-primary', bg: 'bg-primary/10' },
   { icon: Heart, value: '+50', label: 'شريك وداعم', color: 'text-rose-500', bg: 'bg-rose-500/10' },
 ];
