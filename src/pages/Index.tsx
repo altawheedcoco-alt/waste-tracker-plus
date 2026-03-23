@@ -275,6 +275,11 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* Platform Posts Section */}
+          <LazySection minH={400}>
+            <PlatformPostsSection />
+          </LazySection>
+
           {/* C2B Contact Form */}
           <LazySection minH={400}>
             <C2BSubmissionForm />
