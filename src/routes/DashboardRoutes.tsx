@@ -246,6 +246,11 @@ const SweepingCrews = lazy(() => import("@/pages/dashboard/municipal/SweepingCre
 const SweepingEquipment = lazy(() => import("@/pages/dashboard/municipal/SweepingEquipment"));
 const DailyAttendance = lazy(() => import("@/pages/dashboard/municipal/DailyAttendance"));
 const TransferStations = lazy(() => import("@/pages/dashboard/municipal/TransferStations"));
+const MunicipalContracts = lazy(() => import("@/pages/dashboard/municipal/MunicipalContracts"));
+const PenaltiesManagement = lazy(() => import("@/pages/dashboard/municipal/PenaltiesManagement"));
+const WorkerSafety = lazy(() => import("@/pages/dashboard/municipal/WorkerSafety"));
+const EquipmentCustody = lazy(() => import("@/pages/dashboard/municipal/EquipmentCustody"));
+const MunicipalReports = lazy(() => import("@/pages/dashboard/municipal/MunicipalReports"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
