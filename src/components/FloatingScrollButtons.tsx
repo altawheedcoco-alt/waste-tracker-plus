@@ -26,11 +26,10 @@ const FloatingScrollButtons = () => {
     };
   }, []);
 
-  const scrollTo = useCallback((direction: 'up' | 'down') => {
-    window.scrollTo({
-      top: direction === 'up' ? 0 : document.documentElement.scrollHeight,
-      behavior: 'smooth',
-    });
+  const scrollStep = useCallback((direction: 'up' | 'down') => {
+    const vh = window.innerHeight;
+    const offset = direction === 'down' ? vh * 0.85 : -(vh * 0.85);
+    window.scrollBy({ top: offset, behavior: 'smooth' });
   }, []);
 
   const btnClass = cn(
@@ -44,12 +43,12 @@ const FloatingScrollButtons = () => {
   return (
     <div className="fixed left-3 bottom-28 z-40 flex flex-col gap-2">
       {showUp && (
-        <button onClick={() => scrollTo('up')} className={btnClass} aria-label="Scroll to top">
+        <button onClick={() => scrollStep('up')} className={btnClass} aria-label="Scroll up">
           <ChevronUp className="w-4 h-4" />
         </button>
       )}
       {showDown && (
-        <button onClick={() => scrollTo('down')} className={btnClass} aria-label="Scroll to bottom">
+        <button onClick={() => scrollStep('down')} className={btnClass} aria-label="Scroll down">
           <ChevronDown className="w-4 h-4" />
         </button>
       )}
