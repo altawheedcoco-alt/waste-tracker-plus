@@ -84,7 +84,7 @@ const DriverTripSchedule = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('driver_trip_schedules').insert({
+      const { error } = await (supabase as any).from('driver_trip_schedules').insert({
         organization_id: organization!.id,
         driver_id: form.driver_id || null,
         trip_date: form.trip_date,

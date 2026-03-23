@@ -62,10 +62,10 @@ const FuelManagement = () => {
         .order('fuel_date', { ascending: false })
         .limit(100) as any);
       if (error) throw error;
-      const driverIds = [...new Set((data || []).map(r => r.driver_id).filter(Boolean))];
+      const driverIds = [...new Set((data || []).map((r: any) => r.driver_id).filter(Boolean))] as string[];
       let driverMap: Record<string, string> = {};
       if (driverIds.length) {
-        const { data: drvs } = await supabase.from('profiles').select('id, full_name').in('id', driverIds);
+        const { data: drvs } = await supabase.from('profiles').select('id, full_name').in('id', driverIds as string[]);
         driverMap = Object.fromEntries((drvs || []).map(d => [d.id, d.full_name]));
       }
       return (data || []).map(r => ({ ...r, driver: r.driver_id ? { full_name: driverMap[r.driver_id] || '—' } : null })) as FuelRecord[];
