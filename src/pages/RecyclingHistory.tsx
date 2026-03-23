@@ -46,10 +46,7 @@ const timelineData = [
     descEn: "Pyramid construction wasn't just about new stones. Excavations prove Egyptians reused stones from old buildings. Copper smelting workshops in Memphis collected worn tools for remelting into new chisels. Even gold flakes were carefully collected and re-smelted. Used papyrus was recycled as kiln fuel or building insulation.",
     icon: Pyramid,
     color: "from-amber-500 to-yellow-600",
-    bgAccent: "bg-amber-500/10",
-  },
-  {
-    era: "1500 ق.م",
+    image: eraOldKingdom,
     hieroglyphic: "𓊪𓏏𓂋 𓅱𓂧𓏏 𓇋𓏏",
     title: "الدولة الحديثة — نظام فرز متقدم",
     titleEn: "New Kingdom — Advanced Sorting System",
