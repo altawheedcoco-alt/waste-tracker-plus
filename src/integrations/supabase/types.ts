@@ -30434,6 +30434,48 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_post_views: {
+        Row: {
+          browser: string | null
+          country: string | null
+          created_at: string | null
+          device_type: string | null
+          id: string
+          ip_address: string | null
+          os: string | null
+          post_id: string
+          referrer: string | null
+          user_agent: string | null
+          visitor_id: string
+        }
+        Insert: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          post_id: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id: string
+        }
+        Update: {
+          browser?: string | null
+          country?: string | null
+          created_at?: string | null
+          device_type?: string | null
+          id?: string
+          ip_address?: string | null
+          os?: string | null
+          post_id?: string
+          referrer?: string | null
+          user_agent?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       platform_posts: {
         Row: {
           author_name: string
@@ -45625,6 +45667,19 @@ export type Database = {
       toggle_post_like: {
         Args: { p_post_id: string; p_visitor_id: string }
         Returns: boolean
+      }
+      track_post_view: {
+        Args: {
+          p_browser?: string
+          p_device_type?: string
+          p_ip_address?: string
+          p_os?: string
+          p_post_id: string
+          p_referrer?: string
+          p_user_agent?: string
+          p_visitor_id: string
+        }
+        Returns: undefined
       }
       upsert_smart_input: {
         Args: {
