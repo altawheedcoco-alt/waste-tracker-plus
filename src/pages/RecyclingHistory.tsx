@@ -35,7 +35,7 @@ const timelineData = [
     descEn: "Before Egypt's unification, Nile Valley inhabitants reused broken pottery as cutting and scraping tools. They ground old pottery and mixed it with clay for stronger new vessels. Animal bones were crafted into needles and fine tools — the earliest documented form of recycling in human history.",
     icon: Pyramid,
     color: "from-stone-500 to-amber-700",
-    bgAccent: "bg-stone-500/10",
+    image: eraPredynastic,
   },
   {
     era: "3000 ق.م",
