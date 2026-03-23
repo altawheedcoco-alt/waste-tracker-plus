@@ -459,7 +459,7 @@ IndustriesSection.displayName = "IndustriesSection";
    Section 8: المميزات الرئيسية
    ───────────────────────────────────────────── */
 const FeaturesSection = memo(() => (
-  <div className="py-16 sm:py-24 bg-gradient-to-l from-muted/50 to-background">>
+  <div className="py-16 sm:py-24 bg-gradient-to-l from-muted/50 to-background">
     <div className="container px-4">
       <motion.div 
         className="text-center mb-16"
