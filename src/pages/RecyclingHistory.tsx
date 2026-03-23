@@ -150,6 +150,7 @@ const timelineData = [
     color: "from-teal-500 to-green-600",
     bgAccent: "bg-teal-500/10",
   },
+  {
     era: "2003",
     hieroglyphic: "𓏏𓂋𓆑 𓅱𓂧 𓆓𓏏𓏤",
     title: "الخصخصة — صدام النظامين",
