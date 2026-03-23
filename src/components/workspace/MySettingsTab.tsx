@@ -9,12 +9,16 @@ import { Switch } from '@/components/ui/switch';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 import { motion } from 'framer-motion';
+import { useTheme } from 'next-themes';
+import { useUserPreferences } from '@/hooks/useUserPreferences';
 import {
   User, Phone, Lock, Bell, Moon, Globe, Save, Loader2, Eye, EyeOff,
 } from 'lucide-react';
 
 const MySettingsTab = () => {
   const { profile, user } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const { getPref, setPref } = useUserPreferences();
   const [saving, setSaving] = useState(false);
   const [fullName, setFullName] = useState(profile?.full_name || '');
   const [phone, setPhone] = useState(profile?.phone || '');
@@ -25,6 +29,9 @@ const MySettingsTab = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPass, setShowPass] = useState(false);
   const [changingPassword, setChangingPassword] = useState(false);
+
+  const isDark = theme === 'dark';
+  const emailNotifs = getPref('email_notifications', true) as boolean;
 
   const initials = (profile?.full_name || 'U').split(' ').map(n => n[0]).join('').slice(0, 2);
 
