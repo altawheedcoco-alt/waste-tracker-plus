@@ -320,21 +320,33 @@ const RecyclingHistory = memo(() => {
 
                   {/* Content card */}
                   <div className={`ms-20 sm:ms-0 sm:w-[calc(50%-40px)] ${isLeft ? '' : ''}`}>
-                    <div className={`${item.bgAccent} border border-border/50 rounded-2xl p-6 sm:p-8 hover:shadow-lg transition-shadow`}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${item.color}`}>
-                          {item.era}
-                        </span>
-                        <span className="text-amber-500/70 text-sm tracking-[0.2em]" style={{ fontFamily: 'serif' }}>
-                          {item.hieroglyphic}
-                        </span>
+                    <div className={`${item.bgAccent} border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow`}>
+                      {/* Era Image */}
+                      <div className="relative h-40 sm:h-48 overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={isAr ? item.title : item.titleEn}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent`} />
+                        <div className="absolute bottom-3 start-4 flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${item.color}`}>
+                            {item.era}
+                          </span>
+                          <span className="text-amber-300/90 text-sm tracking-[0.2em]" style={{ fontFamily: 'serif', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                            {item.hieroglyphic}
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-                        {isAr ? item.title : item.titleEn}
-                      </h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {isAr ? item.description : item.descEn}
-                      </p>
+                      <div className="p-5 sm:p-6">
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
+                          {isAr ? item.title : item.titleEn}
+                        </h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {isAr ? item.description : item.descEn}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
