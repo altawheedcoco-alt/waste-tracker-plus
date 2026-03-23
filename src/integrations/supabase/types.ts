@@ -30478,6 +30478,7 @@ export type Database = {
       }
       platform_posts: {
         Row: {
+          ai_image_generated: boolean | null
           author_name: string
           badge: string | null
           category: string
@@ -30497,6 +30498,7 @@ export type Database = {
           views_count: number
         }
         Insert: {
+          ai_image_generated?: boolean | null
           author_name?: string
           badge?: string | null
           category?: string
@@ -30516,6 +30518,7 @@ export type Database = {
           views_count?: number
         }
         Update: {
+          ai_image_generated?: boolean | null
           author_name?: string
           badge?: string | null
           category?: string
