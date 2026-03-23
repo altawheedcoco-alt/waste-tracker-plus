@@ -1,14 +1,16 @@
 import { useParams, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ReactMarkdown from 'react-markdown';
-import { ArrowRight, Calendar, User, Eye, Star, FileText, Share2 } from 'lucide-react';
+import { ArrowRight, Calendar, User, Eye, Star, FileText, Share2, Heart } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { useEffect } from 'react';
+import { usePostLike } from '@/hooks/usePostLikes';
+import { cn } from '@/lib/utils';
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -16,6 +18,7 @@ const formatDate = (dateStr: string) =>
 const PostDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { data: post, isLoading } = useQuery({
     queryKey: ['platform-post', id],
@@ -32,15 +35,20 @@ const PostDetail = () => {
     enabled: !!id,
   });
 
-  // Increment views
+  const { liked, likesCount, setLikesCount, toggleLike, loading: likeLoading } = usePostLike(id || '');
+
+  // Sync likes count from post data
+  useEffect(() => {
+    if (post) setLikesCount(post.likes_count || 0);
+  }, [post, setLikesCount]);
+
+  // Increment views via RPC
   useEffect(() => {
     if (!id) return;
-    (supabase as any)
-      .from('platform_posts')
-      .update({ views_count: (post?.views_count || 0) + 1 })
-      .eq('id', id)
-      .then(() => {});
-  }, [id]);
+    (supabase as any).rpc('increment_post_views', { p_post_id: id }).then(() => {
+      queryClient.invalidateQueries({ queryKey: ['platform-post', id] });
+    });
+  }, [id, queryClient]);
 
   // SEO Meta Tags + JSON-LD
   useEffect(() => {
@@ -79,7 +87,6 @@ const PostDetail = () => {
       setMeta('keywords', post.tags.join(', '));
     }
 
-    // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
     if (!canonical) {
       canonical = document.createElement('link');
@@ -88,7 +95,6 @@ const PostDetail = () => {
     }
     canonical.setAttribute('href', window.location.href);
 
-    // JSON-LD
     const jsonLd = {
       '@context': 'https://schema.org',
       '@type': 'Article',
@@ -128,12 +134,16 @@ const PostDetail = () => {
     }
   };
 
+  const handleLike = async () => {
+    await toggleLike();
+    queryClient.invalidateQueries({ queryKey: ['platform-posts-public'] });
+  };
+
   return (
     <div className="min-h-screen bg-background" dir="rtl">
       <Header />
       <div className="pt-20 pb-12">
         <div className="container px-4 max-w-3xl mx-auto">
-          {/* Back */}
           <Button variant="ghost" size="sm" className="mb-6 gap-2" onClick={() => navigate('/posts')}>
             <ArrowRight className="w-4 h-4" />
             العودة للمنشورات
@@ -153,18 +163,12 @@ const PostDetail = () => {
             </div>
           ) : (
             <article>
-              {/* Cover */}
               {post.cover_image_url && (
                 <div className="rounded-2xl overflow-hidden mb-8 shadow-lg">
-                  <img
-                    src={post.cover_image_url}
-                    alt={post.title}
-                    className="w-full h-56 sm:h-72 object-cover"
-                  />
+                  <img src={post.cover_image_url} alt={post.title} className="w-full h-56 sm:h-72 object-cover" />
                 </div>
               )}
 
-              {/* Badges */}
               <div className="flex flex-wrap items-center gap-2 mb-4">
                 <Badge variant="secondary">{post.category}</Badge>
                 {post.is_featured && (
@@ -176,10 +180,8 @@ const PostDetail = () => {
                 {post.badge && <Badge variant="outline">{post.badge}</Badge>}
               </div>
 
-              {/* Title */}
               <h1 className="text-2xl sm:text-3xl font-black mb-4 leading-tight">{post.title}</h1>
 
-              {/* Meta */}
               <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8 pb-6 border-b border-border">
                 <span className="flex items-center gap-1.5">
                   <User className="w-4 h-4" />
@@ -195,13 +197,28 @@ const PostDetail = () => {
                   <Eye className="w-4 h-4" />
                   {post.views_count || 0} مشاهدة
                 </span>
-                <Button variant="ghost" size="sm" className="gap-1.5 ms-auto" onClick={handleShare}>
-                  <Share2 className="w-4 h-4" />
-                  مشاركة
-                </Button>
+                <div className="flex items-center gap-2 ms-auto">
+                  {/* Like Button */}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleLike}
+                    disabled={likeLoading}
+                    className={cn(
+                      'gap-1.5 rounded-full transition-all',
+                      liked ? 'text-red-500 bg-red-50 hover:bg-red-100 dark:bg-red-500/10 dark:hover:bg-red-500/20' : 'text-muted-foreground hover:text-red-500'
+                    )}
+                  >
+                    <Heart className={cn('w-4 h-4 transition-all', liked && 'fill-current scale-110')} />
+                    <span className="text-xs font-bold">{likesCount}</span>
+                  </Button>
+                  <Button variant="ghost" size="sm" className="gap-1.5" onClick={handleShare}>
+                    <Share2 className="w-4 h-4" />
+                    مشاركة
+                  </Button>
+                </div>
               </div>
 
-              {/* Tags */}
               {post.tags && post.tags.length > 0 && (
                 <div className="flex flex-wrap gap-2 mb-6">
                   {post.tags.map((tag: string, i: number) => (
@@ -210,16 +227,36 @@ const PostDetail = () => {
                 </div>
               )}
 
-              {/* Excerpt */}
               {post.excerpt && (
                 <p className="text-lg font-medium text-muted-foreground mb-6 leading-relaxed border-r-4 border-primary pr-4">
                   {post.excerpt}
                 </p>
               )}
 
-              {/* Content */}
               <div className="prose prose-lg prose-stone dark:prose-invert max-w-none prose-headings:font-bold prose-p:leading-relaxed">
                 <ReactMarkdown>{post.content}</ReactMarkdown>
+              </div>
+
+              {/* Bottom Like Bar */}
+              <div className="mt-10 pt-6 border-t border-border flex items-center justify-center gap-4">
+                <Button
+                  variant={liked ? "default" : "outline"}
+                  size="lg"
+                  onClick={handleLike}
+                  disabled={likeLoading}
+                  className={cn(
+                    'gap-2 rounded-full px-8 transition-all',
+                    liked && 'bg-red-500 hover:bg-red-600 text-white border-red-500'
+                  )}
+                >
+                  <Heart className={cn('w-5 h-5', liked && 'fill-current')} />
+                  {liked ? 'أعجبني' : 'إعجاب'}
+                  <span className="font-bold">({likesCount})</span>
+                </Button>
+                <Button variant="outline" size="lg" className="gap-2 rounded-full px-8" onClick={handleShare}>
+                  <Share2 className="w-5 h-5" />
+                  مشاركة
+                </Button>
               </div>
             </article>
           )}

@@ -5,8 +5,8 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, User, Eye, Star, FileText } from 'lucide-react';
-import { useEffect } from 'react';
+import { Calendar, User, Eye, Star, FileText, Heart, Users } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
 
 const PlatformPosts = () => {
   const { data: posts = [], isLoading } = useQuery({
@@ -21,6 +21,12 @@ const PlatformPosts = () => {
       return (data || []) as any[];
     },
   });
+
+  const stats = useMemo(() => {
+    const totalViews = posts.reduce((sum: number, p: any) => sum + (p.views_count || 0), 0);
+    const totalLikes = posts.reduce((sum: number, p: any) => sum + (p.likes_count || 0), 0);
+    return { totalViews, totalLikes, totalPosts: posts.length };
+  }, [posts]);
 
   // SEO
   useEffect(() => {
@@ -53,7 +59,28 @@ const PlatformPosts = () => {
               <span className="text-sm font-bold text-primary">منشورات المنصة</span>
             </div>
             <h1 className="text-3xl md:text-4xl font-black mb-3">أحدث المنشورات والمقالات</h1>
-            <p className="text-muted-foreground max-w-xl mx-auto">تابع آخر الأخبار والمقالات والتحديثات من فريق المنصة</p>
+            <p className="text-muted-foreground max-w-xl mx-auto mb-6">تابع آخر الأخبار والمقالات والتحديثات من فريق المنصة</p>
+
+            {/* Stats Bar */}
+            {!isLoading && posts.length > 0 && (
+              <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-border/50">
+                  <FileText className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-bold">{stats.totalPosts}</span>
+                  <span className="text-xs text-muted-foreground">منشور</span>
+                </div>
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-border/50">
+                  <Eye className="w-4 h-4 text-blue-500" />
+                  <span className="text-sm font-bold">{stats.totalViews.toLocaleString('ar-EG')}</span>
+                  <span className="text-xs text-muted-foreground">مشاهدة</span>
+                </div>
+                <div className="flex items-center gap-2 bg-card/80 backdrop-blur-sm rounded-full px-4 py-2 shadow-sm border border-border/50">
+                  <Heart className="w-4 h-4 text-red-500" />
+                  <span className="text-sm font-bold">{stats.totalLikes.toLocaleString('ar-EG')}</span>
+                  <span className="text-xs text-muted-foreground">إعجاب</span>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -114,10 +141,16 @@ const PlatformPosts = () => {
                             </span>
                           )}
                         </div>
-                        <span className="flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          {post.views_count || 0}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <span className="flex items-center gap-1">
+                            <Heart className="w-3 h-3 text-red-400" />
+                            {post.likes_count || 0}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Eye className="w-3 h-3" />
+                            {post.views_count || 0}
+                          </span>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
