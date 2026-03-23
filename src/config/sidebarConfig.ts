@@ -411,6 +411,28 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: MessageCircle, labelAr: 'شكاوى المواطنين', labelEn: 'Complaints', path: '/dashboard/citizen-complaints', key: 'citizen-complaints', bindingType: 'internal' as const },
     ],
   },
+  {
+    id: 'municipal-workforce',
+    icon: Users,
+    labelAr: 'القوى العاملة',
+    labelEn: 'Workforce',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: Users, labelAr: 'طواقم الكنس والنظافة', labelEn: 'Sweeping Crews', path: '/dashboard/sweeping-crews', key: 'sweeping-crews', bindingType: 'internal' as const },
+      { icon: UserCheck, labelAr: 'حضور وانصراف', labelEn: 'Attendance', path: '/dashboard/daily-attendance', key: 'daily-attendance', bindingType: 'internal' as const },
+    ],
+  },
+  {
+    id: 'municipal-assets',
+    icon: Package,
+    labelAr: 'المعدات والمحطات',
+    labelEn: 'Assets & Stations',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: Package, labelAr: 'المعدات والأدوات', labelEn: 'Equipment', path: '/dashboard/sweeping-equipment', key: 'sweeping-equipment', bindingType: 'internal' as const },
+      { icon: Building2, labelAr: 'محطات الترحيل', labelEn: 'Transfer Stations', path: '/dashboard/transfer-stations', key: 'transfer-stations', bindingType: 'internal' as const },
+    ],
+  },
 
   // ═══════════════ الرقابة والإشراف (Regulator) ═══════════════
   {
