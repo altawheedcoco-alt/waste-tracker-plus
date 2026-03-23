@@ -412,6 +412,18 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
   {
+    id: 'municipal-contracts',
+    icon: FileText,
+    labelAr: 'العقود والامتثال',
+    labelEn: 'Contracts & Compliance',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: FileText, labelAr: 'العقود الحكومية', labelEn: 'Contracts', path: '/dashboard/municipal-contracts', key: 'municipal-contracts', bindingType: 'internal' as const },
+      { icon: AlertTriangle, labelAr: 'الغرامات والجزاءات', labelEn: 'Penalties', path: '/dashboard/penalties-management', key: 'penalties-management', bindingType: 'internal' as const },
+      { icon: BarChart3, labelAr: 'التقارير الدورية', labelEn: 'Reports', path: '/dashboard/municipal-reports', key: 'municipal-reports', bindingType: 'internal' as const },
+    ],
+  },
+  {
     id: 'municipal-workforce',
     icon: Users,
     labelAr: 'القوى العاملة',
@@ -420,6 +432,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Users, labelAr: 'طواقم الكنس والنظافة', labelEn: 'Sweeping Crews', path: '/dashboard/sweeping-crews', key: 'sweeping-crews', bindingType: 'internal' as const },
       { icon: UserCheck, labelAr: 'حضور وانصراف', labelEn: 'Attendance', path: '/dashboard/daily-attendance', key: 'daily-attendance', bindingType: 'internal' as const },
+      { icon: Shield, labelAr: 'سلامة العمال', labelEn: 'Worker Safety', path: '/dashboard/worker-safety', key: 'worker-safety', bindingType: 'internal' as const },
     ],
   },
   {
@@ -431,6 +444,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Package, labelAr: 'المعدات والأدوات', labelEn: 'Equipment', path: '/dashboard/sweeping-equipment', key: 'sweeping-equipment', bindingType: 'internal' as const },
       { icon: Building2, labelAr: 'محطات الترحيل', labelEn: 'Transfer Stations', path: '/dashboard/transfer-stations', key: 'transfer-stations', bindingType: 'internal' as const },
+      { icon: Boxes, labelAr: 'العُهد والمستلزمات', labelEn: 'Custody', path: '/dashboard/equipment-custody', key: 'equipment-custody', bindingType: 'internal' as const },
     ],
   },
 
