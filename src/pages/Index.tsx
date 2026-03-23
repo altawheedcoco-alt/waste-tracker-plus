@@ -59,6 +59,7 @@ const SaaSTechSection = lazyRetry(() => import("@/components/landing/SaaSTechSec
 const VisitorCounter = lazyRetry(() => import("@/components/landing/VisitorCounter"));
 const C2BSubmissionForm = lazyRetry(() => import("@/components/c2b/C2BSubmissionForm"));
 const PlatformPostsSection = lazyRetry(() => import("@/components/landing/PlatformPostsSection"));
+const FloatingScrollButtons = lazyRetry(() => import("@/components/FloatingScrollButtons"));
 
 // v5.1 — New showcase sections
 const DriverEcosystemShowcase = lazyRetry(() => import("@/components/landing/DriverEcosystemShowcase"));
