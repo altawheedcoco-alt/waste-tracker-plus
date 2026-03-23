@@ -1,6 +1,5 @@
 /**
- * صفحة المصادقة الرئيسية — Main Auth Page v3.0
- * تم إعادة هيكلتها لتكون نظيفة ومكونات مستقلة
+ * صفحة المصادقة الرئيسية — Main Auth Page v5.1
  */
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
@@ -8,7 +7,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Leaf, Sparkles } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Leaf, Sparkles, Shield, Zap, Globe, ArrowLeft } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import PlatformLogo from '@/components/common/PlatformLogo';
 import AuthSidePanel from '@/components/auth/AuthSidePanel';
@@ -111,19 +111,26 @@ const Auth = () => {
 
   return (
     <div className="min-h-screen flex flex-col lg:flex-row bg-background">
-      {/* Side Panel - fixed height */}
+      {/* Side Panel */}
       <div className="hidden lg:block lg:w-[44%] xl:w-[46%] lg:h-screen lg:sticky lg:top-0">
         <AuthSidePanel />
       </div>
 
-      {/* Form Panel - scrollable */}
+      {/* Form Panel */}
       <div className="flex-1 flex items-start lg:items-center justify-center p-4 sm:p-6 lg:p-8 overflow-y-auto auth-scroll-container relative min-h-screen">
-        {/* v3.0 Background decorations */}
+        {/* v5.1 Background */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute top-0 right-0 w-full h-full opacity-50" style={{
-            background: 'radial-gradient(ellipse at 80% 20%, hsl(160, 68%, 40%, 0.06) 0%, transparent 50%), radial-gradient(ellipse at 20% 80%, hsl(205, 78%, 42%, 0.05) 0%, transparent 50%)',
+          <div className="absolute inset-0 opacity-40" style={{
+            background: 'radial-gradient(ellipse at 80% 10%, hsl(var(--primary) / 0.08) 0%, transparent 50%), radial-gradient(ellipse at 10% 90%, hsl(160 68% 40% / 0.05) 0%, transparent 50%)',
           }} />
-          <div className="absolute bottom-0 left-0 w-full h-32 bg-gradient-to-t from-muted/30 to-transparent" />
+          <div className="absolute top-0 left-0 w-full h-1" style={{
+            background: 'linear-gradient(90deg, hsl(160 68% 40%), hsl(178 60% 38%), hsl(205 78% 42%))',
+          }} />
+          {/* Subtle grid pattern */}
+          <div className="absolute inset-0 opacity-[0.015]" style={{
+            backgroundImage: 'radial-gradient(circle, hsl(var(--foreground)) 1px, transparent 1px)',
+            backgroundSize: '24px 24px',
+          }} />
         </div>
 
         <motion.div
@@ -132,29 +139,31 @@ const Auth = () => {
           transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-lg relative z-10"
         >
-          {/* Logo */}
-          <div className="text-center mb-6">
-            <motion.div whileHover={{ scale: 1.05 }} className="inline-flex flex-col items-center gap-2">
+          {/* Logo Header */}
+          <div className="text-center mb-5">
+            <motion.div whileHover={{ scale: 1.03 }} className="inline-flex flex-col items-center gap-2">
               <PlatformLogo size="xl" />
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-medium tracking-[0.2em] uppercase text-muted-foreground/40">
+                <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-muted-foreground/50">
                   Waste Management System
                 </span>
-                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-primary/10 text-[9px] font-bold text-primary tracking-wider">
+                <Badge variant="outline" className="text-[9px] px-1.5 py-0 gap-1 border-primary/30 text-primary font-bold">
                   <Sparkles className="w-2.5 h-2.5" />
-                  v3.0
-                </span>
+                  v5.1
+                </Badge>
               </div>
             </motion.div>
           </div>
 
-          <Card className="border border-border/30 shadow-2xl shadow-primary/[0.04] rounded-2xl bg-card/98 backdrop-blur-sm overflow-hidden">
-            {/* Top accent gradient */}
-            <div className="h-1 w-full" style={{
-              background: 'linear-gradient(90deg, hsl(160, 68%, 40%), hsl(178, 60%, 38%), hsl(205, 78%, 42%))',
+          <Card className="border border-border/40 shadow-2xl shadow-primary/[0.06] rounded-2xl bg-card/98 backdrop-blur-sm overflow-hidden">
+            {/* Top gradient accent */}
+            <div className="h-1.5 w-full" style={{
+              background: 'linear-gradient(90deg, hsl(160 68% 40%), hsl(178 60% 38%), hsl(205 78% 42%), hsl(160 68% 40%))',
+              backgroundSize: '200% 100%',
+              animation: 'shimmer 3s ease-in-out infinite',
             }} />
             
-            <CardHeader className="text-center pb-3 pt-6">
+            <CardHeader className="text-center pb-2 pt-5">
               <div className="mb-3 pb-3 border-b border-border/20">
                 <h2 className="text-base sm:text-lg font-bold text-primary tracking-wide">{t('landing.systemName')}</h2>
                 <p className="text-xs sm:text-sm font-semibold text-foreground/50">{t('landing.systemNameAr')}</p>
@@ -163,7 +172,7 @@ const Auth = () => {
               <CardDescription className="text-sm">{getDescription()}</CardDescription>
             </CardHeader>
 
-            <CardContent className="pt-2 pb-6">
+            <CardContent className="pt-1 pb-6">
               <AnimatePresence mode="wait">
                 {authMode === 'login' && (
                   <LoginForm onSwitchToRegister={() => { setAuthMode('register'); setRegistrationType(null); }} />
@@ -193,7 +202,7 @@ const Auth = () => {
               </AnimatePresence>
 
               {/* Toggle login/signup */}
-              <div className="mt-6 text-center">
+              <div className="mt-5 text-center">
                 <button
                   type="button"
                   onClick={() => {
@@ -218,29 +227,55 @@ const Auth = () => {
               {/* Back to home */}
               <div className="mt-3 text-center">
                 <Button variant="ghost" size="sm" onClick={() => navigate('/')} className="text-muted-foreground/50 hover:text-muted-foreground text-xs gap-1.5">
-                  <Leaf size={14} />
+                  <ArrowLeft size={14} />
                   {t('auth.backToHome')}
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          {/* Mobile-only: mini features */}
+          {/* Mobile features grid */}
           <div className="lg:hidden mt-4 grid grid-cols-2 gap-2">
             {[
-              { icon: '♻️', text: 'إدارة ذكية' },
-              { icon: '🔒', text: 'حماية شاملة' },
-              { icon: '📊', text: 'تقارير متقدمة' },
-              { icon: '🚛', text: 'تتبع لحظي' },
+              { icon: <Zap className="w-3.5 h-3.5 text-primary" />, text: 'ذكاء اصطناعي', desc: 'تحليل فوري' },
+              { icon: <Shield className="w-3.5 h-3.5 text-primary" />, text: 'حماية شاملة', desc: 'تشفير متقدم' },
+              { icon: <Globe className="w-3.5 h-3.5 text-primary" />, text: 'تتبع لحظي', desc: 'GPS مباشر' },
+              { icon: <Leaf className="w-3.5 h-3.5 text-primary" />, text: 'امتثال بيئي', desc: 'قانون 202' },
             ].map((f, i) => (
-              <div key={i} className="flex items-center gap-2 p-2.5 rounded-xl bg-muted/50 border border-border/30">
-                <span className="text-sm">{f.icon}</span>
-                <span className="text-[11px] font-medium text-muted-foreground">{f.text}</span>
-              </div>
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 + i * 0.08 }}
+                className="flex items-center gap-2.5 p-2.5 rounded-xl bg-card/80 border border-border/40 shadow-sm"
+              >
+                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                  {f.icon}
+                </div>
+                <div>
+                  <span className="text-[11px] font-semibold text-foreground block">{f.text}</span>
+                  <span className="text-[9px] text-muted-foreground">{f.desc}</span>
+                </div>
+              </motion.div>
             ))}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-4 text-center">
+            <p className="text-[10px] text-muted-foreground/40">
+              © 2024-2026 iRecycle Platform · متوافق مع القانون 202/2020
+            </p>
           </div>
         </motion.div>
       </div>
+
+      {/* Shimmer animation */}
+      <style>{`
+        @keyframes shimmer {
+          0%, 100% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+        }
+      `}</style>
     </div>
   );
 };
