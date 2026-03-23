@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -18,7 +18,6 @@ import { fetchLinkedPartnerIds } from '@/hooks/useLinkedPartnerIds';
 const PartnersTimelineEmbed = () => {
   const { organization } = useAuth();
   const navigate = useNavigate();
-  const [selectedType, setSelectedType] = useState<string>('all');
 
   const { data: partnerIds = [] } = useQuery({
     queryKey: ['partner-ids', organization?.id],
@@ -27,22 +26,57 @@ const PartnersTimelineEmbed = () => {
   });
 
   const { data: posts = [], isLoading, refetch } = useQuery({
-    queryKey: ['partners-timeline-embed', partnerIds, organization?.id, selectedType],
+    queryKey: ['partners-timeline-embed', partnerIds, organization?.id],
     queryFn: async () => {
       if (!organization?.id) return [];
       const allIds = [...partnerIds, organization.id];
       if (allIds.length === 0) return [];
 
-      let query = supabase
+      const { data: postsData, error } = await supabase
         .from('organization_posts')
-        .select('*, organization:organizations(id, name, logo_url, organization_type, is_verified)')
+        .select('*')
         .in('organization_id', allIds)
         .order('created_at', { ascending: false })
         .limit(20);
 
-      const { data, error } = await query;
       if (error) throw error;
-      return data || [];
+
+      // Fetch orgs
+      const { data: orgsData } = await supabase
+        .from('organizations')
+        .select('id, name, logo_url, organization_type, is_verified')
+        .in('id', allIds);
+      const orgsMap = new Map(orgsData?.map(org => [org.id, org]) || []);
+
+      // Fetch author profiles (exclude drivers)
+      const authorIds = [...new Set((postsData || []).map(p => p.author_id).filter(Boolean))];
+      let authorsMap = new Map<string, { id: string; full_name: string | null; avatar_url: string | null }>();
+      
+      if (authorIds.length > 0) {
+        const { data: driverRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'driver')
+          .in('user_id', authorIds);
+        
+        const driverIds = new Set((driverRoles || []).map(r => r.user_id));
+        const nonDriverIds = authorIds.filter(id => !driverIds.has(id));
+
+        if (nonDriverIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', nonDriverIds);
+          authorsMap = new Map((profilesData || []).map(p => [p.id, p]));
+        }
+      }
+
+      return (postsData || []).map(post => ({
+        ...post,
+        media_urls: post.media_urls as string[] | null,
+        organization: orgsMap.get(post.organization_id),
+        author: post.author_id ? authorsMap.get(post.author_id) || null : null,
+      }));
     },
     enabled: !!organization?.id && partnerIds.length > 0,
   });
@@ -73,14 +107,19 @@ const PartnersTimelineEmbed = () => {
           <CardContent className="p-3 space-y-2">
             <div className="flex items-center gap-2">
               <Avatar className="h-8 w-8">
-                <AvatarImage src={post.organization?.logo_url} />
+                <AvatarImage src={post.author?.avatar_url || post.organization?.logo_url} />
                 <AvatarFallback className="text-[10px] bg-primary/10 text-primary">
-                  {post.organization?.name?.charAt(0)}
+                  {(post.author?.full_name || post.organization?.name)?.charAt(0)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-medium truncate">{post.organization?.name}</span>
+                <div className="flex items-center gap-1 flex-wrap">
+                  {post.author?.full_name && (
+                    <span className="text-xs font-medium">{post.author.full_name}</span>
+                  )}
+                  <span className={`text-xs ${post.author?.full_name ? 'text-muted-foreground' : 'font-medium'} truncate`}>
+                    {post.author?.full_name ? `· ${post.organization?.name}` : post.organization?.name}
+                  </span>
                   {post.organization?.is_verified && <BadgeCheck className="h-3 w-3 text-primary flex-shrink-0" />}
                 </div>
                 <div className="flex items-center gap-1 text-[10px] text-muted-foreground">

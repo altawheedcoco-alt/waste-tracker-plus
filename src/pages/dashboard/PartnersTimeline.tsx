@@ -36,6 +36,7 @@ interface Post {
   likes_count: number;
   created_at: string;
   organization_id: string;
+  author_id: string | null;
   organization?: {
     id: string;
     name: string;
@@ -43,6 +44,11 @@ interface Post {
     organization_type: string;
     is_verified: boolean;
   };
+  author?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 const PartnersTimeline = () => {
@@ -119,10 +125,36 @@ const PartnersTimeline = () => {
 
       const orgsMap = new Map(orgsData?.map(org => [org.id, org]) || []);
 
+      // Fetch author profiles (exclude drivers)
+      const authorIds = [...new Set((postsData || []).map(p => p.author_id).filter(Boolean))];
+      let authorsMap = new Map<string, { id: string; full_name: string | null; avatar_url: string | null }>();
+      
+      if (authorIds.length > 0) {
+        // Get driver user IDs to exclude
+        const { data: driverRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'driver')
+          .in('user_id', authorIds);
+        
+        const driverIds = new Set((driverRoles || []).map(r => r.user_id));
+        const nonDriverIds = authorIds.filter(id => !driverIds.has(id));
+
+        if (nonDriverIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', nonDriverIds);
+          
+          authorsMap = new Map((profilesData || []).map(p => [p.id, p]));
+        }
+      }
+
       return (postsData || []).map(post => ({
         ...post,
         media_urls: post.media_urls as string[] | null,
         organization: orgsMap.get(post.organization_id),
+        author: post.author_id ? authorsMap.get(post.author_id) || null : null,
       })) as Post[];
     },
     enabled: !!organization?.id,
@@ -233,15 +265,20 @@ const PartnersTimeline = () => {
                         onClick={() => navigate(`/dashboard/organization/${post.organization_id}`)}
                       >
                         <Avatar className="h-12 w-12 ring-2 ring-border">
-                          <AvatarImage src={post.organization?.logo_url || ''} />
+                          <AvatarImage src={post.author?.avatar_url || post.organization?.logo_url || ''} />
                           <AvatarFallback className="bg-primary/10">
                             <Building2 className="w-6 h-6 text-primary" />
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold hover:underline">
-                              {post.organization?.name || 'جهة'}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {post.author?.full_name && (
+                              <span className="font-semibold text-foreground">
+                                {post.author.full_name}
+                              </span>
+                            )}
+                            <span className={`${post.author?.full_name ? 'text-xs text-muted-foreground' : 'font-semibold'} hover:underline`}>
+                              {post.author?.full_name ? `· ${post.organization?.name || 'جهة'}` : (post.organization?.name || 'جهة')}
                             </span>
                             {post.organization?.is_verified && (
                               <BadgeCheck className="w-4 h-4 text-primary" />
