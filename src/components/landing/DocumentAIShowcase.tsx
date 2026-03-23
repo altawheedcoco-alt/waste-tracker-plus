@@ -55,7 +55,7 @@ const ProblemSection = memo(() => (
             ].map((item, i) => (
               <motion.div 
                 key={i} 
-                className="bg-[hsl(200,60%,96%)] rounded-xl p-4 text-right border border-[hsl(200,40%,90%)]"
+                className="bg-muted rounded-xl p-4 text-right border border-border"
                 custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp}
               >
@@ -80,9 +80,9 @@ const ProblemSection = memo(() => (
           </div>
           <div className="space-y-4">
             {[
-              { title: "ارتفاع التكاليف التشغيلية", icon: TrendingUp, color: "bg-red-50 border-red-100" },
-              { title: "تأخيرات في المعاملات وإجراءات انضمام العملاء الجدد", icon: Clock, color: "bg-amber-50 border-amber-100" },
-              { title: "زيادة مخاطر الاحتيال ومخالفات الامتثال", icon: AlertTriangle, color: "bg-orange-50 border-orange-100" },
+              { title: "ارتفاع التكاليف التشغيلية", icon: TrendingUp, color: "bg-destructive/8 border-destructive/20 dark:bg-destructive/15 dark:border-destructive/30" },
+              { title: "تأخيرات في المعاملات وإجراءات انضمام العملاء الجدد", icon: Clock, color: "bg-amber-500/8 border-amber-500/20 dark:bg-amber-500/15 dark:border-amber-500/30" },
+              { title: "زيادة مخاطر الاحتيال ومخالفات الامتثال", icon: AlertTriangle, color: "bg-orange-500/8 border-orange-500/20 dark:bg-orange-500/15 dark:border-orange-500/30" },
             ].map((item, i) => (
               <motion.div 
                 key={i}
@@ -206,7 +206,7 @@ const OfferingsSection = memo(() => (
           ].map((item, i) => (
             <motion.div
               key={i}
-              className={`bg-[hsl(200,30%,97%)] rounded-xl p-6 text-right border-r-4 ${item.color} hover:bg-[hsl(200,30%,95%)] transition-colors`}
+              className={`bg-muted rounded-xl p-6 text-right border-r-4 ${item.color} hover:bg-muted/80 transition-colors`}
               custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp}
             >
@@ -263,7 +263,7 @@ const AutomationSection = memo(() => (
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
-            <div className="p-5 bg-[hsl(200,40%,96%)] text-right">
+            <div className="p-5 bg-muted text-right">
               <p className="text-sm text-[hsl(var(--landing-muted-foreground))]">الحالة:</p>
               <p className="font-semibold text-[hsl(var(--landing-foreground))]">"{item.condition}"</p>
             </div>
@@ -442,7 +442,7 @@ const IndustriesSection = memo(() => (
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
-            <div className="w-12 h-12 rounded-xl bg-[hsl(200,60%,96%)] flex items-center justify-center mb-4 mr-auto group-hover:bg-[hsl(var(--eco-emerald))]/10 transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-muted flex items-center justify-center mb-4 mr-auto group-hover:bg-[hsl(var(--eco-emerald))]/10 transition-colors">
               <item.icon className="w-6 h-6 text-[hsl(200,80%,50%)] group-hover:text-[hsl(var(--eco-emerald))] transition-colors" />
             </div>
             <h3 className="font-bold text-lg text-[hsl(var(--landing-foreground))] mb-2">{item.title}</h3>
@@ -648,7 +648,7 @@ const UseCasesSection = memo(() => (
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
-            <div className="bg-[hsl(200,40%,96%)] p-6 text-right">
+            <div className="bg-muted p-6 text-right">
               <div className="flex items-center gap-3 justify-end mb-3">
                 <h3 className="font-bold text-lg text-[hsl(var(--landing-foreground))]">{item.title}</h3>
                 <div className="w-10 h-10 rounded-xl bg-card flex items-center justify-center">
@@ -664,7 +664,7 @@ const UseCasesSection = memo(() => (
                     key={j}
                     className={`text-xs px-3 py-1.5 rounded-full font-medium ${
                       item.status === "error" && j === item.tags.length - 1
-                        ? "bg-red-50 text-red-600 border border-red-200"
+                        ? "bg-destructive/10 text-destructive border border-destructive/30"
                         : "bg-[hsl(var(--eco-emerald))]/10 text-[hsl(var(--eco-emerald))] border border-[hsl(var(--eco-emerald))]/20"
                     }`}
                   >
@@ -703,17 +703,17 @@ const ComplianceSection = memo(() => (
               {
                 title: "التحقق من الهوية القانونية للعملاء (KYC)",
                 desc: "استخراج والتحقق من هويات العملاء لتسريع إجراءات الانضمام.",
-                color: "bg-[hsl(200,40%,96%)]",
+                color: "bg-muted",
               },
               {
                 title: "الامتثال التنظيمي والتدقيق",
                 desc: "مراجعة المستندات المالية والتشغيلية للتأكد من مطابقتها للمعايير المعتمدة في الصناعة.",
-                color: "bg-[hsl(200,30%,95%)]",
+                color: "bg-muted/80",
               },
               {
                 title: "كشف الاحتيال",
                 desc: "رصد الشذوذ في العقود والمعاملات ومطالبات التأمين وتذاكر الوزن.",
-                color: "bg-[hsl(200,40%,96%)]",
+                color: "bg-muted",
               },
             ].map((item, i) => (
               <motion.div
@@ -746,7 +746,7 @@ const ComplianceSection = memo(() => (
             </div>
           </div>
           <p className="text-lg font-bold text-[hsl(var(--eco-emerald))]">موثوق ✓</p>
-          <div className="bg-[hsl(200,40%,96%)] rounded-xl p-4 text-center max-w-xs">
+          <div className="bg-muted rounded-xl p-4 text-center max-w-xs">
             <p className="text-sm text-[hsl(var(--landing-muted-foreground))]">
               نظام تحقق آلي متعدد المراحل يضمن صحة التوقيعات والأختام والبيانات القانونية مع بصمة رقمية SHA-256
             </p>
@@ -834,7 +834,7 @@ const OcrVsAiSection = memo(() => (
           <p className="text-[hsl(var(--landing-muted-foreground))] text-lg">يقرأ النص فقط</p>
         </motion.div>
         <motion.div
-          className="bg-[hsl(200,40%,96%)] p-8 sm:p-12 text-center"
+          className="bg-muted p-8 sm:p-12 text-center"
           initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={fadeIn}
         >
