@@ -66,24 +66,21 @@ const IRecycleLogo = memo(({
       <circle cx="32" cy="32" r="28" fill="none" stroke={colors.secondary} strokeWidth="0.5" opacity="0.3" />
 
       {/* Recycling arrows — 3 curved arrows forming a triangle */}
-      <g opacity="0.2" fill="#fff">
-        {/* Top arrow */}
+      <g opacity="0.2" fill={innerColor}>
         <path d="M32 14 L40 26 L36 26 L36 30 L28 30 L28 26 L24 26 Z" />
-        {/* Bottom-left arrow */}
         <path d="M18 42 L22 30 L25 33 L29 31 L25 38 L21 36 Z" transform="rotate(-2 22 36)" />
-        {/* Bottom-right arrow */}
         <path d="M46 42 L42 30 L39 33 L35 31 L39 38 L43 36 Z" transform="rotate(2 42 36)" />
       </g>
 
       {/* Modern recycling ring */}
-      <circle cx="32" cy="32" r="16" fill="none" stroke="#fff" strokeWidth="2.5" opacity="0.35" strokeDasharray="8 4" />
+      <circle cx="32" cy="32" r="16" fill="none" stroke={innerColor} strokeWidth="2.5" opacity="0.35" strokeDasharray="8 4" />
 
       {/* Center "i" lettermark */}
-      <circle cx="32" cy="22" r="3" fill="#fff" />
-      <rect x="29.5" y="28" width="5" height="16" rx="2.5" fill="#fff" />
+      <circle cx="32" cy="22" r="3" fill={innerColor} />
+      <rect x="29.5" y="28" width="5" height="16" rx="2.5" fill={innerColor} />
 
       {/* Subtle inner glow */}
-      <circle cx="32" cy="32" r="26" fill="none" stroke="#fff" strokeWidth="0.5" opacity="0.15" />
+      <circle cx="32" cy="32" r="26" fill="none" stroke={innerColor} strokeWidth="0.5" opacity="0.15" />
     </svg>
   );
 
