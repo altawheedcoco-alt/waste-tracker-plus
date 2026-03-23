@@ -254,6 +254,8 @@ const EquipmentCustody = lazy(() => import("@/pages/dashboard/municipal/Equipmen
 const MunicipalReports = lazy(() => import("@/pages/dashboard/municipal/MunicipalReports"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
+const LeadGeneration = lazy(() => import("@/pages/dashboard/LeadGeneration"));
+const CompanyDirectory = lazy(() => import("@/pages/dashboard/CompanyDirectory"));
 
 /**
  * All dashboard routes wrapped inside a single DashboardRouteGuard layout route.
