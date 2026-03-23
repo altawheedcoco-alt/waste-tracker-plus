@@ -13472,6 +13472,79 @@ export type Database = {
           },
         ]
       }
+      driver_trip_schedules: {
+        Row: {
+          assigned_workers: string[] | null
+          created_at: string
+          driver_id: string | null
+          end_time: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          pickup_locations: Json | null
+          route_description: string | null
+          start_time: string | null
+          status: string
+          trip_date: string
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          assigned_workers?: string[] | null
+          created_at?: string
+          driver_id?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          pickup_locations?: Json | null
+          route_description?: string | null
+          start_time?: string | null
+          status?: string
+          trip_date?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          assigned_workers?: string[] | null
+          created_at?: string
+          driver_id?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          pickup_locations?: Json | null
+          route_description?: string | null
+          start_time?: string | null
+          status?: string
+          trip_date?: string
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_trip_schedules_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_trip_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "driver_trip_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_wallet: {
         Row: {
           created_at: string | null
@@ -18274,6 +18347,92 @@ export type Database = {
           },
         ]
       }
+      fuel_records: {
+        Row: {
+          cost_per_liter: number
+          created_at: string
+          driver_id: string | null
+          fuel_date: string
+          fuel_type: string | null
+          id: string
+          liters: number
+          notes: string | null
+          odometer_reading: number | null
+          organization_id: string
+          receipt_url: string | null
+          shipment_id: string | null
+          station_name: string | null
+          total_cost: number | null
+          updated_at: string
+          vehicle_id: string | null
+        }
+        Insert: {
+          cost_per_liter: number
+          created_at?: string
+          driver_id?: string | null
+          fuel_date?: string
+          fuel_type?: string | null
+          id?: string
+          liters: number
+          notes?: string | null
+          odometer_reading?: number | null
+          organization_id: string
+          receipt_url?: string | null
+          shipment_id?: string | null
+          station_name?: string | null
+          total_cost?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Update: {
+          cost_per_liter?: number
+          created_at?: string
+          driver_id?: string | null
+          fuel_date?: string
+          fuel_type?: string | null
+          id?: string
+          liters?: number
+          notes?: string | null
+          odometer_reading?: number | null
+          organization_id?: string
+          receipt_url?: string | null
+          shipment_id?: string | null
+          station_name?: string | null
+          total_cost?: number | null
+          updated_at?: string
+          vehicle_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fuel_records_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "fuel_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fuel_records_shipment_id_fkey"
+            columns: ["shipment_id"]
+            isOneToOne: false
+            referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       geo_concentration_alerts: {
         Row: {
           acknowledged_at: string | null
@@ -22723,6 +22882,60 @@ export type Database = {
             columns: ["lesson_id"]
             isOneToOne: false
             referencedRelation: "lms_lessons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loading_workers: {
+        Row: {
+          created_at: string
+          daily_rate: number | null
+          full_name: string
+          id: string
+          national_id: string | null
+          notes: string | null
+          organization_id: string
+          phone: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          daily_rate?: number | null
+          full_name: string
+          id?: string
+          national_id?: string | null
+          notes?: string | null
+          organization_id: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          daily_rate?: number | null
+          full_name?: string
+          id?: string
+          national_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          phone?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loading_workers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "loading_workers_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
