@@ -15,38 +15,54 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Find news items that are scheduled and due for publishing
     const now = new Date().toISOString();
 
-    const { data: dueNews, error: fetchError } = await supabase
+    // 1. Auto-publish scheduled NEWS
+    const { data: dueNews, error: newsErr } = await supabase
       .from("platform_news")
       .select("id")
       .eq("is_published", false)
       .lte("published_at", now)
       .not("published_at", "is", null);
 
-    if (fetchError) throw fetchError;
+    if (newsErr) throw newsErr;
 
-    if (!dueNews || dueNews.length === 0) {
-      return new Response(
-        JSON.stringify({ success: true, published: 0, message: "لا توجد أخبار مستحقة للنشر" }),
-        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
+    let newsPublished = 0;
+    if (dueNews && dueNews.length > 0) {
+      const ids = dueNews.map((n: any) => n.id);
+      const { error } = await supabase
+        .from("platform_news")
+        .update({ is_published: true })
+        .in("id", ids);
+      if (error) throw error;
+      newsPublished = ids.length;
     }
 
-    const ids = dueNews.map((n: any) => n.id);
+    // 2. Auto-publish scheduled POSTS
+    const { data: duePosts, error: postsErr } = await supabase
+      .from("platform_posts")
+      .select("id")
+      .eq("is_published", false)
+      .lte("published_at", now)
+      .not("published_at", "is", null);
 
-    const { error: updateError } = await supabase
-      .from("platform_news")
-      .update({ is_published: true })
-      .in("id", ids);
+    if (postsErr) throw postsErr;
 
-    if (updateError) throw updateError;
+    let postsPublished = 0;
+    if (duePosts && duePosts.length > 0) {
+      const ids = duePosts.map((p: any) => p.id);
+      const { error } = await supabase
+        .from("platform_posts")
+        .update({ is_published: true })
+        .in("id", ids);
+      if (error) throw error;
+      postsPublished = ids.length;
+    }
 
-    console.log(`Auto-published ${ids.length} news items at ${now}`);
+    console.log(`Auto-published: ${newsPublished} news, ${postsPublished} posts at ${now}`);
 
     return new Response(
-      JSON.stringify({ success: true, published: ids.length }),
+      JSON.stringify({ success: true, newsPublished, postsPublished }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
