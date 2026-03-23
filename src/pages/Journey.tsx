@@ -2,7 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense, useState } from "react";
-import { Rocket, Users, Trophy, Eye, Calendar, Code, Sparkles, ArrowLeft, ArrowRight, CheckCircle2, Clock, Star, Heart, Zap, Shield, Target, Lightbulb } from "lucide-react";
+import { Rocket, Users, Trophy, Eye, Calendar, Code, Sparkles, ArrowLeft, ArrowRight, CheckCircle2, Clock, Star, Heart, Zap, Shield, Target, Lightbulb, Quote, Headphones, Scale, Megaphone, Bot, Building2 } from "lucide-react";
 import PageNavBar from "@/components/ui/page-nav-bar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
