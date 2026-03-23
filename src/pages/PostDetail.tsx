@@ -267,7 +267,7 @@ const PostDetail = () => {
                 </p>
               )}
 
-              <div className="<div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-p:leading-relaxed"> max-w-none prose-headings:font-bold prose-p:leading-relaxed">
+              <div className="prose prose-lg dark:prose-invert max-w-none prose-headings:font-bold prose-p:leading-relaxed">
                 <ReactMarkdown>{post.content}</ReactMarkdown>
               </div>
 
