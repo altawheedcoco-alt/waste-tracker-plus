@@ -15822,6 +15822,81 @@ export type Database = {
         }
         Relationships: []
       }
+      equipment_custody: {
+        Row: {
+          condition_on_return: string | null
+          created_at: string | null
+          id: string
+          issue_date: string | null
+          issued_by: string | null
+          issued_to_crew_id: string | null
+          issued_to_name: string | null
+          issued_to_worker_id: string | null
+          item_category: string | null
+          item_name: string
+          notes: string | null
+          organization_id: string
+          quantity_damaged: number | null
+          quantity_issued: number | null
+          quantity_returned: number | null
+          return_date: string | null
+          unit_cost: number | null
+        }
+        Insert: {
+          condition_on_return?: string | null
+          created_at?: string | null
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          issued_to_crew_id?: string | null
+          issued_to_name?: string | null
+          issued_to_worker_id?: string | null
+          item_category?: string | null
+          item_name: string
+          notes?: string | null
+          organization_id: string
+          quantity_damaged?: number | null
+          quantity_issued?: number | null
+          quantity_returned?: number | null
+          return_date?: string | null
+          unit_cost?: number | null
+        }
+        Update: {
+          condition_on_return?: string | null
+          created_at?: string | null
+          id?: string
+          issue_date?: string | null
+          issued_by?: string | null
+          issued_to_crew_id?: string | null
+          issued_to_name?: string | null
+          issued_to_worker_id?: string | null
+          item_category?: string | null
+          item_name?: string
+          notes?: string | null
+          organization_id?: string
+          quantity_damaged?: number | null
+          quantity_issued?: number | null
+          quantity_returned?: number | null
+          return_date?: string | null
+          unit_cost?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "equipment_custody_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "equipment_custody_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       equipment_inquiries: {
         Row: {
           contact_phone: string | null
@@ -24861,6 +24936,105 @@ export type Database = {
           },
         ]
       }
+      municipal_contracts: {
+        Row: {
+          actual_complaints: number | null
+          actual_coverage: number | null
+          actual_tonnage: number | null
+          annual_value: number | null
+          area_description: string | null
+          authority_type: string | null
+          contract_number: string
+          contract_title: string
+          contracting_authority: string
+          created_at: string | null
+          created_by: string | null
+          end_date: string
+          id: string
+          kpi_coverage_target: number | null
+          kpi_max_complaints: number | null
+          kpi_min_tonnage: number | null
+          kpi_response_time_hours: number | null
+          monthly_value: number | null
+          notes: string | null
+          organization_id: string
+          penalties_total: number | null
+          sla_compliance_percent: number | null
+          start_date: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          actual_complaints?: number | null
+          actual_coverage?: number | null
+          actual_tonnage?: number | null
+          annual_value?: number | null
+          area_description?: string | null
+          authority_type?: string | null
+          contract_number: string
+          contract_title: string
+          contracting_authority: string
+          created_at?: string | null
+          created_by?: string | null
+          end_date: string
+          id?: string
+          kpi_coverage_target?: number | null
+          kpi_max_complaints?: number | null
+          kpi_min_tonnage?: number | null
+          kpi_response_time_hours?: number | null
+          monthly_value?: number | null
+          notes?: string | null
+          organization_id: string
+          penalties_total?: number | null
+          sla_compliance_percent?: number | null
+          start_date: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          actual_complaints?: number | null
+          actual_coverage?: number | null
+          actual_tonnage?: number | null
+          annual_value?: number | null
+          area_description?: string | null
+          authority_type?: string | null
+          contract_number?: string
+          contract_title?: string
+          contracting_authority?: string
+          created_at?: string | null
+          created_by?: string | null
+          end_date?: string
+          id?: string
+          kpi_coverage_target?: number | null
+          kpi_max_complaints?: number | null
+          kpi_min_tonnage?: number | null
+          kpi_response_time_hours?: number | null
+          monthly_value?: number | null
+          notes?: string | null
+          organization_id?: string
+          penalties_total?: number | null
+          sla_compliance_percent?: number | null
+          start_date?: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "municipal_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "municipal_contracts_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       note_reads: {
         Row: {
           id: string
@@ -31564,6 +31738,75 @@ export type Database = {
           },
           {
             foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      proof_of_service: {
+        Row: {
+          created_at: string | null
+          id: string
+          location_lat: number | null
+          location_lng: number | null
+          notes: string | null
+          organization_id: string
+          photo_after_url: string | null
+          photo_before_url: string | null
+          recorded_at: string | null
+          recorded_by: string | null
+          service_type: string | null
+          supervisor_name: string | null
+          supervisor_signature_url: string | null
+          trip_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          organization_id: string
+          photo_after_url?: string | null
+          photo_before_url?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          service_type?: string | null
+          supervisor_name?: string | null
+          supervisor_signature_url?: string | null
+          trip_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          location_lat?: number | null
+          location_lng?: number | null
+          notes?: string | null
+          organization_id?: string
+          photo_after_url?: string | null
+          photo_before_url?: string | null
+          recorded_at?: string | null
+          recorded_by?: string | null
+          service_type?: string | null
+          supervisor_name?: string | null
+          supervisor_signature_url?: string | null
+          trip_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proof_of_service_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "proof_of_service_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
@@ -44051,6 +44294,87 @@ export type Database = {
           },
           {
             foreignKeyName: "work_permits_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      worker_incidents: {
+        Row: {
+          actions_taken: string | null
+          created_at: string | null
+          crew_id: string | null
+          days_lost: number | null
+          description: string | null
+          follow_up_date: string | null
+          id: string
+          incident_date: string
+          incident_type: string
+          location_description: string | null
+          medical_report_url: string | null
+          organization_id: string
+          reported_by: string | null
+          severity: string | null
+          status: string | null
+          updated_at: string | null
+          worker_id: string | null
+          worker_name: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          actions_taken?: string | null
+          created_at?: string | null
+          crew_id?: string | null
+          days_lost?: number | null
+          description?: string | null
+          follow_up_date?: string | null
+          id?: string
+          incident_date?: string
+          incident_type?: string
+          location_description?: string | null
+          medical_report_url?: string | null
+          organization_id: string
+          reported_by?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+          worker_id?: string | null
+          worker_name?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          actions_taken?: string | null
+          created_at?: string | null
+          crew_id?: string | null
+          days_lost?: number | null
+          description?: string | null
+          follow_up_date?: string | null
+          id?: string
+          incident_date?: string
+          incident_type?: string
+          location_description?: string | null
+          medical_report_url?: string | null
+          organization_id?: string
+          reported_by?: string | null
+          severity?: string | null
+          status?: string | null
+          updated_at?: string | null
+          worker_id?: string | null
+          worker_name?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "worker_incidents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "worker_incidents_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
