@@ -46,6 +46,7 @@ const emptyForm = {
   category: 'عام',
   author_name: 'فريق المنصة',
   badge: 'جديد',
+  tags: '',
   is_featured: false,
   sort_order: 0,
   publishMode: 'draft' as PublishMode,
