@@ -60,6 +60,8 @@ const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicP
 const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyticsPanel'));
 const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
+const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
+const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
