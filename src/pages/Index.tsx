@@ -296,6 +296,7 @@ const Index = () => {
           </LazySection>
 
           {isVisible('footer') && <LazySection minH={300}><Footer /></LazySection>}
+          <Suspense fallback={null}><FloatingScrollButtons /></Suspense>
         </div>
       </LandingWrapper>
     </Suspense>
