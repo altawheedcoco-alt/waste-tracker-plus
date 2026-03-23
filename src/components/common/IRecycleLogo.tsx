@@ -44,7 +44,7 @@ const IRecycleLogo = memo(({
       alt="iRecycle"
       width={size}
       height={size}
-      className="object-contain rounded-full"
+      className="object-contain rounded-full ring-2 ring-primary/20 shadow-lg"
       style={{ width: size, height: size }}
     />
   );
