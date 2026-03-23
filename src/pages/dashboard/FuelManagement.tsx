@@ -75,7 +75,7 @@ const FuelManagement = () => {
 
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const { error } = await supabase.from('fuel_records').insert({
+      const { error } = await (supabase as any).from('fuel_records').insert({
         organization_id: organization!.id,
         driver_id: form.driver_id || null,
         fuel_date: form.fuel_date,
