@@ -93,6 +93,7 @@ const AdminPlatformPosts = () => {
         category: item.category,
         author_name: item.author_name,
         badge: item.badge || null,
+        tags: item.tags ? item.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
         is_featured: item.is_featured,
         sort_order: item.sort_order,
         is_published,
