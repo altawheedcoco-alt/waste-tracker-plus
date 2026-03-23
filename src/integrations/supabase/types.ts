@@ -30413,6 +30413,27 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_post_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          post_id: string
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          post_id: string
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       platform_posts: {
         Row: {
           author_name: string
@@ -30425,6 +30446,7 @@ export type Database = {
           id: string
           is_featured: boolean
           is_published: boolean
+          likes_count: number | null
           published_at: string | null
           sort_order: number
           tags: string[] | null
@@ -30443,6 +30465,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          likes_count?: number | null
           published_at?: string | null
           sort_order?: number
           tags?: string[] | null
@@ -30461,6 +30484,7 @@ export type Database = {
           id?: string
           is_featured?: boolean
           is_published?: boolean
+          likes_count?: number | null
           published_at?: string | null
           sort_order?: number
           tags?: string[] | null
@@ -45464,6 +45488,7 @@ export type Database = {
         Args: { _share_code: string }
         Returns: undefined
       }
+      increment_post_views: { Args: { p_post_id: string }; Returns: undefined }
       is_chat_participant: {
         Args: { _room_id: string; _user_id: string }
         Returns: boolean
@@ -45595,6 +45620,10 @@ export type Database = {
       }
       switch_organization: {
         Args: { _organization_id: string; _user_id: string }
+        Returns: boolean
+      }
+      toggle_post_like: {
+        Args: { p_post_id: string; p_visitor_id: string }
         Returns: boolean
       }
       upsert_smart_input: {
