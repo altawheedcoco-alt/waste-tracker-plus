@@ -79,6 +79,9 @@ const DriverSelfTracker = memo(() => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'active' | 'reconnecting'>('connecting');
+  const autoStartedRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastPosition, setLastPosition] = useState<{ lat: number; lng: number } | null>(null);
 
   // Pending stop detection
@@ -226,54 +229,76 @@ const DriverSelfTracker = memo(() => {
       return;
     }
 
+    setConnectionStatus('connecting');
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (!startTime) {
+          setStartTime(Date.now());
+          setPoints([]);
+          setStops([]);
+          setTotalDistance(0);
+          setElapsed(0);
+          pendingStopRef.current = null;
+
+          // Clear old layers
+          if (polylineRef.current && mapInstance.current) {
+            mapInstance.current.removeLayer(polylineRef.current);
+            polylineRef.current = null;
+          }
+          if (posMarkerRef.current && mapInstance.current) {
+            mapInstance.current.removeLayer(posMarkerRef.current);
+            posMarkerRef.current = null;
+          }
+        }
+
         setIsTracking(true);
-        setStartTime(Date.now());
-        setPoints([]);
-        setStops([]);
-        setTotalDistance(0);
-        setElapsed(0);
-        pendingStopRef.current = null;
-
-        // Clear old layers
-        if (polylineRef.current && mapInstance.current) {
-          mapInstance.current.removeLayer(polylineRef.current);
-          polylineRef.current = null;
-        }
-        if (posMarkerRef.current && mapInstance.current) {
-          mapInstance.current.removeLayer(posMarkerRef.current);
-          posMarkerRef.current = null;
-        }
-
+        setConnectionStatus('active');
         handlePosition(pos);
+
+        // Clear any existing watch
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+        }
 
         watchIdRef.current = navigator.geolocation.watchPosition(handlePosition, (err) => {
           console.error('Geolocation error:', err);
-          toast.error('خطأ في تتبع الموقع: ' + err.message);
+          setConnectionStatus('reconnecting');
+          // Auto-reconnect after 3 seconds
+          if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = setTimeout(() => {
+            startTracking();
+          }, 3000);
         }, {
           enableHighAccuracy: true,
           maximumAge: 5000,
           timeout: 15000,
         });
-
-        toast.success('بدأ تسجيل المسار');
       },
       (err) => {
-        toast.error('لا يمكن الوصول للموقع. يرجى تفعيل GPS');
-        console.error(err);
+        console.error('GPS error:', err);
+        setConnectionStatus('reconnecting');
+        // Auto-retry after 5 seconds
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = setTimeout(() => {
+          startTracking();
+        }, 5000);
       },
       { enableHighAccuracy: true }
     );
-  }, [handlePosition]);
+  }, [handlePosition, startTime]);
 
   const stopTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
     setIsTracking(false);
-    toast.info('تم إيقاف تسجيل المسار');
+    setConnectionStatus('connecting');
   }, []);
 
   const resetTracking = useCallback(() => {
@@ -306,34 +331,74 @@ const DriverSelfTracker = memo(() => {
 
   const avgSpeed = elapsed > 0 ? (totalDistance / 1000) / (elapsed / 3600) : 0;
 
+  // Auto-start on mount
+  useEffect(() => {
+    if (!autoStartedRef.current) {
+      autoStartedRef.current = true;
+      startTracking();
+    }
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+      }
+    };
+  }, [startTracking]);
+
+  // Re-connect when tab becomes visible again
+  useEffect(() => {
+    const handleVis = () => {
+      if (document.visibilityState === 'visible' && !isTracking) {
+        setConnectionStatus('reconnecting');
+        startTracking();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVis);
+    return () => document.removeEventListener('visibilitychange', handleVis);
+  }, [isTracking, startTracking]);
+
+  // Keep-alive: if no position received for 30s, force reconnect
+  useEffect(() => {
+    if (!isTracking) return;
+    const keepAlive = setInterval(() => {
+      const lastPt = points[points.length - 1];
+      if (lastPt && Date.now() - lastPt.timestamp > 30000) {
+        setConnectionStatus('reconnecting');
+        startTracking();
+      }
+    }, 15000);
+    return () => clearInterval(keepAlive);
+  }, [isTracking, points, startTracking]);
+
+  const statusConfig = {
+    connecting: { label: 'جاري الاتصال...', color: 'bg-amber-500', pulse: true },
+    active: { label: 'متصل - تتبع مباشر', color: 'bg-primary', pulse: true },
+    reconnecting: { label: 'إعادة الاتصال...', color: 'bg-orange-500', pulse: true },
+  };
+
+  const status = statusConfig[connectionStatus];
+
   return (
     <div className="space-y-4" dir="rtl">
-      {/* Control Bar */}
+      {/* Status Bar - Always On */}
       <Card className="border-primary/20">
         <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {!isTracking ? (
-              <Button onClick={startTracking} className="gap-2 bg-primary hover:bg-primary/90">
-                <Play className="w-4 h-4" />
-                بدء التتبع
-              </Button>
-            ) : (
-              <Button onClick={stopTracking} variant="destructive" className="gap-2">
-                <Square className="w-4 h-4" />
-                إيقاف
-              </Button>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className={`border-primary text-primary gap-1.5 ${status.pulse ? 'animate-pulse' : ''}`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${status.color}`} />
+                {status.label}
+              </Badge>
+              {points.length > 0 && (
+                <span className="text-xs text-muted-foreground">({points.length} نقطة)</span>
+              )}
+            </div>
             <Button onClick={resetTracking} variant="outline" size="sm" className="gap-1">
               <RotateCcw className="w-3.5 h-3.5" />
               إعادة تعيين
             </Button>
-
-            {isTracking && (
-              <Badge variant="outline" className="animate-pulse border-primary text-primary gap-1">
-                <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                تتبع مباشر
-              </Badge>
-            )}
           </div>
         </CardContent>
       </Card>
