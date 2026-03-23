@@ -61,7 +61,7 @@ const LoadingWorkers = () => {
         const { error } = await (supabase as any).from('loading_workers').update(workerData).eq('id', editingWorker.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('loading_workers').insert({ ...workerData, organization_id: organization!.id });
+        const { error } = await (supabase as any).from('loading_workers').insert({ ...workerData, organization_id: organization!.id });
         if (error) throw error;
       }
     },
