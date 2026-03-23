@@ -91,7 +91,13 @@ const DriverSelfTracker = memo(() => {
     L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION, maxZoom: 19 }).addTo(map);
     mapInstance.current = map;
 
+    // Fix tile rendering when container size isn't ready yet
+    setTimeout(() => map.invalidateSize(), 300);
+    const resizeObserver = new ResizeObserver(() => map.invalidateSize());
+    resizeObserver.observe(mapRef.current);
+
     return () => {
+      resizeObserver.disconnect();
       map.remove();
       mapInstance.current = null;
     };
