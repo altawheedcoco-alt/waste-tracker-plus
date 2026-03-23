@@ -30370,6 +30370,7 @@ export type Database = {
           is_published: boolean
           link: string | null
           published_at: string | null
+          scheduled_at: string | null
           sort_order: number | null
           title: string
           updated_at: string
@@ -30387,6 +30388,7 @@ export type Database = {
           is_published?: boolean
           link?: string | null
           published_at?: string | null
+          scheduled_at?: string | null
           sort_order?: number | null
           title: string
           updated_at?: string
@@ -30404,9 +30406,64 @@ export type Database = {
           is_published?: boolean
           link?: string | null
           published_at?: string | null
+          scheduled_at?: string | null
           sort_order?: number | null
           title?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      platform_posts: {
+        Row: {
+          author_name: string
+          badge: string | null
+          category: string
+          content: string
+          cover_image_url: string | null
+          created_at: string
+          excerpt: string | null
+          id: string
+          is_featured: boolean
+          is_published: boolean
+          published_at: string | null
+          sort_order: number
+          title: string
+          updated_at: string
+          views_count: number
+        }
+        Insert: {
+          author_name?: string
+          badge?: string | null
+          category?: string
+          content: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          sort_order?: number
+          title: string
+          updated_at?: string
+          views_count?: number
+        }
+        Update: {
+          author_name?: string
+          badge?: string | null
+          category?: string
+          content?: string
+          cover_image_url?: string | null
+          created_at?: string
+          excerpt?: string | null
+          id?: string
+          is_featured?: boolean
+          is_published?: boolean
+          published_at?: string | null
+          sort_order?: number
+          title?: string
+          updated_at?: string
+          views_count?: number
         }
         Relationships: []
       }

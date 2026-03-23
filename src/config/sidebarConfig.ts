@@ -1073,6 +1073,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Globe, labelAr: 'الصفحة الرئيسية', labelEn: 'Homepage', path: '/dashboard/homepage-manager', key: 'homepage-manager', bindingType: 'admin' as const },
       { icon: Newspaper, labelAr: 'الأخبار', labelEn: 'News', path: '/dashboard/news-manager', key: 'news-manager', bindingType: 'admin' as const },
+      { icon: FileText, labelAr: 'المنشورات', labelEn: 'Posts', path: '/dashboard/posts-manager', key: 'posts-manager', bindingType: 'admin' as const },
       { icon: BookOpen, labelAr: 'المدونة', labelEn: 'Blog', path: '/dashboard/blog-manager', key: 'blog-manager', bindingType: 'admin' as const },
       { icon: MessageCircle, labelAr: 'التعليقات', labelEn: 'Testimonials', path: '/dashboard/testimonials-management', key: 'testimonials-management', bindingType: 'admin' as const },
       { icon: Video, labelAr: 'الفيديو', labelEn: 'Video', path: '/dashboard/video-generator', key: 'video-gen', bindingType: 'admin' as const },
