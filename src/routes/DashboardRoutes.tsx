@@ -233,6 +233,9 @@ const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBranding
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const PlatformFeaturesDoc = lazy(() => import("@/pages/dashboard/PlatformFeaturesDoc"));
 const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMonitor"));
+const LoadingWorkers = lazy(() => import("@/pages/dashboard/LoadingWorkers"));
+const DriverTripSchedule = lazy(() => import("@/pages/dashboard/DriverTripSchedule"));
+const FuelManagement = lazy(() => import("@/pages/dashboard/FuelManagement"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
