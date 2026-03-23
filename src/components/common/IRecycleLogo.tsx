@@ -44,8 +44,11 @@ const IRecycleLogo = memo(({
       accent: 'rgba(255,255,255,0.7)',
       text: '#ffffff',
       subtext: 'rgba(255,255,255,0.7)',
+      inner: 'hsl(160, 68%, 40%)',
     },
   }[theme];
+
+  const innerColor = (colors as any).inner || '#fff';
 
   const iconSize = size;
 
