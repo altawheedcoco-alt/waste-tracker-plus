@@ -331,34 +331,74 @@ const DriverSelfTracker = memo(() => {
 
   const avgSpeed = elapsed > 0 ? (totalDistance / 1000) / (elapsed / 3600) : 0;
 
+  // Auto-start on mount
+  useEffect(() => {
+    if (!autoStartedRef.current) {
+      autoStartedRef.current = true;
+      startTracking();
+    }
+    return () => {
+      if (watchIdRef.current !== null) {
+        navigator.geolocation.clearWatch(watchIdRef.current);
+      }
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+      }
+    };
+  }, [startTracking]);
+
+  // Re-connect when tab becomes visible again
+  useEffect(() => {
+    const handleVis = () => {
+      if (document.visibilityState === 'visible' && !isTracking) {
+        setConnectionStatus('reconnecting');
+        startTracking();
+      }
+    };
+    document.addEventListener('visibilitychange', handleVis);
+    return () => document.removeEventListener('visibilitychange', handleVis);
+  }, [isTracking, startTracking]);
+
+  // Keep-alive: if no position received for 30s, force reconnect
+  useEffect(() => {
+    if (!isTracking) return;
+    const keepAlive = setInterval(() => {
+      const lastPt = points[points.length - 1];
+      if (lastPt && Date.now() - lastPt.timestamp > 30000) {
+        setConnectionStatus('reconnecting');
+        startTracking();
+      }
+    }, 15000);
+    return () => clearInterval(keepAlive);
+  }, [isTracking, points, startTracking]);
+
+  const statusConfig = {
+    connecting: { label: 'جاري الاتصال...', color: 'bg-amber-500', pulse: true },
+    active: { label: 'متصل - تتبع مباشر', color: 'bg-primary', pulse: true },
+    reconnecting: { label: 'إعادة الاتصال...', color: 'bg-orange-500', pulse: true },
+  };
+
+  const status = statusConfig[connectionStatus];
+
   return (
     <div className="space-y-4" dir="rtl">
-      {/* Control Bar */}
+      {/* Status Bar - Always On */}
       <Card className="border-primary/20">
         <CardContent className="p-4">
-          <div className="flex flex-wrap items-center gap-3">
-            {!isTracking ? (
-              <Button onClick={startTracking} className="gap-2 bg-primary hover:bg-primary/90">
-                <Play className="w-4 h-4" />
-                بدء التتبع
-              </Button>
-            ) : (
-              <Button onClick={stopTracking} variant="destructive" className="gap-2">
-                <Square className="w-4 h-4" />
-                إيقاف
-              </Button>
-            )}
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <Badge variant="outline" className={`border-primary text-primary gap-1.5 ${status.pulse ? 'animate-pulse' : ''}`}>
+                <div className={`w-2.5 h-2.5 rounded-full ${status.color}`} />
+                {status.label}
+              </Badge>
+              {points.length > 0 && (
+                <span className="text-xs text-muted-foreground">({points.length} نقطة)</span>
+              )}
+            </div>
             <Button onClick={resetTracking} variant="outline" size="sm" className="gap-1">
               <RotateCcw className="w-3.5 h-3.5" />
               إعادة تعيين
             </Button>
-
-            {isTracking && (
-              <Badge variant="outline" className="animate-pulse border-primary text-primary gap-1">
-                <div className="w-2 h-2 rounded-full bg-primary animate-ping" />
-                تتبع مباشر
-              </Badge>
-            )}
           </div>
         </CardContent>
       </Card>
