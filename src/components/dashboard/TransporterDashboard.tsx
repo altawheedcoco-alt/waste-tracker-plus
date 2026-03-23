@@ -200,6 +200,13 @@ const TransporterDashboard = () => {
         </DashboardV2Header>
       </div>
 
+      {/* ★ مركز المنشورات الموحد */}
+      <div id="section-posts">
+        <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+          <PostsHub />
+        </Suspense>
+      </div>
+
       {/* 2. مركز القيادة */}
       <div id="section-command">
         <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
