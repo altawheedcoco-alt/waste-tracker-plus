@@ -16,9 +16,11 @@ import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
 const OrganizationPosts = lazy(() => import('@/components/organization/OrganizationPosts'));
-const PartnersTimelineContent = lazy(() => import('@/pages/dashboard/PartnersTimeline'));
 const BroadcastChannelView = lazy(() => import('@/components/chat/BroadcastChannelView'));
-const PlatformPostsEmbed = lazy(() => import('@/pages/PlatformPosts'));
+
+// Lightweight embedded versions for Partners Timeline & Platform Posts
+import PartnersTimelineEmbed from './PostsHubPartners';
+import PlatformPostsEmbed from './PostsHubPlatform';
 
 const TAB_CONFIG = [
   { value: 'org-posts', label: 'منشورات جهتي', icon: Building2, color: 'text-primary' },
@@ -48,7 +50,6 @@ const PostsHub = () => {
 
         <CardContent className="p-0">
           <Tabs value={activeTab} onValueChange={setActiveTab} dir="rtl">
-            {/* Tab Navigation */}
             <div className="px-2 sm:px-4 overflow-x-auto scrollbar-thin pb-1">
               <TabsList className="inline-flex w-max gap-0.5 h-auto p-1 bg-muted/40 backdrop-blur-sm rounded-xl border border-border/30 flex-row-reverse">
                 {TAB_CONFIG.map((tab) => {
@@ -79,26 +80,15 @@ const PostsHub = () => {
                   />
                 )}
               </Suspense>
-              <div className="mt-3 text-center">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs gap-1 text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/dashboard/organization-profile?tab=posts')}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  فتح في الملف التجاري
-                </Button>
-              </div>
+              <LinkButton label="فتح في الملف التجاري" onClick={() => navigate('/dashboard/organization-profile?tab=posts')} />
             </TabsContent>
 
             {/* Partners Timeline */}
-            <TabsContent value="partners" className="mt-0">
-              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                <div className="max-h-[70vh] overflow-y-auto">
-                  <PartnersTimelineContent />
-                </div>
-              </Suspense>
+            <TabsContent value="partners" className="mt-0 p-2 sm:p-4">
+              <div className="max-h-[70vh] overflow-y-auto">
+                <PartnersTimelineEmbed />
+              </div>
+              <LinkButton label="فتح التايم لاين كاملاً" onClick={() => navigate('/dashboard/partners-timeline')} />
             </TabsContent>
 
             {/* Broadcast Channels */}
@@ -111,23 +101,11 @@ const PostsHub = () => {
             </TabsContent>
 
             {/* Platform Posts */}
-            <TabsContent value="platform" className="mt-0">
-              <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                <div className="max-h-[70vh] overflow-y-auto p-2 sm:p-4">
-                  <PlatformPostsEmbed />
-                </div>
-              </Suspense>
-              <div className="text-center py-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-xs gap-1 text-muted-foreground hover:text-foreground"
-                  onClick={() => navigate('/posts')}
-                >
-                  <ExternalLink className="h-3 w-3" />
-                  فتح صفحة المنشورات كاملة
-                </Button>
+            <TabsContent value="platform" className="mt-0 p-2 sm:p-4">
+              <div className="max-h-[70vh] overflow-y-auto">
+                <PlatformPostsEmbed />
               </div>
+              <LinkButton label="فتح صفحة المنشورات" onClick={() => navigate('/posts')} />
             </TabsContent>
           </Tabs>
         </CardContent>
@@ -135,5 +113,14 @@ const PostsHub = () => {
     </motion.div>
   );
 };
+
+const LinkButton = ({ label, onClick }: { label: string; onClick: () => void }) => (
+  <div className="mt-3 text-center">
+    <Button variant="ghost" size="sm" className="text-xs gap-1 text-muted-foreground hover:text-foreground" onClick={onClick}>
+      <ExternalLink className="h-3 w-3" />
+      {label}
+    </Button>
+  </div>
+);
 
 export default PostsHub;
