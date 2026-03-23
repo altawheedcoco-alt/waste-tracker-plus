@@ -44,7 +44,7 @@ const LoadingWorkers = () => {
   const { data: workers = [], isLoading } = useQuery({
     queryKey: ['loading-workers', organization?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('loading_workers')
         .select('*')
         .eq('organization_id', organization!.id)
