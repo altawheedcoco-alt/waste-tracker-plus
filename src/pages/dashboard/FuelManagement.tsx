@@ -55,12 +55,12 @@ const FuelManagement = () => {
   const { data: records = [], isLoading } = useQuery({
     queryKey: ['fuel-records', organization?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('fuel_records')
+      const { data, error } = await (supabase
+        .from('fuel_records' as any)
         .select('*')
         .eq('organization_id', organization!.id)
         .order('fuel_date', { ascending: false })
-        .limit(100);
+        .limit(100) as any);
       if (error) throw error;
       const driverIds = [...new Set((data || []).map(r => r.driver_id).filter(Boolean))];
       let driverMap: Record<string, string> = {};

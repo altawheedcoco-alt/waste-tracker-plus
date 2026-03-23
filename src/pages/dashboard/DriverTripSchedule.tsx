@@ -63,12 +63,12 @@ const DriverTripSchedule = () => {
   const { data: trips = [], isLoading } = useQuery({
     queryKey: ['trip-schedules', organization?.id, selectedDate],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('driver_trip_schedules')
+      const { data, error } = await (supabase
+        .from('driver_trip_schedules' as any)
         .select('*')
         .eq('organization_id', organization!.id)
         .eq('trip_date', selectedDate)
-        .order('start_time');
+        .order('start_time') as any);
       if (error) throw error;
       // Enrich with driver names
       const driverIds = [...new Set((data || []).map(t => t.driver_id).filter(Boolean))];
