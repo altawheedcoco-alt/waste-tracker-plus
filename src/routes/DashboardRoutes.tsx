@@ -277,6 +277,12 @@ export const dashboardRoutes = (
     <Route path="/dashboard/loading-workers" element={<LoadingWorkers />} />
     <Route path="/dashboard/driver-trip-schedule" element={<DriverTripSchedule />} />
     <Route path="/dashboard/fuel-management" element={<FuelManagement />} />
+    <Route path="/dashboard/municipal-dashboard" element={<MunicipalDashboard />} />
+    <Route path="/dashboard/service-zones" element={<ServiceZones />} />
+    <Route path="/dashboard/street-bins" element={<StreetBins />} />
+    <Route path="/dashboard/collection-routes" element={<CollectionRoutes />} />
+    <Route path="/dashboard/collection-trips" element={<CollectionTrips />} />
+    <Route path="/dashboard/citizen-complaints" element={<CitizenComplaints />} />
     <Route path="/dashboard/reports" element={<Reports />} />
     <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
     <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />
