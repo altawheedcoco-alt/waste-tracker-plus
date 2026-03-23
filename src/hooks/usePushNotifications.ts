@@ -41,8 +41,8 @@ export function usePushNotifications() {
     
     try {
       new Notification(title, {
-        icon: '/favicon.ico',
-        badge: '/favicon.ico',
+        icon: '/favicon.png',
+        badge: '/favicon.png',
         dir: 'rtl',
         lang: 'ar',
         ...options,
@@ -52,8 +52,8 @@ export function usePushNotifications() {
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.ready.then(registration => {
           registration.showNotification(title, {
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
+            icon: '/favicon.png',
+            badge: '/favicon.png',
             dir: 'rtl',
             lang: 'ar',
             ...options,
