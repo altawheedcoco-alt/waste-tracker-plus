@@ -22,7 +22,7 @@ const DEFAULT: BrandingData = {
   notification_logo_url: '',
   tagline: 'نحو مستقبل أنظف',
   tagline_en: 'Towards a cleaner future',
-  primary_color: '#16a34a',
+  primary_color: '#22996E',
 };
 
 export function useBranding() {
