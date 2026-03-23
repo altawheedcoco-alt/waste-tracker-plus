@@ -156,6 +156,7 @@ const AdminPlatformPosts = () => {
       category: item.category,
       author_name: item.author_name,
       badge: item.badge || '',
+      tags: (item.tags || []).join(', '),
       is_featured: item.is_featured,
       sort_order: item.sort_order,
       publishMode: item.is_published ? 'now' : 'draft',
