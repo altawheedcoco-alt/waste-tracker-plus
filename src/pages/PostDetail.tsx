@@ -75,6 +75,9 @@ const PostDetail = () => {
     setMeta('twitter:card', 'summary_large_image');
     setMeta('twitter:title', post.title);
     setMeta('twitter:description', desc);
+    if (post.tags && post.tags.length > 0) {
+      setMeta('keywords', post.tags.join(', '));
+    }
 
     // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
