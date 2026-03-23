@@ -6289,6 +6289,110 @@ export type Database = {
           },
         ]
       }
+      citizen_complaints: {
+        Row: {
+          assigned_to: string | null
+          citizen_name: string | null
+          citizen_phone: string | null
+          complaint_number: string
+          complaint_type: string
+          created_at: string
+          description: string | null
+          id: string
+          latitude: number | null
+          location_text: string | null
+          longitude: number | null
+          organization_id: string
+          photo_urls: string[] | null
+          priority: string | null
+          resolution_notes: string | null
+          resolved_at: string | null
+          response_time_minutes: number | null
+          satisfaction_rating: number | null
+          source: string | null
+          status: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          citizen_name?: string | null
+          citizen_phone?: string | null
+          complaint_number?: string
+          complaint_type: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_text?: string | null
+          longitude?: number | null
+          organization_id: string
+          photo_urls?: string[] | null
+          priority?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          response_time_minutes?: number | null
+          satisfaction_rating?: number | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          citizen_name?: string | null
+          citizen_phone?: string | null
+          complaint_number?: string
+          complaint_type?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          latitude?: number | null
+          location_text?: string | null
+          longitude?: number | null
+          organization_id?: string
+          photo_urls?: string[] | null
+          priority?: string | null
+          resolution_notes?: string | null
+          resolved_at?: string | null
+          response_time_minutes?: number | null
+          satisfaction_rating?: number | null
+          source?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "citizen_complaints_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "citizen_complaints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "citizen_complaints_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "citizen_complaints_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_portals: {
         Row: {
           created_at: string
@@ -6513,6 +6617,203 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_routes: {
+        Row: {
+          assigned_driver_id: string | null
+          assigned_vehicle_id: string | null
+          created_at: string
+          end_time: string | null
+          estimated_bins: number | null
+          estimated_distance_km: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          route_code: string | null
+          route_name: string
+          route_type: string | null
+          schedule_days: string[] | null
+          start_time: string | null
+          status: string
+          updated_at: string
+          waypoints: Json | null
+          zone_id: string | null
+        }
+        Insert: {
+          assigned_driver_id?: string | null
+          assigned_vehicle_id?: string | null
+          created_at?: string
+          end_time?: string | null
+          estimated_bins?: number | null
+          estimated_distance_km?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          route_code?: string | null
+          route_name: string
+          route_type?: string | null
+          schedule_days?: string[] | null
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          waypoints?: Json | null
+          zone_id?: string | null
+        }
+        Update: {
+          assigned_driver_id?: string | null
+          assigned_vehicle_id?: string | null
+          created_at?: string
+          end_time?: string | null
+          estimated_bins?: number | null
+          estimated_distance_km?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          route_code?: string | null
+          route_name?: string
+          route_type?: string | null
+          schedule_days?: string[] | null
+          start_time?: string | null
+          status?: string
+          updated_at?: string
+          waypoints?: Json | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_routes_assigned_driver_id_fkey"
+            columns: ["assigned_driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_routes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "collection_routes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_routes_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      collection_trips: {
+        Row: {
+          actual_end: string | null
+          actual_start: string | null
+          bins_collected: number | null
+          completion_percent: number | null
+          created_at: string
+          distance_km: number | null
+          driver_id: string | null
+          gps_track: Json | null
+          id: string
+          issues: string | null
+          notes: string | null
+          organization_id: string
+          photo_proofs: string[] | null
+          route_id: string | null
+          status: string
+          total_bins: number | null
+          trip_date: string
+          updated_at: string
+          weight_tons: number | null
+          zone_id: string | null
+        }
+        Insert: {
+          actual_end?: string | null
+          actual_start?: string | null
+          bins_collected?: number | null
+          completion_percent?: number | null
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          gps_track?: Json | null
+          id?: string
+          issues?: string | null
+          notes?: string | null
+          organization_id: string
+          photo_proofs?: string[] | null
+          route_id?: string | null
+          status?: string
+          total_bins?: number | null
+          trip_date?: string
+          updated_at?: string
+          weight_tons?: number | null
+          zone_id?: string | null
+        }
+        Update: {
+          actual_end?: string | null
+          actual_start?: string | null
+          bins_collected?: number | null
+          completion_percent?: number | null
+          created_at?: string
+          distance_km?: number | null
+          driver_id?: string | null
+          gps_track?: Json | null
+          id?: string
+          issues?: string | null
+          notes?: string | null
+          organization_id?: string
+          photo_proofs?: string[] | null
+          route_id?: string | null
+          status?: string
+          total_bins?: number | null
+          trip_date?: string
+          updated_at?: string
+          weight_tons?: number | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "collection_trips_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "collection_trips_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_trips_route_id_fkey"
+            columns: ["route_id"]
+            isOneToOne: false
+            referencedRelation: "collection_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_trips_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -7745,6 +8046,90 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "contract_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contract_penalties: {
+        Row: {
+          amount: number
+          complaint_id: string | null
+          created_at: string
+          description: string | null
+          id: string
+          issued_by: string | null
+          notes: string | null
+          organization_id: string
+          penalty_date: string
+          penalty_type: string
+          status: string | null
+          trip_id: string | null
+          zone_id: string | null
+        }
+        Insert: {
+          amount?: number
+          complaint_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id: string
+          penalty_date?: string
+          penalty_type: string
+          status?: string | null
+          trip_id?: string | null
+          zone_id?: string | null
+        }
+        Update: {
+          amount?: number
+          complaint_id?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          issued_by?: string | null
+          notes?: string | null
+          organization_id?: string
+          penalty_date?: string
+          penalty_type?: string
+          status?: string | null
+          trip_id?: string | null
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contract_penalties_complaint_id_fkey"
+            columns: ["complaint_id"]
+            isOneToOne: false
+            referencedRelation: "citizen_complaints"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_penalties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "contract_penalties_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_penalties_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "collection_trips"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contract_penalties_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -34570,6 +34955,78 @@ export type Database = {
           },
         ]
       }
+      service_zones: {
+        Row: {
+          area_km2: number | null
+          bin_count: number | null
+          boundary_geojson: Json | null
+          city: string | null
+          contract_reference: string | null
+          created_at: string
+          district: string | null
+          governorate: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          population_estimate: number | null
+          status: string
+          updated_at: string
+          zone_code: string | null
+          zone_name: string
+        }
+        Insert: {
+          area_km2?: number | null
+          bin_count?: number | null
+          boundary_geojson?: Json | null
+          city?: string | null
+          contract_reference?: string | null
+          created_at?: string
+          district?: string | null
+          governorate?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          population_estimate?: number | null
+          status?: string
+          updated_at?: string
+          zone_code?: string | null
+          zone_name: string
+        }
+        Update: {
+          area_km2?: number | null
+          bin_count?: number | null
+          boundary_geojson?: Json | null
+          city?: string | null
+          contract_reference?: string | null
+          created_at?: string
+          district?: string | null
+          governorate?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          population_estimate?: number | null
+          status?: string
+          updated_at?: string
+          zone_code?: string | null
+          zone_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_zones_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "service_zones_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       shared_collaboration_files: {
         Row: {
           category: string | null
@@ -37659,6 +38116,97 @@ export type Database = {
             columns: ["viewer_organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      street_bins: {
+        Row: {
+          address: string | null
+          bin_code: string
+          bin_type: string | null
+          capacity_liters: number | null
+          created_at: string
+          fill_level_percent: number | null
+          has_sensor: boolean | null
+          id: string
+          installed_at: string | null
+          landmark: string | null
+          last_collected_at: string | null
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          organization_id: string
+          photo_url: string | null
+          sensor_id: string | null
+          status: string
+          updated_at: string
+          zone_id: string | null
+        }
+        Insert: {
+          address?: string | null
+          bin_code: string
+          bin_type?: string | null
+          capacity_liters?: number | null
+          created_at?: string
+          fill_level_percent?: number | null
+          has_sensor?: boolean | null
+          id?: string
+          installed_at?: string | null
+          landmark?: string | null
+          last_collected_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          organization_id: string
+          photo_url?: string | null
+          sensor_id?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Update: {
+          address?: string | null
+          bin_code?: string
+          bin_type?: string | null
+          capacity_liters?: number | null
+          created_at?: string
+          fill_level_percent?: number | null
+          has_sensor?: boolean | null
+          id?: string
+          installed_at?: string | null
+          landmark?: string | null
+          last_collected_at?: string | null
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          organization_id?: string
+          photo_url?: string | null
+          sensor_id?: string | null
+          status?: string
+          updated_at?: string
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "street_bins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "street_bins_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "street_bins_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
             referencedColumns: ["id"]
           },
         ]
@@ -44291,6 +44839,7 @@ export type Database = {
         | "iso_body"
         | "regulator"
         | "transport_office"
+        | "municipal_contractor"
       quick_link_field_mode: "fixed" | "restricted_list" | "free_input"
       shipment_status:
         | "new"
@@ -44540,6 +45089,7 @@ export const Constants = {
         "iso_body",
         "regulator",
         "transport_office",
+        "municipal_contractor",
       ],
       quick_link_field_mode: ["fixed", "restricted_list", "free_input"],
       shipment_status: [

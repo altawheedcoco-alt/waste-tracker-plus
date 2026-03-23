@@ -236,6 +236,12 @@ const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMon
 const LoadingWorkers = lazy(() => import("@/pages/dashboard/LoadingWorkers"));
 const DriverTripSchedule = lazy(() => import("@/pages/dashboard/DriverTripSchedule"));
 const FuelManagement = lazy(() => import("@/pages/dashboard/FuelManagement"));
+const ServiceZones = lazy(() => import("@/pages/dashboard/municipal/ServiceZones"));
+const StreetBins = lazy(() => import("@/pages/dashboard/municipal/StreetBins"));
+const CollectionRoutes = lazy(() => import("@/pages/dashboard/municipal/CollectionRoutes"));
+const CollectionTrips = lazy(() => import("@/pages/dashboard/municipal/CollectionTrips"));
+const CitizenComplaints = lazy(() => import("@/pages/dashboard/municipal/CitizenComplaints"));
+const MunicipalDashboard = lazy(() => import("@/pages/dashboard/municipal/MunicipalDashboard"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
@@ -271,6 +277,12 @@ export const dashboardRoutes = (
     <Route path="/dashboard/loading-workers" element={<LoadingWorkers />} />
     <Route path="/dashboard/driver-trip-schedule" element={<DriverTripSchedule />} />
     <Route path="/dashboard/fuel-management" element={<FuelManagement />} />
+    <Route path="/dashboard/municipal-dashboard" element={<MunicipalDashboard />} />
+    <Route path="/dashboard/service-zones" element={<ServiceZones />} />
+    <Route path="/dashboard/street-bins" element={<StreetBins />} />
+    <Route path="/dashboard/collection-routes" element={<CollectionRoutes />} />
+    <Route path="/dashboard/collection-trips" element={<CollectionTrips />} />
+    <Route path="/dashboard/citizen-complaints" element={<CitizenComplaints />} />
     <Route path="/dashboard/reports" element={<Reports />} />
     <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
     <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />

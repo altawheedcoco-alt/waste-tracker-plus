@@ -395,6 +395,23 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
+  // ═══════════════ المقاول البلدي (Municipal Contractor) ═══════════════
+  {
+    id: 'municipal-operations',
+    icon: Truck,
+    labelAr: 'العمليات البلدية',
+    labelEn: 'Municipal Operations',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: BarChart3, labelAr: 'لوحة المراقبة', labelEn: 'Dashboard', path: '/dashboard/municipal-dashboard', key: 'municipal-dashboard', bindingType: 'internal' as const },
+      { icon: LayoutDashboard, labelAr: 'مناطق الخدمة', labelEn: 'Service Zones', path: '/dashboard/service-zones', key: 'service-zones', bindingType: 'internal' as const },
+      { icon: MapPin, labelAr: 'سجل الصناديق', labelEn: 'Street Bins', path: '/dashboard/street-bins', key: 'street-bins', bindingType: 'internal' as const },
+      { icon: Truck, labelAr: 'مسارات الجمع', labelEn: 'Collection Routes', path: '/dashboard/collection-routes', key: 'collection-routes', bindingType: 'internal' as const },
+      { icon: Package, labelAr: 'رحلات الجمع', labelEn: 'Collection Trips', path: '/dashboard/collection-trips', key: 'collection-trips', bindingType: 'internal' as const },
+      { icon: MessageCircle, labelAr: 'شكاوى المواطنين', labelEn: 'Complaints', path: '/dashboard/citizen-complaints', key: 'citizen-complaints', bindingType: 'internal' as const },
+    ],
+  },
+
   // ═══════════════ الرقابة والإشراف (Regulator) ═══════════════
   {
     id: 'regulator-command',
