@@ -49,12 +49,12 @@ const DriverTripSchedule = () => {
   const { data: drivers = [] } = useQuery({
     queryKey: ['org-drivers', organization?.id],
     queryFn: async () => {
-      const { data } = await supabase
+      const { data } = await (supabase
         .from('profiles')
         .select('id, full_name')
         .eq('organization_id', organization!.id)
         .eq('role', 'driver')
-        .eq('is_active', true);
+        .eq('is_active', true) as any);
       return data || [];
     },
     enabled: !!organization?.id,
