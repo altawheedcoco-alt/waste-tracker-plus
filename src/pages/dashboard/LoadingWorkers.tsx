@@ -75,7 +75,7 @@ const LoadingWorkers = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase.from('loading_workers').delete().eq('id', id);
+      const { error } = await (supabase as any).from('loading_workers').delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
