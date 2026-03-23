@@ -79,6 +79,9 @@ const DriverSelfTracker = memo(() => {
   const [startTime, setStartTime] = useState<number | null>(null);
   const [elapsed, setElapsed] = useState(0);
   const [currentSpeed, setCurrentSpeed] = useState(0);
+  const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'active' | 'reconnecting'>('connecting');
+  const autoStartedRef = useRef(false);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [lastPosition, setLastPosition] = useState<{ lat: number; lng: number } | null>(null);
 
   // Pending stop detection
