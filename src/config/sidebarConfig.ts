@@ -16,7 +16,7 @@ import {
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
-  Image, Clock, ChevronRight, Blocks, ListOrdered,
+  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
@@ -286,6 +286,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Containers', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassign', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Fuel, labelAr: 'إدارة الوقود', labelEn: 'Fuel Management', path: '/dashboard/fuel-management', key: 'fuel-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
@@ -299,7 +300,8 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     items: [
       { icon: Users, labelAr: 'السائقون', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers', 'view_drivers'] },
       { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const, requiredPermissions: ['manage_drivers'] },
-      { icon: CalendarClock, labelAr: 'جدولة الورديات', labelEn: 'Shifts', path: '/dashboard?tab=intelligence', key: 'shift-scheduler', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: CalendarClock, labelAr: 'جدولة الرحلات', labelEn: 'Trip Schedule', path: '/dashboard/driver-trip-schedule', key: 'driver-trip-schedule', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: HardHat, labelAr: 'عمال التحميل', labelEn: 'Loading Workers', path: '/dashboard/loading-workers', key: 'loading-workers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 

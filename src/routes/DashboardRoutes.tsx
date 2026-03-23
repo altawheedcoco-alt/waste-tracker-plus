@@ -233,6 +233,9 @@ const AdminBrandingSettings = lazy(() => import("@/pages/dashboard/AdminBranding
 const Quotations = lazy(() => import("@/pages/dashboard/Quotations"));
 const PlatformFeaturesDoc = lazy(() => import("@/pages/dashboard/PlatformFeaturesDoc"));
 const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMonitor"));
+const LoadingWorkers = lazy(() => import("@/pages/dashboard/LoadingWorkers"));
+const DriverTripSchedule = lazy(() => import("@/pages/dashboard/DriverTripSchedule"));
+const FuelManagement = lazy(() => import("@/pages/dashboard/FuelManagement"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
@@ -265,6 +268,9 @@ export const dashboardRoutes = (
     <Route path="/dashboard/shipment-routes" element={<ShipmentRoutesMap />} />
     <Route path="/dashboard/driver-my-route" element={<DriverMyRoute />} />
     <Route path="/dashboard/tracking-center" element={<TrackingCenter />} />
+    <Route path="/dashboard/loading-workers" element={<LoadingWorkers />} />
+    <Route path="/dashboard/driver-trip-schedule" element={<DriverTripSchedule />} />
+    <Route path="/dashboard/fuel-management" element={<FuelManagement />} />
     <Route path="/dashboard/reports" element={<Reports />} />
     <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
     <Route path="/dashboard/environmental-sustainability" element={<EnvironmentalSustainability />} />
