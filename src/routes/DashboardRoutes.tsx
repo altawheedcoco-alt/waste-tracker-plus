@@ -536,6 +536,8 @@ export const dashboardRoutes = (
     <Route path="/dashboard/shipment-market" element={<ShipmentMarket />} />
     <Route path="/dashboard/driver-wallet" element={<DriverWallet />} />
     <Route path="/dashboard/driver-analytics" element={<DriverAnalytics />} />
+    <Route path="/dashboard/lead-generation" element={<LeadGeneration />} />
+    <Route path="/dashboard/company-directory" element={<CompanyDirectory />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
