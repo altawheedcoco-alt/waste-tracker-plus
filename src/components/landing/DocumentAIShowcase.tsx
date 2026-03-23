@@ -93,7 +93,7 @@ const ProblemSection = memo(() => (
                 <div>
                   <h4 className="font-bold text-[hsl(var(--landing-foreground))]">{item.title}</h4>
                 </div>
-                <div className="w-10 h-10 rounded-lg bg-white/80 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-lg bg-card/80 flex items-center justify-center flex-shrink-0">
                   <item.icon className="w-5 h-5 text-[hsl(var(--landing-foreground))]" />
                 </div>
               </motion.div>
@@ -146,7 +146,7 @@ const SolutionSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm hover:shadow-md transition-shadow"
+            className="bg-card rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm hover:shadow-md transition-shadow"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
@@ -259,7 +259,7 @@ const AutomationSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-2xl overflow-hidden shadow-sm border border-[hsl(var(--landing-border))]"
+            className="bg-card rounded-2xl overflow-hidden shadow-sm border border-[hsl(var(--landing-border))]"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
@@ -350,7 +350,7 @@ const PipelineSection = memo(() => {
           {steps.map((step, i) => (
             <motion.div
               key={i}
-              className="flex items-start gap-4 bg-white rounded-xl p-4 border border-[hsl(var(--landing-border))]"
+              className="flex items-start gap-4 bg-card rounded-xl p-4 border border-[hsl(var(--landing-border))]"
               custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp}
             >
@@ -396,7 +396,7 @@ const ImpactSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="text-center bg-white rounded-2xl p-6 border border-[hsl(var(--landing-border))] shadow-sm"
+            className="text-center bg-card rounded-2xl p-6 border border-[hsl(var(--landing-border))] shadow-sm"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
@@ -438,7 +438,7 @@ const IndustriesSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm hover:shadow-md hover:border-[hsl(var(--eco-emerald))]/30 transition-all group"
+            className="bg-card rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm hover:shadow-md hover:border-[hsl(var(--eco-emerald))]/30 transition-all group"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
@@ -486,7 +486,7 @@ const FeaturesSection = memo(() => (
           ].map((item, i) => (
             <motion.div 
               key={i} 
-              className="bg-white rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
+              className="bg-card rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
               custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp}
             >
@@ -522,7 +522,7 @@ const FeaturesSection = memo(() => (
           ].map((item, i) => (
             <motion.div 
               key={i} 
-              className="bg-white rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
+              className="bg-card rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
               custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp}
             >
@@ -577,7 +577,7 @@ const WhyUsSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
+            className="bg-card rounded-2xl p-6 text-right border border-[hsl(var(--landing-border))] shadow-sm"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
@@ -644,14 +644,14 @@ const UseCasesSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-2xl overflow-hidden border border-[hsl(var(--landing-border))] shadow-sm"
+            className="bg-card rounded-2xl overflow-hidden border border-[hsl(var(--landing-border))] shadow-sm"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
             <div className="bg-[hsl(200,40%,96%)] p-6 text-right">
               <div className="flex items-center gap-3 justify-end mb-3">
                 <h3 className="font-bold text-lg text-[hsl(var(--landing-foreground))]">{item.title}</h3>
-                <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-card flex items-center justify-center">
                   <item.icon className="w-5 h-5 text-[hsl(var(--eco-emerald))]" />
                 </div>
               </div>
@@ -736,7 +736,7 @@ const ComplianceSection = memo(() => (
           variants={fadeIn}
         >
           <div className="flex items-center gap-4 flex-wrap justify-center">
-            <div className="bg-white rounded-2xl p-6 border border-[hsl(var(--landing-border))] shadow-sm text-center">
+            <div className="bg-card rounded-2xl p-6 border border-[hsl(var(--landing-border))] shadow-sm text-center">
               <FileSearch className="w-8 h-8 text-[hsl(var(--eco-emerald))] mx-auto mb-2" />
               <p className="text-sm font-medium text-[hsl(var(--landing-foreground))]">التحقق من التوقيعات</p>
             </div>
@@ -790,7 +790,7 @@ const IntegrationJourneySection = memo(() => {
               className={`flex items-center gap-4 rounded-xl p-5 ${
                 step.highlighted
                   ? "bg-[hsl(var(--eco-emerald))] text-white"
-                  : "bg-white border border-[hsl(var(--landing-border))]"
+                  : "bg-card border border-[hsl(var(--landing-border))]"
               }`}
               custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
               variants={fadeUp}
@@ -847,7 +847,7 @@ const OcrVsAiSection = memo(() => (
 
       {/* VS badge */}
       <div className="flex justify-center -mt-24 mb-8 relative z-10">
-        <div className="w-16 h-16 rounded-full bg-white border-4 border-[hsl(var(--landing-border))] flex items-center justify-center shadow-lg">
+        <div className="w-16 h-16 rounded-full bg-card border-4 border-[hsl(var(--landing-border))] flex items-center justify-center shadow-lg">
           <span className="text-xl font-black text-[hsl(var(--landing-foreground))]">VS</span>
         </div>
       </div>
@@ -871,7 +871,7 @@ const OcrVsAiSection = memo(() => (
         ].map((item, i) => (
           <motion.div
             key={i}
-            className="bg-white rounded-xl p-5 text-right border border-[hsl(var(--landing-border))] shadow-sm"
+            className="bg-card rounded-xl p-5 text-right border border-[hsl(var(--landing-border))] shadow-sm"
             custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
             variants={fadeUp}
           >
