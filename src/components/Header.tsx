@@ -102,6 +102,7 @@ const Header = memo(() => {
       label: t('nav.resources'),
       icon: BookOpen,
       items: [
+        { label: 'منشورات المنصة', href: '/posts', icon: FileText, desc: 'آخر المقالات والإعلانات الرسمية من فريق المنصة', badge: 'جديد' },
         { label: t('header.blog'), href: '/blog', icon: BookOpen, desc: t('header.blogDesc') },
         { label: t('header.recyclingHistory'), href: '/recycling-history', icon: Landmark, desc: t('header.recyclingHistoryDesc'), badge: t('header.new') },
         { label: t('header.helpCenter'), href: '/help', icon: HelpCircle, desc: t('header.helpCenterDesc') },
