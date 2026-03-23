@@ -75,6 +75,9 @@ const PostDetail = () => {
     setMeta('twitter:card', 'summary_large_image');
     setMeta('twitter:title', post.title);
     setMeta('twitter:description', desc);
+    if (post.tags && post.tags.length > 0) {
+      setMeta('keywords', post.tags.join(', '));
+    }
 
     // Canonical
     let canonical = document.querySelector('link[rel="canonical"]') as HTMLLinkElement;
@@ -197,6 +200,15 @@ const PostDetail = () => {
                   مشاركة
                 </Button>
               </div>
+
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {post.tags.map((tag: string, i: number) => (
+                    <Badge key={i} variant="outline" className="text-xs">#{tag}</Badge>
+                  ))}
+                </div>
+              )}
 
               {/* Excerpt */}
               {post.excerpt && (

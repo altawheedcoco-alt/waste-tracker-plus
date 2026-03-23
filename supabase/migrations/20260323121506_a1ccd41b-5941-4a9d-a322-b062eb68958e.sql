@@ -1,0 +1,1 @@
+ALTER TABLE public.platform_posts ADD COLUMN IF NOT EXISTS tags text[] DEFAULT '{}';

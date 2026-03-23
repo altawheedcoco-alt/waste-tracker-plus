@@ -25,6 +25,7 @@ interface PostItem {
   category: string;
   author_name: string;
   badge: string | null;
+  tags: string[] | null;
   is_published: boolean;
   is_featured: boolean;
   published_at: string | null;
@@ -45,6 +46,7 @@ const emptyForm = {
   category: 'عام',
   author_name: 'فريق المنصة',
   badge: 'جديد',
+  tags: '',
   is_featured: false,
   sort_order: 0,
   publishMode: 'draft' as PublishMode,
@@ -91,6 +93,7 @@ const AdminPlatformPosts = () => {
         category: item.category,
         author_name: item.author_name,
         badge: item.badge || null,
+        tags: item.tags ? item.tags.split(',').map((t: string) => t.trim()).filter(Boolean) : [],
         is_featured: item.is_featured,
         sort_order: item.sort_order,
         is_published,
@@ -153,6 +156,7 @@ const AdminPlatformPosts = () => {
       category: item.category,
       author_name: item.author_name,
       badge: item.badge || '',
+      tags: (item.tags || []).join(', '),
       is_featured: item.is_featured,
       sort_order: item.sort_order,
       publishMode: item.is_published ? 'now' : 'draft',
@@ -294,6 +298,11 @@ const AdminPlatformPosts = () => {
             <div className="space-y-2">
               <Label>الشارة</Label>
               <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="جديد، مهم..." />
+            </div>
+            <div className="space-y-2">
+              <Label>الكلمات المفتاحية (Tags)</Label>
+              <Input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} placeholder="إعادة تدوير، بيئة، مصر، نفايات..." dir="rtl" />
+              <p className="text-[10px] text-muted-foreground">افصل بين الكلمات بفاصلة — تساعد في تحسين ظهور المنشور في محركات البحث</p>
             </div>
 
             {/* وضع النشر */}
