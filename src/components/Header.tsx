@@ -179,8 +179,8 @@ const Header = memo(() => {
               className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0"
               onClick={() => navigate('/')}
             >
-              <div className="transition-transform duration-300 group-hover:scale-105">
-                <PlatformLogo size="md" showText priority />
+              <div className="transition-transform duration-300 group-hover:scale-105 drop-shadow-md">
+                <PlatformLogo size="lg" showText priority />
               </div>
             </div>
 
