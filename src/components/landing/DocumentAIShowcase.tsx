@@ -375,7 +375,7 @@ PipelineSection.displayName = "PipelineSection";
    Section 6: الأثر والنتائج القابلة للقياس
    ───────────────────────────────────────────── */
 const ImpactSection = memo(() => (
-  <div className="py-16 sm:py-24 bg-gradient-to-b from-muted/50 to-background">>
+  <div className="py-16 sm:py-24 bg-gradient-to-b from-muted/50 to-background">
     <div className="container px-4">
       <motion.div 
         className="text-center mb-16"
