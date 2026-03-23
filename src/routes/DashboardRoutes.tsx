@@ -317,6 +317,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/admin-revenue" element={<AdminRevenueManagement />} />
     <Route path="/dashboard/c2b-management" element={<C2BManagement />} />
     <Route path="/dashboard/news-manager" element={<NewsManager />} />
+    <Route path="/dashboard/posts-manager" element={<PlatformPostsManager />} />
     <Route path="/dashboard/blog-manager" element={<BlogManager />} />
     <Route path="/dashboard/testimonials-management" element={<TestimonialsManagement />} />
     <Route path="/dashboard/partners" element={<Partners />} />

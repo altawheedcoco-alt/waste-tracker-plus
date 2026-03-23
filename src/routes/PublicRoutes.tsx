@@ -91,6 +91,7 @@ export const publicRoutes = (
     <Route path="/org-profile/:code" element={<PublicOrgProfile />} />
     <Route path="/portal/:slug" element={<PublicClientPortal />} />
     <Route path="/news" element={<News />} />
+    <Route path="/posts" element={<PlatformPosts />} />
     <Route path="/brochure" element={<FullBrochure />} />
     <Route path="/permit-view/:token" element={<PublicPermitView />} />
     <Route path="/auth" element={<Auth />} />
