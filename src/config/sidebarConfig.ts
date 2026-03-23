@@ -13,7 +13,7 @@ import {
   Boxes, GitCompareArrows, FolderOpen, Inbox, TreePine, Store, GraduationCap,
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
-  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
+  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload, UserCheck,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
   Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
