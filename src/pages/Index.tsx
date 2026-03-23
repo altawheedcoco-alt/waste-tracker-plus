@@ -58,6 +58,7 @@ const PlatformShowcase = lazyRetry(() => import("@/components/landing/PlatformSh
 const SaaSTechSection = lazyRetry(() => import("@/components/landing/SaaSTechSection"));
 const VisitorCounter = lazyRetry(() => import("@/components/landing/VisitorCounter"));
 const C2BSubmissionForm = lazyRetry(() => import("@/components/c2b/C2BSubmissionForm"));
+const PlatformPostsSection = lazyRetry(() => import("@/components/landing/PlatformPostsSection"));
 
 // v5.1 — New showcase sections
 const DriverEcosystemShowcase = lazyRetry(() => import("@/components/landing/DriverEcosystemShowcase"));
