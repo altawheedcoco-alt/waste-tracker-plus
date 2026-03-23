@@ -265,15 +265,20 @@ const PartnersTimeline = () => {
                         onClick={() => navigate(`/dashboard/organization/${post.organization_id}`)}
                       >
                         <Avatar className="h-12 w-12 ring-2 ring-border">
-                          <AvatarImage src={post.organization?.logo_url || ''} />
+                          <AvatarImage src={post.author?.avatar_url || post.organization?.logo_url || ''} />
                           <AvatarFallback className="bg-primary/10">
                             <Building2 className="w-6 h-6 text-primary" />
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-semibold hover:underline">
-                              {post.organization?.name || 'جهة'}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {post.author?.full_name && (
+                              <span className="font-semibold text-foreground">
+                                {post.author.full_name}
+                              </span>
+                            )}
+                            <span className={`${post.author?.full_name ? 'text-xs text-muted-foreground' : 'font-semibold'} hover:underline`}>
+                              {post.author?.full_name ? `· ${post.organization?.name || 'جهة'}` : (post.organization?.name || 'جهة')}
                             </span>
                             {post.organization?.is_verified && (
                               <BadgeCheck className="w-4 h-4 text-primary" />
