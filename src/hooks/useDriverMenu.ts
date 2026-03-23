@@ -5,7 +5,7 @@
 import {
   LayoutDashboard, Package, MapPin, User, FileText,
   GraduationCap, Trophy, Bell, Settings, Briefcase,
-  Zap, ShoppingCart, Star, CreditCard, BarChart3,
+  Zap, ShoppingCart, Star, CreditCard, BarChart3, Route,
   PlusCircle, Map,
 } from 'lucide-react';
 import type { DriverType } from '@/types/driver-types';

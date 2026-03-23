@@ -263,6 +263,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/transporter-drivers" element={<TransporterDrivers />} />
     <Route path="/dashboard/driver-tracking" element={<DriverTracking />} />
     <Route path="/dashboard/shipment-routes" element={<ShipmentRoutesMap />} />
+    <Route path="/dashboard/driver-my-route" element={<DriverMyRoute />} />
     <Route path="/dashboard/tracking-center" element={<TrackingCenter />} />
     <Route path="/dashboard/reports" element={<Reports />} />
     <Route path="/dashboard/carbon-footprint" element={<CarbonFootprintAnalysis />} />
