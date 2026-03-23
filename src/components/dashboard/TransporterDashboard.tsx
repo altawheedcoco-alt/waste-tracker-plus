@@ -53,6 +53,7 @@ const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload')
 const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/TransporterOperationsTabs'));
 const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
 const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
+const PostsHub = lazy(() => import('./transporter/PostsHub'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
