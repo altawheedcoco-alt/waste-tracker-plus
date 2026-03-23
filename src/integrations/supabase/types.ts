@@ -6717,9 +6717,11 @@ export type Database = {
         Row: {
           actual_end: string | null
           actual_start: string | null
+          bags_count: number | null
           bins_collected: number | null
           completion_percent: number | null
           created_at: string
+          crew_id: string | null
           distance_km: number | null
           driver_id: string | null
           gps_track: Json | null
@@ -6727,21 +6729,29 @@ export type Database = {
           issues: string | null
           notes: string | null
           organization_id: string
+          photo_after_url: string | null
+          photo_before_url: string | null
           photo_proofs: string[] | null
           route_id: string | null
           status: string
+          supervisor_approved: boolean | null
           total_bins: number | null
+          transfer_station_id: string | null
           trip_date: string
+          trip_type: string | null
           updated_at: string
+          vehicle_plate: string | null
           weight_tons: number | null
           zone_id: string | null
         }
         Insert: {
           actual_end?: string | null
           actual_start?: string | null
+          bags_count?: number | null
           bins_collected?: number | null
           completion_percent?: number | null
           created_at?: string
+          crew_id?: string | null
           distance_km?: number | null
           driver_id?: string | null
           gps_track?: Json | null
@@ -6749,21 +6759,29 @@ export type Database = {
           issues?: string | null
           notes?: string | null
           organization_id: string
+          photo_after_url?: string | null
+          photo_before_url?: string | null
           photo_proofs?: string[] | null
           route_id?: string | null
           status?: string
+          supervisor_approved?: boolean | null
           total_bins?: number | null
+          transfer_station_id?: string | null
           trip_date?: string
+          trip_type?: string | null
           updated_at?: string
+          vehicle_plate?: string | null
           weight_tons?: number | null
           zone_id?: string | null
         }
         Update: {
           actual_end?: string | null
           actual_start?: string | null
+          bags_count?: number | null
           bins_collected?: number | null
           completion_percent?: number | null
           created_at?: string
+          crew_id?: string | null
           distance_km?: number | null
           driver_id?: string | null
           gps_track?: Json | null
@@ -6771,16 +6789,29 @@ export type Database = {
           issues?: string | null
           notes?: string | null
           organization_id?: string
+          photo_after_url?: string | null
+          photo_before_url?: string | null
           photo_proofs?: string[] | null
           route_id?: string | null
           status?: string
+          supervisor_approved?: boolean | null
           total_bins?: number | null
+          transfer_station_id?: string | null
           trip_date?: string
+          trip_type?: string | null
           updated_at?: string
+          vehicle_plate?: string | null
           weight_tons?: number | null
           zone_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "collection_trips_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "sweeping_crews"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "collection_trips_driver_id_fkey"
             columns: ["driver_id"]
@@ -6807,6 +6838,13 @@ export type Database = {
             columns: ["route_id"]
             isOneToOne: false
             referencedRelation: "collection_routes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "collection_trips_transfer_station_id_fkey"
+            columns: ["transfer_station_id"]
+            isOneToOne: false
+            referencedRelation: "transfer_stations"
             referencedColumns: ["id"]
           },
           {
@@ -9238,6 +9276,85 @@ export type Database = {
             columns: ["resolved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      daily_attendance: {
+        Row: {
+          attendance_date: string
+          bonus: number | null
+          check_in_time: string | null
+          check_out_time: string | null
+          created_at: string | null
+          crew_id: string | null
+          daily_rate: number | null
+          deductions: number | null
+          id: string
+          notes: string | null
+          organization_id: string
+          overtime_hours: number | null
+          status: string
+          worker_code: string | null
+          worker_name: string
+          worker_role: string
+        }
+        Insert: {
+          attendance_date?: string
+          bonus?: number | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          crew_id?: string | null
+          daily_rate?: number | null
+          deductions?: number | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          overtime_hours?: number | null
+          status?: string
+          worker_code?: string | null
+          worker_name: string
+          worker_role?: string
+        }
+        Update: {
+          attendance_date?: string
+          bonus?: number | null
+          check_in_time?: string | null
+          check_out_time?: string | null
+          created_at?: string | null
+          crew_id?: string | null
+          daily_rate?: number | null
+          deductions?: number | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          overtime_hours?: number | null
+          status?: string
+          worker_code?: string | null
+          worker_name?: string
+          worker_role?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_attendance_crew_id_fkey"
+            columns: ["crew_id"]
+            isOneToOne: false
+            referencedRelation: "sweeping_crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "daily_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "daily_attendance_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
@@ -34958,54 +35075,78 @@ export type Database = {
       service_zones: {
         Row: {
           area_km2: number | null
+          assigned_crews_count: number | null
           bin_count: number | null
           boundary_geojson: Json | null
           city: string | null
+          contract_end_date: string | null
           contract_reference: string | null
+          contract_start_date: string | null
+          contract_value: number | null
           created_at: string
+          daily_waste_estimate_tons: number | null
           district: string | null
           governorate: string | null
           id: string
           notes: string | null
           organization_id: string
+          payment_frequency: string | null
           population_estimate: number | null
           status: string
+          streets_count: number | null
+          transfer_station_id: string | null
           updated_at: string
           zone_code: string | null
           zone_name: string
         }
         Insert: {
           area_km2?: number | null
+          assigned_crews_count?: number | null
           bin_count?: number | null
           boundary_geojson?: Json | null
           city?: string | null
+          contract_end_date?: string | null
           contract_reference?: string | null
+          contract_start_date?: string | null
+          contract_value?: number | null
           created_at?: string
+          daily_waste_estimate_tons?: number | null
           district?: string | null
           governorate?: string | null
           id?: string
           notes?: string | null
           organization_id: string
+          payment_frequency?: string | null
           population_estimate?: number | null
           status?: string
+          streets_count?: number | null
+          transfer_station_id?: string | null
           updated_at?: string
           zone_code?: string | null
           zone_name: string
         }
         Update: {
           area_km2?: number | null
+          assigned_crews_count?: number | null
           bin_count?: number | null
           boundary_geojson?: Json | null
           city?: string | null
+          contract_end_date?: string | null
           contract_reference?: string | null
+          contract_start_date?: string | null
+          contract_value?: number | null
           created_at?: string
+          daily_waste_estimate_tons?: number | null
           district?: string | null
           governorate?: string | null
           id?: string
           notes?: string | null
           organization_id?: string
+          payment_frequency?: string | null
           population_estimate?: number | null
           status?: string
+          streets_count?: number | null
+          transfer_station_id?: string | null
           updated_at?: string
           zone_code?: string | null
           zone_name?: string
@@ -35023,6 +35164,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_zones_transfer_station_id_fkey"
+            columns: ["transfer_station_id"]
+            isOneToOne: false
+            referencedRelation: "transfer_stations"
             referencedColumns: ["id"]
           },
         ]
@@ -38123,18 +38271,26 @@ export type Database = {
       street_bins: {
         Row: {
           address: string | null
+          assigned_crew_id: string | null
           bin_code: string
           bin_type: string | null
           capacity_liters: number | null
+          collection_frequency: string | null
+          color: string | null
+          condition: string | null
           created_at: string
           fill_level_percent: number | null
           has_sensor: boolean | null
           id: string
+          installation_date: string | null
           installed_at: string | null
           landmark: string | null
           last_collected_at: string | null
+          last_painted_at: string | null
           latitude: number | null
           longitude: number | null
+          material: string | null
+          needs_replacement: boolean | null
           notes: string | null
           organization_id: string
           photo_url: string | null
@@ -38145,18 +38301,26 @@ export type Database = {
         }
         Insert: {
           address?: string | null
+          assigned_crew_id?: string | null
           bin_code: string
           bin_type?: string | null
           capacity_liters?: number | null
+          collection_frequency?: string | null
+          color?: string | null
+          condition?: string | null
           created_at?: string
           fill_level_percent?: number | null
           has_sensor?: boolean | null
           id?: string
+          installation_date?: string | null
           installed_at?: string | null
           landmark?: string | null
           last_collected_at?: string | null
+          last_painted_at?: string | null
           latitude?: number | null
           longitude?: number | null
+          material?: string | null
+          needs_replacement?: boolean | null
           notes?: string | null
           organization_id: string
           photo_url?: string | null
@@ -38167,18 +38331,26 @@ export type Database = {
         }
         Update: {
           address?: string | null
+          assigned_crew_id?: string | null
           bin_code?: string
           bin_type?: string | null
           capacity_liters?: number | null
+          collection_frequency?: string | null
+          color?: string | null
+          condition?: string | null
           created_at?: string
           fill_level_percent?: number | null
           has_sensor?: boolean | null
           id?: string
+          installation_date?: string | null
           installed_at?: string | null
           landmark?: string | null
           last_collected_at?: string | null
+          last_painted_at?: string | null
           latitude?: number | null
           longitude?: number | null
+          material?: string | null
+          needs_replacement?: boolean | null
           notes?: string | null
           organization_id?: string
           photo_url?: string | null
@@ -38188,6 +38360,13 @@ export type Database = {
           zone_id?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "street_bins_assigned_crew_id_fkey"
+            columns: ["assigned_crew_id"]
+            isOneToOne: false
+            referencedRelation: "sweeping_crews"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "street_bins_organization_id_fkey"
             columns: ["organization_id"]
@@ -38757,6 +38936,183 @@ export type Database = {
           {
             foreignKeyName: "sustainability_reports_partner_organization_id_fkey"
             columns: ["partner_organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sweeping_crews: {
+        Row: {
+          created_at: string | null
+          crew_code: string | null
+          crew_name: string
+          crew_type: string
+          equipment_summary: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          shift_end: string | null
+          shift_start: string | null
+          status: string
+          supervisor_name: string | null
+          supervisor_phone: string | null
+          updated_at: string | null
+          worker_count: number
+          zone_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          crew_code?: string | null
+          crew_name: string
+          crew_type?: string
+          equipment_summary?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          shift_end?: string | null
+          shift_start?: string | null
+          status?: string
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          updated_at?: string | null
+          worker_count?: number
+          zone_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          crew_code?: string | null
+          crew_name?: string
+          crew_type?: string
+          equipment_summary?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          shift_end?: string | null
+          shift_start?: string | null
+          status?: string
+          supervisor_name?: string | null
+          supervisor_phone?: string | null
+          updated_at?: string | null
+          worker_count?: number
+          zone_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sweeping_crews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "sweeping_crews_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sweeping_crews_zone_id_fkey"
+            columns: ["zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sweeping_equipment: {
+        Row: {
+          assigned_crew_id: string | null
+          assigned_zone_id: string | null
+          brand: string | null
+          condition: string
+          created_at: string | null
+          equipment_code: string | null
+          equipment_name: string
+          equipment_type: string
+          fuel_type: string | null
+          id: string
+          last_maintenance_date: string | null
+          model: string | null
+          next_maintenance_date: string | null
+          notes: string | null
+          organization_id: string
+          plate_number: string | null
+          purchase_cost: number | null
+          purchase_date: string | null
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          assigned_crew_id?: string | null
+          assigned_zone_id?: string | null
+          brand?: string | null
+          condition?: string
+          created_at?: string | null
+          equipment_code?: string | null
+          equipment_name: string
+          equipment_type?: string
+          fuel_type?: string | null
+          id?: string
+          last_maintenance_date?: string | null
+          model?: string | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          organization_id: string
+          plate_number?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          assigned_crew_id?: string | null
+          assigned_zone_id?: string | null
+          brand?: string | null
+          condition?: string
+          created_at?: string | null
+          equipment_code?: string | null
+          equipment_name?: string
+          equipment_type?: string
+          fuel_type?: string | null
+          id?: string
+          last_maintenance_date?: string | null
+          model?: string | null
+          next_maintenance_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          plate_number?: string | null
+          purchase_cost?: number | null
+          purchase_date?: string | null
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sweeping_equipment_assigned_crew_id_fkey"
+            columns: ["assigned_crew_id"]
+            isOneToOne: false
+            referencedRelation: "sweeping_crews"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sweeping_equipment_assigned_zone_id_fkey"
+            columns: ["assigned_zone_id"]
+            isOneToOne: false
+            referencedRelation: "service_zones"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sweeping_equipment_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "sweeping_equipment_organization_id_fkey"
+            columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
             referencedColumns: ["id"]
@@ -39658,6 +40014,96 @@ export type Database = {
             columns: ["shipment_id"]
             isOneToOne: false
             referencedRelation: "shipments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transfer_stations: {
+        Row: {
+          address: string | null
+          capacity_tons_per_day: number | null
+          city: string | null
+          contact_person: string | null
+          contact_phone: string | null
+          created_at: string | null
+          current_load_tons: number | null
+          governorate: string | null
+          has_sorting_line: boolean | null
+          has_weighbridge: boolean | null
+          id: string
+          latitude: number | null
+          longitude: number | null
+          notes: string | null
+          operating_hours_end: string | null
+          operating_hours_start: string | null
+          organization_id: string
+          station_code: string | null
+          station_name: string
+          station_type: string
+          status: string
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          capacity_tons_per_day?: number | null
+          city?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          current_load_tons?: number | null
+          governorate?: string | null
+          has_sorting_line?: boolean | null
+          has_weighbridge?: boolean | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          operating_hours_end?: string | null
+          operating_hours_start?: string | null
+          organization_id: string
+          station_code?: string | null
+          station_name: string
+          station_type?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          capacity_tons_per_day?: number | null
+          city?: string | null
+          contact_person?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          current_load_tons?: number | null
+          governorate?: string | null
+          has_sorting_line?: boolean | null
+          has_weighbridge?: boolean | null
+          id?: string
+          latitude?: number | null
+          longitude?: number | null
+          notes?: string | null
+          operating_hours_end?: string | null
+          operating_hours_start?: string | null
+          organization_id?: string
+          station_code?: string | null
+          station_name?: string
+          station_type?: string
+          status?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transfer_stations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "transfer_stations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]

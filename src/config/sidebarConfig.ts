@@ -13,7 +13,7 @@ import {
   Boxes, GitCompareArrows, FolderOpen, Inbox, TreePine, Store, GraduationCap,
   Award, Receipt, Leaf, TrendingUp, Lock, Database, Trophy, Globe, Bot, Gauge,
   Eye, Umbrella, PenTool, Network, FileSignature, ClipboardCheck, Printer,
-  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
+  CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload, UserCheck,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
   Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
@@ -409,6 +409,28 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Truck, labelAr: 'مسارات الجمع', labelEn: 'Collection Routes', path: '/dashboard/collection-routes', key: 'collection-routes', bindingType: 'internal' as const },
       { icon: Package, labelAr: 'رحلات الجمع', labelEn: 'Collection Trips', path: '/dashboard/collection-trips', key: 'collection-trips', bindingType: 'internal' as const },
       { icon: MessageCircle, labelAr: 'شكاوى المواطنين', labelEn: 'Complaints', path: '/dashboard/citizen-complaints', key: 'citizen-complaints', bindingType: 'internal' as const },
+    ],
+  },
+  {
+    id: 'municipal-workforce',
+    icon: Users,
+    labelAr: 'القوى العاملة',
+    labelEn: 'Workforce',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: Users, labelAr: 'طواقم الكنس والنظافة', labelEn: 'Sweeping Crews', path: '/dashboard/sweeping-crews', key: 'sweeping-crews', bindingType: 'internal' as const },
+      { icon: UserCheck, labelAr: 'حضور وانصراف', labelEn: 'Attendance', path: '/dashboard/daily-attendance', key: 'daily-attendance', bindingType: 'internal' as const },
+    ],
+  },
+  {
+    id: 'municipal-assets',
+    icon: Package,
+    labelAr: 'المعدات والمحطات',
+    labelEn: 'Assets & Stations',
+    visibleFor: ['municipal_contractor'],
+    items: [
+      { icon: Package, labelAr: 'المعدات والأدوات', labelEn: 'Equipment', path: '/dashboard/sweeping-equipment', key: 'sweeping-equipment', bindingType: 'internal' as const },
+      { icon: Building2, labelAr: 'محطات الترحيل', labelEn: 'Transfer Stations', path: '/dashboard/transfer-stations', key: 'transfer-stations', bindingType: 'internal' as const },
     ],
   },
 
