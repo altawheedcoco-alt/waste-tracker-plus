@@ -6,6 +6,25 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/egypt-history-hero.webp";
 
+// Historical era images
+import eraPredynastic from "@/assets/history/era-predynastic.jpg";
+import eraOldKingdom from "@/assets/history/era-old-kingdom.jpg";
+import eraNewKingdom from "@/assets/history/era-new-kingdom.jpg";
+import eraPtolemaic from "@/assets/history/era-ptolemaic.jpg";
+import eraFatimid from "@/assets/history/era-fatimid.jpg";
+import eraAyyubid from "@/assets/history/era-ayyubid.jpg";
+import eraMamluk from "@/assets/history/era-mamluk.jpg";
+import eraMuhammadAli from "@/assets/history/era-muhammad-ali.jpg";
+import eraZabbaleen from "@/assets/history/era-zabbaleen.jpg";
+import era1952 from "@/assets/history/era-1952.jpg";
+import era1970s from "@/assets/history/era-1970s.jpg";
+import era1981 from "@/assets/history/era-1981.jpg";
+import era1990s from "@/assets/history/era-1990s.jpg";
+import era2003 from "@/assets/history/era-2003.jpg";
+import era2009 from "@/assets/history/era-2009.jpg";
+import era2020 from "@/assets/history/era-2020.jpg";
+import era2025 from "@/assets/history/era-2025.jpg";
+
 const timelineData = [
   {
     era: "3500 ق.م",
