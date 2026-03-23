@@ -6,6 +6,25 @@ import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/contexts/LanguageContext";
 import heroImg from "@/assets/egypt-history-hero.webp";
 
+// Historical era images
+import eraPredynastic from "@/assets/history/era-predynastic.jpg";
+import eraOldKingdom from "@/assets/history/era-old-kingdom.jpg";
+import eraNewKingdom from "@/assets/history/era-new-kingdom.jpg";
+import eraPtolemaic from "@/assets/history/era-ptolemaic.jpg";
+import eraFatimid from "@/assets/history/era-fatimid.jpg";
+import eraAyyubid from "@/assets/history/era-ayyubid.jpg";
+import eraMamluk from "@/assets/history/era-mamluk.jpg";
+import eraMuhammadAli from "@/assets/history/era-muhammad-ali.jpg";
+import eraZabbaleen from "@/assets/history/era-zabbaleen.jpg";
+import era1952 from "@/assets/history/era-1952.jpg";
+import era1970s from "@/assets/history/era-1970s.jpg";
+import era1981 from "@/assets/history/era-1981.jpg";
+import era1990s from "@/assets/history/era-1990s.jpg";
+import era2003 from "@/assets/history/era-2003.jpg";
+import era2009 from "@/assets/history/era-2009.jpg";
+import era2020 from "@/assets/history/era-2020.jpg";
+import era2025 from "@/assets/history/era-2025.jpg";
+
 const timelineData = [
   {
     era: "3500 ق.م",
@@ -17,6 +36,7 @@ const timelineData = [
     icon: Pyramid,
     color: "from-stone-500 to-amber-700",
     bgAccent: "bg-stone-500/10",
+    image: eraPredynastic,
   },
   {
     era: "3000 ق.م",
@@ -28,6 +48,7 @@ const timelineData = [
     icon: Pyramid,
     color: "from-amber-500 to-yellow-600",
     bgAccent: "bg-amber-500/10",
+    image: eraOldKingdom,
   },
   {
     era: "1500 ق.م",
@@ -39,6 +60,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-orange-500 to-red-600",
     bgAccent: "bg-orange-500/10",
+    image: eraNewKingdom,
   },
   {
     era: "300 ق.م",
@@ -50,6 +72,7 @@ const timelineData = [
     icon: Globe,
     color: "from-blue-500 to-indigo-600",
     bgAccent: "bg-blue-500/10",
+    image: eraPtolemaic,
   },
   {
     era: "القرن 10",
@@ -61,6 +84,7 @@ const timelineData = [
     icon: Sparkles,
     color: "from-violet-500 to-purple-600",
     bgAccent: "bg-violet-500/10",
+    image: eraFatimid,
   },
   {
     era: "القرن 12",
@@ -72,6 +96,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-red-600 to-amber-600",
     bgAccent: "bg-red-500/10",
+    image: eraAyyubid,
   },
   {
     era: "القرن 15",
@@ -83,6 +108,7 @@ const timelineData = [
     icon: Globe,
     color: "from-yellow-600 to-orange-600",
     bgAccent: "bg-yellow-500/10",
+    image: eraMamluk,
   },
   {
     era: "القرن 19",
@@ -94,6 +120,7 @@ const timelineData = [
     icon: Globe,
     color: "from-emerald-500 to-teal-600",
     bgAccent: "bg-emerald-500/10",
+    image: eraMuhammadAli,
   },
   {
     era: "1940s",
@@ -105,6 +132,7 @@ const timelineData = [
     icon: Recycle,
     color: "from-zinc-500 to-slate-600",
     bgAccent: "bg-zinc-500/10",
+    image: eraZabbaleen,
   },
   {
     era: "1952",
@@ -116,6 +144,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-stone-600 to-zinc-500",
     bgAccent: "bg-stone-500/10",
+    image: era1952,
   },
   {
     era: "1970s",
@@ -127,6 +156,7 @@ const timelineData = [
     icon: Recycle,
     color: "from-sky-500 to-blue-600",
     bgAccent: "bg-sky-500/10",
+    image: era1970s,
   },
   {
     era: "1981",
@@ -138,6 +168,7 @@ const timelineData = [
     icon: Globe,
     color: "from-blue-600 to-indigo-500",
     bgAccent: "bg-blue-500/10",
+    image: era1981,
   },
   {
     era: "1990s",
@@ -149,6 +180,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-teal-500 to-green-600",
     bgAccent: "bg-teal-500/10",
+    image: era1990s,
   },
   {
     era: "2003",
@@ -160,6 +192,7 @@ const timelineData = [
     icon: Globe,
     color: "from-rose-500 to-red-600",
     bgAccent: "bg-rose-500/10",
+    image: era2003,
   },
   {
     era: "2009",
@@ -171,6 +204,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-amber-600 to-yellow-500",
     bgAccent: "bg-amber-500/10",
+    image: era2009,
   },
   {
     era: "2020",
@@ -182,6 +216,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-green-500 to-emerald-600",
     bgAccent: "bg-green-500/10",
+    image: era2020,
   },
   {
     era: "2025",
@@ -193,6 +228,7 @@ const timelineData = [
     icon: Cpu,
     color: "from-primary to-emerald-500",
     bgAccent: "bg-primary/10",
+    image: era2025,
   },
 ];
 
@@ -284,21 +320,33 @@ const RecyclingHistory = memo(() => {
 
                   {/* Content card */}
                   <div className={`ms-20 sm:ms-0 sm:w-[calc(50%-40px)] ${isLeft ? '' : ''}`}>
-                    <div className={`${item.bgAccent} border border-border/50 rounded-2xl p-6 sm:p-8 hover:shadow-lg transition-shadow`}>
-                      <div className="flex items-center gap-3 mb-3">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${item.color}`}>
-                          {item.era}
-                        </span>
-                        <span className="text-amber-500/70 text-sm tracking-[0.2em]" style={{ fontFamily: 'serif' }}>
-                          {item.hieroglyphic}
-                        </span>
+                    <div className={`${item.bgAccent} border border-border/50 rounded-2xl overflow-hidden hover:shadow-lg transition-shadow`}>
+                      {/* Era Image */}
+                      <div className="relative h-40 sm:h-48 overflow-hidden">
+                        <img
+                          src={item.image}
+                          alt={isAr ? item.title : item.titleEn}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className={`absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent`} />
+                        <div className="absolute bottom-3 start-4 flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-xs font-bold text-white bg-gradient-to-r ${item.color}`}>
+                            {item.era}
+                          </span>
+                          <span className="text-amber-300/90 text-sm tracking-[0.2em]" style={{ fontFamily: 'serif', textShadow: '0 1px 4px rgba(0,0,0,0.5)' }}>
+                            {item.hieroglyphic}
+                          </span>
+                        </div>
                       </div>
-                      <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
-                        {isAr ? item.title : item.titleEn}
-                      </h3>
-                      <p className="text-muted-foreground text-sm leading-relaxed">
-                        {isAr ? item.description : item.descEn}
-                      </p>
+                      <div className="p-5 sm:p-6">
+                        <h3 className="text-lg sm:text-xl font-bold text-foreground mb-2">
+                          {isAr ? item.title : item.titleEn}
+                        </h3>
+                        <p className="text-muted-foreground text-sm leading-relaxed">
+                          {isAr ? item.description : item.descEn}
+                        </p>
+                      </div>
                     </div>
                   </div>
 
