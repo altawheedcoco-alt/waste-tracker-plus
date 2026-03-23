@@ -30494,6 +30494,33 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_tags: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          id: string
+          is_active: boolean | null
+          name: string
+          usage_count: number | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name: string
+          usage_count?: number | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          id?: string
+          is_active?: boolean | null
+          name?: string
+          usage_count?: number | null
+        }
+        Relationships: []
+      }
       points_transactions: {
         Row: {
           action_description: string | null
