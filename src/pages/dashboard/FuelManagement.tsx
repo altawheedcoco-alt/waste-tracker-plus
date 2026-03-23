@@ -46,7 +46,7 @@ const FuelManagement = () => {
   const { data: drivers = [] } = useQuery({
     queryKey: ['org-drivers-fuel', organization?.id],
     queryFn: async () => {
-      const { data } = await (supabase.from('profiles').select('id, full_name').eq('organization_id', organization!.id).eq('role', 'driver').eq('is_active', true) as any);
+      const { data } = await (supabase as any).from('profiles').select('id, full_name').eq('organization_id', organization!.id).eq('role', 'driver').eq('is_active', true);
       return data || [];
     },
     enabled: !!organization?.id,
