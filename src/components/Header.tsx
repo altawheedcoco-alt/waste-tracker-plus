@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -102,6 +102,7 @@ const Header = memo(() => {
       label: t('nav.resources'),
       icon: BookOpen,
       items: [
+        { label: 'منشورات المنصة', href: '/posts', icon: FileText, desc: 'آخر المقالات والإعلانات الرسمية من فريق المنصة', badge: 'جديد' },
         { label: t('header.blog'), href: '/blog', icon: BookOpen, desc: t('header.blogDesc') },
         { label: t('header.recyclingHistory'), href: '/recycling-history', icon: Landmark, desc: t('header.recyclingHistoryDesc'), badge: t('header.new') },
         { label: t('header.helpCenter'), href: '/help', icon: HelpCircle, desc: t('header.helpCenterDesc') },
@@ -315,6 +316,15 @@ const Header = memo(() => {
         <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col gap-1">
+              {/* زر المنشورات المستقل */}
+              <button
+                onClick={() => handleNavClick('/posts')}
+                className="flex items-center gap-2.5 w-full px-3.5 py-3.5 text-sm font-bold rounded-xl text-primary bg-primary/8 hover:bg-primary/15 transition-all touch-manipulation"
+              >
+                <FileText className="w-4 h-4 text-primary" />
+                منشورات المنصة
+                <span className="ms-auto px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-primary/10 text-primary leading-none">جديد</span>
+              </button>
               {dropdowns.map((dropdown) => (
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
