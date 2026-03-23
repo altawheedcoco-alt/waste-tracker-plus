@@ -29,6 +29,7 @@ const GoogleSetup = lazyRetry(() => import("@/pages/GoogleSetup"));
 const NotFound = lazyRetry(() => import("@/pages/NotFound"));
 const News = lazyRetry(() => import("@/pages/News"));
 const PlatformPosts = lazyRetry(() => import("@/pages/PlatformPosts"));
+const PostDetail = lazyRetry(() => import("@/pages/PostDetail"));
 const FullBrochure = lazyRetry(() => import("@/pages/Brochure"));
 const PublicTrackingPage = lazyRetry(() => import("@/pages/PublicTracking"));
 const PublicPermitView = lazyRetry(() => import("@/pages/PublicPermitView"));
@@ -92,6 +93,7 @@ export const publicRoutes = (
     <Route path="/portal/:slug" element={<PublicClientPortal />} />
     <Route path="/news" element={<News />} />
     <Route path="/posts" element={<PlatformPosts />} />
+    <Route path="/posts/:id" element={<PostDetail />} />
     <Route path="/brochure" element={<FullBrochure />} />
     <Route path="/permit-view/:token" element={<PublicPermitView />} />
     <Route path="/auth" element={<Auth />} />

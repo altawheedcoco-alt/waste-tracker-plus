@@ -13,4 +13,4 @@ Allow: /
 User-agent: *
 Allow: /
 
-Sitemap: https://irecycle21.lovable.app/sitemap.xml
+Sitemap: https://dgununqfxohodimmgxuk.supabase.co/functions/v1/sitemap

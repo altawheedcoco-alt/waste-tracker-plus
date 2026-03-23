@@ -38,13 +38,15 @@ const PlatformPostsSection = memo(() => {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           {posts.map((post: any) => (
-            <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-all duration-300 group">
+             <Link key={post.id} to={`/posts/${post.id}`}>
+              <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 group h-full">
               {post.cover_image_url && (
                 <div className="h-40 overflow-hidden">
                   <img
                     src={post.cover_image_url}
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
                   />
                 </div>
               )}
@@ -72,7 +74,8 @@ const PlatformPostsSection = memo(() => {
                   )}
                 </div>
               </CardContent>
-            </Card>
+              </Card>
+            </Link>
           ))}
         </div>
 
