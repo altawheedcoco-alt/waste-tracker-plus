@@ -1,11 +1,12 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText, Sun, Moon } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
 import PlatformLogo from "@/components/common/PlatformLogo";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { useAuth } from "@/contexts/AuthContext";
+import { useThemeSettings } from "@/contexts/ThemeSettingsContext";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ const Header = memo(() => {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { user, profile, signOut } = useAuth();
+  const { settings, toggleDarkMode } = useThemeSettings();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
@@ -274,6 +276,15 @@ const Header = memo(() => {
 
             {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-border/50 bg-background/60 text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 overflow-hidden group"
+                aria-label={settings.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <Sun className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+              </button>
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
@@ -329,13 +340,23 @@ const Header = memo(() => {
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
               <div className="flex flex-col gap-2.5 pt-4 border-t border-border/40 mt-3">
-                <button
-                  onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
-                >
-                  <Globe className="w-4 h-4" />
-                  {language === 'ar' ? 'English' : 'عربي'}
-                </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                  >
+                    <Globe className="w-4 h-4" />
+                    {language === 'ar' ? 'English' : 'عربي'}
+                  </button>
+                  <button
+                    onClick={toggleDarkMode}
+                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                    aria-label={settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
+                  >
+                    {settings.isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
+                  </button>
+                </div>
                 <GuideButton />
                 {user ? (
                   <div className="grid grid-cols-2 gap-2.5">
