@@ -16,7 +16,7 @@ import {
   CreditCard, Monitor, Plus, CheckSquare, UserPlus, Video, HardHat, Upload,
   CalendarClock, Gauge as GaugeIcon, Heart, Timer, Briefcase, ArrowLeftRight,
   Megaphone, Repeat, Crown, Star, Phone, Mail, Radio, Landmark, Cog, Hash,
-  Image, Clock, ChevronRight, Blocks, ListOrdered,
+  Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
 
