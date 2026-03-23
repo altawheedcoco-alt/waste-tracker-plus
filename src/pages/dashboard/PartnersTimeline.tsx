@@ -125,10 +125,36 @@ const PartnersTimeline = () => {
 
       const orgsMap = new Map(orgsData?.map(org => [org.id, org]) || []);
 
+      // Fetch author profiles (exclude drivers)
+      const authorIds = [...new Set((postsData || []).map(p => p.author_id).filter(Boolean))];
+      let authorsMap = new Map<string, { id: string; full_name: string | null; avatar_url: string | null }>();
+      
+      if (authorIds.length > 0) {
+        // Get driver user IDs to exclude
+        const { data: driverRoles } = await supabase
+          .from('user_roles')
+          .select('user_id')
+          .eq('role', 'driver')
+          .in('user_id', authorIds);
+        
+        const driverIds = new Set((driverRoles || []).map(r => r.user_id));
+        const nonDriverIds = authorIds.filter(id => !driverIds.has(id));
+
+        if (nonDriverIds.length > 0) {
+          const { data: profilesData } = await supabase
+            .from('profiles')
+            .select('id, full_name, avatar_url')
+            .in('id', nonDriverIds);
+          
+          authorsMap = new Map((profilesData || []).map(p => [p.id, p]));
+        }
+      }
+
       return (postsData || []).map(post => ({
         ...post,
         media_urls: post.media_urls as string[] | null,
         organization: orgsMap.get(post.organization_id),
+        author: post.author_id ? authorsMap.get(post.author_id) || null : null,
       })) as Post[];
     },
     enabled: !!organization?.id,
