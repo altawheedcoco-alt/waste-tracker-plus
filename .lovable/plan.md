@@ -1,43 +1,91 @@
 
 
-# خطة تنسيق الوضع النهاري والليلي — الصفحة الرئيسية وملحقاتها
+# خطة تفعيل تجربة السائق المستقل (نموذج Didi/Uber)
 
-## المشاكل المكتشفة
+## الوضع الحالي
 
-### 1. DocumentAIShowcase.tsx — 4 مشاكل
-- **سطر 113**: `bg-gradient-to-b from-[hsl(200,30%,96%)] to-white` — خلفية بيضاء ثابتة لا تتغير في الوضع الليلي
-- **سطر 378**: نفس المشكلة بالضبط
-- **سطر 462**: `bg-gradient-to-l from-[hsl(200,30%,96%)] to-white` — نفس المشكلة
-- **سطر 721**: `border-[hsl(200,30%,90%)]` — حد ثابت لا يتكيف
+البنية التحتية موجودة بالفعل:
+- جداول قاعدة البيانات: `driver_shipment_offers`, `driver_mission_offers`, `driver_financial_wallet` -- كلها موجودة
+- المكونات: `DriverOfferPopup`, `IndependentOffersPanel`, `ShipmentMarketplace`, `DriverFinancialWallet`, `DriverSelfTracker` -- موجودة
+- التبويبات: العروض، السوق، الشحنات، المحفظة، التحليلات -- موجودة في `DriverDashboard`
+- المسارات: `/dashboard/driver-offers`, `/dashboard/shipment-market`, `/dashboard/driver-wallet` -- مسجلة
 
-### 2. PostDetail.tsx — مشكلة واحدة
-- **سطر 270**: `prose-stone` ينتج نصوص رمادية داكنة لا تظهر على خلفية الوضع الليلي
-
-### 3. WhatsAppShowcase.tsx — مشكلة طفيفة
-- **سطر 281**: `bg-white text-green-700` — زر ثابت بخلفية بيضاء (مقبول لأنه زر CTA على خلفية خضراء، لكن يمكن تحسينه)
-
-### 4. PlatformPosts.tsx — ✅ سليمة (تستخدم tokens صحيحة)
-### 5. باقي صفحات Landing — ✅ سليمة
+**المشكلة**: التجربة ناقصة وغير متكاملة مثل Didi -- تحتاج:
 
 ---
 
-## خطة الإصلاح
+## التحسينات المطلوبة (7 خطوات)
 
-### الملف 1: `src/components/landing/DocumentAIShowcase.tsx`
-| السطر | الحالي | الجديد |
-|-------|--------|--------|
-| 113 | `from-[hsl(200,30%,96%)] to-white` | `from-muted/50 to-background` |
-| 378 | `from-[hsl(200,30%,96%)] to-white` | `from-muted/50 to-background` |
-| 462 | `from-[hsl(200,30%,96%)] to-white` | `from-muted/50 to-background` |
-| 721 | `border-[hsl(200,30%,90%)]` | `border-border` |
+### 1. شاشة الرئيسية "Go Online" -- حالة التوفر الذكية
+**الملف**: `src/components/dashboard/DriverDashboard.tsx`
+- إضافة زر كبير دائري "أنا متاح" / "غير متاح" بأنيميشن (مثل زر Didi Go)
+- عند الضغط يبدل `is_available` في جدول `drivers` مباشرة
+- يفعّل تلقائياً GPS tracking عند الاتصال
+- عداد حي يوضح "متاح منذ X دقيقة"
 
-### الملف 2: `src/pages/PostDetail.tsx`
-| السطر | الحالي | الجديد |
-|-------|--------|--------|
-| 270 | `prose prose-lg prose-stone dark:prose-invert` | `prose prose-lg dark:prose-invert` |
+### 2. تفعيل Geolocation المستمر عند الاتصال
+**الملف الجديد**: `src/hooks/useDriverLiveLocation.ts`
+- Hook يعمل فقط عندما `is_available = true`
+- يرسل الموقع كل 15 ثانية إلى `driver_location_logs`
+- يعرض مؤشر GPS في الهيدر (أخضر/أحمر/رمادي)
+- يتكامل مع `DriverSelfTracker` الموجود
 
-### النتيجة المتوقعة
-- الوضع النهاري: خلفيات فاتحة طبيعية مع نصوص داكنة واضحة
-- الوضع الليلي: خلفيات داكنة تتبع `--background` و `--muted` مع نصوص فاتحة واضحة
-- لا تأثير على أي مكونات أخرى — التغييرات محصورة في الأماكن المحددة
+### 3. Popup العروض المحسّن (Didi-style)
+**الملف**: `src/components/driver/DriverOfferPopup.tsx`
+- إضافة عرض المسافة بالكيلومتر وزمن الوصول المتوقع (ETA)
+- عرض سعر/كم (مثلاً: "٥ ج.م/كم")
+- إضافة خريطة مصغرة للمسار (pickup → delivery)
+- اهتزاز + صوت عند وصول عرض جديد
+- عرض نوع المركبة المطلوبة + نوع المخلفات بأيقونات واضحة
+
+### 4. آلية التسعير الديناميكي
+**الملف**: `src/components/driver/PricingBreakdown.tsx` (جديد)
+- عرض تفصيل السعر:
+  - رسم بدء الرحلة (Flag-drop): ٢٥ ج.م
+  - سعر الكيلومتر: ٥ ج.م × المسافة
+  - رسوم انتظار: ١٠٠ ج.م/ساعة
+  - مضاعف المخلفات الخطرة: ×١.٥
+- مكون يُعرض داخل `DriverOfferPopup` و `ShipmentMarketplace`
+
+### 5. شاشة تحميل الشحنة (Loading Mode)
+**الملف**: `src/components/driver/ShipmentLoadingMode.tsx` (جديد)
+- واجهة مخصصة تظهر بعد قبول العرض بمراحل:
+  1. **متجه للاستلام**: خريطة + ملاحة + ETA
+  2. **في موقع الاستلام**: زر "بدء التحميل" + كاميرا توثيق
+  3. **في الطريق**: تتبع مباشر + عداد المسافة
+  4. **في موقع التسليم**: زر "تم التسليم" + توقيع إلكتروني
+- كل مرحلة تحدث `shipments.status` عبر Repository
+
+### 6. محفظة مالية حقيقية (ربط البيانات)
+**الملف**: `src/components/driver/DriverFinancialWallet.tsx`
+- ربط المحفظة بجدول `driver_financial_wallet` الموجود فعلاً
+- إضافة: أرباح اليوم، أرباح الأسبوع، رصيد معلق (Escrow)
+- سجل المعاملات من `driver_wallet_transactions`
+- عرض تفاصيل كل معاملة (رقم الشحنة، المبلغ، التاريخ)
+
+### 7. التكامل الشامل في الداشبورد
+**الملف**: `src/components/dashboard/DriverDashboard.tsx`
+- التبويب الافتراضي للمستقل = شاشة "Go Online" بدلاً من "العروض"
+- إضافة `useDriverLiveLocation` عند فتح الداشبورد
+- عرض إحصائيات سريعة: (رحلات اليوم، أرباح اليوم، التقييم، معدل القبول)
+- Floating Action Button للوصول السريع (SOS، موقعي، كاميرا)
+
+---
+
+## التفاصيل التقنية
+
+### الملفات المعدلة
+1. `src/components/dashboard/DriverDashboard.tsx` -- إعادة هيكلة التبويب الأول + زر Go Online
+2. `src/components/driver/DriverOfferPopup.tsx` -- تحسين العرض بتفاصيل السعر والمسافة
+3. `src/components/driver/DriverFinancialWallet.tsx` -- ربط بيانات حقيقية
+4. `src/components/driver/IndependentOffersPanel.tsx` -- إضافة تفاصيل أكثر
+
+### الملفات الجديدة
+1. `src/hooks/useDriverLiveLocation.ts` -- تتبع الموقع المستمر
+2. `src/components/driver/PricingBreakdown.tsx` -- تفصيل التسعير
+3. `src/components/driver/ShipmentLoadingMode.tsx` -- مراحل تحميل الشحنة
+4. `src/components/driver/GoOnlineButton.tsx` -- زر التوفر الرئيسي
+
+### لا حاجة لتعديل قاعدة البيانات
+كل الجداول المطلوبة موجودة: `drivers`, `driver_location_logs`, `driver_shipment_offers`, `driver_mission_offers`, `driver_financial_wallet`, `driver_wallet_transactions`, `shipments`
 
