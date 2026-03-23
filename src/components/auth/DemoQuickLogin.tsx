@@ -55,6 +55,7 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
       { email: 'demo-recycler@irecycle.test', label: 'التدوير التجريبية', desc: 'مدور', icon: Recycle, color: 'from-cyan-500 to-blue-600' },
       { email: 'disposal@demo.com', label: 'الأمان للتخلص', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
       { email: 'demo-disposal@irecycle.test', label: 'التخلص التجريبية', desc: 'تخلص آمن', icon: ShieldCheck, color: 'from-purple-500 to-violet-600' },
+      { email: 'municipal@irecycle.test', label: 'النظافة المتحدة', desc: 'مقاول بلدي 🏗️', icon: HardHat, color: 'from-lime-600 to-green-800' },
     ],
   },
   {
