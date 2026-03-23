@@ -5,7 +5,7 @@
 import {
   LayoutDashboard, Package, MapPin, User, FileText,
   GraduationCap, Trophy, Bell, Settings, Briefcase,
-  Zap, ShoppingCart, Star, CreditCard, BarChart3,
+  Zap, ShoppingCart, Star, CreditCard, BarChart3, Route,
   PlusCircle, Map,
 } from 'lucide-react';
 import type { DriverType } from '@/types/driver-types';
@@ -44,6 +44,7 @@ export function getDriverMenuItems(
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
         { icon: PlusCircle, label: lang === 'ar' ? 'إنشاء شحنة' : 'Create Shipment', path: '/dashboard/create-shipment', key: 'driver-create-shipment' },
         { icon: Map, label: lang === 'ar' ? 'خريطة المسارات' : 'Routes Map', path: '/dashboard/shipment-routes', key: 'driver-routes' },
+        { icon: Route, label: lang === 'ar' ? 'تتبع مساري' : 'My Route', path: '/dashboard/driver-my-route', key: 'driver-my-route' },
         common[1], // location
         { icon: User, label: lang === 'ar' ? 'ملفي' : 'Profile', path: '/dashboard/driver-profile', key: 'driver-profile' },
         { icon: FileText, label: lang === 'ar' ? 'بياناتي' : 'My Data', path: '/dashboard/driver-data', key: 'driver-data' },
@@ -65,6 +66,7 @@ export function getDriverMenuItems(
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
         { icon: CreditCard, label: lang === 'ar' ? 'المحفظة' : 'Wallet', path: '/dashboard/driver-wallet', key: 'driver-wallet' },
         { icon: BarChart3, label: lang === 'ar' ? 'التحليلات' : 'Analytics', path: '/dashboard/driver-analytics', key: 'driver-analytics' },
+        { icon: Route, label: lang === 'ar' ? 'تتبع مساري' : 'My Route', path: '/dashboard/driver-my-route', key: 'driver-my-route' },
         common[1],
         { icon: Star, label: lang === 'ar' ? 'ملفي المهني' : 'Public Profile', path: '/dashboard/driver-profile', key: 'driver-public-profile' },
         ...common.slice(2),
