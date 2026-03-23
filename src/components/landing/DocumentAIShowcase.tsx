@@ -826,7 +826,7 @@ const OcrVsAiSection = memo(() => (
       {/* Comparison */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-0 mb-16 rounded-2xl overflow-hidden border border-[hsl(var(--landing-border))] shadow-sm">
         <motion.div
-          className="bg-[hsl(0,0%,95%)] p-8 sm:p-12 text-center"
+          className="bg-muted p-8 sm:p-12 text-center"
           initial="hidden" whileInView="visible" viewport={{ once: true }}
           variants={fadeIn}
         >
