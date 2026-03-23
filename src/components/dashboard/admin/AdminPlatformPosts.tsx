@@ -12,122 +12,107 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import {
-  Plus, Pencil, Trash2, Newspaper, Eye, EyeOff,
-  Star, GripVertical, Clock, CalendarClock
+  Plus, Pencil, Trash2, FileText, Eye, EyeOff,
+  Star, Clock, CalendarClock, Image
 } from 'lucide-react';
 
-interface NewsItem {
+interface PostItem {
   id: string;
   title: string;
-  description: string;
+  excerpt: string | null;
+  content: string;
+  cover_image_url: string | null;
   category: string;
-  badge: string;
-  icon_name: string;
-  color_gradient: string;
-  link: string;
+  author_name: string;
+  badge: string | null;
   is_published: boolean;
   is_featured: boolean;
   published_at: string | null;
-  scheduled_at: string | null;
   sort_order: number;
+  views_count: number;
   created_at: string;
 }
 
-const GRADIENT_OPTIONS = [
-  { value: 'from-blue-500 to-cyan-500', label: 'أزرق' },
-  { value: 'from-emerald-500 to-green-500', label: 'أخضر' },
-  { value: 'from-amber-500 to-orange-500', label: 'برتقالي' },
-  { value: 'from-purple-500 to-violet-500', label: 'بنفسجي' },
-  { value: 'from-rose-500 to-pink-500', label: 'وردي' },
-  { value: 'from-indigo-500 to-blue-500', label: 'نيلي' },
-  { value: 'from-teal-500 to-cyan-500', label: 'فيروزي' },
-  { value: 'from-sky-500 to-blue-500', label: 'سماوي' },
-  { value: 'from-orange-500 to-red-500', label: 'أحمر' },
-  { value: 'from-green-500 to-teal-500', label: 'أخضر غامق' },
-];
+const CATEGORIES = ['عام', 'تحديثات', 'بيئة', 'تقنية', 'شراكات', 'إنجازات', 'نصائح', 'قوانين'];
 
-const ICON_OPTIONS = [
-  'Newspaper', 'Users', 'Award', 'Megaphone', 'ShieldCheck',
-  'Recycle', 'Truck', 'BarChart3', 'FileCheck', 'Globe',
-  'BookOpen', 'Bell', 'Sparkles', 'Zap', 'Star',
-];
-
-type PublishMode = 'now' | 'scheduled' | 'draft';
+type PublishMode = 'draft' | 'now' | 'scheduled';
 
 const emptyForm = {
-  title: '', description: '', category: 'عام', badge: 'جديد',
-  icon_name: 'Newspaper', color_gradient: 'from-blue-500 to-cyan-500',
-  link: '/', is_featured: false, sort_order: 0,
+  title: '',
+  excerpt: '',
+  content: '',
+  cover_image_url: '',
+  category: 'عام',
+  author_name: 'فريق المنصة',
+  badge: 'جديد',
+  is_featured: false,
+  sort_order: 0,
   publishMode: 'draft' as PublishMode,
   scheduledDate: '',
 };
 
-const AdminNewsManager = () => {
+const AdminPlatformPosts = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState(emptyForm);
 
-  const { data: news = [], isLoading } = useQuery({
-    queryKey: ['admin-platform-news'],
+  const { data: posts = [], isLoading } = useQuery({
+    queryKey: ['admin-platform-posts'],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('platform_news' as any)
+        .from('platform_posts' as any)
         .select('*')
-        .order('sort_order', { ascending: true });
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return (data || []) as unknown as NewsItem[];
+      return (data || []) as unknown as PostItem[];
     },
   });
 
   const saveMutation = useMutation({
-    mutationFn: async (item: typeof form & { id?: string }) => {
+    mutationFn: async (item: typeof form) => {
       const now = new Date().toISOString();
       let is_published = false;
       let published_at: string | null = null;
-      let scheduled_at: string | null = null;
 
       if (item.publishMode === 'now') {
         is_published = true;
         published_at = now;
       } else if (item.publishMode === 'scheduled' && item.scheduledDate) {
-        is_published = false;
         published_at = new Date(item.scheduledDate).toISOString();
-        scheduled_at = published_at;
       }
 
       const payload = {
         title: item.title,
-        description: item.description,
+        excerpt: item.excerpt || null,
+        content: item.content,
+        cover_image_url: item.cover_image_url || null,
         category: item.category,
-        badge: item.badge,
-        icon_name: item.icon_name,
-        color_gradient: item.color_gradient,
-        link: item.link,
+        author_name: item.author_name,
+        badge: item.badge || null,
         is_featured: item.is_featured,
         sort_order: item.sort_order,
         is_published,
         published_at,
-        scheduled_at,
       };
 
       if (editingId) {
         const { error } = await supabase
-          .from('platform_news' as any)
+          .from('platform_posts' as any)
           .update(payload as any)
           .eq('id', editingId);
         if (error) throw error;
       } else {
         const { error } = await supabase
-          .from('platform_news' as any)
+          .from('platform_posts' as any)
           .insert(payload as any);
         if (error) throw error;
       }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-platform-news'] });
-      queryClient.invalidateQueries({ queryKey: ['platform-news'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-platform-posts'] });
+      queryClient.invalidateQueries({ queryKey: ['platform-posts-public'] });
       setDialogOpen(false);
       setEditingId(null);
       setForm(emptyForm);
@@ -140,73 +125,49 @@ const AdminNewsManager = () => {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('platform_news' as any)
-        .delete()
-        .eq('id', id);
+      const { error } = await supabase.from('platform_posts' as any).delete().eq('id', id);
       if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin-platform-news'] });
-      queryClient.invalidateQueries({ queryKey: ['platform-news'] });
+      queryClient.invalidateQueries({ queryKey: ['admin-platform-posts'] });
       toast({ title: 'تم الحذف' });
     },
   });
 
-  const togglePublish = async (item: NewsItem) => {
+  const togglePublish = async (item: PostItem) => {
     await supabase
-      .from('platform_news' as any)
-      .update({
-        is_published: !item.is_published,
-        published_at: !item.is_published ? new Date().toISOString() : null,
-      } as any)
+      .from('platform_posts' as any)
+      .update({ is_published: !item.is_published, published_at: !item.is_published ? new Date().toISOString() : null } as any)
       .eq('id', item.id);
-    queryClient.invalidateQueries({ queryKey: ['admin-platform-news'] });
-    queryClient.invalidateQueries({ queryKey: ['platform-news'] });
+    queryClient.invalidateQueries({ queryKey: ['admin-platform-posts'] });
+    queryClient.invalidateQueries({ queryKey: ['platform-posts-public'] });
   };
 
-  const openEdit = (item: NewsItem) => {
+  const openEdit = (item: PostItem) => {
     setEditingId(item.id);
-    const isScheduled = !item.is_published && item.scheduled_at;
     setForm({
       title: item.title,
-      description: item.description,
+      excerpt: item.excerpt || '',
+      content: item.content,
+      cover_image_url: item.cover_image_url || '',
       category: item.category,
-      badge: item.badge,
-      icon_name: item.icon_name,
-      color_gradient: item.color_gradient,
-      link: item.link,
+      author_name: item.author_name,
+      badge: item.badge || '',
       is_featured: item.is_featured,
       sort_order: item.sort_order,
-      publishMode: item.is_published ? 'now' : isScheduled ? 'scheduled' : 'draft',
-      scheduledDate: item.scheduled_at ? new Date(item.scheduled_at).toISOString().slice(0, 16) : '',
+      publishMode: item.is_published ? 'now' : 'draft',
+      scheduledDate: '',
     });
     setDialogOpen(true);
   };
 
   const openNew = () => {
     setEditingId(null);
-    setForm({ ...emptyForm, sort_order: news.length + 1 });
+    setForm({ ...emptyForm, sort_order: posts.length + 1 });
     setDialogOpen(true);
   };
 
-  const publishedCount = news.filter(n => n.is_published).length;
-  const draftCount = news.filter(n => !n.is_published && !n.scheduled_at).length;
-  const scheduledCount = news.filter(n => !n.is_published && n.scheduled_at).length;
-
-  const getStatusBadge = (item: NewsItem) => {
-    if (item.is_published) return <Badge className="bg-emerald-500/10 text-emerald-600 text-[10px]">منشور</Badge>;
-    if (item.scheduled_at) {
-      const date = new Date(item.scheduled_at);
-      return (
-        <Badge className="bg-amber-500/10 text-amber-600 text-[10px] gap-1">
-          <Clock className="w-3 h-3" />
-          مجدول {date.toLocaleDateString('ar-EG', { month: 'short', day: 'numeric' })}
-        </Badge>
-      );
-    }
-    return <Badge variant="outline" className="text-[10px]">مسودة</Badge>;
-  };
+  const publishedCount = posts.filter(p => p.is_published).length;
 
   return (
     <div className="space-y-4" dir="rtl">
@@ -215,59 +176,56 @@ const AdminNewsManager = () => {
           <div className="flex items-center justify-between">
             <Button onClick={openNew} className="gap-2">
               <Plus className="w-4 h-4" />
-              خبر جديد
+              منشور جديد
             </Button>
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Newspaper className="w-5 h-5 text-primary" />
-              إدارة أخبار المنصة
+              <FileText className="w-5 h-5 text-primary" />
+              إدارة منشورات المنصة
             </CardTitle>
           </div>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-4 justify-end text-sm flex-wrap">
+          <div className="flex gap-4 justify-end text-sm">
             <span className="flex items-center gap-1">
-              <Badge variant="outline" className="bg-primary/10">{news.length}</Badge>
+              <Badge variant="outline" className="bg-primary/10">{posts.length}</Badge>
               إجمالي
             </span>
             <span className="flex items-center gap-1">
               <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600">{publishedCount}</Badge>
               منشور
             </span>
-            <span className="flex items-center gap-1">
-              <Badge variant="outline" className="bg-amber-500/10 text-amber-600">{scheduledCount}</Badge>
-              مجدول
-            </span>
-            <span className="flex items-center gap-1">
-              <Badge variant="outline" className="bg-muted">{draftCount}</Badge>
-              مسودة
-            </span>
           </div>
         </CardContent>
       </Card>
 
       <div className="space-y-2">
-        {news.map((item) => (
-          <Card key={item.id} className={`transition-all ${!item.is_published && !item.scheduled_at ? 'opacity-60 border-dashed' : ''}`}>
+        {posts.map((item) => (
+          <Card key={item.id} className={`transition-all ${!item.is_published ? 'opacity-60 border-dashed' : ''}`}>
             <CardContent className="py-3 px-4">
               <div className="flex items-center gap-3">
-                <GripVertical className="w-4 h-4 text-muted-foreground shrink-0" />
-                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${item.color_gradient} flex items-center justify-center shrink-0`}>
-                  <Newspaper className="w-5 h-5 text-white" />
-                </div>
+                {item.cover_image_url ? (
+                  <img src={item.cover_image_url} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />
+                ) : (
+                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <Image className="w-5 h-5 text-primary/50" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-0.5">
                     <h3 className="font-bold text-sm truncate">{item.title}</h3>
                     {item.is_featured && <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500 shrink-0" />}
                   </div>
-                  <p className="text-xs text-muted-foreground truncate">{item.description}</p>
-                  <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  <p className="text-xs text-muted-foreground truncate">{item.excerpt || item.content.slice(0, 80)}</p>
+                  <div className="flex items-center gap-2 mt-1">
                     <Badge variant="secondary" className="text-[10px]">{item.category}</Badge>
-                    {getStatusBadge(item)}
-                    <span className="text-[10px] text-muted-foreground">ترتيب: {item.sort_order}</span>
+                    <Badge variant={item.is_published ? 'default' : 'outline'} className="text-[10px]">
+                      {item.is_published ? 'منشور' : 'مسودة'}
+                    </Badge>
+                    <span className="text-[10px] text-muted-foreground">👁 {item.views_count}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-1 shrink-0">
-                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => togglePublish(item)} title={item.is_published ? 'إلغاء النشر' : 'نشر'}>
+                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => togglePublish(item)}>
                     {item.is_published ? <Eye className="w-4 h-4 text-emerald-500" /> : <EyeOff className="w-4 h-4 text-muted-foreground" />}
                   </Button>
                   <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEdit(item)}>
@@ -282,14 +240,14 @@ const AdminNewsManager = () => {
           </Card>
         ))}
 
-        {news.length === 0 && !isLoading && (
+        {posts.length === 0 && !isLoading && (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              <Newspaper className="w-12 h-12 mx-auto mb-3 opacity-30" />
-              <p>لا توجد أخبار بعد</p>
+              <FileText className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>لا توجد منشورات بعد</p>
               <Button onClick={openNew} variant="outline" className="mt-3 gap-2">
                 <Plus className="w-4 h-4" />
-                أضف أول خبر
+                أضف أول منشور
               </Button>
             </CardContent>
           </Card>
@@ -299,69 +257,43 @@ const AdminNewsManager = () => {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" dir="rtl">
           <DialogHeader>
-            <DialogTitle>{editingId ? 'تعديل الخبر' : 'خبر جديد'}</DialogTitle>
+            <DialogTitle>{editingId ? 'تعديل المنشور' : 'منشور جديد'}</DialogTitle>
           </DialogHeader>
-
           <div className="space-y-4">
             <div className="space-y-2">
               <Label>العنوان *</Label>
               <Input value={form.title} onChange={e => setForm(f => ({ ...f, title: e.target.value }))} />
             </div>
-
             <div className="space-y-2">
-              <Label>الوصف *</Label>
-              <Textarea value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} rows={3} />
+              <Label>المقتطف</Label>
+              <Input value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} placeholder="ملخص قصير يظهر في البطاقة..." />
             </div>
-
+            <div className="space-y-2">
+              <Label>المحتوى *</Label>
+              <Textarea value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} rows={6} />
+            </div>
+            <div className="space-y-2">
+              <Label>رابط صورة الغلاف</Label>
+              <Input value={form.cover_image_url} onChange={e => setForm(f => ({ ...f, cover_image_url: e.target.value }))} dir="ltr" placeholder="https://..." />
+            </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
                 <Label>التصنيف</Label>
-                <Input value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))} />
-              </div>
-              <div className="space-y-2">
-                <Label>الشارة</Label>
-                <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="جديد، محدّث، هام..." />
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label>الرابط</Label>
-              <Input value={form.link} onChange={e => setForm(f => ({ ...f, link: e.target.value }))} dir="ltr" placeholder="/dashboard/..." />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-2">
-                <Label>اللون</Label>
-                <Select value={form.color_gradient} onValueChange={v => setForm(f => ({ ...f, color_gradient: v }))}>
+                <Select value={form.category} onValueChange={v => setForm(f => ({ ...f, category: v }))}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {GRADIENT_OPTIONS.map(g => (
-                      <SelectItem key={g.value} value={g.value}>
-                        <div className="flex items-center gap-2">
-                          <div className={`w-4 h-4 rounded bg-gradient-to-r ${g.value}`} />
-                          {g.label}
-                        </div>
-                      </SelectItem>
-                    ))}
+                    {CATEGORIES.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>الأيقونة</Label>
-                <Select value={form.icon_name} onValueChange={v => setForm(f => ({ ...f, icon_name: v }))}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {ICON_OPTIONS.map(icon => (
-                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label>اسم الكاتب</Label>
+                <Input value={form.author_name} onChange={e => setForm(f => ({ ...f, author_name: e.target.value }))} />
               </div>
             </div>
-
             <div className="space-y-2">
-              <Label>الترتيب</Label>
-              <Input type="number" value={form.sort_order} onChange={e => setForm(f => ({ ...f, sort_order: parseInt(e.target.value) || 0 }))} />
+              <Label>الشارة</Label>
+              <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="جديد، مهم..." />
             </div>
 
             {/* وضع النشر */}
@@ -371,11 +303,11 @@ const AdminNewsManager = () => {
                 وضع النشر
               </Label>
               <div className="flex gap-2 flex-wrap">
-                {[
+                {([
                   { value: 'draft' as PublishMode, label: 'مسودة', icon: '📝' },
                   { value: 'now' as PublishMode, label: 'نشر فوري', icon: '🚀' },
                   { value: 'scheduled' as PublishMode, label: 'جدولة', icon: '⏰' },
-                ].map(opt => (
+                ]).map(opt => (
                   <Button
                     key={opt.value}
                     type="button"
@@ -391,7 +323,7 @@ const AdminNewsManager = () => {
               </div>
               {form.publishMode === 'scheduled' && (
                 <div className="space-y-2 mt-2">
-                  <Label className="text-xs">تاريخ ووقت النشر المجدول</Label>
+                  <Label className="text-xs">تاريخ ووقت النشر</Label>
                   <Input
                     type="datetime-local"
                     value={form.scheduledDate}
@@ -399,20 +331,19 @@ const AdminNewsManager = () => {
                     dir="ltr"
                     min={new Date().toISOString().slice(0, 16)}
                   />
-                  <p className="text-[11px] text-muted-foreground">سيُنشر تلقائياً في الموعد المحدد (9 صباحاً يومياً)</p>
                 </div>
               )}
             </div>
 
             <div className="flex items-center justify-between">
               <Switch checked={form.is_featured} onCheckedChange={v => setForm(f => ({ ...f, is_featured: v }))} />
-              <Label>خبر مميز</Label>
+              <Label>منشور مميز</Label>
             </div>
 
             <Button
               className="w-full"
               onClick={() => saveMutation.mutate(form)}
-              disabled={!form.title.trim() || !form.description.trim() || saveMutation.isPending || (form.publishMode === 'scheduled' && !form.scheduledDate)}
+              disabled={!form.title.trim() || !form.content.trim() || saveMutation.isPending}
             >
               {saveMutation.isPending ? 'جاري الحفظ...' : editingId ? 'تحديث' : 'إضافة'}
             </Button>
@@ -423,4 +354,4 @@ const AdminNewsManager = () => {
   );
 };
 
-export default AdminNewsManager;
+export default AdminPlatformPosts;
