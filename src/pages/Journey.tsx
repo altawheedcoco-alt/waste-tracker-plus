@@ -2,7 +2,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import Header from "@/components/Header";
 import { lazy, Suspense, useState } from "react";
-import { Rocket, Users, Trophy, Eye, Calendar, Code, Sparkles, ArrowLeft, ArrowRight, CheckCircle2, Clock, Star, Heart, Zap, Shield, Target, Lightbulb } from "lucide-react";
+import { Rocket, Users, Trophy, Eye, Calendar, Code, Sparkles, ArrowLeft, ArrowRight, CheckCircle2, Clock, Star, Heart, Zap, Shield, Target, Lightbulb, Quote, Headphones, Scale, Megaphone, Bot, Building2 } from "lucide-react";
 import PageNavBar from "@/components/ui/page-nav-bar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
@@ -122,21 +122,67 @@ const achievements = [
 const team = [
   {
     role: 'المؤسس والمطور الرئيسي',
-    desc: 'صاحب الرؤية والمسؤول عن التصميم والتطوير التقني الكامل للمنصة منذ عام 2021.',
+    desc: 'صاحب الرؤية والمسؤول عن التصميم والتطوير التقني الكامل للمنصة منذ عام 2021. يقود عملية التحول الرقمي لمنظومة إدارة المخلفات في مصر.',
     icon: Lightbulb,
     color: 'from-primary to-[hsl(200,75%,45%)]',
+    quote: 'بدأنا بحلم بسيط: أن نجعل كل طن مخلفات قابلاً للتتبع رقمياً. اليوم نحن أقرب من أي وقت مضى لتحقيق اقتصاد دائري حقيقي.',
+    members: 1,
+  },
+  {
+    role: 'مدير العمليات والتشغيل',
+    desc: 'يشرف على تنسيق العمليات الميدانية وضمان سلاسة الربط بين المولدين والناقلين والمُدوِّرين، مع متابعة مؤشرات الأداء التشغيلي يومياً.',
+    icon: Building2,
+    color: 'from-amber-500 to-orange-500',
+    quote: 'النظام الرقمي حوّل عملياتنا من فوضى ورقية إلى منظومة بيانات حية — كل شحنة لها قصة موثقة من البداية للنهاية.',
+    members: 3,
   },
   {
     role: 'فريق الدعم الفني',
-    desc: 'فريق متخصص في دعم المستخدمين وحل المشكلات التقنية وضمان استمرارية الخدمة.',
-    icon: Shield,
+    desc: 'فريق متخصص في دعم المستخدمين على مدار الساعة، حل المشكلات التقنية فوراً، وتدريب الجهات الجديدة على استخدام المنصة بكفاءة.',
+    icon: Headphones,
     color: 'from-blue-500 to-cyan-500',
+    quote: 'كل مكالمة دعم هي فرصة لتحسين المنصة. نحن لا نحل مشاكل فقط — نحن نبني ثقة مع كل مستخدم.',
+    members: 5,
   },
   {
     role: 'المستشارون البيئيون',
-    desc: 'خبراء في إدارة المخلفات والتشريعات البيئية يساهمون في تطوير سياسات المنصة.',
+    desc: 'خبراء متخصصون في التشريعات البيئية المصرية وقانون 202/2020، يساهمون في ضمان امتثال المنصة للمعايير الوطنية والدولية.',
     icon: Star,
     color: 'from-emerald-500 to-green-500',
+    quote: 'iRecycle ليست مجرد منصة تقنية — إنها أداة لتطبيق القانون البيئي على أرض الواقع بشكل عملي وقابل للقياس.',
+    members: 4,
+  },
+  {
+    role: 'فريق التطوير والبرمجة',
+    desc: 'فريق هندسي يعمل على تطوير وصيانة البنية التحتية للمنصة، تحسين الأداء، وإضافة مميزات جديدة بشكل مستمر.',
+    icon: Code,
+    color: 'from-purple-500 to-violet-500',
+    quote: 'كل سطر كود نكتبه يخدم هدفاً بيئياً. التكنولوجيا هنا ليست غاية بل وسيلة لخدمة كوكبنا.',
+    members: 6,
+  },
+  {
+    role: 'فريق الذكاء الاصطناعي',
+    desc: 'متخصصون في تطوير نماذج التعلم الآلي لتصنيف المخلفات تلقائياً، التنبؤ بالكميات، وتحسين مسارات النقل باستخدام خوارزميات ذكية.',
+    icon: Bot,
+    color: 'from-pink-500 to-rose-500',
+    quote: 'الذكاء الاصطناعي في iRecycle ليس رفاهية — هو عين المنصة التي ترى ما لا يراه البشر في بيانات المخلفات.',
+    members: 3,
+  },
+  {
+    role: 'فريق الامتثال والشؤون القانونية',
+    desc: 'يضمن التزام المنصة بكافة اللوائح والتشريعات المحلية والدولية، ومراجعة العقود والسياسات وحماية بيانات المستخدمين.',
+    icon: Scale,
+    color: 'from-slate-500 to-zinc-600',
+    quote: 'الامتثال القانوني هو خط الدفاع الأول لحماية مستخدمينا وشركائنا — لا نتهاون فيه أبداً.',
+    members: 2,
+  },
+  {
+    role: 'فريق التسويق والشراكات',
+    desc: 'يعمل على بناء شراكات استراتيجية مع الجهات الحكومية والقطاع الخاص، وتوسيع قاعدة مستخدمي المنصة في جميع المحافظات.',
+    icon: Megaphone,
+    color: 'from-teal-500 to-cyan-600',
+    quote: 'كل شراكة جديدة هي خطوة نحو تغطية مصر بالكامل — هدفنا أن لا تبقى محافظة بدون iRecycle.',
+    members: 4,
   },
 ];
 
@@ -329,33 +375,81 @@ const Journey = () => {
 
             {/* Team Tab */}
             <TabsContent value="team">
-              <div className="space-y-5">
+              {/* Team Stats */}
+              <div className="grid grid-cols-3 gap-3 mb-8">
+                {[
+                  { label: 'أقسام متخصصة', value: '8', icon: Building2, color: 'text-primary', bg: 'bg-primary/10' },
+                  { label: 'عضو فريق', value: '+28', icon: Users, color: 'text-blue-500', bg: 'bg-blue-500/10' },
+                  { label: 'سنوات خبرة مجمعة', value: '+40', icon: Trophy, color: 'text-amber-500', bg: 'bg-amber-500/10' },
+                ].map((s, i) => (
+                  <motion.div
+                    key={s.label}
+                    className="text-center p-4 rounded-xl border border-border/50 bg-card"
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: i * 0.05 }}
+                  >
+                    <div className={cn("w-10 h-10 rounded-lg flex items-center justify-center mx-auto mb-2", s.bg)}>
+                      <s.icon className={cn("w-5 h-5", s.color)} />
+                    </div>
+                    <div className="text-xl font-extrabold text-foreground">{s.value}</div>
+                    <div className="text-xs text-muted-foreground">{s.label}</div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Team Cards */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {team.map((t, i) => (
                   <motion.div
                     key={t.role}
-                    className="flex gap-4 p-6 rounded-2xl border border-border/50 bg-card hover:shadow-md transition-shadow"
+                    className="group p-5 rounded-2xl border border-border/50 bg-card hover:shadow-lg transition-all duration-300"
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.1 }}
+                    transition={{ delay: i * 0.07 }}
                   >
-                    <div className={cn("w-14 h-14 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shrink-0", t.color)}>
-                      <t.icon className="w-7 h-7 text-white" />
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className={cn("w-12 h-12 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-md shrink-0", t.color)}>
+                        <t.icon className="w-6 h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-base font-bold text-foreground leading-tight">{t.role}</h3>
+                        <span className="text-xs text-muted-foreground">{t.members} {t.members === 1 ? 'عضو' : 'أعضاء'}</span>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-foreground mb-1">{t.role}</h3>
-                      <p className="text-sm text-muted-foreground leading-relaxed">{t.desc}</p>
+                    <p className="text-sm text-muted-foreground leading-relaxed mb-3">{t.desc}</p>
+                    
+                    {/* Quote */}
+                    <div className="relative bg-muted/40 rounded-xl p-3.5 border-r-2 border-primary/40">
+                      <Quote className="w-4 h-4 text-primary/40 absolute top-2 left-2" />
+                      <p className="text-sm text-foreground/75 italic leading-relaxed pr-1">
+                        "{t.quote}"
+                      </p>
                     </div>
                   </motion.div>
                 ))}
               </div>
 
-              <div className="mt-8 rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background p-8 text-center">
+              {/* Bottom Banner */}
+              <motion.div 
+                className="mt-8 rounded-2xl bg-gradient-to-br from-foreground to-foreground/90 text-background p-8 text-center"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.6 }}
+              >
                 <Heart className="w-8 h-8 text-primary mx-auto mb-3" />
-                <h3 className="text-xl font-bold mb-2">شكراً لكل من ساهم في هذه الرحلة</h3>
-                <p className="text-background/70 text-sm max-w-md mx-auto">
-                  نقدر كل مستخدم وشريك ساهم في تطوير المنصة بملاحظاته واقتراحاته
+                <h3 className="text-xl font-bold mb-2">معاً نبني مستقبل أنظف 🌍</h3>
+                <p className="text-background/70 text-sm max-w-md mx-auto mb-4">
+                  نقدر كل مستخدم وشريك ساهم في تطوير المنصة بملاحظاته واقتراحاته — أنتم جزء أساسي من فريقنا
                 </p>
-              </div>
+                <div className="flex items-center justify-center gap-6 text-background/50 text-xs">
+                  <span>♻️ رؤية 2030</span>
+                  <span>•</span>
+                  <span>🇪🇬 صنع في مصر</span>
+                  <span>•</span>
+                  <span>💚 للبيئة والمجتمع</span>
+                </div>
+              </motion.div>
             </TabsContent>
 
             {/* Vision Tab */}
