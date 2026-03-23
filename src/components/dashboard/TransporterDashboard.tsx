@@ -53,6 +53,7 @@ const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload')
 const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/TransporterOperationsTabs'));
 const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
 const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
+const PostsHub = lazy(() => import('./transporter/PostsHub'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
@@ -197,6 +198,13 @@ const TransporterDashboard = () => {
         >
           <TransporterHeader organizationName={organization?.name || ''} />
         </DashboardV2Header>
+      </div>
+
+      {/* ★ مركز المنشورات الموحد */}
+      <div id="section-posts">
+        <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+          <PostsHub />
+        </Suspense>
       </div>
 
       {/* 2. مركز القيادة */}
