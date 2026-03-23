@@ -28,6 +28,7 @@ const Auth = lazyRetry(() => import("@/pages/Auth"));
 const GoogleSetup = lazyRetry(() => import("@/pages/GoogleSetup"));
 const NotFound = lazyRetry(() => import("@/pages/NotFound"));
 const News = lazyRetry(() => import("@/pages/News"));
+const PlatformPosts = lazyRetry(() => import("@/pages/PlatformPosts"));
 const FullBrochure = lazyRetry(() => import("@/pages/Brochure"));
 const PublicTrackingPage = lazyRetry(() => import("@/pages/PublicTracking"));
 const PublicPermitView = lazyRetry(() => import("@/pages/PublicPermitView"));
