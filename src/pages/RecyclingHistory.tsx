@@ -35,6 +35,7 @@ const timelineData = [
     descEn: "Before Egypt's unification, Nile Valley inhabitants reused broken pottery as cutting and scraping tools. They ground old pottery and mixed it with clay for stronger new vessels. Animal bones were crafted into needles and fine tools — the earliest documented form of recycling in human history.",
     icon: Pyramid,
     color: "from-stone-500 to-amber-700",
+    bgAccent: "bg-stone-500/10",
     image: eraPredynastic,
   },
   {
@@ -46,7 +47,11 @@ const timelineData = [
     descEn: "Pyramid construction wasn't just about new stones. Excavations prove Egyptians reused stones from old buildings. Copper smelting workshops in Memphis collected worn tools for remelting into new chisels. Even gold flakes were carefully collected and re-smelted. Used papyrus was recycled as kiln fuel or building insulation.",
     icon: Pyramid,
     color: "from-amber-500 to-yellow-600",
+    bgAccent: "bg-amber-500/10",
     image: eraOldKingdom,
+  },
+  {
+    era: "1500 ق.م",
     hieroglyphic: "𓊪𓏏𓂋 𓅱𓂧𓏏 𓇋𓏏",
     title: "الدولة الحديثة — نظام فرز متقدم",
     titleEn: "New Kingdom — Advanced Sorting System",
@@ -55,6 +60,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-orange-500 to-red-600",
     bgAccent: "bg-orange-500/10",
+    image: eraNewKingdom,
   },
   {
     era: "300 ق.م",
@@ -66,6 +72,7 @@ const timelineData = [
     icon: Globe,
     color: "from-blue-500 to-indigo-600",
     bgAccent: "bg-blue-500/10",
+    image: eraPtolemaic,
   },
   {
     era: "القرن 10",
@@ -77,6 +84,7 @@ const timelineData = [
     icon: Sparkles,
     color: "from-violet-500 to-purple-600",
     bgAccent: "bg-violet-500/10",
+    image: eraFatimid,
   },
   {
     era: "القرن 12",
@@ -88,6 +96,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-red-600 to-amber-600",
     bgAccent: "bg-red-500/10",
+    image: eraAyyubid,
   },
   {
     era: "القرن 15",
@@ -99,6 +108,7 @@ const timelineData = [
     icon: Globe,
     color: "from-yellow-600 to-orange-600",
     bgAccent: "bg-yellow-500/10",
+    image: eraMamluk,
   },
   {
     era: "القرن 19",
@@ -110,6 +120,7 @@ const timelineData = [
     icon: Globe,
     color: "from-emerald-500 to-teal-600",
     bgAccent: "bg-emerald-500/10",
+    image: eraMuhammadAli,
   },
   {
     era: "1940s",
@@ -121,6 +132,7 @@ const timelineData = [
     icon: Recycle,
     color: "from-zinc-500 to-slate-600",
     bgAccent: "bg-zinc-500/10",
+    image: eraZabbaleen,
   },
   {
     era: "1952",
@@ -132,6 +144,7 @@ const timelineData = [
     icon: Scroll,
     color: "from-stone-600 to-zinc-500",
     bgAccent: "bg-stone-500/10",
+    image: era1952,
   },
   {
     era: "1970s",
@@ -143,6 +156,7 @@ const timelineData = [
     icon: Recycle,
     color: "from-sky-500 to-blue-600",
     bgAccent: "bg-sky-500/10",
+    image: era1970s,
   },
   {
     era: "1981",
@@ -154,6 +168,7 @@ const timelineData = [
     icon: Globe,
     color: "from-blue-600 to-indigo-500",
     bgAccent: "bg-blue-500/10",
+    image: era1981,
   },
   {
     era: "1990s",
@@ -165,6 +180,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-teal-500 to-green-600",
     bgAccent: "bg-teal-500/10",
+    image: era1990s,
   },
   {
     era: "2003",
@@ -176,6 +192,7 @@ const timelineData = [
     icon: Globe,
     color: "from-rose-500 to-red-600",
     bgAccent: "bg-rose-500/10",
+    image: era2003,
   },
   {
     era: "2009",
@@ -187,6 +204,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-amber-600 to-yellow-500",
     bgAccent: "bg-amber-500/10",
+    image: era2009,
   },
   {
     era: "2020",
@@ -198,6 +216,7 @@ const timelineData = [
     icon: Leaf,
     color: "from-green-500 to-emerald-600",
     bgAccent: "bg-green-500/10",
+    image: era2020,
   },
   {
     era: "2025",
@@ -209,6 +228,7 @@ const timelineData = [
     icon: Cpu,
     color: "from-primary to-emerald-500",
     bgAccent: "bg-primary/10",
+    image: era2025,
   },
 ];
 
