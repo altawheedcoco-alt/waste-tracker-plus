@@ -236,6 +236,12 @@ const RestrictionsMonitor = lazy(() => import("@/pages/dashboard/RestrictionsMon
 const LoadingWorkers = lazy(() => import("@/pages/dashboard/LoadingWorkers"));
 const DriverTripSchedule = lazy(() => import("@/pages/dashboard/DriverTripSchedule"));
 const FuelManagement = lazy(() => import("@/pages/dashboard/FuelManagement"));
+const ServiceZones = lazy(() => import("@/pages/dashboard/municipal/ServiceZones"));
+const StreetBins = lazy(() => import("@/pages/dashboard/municipal/StreetBins"));
+const CollectionRoutes = lazy(() => import("@/pages/dashboard/municipal/CollectionRoutes"));
+const CollectionTrips = lazy(() => import("@/pages/dashboard/municipal/CollectionTrips"));
+const CitizenComplaints = lazy(() => import("@/pages/dashboard/municipal/CitizenComplaints"));
+const MunicipalDashboard = lazy(() => import("@/pages/dashboard/municipal/MunicipalDashboard"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
 
