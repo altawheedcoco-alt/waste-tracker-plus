@@ -718,7 +718,7 @@ const ComplianceSection = memo(() => (
             ].map((item, i) => (
               <motion.div
                 key={i}
-                className={`${item.color} rounded-xl p-5 text-right className={`${item.color} rounded-xl p-5 text-right border border-border`}`}
+                className={`${item.color} rounded-xl p-5 text-right border border-border`}
                 custom={i} initial="hidden" whileInView="visible" viewport={{ once: true }}
                 variants={fadeUp}
               >
