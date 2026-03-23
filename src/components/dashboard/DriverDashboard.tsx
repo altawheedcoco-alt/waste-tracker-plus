@@ -13,6 +13,7 @@ import {
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
   Briefcase, Zap, Star, BarChart3, ShoppingCart, CreditCard,
+  Power,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
@@ -60,6 +61,8 @@ const DriverPublicProfile = lazy(() => import('@/components/driver/DriverPublicP
 const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyticsPanel'));
 const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
+const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
+const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -130,6 +133,7 @@ const hiredTabs = [
 ];
 
 const independentTabs = [
+  { value: 'home', label: 'الرئيسية', icon: Power },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
@@ -373,6 +377,25 @@ const DriverDashboard = () => {
               ))}
             </TabsList>
           </div>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: الرئيسية — Go Online (مستقل فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="home" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              {driverInfo && (
+                <GoOnlineButton
+                  driverId={driverInfo.id}
+                  isAvailable={driverInfo.is_available}
+                  onToggle={(newState) => {
+                    setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
+                  }}
+                  rating={driverInfo.rating}
+                  totalTrips={driverInfo.total_trips}
+                />
+              )}
+            </Suspense>
+          </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 1: المهام - Daily Tasks & Assignment */}
