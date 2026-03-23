@@ -36,6 +36,7 @@ interface Post {
   likes_count: number;
   created_at: string;
   organization_id: string;
+  author_id: string | null;
   organization?: {
     id: string;
     name: string;
@@ -43,6 +44,11 @@ interface Post {
     organization_type: string;
     is_verified: boolean;
   };
+  author?: {
+    id: string;
+    full_name: string | null;
+    avatar_url: string | null;
+  } | null;
 }
 
 const PartnersTimeline = () => {
