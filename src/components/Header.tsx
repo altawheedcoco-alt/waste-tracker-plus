@@ -340,13 +340,23 @@ const Header = memo(() => {
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
               <div className="flex flex-col gap-2.5 pt-4 border-t border-border/40 mt-3">
-                <button
-                  onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                  className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
-                >
-                  <Globe className="w-4 h-4" />
-                  {language === 'ar' ? 'English' : 'عربي'}
-                </button>
+                <div className="grid grid-cols-2 gap-2.5">
+                  <button
+                    onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                  >
+                    <Globe className="w-4 h-4" />
+                    {language === 'ar' ? 'English' : 'عربي'}
+                  </button>
+                  <button
+                    onClick={toggleDarkMode}
+                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                    aria-label={settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
+                  >
+                    {settings.isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                    {settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
+                  </button>
+                </div>
                 <GuideButton />
                 {user ? (
                   <div className="grid grid-cols-2 gap-2.5">
