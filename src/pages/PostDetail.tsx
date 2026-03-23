@@ -42,10 +42,44 @@ const PostDetail = () => {
     if (post) setLikesCount(post.likes_count || 0);
   }, [post, setLikesCount]);
 
-  // Increment views via RPC
+  // Track view with IP via Edge Function
   useEffect(() => {
     if (!id) return;
-    (supabase as any).rpc('increment_post_views', { p_post_id: id }).then(() => {
+    const visitorId = localStorage.getItem('visitor_id') || (() => {
+      const vid = crypto.randomUUID();
+      localStorage.setItem('visitor_id', vid);
+      return vid;
+    })();
+    const ua = navigator.userAgent;
+    const getBrowser = (u: string) => {
+      if (u.includes('Firefox')) return 'Firefox';
+      if (u.includes('Edg')) return 'Edge';
+      if (u.includes('Chrome')) return 'Chrome';
+      if (u.includes('Safari')) return 'Safari';
+      return 'Other';
+    };
+    const getOS = (u: string) => {
+      if (u.includes('Windows')) return 'Windows';
+      if (u.includes('Mac')) return 'macOS';
+      if (u.includes('Android')) return 'Android';
+      if (u.includes('iPhone') || u.includes('iPad')) return 'iOS';
+      if (u.includes('Linux')) return 'Linux';
+      return 'Other';
+    };
+    const w = window.innerWidth;
+    const deviceType = w < 768 ? 'mobile' : w < 1024 ? 'tablet' : 'desktop';
+
+    supabase.functions.invoke('track-post-view', {
+      body: {
+        post_id: id,
+        visitor_id: visitorId,
+        user_agent: ua,
+        device_type: deviceType,
+        browser: getBrowser(ua),
+        os: getOS(ua),
+        referrer: document.referrer || null,
+      },
+    }).then(() => {
       queryClient.invalidateQueries({ queryKey: ['platform-post', id] });
     });
   }, [id, queryClient]);
