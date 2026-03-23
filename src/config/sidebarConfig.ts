@@ -286,6 +286,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Boxes, labelAr: 'إدارة الحاويات', labelEn: 'Containers', path: '/dashboard?tab=fleet', key: 'container-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: GitCompareArrows, labelAr: 'إعادة تعيين المركبات', labelEn: 'Vehicle Reassign', path: '/dashboard?tab=fleet', key: 'vehicle-reassignment', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: Wrench, labelAr: 'الصيانة الوقائية', labelEn: 'Maintenance', path: '/dashboard/preventive-maintenance', key: 'preventive-maintenance', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
+      { icon: Fuel, labelAr: 'إدارة الوقود', labelEn: 'Fuel Management', path: '/dashboard/fuel-management', key: 'fuel-management', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
     ],
   },
 
