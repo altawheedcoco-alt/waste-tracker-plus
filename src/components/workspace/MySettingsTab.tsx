@@ -210,21 +210,33 @@ const MySettingsTab = () => {
                 <Bell className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">إشعارات البريد الإلكتروني</span>
               </div>
-              <Switch defaultChecked />
+              <Switch 
+                checked={emailNotifs} 
+                onCheckedChange={(v) => {
+                  setPref('email_notifications', v);
+                  toast.success(v ? 'تم تفعيل إشعارات البريد' : 'تم إيقاف إشعارات البريد');
+                }} 
+              />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Moon className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">الوضع الليلي</span>
               </div>
-              <Switch />
+              <Switch 
+                checked={isDark} 
+                onCheckedChange={(v) => {
+                  setTheme(v ? 'dark' : 'light');
+                  toast.success(v ? 'تم تفعيل الوضع الليلي' : 'تم تفعيل الوضع النهاري');
+                }} 
+              />
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Globe className="w-4 h-4 text-muted-foreground" />
                 <span className="text-sm">اللغة العربية</span>
               </div>
-              <Switch defaultChecked />
+              <Switch checked={true} disabled />
             </div>
           </CardContent>
         </Card>
