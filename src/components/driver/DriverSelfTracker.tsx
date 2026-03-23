@@ -229,54 +229,76 @@ const DriverSelfTracker = memo(() => {
       return;
     }
 
+    setConnectionStatus('connecting');
+
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (!startTime) {
+          setStartTime(Date.now());
+          setPoints([]);
+          setStops([]);
+          setTotalDistance(0);
+          setElapsed(0);
+          pendingStopRef.current = null;
+
+          // Clear old layers
+          if (polylineRef.current && mapInstance.current) {
+            mapInstance.current.removeLayer(polylineRef.current);
+            polylineRef.current = null;
+          }
+          if (posMarkerRef.current && mapInstance.current) {
+            mapInstance.current.removeLayer(posMarkerRef.current);
+            posMarkerRef.current = null;
+          }
+        }
+
         setIsTracking(true);
-        setStartTime(Date.now());
-        setPoints([]);
-        setStops([]);
-        setTotalDistance(0);
-        setElapsed(0);
-        pendingStopRef.current = null;
-
-        // Clear old layers
-        if (polylineRef.current && mapInstance.current) {
-          mapInstance.current.removeLayer(polylineRef.current);
-          polylineRef.current = null;
-        }
-        if (posMarkerRef.current && mapInstance.current) {
-          mapInstance.current.removeLayer(posMarkerRef.current);
-          posMarkerRef.current = null;
-        }
-
+        setConnectionStatus('active');
         handlePosition(pos);
+
+        // Clear any existing watch
+        if (watchIdRef.current !== null) {
+          navigator.geolocation.clearWatch(watchIdRef.current);
+        }
 
         watchIdRef.current = navigator.geolocation.watchPosition(handlePosition, (err) => {
           console.error('Geolocation error:', err);
-          toast.error('خطأ في تتبع الموقع: ' + err.message);
+          setConnectionStatus('reconnecting');
+          // Auto-reconnect after 3 seconds
+          if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+          reconnectTimerRef.current = setTimeout(() => {
+            startTracking();
+          }, 3000);
         }, {
           enableHighAccuracy: true,
           maximumAge: 5000,
           timeout: 15000,
         });
-
-        toast.success('بدأ تسجيل المسار');
       },
       (err) => {
-        toast.error('لا يمكن الوصول للموقع. يرجى تفعيل GPS');
-        console.error(err);
+        console.error('GPS error:', err);
+        setConnectionStatus('reconnecting');
+        // Auto-retry after 5 seconds
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = setTimeout(() => {
+          startTracking();
+        }, 5000);
       },
       { enableHighAccuracy: true }
     );
-  }, [handlePosition]);
+  }, [handlePosition, startTime]);
 
   const stopTracking = useCallback(() => {
     if (watchIdRef.current !== null) {
       navigator.geolocation.clearWatch(watchIdRef.current);
       watchIdRef.current = null;
     }
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
     setIsTracking(false);
-    toast.info('تم إيقاف تسجيل المسار');
+    setConnectionStatus('connecting');
   }, []);
 
   const resetTracking = useCallback(() => {
