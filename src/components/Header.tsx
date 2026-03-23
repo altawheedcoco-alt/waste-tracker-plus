@@ -33,7 +33,7 @@ const Header = memo(() => {
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
-  const { user, profile, signOut } = useAuth();
+  const { settings, toggleDarkMode } = useThemeSettings();
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
