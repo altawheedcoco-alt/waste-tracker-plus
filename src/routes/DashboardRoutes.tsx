@@ -254,6 +254,8 @@ const EquipmentCustody = lazy(() => import("@/pages/dashboard/municipal/Equipmen
 const MunicipalReports = lazy(() => import("@/pages/dashboard/municipal/MunicipalReports"));
 const NotFound = lazy(() => import("@/pages/NotFound"));
 const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/IndependentDriverOnboarding"));
+const LeadGeneration = lazy(() => import("@/pages/dashboard/LeadGeneration"));
+const CompanyDirectory = lazy(() => import("@/pages/dashboard/CompanyDirectory"));
 
 /**
  * All dashboard routes wrapped inside a single DashboardRouteGuard layout route.
@@ -534,6 +536,8 @@ export const dashboardRoutes = (
     <Route path="/dashboard/shipment-market" element={<ShipmentMarket />} />
     <Route path="/dashboard/driver-wallet" element={<DriverWallet />} />
     <Route path="/dashboard/driver-analytics" element={<DriverAnalytics />} />
+    <Route path="/dashboard/lead-generation" element={<LeadGeneration />} />
+    <Route path="/dashboard/company-directory" element={<CompanyDirectory />} />
     {/* Catch-all: show 404 instead of silently falling back to Dashboard */}
     <Route path="/dashboard/*" element={<NotFound />} />
   </Route>
