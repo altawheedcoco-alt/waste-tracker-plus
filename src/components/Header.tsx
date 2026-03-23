@@ -276,6 +276,15 @@ const Header = memo(() => {
 
             {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+              {/* Dark Mode Toggle */}
+              <button
+                onClick={toggleDarkMode}
+                className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-border/50 bg-background/60 text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 overflow-hidden group"
+                aria-label={settings.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                <Sun className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+              </button>
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
