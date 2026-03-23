@@ -25,6 +25,7 @@ interface PostItem {
   category: string;
   author_name: string;
   badge: string | null;
+  tags: string[] | null;
   is_published: boolean;
   is_featured: boolean;
   published_at: string | null;
