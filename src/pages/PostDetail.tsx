@@ -201,6 +201,15 @@ const PostDetail = () => {
                 </Button>
               </div>
 
+              {/* Tags */}
+              {post.tags && post.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {post.tags.map((tag: string, i: number) => (
+                    <Badge key={i} variant="outline" className="text-xs">#{tag}</Badge>
+                  ))}
+                </div>
+              )}
+
               {/* Excerpt */}
               {post.excerpt && (
                 <p className="text-lg font-medium text-muted-foreground mb-6 leading-relaxed border-r-4 border-primary pr-4">

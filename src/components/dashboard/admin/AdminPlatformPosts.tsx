@@ -299,6 +299,11 @@ const AdminPlatformPosts = () => {
               <Label>الشارة</Label>
               <Input value={form.badge} onChange={e => setForm(f => ({ ...f, badge: e.target.value }))} placeholder="جديد، مهم..." />
             </div>
+            <div className="space-y-2">
+              <Label>الكلمات المفتاحية (Tags)</Label>
+              <Input value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} placeholder="إعادة تدوير، بيئة، مصر، نفايات..." dir="rtl" />
+              <p className="text-[10px] text-muted-foreground">افصل بين الكلمات بفاصلة — تساعد في تحسين ظهور المنشور في محركات البحث</p>
+            </div>
 
             {/* وضع النشر */}
             <div className="space-y-3 p-3 rounded-lg border border-border bg-muted/30">
