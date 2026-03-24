@@ -254,7 +254,7 @@ export async function notifyOrganizationMembers(
       .eq('organization_id', organizationId);
 
     if (!members?.length) {
-      return { inApp: { success: true }, whatsApp: { success: true } };
+      return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
     }
 
     let userIds = members.map(m => m.id);
