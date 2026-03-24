@@ -32,16 +32,19 @@ export const useNetworkStatus = (): NetworkStatus => {
                        (navigator as any).mozConnection || 
                        (navigator as any).webkitConnection;
 
-    const isSlowConnection = connection?.effectiveType === '2g' || 
-                             connection?.effectiveType === 'slow-2g' ||
-                             (connection?.downlink && connection.downlink < 1.5);
+    const effectiveType = connection?.effectiveType || null;
+    const downlink = connection?.downlink || null;
+    const isSlowConnection = effectiveType === '2g' || 
+                              effectiveType === 'slow-2g' ||
+                              effectiveType === '3g' ||
+                              (downlink != null && downlink < 1.5);
 
     setStatus({
       isOnline: navigator.onLine,
       isSlowConnection,
       connectionType: connection?.type || null,
-      effectiveType: connection?.effectiveType || null,
-      downlink: connection?.downlink || null,
+      effectiveType,
+      downlink,
       rtt: connection?.rtt || null,
     });
   }, []);

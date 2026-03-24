@@ -137,18 +137,29 @@ export const createSmartQueryClient = () => new QueryClient({
       staleTime: CACHE_PROFILES.operational.staleTime,
       gcTime: CACHE_PROFILES.operational.gcTime,
       retry: (failureCount, error: any) => {
-        // لا إعادة محاولة عند 401/403
         if (error?.status === 401 || error?.status === 403) return false;
-        // لا إعادة محاولة عند 404
         if (error?.status === 404) return false;
-        return failureCount < 2;
+        // المزيد من المحاولات عند ضعف الشبكة
+        const connection = (navigator as any).connection;
+        const maxRetries = connection?.effectiveType === '2g' || connection?.effectiveType === 'slow-2g' ? 4 : 3;
+        return failureCount < maxRetries;
+      },
+      retryDelay: (attemptIndex) => {
+        // تأخير أسي مع jitter لتجنب thundering herd
+        const base = Math.min(1000 * 2 ** attemptIndex, 15000);
+        return base + Math.random() * 1000;
       },
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: true,
+      // استخدام البيانات القديمة أثناء إعادة الجلب
+      placeholderData: (prev: any) => prev,
+      networkMode: 'offlineFirst',
     },
     mutations: {
-      retry: 1,
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+      networkMode: 'offlineFirst',
     },
   },
 });
