@@ -276,6 +276,7 @@ export async function notifyOrganizationMembers(
     return {
       inApp: { success: false, error: err.message },
       whatsApp: { success: false, error: err.message },
+      push: { success: false, error: err.message },
     };
   }
 }
