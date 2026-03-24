@@ -55,7 +55,7 @@ self.addEventListener('push', (event) => {
   }
 
   const title = payload.title || 'iRecycle';
-  const options: NotificationOptions = {
+  const options: Record<string, any> = {
     body: payload.body || '',
     icon: '/favicon.png',
     badge: '/favicon.png',
