@@ -116,42 +116,11 @@ export default defineConfig(({ mode }) => ({
         cleanupOutdatedCaches: true,
         // منع تخزين أي صفحات HTML — دائماً جلب من الشبكة
         navigateFallback: undefined,
-      runtimeCaching: [
+        runtimeCaching: [
           {
-            // Supabase API — شبكة أولاً مع fallback للكاش
-            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'supabase-api-cache',
-              networkTimeoutSeconds: 5,
-              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // Supabase Auth/Storage — شبكة فقط
-            urlPattern: /^https:\/\/.*\.supabase\.co\/(auth|storage)\/.*/i,
+            // كل طلبات Supabase — لا تخزين أبداً
+            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkOnly',
-          },
-          {
-            // صور وأصول ثابتة — كاش أولاً
-            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'images-cache',
-              expiration: { maxEntries: 80, maxAgeSeconds: 60 * 60 * 24 * 30 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
-          },
-          {
-            // JS/CSS chunks — StaleWhileRevalidate للسرعة
-            urlPattern: /\.(?:js|css)$/i,
-            handler: 'StaleWhileRevalidate',
-            options: {
-              cacheName: 'static-resources',
-              expiration: { maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 7 },
-              cacheableResponse: { statuses: [0, 200] },
-            },
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
