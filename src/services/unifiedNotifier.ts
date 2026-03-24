@@ -228,6 +228,7 @@ export async function notifyAdmins(
     return {
       inApp: { success: false, error: err.message },
       whatsApp: { success: false, error: err.message },
+      push: { success: false, error: err.message },
     };
   }
 }
