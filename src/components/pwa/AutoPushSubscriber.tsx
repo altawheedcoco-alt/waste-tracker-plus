@@ -5,7 +5,7 @@
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
-import { shouldEnablePWA } from '@/lib/pwaRuntime';
+
 
 export function AutoPushSubscriber() {
   const { user } = useAuth();
