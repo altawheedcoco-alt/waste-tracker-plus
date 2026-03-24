@@ -211,7 +211,7 @@ export async function notifyAdmins(
       .eq('role', 'admin');
 
     if (!admins?.length) {
-      return { inApp: { success: true }, whatsApp: { success: true } };
+      return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
     }
 
     return sendBulkDualNotification({
