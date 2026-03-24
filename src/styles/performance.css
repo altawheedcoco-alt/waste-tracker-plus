@@ -1,10 +1,12 @@
-/* v3.0 Performance & Data Saver Optimizations */
+/* v4.0 Performance, Data Saver & Ultra-Slow Network Optimizations */
 
 .reduce-motion,
 .reduce-motion * {
-  animation-duration: 0.1s !important;
+  animation-duration: 0.01s !important;
   animation-delay: 0s !important;
-  transition-duration: 0.1s !important;
+  transition-duration: 0.01s !important;
+  animation: none !important;
+  transition: none !important;
 }
 
 .data-saver {
@@ -14,10 +16,23 @@
   --shadow-glow: none;
 }
 
+.data-saver img {
+  image-rendering: optimizeSpeed;
+}
+
 .data-saver .bg-gradient-to-r,
 .data-saver .bg-gradient-to-br,
 .data-saver .bg-gradient-to-b {
   background: hsl(var(--primary)) !important;
+}
+
+.data-saver video,
+.data-saver iframe {
+  display: none !important;
+}
+
+.data-saver [data-decorative="true"] {
+  display: none !important;
 }
 
 .offline-mode { filter: grayscale(0.3); }
@@ -37,3 +52,9 @@
 }
 
 .optimize-rendering { contain: layout style paint; }
+
+/* Content-visibility for off-screen optimization */
+.lazy-section {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 500px;
+}
