@@ -56,7 +56,7 @@ const IRecycleLogo = memo(({
   const textScale = size / 40;
   const nameSize = Math.max(14, 16 * textScale);
   const arSize = Math.max(10, 12 * textScale);
-  const subtitleSize = Math.max(7, 8 * textScale);
+  const subtitleSize = Math.max(9, 10 * textScale);
 
   if (variant === 'stacked') {
     return (
