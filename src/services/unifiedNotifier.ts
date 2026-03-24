@@ -65,6 +65,7 @@ export async function sendDualNotification(notification: DualNotification): Prom
   const result: NotifyResult = {
     inApp: { success: false },
     whatsApp: { success: false },
+    push: { success: false },
   };
 
   // Fetch branding for notifications
