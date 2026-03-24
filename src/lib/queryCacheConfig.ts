@@ -131,24 +131,42 @@ export const getCacheOptions = (queryKey: readonly unknown[]) => {
 /**
  * إنشاء QueryClient ذكي مع تخزين مؤقت تكيّفي
  */
+/**
+ * Detect slow network for adaptive query settings
+ */
+const isSlowNetwork = (): boolean => {
+  const conn = (navigator as any).connection;
+  if (!conn) return false;
+  const type = conn.effectiveType;
+  return type === '2g' || type === 'slow-2g' || type === '3g' || (conn.downlink && conn.downlink < 1);
+};
+
 export const createSmartQueryClient = () => new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: CACHE_PROFILES.operational.staleTime,
       gcTime: CACHE_PROFILES.operational.gcTime,
+      networkMode: 'offlineFirst',
       retry: (failureCount, error: any) => {
-        // لا إعادة محاولة عند 401/403
         if (error?.status === 401 || error?.status === 403) return false;
-        // لا إعادة محاولة عند 404
         if (error?.status === 404) return false;
-        return failureCount < 2;
+        // More retries on slow networks
+        const maxRetries = isSlowNetwork() ? 4 : 2;
+        return failureCount < maxRetries;
+      },
+      retryDelay: (attemptIndex) => {
+        // Exponential backoff with jitter
+        const base = isSlowNetwork() ? 2000 : 1000;
+        return Math.min(base * Math.pow(2, attemptIndex), 30000) * (0.5 + Math.random() * 0.5);
       },
       refetchOnWindowFocus: false,
       refetchOnMount: false,
       refetchOnReconnect: true,
     },
     mutations: {
-      retry: 1,
+      networkMode: 'offlineFirst',
+      retry: 2,
+      retryDelay: (attemptIndex) => Math.min(1000 * Math.pow(2, attemptIndex), 15000),
     },
   },
 });

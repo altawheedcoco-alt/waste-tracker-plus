@@ -33,8 +33,10 @@ export const useNetworkStatus = (): NetworkStatus => {
                        (navigator as any).webkitConnection;
 
     const isSlowConnection = connection?.effectiveType === '2g' || 
-                             connection?.effectiveType === 'slow-2g' ||
-                             (connection?.downlink && connection.downlink < 1.5);
+                              connection?.effectiveType === 'slow-2g' ||
+                              connection?.effectiveType === '3g' ||
+                              (connection?.downlink != null && connection.downlink < 1) ||
+                              (connection?.rtt != null && connection.rtt > 1000);
 
     setStatus({
       isOnline: navigator.onLine,

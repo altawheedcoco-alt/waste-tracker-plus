@@ -114,13 +114,44 @@ export default defineConfig(({ mode }) => ({
         skipWaiting: true,
         clientsClaim: true,
         cleanupOutdatedCaches: true,
-        // منع تخزين أي صفحات HTML — دائماً جلب من الشبكة
-        navigateFallback: undefined,
+        navigateFallback: '/index.html',
         runtimeCaching: [
           {
-            // كل طلبات Supabase — لا تخزين أبداً
-            urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
+            // Supabase Auth — always network
+            urlPattern: /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
             handler: 'NetworkOnly',
+          },
+          {
+            // Supabase REST/Storage — network first with cache fallback for slow networks
+            urlPattern: /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-api-cache',
+              networkTimeoutSeconds: 8,
+              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 30 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Supabase Storage files — cache first
+            urlPattern: /^https:\/\/.*\.supabase\.co\/storage\/.*/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'supabase-storage-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 7 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // Supabase Edge Functions — network first with short timeout
+            urlPattern: /^https:\/\/.*\.supabase\.co\/functions\/.*/i,
+            handler: 'NetworkFirst',
+            options: {
+              cacheName: 'supabase-functions-cache',
+              networkTimeoutSeconds: 10,
+              expiration: { maxEntries: 50, maxAgeSeconds: 60 * 5 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
           },
           {
             urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
@@ -137,6 +168,16 @@ export default defineConfig(({ mode }) => ({
             options: {
               cacheName: 'gstatic-fonts-cache',
               expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 },
+              cacheableResponse: { statuses: [0, 200] },
+            },
+          },
+          {
+            // All images — cache first for instant loading
+            urlPattern: /\.(?:png|jpg|jpeg|svg|gif|webp|ico)$/i,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'images-cache',
+              expiration: { maxEntries: 100, maxAgeSeconds: 60 * 60 * 24 * 30 },
               cacheableResponse: { statuses: [0, 200] },
             },
           },

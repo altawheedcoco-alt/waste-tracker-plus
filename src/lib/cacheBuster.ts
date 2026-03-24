@@ -57,15 +57,27 @@ export async function bustStaleCaches() {
     const stored = localStorage.getItem(CACHE_VERSION_KEY);
     
     if (stored !== CURRENT_VERSION) {
-      console.log('[CacheBuster] Version changed, clearing all caches...');
+      console.log('[CacheBuster] Version changed, clearing outdated caches...');
 
-      await clearAllRuntimeCaches();
+      // Only clear outdated workbox caches, keep API/storage caches for offline use
+      if ('caches' in window) {
+        const names = await caches.keys();
+        const outdatedCaches = names.filter(n => 
+          n.startsWith('workbox-precache') || n.startsWith('workbox-runtime')
+        );
+        await Promise.all(outdatedCaches.map(n => caches.delete(n)));
+        console.log(`[CacheBuster] Cleared ${outdatedCaches.length} outdated caches, kept ${names.length - outdatedCaches.length} API caches`);
+      }
 
       localStorage.setItem(CACHE_VERSION_KEY, CURRENT_VERSION);
 
-      console.log('[CacheBuster] Build version changed — reloading clean app shell...');
-      window.location.reload();
-      return;
+      // Only reload if online — offline users keep using cached version
+      if (navigator.onLine) {
+        console.log('[CacheBuster] Online — reloading for new version...');
+        window.location.reload();
+        return;
+      }
+      console.log('[CacheBuster] Offline — will update on next online visit');
     }
   } catch (e) {
     console.warn('[CacheBuster] Error:', e);
