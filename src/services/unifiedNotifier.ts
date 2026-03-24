@@ -114,6 +114,29 @@ export async function sendDualNotification(notification: DualNotification): Prom
     console.warn('[UnifiedNotifier] WhatsApp failed (non-blocking):', err.message);
   }
 
+  // 3. Web Push (background notifications)
+  try {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: {
+        user_id: notification.user_id,
+        title: notification.title,
+        body: notification.message,
+        tag: `notif-${notification.type || 'general'}-${Date.now()}`,
+        data: {
+          url: notification.metadata?.url || '/',
+          type: notification.type,
+          reference_id: notification.reference_id,
+        },
+      },
+    });
+    result.push = error
+      ? { success: false, error: error.message }
+      : { success: true, sent: data?.sent || 0 };
+  } catch (err: any) {
+    result.push = { success: false, error: err.message };
+    console.warn('[UnifiedNotifier] Push failed (non-blocking):', err.message);
+  }
+
   return result;
 }
 
