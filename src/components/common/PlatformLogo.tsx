@@ -32,10 +32,10 @@ const sizeToPixels: Record<LogoSize, number> = {
  */
 const PlatformLogo = memo(({
   size = 'md',
-  showText = false,
+  showText = true,
   className,
   inverted = false,
-  showSubtitle = false,
+  showSubtitle = true,
 }: PlatformLogoProps) => {
   const px = sizeToPixels[size];
   const theme = inverted ? 'white' : 'light';
