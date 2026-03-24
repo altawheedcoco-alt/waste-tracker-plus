@@ -258,8 +258,7 @@ const RecyclerDashboard = () => {
         subtitle="وظائف التدوير والإنتاج"
       />
 
-      {/* 4. بورصة السلع العالمية + التنبيهات */}
-      <GlobalCommodityTicker />
+      {/* 4. التنبيهات */}
       <DashboardAlertsHub orgType="recycler" />
 
       {/* 5. التواصل */}

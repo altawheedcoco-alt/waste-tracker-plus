@@ -231,8 +231,7 @@ const TransporterDashboard = () => {
         </ErrorBoundary>
       </div>
 
-      {/* 5. بورصة السلع العالمية + التنبيهات */}
-      <GlobalCommodityTicker />
+      {/* 5. التنبيهات */}
       <div id="section-alerts">
         <Suspense fallback={null}>
           <DashboardAlertsHub
