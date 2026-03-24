@@ -147,6 +147,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
   const result: NotifyResult = {
     inApp: { success: false },
     whatsApp: { success: false },
+    push: { success: false },
   };
 
   if (!notification.user_ids.length) {
