@@ -19,6 +19,7 @@ const CodeProtection = lazy(() => import("./components/security/CodeProtection")
 const InstallPWA = lazy(() => import("./components/pwa/InstallPWA"));
 const PWAUpdatePrompt = lazy(() => import("./components/pwa/PWAUpdatePrompt"));
 const ProductionReadiness = lazy(() => import("./components/production/ProductionReadiness"));
+const AutoPushSubscriber = lazy(() => import("./components/pwa/AutoPushSubscriber").then(m => ({ default: m.AutoPushSubscriber })));
 
 // Minimal loading component
 const PageLoader = memo(() => (
@@ -105,6 +106,7 @@ const Providers = memo(() => (
                   <CodeProtection />
                   {shouldEnablePWA() ? <InstallPWA /> : null}
                   {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
+                  {shouldEnablePWA() ? <AutoPushSubscriber /> : null}
                   <ProductionReadiness />
                 </Suspense>
               </AuthProvider>
