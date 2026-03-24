@@ -55,6 +55,7 @@ export interface BulkDualNotification {
 interface NotifyResult {
   inApp: { success: boolean; error?: string };
   whatsApp: { success: boolean; error?: string; sent?: number };
+  push: { success: boolean; error?: string; sent?: number };
 }
 
 /**
@@ -64,6 +65,7 @@ export async function sendDualNotification(notification: DualNotification): Prom
   const result: NotifyResult = {
     inApp: { success: false },
     whatsApp: { success: false },
+    push: { success: false },
   };
 
   // Fetch branding for notifications
@@ -112,6 +114,29 @@ export async function sendDualNotification(notification: DualNotification): Prom
     console.warn('[UnifiedNotifier] WhatsApp failed (non-blocking):', err.message);
   }
 
+  // 3. Web Push (background notifications)
+  try {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: {
+        user_id: notification.user_id,
+        title: notification.title,
+        body: notification.message,
+        tag: `notif-${notification.type || 'general'}-${Date.now()}`,
+        data: {
+          url: notification.metadata?.url || '/',
+          type: notification.type,
+          reference_id: notification.reference_id,
+        },
+      },
+    });
+    result.push = error
+      ? { success: false, error: error.message }
+      : { success: true, sent: data?.sent || 0 };
+  } catch (err: any) {
+    result.push = { success: false, error: err.message };
+    console.warn('[UnifiedNotifier] Push failed (non-blocking):', err.message);
+  }
+
   return result;
 }
 
@@ -122,10 +147,11 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
   const result: NotifyResult = {
     inApp: { success: false },
     whatsApp: { success: false },
+    push: { success: false },
   };
 
   if (!notification.user_ids.length) {
-    return { inApp: { success: true }, whatsApp: { success: true } };
+    return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
   }
 
   // 1. إشعارات داخلية (دفعة واحدة)
@@ -162,6 +188,23 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
     console.warn('[UnifiedNotifier] Bulk WhatsApp failed (non-blocking):', err.message);
   }
 
+  // 3. Web Push (bulk)
+  try {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: {
+        user_ids: notification.user_ids,
+        title: notification.title,
+        body: notification.message,
+        tag: `notif-${notification.type || 'general'}-${Date.now()}`,
+      },
+    });
+    result.push = error
+      ? { success: false, error: error.message }
+      : { success: true, sent: data?.sent || 0 };
+  } catch (err: any) {
+    result.push = { success: false, error: err.message };
+  }
+
   return result;
 }
 
@@ -185,7 +228,7 @@ export async function notifyAdmins(
       .eq('role', 'admin');
 
     if (!admins?.length) {
-      return { inApp: { success: true }, whatsApp: { success: true } };
+      return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
     }
 
     return sendBulkDualNotification({
@@ -202,6 +245,7 @@ export async function notifyAdmins(
     return {
       inApp: { success: false, error: err.message },
       whatsApp: { success: false, error: err.message },
+      push: { success: false, error: err.message },
     };
   }
 }
@@ -227,7 +271,7 @@ export async function notifyOrganizationMembers(
       .eq('organization_id', organizationId);
 
     if (!members?.length) {
-      return { inApp: { success: true }, whatsApp: { success: true } };
+      return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
     }
 
     let userIds = members.map(m => m.id);
@@ -249,6 +293,7 @@ export async function notifyOrganizationMembers(
     return {
       inApp: { success: false, error: err.message },
       whatsApp: { success: false, error: err.message },
+      push: { success: false, error: err.message },
     };
   }
 }
