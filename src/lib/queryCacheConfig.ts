@@ -153,7 +153,7 @@ export const createSmartQueryClient = () => new QueryClient({
       refetchOnMount: false,
       refetchOnReconnect: true,
       // استخدام البيانات القديمة أثناء إعادة الجلب
-      keepPreviousData: true,
+      placeholderData: (prev: any) => prev,
       networkMode: 'offlineFirst',
     },
     mutations: {
