@@ -95,26 +95,33 @@ export function useWebPush() {
       setIsSubscribed(true);
       toast.success('تم تفعيل الإشعارات ✅');
 
-      // Save in background with retry
+      // Save subscription with retry - await to catch errors
       const saveSubscription = async (retries = 3) => {
+        const payload = {
+          user_id: user.id,
+          endpoint: subscription!.endpoint,
+          p256dh: subJson.keys?.p256dh || '',
+          auth_key: subJson.keys?.auth || '',
+        };
+        console.log('[WebPush] Saving subscription payload:', JSON.stringify({ ...payload, p256dh: '***', auth_key: '***' }));
+        
         for (let i = 0; i < retries; i++) {
-          const { error } = await supabase.from('push_subscriptions' as any).upsert(
-            {
-              user_id: user.id,
-              endpoint: subscription.endpoint,
-              p256dh: subJson.keys?.p256dh || '',
-              auth_key: subJson.keys?.auth || '',
-            },
-            { onConflict: 'user_id,endpoint' }
-          );
-          if (!error) {
-            console.log('[WebPush] Subscription saved successfully');
-            return;
+          try {
+            const { data, error } = await supabase.from('push_subscriptions' as any).upsert(
+              payload,
+              { onConflict: 'user_id,endpoint' }
+            ).select();
+            if (!error) {
+              console.log('[WebPush] Subscription saved successfully:', data);
+              return;
+            }
+            console.error(`[WebPush] DB save attempt ${i + 1}/${retries} failed:`, error.message, error.details, error.hint, error.code);
+          } catch (e) {
+            console.error(`[WebPush] DB save attempt ${i + 1}/${retries} exception:`, e);
           }
-          console.error(`[WebPush] DB save attempt ${i + 1} failed:`, error);
           if (i < retries - 1) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
         }
-        toast.error('تم تفعيل الإشعارات لكن فشل حفظ الاشتراك');
+        toast.error('تم تفعيل الإشعارات لكن فشل حفظ الاشتراك — تواصل مع الدعم');
       };
       saveSubscription();
 
