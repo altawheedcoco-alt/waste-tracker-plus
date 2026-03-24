@@ -49,46 +49,30 @@ export const useAdaptiveLoading = (): AdaptiveConfig & { device: DeviceCapabilit
   const [device] = useState(getDeviceCapabilities);
 
   const config = useMemo<AdaptiveConfig>(() => {
-    const isUltraSlow = effectiveType === 'slow-2g' || 
-      (effectiveType === '2g' && device.isLowEnd);
     const isSlow = isSlowConnection || effectiveType === '2g' || effectiveType === 'slow-2g';
     const isMedium = effectiveType === '3g';
 
     if (!isOnline) {
       return {
-        pageSize: 10,
-        enableAnimations: false,
+        pageSize: 20,
+        enableAnimations: true,
         imageQuality: 'low',
         enablePrefetch: false,
-        networkTimeout: 60000,
+        networkTimeout: 30000,
         queryStaleTime: Infinity,
         refetchInterval: false,
         reduceData: true,
       };
     }
 
-    // Ultra-slow: 0-1 KB/s — maximum data saving
-    if (isUltraSlow) {
-      return {
-        pageSize: 5,
-        enableAnimations: false,
-        imageQuality: 'low',
-        enablePrefetch: false,
-        networkTimeout: 45000,
-        queryStaleTime: 30 * 60 * 1000,
-        refetchInterval: 120000,
-        reduceData: true,
-      };
-    }
-
     if (isSlow || device.isLowEnd) {
       return {
-        pageSize: 10,
-        enableAnimations: false,
+        pageSize: 15,
+        enableAnimations: true,
         imageQuality: 'low',
         enablePrefetch: false,
-        networkTimeout: 30000,
-        queryStaleTime: 15 * 60 * 1000,
+        networkTimeout: 20000,
+        queryStaleTime: 10 * 60 * 1000,
         refetchInterval: 60000,
         reduceData: true,
       };
@@ -100,7 +84,7 @@ export const useAdaptiveLoading = (): AdaptiveConfig & { device: DeviceCapabilit
         enableAnimations: true,
         imageQuality: 'medium',
         enablePrefetch: true,
-        networkTimeout: 15000,
+        networkTimeout: 10000,
         queryStaleTime: 5 * 60 * 1000,
         refetchInterval: 30000,
         reduceData: false,
