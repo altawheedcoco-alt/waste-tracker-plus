@@ -188,6 +188,23 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
     console.warn('[UnifiedNotifier] Bulk WhatsApp failed (non-blocking):', err.message);
   }
 
+  // 3. Web Push (bulk)
+  try {
+    const { data, error } = await supabase.functions.invoke('send-push', {
+      body: {
+        user_ids: notification.user_ids,
+        title: notification.title,
+        body: notification.message,
+        tag: `notif-${notification.type || 'general'}-${Date.now()}`,
+      },
+    });
+    result.push = error
+      ? { success: false, error: error.message }
+      : { success: true, sent: data?.sent || 0 };
+  } catch (err: any) {
+    result.push = { success: false, error: err.message };
+  }
+
   return result;
 }
 
