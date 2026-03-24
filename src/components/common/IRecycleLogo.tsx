@@ -38,15 +38,56 @@ const IRecycleLogo = memo(({
     },
   }[theme];
 
+  const badgeSize = Math.max(14, size * 0.35);
+
   const IconImg = (
-    <img
-      src={logoImg}
-      alt="iRecycle"
-      width={size}
-      height={size}
-      className="object-contain rounded-full ring-2 ring-primary/20 shadow-lg"
-      style={{ width: size, height: size }}
-    />
+    <div className="relative inline-flex items-center justify-center" style={{ width: size + 12, height: size + 12 }}>
+      {/* Pearlescent blue glowing ring */}
+      <div
+        className="absolute inset-0 rounded-full animate-pulse"
+        style={{
+          background: 'conic-gradient(from 0deg, #60a5fa, #93c5fd, #bfdbfe, #dbeafe, #93c5fd, #60a5fa)',
+          padding: 3,
+          filter: 'blur(0.5px)',
+          boxShadow: '0 0 12px 3px rgba(96,165,250,0.45), 0 0 24px 6px rgba(147,197,253,0.25), inset 0 0 8px rgba(191,219,254,0.3)',
+        }}
+      >
+        <div className="w-full h-full rounded-full bg-background" />
+      </div>
+      {/* Logo image */}
+      <img
+        src={logoImg}
+        alt="iRecycle"
+        width={size}
+        height={size}
+        className="object-contain rounded-full relative z-10"
+        style={{ width: size, height: size }}
+      />
+      {/* Verification shield badge */}
+      <div
+        className="absolute z-20 flex items-center justify-center rounded-full bg-blue-500 shadow-md border-2 border-background"
+        style={{
+          width: badgeSize,
+          height: badgeSize,
+          bottom: -2,
+          left: '50%',
+          transform: 'translateX(-50%)',
+        }}
+      >
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="white"
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          style={{ width: badgeSize * 0.6, height: badgeSize * 0.6 }}
+        >
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="rgba(255,255,255,0.2)" />
+          <path d="M9 12l2 2 4-4" />
+        </svg>
+      </div>
+    </div>
   );
 
   if (variant === 'icon-only') {
