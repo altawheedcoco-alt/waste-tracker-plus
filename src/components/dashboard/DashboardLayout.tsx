@@ -138,6 +138,7 @@ import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
 import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg } from '@/config/sidebarConfig';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
+import PushToggle from './PushToggle';
 import ViewModeToolbar from './ViewModeToolbar';
 import { useDriverType } from '@/hooks/useDriverType';
 import { getDriverMenuItems } from '@/hooks/useDriverMenu';
@@ -540,6 +541,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           {/* Account Switcher / Organization info */}
           <div className="border-b border-sidebar-border">
             <AccountSwitcher collapsed={false} />
+          </div>
+
+          {/* Push Notifications Toggle */}
+          <div className="px-3 py-2 border-b border-sidebar-border">
+            <PushToggle />
           </div>
 
           {/* Search Box */}
@@ -997,6 +1003,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     >
                       <X size={20} />
                     </button>
+                  </div>
+
+                  {/* Push Notifications Toggle */}
+                  <div className="px-4 pt-2 shrink-0">
+                    <PushToggle />
                   </div>
 
                   {/* Search */}
