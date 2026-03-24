@@ -151,7 +151,7 @@ export async function sendBulkDualNotification(notification: BulkDualNotificatio
   };
 
   if (!notification.user_ids.length) {
-    return { inApp: { success: true }, whatsApp: { success: true } };
+    return { inApp: { success: true }, whatsApp: { success: true }, push: { success: true } };
   }
 
   // 1. إشعارات داخلية (دفعة واحدة)
