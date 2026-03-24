@@ -245,6 +245,9 @@ const RecyclerDashboard = () => {
         </Button>
       </DashboardV2Header>
 
+      {/* ★ بورصة السلع العالمية — أعلى لوحة التحكم */}
+      <GlobalCommodityTicker />
+
       {/* 2. مركز القيادة */}
       <Suspense fallback={null}><RecyclerCommandCenter /></Suspense>
 
