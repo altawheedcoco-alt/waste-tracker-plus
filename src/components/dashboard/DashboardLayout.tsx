@@ -138,6 +138,7 @@ import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
 import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg } from '@/config/sidebarConfig';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
+import PushToggle from './PushToggle';
 import ViewModeToolbar from './ViewModeToolbar';
 import { useDriverType } from '@/hooks/useDriverType';
 import { getDriverMenuItems } from '@/hooks/useDriverMenu';
