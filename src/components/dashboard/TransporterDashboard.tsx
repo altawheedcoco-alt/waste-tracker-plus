@@ -201,6 +201,9 @@ const TransporterDashboard = () => {
         </DashboardV2Header>
       </div>
 
+      {/* ★ بورصة السلع العالمية — أعلى لوحة التحكم */}
+      <GlobalCommodityTicker />
+
       {/* ★ مركز المنشورات الموحد */}
       <div id="section-posts">
         <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
