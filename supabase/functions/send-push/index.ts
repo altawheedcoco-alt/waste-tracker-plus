@@ -358,7 +358,7 @@ Deno.serve(async (req) => {
     await Promise.allSettled(
       subscriptions.map(async (sub) => {
         const result = await sendPushNotification(
-          { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth },
+          { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
           payload,
           vapidPublicKey,
           vapidPrivateKey
