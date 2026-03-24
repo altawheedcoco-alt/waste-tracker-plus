@@ -82,8 +82,7 @@ export function useWebPush() {
           user_id: user.id,
           endpoint: subscription.endpoint,
           p256dh,
-          auth,
-          user_agent: navigator.userAgent,
+          auth_key: auth,
         },
         { onConflict: 'user_id,endpoint' }
       );
