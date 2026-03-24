@@ -55,6 +55,7 @@ export interface BulkDualNotification {
 interface NotifyResult {
   inApp: { success: boolean; error?: string };
   whatsApp: { success: boolean; error?: string; sent?: number };
+  push: { success: boolean; error?: string; sent?: number };
 }
 
 /**
