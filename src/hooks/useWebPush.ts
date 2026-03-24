@@ -91,22 +91,32 @@ export function useWebPush() {
 
       const subJson = subscription.toJSON();
 
-      // 5. Save to DB (fire-and-forget for perceived speed)
+      // 5. Save to DB — show success immediately but retry on failure
       setIsSubscribed(true);
       toast.success('تم تفعيل الإشعارات ✅');
 
-      // Save in background — don't block UI
-      supabase.from('push_subscriptions').upsert(
-        {
-          user_id: user.id,
-          endpoint: subscription.endpoint,
-          p256dh: subJson.keys?.p256dh || '',
-          auth_key: subJson.keys?.auth || '',
-        },
-        { onConflict: 'user_id,endpoint' }
-      ).then(({ error }) => {
-        if (error) console.error('[WebPush] DB save error:', error);
-      });
+      // Save in background with retry
+      const saveSubscription = async (retries = 3) => {
+        for (let i = 0; i < retries; i++) {
+          const { error } = await supabase.from('push_subscriptions' as any).upsert(
+            {
+              user_id: user.id,
+              endpoint: subscription.endpoint,
+              p256dh: subJson.keys?.p256dh || '',
+              auth_key: subJson.keys?.auth || '',
+            },
+            { onConflict: 'user_id,endpoint' }
+          );
+          if (!error) {
+            console.log('[WebPush] Subscription saved successfully');
+            return;
+          }
+          console.error(`[WebPush] DB save attempt ${i + 1} failed:`, error);
+          if (i < retries - 1) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+        }
+        toast.error('تم تفعيل الإشعارات لكن فشل حفظ الاشتراك');
+      };
+      saveSubscription();
 
       return true;
     } catch (err: any) {
