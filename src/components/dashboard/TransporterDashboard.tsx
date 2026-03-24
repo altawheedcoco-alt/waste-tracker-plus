@@ -45,6 +45,7 @@ const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyP
 const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
 const DailyOperationsSummary = lazy(() => import('./operations/DailyOperationsSummary'));
 const DashboardAlertsHub = lazy(() => import('./shared/DashboardAlertsHub'));
+import GlobalCommodityTicker from './shared/GlobalCommodityTicker';
 const DashboardWidgetCustomizer = lazy(() => import('./DashboardWidgetCustomizer'));
 const DocumentVerificationWidget = lazy(() => import('./DocumentVerificationWidget'));
 const AutomationSettingsDialog = lazy(() => import('@/components/automation/AutomationSettingsDialog'));
@@ -227,7 +228,8 @@ const TransporterDashboard = () => {
         </ErrorBoundary>
       </div>
 
-      {/* 5. التنبيهات والإشعارات */}
+      {/* 5. بورصة السلع العالمية + التنبيهات */}
+      <GlobalCommodityTicker />
       <div id="section-alerts">
         <Suspense fallback={null}>
           <DashboardAlertsHub

@@ -27,6 +27,7 @@ import RecyclingCertificateDialog from '@/components/reports/RecyclingCertificat
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import QuickActionsGrid from './QuickActionsGrid';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
+import GlobalCommodityTicker from './shared/GlobalCommodityTicker';
 
 // Modular tab groups
 import RecyclerOverviewTab from './recycler/tabs/RecyclerOverviewTab';
@@ -254,7 +255,8 @@ const RecyclerDashboard = () => {
         subtitle="وظائف التدوير والإنتاج"
       />
 
-      {/* 4. التنبيهات والإشعارات */}
+      {/* 4. بورصة السلع العالمية + التنبيهات */}
+      <GlobalCommodityTicker />
       <DashboardAlertsHub orgType="recycler" />
 
       {/* 5. التواصل */}
