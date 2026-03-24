@@ -14,7 +14,7 @@ export function AutoPushSubscriber() {
 
   useEffect(() => {
     // Only run in production PWA, when user is logged in
-    if (!user || !isSupported || !shouldEnablePWA()) return;
+    if (!user || !isSupported) return;
     // Already subscribed or already attempted this session
     if (isSubscribed || attemptedRef.current) return;
     // If permission was previously denied, don't ask again
