@@ -79,7 +79,7 @@ const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode;
     // Use requestIdleCallback to observe after paint
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '800px' }
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -101,7 +101,7 @@ LazySection.displayName = 'LazySection';
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => setShow(true), 800);
+    const id = setTimeout(() => setShow(true), 300);
     return () => clearTimeout(id);
   }, []);
   if (!show) return <div className="h-[42px] sm:h-[36px]" />;
