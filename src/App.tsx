@@ -14,6 +14,7 @@ import { shouldEnablePWA } from "@/lib/pwaRuntime";
 
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
+const OfflineModeBanner = lazy(() => import("./components/offline/OfflineModeBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
 const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
 const InstallPWA = lazy(() => import("./components/pwa/InstallPWA"));
@@ -103,6 +104,7 @@ const Providers = memo(() => (
                 </ErrorBoundary>
                 <Suspense fallback={null}>
                   <OfflineBanner />
+                  <OfflineModeBanner />
                   {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
                   {shouldEnablePWA() ? <InstallPWA /> : null}
