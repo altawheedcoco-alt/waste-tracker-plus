@@ -62,7 +62,7 @@
 
   /* v3.0 Headings — tighter, more authoritative */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-cairo font-bold;
+    @apply font-cairo font-bold text-foreground;
     line-height: 1.2;
     letter-spacing: -0.025em;
     text-align: right;
