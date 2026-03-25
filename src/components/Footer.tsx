@@ -284,7 +284,7 @@ const ContactItem = ({ icon: Icon, children }: { icon: typeof MapPin; children: 
 );
 
 const SocialIcon = ({ icon: Icon, label }: { icon: typeof Facebook; label: string }) => (
-  <button className="w-8 h-8 rounded-full bg-background/8 hover:bg-primary hover:scale-110 flex items-center justify-center transition-all duration-200" aria-label={label} title={label}>
+  <button className="w-8 h-8 rounded-full bg-white/8 hover:bg-primary hover:scale-110 flex items-center justify-center transition-all duration-200" aria-label={label} title={label}>
     <Icon className="w-3.5 h-3.5" />
   </button>
 );
