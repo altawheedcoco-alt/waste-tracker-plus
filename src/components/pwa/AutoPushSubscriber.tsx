@@ -1,11 +1,10 @@
 /**
- * AutoPushSubscriber — يشترك تلقائياً في Web Push عند تسجيل الدخول
- * يعمل في الخلفية بدون واجهة — يطلب الإذن مرة واحدة فقط
+ * AutoPushSubscriber — يفرض تفعيل الإشعارات إلزامياً على كل مستخدم
+ * يطلب الإذن تلقائياً عند كل زيارة حتى يتم التفعيل
  */
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
-
 
 export function AutoPushSubscriber() {
   const { user } = useAuth();
@@ -13,22 +12,26 @@ export function AutoPushSubscriber() {
   const attemptedRef = useRef(false);
 
   useEffect(() => {
-    // Only run in production PWA, when user is logged in
     if (!user || !isSupported) return;
-    // Already subscribed or already attempted this session
-    if (isSubscribed || attemptedRef.current) return;
-    // If permission was previously denied, don't ask again
+    if (isSubscribed) return;
+    // If denied, we can't ask again (browser restriction) — banner will show instructions
     if (permission === 'denied') return;
+    if (attemptedRef.current) return;
 
     attemptedRef.current = true;
 
-    // Small delay to not block initial render
+    // Request immediately with minimal delay
     const timer = setTimeout(() => {
       subscribe();
-    }, 3000);
+    }, 1500);
 
     return () => clearTimeout(timer);
   }, [user, isSupported, isSubscribed, permission, subscribe]);
+
+  // Reset attempt flag when user changes (re-login)
+  useEffect(() => {
+    attemptedRef.current = false;
+  }, [user?.id]);
 
   return null;
 }
