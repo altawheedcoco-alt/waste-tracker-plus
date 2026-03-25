@@ -34,7 +34,7 @@ interface PostItem {
   created_at: string;
 }
 
-const CATEGORIES = ['عام', 'تحديثات', 'بيئة', 'تقنية', 'شراكات', 'إنجازات', 'نصائح', 'قوانين'];
+const CATEGORIES = ['عام', 'تحديثات', 'بيئة', 'تقنية', 'شراكات', 'إنجازات', 'نصائح', 'قوانين', 'إعادة تدوير'];
 
 type PublishMode = 'draft' | 'now' | 'scheduled';
 
