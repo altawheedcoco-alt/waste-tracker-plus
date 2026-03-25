@@ -121,9 +121,15 @@ const Providers = memo(() => (
 ));
 Providers.displayName = 'Providers';
 
-const App = memo(() => (
-  <Providers />
-));
+const App = memo(() => {
+  const cacheCleared = useRef(false);
+  useEffect(() => {
+    if (cacheCleared.current) return;
+    cacheCleared.current = true;
+    import('@/lib/cacheBuster').then(m => m.bustStaleCaches());
+  }, []);
+  return <Providers />;
+});
 App.displayName = 'App';
 
 export default App;
