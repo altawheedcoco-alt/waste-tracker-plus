@@ -42,6 +42,11 @@ const PostDetail = () => {
     if (post) setLikesCount(post.likes_count || 0);
   }, [post, setLikesCount]);
 
+  // Scroll to top on mount
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [id]);
+
   // Track view with IP via Edge Function
   useEffect(() => {
     if (!id) return;
