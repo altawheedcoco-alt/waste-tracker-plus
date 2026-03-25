@@ -1003,10 +1003,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     </button>
                   </div>
 
-                  {/* Push Notifications Toggle */}
-                  <div className="px-3 pt-2 shrink-0">
-                    <PushToggle />
-                  </div>
 
                   {/* Search */}
                   <div className="px-4 pt-3 shrink-0">
