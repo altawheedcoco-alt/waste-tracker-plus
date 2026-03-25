@@ -135,7 +135,7 @@ const BlogPost = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background text-foreground">
         <Header />
         <main className="pt-32 pb-16 px-4 max-w-3xl mx-auto">
           <Skeleton className="h-10 w-3/4 mb-4" />
@@ -148,7 +148,7 @@ const BlogPost = () => {
 
   if (!post) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background text-foreground">
         <Header />
         <main className="pt-32 pb-16 px-4 text-center">
           <BookOpen className="w-16 h-16 mx-auto mb-4 text-muted-foreground opacity-30" />
@@ -162,7 +162,7 @@ const BlogPost = () => {
   const style = TEMPLATE_CLASSES[post.template_style] || TEMPLATE_CLASSES.standard;
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       <Header />
       <main className="pt-32 pb-16 px-4">
         <div className={style.wrapper}>

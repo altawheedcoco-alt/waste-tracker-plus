@@ -140,7 +140,7 @@ const AuditPortal = () => {
   const progress = checklist.length > 0 ? Math.round((assessedCount / checklist.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-l from-primary/10 via-background to-background border-b">
         <div className="max-w-5xl mx-auto px-4 py-6">

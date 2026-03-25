@@ -425,7 +425,7 @@ const MapPage = () => {
 
   /* ═══════════════════════════ Render ═══════════════════════════ */
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <div className="container mx-auto p-4 pt-24 space-y-4">
         <PageNavBar />

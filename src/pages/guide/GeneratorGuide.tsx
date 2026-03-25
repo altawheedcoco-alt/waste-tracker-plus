@@ -211,7 +211,7 @@ const GeneratorGuide = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-l from-primary to-primary/80 text-primary-foreground">
         <div className="container mx-auto px-4 py-8">

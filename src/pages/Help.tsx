@@ -33,7 +33,7 @@ const Help = () => {
   const faqList = faqs[language] || faqs.ar;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background text-foreground">
       <Header />
       <main className="container mx-auto px-4 pt-28 pb-16 max-w-3xl">
         <PageNavBar className="mb-6" />

@@ -50,7 +50,7 @@ const Blog = () => {
   const regular = posts.filter((p: any) => !p.is_featured);
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       <Header />
       <main className="container mx-auto px-4 pt-32 pb-16 max-w-5xl">
         <PageNavBar className="mb-6" />

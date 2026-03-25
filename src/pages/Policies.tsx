@@ -509,7 +509,7 @@ const Policies = () => {
   const collapseAll = () => setExpandedSections(new Set());
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       <Header />
       
       <main className="pt-24 pb-16">
