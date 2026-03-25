@@ -177,7 +177,7 @@ const Header = memo(() => {
             <div className="flex items-center gap-3">
               <button
                 onClick={() => handleNavClick('#ticker')}
-                className="flex items-center gap-1.5 text-[10.5px] font-semibold text-primary/70 hover:text-primary transition-colors"
+                className="flex items-center gap-1.5 text-[10.5px] font-bold text-primary/70 hover:text-primary transition-colors"
               >
                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                 {language === 'ar' ? 'آخر الأخبار والتحديثات' : 'Latest News & Updates'}
