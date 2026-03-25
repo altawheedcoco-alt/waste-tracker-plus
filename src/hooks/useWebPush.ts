@@ -132,6 +132,32 @@ export function useWebPush() {
 
       if (saved) {
         toast.success('تم تفعيل الإشعارات ✅');
+
+        // Send confirmation via all channels
+        const confirmTitle = '🔔 تم تفعيل الإشعارات بنجاح';
+        const confirmBody = 'مرحباً! تم تفعيل الإشعارات لديك — ستصلك جميع التنبيهات والتحديثات المهمة فوراً.';
+
+        // 1. In-app notification
+        supabase.from('notifications').insert({
+          user_id: user.id,
+          title: confirmTitle,
+          message: confirmBody,
+          type: 'system',
+          is_read: false,
+        } as any).then(({ error }) => {
+          if (error) console.warn('[WebPush] In-app notification error:', error.message);
+        });
+
+        // 2. Web Push notification (via edge function to test the pipeline)
+        supabase.functions.invoke('send-push', {
+          body: {
+            user_ids: [user.id],
+            title: confirmTitle,
+            body: confirmBody,
+          },
+        }).then(({ error }) => {
+          if (error) console.warn('[WebPush] Push confirmation error:', error);
+        });
       } else {
         toast.warning('تم التفعيل لكن فشل الحفظ — حاول لاحقاً');
       }
