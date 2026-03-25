@@ -196,7 +196,6 @@ const Index = () => {
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
-              <VersionBar />
               <Header />
               {isVisible('ticker') && <DeferredTicker />}
             </ErrorBoundary>
