@@ -196,12 +196,12 @@ const Header = memo(() => {
                   <button
                     className={`group flex items-center gap-1 px-2 xl:px-3 py-2 text-[12px] xl:text-[13px] font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
                       openDropdown === dropdown.label
-                        ? 'text-primary bg-primary/8'
-                        : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+                        ? 'text-primary bg-primary/10'
+                        : 'text-foreground/75 dark:text-foreground/85 hover:text-foreground hover:bg-accent/50'
                     }`}
                     onClick={() => setOpenDropdown(openDropdown === dropdown.label ? null : dropdown.label)}
                   >
-                    <dropdown.icon className={`w-3.5 h-3.5 transition-colors ${openDropdown === dropdown.label ? 'text-primary' : 'text-muted-foreground/60 group-hover:text-foreground/70'}`} />
+                    <dropdown.icon className={`w-3.5 h-3.5 transition-colors ${openDropdown === dropdown.label ? 'text-primary' : 'text-foreground/50 dark:text-foreground/60 group-hover:text-foreground/70'}`} />
                     {dropdown.label}
                     <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdown === dropdown.label ? 'rotate-180 text-primary' : ''}`} />
                   </button>
