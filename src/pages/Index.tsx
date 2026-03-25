@@ -101,7 +101,7 @@ LazySection.displayName = 'LazySection';
 const DeferredTicker = memo(() => {
   const [show, setShow] = useState(false);
   useEffect(() => {
-    const id = setTimeout(() => setShow(true), 800);
+    const id = setTimeout(() => setShow(true), 300);
     return () => clearTimeout(id);
   }, []);
   if (!show) return <div className="h-[42px] sm:h-[36px]" />;
