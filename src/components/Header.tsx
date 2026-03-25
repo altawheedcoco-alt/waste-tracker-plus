@@ -173,58 +173,58 @@ const Header = memo(() => {
       </div>
 
       {/* Top utility bar - corporate style */}
-      <div className="hidden lg:block bg-foreground/[0.03] dark:bg-foreground/[0.04] border-b border-border/15">
+      <div className="hidden lg:block bg-muted/50 dark:bg-muted/30 border-b border-border/30 dark:border-border/20">
         <div className="w-full mx-auto px-5 max-w-[1400px]">
-          <div className="flex items-center justify-between h-8">
+          <div className="flex items-center justify-between h-9">
             {/* Left: Quick links */}
             <div className="flex items-center gap-2.5">
               <button
                 onClick={() => handleNavClick('#ticker')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-primary/80 hover:text-primary hover:bg-primary/10 transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-primary hover:bg-primary/15 dark:hover:bg-primary/20 transition-all duration-200"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
-                  <Newspaper className="w-2.5 h-2.5 text-primary" />
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/15 dark:bg-primary/25 border border-primary/30 dark:border-primary/40 shadow-[0_0_6px_hsl(var(--primary)/0.15)]">
+                  <Newspaper className="w-3 h-3 text-primary dark:text-primary" />
                 </span>
                 {language === 'ar' ? 'آخر الأخبار' : 'News'}
               </button>
-              <span className="w-px h-3.5 bg-border/20" />
+              <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
               <button
                 onClick={() => handleNavClick('/posts')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-foreground/80 dark:text-foreground/90 hover:bg-accent dark:hover:bg-accent/60 transition-all duration-200"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
-                  <FileText className="w-2.5 h-2.5 text-foreground/60" />
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 shadow-sm">
+                  <FileText className="w-3 h-3 text-foreground/70 dark:text-foreground/90" />
                 </span>
                 {language === 'ar' ? 'المنشورات' : 'Posts'}
               </button>
               <button
                 onClick={() => handleNavClick('/help')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-foreground/80 dark:text-foreground/90 hover:bg-accent dark:hover:bg-accent/60 transition-all duration-200"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
-                  <HelpCircle className="w-2.5 h-2.5 text-foreground/60" />
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 shadow-sm">
+                  <HelpCircle className="w-3 h-3 text-foreground/70 dark:text-foreground/90" />
                 </span>
                 {language === 'ar' ? 'مركز المساعدة' : 'Help'}
               </button>
             </div>
 
             {/* Right: Utilities */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={toggleDarkMode}
-                className="relative flex items-center justify-center w-5 h-5 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30 text-foreground/60 hover:text-foreground hover:border-primary/30 transition-all duration-300"
+                className="relative flex items-center justify-center w-6 h-6 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 text-foreground/70 dark:text-foreground/90 hover:border-primary/40 hover:shadow-[0_0_6px_hsl(var(--primary)/0.15)] transition-all duration-300 shadow-sm"
                 aria-label="Toggle theme"
               >
-                <Sun className={`w-2.5 h-2.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-                <Moon className={`w-2.5 h-2.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
               </button>
-              <span className="w-px h-3.5 bg-border/20" />
+              <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-foreground/80 dark:text-foreground/90 hover:bg-accent dark:hover:bg-accent/60 transition-all duration-200"
               >
-                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
-                  <Globe className="w-2.5 h-2.5 text-foreground/60" />
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 shadow-sm">
+                  <Globe className="w-3 h-3 text-foreground/70 dark:text-foreground/90" />
                 </span>
                 {language === 'ar' ? 'EN' : 'عربي'}
               </button>
