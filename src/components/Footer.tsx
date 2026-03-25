@@ -146,7 +146,7 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <PlatformLogo size="lg" showText inverted showSubtitle />
             </div>
-            <p className="text-background/55 leading-relaxed mb-4 text-xs max-w-xs">
+            <p className="text-white/55 leading-relaxed mb-4 text-xs max-w-xs">
               {t('footer.brandDesc')}
             </p>
 
