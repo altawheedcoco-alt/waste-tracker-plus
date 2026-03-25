@@ -53,19 +53,12 @@ export function useWebPush() {
     setLoading(true);
 
     try {
-      // 1. Request permission
+      // 1. Request permission (no timeout — let browser handle it)
       let perm: NotificationPermission;
       try {
-        perm = await Promise.race([
-          Notification.requestPermission(),
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), 15000)),
-        ]);
+        perm = await Notification.requestPermission();
       } catch {
         perm = Notification.permission;
-        if (perm === 'default') {
-          toast.error('لم يظهر طلب الإذن — جرّب تاني أو فعّل الإشعارات من إعدادات المتصفح');
-          return false;
-        }
       }
       setPermission(perm);
 
