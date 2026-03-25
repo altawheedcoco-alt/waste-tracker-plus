@@ -4,56 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
 
-// Mock data for offline/demo mode
-const OFFLINE_MODE_KEY = '__offline_mode';
-const OFFLINE_MOCK_USER_KEY = '__offline_mock_user';
-
-function isOfflineModeActive(): boolean {
-  return localStorage.getItem(OFFLINE_MODE_KEY) === 'true';
-}
-
-const MOCK_USER_ID = 'offline-demo-user-00000000';
-const MOCK_ORG_ID = 'offline-demo-org-00000000';
-
-function getMockProfile(): Profile {
-  return {
-    id: MOCK_USER_ID,
-    user_id: MOCK_USER_ID,
-    organization_id: MOCK_ORG_ID,
-    active_organization_id: MOCK_ORG_ID,
-    full_name: 'مستخدم تجريبي (وضع محلي)',
-    email: 'demo@irecycle.local',
-    phone: '01000000000',
-    avatar_url: null,
-    is_active: true,
-  };
-}
-
-function getMockOrganization(): Organization {
-  return {
-    id: MOCK_ORG_ID,
-    name: 'شركة تجريبية (وضع محلي)',
-    organization_type: 'generator',
-    email: 'demo-org@irecycle.local',
-    phone: '01000000000',
-    is_verified: true,
-    is_active: true,
-  };
-}
-
-function getMockUserOrgs(): UserOrganization[] {
-  return [{
-    organization_id: MOCK_ORG_ID,
-    organization_name: 'شركة تجريبية (وضع محلي)',
-    organization_type: 'generator',
-    role_in_organization: 'admin',
-    is_primary: true,
-    is_active: true,
-    is_verified: true,
-    logo_url: null,
-  }];
-}
-
 // Types
 export interface Profile {
   id: string;
@@ -374,19 +324,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     
     const initializeAuth = async () => {
       try {
-      // Check offline mode first
-      if (isOfflineModeActive()) {
-        console.log('[Auth] Offline mode active — using mock data');
-        setProfile(getMockProfile());
-        setOrganization(getMockOrganization());
-        setUserOrganizations(getMockUserOrgs());
-        setRoles(['company_admin']);
-        initialSessionHandled = true;
-        if (mounted) setLoading(false);
-        return;
-      }
-
-      const sessionPromise = supabase.auth.getSession();
+        // Generous timeout — 10s to accommodate slow mobile networks
+        const sessionPromise = supabase.auth.getSession();
         const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 10000));
         
         const result = await Promise.race([sessionPromise, timeoutPromise]);
@@ -404,25 +343,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           }
           initialSessionHandled = true;
         } else {
-        console.warn('Auth session fetch timed out, activating offline mode');
-        localStorage.setItem(OFFLINE_MODE_KEY, 'true');
-        setProfile(getMockProfile());
-        setOrganization(getMockOrganization());
-        setUserOrganizations(getMockUserOrgs());
-        setRoles(['company_admin']);
+          // Timeout - proceed without auth
+          console.warn('Auth session fetch timed out, proceeding without auth');
           initialSessionHandled = true;
         }
       } catch (error) {
         console.error('Error initializing auth:', error);
-      // If auth fails completely, activate offline mode
-      if (!initialSessionHandled) {
-        console.warn('[Auth] Auth failed, activating offline mode');
-        localStorage.setItem(OFFLINE_MODE_KEY, 'true');
-        setProfile(getMockProfile());
-        setOrganization(getMockOrganization());
-        setUserOrganizations(getMockUserOrgs());
-        setRoles(['company_admin']);
-      }
         initialSessionHandled = true;
       } finally {
         if (mounted) {

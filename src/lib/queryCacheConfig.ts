@@ -137,8 +137,6 @@ export const createSmartQueryClient = () => new QueryClient({
       staleTime: CACHE_PROFILES.operational.staleTime,
       gcTime: CACHE_PROFILES.operational.gcTime,
       retry: (failureCount, error: any) => {
-        // في الوضع المحلي لا نعيد المحاولة أبداً
-        if (localStorage.getItem('__offline_mode') === 'true') return false;
         // لا إعادة محاولة عند 401/403
         if (error?.status === 401 || error?.status === 403) return false;
         // لا إعادة محاولة عند 404
