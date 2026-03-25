@@ -306,12 +306,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
-    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
+    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") || "";
+    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") || "";
 
-    console.log("[send-push] VAPID_PUBLIC_KEY starts with:", vapidPublicKey?.substring(0, 10));
-    console.log("[send-push] VAPID_PUBLIC_KEY length:", vapidPublicKey?.length);
-    console.log("[send-push] Expected client key starts with: BAUii7gQ7f");
+    console.log("[send-push] VAPID pub key first 10 chars:", vapidPublicKey.substring(0, 10), "len:", vapidPublicKey.length);
 
     if (!vapidPublicKey || !vapidPrivateKey) {
       return new Response(
