@@ -1,7 +1,6 @@
 /**
  * useWebPush — Subscribe to Web Push notifications (VAPID)
- * Works even when browser/tab is closed.
- * Optimized for fast subscription (~1-3 seconds)
+ * Simplified: user taps button → permission dialog → subscribe → done
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,9 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
 const VAPID_PUBLIC_KEY = 'BAUii7gQ7fO0xLhOUzWqpzfZ7UDj_PqKYKT2ahVOThwaP9lP7gENAfC33gRUUi3frzfBQ2t0d_Jdna50WByL6xA';
-const PERMISSION_TIMEOUT_MS = 10000;
 
-// Pre-compute the application server key once
 let _cachedAppServerKey: Uint8Array | null = null;
 function getAppServerKey(): Uint8Array {
   if (_cachedAppServerKey) return _cachedAppServerKey;
@@ -22,17 +19,6 @@ function getAppServerKey(): Uint8Array {
   return _cachedAppServerKey;
 }
 
-async function requestPermissionWithTimeout(): Promise<NotificationPermission | 'timeout'> {
-  const permissionPromise = Notification.requestPermission();
-
-  const timeoutPromise = new Promise<'timeout'>((resolve) => {
-    window.setTimeout(() => resolve('timeout'), PERMISSION_TIMEOUT_MS);
-  });
-
-  return Promise.race([permissionPromise, timeoutPromise]);
-}
-
-// Pre-warm: get SW registration early so it's ready when user clicks
 let _cachedRegistration: ServiceWorkerRegistration | null = null;
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.ready.then(reg => { _cachedRegistration = reg; });
@@ -45,17 +31,14 @@ export function useWebPush() {
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [loading, setLoading] = useState(false);
   const regRef = useRef<ServiceWorkerRegistration | null>(_cachedRegistration);
-  const subscribeLockRef = useRef(false);
 
   useEffect(() => {
     const supported = 'PushManager' in window && 'serviceWorker' in navigator && 'Notification' in window;
     setIsSupported(supported);
-
     if (!supported) return;
 
     setPermission(Notification.permission);
 
-    // Use cached registration or wait for it
     const checkSub = async () => {
       try {
         if (!regRef.current) {
@@ -64,9 +47,7 @@ export function useWebPush() {
         }
         const sub = await regRef.current.pushManager.getSubscription();
         setIsSubscribed(!!sub);
-      } catch {
-        /* SW not ready */
-      }
+      } catch { /* ignore */ }
     };
     checkSub();
   }, []);
@@ -77,51 +58,47 @@ export function useWebPush() {
       return false;
     }
 
-    if (subscribeLockRef.current) return false;
-
-    subscribeLockRef.current = true;
     setLoading(true);
-
     try {
-      const currentPermission = Notification.permission;
-      setPermission(currentPermission);
-
-      let perm: NotificationPermission | 'timeout' = currentPermission;
-      if (currentPermission === 'default') {
-        perm = await requestPermissionWithTimeout();
-
-        if (perm === 'timeout') {
-          setPermission(Notification.permission);
-          toast.error('لم يظهر طلب الإذن — اضغط زر التفعيل مرة أخرى أو فعّل الإشعارات من إعدادات المتصفح');
+      // 1. Request permission — with 15s safety timeout
+      let perm: NotificationPermission;
+      try {
+        perm = await Promise.race([
+          Notification.requestPermission(),
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error('timeout')), 15000)
+          ),
+        ]);
+      } catch {
+        // Timed out or errored — check current state
+        perm = Notification.permission;
+        if (perm === 'default') {
+          toast.error('لم يظهر طلب الإذن — جرّب تاني أو فعّل الإشعارات من إعدادات المتصفح');
           return false;
         }
-
-        setPermission(perm);
       }
 
-      if (perm === 'denied') {
-        toast.error('الإشعارات محظورة من إعدادات المتصفح');
-        return false;
-      }
+      setPermission(perm);
 
       if (perm !== 'granted') {
-        toast.error('لم يتم منح إذن الإشعارات');
+        toast.error(perm === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'لم يتم قبول الإذن');
         return false;
       }
 
+      // 2. Get SW registration
       const registration = regRef.current || _cachedRegistration || await navigator.serviceWorker.ready;
       regRef.current = registration;
 
+      // 3. Subscribe to push
       let subscription = await registration.pushManager.getSubscription();
-
       if (!subscription) {
-        const appServerKey = getAppServerKey();
         subscription = await registration.pushManager.subscribe({
           userVisibleOnly: true,
-          applicationServerKey: appServerKey.buffer as ArrayBuffer,
+          applicationServerKey: getAppServerKey().buffer as ArrayBuffer,
         });
       }
 
+      // 4. Save to DB (best-effort with retry)
       const subJson = subscription.toJSON();
       const payload = {
         user_id: user.id,
@@ -129,44 +106,24 @@ export function useWebPush() {
         p256dh: subJson.keys?.p256dh || '',
         auth_key: subJson.keys?.auth || '',
       };
-      console.log('[WebPush] Saving subscription for user:', user.id);
 
       let saved = false;
-      for (let i = 0; i < 3; i++) {
-        try {
-          const { error } = await supabase.from('push_subscriptions' as any).upsert(
-            payload,
-            { onConflict: 'user_id,endpoint' }
-          );
-
-          if (!error) {
-            saved = true;
-            console.log('[WebPush] ✅ Subscription saved to DB');
-            break;
-          }
-
-          console.error(`[WebPush] DB save attempt ${i + 1}/3:`, error.message, error.code);
-        } catch (e) {
-          console.error(`[WebPush] DB save exception ${i + 1}/3:`, e);
-        }
-
-        if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
+      for (let i = 0; i < 2; i++) {
+        const { error } = await supabase.from('push_subscriptions' as any).upsert(
+          payload, { onConflict: 'user_id,endpoint' }
+        );
+        if (!error) { saved = true; break; }
+        if (i === 0) await new Promise(r => setTimeout(r, 1000));
       }
 
       setIsSubscribed(true);
-      if (saved) {
-        toast.success('تم تفعيل الإشعارات ✅');
-      } else {
-        toast.warning('تم تفعيل الإشعارات لكن فشل الحفظ — حاول مرة أخرى');
-      }
-
+      toast.success(saved ? 'تم تفعيل الإشعارات ✅' : 'تم التفعيل لكن فشل الحفظ — حاول لاحقاً');
       return true;
-    } catch (err: any) {
-      console.error('[WebPush] Subscribe error:', err);
-      toast.error('حدث خطأ أثناء تفعيل الإشعارات');
+    } catch (err) {
+      console.error('[WebPush] Error:', err);
+      toast.error('حدث خطأ — حاول مرة أخرى');
       return false;
     } finally {
-      subscribeLockRef.current = false;
       setLoading(false);
       setPermission(Notification.permission);
     }
@@ -179,11 +136,8 @@ export function useWebPush() {
       const subscription = await registration.pushManager.getSubscription();
       if (subscription) {
         await subscription.unsubscribe();
-        await supabase
-          .from('push_subscriptions')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('endpoint', subscription.endpoint);
+        await supabase.from('push_subscriptions').delete()
+          .eq('user_id', user.id).eq('endpoint', subscription.endpoint);
       }
       setIsSubscribed(false);
       toast.success('تم إلغاء الإشعارات');

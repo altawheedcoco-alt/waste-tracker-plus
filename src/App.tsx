@@ -107,7 +107,6 @@ const Providers = memo(() => (
                   <CodeProtection />
                   {shouldEnablePWA() ? <InstallPWA /> : null}
                   {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
-                  <AutoPushSubscriber />
                   <PushPermissionBanner />
                   <ProductionReadiness />
                 </Suspense>
