@@ -7,7 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-const VAPID_PUBLIC_KEY = 'BAUii7gQ7fO0xLhOUzWqpzfZ7UDj_PqKYKT2ahVOThwaP9lP7gENAfC33gRUUi3frzfBQ2t0d_Jdna50WByL6xA';
+const VAPID_PUBLIC_KEY = 'BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs';
 
 let _cachedAppServerKey: Uint8Array | null = null;
 function getAppServerKey(): Uint8Array {
