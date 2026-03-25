@@ -138,7 +138,7 @@ const SafetyCardPrintView = ({ record, organizationName, onClose }: SafetyCardPr
               <li>وفقاً لقانون العمل المصري وقانون البيئة رقم 4/1994</li>
             </ul>
             <div style={{ textAlign: 'center', marginTop: '8px', opacity: 0.6, fontSize: '9px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-              صادر من نظام <img src="/irecycle-logo.png" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} /> لإدارة المخلفات — {new Date().getFullYear()}
+              صادر من نظام <img src="/irecycle-logo.webp" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} /> لإدارة المخلفات — {new Date().getFullYear()}
             </div>
           </div>
         </div>

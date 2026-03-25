@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
-import logoImg from '@/assets/irecycle-logo-premium-3d.png';
+import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
 
 type LogoVariant = 'icon-only' | 'full' | 'stacked';
 type LogoTheme = 'light' | 'dark' | 'white';

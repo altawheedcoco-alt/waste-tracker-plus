@@ -9,7 +9,7 @@ export const IRECYCLE_TAGLINES = [
 ] as const;
 
 /** HTML tagline with logo for print templates */
-export const IRECYCLE_LOGO_URL = '/irecycle-logo.png';
+export const IRECYCLE_LOGO_URL = '/irecycle-logo.webp';
 
 export function getDailyTaglineHTML(): string {
   const dayIndex = Math.floor(Date.now() / 86400000) % IRECYCLE_TAGLINES.length;
