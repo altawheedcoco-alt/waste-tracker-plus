@@ -1,9 +1,9 @@
 /**
- * PushPermissionBanner — بانر بسيط لتفعيل الإشعارات بضغطة واحدة
- * يظهر حتى يتم التفعيل — لا يمكن إغلاقه
+ * PushPermissionBanner — بانر بسيط لتفعيل الإشعارات
+ * يظهر مرة واحدة — يضغط المستخدم "تفعيل" ← يظهر إذن المتصفح ← خلاص
  */
 import { useState, useEffect } from 'react';
-import { Bell, ShieldAlert, Loader2 } from 'lucide-react';
+import { Bell, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
 import { cn } from '@/lib/utils';
@@ -15,17 +15,13 @@ export default function PushPermissionBanner() {
 
   useEffect(() => {
     if (!user || !isSupported) return;
-    if (isSubscribed) {
-      setVisible(false);
-      return;
-    }
-    const t = setTimeout(() => setVisible(true), 800);
+    // Already subscribed or denied — don't show
+    if (isSubscribed || permission === 'denied') return;
+    const t = setTimeout(() => setVisible(true), 1500);
     return () => clearTimeout(t);
-  }, [user, isSupported, isSubscribed]);
+  }, [user, isSupported, isSubscribed, permission]);
 
   if (!visible) return null;
-
-  const isDenied = permission === 'denied';
 
   const handleEnable = async () => {
     const ok = await subscribe();
@@ -33,64 +29,34 @@ export default function PushPermissionBanner() {
   };
 
   return (
-    <>
-      <div className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm" />
-
-      <div className={cn(
-        'fixed bottom-20 left-4 right-4 z-[9999] mx-auto max-w-sm',
-        'bg-primary text-primary-foreground rounded-2xl shadow-2xl',
-        'p-5 flex flex-col items-center gap-3 animate-in slide-in-from-bottom-5 duration-500'
-      )}>
-        <div className="shrink-0 bg-primary-foreground/20 rounded-full p-3">
-          {isDenied ? (
-            <ShieldAlert className="w-7 h-7" />
-          ) : (
-            <Bell className="w-7 h-7" />
-          )}
-        </div>
-
-        <div className="text-center">
-          {isDenied ? (
-            <>
-              <p className="text-base font-bold leading-tight">الإشعارات محظورة ⚠️</p>
-              <p className="text-xs opacity-90 mt-2 leading-relaxed">
-                فعّل الإشعارات من إعدادات المتصفح ← الأذونات ← السماح بالإشعارات، ثم أعد تحميل الصفحة
-              </p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold bg-primary-foreground text-primary hover:opacity-90"
-              >
-                إعادة تحميل الصفحة
-              </button>
-            </>
-          ) : (
-            <>
-              <p className="text-base font-bold leading-tight">تفعيل الإشعارات 🔔</p>
-              <p className="text-xs opacity-90 mt-2 leading-relaxed">
-                اضغط الزر وبعدها اختر "سماح" لتصلك التنبيهات المهمة
-              </p>
-              <button
-                onClick={handleEnable}
-                disabled={loading}
-                className={cn(
-                  'mt-3 w-full py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2',
-                  'bg-primary-foreground text-primary hover:opacity-90',
-                  loading && 'opacity-60 cursor-wait'
-                )}
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    جاري التفعيل...
-                  </>
-                ) : (
-                  'تفعيل الإشعارات'
-                )}
-              </button>
-            </>
-          )}
-        </div>
+    <div className={cn(
+      'fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-sm',
+      'bg-card border border-border rounded-2xl shadow-lg',
+      'p-4 flex items-center gap-3 animate-in slide-in-from-bottom-5 duration-300'
+    )}>
+      <div className="shrink-0 bg-primary/10 rounded-full p-2.5">
+        <Bell className="w-5 h-5 text-primary" />
       </div>
-    </>
+
+      <div className="flex-1 min-w-0">
+        <p className="text-sm font-semibold text-foreground">تفعيل الإشعارات</p>
+        <p className="text-xs text-muted-foreground mt-0.5">لتصلك التنبيهات المهمة فوراً</p>
+      </div>
+
+      <button
+        onClick={handleEnable}
+        disabled={loading}
+        className="shrink-0 px-4 py-2 rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:opacity-90 transition-opacity disabled:opacity-50"
+      >
+        {loading ? '...' : 'تفعيل'}
+      </button>
+
+      <button
+        onClick={() => setVisible(false)}
+        className="shrink-0 p-1 rounded-full hover:bg-muted/60 transition-colors"
+      >
+        <X className="w-4 h-4 text-muted-foreground" />
+      </button>
+    </div>
   );
 }
