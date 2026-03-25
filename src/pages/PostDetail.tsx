@@ -179,7 +179,7 @@ const PostDetail = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       <Header />
       <div className="pt-20 pb-12">
         <div className="container px-4 max-w-3xl mx-auto">
