@@ -1,12 +1,14 @@
 /**
- * PushPermissionBanner — بانر بسيط لتفعيل الإشعارات
- * يظهر مرة واحدة — يضغط المستخدم "تفعيل" ← يظهر إذن المتصفح ← خلاص
+ * PushPermissionBanner — بانر بسيط لتفعيل الإشعارات بنقرة واحدة
+ * يظهر مرة واحدة فقط — يضغط المستخدم "تفعيل" ← إذن المتصفح ← اشتراك ← يختفي
  */
 import { useState, useEffect } from 'react';
 import { Bell, X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
 import { cn } from '@/lib/utils';
+
+const DISMISSED_KEY = 'push_banner_dismissed';
 
 export default function PushPermissionBanner() {
   const { user } = useAuth();
@@ -15,17 +17,31 @@ export default function PushPermissionBanner() {
 
   useEffect(() => {
     if (!user || !isSupported) return;
-    // Already subscribed or denied — don't show
     if (isSubscribed || permission === 'denied') return;
-    const t = setTimeout(() => setVisible(true), 1500);
+    if (localStorage.getItem(DISMISSED_KEY)) return;
+
+    const t = setTimeout(() => setVisible(true), 2500);
     return () => clearTimeout(t);
   }, [user, isSupported, isSubscribed, permission]);
+
+  // Hide after successful subscription
+  useEffect(() => {
+    if (isSubscribed && visible) setVisible(false);
+  }, [isSubscribed, visible]);
 
   if (!visible) return null;
 
   const handleEnable = async () => {
     const ok = await subscribe();
-    if (ok) setVisible(false);
+    if (ok) {
+      setVisible(false);
+      localStorage.setItem(DISMISSED_KEY, '1');
+    }
+  };
+
+  const handleDismiss = () => {
+    setVisible(false);
+    localStorage.setItem(DISMISSED_KEY, '1');
   };
 
   return (
@@ -52,7 +68,7 @@ export default function PushPermissionBanner() {
       </button>
 
       <button
-        onClick={() => setVisible(false)}
+        onClick={handleDismiss}
         className="shrink-0 p-1 rounded-full hover:bg-muted/60 transition-colors"
       >
         <X className="w-4 h-4 text-muted-foreground" />

@@ -142,7 +142,7 @@ import { lazy, Suspense } from 'react';
 import ViewModeToolbar from './ViewModeToolbar';
 import { useDriverType } from '@/hooks/useDriverType';
 import { getDriverMenuItems } from '@/hooks/useDriverMenu';
-import PushToggle from './PushToggle';
+
 const EncryptedChatWidget = lazy(() => import('@/components/chat/EncryptedChatWidget'));
 const UnifiedFloatingMenu = lazy(() => import('@/components/layout/UnifiedFloatingMenu'));
 
@@ -544,10 +544,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             <AccountSwitcher collapsed={false} />
           </div>
 
-          {/* Push Notifications Toggle */}
-          <div className="border-b border-sidebar-border px-2">
-            <PushToggle />
-          </div>
 
 
           {/* Search Box */}
@@ -1007,10 +1003,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     </button>
                   </div>
 
-                  {/* Push Notifications Toggle */}
-                  <div className="px-3 pt-2 shrink-0">
-                    <PushToggle />
-                  </div>
 
                   {/* Search */}
                   <div className="px-4 pt-3 shrink-0">
