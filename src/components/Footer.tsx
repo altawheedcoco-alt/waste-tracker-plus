@@ -211,23 +211,23 @@ const Footer = () => {
         </div>
 
         {/* ─── Legal Bar ─── */}
-        <div className="border-t border-background/10 pt-4">
+        <div className="border-t border-white/10 pt-4">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-3">
             {legalLinks.map((link, i) => (
               <span key={link.href} className="flex items-center gap-3">
-                <button onClick={() => handleNavigate(link.href)} className="text-background/45 hover:text-primary transition-colors text-[11px]">
+                <button onClick={() => handleNavigate(link.href)} className="text-white/45 hover:text-primary transition-colors text-[11px]">
                   {link.label}
                 </button>
-                {i < legalLinks.length - 1 && <span className="text-background/15">·</span>}
+                {i < legalLinks.length - 1 && <span className="text-white/15">·</span>}
               </span>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 text-background/35 text-[11px]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 text-white/35 text-[11px]">
             <div className="flex items-center gap-2">
               <span>© {new Date().getFullYear()} iRecycle. {t('footer.allRightsReserved')}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-black tracking-wide">v5.1</span>
             </div>
-            <span className="text-background/25 text-[10px]">
+            <span className="text-white/25 text-[10px]">
               {isAr ? 'صُنع بـ 💚 لمستقبل أنظف في مصر' : 'Made with 💚 for a cleaner future in Egypt'}
             </span>
           </div>
