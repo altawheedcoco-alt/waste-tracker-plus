@@ -309,6 +309,10 @@ Deno.serve(async (req) => {
     const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
     const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
 
+    console.log("[send-push] VAPID_PUBLIC_KEY starts with:", vapidPublicKey?.substring(0, 10));
+    console.log("[send-push] VAPID_PUBLIC_KEY length:", vapidPublicKey?.length);
+    console.log("[send-push] Expected client key starts with: BAUii7gQ7f");
+
     if (!vapidPublicKey || !vapidPrivateKey) {
       return new Response(
         JSON.stringify({ error: "VAPID keys not configured" }),
@@ -358,18 +362,23 @@ Deno.serve(async (req) => {
     const expiredEndpoints: string[] = [];
     let sent = 0;
 
+    const errors: any[] = [];
     await Promise.allSettled(
       subscriptions.map(async (sub) => {
+        console.log("[send-push] Sending to endpoint:", sub.endpoint.substring(0, 60));
         const result = await sendPushNotification(
           { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
           payload,
           vapidPublicKey,
           vapidPrivateKey
         );
+        console.log("[send-push] Result:", JSON.stringify(result));
         if (result.success) {
           sent++;
         } else if (result.error === "subscription_expired") {
           expiredEndpoints.push(sub.endpoint);
+        } else {
+          errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result });
         }
       })
     );
@@ -383,7 +392,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ sent, total: subscriptions.length, expired: expiredEndpoints.length }),
+      JSON.stringify({ sent, total: subscriptions.length, expired: expiredEndpoints.length, errors }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
