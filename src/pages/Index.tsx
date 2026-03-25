@@ -206,39 +206,53 @@ const Index = () => {
           )}
 
           {/* SaaS Tech Section - technical identity */}
-          <LazySection minH={500}>
-            <SaaSTechSection />
-          </LazySection>
+          <div id="saas-tech">
+            <LazySection minH={500}>
+              <SaaSTechSection />
+            </LazySection>
+          </div>
 
           {/* Platform Showcase - immediately after tech section */}
-          <LazySection minH={600}>
-            <PlatformShowcase />
-          </LazySection>
+          <div id="platform-showcase">
+            <LazySection minH={600}>
+              <PlatformShowcase />
+            </LazySection>
+          </div>
 
           {/* v5.1 — Driver Ecosystem Showcase */}
-          <LazySection minH={500}>
-            <DriverEcosystemShowcase />
-          </LazySection>
+          <div id="driver-ecosystem">
+            <LazySection minH={500}>
+              <DriverEcosystemShowcase />
+            </LazySection>
+          </div>
 
           {/* v5.1 — Marketplace & Auction */}
-          <LazySection minH={400}>
-            <MarketplacePreview />
-          </LazySection>
+          <div id="marketplace">
+            <LazySection minH={400}>
+              <MarketplacePreview />
+            </LazySection>
+          </div>
 
           {/* v5.1 — Wallet & Finance */}
-          <LazySection minH={400}>
-            <WalletFinanceShowcase />
-          </LazySection>
+          <div id="wallet-finance">
+            <LazySection minH={400}>
+              <WalletFinanceShowcase />
+            </LazySection>
+          </div>
 
           {/* v5.1 — Rating & Trust */}
-          <LazySection minH={400}>
-            <RatingTrustSection />
-          </LazySection>
+          <div id="rating-trust">
+            <LazySection minH={400}>
+              <RatingTrustSection />
+            </LazySection>
+          </div>
 
           {/* v5.1 — Regulator Showcase */}
-          <LazySection minH={400}>
-            <RegulatorShowcase />
-          </LazySection>
+          <div id="regulator-showcase">
+            <LazySection minH={400}>
+              <RegulatorShowcase />
+            </LazySection>
+          </div>
 
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (

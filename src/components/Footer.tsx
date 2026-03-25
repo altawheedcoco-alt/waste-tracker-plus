@@ -109,7 +109,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative bg-foreground text-background">
+    <footer className="relative bg-[hsl(220,20%,10%)] dark:bg-[hsl(225,16%,6%)] text-[hsl(220,20%,98%)] dark:text-[hsl(210,15%,92%)]">
       {/* Top wave */}
       <div className="absolute -top-px left-0 right-0 overflow-hidden">
         <svg viewBox="0 0 1440 40" className="w-full h-6 sm:h-10 fill-background" preserveAspectRatio="none">
