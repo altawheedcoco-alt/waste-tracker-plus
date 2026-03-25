@@ -191,7 +191,7 @@ const Header = memo(() => {
               </button>
               <button
                 onClick={() => handleNavClick('/help')}
-                className="text-[10.5px] font-medium text-muted-foreground/60 hover:text-foreground/80 transition-colors"
+                className="text-[10.5px] font-bold text-muted-foreground/60 hover:text-foreground/80 transition-colors"
               >
                 {language === 'ar' ? 'مركز المساعدة' : 'Help Center'}
               </button>
