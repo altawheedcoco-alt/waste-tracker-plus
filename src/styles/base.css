@@ -74,6 +74,7 @@
   h4 { @apply text-base sm:text-lg; }
 
   p {
+    @apply text-foreground;
     line-height: 1.7;
     text-align: right;
   }
