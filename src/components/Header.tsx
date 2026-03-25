@@ -210,7 +210,7 @@ const Header = memo(() => {
               <span className="w-px h-3 bg-border/20" />
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1 text-[10.5px] font-semibold text-muted-foreground/50 hover:text-foreground/70 transition-colors"
+                className="flex items-center gap-1 text-[10.5px] font-bold text-muted-foreground/50 hover:text-foreground/70 transition-colors"
               >
                 <Globe className="w-3 h-3" />
                 {language === 'ar' ? 'English' : 'عربي'}
