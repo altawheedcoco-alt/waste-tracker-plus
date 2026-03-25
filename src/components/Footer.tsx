@@ -57,21 +57,21 @@ const Footer = () => {
   // 2) الحلول والخدمات — تتوافق مع أقسام Features/Services/Showcases
   const solutionLinks = [
     { label: isAr ? 'إدارة الشحنات' : 'Shipment Management', href: '#services', icon: Recycle },
-    { label: isAr ? 'تتبع النقل' : 'Transport Tracking', href: '#services', icon: Truck },
-    { label: isAr ? 'منظومة السائقين' : 'Driver Ecosystem', href: '#features', icon: Users },
-    { label: isAr ? 'السوق والمزادات' : 'Marketplace', href: '#features', icon: PackageSearch },
-    { label: isAr ? 'المحفظة والمالية' : 'Wallet & Finance', href: '#features', icon: Wallet },
-    { label: isAr ? 'التقييم والثقة' : 'Rating & Trust', href: '#features', icon: Star },
+    { label: isAr ? 'تتبع النقل' : 'Transport Tracking', href: '/track', icon: Truck },
+    { label: isAr ? 'منظومة السائقين' : 'Driver Ecosystem', href: '#driver-ecosystem', icon: Users },
+    { label: isAr ? 'السوق والمزادات' : 'Marketplace', href: '#marketplace', icon: PackageSearch },
+    { label: isAr ? 'المحفظة والمالية' : 'Wallet & Finance', href: '#wallet-finance', icon: Wallet },
+    { label: isAr ? 'التقييم والثقة' : 'Rating & Trust', href: '#rating-trust', icon: Star },
   ];
 
   // 3) التقنية والذكاء الاصطناعي — SaaS/AI/Doc showcases
   const techLinks = [
     { label: isAr ? 'الوكيل الذكي' : 'Smart Agent', href: '#smart-agent', icon: Brain },
-    { label: isAr ? 'استوديو المستندات' : 'Document AI', href: '#features', icon: FileCheck },
-    { label: isAr ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#features', icon: Smartphone },
-    { label: isAr ? 'التقارير البيئية' : 'Env Reports', href: '#features', icon: BarChart3 },
+    { label: isAr ? 'استوديو المستندات' : 'Document AI', href: '#doc-ai', icon: FileCheck },
+    { label: isAr ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#whatsapp-notifications', icon: Smartphone },
+    { label: isAr ? 'التقارير البيئية' : 'Env Reports', href: '#stats', icon: BarChart3 },
     { label: isAr ? 'البصمة الكربونية' : 'Carbon Footprint', href: '/recycling-history', icon: Footprints },
-    { label: isAr ? 'البنية التقنية SaaS' : 'SaaS Platform', href: '#features', icon: Monitor },
+    { label: isAr ? 'البنية التقنية SaaS' : 'SaaS Platform', href: '#saas-tech', icon: Monitor },
   ];
 
   // 4) الجهات الرقابية والشراكات
