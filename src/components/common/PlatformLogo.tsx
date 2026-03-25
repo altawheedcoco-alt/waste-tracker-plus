@@ -1,6 +1,7 @@
 import { memo } from 'react';
 import IRecycleLogo from './IRecycleLogo';
 import { cn } from '@/lib/utils';
+import { useThemeSettings } from '@/contexts/ThemeSettingsContext';
 
 type LogoSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl' | 'print';
 
@@ -28,7 +29,7 @@ const sizeToPixels: Record<LogoSize, number> = {
 
 /**
  * Unified platform logo — wraps IRecycleLogo SVG component.
- * Drop-in replacement for the old PNG-based logo.
+ * Auto-detects dark mode for proper text contrast.
  */
 const PlatformLogo = memo(({
   size = 'md',
@@ -38,7 +39,10 @@ const PlatformLogo = memo(({
   showSubtitle = false,
 }: PlatformLogoProps) => {
   const px = sizeToPixels[size];
-  const theme = inverted ? 'white' : 'light';
+  const { settings } = useThemeSettings();
+  
+  // inverted = white text (for dark footers), otherwise auto-detect from theme
+  const theme = inverted ? 'white' : settings.isDarkMode ? 'dark' : 'light';
   const variant = showText ? 'full' : 'icon-only';
 
   return (
