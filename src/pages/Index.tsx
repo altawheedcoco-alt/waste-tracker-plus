@@ -28,7 +28,7 @@ function lazyRetry<T extends React.ComponentType<any>>(
 
 // Critical above-fold: load eagerly
 import Header from "@/components/Header";
-import VersionBar from "@/components/VersionBar";
+
 import Hero from "@/components/Hero";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
@@ -196,7 +196,6 @@ const Index = () => {
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
-              <VersionBar />
               <Header />
               {isVisible('ticker') && <DeferredTicker />}
             </ErrorBoundary>

@@ -40,7 +40,7 @@ const NewsTicker = memo(() => {
 
   return (
     <div id="ticker">
-      {/* Mobile */}
+      {/* Mobile: version(28) + nav(52) = 80px */}
       <div className="fixed top-[80px] left-0 right-0 w-full overflow-hidden z-40 h-[34px] sm:hidden" dir="rtl">
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-border/30" />
         
@@ -66,7 +66,7 @@ const NewsTicker = memo(() => {
         </div>
       </div>
 
-      {/* Desktop */}
+      {/* Desktop: version(28) + utility(32) + nav(60) = 120px */}
       <div className="fixed top-[120px] left-0 right-0 w-full overflow-hidden z-40 h-[38px] hidden sm:block" dir="rtl">
         <div className="absolute inset-0 bg-background/50 backdrop-blur-xl border-b border-border/20" />
 
