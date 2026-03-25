@@ -1,9 +1,9 @@
 /**
- * PushPermissionBanner — بانر إلزامي لتفعيل الإشعارات
- * لا يمكن إغلاقه — يظهر دائماً حتى يتم التفعيل
+ * PushPermissionBanner — بانر بسيط لتفعيل الإشعارات بضغطة واحدة
+ * يظهر حتى يتم التفعيل — لا يمكن إغلاقه
  */
 import { useState, useEffect } from 'react';
-import { Bell, ShieldAlert } from 'lucide-react';
+import { Bell, ShieldAlert, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
 import { cn } from '@/lib/utils';
@@ -15,16 +15,13 @@ export default function PushPermissionBanner() {
 
   useEffect(() => {
     if (!user || !isSupported) return;
-    // Hide only if already subscribed
     if (isSubscribed) {
       setVisible(false);
       return;
     }
-
-    // Show after short delay
-    const t = setTimeout(() => setVisible(true), 1000);
+    const t = setTimeout(() => setVisible(true), 800);
     return () => clearTimeout(t);
-  }, [user, isSupported, isSubscribed, permission]);
+  }, [user, isSupported, isSubscribed]);
 
   if (!visible) return null;
 
@@ -37,9 +34,8 @@ export default function PushPermissionBanner() {
 
   return (
     <>
-      {/* Backdrop overlay */}
       <div className="fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm" />
-      
+
       <div className={cn(
         'fixed bottom-20 left-4 right-4 z-[9999] mx-auto max-w-sm',
         'bg-primary text-primary-foreground rounded-2xl shadow-2xl',
@@ -54,37 +50,44 @@ export default function PushPermissionBanner() {
         </div>
 
         <div className="text-center">
-          <p className="text-base font-bold leading-tight">
-            {isDenied ? 'الإشعارات محظورة ⚠️' : 'تفعيل الإشعارات إلزامي 🔔'}
-          </p>
-          <p className="text-xs opacity-90 mt-2 leading-relaxed">
-            {isDenied
-              ? 'يجب تفعيل الإشعارات من إعدادات المتصفح ← الأذونات ← السماح بالإشعارات، ثم أعد تحميل الصفحة'
-              : 'لضمان وصول التحديثات والتنبيهات المهمة، يجب تفعيل الإشعارات للاستمرار في استخدام المنصة'
-            }
-          </p>
-
-          {!isDenied && (
-            <button
-              onClick={handleEnable}
-              disabled={loading}
-              className={cn(
-                'mt-3 w-full py-2.5 rounded-xl text-sm font-bold transition-all',
-                'bg-primary-foreground text-primary hover:opacity-90',
-                loading && 'opacity-60 cursor-wait'
-              )}
-            >
-              {loading ? 'جاري التفعيل...' : 'تفعيل الإشعارات الآن'}
-            </button>
-          )}
-
-          {isDenied && (
-            <button
-              onClick={() => window.location.reload()}
-              className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold bg-primary-foreground text-primary hover:opacity-90"
-            >
-              إعادة تحميل الصفحة
-            </button>
+          {isDenied ? (
+            <>
+              <p className="text-base font-bold leading-tight">الإشعارات محظورة ⚠️</p>
+              <p className="text-xs opacity-90 mt-2 leading-relaxed">
+                فعّل الإشعارات من إعدادات المتصفح ← الأذونات ← السماح بالإشعارات، ثم أعد تحميل الصفحة
+              </p>
+              <button
+                onClick={() => window.location.reload()}
+                className="mt-3 w-full py-2.5 rounded-xl text-sm font-bold bg-primary-foreground text-primary hover:opacity-90"
+              >
+                إعادة تحميل الصفحة
+              </button>
+            </>
+          ) : (
+            <>
+              <p className="text-base font-bold leading-tight">تفعيل الإشعارات 🔔</p>
+              <p className="text-xs opacity-90 mt-2 leading-relaxed">
+                اضغط الزر وبعدها اختر "سماح" لتصلك التنبيهات المهمة
+              </p>
+              <button
+                onClick={handleEnable}
+                disabled={loading}
+                className={cn(
+                  'mt-3 w-full py-3 rounded-xl text-sm font-bold transition-all flex items-center justify-center gap-2',
+                  'bg-primary-foreground text-primary hover:opacity-90',
+                  loading && 'opacity-60 cursor-wait'
+                )}
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    جاري التفعيل...
+                  </>
+                ) : (
+                  'تفعيل الإشعارات'
+                )}
+              </button>
+            </>
           )}
         </div>
       </div>
