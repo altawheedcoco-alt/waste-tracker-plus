@@ -251,7 +251,7 @@ const DriverGuide = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-l from-purple-600 to-purple-800 text-white">
         <div className="container mx-auto px-4 py-8">

@@ -170,7 +170,7 @@ export default function ScopedAccessPortal() {
   if (linkInfo.can_view_ledger) availableTabs.push({ value: 'ledger', label: 'كشف الحساب', icon: BookOpen });
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <div className="border-b bg-card">
         <div className="max-w-6xl mx-auto px-4 py-4">

@@ -43,7 +43,7 @@ const News = memo(() => {
   });
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       <Header />
       
       <main className="pt-32 sm:pt-36 pb-16 px-4">

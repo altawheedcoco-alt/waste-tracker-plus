@@ -245,7 +245,7 @@ const TransporterGuide = () => {
   }));
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Header */}
       <div className="bg-gradient-to-l from-orange-600 to-orange-800 text-white">
         <div className="container mx-auto px-4 py-8">

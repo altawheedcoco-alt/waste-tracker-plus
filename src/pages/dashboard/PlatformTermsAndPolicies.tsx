@@ -327,7 +327,7 @@ const PlatformTermsAndPolicies = () => {
   const today = format(new Date(), 'dd MMMM yyyy', { locale: ar });
 
   return (
-    <div className="min-h-screen bg-background" dir="rtl">
+    <div className="min-h-screen bg-background text-foreground" dir="rtl">
       {/* Action Bar */}
       <div className="sticky top-0 z-10 bg-background/95 backdrop-blur border-b p-4 print:hidden">
         <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
