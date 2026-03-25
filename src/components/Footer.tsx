@@ -76,11 +76,11 @@ const Footer = () => {
 
   // 4) الجهات الرقابية والشراكات
   const regulatorLinks = [
-    { label: isAr ? 'الجهات الرقابية' : 'Regulators', href: '#features', icon: Building2 },
+    { label: isAr ? 'الجهات الرقابية' : 'Regulators', href: '#regulator-showcase', icon: Building2 },
     { label: isAr ? 'الشراكات' : 'Partnerships', href: '/partnerships', icon: Handshake },
     { label: isAr ? 'الاستشاريون' : 'Consultants', href: '/consultant-portal', icon: BadgeCheck },
-    { label: isAr ? 'المبادرة الوطنية' : 'National Initiative', href: '#features', icon: Megaphone },
-    { label: isAr ? 'الاستدامة البيئية' : 'Sustainability', href: '#features', icon: Leaf },
+    { label: isAr ? 'المبادرة الوطنية' : 'National Initiative', href: '#initiative', icon: Megaphone },
+    { label: isAr ? 'الاستدامة البيئية' : 'Sustainability', href: '#platform-showcase', icon: Leaf },
   ];
 
   // 5) الموارد والتعليم
