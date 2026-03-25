@@ -104,6 +104,7 @@ export function useWebPush() {
       // 4. Verify
       const verifySub = await registration.pushManager.getSubscription();
       setIsSubscribed(!!verifySub);
+      console.log('[WebPush] Subscription saved:', saved, 'verified:', !!verifySub);
 
       if (saved) {
         toast.success('تم تفعيل الإشعارات ✅');
