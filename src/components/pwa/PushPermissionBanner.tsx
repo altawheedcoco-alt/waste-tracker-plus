@@ -18,9 +18,12 @@ export default function PushPermissionBanner() {
   useEffect(() => {
     if (!user || !isSupported) return;
     if (isSubscribed || permission === 'denied') return;
-    if (localStorage.getItem(DISMISSED_KEY)) return;
 
-    const t = setTimeout(() => setVisible(true), 2500);
+    // If previously dismissed, wait longer before showing again
+    const wasDismissed = localStorage.getItem(DISMISSED_KEY);
+    const delay = wasDismissed ? 15000 : 2500;
+
+    const t = setTimeout(() => setVisible(true), delay);
     return () => clearTimeout(t);
   }, [user, isSupported, isSubscribed, permission]);
 
