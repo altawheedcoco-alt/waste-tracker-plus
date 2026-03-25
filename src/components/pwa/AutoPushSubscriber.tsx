@@ -1,10 +1,16 @@
 /**
  * AutoPushSubscriber — يفرض تفعيل الإشعارات إلزامياً على كل مستخدم
- * يطلب الإذن تلقائياً عند كل زيارة حتى يتم التفعيل
+ * يطلب الإذن تلقائياً فقط داخل التطبيق المثبّت لتجنب تعليق بعض متصفحات أندرويد
  */
 import { useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
+
+const isStandaloneMode = () => {
+  if (typeof window === 'undefined') return false;
+
+  return window.matchMedia('(display-mode: standalone)').matches || (window.navigator as Navigator & { standalone?: boolean }).standalone === true;
+};
 
 export function AutoPushSubscriber() {
   const { user } = useAuth();
@@ -13,22 +19,20 @@ export function AutoPushSubscriber() {
 
   useEffect(() => {
     if (!user || !isSupported) return;
+    if (!isStandaloneMode()) return;
     if (isSubscribed) return;
-    // If denied, we can't ask again (browser restriction) — banner will show instructions
     if (permission === 'denied') return;
     if (attemptedRef.current) return;
 
     attemptedRef.current = true;
 
-    // Request immediately with minimal delay
     const timer = setTimeout(() => {
-      subscribe();
+      void subscribe();
     }, 1500);
 
     return () => clearTimeout(timer);
   }, [user, isSupported, isSubscribed, permission, subscribe]);
 
-  // Reset attempt flag when user changes (re-login)
   useEffect(() => {
     attemptedRef.current = false;
   }, [user?.id]);
