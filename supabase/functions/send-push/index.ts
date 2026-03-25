@@ -332,10 +332,13 @@ Deno.serve(async (req) => {
     }
 
     // Fetch subscriptions
+    console.log("[send-push] Looking for subscriptions for users:", targetUserIds);
     const { data: subscriptions, error: subError } = await supabase
       .from("push_subscriptions")
       .select("*")
       .in("user_id", targetUserIds);
+
+    console.log("[send-push] Query result:", { count: subscriptions?.length, error: subError?.message });
 
     if (subError) {
       return new Response(
@@ -346,7 +349,7 @@ Deno.serve(async (req) => {
 
     if (!subscriptions?.length) {
       return new Response(
-        JSON.stringify({ sent: 0, message: "No subscriptions found" }),
+        JSON.stringify({ sent: 0, message: "No subscriptions found", targetUserIds }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
