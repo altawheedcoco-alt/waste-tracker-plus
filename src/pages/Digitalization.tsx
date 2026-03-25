@@ -6,7 +6,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import {
   Binary, Cpu, Globe2, ShieldCheck, BarChart3, FileCheck, Truck, Factory,
   Recycle, Scale, Zap, Cloud, Lock, Eye, TrendingUp, Workflow, Brain,
-  Database, Network, Fingerprint, ArrowRight, Sparkles, CheckCircle2
+  Database, Network, Fingerprint, ArrowRight, Sparkles, CheckCircle2, XCircle
 } from "lucide-react";
 
 const fadeUp = {
