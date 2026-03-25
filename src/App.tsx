@@ -108,6 +108,7 @@ const Providers = memo(() => (
                   {shouldEnablePWA() ? <InstallPWA /> : null}
                   {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
                   {/* PushPermissionBanner disabled — push activated via PushToggle or AutoPushSubscriber */}
+                  <AutoPushSubscriber />
                   <ProductionReadiness />
                 </Suspense>
               </AuthProvider>
