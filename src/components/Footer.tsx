@@ -251,7 +251,7 @@ const Footer = () => {
 /* ─── Sub-components ─── */
 
 const FooterHeading = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <h4 className={`font-bold text-xs text-background/80 mb-2.5 ${className || ''}`}>{children}</h4>
+  <h4 className={`font-bold text-xs text-white/80 mb-2.5 ${className || ''}`}>{children}</h4>
 );
 
 const FooterColumn = ({ title, links, onNavigate }: { 
