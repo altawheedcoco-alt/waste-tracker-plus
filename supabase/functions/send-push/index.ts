@@ -306,10 +306,21 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") || "";
-    const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") || "";
-
-    console.log("[send-push] VAPID pub key first 10 chars:", vapidPublicKey.substring(0, 10), "len:", vapidPublicKey.length);
+    // Use env vars, fallback to hardcoded keys if env is broken
+    const FALLBACK_PUBLIC = "BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs";
+    const FALLBACK_PRIVATE = "lVe3qnCIT_3r1JUj0h8NRCvCc3vko0cUBRZXuhh_w7g";
+    
+    let vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY") || "";
+    let vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY") || "";
+    
+    // If env value is too short / corrupted, use fallback
+    if (vapidPublicKey.length < 40) {
+      console.log("[send-push] VAPID env key corrupted, using fallback");
+      vapidPublicKey = FALLBACK_PUBLIC;
+      vapidPrivateKey = FALLBACK_PRIVATE;
+    }
+    
+    console.log("[send-push] Using VAPID key starting with:", vapidPublicKey.substring(0, 10), "len:", vapidPublicKey.length);
 
     if (!vapidPublicKey || !vapidPrivateKey) {
       return new Response(
