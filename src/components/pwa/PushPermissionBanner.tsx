@@ -19,12 +19,7 @@ export default function PushPermissionBanner() {
     if (!user || !isSupported) return;
     if (isSubscribed || permission === 'denied') return;
 
-    // If previously dismissed, wait longer before showing again
-    const wasDismissed = localStorage.getItem(DISMISSED_KEY);
-    const delay = wasDismissed ? 15000 : 2500;
-
-    const t = setTimeout(() => setVisible(true), delay);
-    return () => clearTimeout(t);
+    setVisible(true);
   }, [user, isSupported, isSubscribed, permission]);
 
   // Hide after successful subscription
