@@ -125,7 +125,7 @@ const Footer = () => {
             <h3 className="text-lg sm:text-xl font-bold mb-1">
               {isAr ? '🌱 انضم إلى منظومة iRecycle' : '🌱 Join the iRecycle Ecosystem'}
             </h3>
-            <p className="text-background/60 text-sm">
+            <p className="text-white/60 text-sm">
               {isAr ? 'أول منصة SaaS متكاملة لإدارة المخلفات في مصر والشرق الأوسط' : 'The first integrated SaaS platform for waste management in Egypt & MENA'}
             </p>
           </div>
