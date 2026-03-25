@@ -93,9 +93,10 @@ export function useWebPush() {
 
       let saved = false;
       for (let i = 0; i < 3; i++) {
-        const { error } = await supabase.from('push_subscriptions' as any).upsert(
-          payload, { onConflict: 'user_id,endpoint' }
+        const { error } = await supabase.from('push_subscriptions').upsert(
+          payload as any, { onConflict: 'user_id,endpoint' }
         );
+        if (error) console.error('[WebPush] Save error attempt', i + 1, error.message);
         if (!error) { saved = true; break; }
         if (i < 2) await new Promise(r => setTimeout(r, 800));
       }
@@ -103,6 +104,7 @@ export function useWebPush() {
       // 4. Verify
       const verifySub = await registration.pushManager.getSubscription();
       setIsSubscribed(!!verifySub);
+      console.log('[WebPush] Subscription saved:', saved, 'verified:', !!verifySub);
 
       if (saved) {
         toast.success('تم تفعيل الإشعارات ✅');
