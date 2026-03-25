@@ -146,7 +146,7 @@ const Header = memo(() => {
   }, [navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] animate-fade-in">
+    <header className="fixed top-7 left-0 right-0 z-[60] animate-fade-in">
       {/* Top utility bar - corporate style */}
       <div className="hidden lg:block bg-foreground/[0.03] dark:bg-foreground/[0.04] border-b border-border/15">
         <div className="w-full mx-auto px-5 max-w-[1400px]">

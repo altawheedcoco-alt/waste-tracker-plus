@@ -34,10 +34,14 @@ const NewsTicker = memo(() => {
     : platformPhrases;
   const tickerItems = [...displayItems, ...displayItems, ...displayItems];
 
+  // New header heights: version bar (28px) + utility bar (32px desktop) + main nav (52px mobile / 60px desktop)
+  // Mobile: 28 + 52 = 80px → top-[80px]
+  // Desktop: 28 + 32 + 60 = 120px → sm:top-[120px]
+
   return (
     <div id="ticker">
       {/* Mobile */}
-      <div className="fixed top-14 left-0 right-0 w-full overflow-hidden z-40 h-[34px] sm:hidden" dir="rtl">
+      <div className="fixed top-[80px] left-0 right-0 w-full overflow-hidden z-40 h-[34px] sm:hidden" dir="rtl">
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-border/30" />
         
         <div className="relative h-full flex items-center">
@@ -63,7 +67,7 @@ const NewsTicker = memo(() => {
       </div>
 
       {/* Desktop */}
-      <div className="fixed top-14 sm:top-[72px] left-0 right-0 w-full overflow-hidden z-40 h-[38px] hidden sm:block" dir="rtl">
+      <div className="fixed top-[120px] left-0 right-0 w-full overflow-hidden z-40 h-[38px] hidden sm:block" dir="rtl">
         <div className="absolute inset-0 bg-background/50 backdrop-blur-xl border-b border-border/20" />
 
         <div className="relative flex items-center h-full">
