@@ -192,7 +192,194 @@ const Digitalization = memo(() => {
         </div>
       </section>
 
-      {/* Digital vs Traditional */}
+      {/* Deep Dive: How the platform serves each pillar */}
+      <section className="py-16 sm:py-20">
+        <div className="max-w-[1100px] mx-auto px-4 sm:px-6">
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={0} className="text-center mb-14">
+            <h2 className="text-3xl sm:text-4xl font-black mb-4">
+              {isAr ? 'كيف تخدم المنصة كل تفصيلة؟' : 'How Does the Platform Serve Every Detail?'}
+            </h2>
+            <p className="max-w-3xl mx-auto text-muted-foreground text-base leading-relaxed">
+              {isAr
+                ? 'لكل ركيزة من ركائز الرقمنة، بنت المنصة أدوات وأنظمة متخصصة تعمل بشكل متكامل. إليك كيف يتحقق ذلك عملياً:'
+                : 'For each digitalization pillar, the platform has built specialized tools and systems that work together. Here\'s how it works in practice:'
+              }
+            </p>
+          </motion.div>
+
+          {/* 1. Digital Documentation Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={1}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center shadow-lg">
+                <FileCheck className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '١. التوثيق الرقمي — بالتفصيل' : '1. Digital Documentation — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'استوديو المستندات الذكي (AI Studio)' : 'AI Document Studio', d: isAr ? 'إنشاء عقود وفواتير وشهادات بالذكاء الاصطناعي — تكتب الوصف والمنصة تُنتج المستند جاهزاً للتوقيع بصيغة احترافية.' : 'Generate contracts, invoices & certificates with AI — describe what you need and the platform produces a signing-ready professional document.' },
+                { t: isAr ? 'التوقيع الإلكتروني والأختام' : 'E-Signatures & Digital Stamps', d: isAr ? 'كل مستند يُوقَّع إلكترونياً بتوقيع مُعتمد وختم المؤسسة الرقمي، مع ختم زمني غير قابل للتعديل وسجل تدقيق كامل لمن وقّع ومتى.' : 'Every document is signed with verified e-signatures and organizational digital stamps, with immutable timestamps and full audit trail of who signed and when.' },
+                { t: isAr ? 'التوقيع التلقائي' : 'Auto-Signing Rules', d: isAr ? 'يمكن ضبط قواعد توقيع تلقائية — مثلاً: كل فاتورة معتمدة تُوقَّع وتُختم تلقائياً عند تغيير حالتها لـ "معتمدة" دون تدخل يدوي.' : 'Set auto-signing rules — e.g., every approved invoice is automatically signed & stamped when status changes to "approved" without manual intervention.' },
+                { t: isAr ? 'التحقق العلني من المستندات' : 'Public Document Verification', d: isAr ? 'أي مستند صادر من المنصة يحمل QR Code وكود تحقق — أي طرف خارجي يمكنه التحقق من صحة المستند فوراً عبر صفحة التحقق العلنية.' : 'Every platform-issued document carries a QR code and verification code — any external party can instantly verify authenticity via the public verification page.' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* 2. Transport Chain Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={2}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 to-green-400 flex items-center justify-center shadow-lg">
+                <Truck className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '٢. سلسلة النقل الرقمية — بالتفصيل' : '2. Digital Transport Chain — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'الشحنة الرقمية الكاملة' : 'Full Digital Shipment', d: isAr ? 'كل شحنة لها ملف رقمي كامل: نوع المخلف، الوزن، المصدر، الوجهة، السائق المُعيَّن، صور الاستلام والتسليم، وتوقيعات جميع الأطراف — كلها في مكان واحد.' : 'Every shipment has a full digital file: waste type, weight, source, destination, assigned driver, pickup/delivery photos, and all-party signatures — all in one place.' },
+                { t: isAr ? 'ثلاث فئات سائقين' : 'Three Driver Categories', d: isAr ? 'المنصة تدعم السائق التابع (موظف دائم)، السائق المستقل (نموذج Uber)، والسائق المؤجر (رابط مهمة لمرة واحدة) — كل فئة لها صلاحيات وأدوات مختلفة.' : 'The platform supports Employed Drivers (permanent), Freelance Drivers (Uber model), and Hired Drivers (one-time mission link) — each with different permissions and tools.' },
+                { t: isAr ? 'التوزيع الآلي الذكي (Smart Dispatch)' : 'Smart Dispatch Engine', d: isAr ? 'محرك توزيع يختار السائق الأنسب تلقائياً بناءً على الموقع الجغرافي، التقييم، الحمولة المتاحة، وسعر العرض — مع إمكانية المزايدة من السائقين المستقلين.' : 'Dispatch engine auto-selects the best driver based on location, rating, available capacity, and bid price — with bidding capability for freelance drivers.' },
+                { t: isAr ? 'الخريطة الحية والتتبع' : 'Live Map & Tracking', d: isAr ? 'خريطة حية تعرض مواقع جميع السائقين والشحنات النشطة لحظياً، مع إشعارات واتساب وبوش عند كل تحديث حالة (استلام، في الطريق، تم التسليم).' : 'Live map showing all driver locations and active shipments in real-time, with WhatsApp & push notifications at every status update (picked up, in transit, delivered).' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* 3. AI Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={3}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-400 flex items-center justify-center shadow-lg">
+                <Brain className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '٣. الذكاء الاصطناعي — بالتفصيل' : '3. AI Engine — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'وكيل AI للمبيعات (Sales Agent)' : 'AI Sales Agent', d: isAr ? 'وكيل ذكي يستقبل المحادثات عبر واتساب وتليجرام والموقع — يجيب الأسئلة، يُنشئ طلبات جديدة، ويحوّل للفريق البشري عند الحاجة — يعمل ٢٤/٧ بدون توقف.' : 'Smart agent handling conversations via WhatsApp, Telegram & website — answers questions, creates orders, and escalates to human staff when needed — works 24/7.' },
+                { t: isAr ? 'تصنيف المخلفات بالصورة' : 'Image-Based Waste Classification', d: isAr ? 'التقط صورة للمخلف والذكاء الاصطناعي يصنفه تلقائياً (بلاستيك، معدن، ورق، عضوي...) ويقترح المسار الأمثل للمعالجة أو التدوير.' : 'Take a photo of waste and AI auto-classifies it (plastic, metal, paper, organic...) and suggests the optimal processing or recycling route.' },
+                { t: isAr ? 'كشف الشذوذ والتنبيهات' : 'Anomaly Detection & Alerts', d: isAr ? 'المحرك يراقب كل العمليات ويكتشف الأنماط غير الطبيعية: شحنة بوزن مشبوه، تأخير غير مبرر، فجوة في السجلات — وينبّه المسؤول فوراً.' : 'The engine monitors all operations and detects anomalies: suspicious shipment weight, unexplained delays, record gaps — and alerts management immediately.' },
+                { t: isAr ? 'مساعد العمليات الذكي' : 'Smart Operations Assistant', d: isAr ? 'مساعد AI متاح داخل لوحة التحكم يجيب أسئلة المستخدم عن بياناته: "كم شحنة أرسلت هذا الشهر؟"، "ما أكثر نوع مخلف؟"، "ما أداء السائق أحمد؟"' : 'AI assistant inside the dashboard answers user questions about their data: "How many shipments this month?", "What\'s the most common waste type?", "What\'s driver Ahmed\'s performance?"' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* 4. Command Centers Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={4}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-400 flex items-center justify-center shadow-lg">
+                <BarChart3 className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '٤. لوحات التحكم — بالتفصيل' : '4. Command Centers — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'لوحة المولّد (Generator)' : 'Generator Dashboard', d: isAr ? 'تدير طلبات نقل المخلفات، تتابع الشحنات، تراقب الأوزان والتكاليف، تطبع البيانات والفواتير، وتتواصل مع الناقلين — كلها من شاشة واحدة.' : 'Manage waste transport requests, track shipments, monitor weights & costs, print manifests & invoices, and communicate with transporters — all from one screen.' },
+                { t: isAr ? 'لوحة الناقل (Transporter)' : 'Transporter Dashboard', d: isAr ? 'تدير السائقين والمركبات، تستقبل الطلبات، توزّع المهام، تراقب المسارات الحية، تدير المحاسبة مع كل جهة، وتصدر التقارير الرقابية.' : 'Manage drivers & vehicles, receive requests, dispatch tasks, monitor live routes, handle accounting per entity, and generate regulatory reports.' },
+                { t: isAr ? 'لوحة المدوّر (Recycler)' : 'Recycler Dashboard', d: isAr ? 'تدير سعة المنشأة، تتبع المواد الواردة والمُعالَجة، مؤشرات إعادة التدوير، جودة المواد، وتقارير الأثر البيئي — مع ربط مباشر بسوق B2B.' : 'Manage facility capacity, track incoming & processed materials, recycling rates, material quality, environmental impact reports — with direct B2B marketplace link.' },
+                { t: isAr ? 'لوحة المدير السيادي (Sovereign Admin)' : 'Sovereign Admin Panel', d: isAr ? 'رؤية شاملة ٣٦٠° على المنظومة بالكامل: كل الجهات، كل الشحنات، كل المستخدمين، الموافقات، الإعدادات، والتقارير — مع صلاحيات حاكمة كاملة.' : 'Full 360° view of the entire ecosystem: all entities, shipments, users, approvals, settings & reports — with complete sovereign authority.' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* 5. Regulatory Compliance Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={5}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-rose-400 flex items-center justify-center shadow-lg">
+                <Scale className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '٥. الامتثال الرقابي — بالتفصيل' : '5. Regulatory Compliance — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'بوابات الجهات الرقابية' : 'Regulatory Authority Portals', d: isAr ? 'بوابة مخصصة لكل جهة رقابية (WMRA, EEAA, LTRA, IDA) مع تقارير مُعدّة مسبقاً تتوافق مع المتطلبات القانونية لكل هيئة — جاهزة للتقديم بضغطة زر.' : 'Dedicated portal for each authority (WMRA, EEAA, LTRA, IDA) with pre-formatted reports matching each agency\'s legal requirements — ready to submit with one click.' },
+                { t: isAr ? 'التدقيق التفاعلي ISO' : 'Interactive ISO Auditing', d: isAr ? 'نظام تدقيق ISO 14001 تفاعلي مع قوائم فحص رقمية، ربط مباشر بالأدلة من قاعدة البيانات، وإمكانية دعوة المدقق الخارجي عبر رابط آمن مؤقت.' : 'Interactive ISO 14001 audit system with digital checklists, direct evidence linking from the database, and ability to invite external auditors via secure temporary link.' },
+                { t: isAr ? 'إنذارات التراخيص والتجديد' : 'License & Renewal Alerts', d: isAr ? 'المنصة تتبع كل ترخيص وتصريح لكل جهة — وترسل إنذارات استباقية قبل انتهاء الصلاحية بـ 30/60/90 يوماً عبر البوش والإيميل والواتساب.' : 'The platform tracks every license & permit for every entity — sending proactive alerts 30/60/90 days before expiry via push, email & WhatsApp.' },
+                { t: isAr ? 'سجل التدقيق الشامل (Audit Trail)' : 'Comprehensive Audit Trail', d: isAr ? 'كل إجراء على المنصة مسجّل: من أنشأ، من عدّل، من حذف، متى وأين — سجل لا يمكن مسحه أو تعديله، يُستخدم كدليل قانوني عند الحاجة.' : 'Every action is logged: who created, modified, deleted, when & where — an immutable, uneditable record usable as legal evidence when needed.' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* 6. Integration Deep Dive */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={6}
+            className="mb-10 p-6 sm:p-8 rounded-2xl border border-border/40 bg-card">
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-emerald-400 flex items-center justify-center shadow-lg">
+                <Network className="w-5 h-5 text-white" />
+              </div>
+              <h3 className="text-xl font-black">{isAr ? '٦. الربط والتكامل — بالتفصيل' : '6. Integration & Connectivity — In Detail'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {[
+                { t: isAr ? 'مركز التواصل الموحد' : 'Unified Communication Hub', d: isAr ? 'شات مشفر داخل المنصة بين كل الأطراف — رسائل نصية، صور، ملفات، استطلاعات رأي، وقنوات بث جماعية — كل المحادثات محفوظة ومرتبطة بالعمليات.' : 'Encrypted in-platform chat between all parties — text, photos, files, polls, broadcast channels — all conversations saved and linked to operations.' },
+                { t: isAr ? 'سوق B2B الرقمي' : 'B2B Digital Marketplace', d: isAr ? 'سوق تبادل مخلفات بين الجهات — عرض وطلب، تفاوض، رسائل، تأكيد متبادل، تقييم — مع حماية خصوصية العروض بناءً على دور كل مستخدم.' : 'Waste exchange marketplace — supply & demand, negotiation, messaging, mutual confirmation, ratings — with offer privacy protection based on user role.' },
+                { t: isAr ? 'إشعارات متعددة القنوات' : 'Multi-Channel Notifications', d: isAr ? 'كل حدث مهم يُرسل عبر ٤ قنوات: إشعار داخلي، بوش نوتيفيكيشن (حتى لو التطبيق مغلق)، واتساب، وإيميل — لضمان عدم فوات أي تحديث.' : 'Every important event sent via 4 channels: in-app notification, push notification (even when app is closed), WhatsApp & email — ensuring nothing is missed.' },
+                { t: isAr ? 'مفاتيح API للتكامل' : 'API Keys for Integration', d: isAr ? 'نظام مفاتيح API مع صلاحيات محددة (قراءة فقط، كتابة، إدارة) وتحديد معدل الطلبات — يسمح لأي نظام خارجي بالربط الآمن مع بيانات المنصة.' : 'API key system with granular scopes (read-only, write, admin) and rate limiting — allowing any external system to securely connect with platform data.' },
+              ].map((item, i) => (
+                <div key={i} className="p-4 rounded-xl bg-muted/30 dark:bg-muted/15 border border-border/20">
+                  <h4 className="text-sm font-bold mb-1.5 text-foreground">{item.t}</h4>
+                  <p className="text-xs text-muted-foreground leading-relaxed">{item.d}</p>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+
+          {/* Additional Platform Capabilities */}
+          <motion.div initial="hidden" whileInView="visible" viewport={{ once: true }} variants={fadeUp} custom={7}
+            className="p-6 sm:p-8 rounded-2xl border-2 border-primary/20 bg-gradient-to-br from-primary/[0.03] to-transparent">
+            <div className="flex items-center gap-3 mb-5">
+              <Sparkles className="w-8 h-8 text-primary" />
+              <h3 className="text-xl font-black">{isAr ? 'وأكثر من ذلك...' : 'And Much More...'}</h3>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[
+                isAr ? 'نظام محاسبة رقمي متكامل (ERP)' : 'Full Digital Accounting (ERP)',
+                isAr ? 'مزادات المخلفات الإلكترونية' : 'Electronic Waste Auctions',
+                isAr ? 'نظام التوظيف والتعيين الذكي' : 'Smart Recruitment System',
+                isAr ? 'إعلانات المنصة والتسويق' : 'Platform Ads & Marketing',
+                isAr ? 'أكاديمية تدريب إعادة التدوير' : 'Recycling Training Academy',
+                isAr ? 'نظام المكافآت والتقييم' : 'Rewards & Rating System',
+                isAr ? 'بطاقة الهوية الرقمية للمؤسسة' : 'Digital Identity Card',
+                isAr ? 'مركز الطباعة الذكي' : 'Smart Print Center',
+                isAr ? 'كول سنتر ذكي بتحليل المكالمات' : 'Smart Call Center with Analytics',
+              ].map((item, i) => (
+                <div key={i} className="flex items-center gap-2 px-3 py-2.5 rounded-lg bg-card border border-border/30">
+                  <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span className="text-xs font-bold">{item}</span>
+                </div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
       <section className="py-16 sm:py-20">
         <div className="max-w-[1000px] mx-auto px-4 sm:px-6">
           <motion.h2
