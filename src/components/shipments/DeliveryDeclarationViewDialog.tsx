@@ -123,7 +123,7 @@ const DeliveryDeclarationViewDialog = ({
                 'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح.',
                 'من المصنع للمستقبل.. سكة واحدة مع',
               ][Math.floor(Date.now() / 86400000) % 4]}
-              <img src="/irecycle-logo.png" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} />
+              <img src="/irecycle-logo.webp" alt="iRecycle" style={{ height: '14px', verticalAlign: 'middle', borderRadius: '3px' }} />
             </p>
           </div>
         </div>

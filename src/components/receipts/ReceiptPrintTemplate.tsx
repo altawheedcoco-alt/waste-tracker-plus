@@ -793,7 +793,7 @@ export const generateReceiptPrintHTML = (receipt: ReceiptPrintData): string => {
                 'إحنا مش بنلم مخلفات، إحنا بنقفل دايرة الإنتاج صح.',
                 'من المصنع للمستقبل.. سكة واحدة مع',
               ];
-              const logo = '<img src="/irecycle-logo.png" alt="iRecycle" style="height:16px;vertical-align:middle;display:inline-block;margin:0 3px;border-radius:3px;" />';
+              const logo = '<img src="/irecycle-logo.webp" alt="iRecycle" style="height:16px;vertical-align:middle;display:inline-block;margin:0 3px;border-radius:3px;" />';
               return taglines[Math.floor(Date.now() / 86400000) % 4] + ' ' + logo;
             })()}
           </div>
