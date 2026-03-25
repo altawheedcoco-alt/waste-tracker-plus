@@ -93,7 +93,7 @@ const NewsTicker = memo(() => {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 });
 

@@ -335,6 +335,14 @@ const Header = memo(() => {
         <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col gap-1">
+              {/* زر آخر الأخبار */}
+              <button
+                onClick={() => handleNavClick('#ticker')}
+                className="flex items-center gap-2.5 w-full px-3.5 py-3.5 text-sm font-bold rounded-xl text-primary bg-primary/8 hover:bg-primary/15 transition-all touch-manipulation"
+              >
+                <Newspaper className="w-4 h-4 text-primary" />
+                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+              </button>
               {/* زر المنشورات المستقل */}
               <button
                 onClick={() => handleNavClick('/posts')}
