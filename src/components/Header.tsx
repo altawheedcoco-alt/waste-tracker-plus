@@ -212,19 +212,21 @@ const Header = memo(() => {
             <div className="flex items-center gap-2">
               <button
                 onClick={toggleDarkMode}
-                className="relative flex items-center justify-center w-6 h-6 rounded text-muted-foreground/50 hover:text-foreground/70 transition-all duration-300"
+                className="relative flex items-center justify-center w-5 h-5 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30 text-foreground/60 hover:text-foreground hover:border-primary/30 transition-all duration-300"
                 aria-label="Toggle theme"
               >
-                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+                <Sun className={`w-2.5 h-2.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-2.5 h-2.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
               </button>
-              <span className="w-px h-3 bg-border/20" />
+              <span className="w-px h-3.5 bg-border/20" />
               <button
                 onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1 text-[10.5px] font-bold text-muted-foreground/50 hover:text-foreground/70 transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
               >
-                <Globe className="w-3 h-3" />
-                {language === 'ar' ? 'English' : 'عربي'}
+                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
+                  <Globe className="w-2.5 h-2.5 text-foreground/60" />
+                </span>
+                {language === 'ar' ? 'EN' : 'عربي'}
               </button>
             </div>
           </div>
