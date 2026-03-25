@@ -1,26 +1,64 @@
 /// <reference lib="webworker" />
 import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching';
-import { registerRoute } from 'workbox-routing';
-import { NetworkOnly, CacheFirst } from 'workbox-strategies';
+import { registerRoute, NavigationRoute } from 'workbox-routing';
+import { NetworkFirst, NetworkOnly, CacheFirst } from 'workbox-strategies';
 import { ExpirationPlugin } from 'workbox-expiration';
 import { CacheableResponsePlugin } from 'workbox-cacheable-response';
 
 declare let self: ServiceWorkerGlobalScope;
 
-// Workbox precaching
+// Workbox precaching (static assets with revision hashes)
 precacheAndRoute(self.__WB_MANIFEST);
 cleanupOutdatedCaches();
 
-// Skip waiting & claim clients immediately
+// Skip waiting & claim clients immediately — forces new SW to take over
 self.addEventListener('install', () => { self.skipWaiting(); });
-self.addEventListener('activate', (event) => { event.waitUntil(self.clients.claim()); });
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((names) => {
+      return Promise.all(
+        names
+          .filter((name) => !name.includes('workbox-precache'))
+          .map((name) => caches.delete(name))
+      );
+    }).then(() => self.clients.claim())
+  );
+});
 
-// Runtime caching rules
+// Navigation requests (HTML pages) → always network first
+registerRoute(
+  new NavigationRoute(
+    new NetworkFirst({
+      cacheName: 'pages-cache',
+      networkTimeoutSeconds: 5,
+      plugins: [
+        new CacheableResponsePlugin({ statuses: [0, 200] }),
+      ],
+    })
+  )
+);
+
+// JS/CSS app chunks → network first to always get latest
+registerRoute(
+  ({ request }) => 
+    request.destination === 'script' || request.destination === 'style',
+  new NetworkFirst({
+    cacheName: 'app-assets-cache',
+    networkTimeoutSeconds: 5,
+    plugins: [
+      new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 24 * 60 * 60 }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+    ],
+  })
+);
+
+// Supabase API → always from network
 registerRoute(
   /^https:\/\/.*\.supabase\.co\/.*/i,
   new NetworkOnly()
 );
 
+// Google Fonts (rarely change) → cache first
 registerRoute(
   /^https:\/\/fonts\.googleapis\.com\/.*/i,
   new CacheFirst({
@@ -77,7 +115,6 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Focus existing tab if available
       for (const client of clientList) {
         if ('focus' in client) {
           client.focus();
@@ -87,7 +124,6 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Open new window
       return self.clients.openWindow(url);
     })
   );

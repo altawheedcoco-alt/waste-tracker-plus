@@ -18,14 +18,20 @@ export const PWAUpdatePrompt = () => {
       if (!pwaEnabled) return;
 
       if (r) {
-        // فحص التحديثات كل 30 ثانية
-        setInterval(() => r.update(), 30 * 1000);
+        // فحص التحديثات كل 10 ثوانٍ
+        setInterval(() => r.update(), 10 * 1000);
 
+        // فحص فوري عند العودة للتطبيق
         document.addEventListener('visibilitychange', () => {
-          if (document.visibilityState === 'visible') r.update();
+          if (document.visibilityState === 'visible') {
+            r.update();
+          }
         });
 
         window.addEventListener('online', () => r.update());
+        
+        // فحص فوري عند التسجيل
+        r.update();
       }
     },
     onRegisterError(error) {
