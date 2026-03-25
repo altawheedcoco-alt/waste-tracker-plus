@@ -2,22 +2,22 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Shield, Leaf, BarChart3, Truck, Recycle, Globe, CheckCircle2, Sparkles, Zap, Brain, FileCheck, Users } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import authIllustration from '@/assets/auth-side-illustration.png';
-import authIllustration2 from '@/assets/auth-illustration-2.png';
-import authIllustration3 from '@/assets/auth-illustration-3.png';
-import authIllustration4 from '@/assets/auth-illustration-4.png';
-import authIllustration5 from '@/assets/auth-illustration-5.png';
-import authIllustration6 from '@/assets/auth-illustration-6.png';
-import authIllustration7 from '@/assets/auth-illustration-7.png';
-import authIllustration8 from '@/assets/auth-illustration-8.png';
-import authIllustration9 from '@/assets/auth-illustration-9.png';
-import authIllustration10 from '@/assets/auth-illustration-10.png';
-import authIllustration11 from '@/assets/auth-illustration-11.png';
-import authIllustration12 from '@/assets/auth-illustration-12.png';
-import authIllustration13 from '@/assets/auth-illustration-13.png';
-import authIllustration14 from '@/assets/auth-illustration-14.png';
-import authIllustration15 from '@/assets/auth-illustration-15.png';
-import authIllustration16 from '@/assets/auth-illustration-16.png';
+import authIllustration from '@/assets/auth-side-illustration.webp';
+import authIllustration2 from '@/assets/auth-illustration-2.webp';
+import authIllustration3 from '@/assets/auth-illustration-3.webp';
+import authIllustration4 from '@/assets/auth-illustration-4.webp';
+import authIllustration5 from '@/assets/auth-illustration-5.webp';
+import authIllustration6 from '@/assets/auth-illustration-6.webp';
+import authIllustration7 from '@/assets/auth-illustration-7.webp';
+import authIllustration8 from '@/assets/auth-illustration-8.webp';
+import authIllustration9 from '@/assets/auth-illustration-9.webp';
+import authIllustration10 from '@/assets/auth-illustration-10.webp';
+import authIllustration11 from '@/assets/auth-illustration-11.webp';
+import authIllustration12 from '@/assets/auth-illustration-12.webp';
+import authIllustration13 from '@/assets/auth-illustration-13.webp';
+import authIllustration14 from '@/assets/auth-illustration-14.webp';
+import authIllustration15 from '@/assets/auth-illustration-15.webp';
+import authIllustration16 from '@/assets/auth-illustration-16.webp';
 
 const illustrations = [
   { src: authIllustration, alt: 'منصة iRecycle الرقمية', title: 'التحول الرقمي البيئي', desc: 'رقمنة كاملة لعمليات إدارة المخلفات' },
