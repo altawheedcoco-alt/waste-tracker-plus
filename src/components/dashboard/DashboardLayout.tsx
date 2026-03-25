@@ -544,10 +544,6 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             <AccountSwitcher collapsed={false} />
           </div>
 
-          {/* Push Notifications Toggle */}
-          <div className="border-b border-sidebar-border px-2">
-            <PushToggle />
-          </div>
 
 
           {/* Search Box */}
