@@ -291,7 +291,7 @@ const SocialIcon = ({ icon: Icon, label }: { icon: typeof Facebook; label: strin
 
 const FooterLink = ({ children, onClick, icon: Icon }: { children: React.ReactNode; onClick: () => void; icon?: any }) => (
   <li>
-    <button onClick={onClick} className="text-background/55 hover:text-primary transition-all inline-flex items-center gap-1 cursor-pointer text-[11px] group">
+    <button onClick={onClick} className="text-white/55 hover:text-primary transition-all inline-flex items-center gap-1 cursor-pointer text-[11px] group">
       {Icon && <Icon className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity flex-shrink-0" />}
       <span>{children}</span>
     </button>
