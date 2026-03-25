@@ -276,6 +276,14 @@ const Header = memo(() => {
 
             {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+              {/* Latest News Button */}
+              <button
+                onClick={() => handleNavClick('#ticker')}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-primary/20 bg-primary/5 text-xs font-bold text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+              >
+                <Newspaper className="w-3.5 h-3.5" />
+                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+              </button>
               {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
