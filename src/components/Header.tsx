@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText, Sun, Moon, Newspaper } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText, Sun, Moon, Newspaper, Zap } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -49,7 +49,7 @@ const Header = memo(() => {
   const dropdowns: NavDropdown[] = [
     {
       label: t('header.discover'),
-      icon: Eye,
+      icon: Zap,
       columns: 2,
       megaShowcase: true,
       items: [
@@ -158,111 +158,118 @@ const Header = memo(() => {
   }, [navigate]);
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-[60] border-b border-border/30 animate-fade-in">
-      {/* v5.1 Gradient top accent line */}
-      <div className="absolute top-0 left-0 right-0 h-[2.5px] sm:h-[3px] bg-gradient-to-r from-eco-ocean via-primary to-amber-500 opacity-90" />
+    <header className="fixed top-0 left-0 right-0 z-[60] animate-fade-in">
+      {/* Premium gradient accent - thinner, more refined */}
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-primary via-eco-ocean to-primary opacity-80" />
       
-      <div className="bg-background dark:bg-card backdrop-blur-none shadow-sm">
-        <div className="w-full mx-auto px-3 sm:px-4 max-w-[1400px]">
-          <div className="flex items-center h-14 sm:h-[72px] gap-2">
-            {/* Mobile toggle - appears first (right side in RTL) */}
+      <div className="bg-background/95 backdrop-blur-xl border-b border-border/20 shadow-[0_1px_3px_0_hsl(var(--foreground)/0.04)]">
+        <div className="w-full mx-auto px-3 sm:px-5 max-w-[1400px]">
+          <div className="flex items-center h-14 sm:h-16 gap-3">
+            
+            {/* Mobile toggle */}
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="lg:hidden p-2.5 rounded-xl text-foreground hover:bg-accent/50 transition-colors touch-manipulation flex-shrink-0"
+              className="lg:hidden p-2 rounded-lg text-foreground/70 hover:text-foreground hover:bg-accent/60 transition-all touch-manipulation flex-shrink-0"
               aria-label="Toggle menu"
             >
-              {isMenuOpen ? <X size={22} /> : <Menu size={22} />}
+              {isMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
 
-            {/* Logo */}
+            {/* Logo - compact and clean */}
             <div
-              className="flex items-center gap-2 sm:gap-3 cursor-pointer group flex-shrink-0"
+              className="flex items-center cursor-pointer group flex-shrink-0"
               onClick={() => navigate('/')}
             >
-              <div className="transition-transform duration-300 group-hover:scale-105 drop-shadow-md">
+              <div className="transition-transform duration-300 group-hover:scale-[1.03]">
                 <PlatformLogo size="lg" showText priority />
               </div>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Subtle separator */}
+            <div className="hidden lg:block w-px h-7 bg-border/40 flex-shrink-0" />
+
+            {/* Desktop Navigation - clean pill style */}
             <nav className="hidden lg:flex items-center gap-0.5 flex-1 min-w-0 justify-center overflow-visible">
               {dropdowns.map((dropdown, index) => (
                 <div
                   key={dropdown.label}
-                  className={`relative ${index >= 3 ? 'hidden xl:block' : ''}`}
+                  className={`relative ${index >= 4 ? 'hidden xl:block' : ''}`}
                   onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                   onMouseLeave={handleDropdownLeave}
                 >
                   <button
-                    className={`group flex items-center gap-1 px-2 xl:px-3 py-2 text-[12px] xl:text-[13px] font-semibold rounded-xl transition-all duration-200 whitespace-nowrap ${
+                    className={`group flex items-center gap-1.5 px-2.5 xl:px-3 py-1.5 text-[12px] xl:text-[12.5px] font-semibold rounded-lg transition-all duration-200 whitespace-nowrap ${
                       openDropdown === dropdown.label
-                        ? 'text-primary bg-primary/10'
-                        : 'text-foreground/75 dark:text-foreground/85 hover:text-foreground hover:bg-accent/50'
+                        ? 'text-primary bg-primary/8 shadow-sm shadow-primary/5'
+                        : 'text-foreground/65 hover:text-foreground/90 hover:bg-accent/40'
                     }`}
                     onClick={() => setOpenDropdown(openDropdown === dropdown.label ? null : dropdown.label)}
                   >
-                    <dropdown.icon className={`w-3.5 h-3.5 transition-colors ${openDropdown === dropdown.label ? 'text-primary' : 'text-foreground/50 dark:text-foreground/60 group-hover:text-foreground/70'}`} />
+                    <dropdown.icon className={`w-3.5 h-3.5 transition-colors ${openDropdown === dropdown.label ? 'text-primary' : 'text-foreground/40 group-hover:text-foreground/60'}`} />
                     {dropdown.label}
-                    <ChevronDown className={`w-3 h-3 transition-transform duration-300 ${openDropdown === dropdown.label ? 'rotate-180 text-primary' : ''}`} />
+                    <ChevronDown className={`w-3 h-3 opacity-50 transition-transform duration-300 ${openDropdown === dropdown.label ? 'rotate-180 opacity-100 text-primary' : ''}`} />
                   </button>
 
-                  {/* Mega Dropdown */}
+                  {/* Dropdown Panel */}
                   {openDropdown === dropdown.label && (
                     <div
-                      className={`absolute top-full mt-2 bg-background border border-border rounded-2xl shadow-2xl z-50 overflow-hidden animate-fade-in ${
-                        dropdown.megaShowcase ? 'w-[640px]' : dropdown.columns === 2 ? 'w-[520px]' : 'w-[300px]'
+                      className={`absolute top-full mt-1.5 bg-background/98 backdrop-blur-xl border border-border/30 rounded-xl shadow-xl shadow-foreground/5 z-50 overflow-hidden animate-fade-in ${
+                        dropdown.megaShowcase ? 'w-[620px]' : dropdown.columns === 2 ? 'w-[500px]' : 'w-[280px]'
                       }`}
                       style={{ [language === 'ar' ? 'right' : 'left']: 0 }}
                       onMouseEnter={() => handleDropdownEnter(dropdown.label)}
                       onMouseLeave={handleDropdownLeave}
                     >
-                      {/* Dropdown header */}
-                      <div className="px-4 pt-4 pb-2 flex items-center justify-between">
-                        <p className="text-[11px] font-bold text-muted-foreground/60 uppercase tracking-wider">{dropdown.label}</p>
+                      {/* Dropdown header - minimal */}
+                      <div className="px-4 pt-3.5 pb-1.5 flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <dropdown.icon className="w-3.5 h-3.5 text-primary/60" />
+                          <p className="text-[10.5px] font-bold text-muted-foreground/50 uppercase tracking-[0.08em]">{dropdown.label}</p>
+                        </div>
                         {dropdown.megaShowcase && (
-                          <span className="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
+                          <span className="text-[9px] font-bold text-primary/80 bg-primary/6 px-2 py-0.5 rounded-full border border-primary/10">
                             {t('header.integratedSystems')}
                           </span>
                         )}
                       </div>
 
-                      <div className={`px-2 pb-2 ${dropdown.columns === 2 || dropdown.megaShowcase ? 'grid grid-cols-2 gap-0.5' : 'flex flex-col gap-0.5'} ${dropdown.megaShowcase ? 'max-h-[70vh] overflow-y-auto scrollbar-thin' : ''}`}>
+                      <div className={`px-1.5 pb-1.5 ${dropdown.columns === 2 || dropdown.megaShowcase ? 'grid grid-cols-2 gap-px' : 'flex flex-col gap-px'} ${dropdown.megaShowcase ? 'max-h-[65vh] overflow-y-auto scrollbar-thin' : ''}`}>
                         {dropdown.items.map((item) => (
                           <button
                             key={item.href + item.label}
                             onClick={() => handleNavClick(item.href)}
-                            className={`flex items-start gap-3 w-full p-3 rounded-xl hover:bg-accent/70 transition-all duration-150 text-start group/item ${dropdown.megaShowcase ? 'p-4' : ''}`}
+                            className={`flex items-start gap-2.5 w-full p-2.5 rounded-lg hover:bg-accent/50 transition-all duration-150 text-start group/item ${dropdown.megaShowcase ? 'p-3' : ''}`}
                           >
-                            <div className={`rounded-xl bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center flex-shrink-0 group-hover/item:from-primary/20 group-hover/item:to-primary/10 group-hover/item:shadow-sm transition-all ${dropdown.megaShowcase ? 'w-11 h-11' : 'w-9 h-9'}`}>
-                              <item.icon className={`text-primary ${dropdown.megaShowcase ? 'w-5 h-5' : 'w-4 h-4'}`} />
+                            <div className={`rounded-lg bg-primary/6 flex items-center justify-center flex-shrink-0 group-hover/item:bg-primary/12 group-hover/item:shadow-sm transition-all ${dropdown.megaShowcase ? 'w-9 h-9' : 'w-8 h-8'}`}>
+                              <item.icon className={`text-primary/70 group-hover/item:text-primary transition-colors ${dropdown.megaShowcase ? 'w-4.5 h-4.5' : 'w-3.5 h-3.5'}`} />
                             </div>
                             <div className="min-w-0 flex-1">
                               <div className="flex items-center gap-1.5">
-                                <p className="text-sm font-semibold text-foreground group-hover/item:text-primary transition-colors">{item.label}</p>
+                                <p className="text-[12.5px] font-semibold text-foreground/85 group-hover/item:text-foreground transition-colors">{item.label}</p>
                                 {item.badge && (
-                                  <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-primary/10 text-primary leading-none">
+                                  <span className="px-1.5 py-px text-[8px] font-bold rounded bg-primary/8 text-primary/80 leading-none border border-primary/10">
                                     {item.badge}
                                   </span>
                                 )}
                               </div>
                               {dropdown.megaShowcase && item.longDesc ? (
-                                <p className="text-[11px] text-muted-foreground mt-1 leading-[1.6] line-clamp-3">{item.longDesc}</p>
+                                <p className="text-[10.5px] text-muted-foreground/70 mt-0.5 leading-[1.5] line-clamp-2">{item.longDesc}</p>
                               ) : (
-                                <p className="text-[11px] text-muted-foreground mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
+                                <p className="text-[10.5px] text-muted-foreground/60 mt-0.5 leading-relaxed line-clamp-1">{item.desc}</p>
                               )}
                             </div>
                           </button>
                         ))}
                       </div>
 
-                      {/* Footer CTA */}
+                      {/* Footer */}
                       {dropdown.footer && (
-                        <div className="border-t border-border/40 px-2 py-2">
+                        <div className="border-t border-border/20 px-2 py-1.5">
                           <button
                             onClick={() => handleNavClick(dropdown.footer!.href)}
-                            className="flex items-center gap-2 w-full px-3 py-2.5 rounded-xl text-sm font-semibold text-primary hover:bg-primary/5 transition-colors"
+                            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-[12px] font-semibold text-primary/80 hover:text-primary hover:bg-primary/5 transition-colors"
                           >
-                            <dropdown.footer.icon className="w-4 h-4" />
+                            <dropdown.footer.icon className="w-3.5 h-3.5" />
                             {dropdown.footer.label}
                             <ChevronDown className={`w-3 h-3 ${language === 'ar' ? 'rotate-90' : '-rotate-90'}`} />
                           </button>
@@ -274,55 +281,63 @@ const Header = memo(() => {
               ))}
             </nav>
 
-            {/* Right Actions */}
-            <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
-              {/* Latest News Button */}
+            {/* Subtle separator */}
+            <div className="hidden lg:block w-px h-7 bg-border/40 flex-shrink-0" />
+
+            {/* Right Actions - grouped and organized */}
+            <div className="hidden lg:flex items-center gap-1 flex-shrink-0">
+              {/* News pill */}
               <button
                 onClick={() => handleNavClick('#ticker')}
-                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-primary/20 bg-primary/5 text-xs font-bold text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[11px] font-bold text-primary/80 hover:text-primary bg-primary/5 hover:bg-primary/8 border border-primary/10 hover:border-primary/20 transition-all duration-200"
               >
-                <Newspaper className="w-3.5 h-3.5" />
-                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+                <Newspaper className="w-3 h-3" />
+                {language === 'ar' ? 'الأخبار' : 'News'}
               </button>
-              {/* Dark Mode Toggle */}
-              <button
-                onClick={toggleDarkMode}
-                className="relative flex items-center justify-center w-9 h-9 rounded-xl border border-border/50 bg-background/60 text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-300 overflow-hidden group"
-                aria-label={settings.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                <Sun className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-                <Moon className={`w-4 h-4 absolute transition-all duration-500 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
-              </button>
-              <button
-                onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                className="flex items-center gap-1 px-2 py-1.5 rounded-xl border border-border/50 bg-background/60 text-xs font-bold text-muted-foreground hover:text-primary hover:border-primary/30 hover:bg-primary/5 transition-all duration-200"
-                aria-label="Switch language"
-              >
-                <Globe className="w-3.5 h-3.5" />
-                {language === 'ar' ? 'EN' : 'عربي'}
-              </button>
+
+              {/* Utility group */}
+              <div className="flex items-center bg-muted/30 rounded-lg border border-border/20 p-0.5">
+                <button
+                  onClick={toggleDarkMode}
+                  className="relative flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground/70 hover:text-foreground hover:bg-background/80 transition-all duration-300"
+                  aria-label={settings.isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                  <Sun className={`w-3.5 h-3.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                  <Moon className={`w-3.5 h-3.5 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+                </button>
+                <div className="w-px h-4 bg-border/30" />
+                <button
+                  onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
+                  className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-background/80 transition-all duration-200"
+                  aria-label="Switch language"
+                >
+                  <Globe className="w-3 h-3" />
+                  {language === 'ar' ? 'EN' : 'عر'}
+                </button>
+              </div>
+
+              {/* Auth actions */}
               {user ? (
-                <>
-                  <Button variant="default" size="sm" onClick={handleGoToDashboard} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
-                    <LayoutDashboard className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-1 ms-0.5">
+                  <Button variant="default" size="sm" onClick={handleGoToDashboard} className="gap-1.5 text-[11px] font-bold rounded-lg h-7 px-3 shadow-sm whitespace-nowrap">
+                    <LayoutDashboard className="w-3 h-3" />
                     {t('nav.dashboard') || 'لوحة التحكم'}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleLogout} className="gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50">
-                    <LogOut className="w-3.5 h-3.5" />
-                    {t('nav.logout') || 'خروج'}
+                  <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-1 text-[11px] font-semibold rounded-lg h-7 px-2 text-destructive/70 hover:text-destructive hover:bg-destructive/8">
+                    <LogOut className="w-3 h-3" />
                   </Button>
-                </>
+                </div>
               ) : (
-                <>
-                  <Button variant="default" size="sm" onClick={handleLogin} className="gap-1 text-xs font-semibold rounded-xl h-8 px-3 shadow-md whitespace-nowrap">
-                    <LogIn className="w-3.5 h-3.5" />
+                <div className="flex items-center gap-1 ms-0.5">
+                  <Button variant="default" size="sm" onClick={handleLogin} className="gap-1.5 text-[11px] font-bold rounded-lg h-7 px-3 shadow-sm whitespace-nowrap">
+                    <LogIn className="w-3 h-3" />
                     {t('nav.login')}
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-xs font-semibold rounded-xl h-8 px-2.5 border-border/50 hover:border-primary/30 hover:bg-primary/5 hover:text-primary">
-                    <UserPlus className="w-3.5 h-3.5" />
+                  <Button variant="ghost" size="sm" onClick={handleEmployeeLogin} className="hidden xl:flex gap-1 text-[11px] font-semibold rounded-lg h-7 px-2 text-muted-foreground/70 hover:text-foreground">
+                    <UserPlus className="w-3 h-3" />
                     {t('nav.employeeLogin')}
                   </Button>
-                </>
+                </div>
               )}
             </div>
 
@@ -330,69 +345,74 @@ const Header = memo(() => {
         </div>
       </div>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu - redesigned */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
-          <div className="container mx-auto px-4 py-4">
-            <nav className="flex flex-col gap-1">
-              {/* زر آخر الأخبار */}
-              <button
-                onClick={() => handleNavClick('#ticker')}
-                className="flex items-center gap-2.5 w-full px-3.5 py-3.5 text-sm font-bold rounded-xl text-primary bg-primary/8 hover:bg-primary/15 transition-all touch-manipulation"
-              >
-                <Newspaper className="w-4 h-4 text-primary" />
-                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
-              </button>
-              {/* زر المنشورات المستقل */}
-              <button
-                onClick={() => handleNavClick('/posts')}
-                className="flex items-center gap-2.5 w-full px-3.5 py-3.5 text-sm font-bold rounded-xl text-primary bg-primary/8 hover:bg-primary/15 transition-all touch-manipulation"
-              >
-                <FileText className="w-4 h-4 text-primary" />
-                منشورات المنصة
-                <span className="ms-auto px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-primary/10 text-primary leading-none">جديد</span>
-              </button>
+        <div className="lg:hidden bg-background/98 backdrop-blur-xl border-t border-border/20 animate-fade-in max-h-[80vh] overflow-y-auto shadow-xl relative z-50 overscroll-contain">
+          <div className="mx-auto px-4 py-3">
+            <nav className="flex flex-col gap-0.5">
+              {/* Quick actions row */}
+              <div className="flex items-center gap-2 mb-2 pb-2 border-b border-border/20">
+                <button
+                  onClick={() => handleNavClick('#ticker')}
+                  className="flex items-center gap-1.5 flex-1 px-3 py-2.5 text-[12px] font-bold rounded-lg text-primary bg-primary/6 hover:bg-primary/10 border border-primary/10 transition-all touch-manipulation"
+                >
+                  <Newspaper className="w-3.5 h-3.5" />
+                  {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+                </button>
+                <button
+                  onClick={() => handleNavClick('/posts')}
+                  className="flex items-center gap-1.5 flex-1 px-3 py-2.5 text-[12px] font-bold rounded-lg text-foreground/70 bg-accent/40 hover:bg-accent/60 border border-border/20 transition-all touch-manipulation"
+                >
+                  <FileText className="w-3.5 h-3.5" />
+                  منشورات
+                  <span className="ms-auto px-1 py-px text-[8px] font-bold rounded bg-primary/10 text-primary leading-none">جديد</span>
+                </button>
+              </div>
+
+              {/* Navigation dropdowns */}
               {dropdowns.map((dropdown) => (
                 <MobileDropdown key={dropdown.label} dropdown={dropdown} onNavigate={handleNavClick} />
               ))}
-              <div className="flex flex-col gap-2.5 pt-4 border-t border-border/40 mt-3">
-                <div className="grid grid-cols-2 gap-2.5">
+
+              {/* Bottom actions */}
+              <div className="flex flex-col gap-2 pt-3 border-t border-border/20 mt-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     onClick={() => setLanguage(language === 'ar' ? 'en' : 'ar')}
-                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                    className="flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border/30 bg-muted/20 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:border-border/50 transition-all touch-manipulation"
                   >
-                    <Globe className="w-4 h-4" />
+                    <Globe className="w-3.5 h-3.5" />
                     {language === 'ar' ? 'English' : 'عربي'}
                   </button>
                   <button
                     onClick={toggleDarkMode}
-                    className="flex items-center justify-center gap-2 w-full h-11 rounded-xl border border-border/50 bg-muted/30 text-sm font-semibold text-muted-foreground hover:text-primary hover:border-primary/30 transition-all touch-manipulation"
+                    className="flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border/30 bg-muted/20 text-[12px] font-semibold text-muted-foreground hover:text-foreground hover:border-border/50 transition-all touch-manipulation"
                     aria-label={settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
                   >
-                    {settings.isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-                    {settings.isDarkMode ? 'وضع نهاري' : 'وضع ليلي'}
+                    {settings.isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                    {settings.isDarkMode ? 'نهاري' : 'ليلي'}
                   </button>
                 </div>
                 <GuideButton />
                 {user ? (
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
-                      <LayoutDashboard className="w-4 h-4" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-lg touch-manipulation font-bold text-[12px] shadow-sm" onClick={() => { setIsMenuOpen(false); handleGoToDashboard(); }}>
+                      <LayoutDashboard className="w-3.5 h-3.5" />
                       {t('nav.dashboard') || 'لوحة التحكم'}
                     </Button>
-                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm border-destructive/30 text-destructive hover:bg-destructive/10" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
-                      <LogOut className="w-4 h-4" />
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-lg touch-manipulation font-semibold text-[12px] border-destructive/20 text-destructive/80 hover:bg-destructive/8" onClick={() => { setIsMenuOpen(false); handleLogout(); }}>
+                      <LogOut className="w-3.5 h-3.5" />
                       {t('nav.logout') || 'خروج'}
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <Button variant="outline" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm" onClick={handleEmployeeLogin}>
-                      <UserPlus className="w-4 h-4" />
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button variant="outline" className="gap-1.5 h-10 rounded-lg touch-manipulation font-semibold text-[12px]" onClick={handleEmployeeLogin}>
+                      <UserPlus className="w-3.5 h-3.5" />
                       {t('nav.employee')}
                     </Button>
-                    <Button variant="eco" className="gap-1.5 h-11 rounded-xl touch-manipulation font-semibold text-sm shadow-md shadow-primary/20" onClick={handleLogin}>
-                      <LogIn className="w-4 h-4" />
+                    <Button variant="eco" className="gap-1.5 h-10 rounded-lg touch-manipulation font-bold text-[12px] shadow-sm" onClick={handleLogin}>
+                      <LogIn className="w-3.5 h-3.5" />
                       {t('nav.login')}
                     </Button>
                   </div>
@@ -411,40 +431,42 @@ Header.displayName = 'Header';
 const MobileDropdown = ({ dropdown, onNavigate }: { dropdown: NavDropdown; onNavigate: (href: string) => void }) => {
   const [open, setOpen] = useState(false);
   return (
-    <div className="rounded-xl overflow-hidden">
+    <div className="rounded-lg overflow-hidden">
       <button
         onClick={() => setOpen(!open)}
-        className={`flex items-center justify-between w-full px-3.5 py-3.5 text-sm font-semibold rounded-xl transition-all touch-manipulation ${
-          open ? 'text-primary bg-primary/8' : 'text-muted-foreground hover:text-foreground hover:bg-accent/50'
+        className={`flex items-center justify-between w-full px-3 py-3 text-[13px] font-semibold rounded-lg transition-all touch-manipulation ${
+          open ? 'text-primary bg-primary/6' : 'text-foreground/60 hover:text-foreground/80 hover:bg-accent/30'
         }`}
       >
         <div className="flex items-center gap-2.5">
-          <dropdown.icon className={`w-4.5 h-4.5 ${open ? 'text-primary' : 'text-muted-foreground/60'}`} />
+          <div className={`w-7 h-7 rounded-md flex items-center justify-center transition-colors ${open ? 'bg-primary/10' : 'bg-muted/40'}`}>
+            <dropdown.icon className={`w-3.5 h-3.5 ${open ? 'text-primary' : 'text-muted-foreground/50'}`} />
+          </div>
           {dropdown.label}
         </div>
-        <ChevronDown className={`w-4 h-4 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
+        <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="ps-3 pe-1 pb-2.5 flex flex-col gap-0.5 animate-fade-in">
+        <div className="ps-3 pe-1 pb-2 flex flex-col gap-px animate-fade-in">
           {dropdown.items.map((item) => (
             <button
               key={item.href + item.label}
               onClick={() => onNavigate(item.href)}
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-accent/60 active:bg-accent/80 transition-colors text-start touch-manipulation group"
+              className="flex items-center gap-2.5 w-full px-3 py-2.5 rounded-lg hover:bg-accent/40 active:bg-accent/60 transition-colors text-start touch-manipulation group"
             >
-              <div className="w-9 h-9 rounded-lg bg-primary/8 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/15 transition-colors">
-                <item.icon className="w-4 h-4 text-primary" />
+              <div className="w-7 h-7 rounded-md bg-primary/5 flex items-center justify-center flex-shrink-0 group-hover:bg-primary/10 transition-colors">
+                <item.icon className="w-3.5 h-3.5 text-primary/60 group-hover:text-primary transition-colors" />
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5">
-                  <p className="text-sm font-medium text-foreground">{item.label}</p>
+                  <p className="text-[12.5px] font-medium text-foreground/80">{item.label}</p>
                   {item.badge && (
-                    <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-primary/10 text-primary leading-none">
+                    <span className="px-1 py-px text-[8px] font-bold rounded bg-primary/8 text-primary/70 leading-none">
                       {item.badge}
                     </span>
                   )}
                 </div>
-                <p className="text-[11px] text-muted-foreground line-clamp-1 mt-0.5">{item.desc}</p>
+                <p className="text-[10px] text-muted-foreground/50 line-clamp-1 mt-0.5">{item.desc}</p>
               </div>
             </button>
           ))}
