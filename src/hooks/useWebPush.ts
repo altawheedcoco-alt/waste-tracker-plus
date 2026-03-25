@@ -86,7 +86,7 @@ export function useWebPush() {
       const currentPermission = Notification.permission;
       setPermission(currentPermission);
 
-      let perm = currentPermission;
+      let perm: NotificationPermission | 'timeout' = currentPermission;
       if (currentPermission === 'default') {
         perm = await requestPermissionWithTimeout();
 
