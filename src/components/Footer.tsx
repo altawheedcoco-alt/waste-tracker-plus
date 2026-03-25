@@ -270,9 +270,9 @@ const FooterColumn = ({ title, links, onNavigate }: {
 );
 
 const StatMini = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-lg bg-background/5 p-1.5 text-center">
+  <div className="rounded-lg bg-white/5 p-1.5 text-center">
     <div className="text-primary font-black text-xs">{value}</div>
-    <div className="text-background/45 text-[8px] leading-tight">{label}</div>
+    <div className="text-white/45 text-[8px] leading-tight">{label}</div>
   </div>
 );
 
