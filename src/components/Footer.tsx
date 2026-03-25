@@ -57,30 +57,30 @@ const Footer = () => {
   // 2) الحلول والخدمات — تتوافق مع أقسام Features/Services/Showcases
   const solutionLinks = [
     { label: isAr ? 'إدارة الشحنات' : 'Shipment Management', href: '#services', icon: Recycle },
-    { label: isAr ? 'تتبع النقل' : 'Transport Tracking', href: '#services', icon: Truck },
-    { label: isAr ? 'منظومة السائقين' : 'Driver Ecosystem', href: '#features', icon: Users },
-    { label: isAr ? 'السوق والمزادات' : 'Marketplace', href: '#features', icon: PackageSearch },
-    { label: isAr ? 'المحفظة والمالية' : 'Wallet & Finance', href: '#features', icon: Wallet },
-    { label: isAr ? 'التقييم والثقة' : 'Rating & Trust', href: '#features', icon: Star },
+    { label: isAr ? 'تتبع النقل' : 'Transport Tracking', href: '/track', icon: Truck },
+    { label: isAr ? 'منظومة السائقين' : 'Driver Ecosystem', href: '#driver-ecosystem', icon: Users },
+    { label: isAr ? 'السوق والمزادات' : 'Marketplace', href: '#marketplace', icon: PackageSearch },
+    { label: isAr ? 'المحفظة والمالية' : 'Wallet & Finance', href: '#wallet-finance', icon: Wallet },
+    { label: isAr ? 'التقييم والثقة' : 'Rating & Trust', href: '#rating-trust', icon: Star },
   ];
 
   // 3) التقنية والذكاء الاصطناعي — SaaS/AI/Doc showcases
   const techLinks = [
     { label: isAr ? 'الوكيل الذكي' : 'Smart Agent', href: '#smart-agent', icon: Brain },
-    { label: isAr ? 'استوديو المستندات' : 'Document AI', href: '#features', icon: FileCheck },
-    { label: isAr ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#features', icon: Smartphone },
-    { label: isAr ? 'التقارير البيئية' : 'Env Reports', href: '#features', icon: BarChart3 },
+    { label: isAr ? 'استوديو المستندات' : 'Document AI', href: '#doc-ai', icon: FileCheck },
+    { label: isAr ? 'إشعارات واتساب' : 'WhatsApp Alerts', href: '#whatsapp-notifications', icon: Smartphone },
+    { label: isAr ? 'التقارير البيئية' : 'Env Reports', href: '#stats', icon: BarChart3 },
     { label: isAr ? 'البصمة الكربونية' : 'Carbon Footprint', href: '/recycling-history', icon: Footprints },
-    { label: isAr ? 'البنية التقنية SaaS' : 'SaaS Platform', href: '#features', icon: Monitor },
+    { label: isAr ? 'البنية التقنية SaaS' : 'SaaS Platform', href: '#saas-tech', icon: Monitor },
   ];
 
   // 4) الجهات الرقابية والشراكات
   const regulatorLinks = [
-    { label: isAr ? 'الجهات الرقابية' : 'Regulators', href: '#features', icon: Building2 },
+    { label: isAr ? 'الجهات الرقابية' : 'Regulators', href: '#regulator-showcase', icon: Building2 },
     { label: isAr ? 'الشراكات' : 'Partnerships', href: '/partnerships', icon: Handshake },
     { label: isAr ? 'الاستشاريون' : 'Consultants', href: '/consultant-portal', icon: BadgeCheck },
-    { label: isAr ? 'المبادرة الوطنية' : 'National Initiative', href: '#features', icon: Megaphone },
-    { label: isAr ? 'الاستدامة البيئية' : 'Sustainability', href: '#features', icon: Leaf },
+    { label: isAr ? 'المبادرة الوطنية' : 'National Initiative', href: '#initiative', icon: Megaphone },
+    { label: isAr ? 'الاستدامة البيئية' : 'Sustainability', href: '#platform-showcase', icon: Leaf },
   ];
 
   // 5) الموارد والتعليم
@@ -109,7 +109,7 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="relative bg-foreground text-background">
+    <footer className="relative bg-[hsl(220,20%,10%)] dark:bg-[hsl(225,16%,6%)] text-[hsl(220,20%,98%)] dark:text-[hsl(210,15%,92%)]">
       {/* Top wave */}
       <div className="absolute -top-px left-0 right-0 overflow-hidden">
         <svg viewBox="0 0 1440 40" className="w-full h-6 sm:h-10 fill-background" preserveAspectRatio="none">
@@ -125,7 +125,7 @@ const Footer = () => {
             <h3 className="text-lg sm:text-xl font-bold mb-1">
               {isAr ? '🌱 انضم إلى منظومة iRecycle' : '🌱 Join the iRecycle Ecosystem'}
             </h3>
-            <p className="text-background/60 text-sm">
+            <p className="text-white/60 text-sm">
               {isAr ? 'أول منصة SaaS متكاملة لإدارة المخلفات في مصر والشرق الأوسط' : 'The first integrated SaaS platform for waste management in Egypt & MENA'}
             </p>
           </div>
@@ -146,7 +146,7 @@ const Footer = () => {
             <div className="flex items-center gap-3 mb-4">
               <PlatformLogo size="lg" showText inverted showSubtitle />
             </div>
-            <p className="text-background/55 leading-relaxed mb-4 text-xs max-w-xs">
+            <p className="text-white/55 leading-relaxed mb-4 text-xs max-w-xs">
               {t('footer.brandDesc')}
             </p>
 
@@ -211,23 +211,23 @@ const Footer = () => {
         </div>
 
         {/* ─── Legal Bar ─── */}
-        <div className="border-t border-background/10 pt-4">
+        <div className="border-t border-white/10 pt-4">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 mb-3">
             {legalLinks.map((link, i) => (
               <span key={link.href} className="flex items-center gap-3">
-                <button onClick={() => handleNavigate(link.href)} className="text-background/45 hover:text-primary transition-colors text-[11px]">
+                <button onClick={() => handleNavigate(link.href)} className="text-white/45 hover:text-primary transition-colors text-[11px]">
                   {link.label}
                 </button>
-                {i < legalLinks.length - 1 && <span className="text-background/15">·</span>}
+                {i < legalLinks.length - 1 && <span className="text-white/15">·</span>}
               </span>
             ))}
           </div>
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 text-background/35 text-[11px]">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 text-white/35 text-[11px]">
             <div className="flex items-center gap-2">
               <span>© {new Date().getFullYear()} iRecycle. {t('footer.allRightsReserved')}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-black tracking-wide">v5.1</span>
             </div>
-            <span className="text-background/25 text-[10px]">
+            <span className="text-white/25 text-[10px]">
               {isAr ? 'صُنع بـ 💚 لمستقبل أنظف في مصر' : 'Made with 💚 for a cleaner future in Egypt'}
             </span>
           </div>
@@ -251,7 +251,7 @@ const Footer = () => {
 /* ─── Sub-components ─── */
 
 const FooterHeading = ({ children, className }: { children: React.ReactNode; className?: string }) => (
-  <h4 className={`font-bold text-xs text-background/80 mb-2.5 ${className || ''}`}>{children}</h4>
+  <h4 className={`font-bold text-xs text-white/80 mb-2.5 ${className || ''}`}>{children}</h4>
 );
 
 const FooterColumn = ({ title, links, onNavigate }: { 
@@ -270,28 +270,28 @@ const FooterColumn = ({ title, links, onNavigate }: {
 );
 
 const StatMini = ({ label, value }: { label: string; value: string }) => (
-  <div className="rounded-lg bg-background/5 p-1.5 text-center">
+  <div className="rounded-lg bg-white/5 p-1.5 text-center">
     <div className="text-primary font-black text-xs">{value}</div>
-    <div className="text-background/45 text-[8px] leading-tight">{label}</div>
+    <div className="text-white/45 text-[8px] leading-tight">{label}</div>
   </div>
 );
 
 const ContactItem = ({ icon: Icon, children }: { icon: typeof MapPin; children: React.ReactNode }) => (
-  <li className="flex items-start gap-1.5 text-background/55 text-[11px]">
+  <li className="flex items-start gap-1.5 text-white/55 text-[11px]">
     <Icon className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
     <span>{children}</span>
   </li>
 );
 
 const SocialIcon = ({ icon: Icon, label }: { icon: typeof Facebook; label: string }) => (
-  <button className="w-8 h-8 rounded-full bg-background/8 hover:bg-primary hover:scale-110 flex items-center justify-center transition-all duration-200" aria-label={label} title={label}>
+  <button className="w-8 h-8 rounded-full bg-white/8 hover:bg-primary hover:scale-110 flex items-center justify-center transition-all duration-200" aria-label={label} title={label}>
     <Icon className="w-3.5 h-3.5" />
   </button>
 );
 
 const FooterLink = ({ children, onClick, icon: Icon }: { children: React.ReactNode; onClick: () => void; icon?: any }) => (
   <li>
-    <button onClick={onClick} className="text-background/55 hover:text-primary transition-all inline-flex items-center gap-1 cursor-pointer text-[11px] group">
+    <button onClick={onClick} className="text-white/55 hover:text-primary transition-all inline-flex items-center gap-1 cursor-pointer text-[11px] group">
       {Icon && <Icon className="w-3 h-3 opacity-40 group-hover:opacity-100 transition-opacity flex-shrink-0" />}
       <span>{children}</span>
     </button>
