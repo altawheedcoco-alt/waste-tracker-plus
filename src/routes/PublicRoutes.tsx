@@ -68,6 +68,7 @@ const SharedResourcePage = lazyRetry(() => import("@/pages/SharedResourcePage"))
 const SharedShipmentEdit = lazyRetry(() => import("@/pages/SharedShipmentEdit"));
 const AccountPendingPage = lazyRetry(() => import("@/pages/AccountPendingPage"));
 const VerifySeal = lazyRetry(() => import("@/pages/VerifySeal"));
+const Digitalization = lazyRetry(() => import("@/pages/Digitalization"));
 
 const GeneratorGuide = lazyRetry(() => import("@/pages/guide/GeneratorGuide"));
 const TransporterGuide = lazyRetry(() => import("@/pages/guide/TransporterGuide"));
@@ -127,6 +128,7 @@ export const publicRoutes = (
     <Route path="/s/:type/:code" element={<SharedResourcePage />} />
     <Route path="/c2b/:code" element={<C2BPublicView />} />
     <Route path="/verify-seal" element={<VerifySeal />} />
+    <Route path="/digitalization" element={<Digitalization />} />
     <Route path="*" element={<NotFound />} />
   </>
 );

@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, FileText, Sun, Moon, Newspaper, ArrowLeft, ExternalLink, Command, Megaphone, Briefcase, Gavel } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, FileText, Sun, Moon, Newspaper, ArrowLeft, ExternalLink, Command, Megaphone, Briefcase, Gavel, Binary } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -205,6 +205,16 @@ const Header = memo(() => {
                   <HelpCircle className="w-3 h-3 text-foreground/70 dark:text-foreground/90" />
                 </span>
                 {language === 'ar' ? 'مركز المساعدة' : 'Help'}
+              </button>
+              <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
+              <button
+                onClick={() => handleNavClick('/digitalization')}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-primary hover:bg-primary/15 dark:hover:bg-primary/20 transition-all duration-200"
+              >
+                <span className="flex items-center justify-center w-5 h-5 rounded-md bg-primary/15 dark:bg-primary/25 border border-primary/30 dark:border-primary/40 shadow-[0_0_6px_hsl(var(--primary)/0.15)] animate-pulse">
+                  <Binary className="w-3 h-3 text-primary" />
+                </span>
+                {language === 'ar' ? 'الرقمنة' : 'Digital'}
               </button>
             </div>
 
