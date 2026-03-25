@@ -1,4 +1,4 @@
-import { Suspense, lazy, memo, useEffect, useState } from "react";
+import { Suspense, lazy, memo, useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import AccountActivationGuard from "@/components/guards/AccountActivationGuard";
 import { Toaster } from "@/components/ui/toaster";
@@ -121,9 +121,15 @@ const Providers = memo(() => (
 ));
 Providers.displayName = 'Providers';
 
-const App = memo(() => (
-  <Providers />
-));
+const App = memo(() => {
+  const cacheCleared = useRef(false);
+  useEffect(() => {
+    if (cacheCleared.current) return;
+    cacheCleared.current = true;
+    import('@/lib/cacheBuster').then(m => m.bustStaleCaches());
+  }, []);
+  return <Providers />;
+});
 App.displayName = 'App';
 
 export default App;
