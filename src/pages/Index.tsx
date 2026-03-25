@@ -28,7 +28,7 @@ function lazyRetry<T extends React.ComponentType<any>>(
 
 // Critical above-fold: load eagerly
 import Header from "@/components/Header";
-import VersionBar from "@/components/VersionBar";
+
 import Hero from "@/components/Hero";
 
 // Deferred: LandingWrapper is lightweight but not paint-critical
