@@ -177,26 +177,34 @@ const Header = memo(() => {
         <div className="w-full mx-auto px-5 max-w-[1400px]">
           <div className="flex items-center justify-between h-8">
             {/* Left: Quick links */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <button
                 onClick={() => handleNavClick('#ticker')}
-                className="flex items-center gap-1.5 text-[10.5px] font-bold text-primary/70 hover:text-primary transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-primary/80 hover:text-primary hover:bg-primary/10 transition-all duration-200"
               >
-                <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                {language === 'ar' ? 'آخر الأخبار والتحديثات' : 'Latest News & Updates'}
+                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-primary/20 to-primary/10 border border-primary/20">
+                  <Newspaper className="w-2.5 h-2.5 text-primary" />
+                </span>
+                {language === 'ar' ? 'آخر الأخبار' : 'News'}
               </button>
-              <span className="w-px h-3 bg-border/30" />
+              <span className="w-px h-3.5 bg-border/20" />
               <button
                 onClick={() => handleNavClick('/posts')}
-                className="text-[10.5px] font-bold text-muted-foreground/60 hover:text-foreground/80 transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
               >
+                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
+                  <FileText className="w-2.5 h-2.5 text-foreground/60" />
+                </span>
                 {language === 'ar' ? 'المنشورات' : 'Posts'}
               </button>
               <button
                 onClick={() => handleNavClick('/help')}
-                className="text-[10.5px] font-bold text-muted-foreground/60 hover:text-foreground/80 transition-colors"
+                className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[10.5px] font-bold text-muted-foreground/70 hover:text-foreground hover:bg-accent/50 transition-all duration-200"
               >
-                {language === 'ar' ? 'مركز المساعدة' : 'Help Center'}
+                <span className="flex items-center justify-center w-4 h-4 rounded bg-gradient-to-br from-accent/60 to-accent/30 border border-border/30">
+                  <HelpCircle className="w-2.5 h-2.5 text-foreground/60" />
+                </span>
+                {language === 'ar' ? 'مركز المساعدة' : 'Help'}
               </button>
             </div>
 
