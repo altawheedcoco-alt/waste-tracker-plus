@@ -46,7 +46,9 @@ export function useWebPush() {
 
   const subscribe = useCallback(async () => {
     // Guard: no user, not supported, already running
-    if (!isSupported || !user || subscribingRef.current) return false;
+    if (!isSupported) { toast.error('المتصفح لا يدعم الإشعارات'); return false; }
+    if (!user) { toast.error('يجب تسجيل الدخول أولاً'); return false; }
+    if (subscribingRef.current) return false;
     subscribingRef.current = true;
     setLoading(true);
 
@@ -72,17 +74,39 @@ export function useWebPush() {
         return false;
       }
 
-      // 2. Get SW & subscribe to push
-      const registration = await navigator.serviceWorker.ready;
-      let subscription = await registration.pushManager.getSubscription();
-      if (!subscription) {
-        subscription = await registration.pushManager.subscribe({
-          userVisibleOnly: true,
-          applicationServerKey: getAppServerKey().buffer as ArrayBuffer,
-        });
+      // 2. Get SW registration with timeout
+      let registration: ServiceWorkerRegistration;
+      try {
+        // First ensure SW is registered
+        if (!navigator.serviceWorker.controller) {
+          await navigator.serviceWorker.register('/sw.js', { scope: '/' });
+        }
+        registration = await Promise.race([
+          navigator.serviceWorker.ready,
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('sw_timeout')), 10000)),
+        ]);
+      } catch (swErr) {
+        console.error('[WebPush] SW not ready:', swErr);
+        toast.error('تعذر تشغيل خدمة الإشعارات — أعد تحميل الصفحة وحاول مرة أخرى');
+        return false;
       }
 
-      // 3. Save to DB (upsert with retry)
+      // 3. Subscribe to push
+      let subscription = await registration.pushManager.getSubscription();
+      if (!subscription) {
+        try {
+          subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: getAppServerKey().buffer as ArrayBuffer,
+          });
+        } catch (subErr) {
+          console.error('[WebPush] Subscribe error:', subErr);
+          toast.error('فشل الاشتراك في الإشعارات — تأكد من إعدادات المتصفح');
+          return false;
+        }
+      }
+
+      // 4. Save to DB (upsert with retry)
       const subJson = subscription.toJSON();
       const payload = {
         user_id: user.id,
@@ -101,7 +125,7 @@ export function useWebPush() {
         if (i < 2) await new Promise(r => setTimeout(r, 800));
       }
 
-      // 4. Verify
+      // 5. Verify
       const verifySub = await registration.pushManager.getSubscription();
       setIsSubscribed(!!verifySub);
       console.log('[WebPush] Subscription saved:', saved, 'verified:', !!verifySub);
