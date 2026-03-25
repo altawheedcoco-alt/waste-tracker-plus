@@ -219,7 +219,7 @@ const Digitalization = memo(() => {
                 className="flex flex-col sm:flex-row items-stretch gap-2 sm:gap-0"
               >
                 <div className="flex-1 flex items-center gap-3 px-5 py-3.5 rounded-xl sm:rounded-e-none bg-destructive/5 dark:bg-destructive/10 border border-destructive/20">
-                  <X className="w-4 h-4 text-destructive flex-shrink-0" />
+                  <XCircle className="w-4 h-4 text-destructive flex-shrink-0" />
                   <span className="text-sm font-semibold text-destructive">{item.before}</span>
                 </div>
                 <div className="hidden sm:flex items-center justify-center w-10 bg-muted/50 border-y border-border/30">
