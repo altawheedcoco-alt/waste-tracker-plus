@@ -40,6 +40,15 @@ import { publicRoutes } from "@/routes/PublicRoutes";
 // Eagerly preload dashboard routes module on first script eval
 const dashboardRoutesPromise = import('@/routes/DashboardRoutes');
 
+// Scroll to top on every route change
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+};
+
 const AppRoutes = memo(() => {
   const location = useLocation();
   const [dashboardRoutes, setDashboardRoutes] = useState<React.ReactNode>(null);
