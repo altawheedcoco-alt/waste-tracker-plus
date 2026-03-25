@@ -388,7 +388,7 @@ Deno.serve(async (req) => {
     }
 
     return new Response(
-      JSON.stringify({ sent, total: subscriptions.length, expired: expiredEndpoints.length }),
+      JSON.stringify({ sent, total: subscriptions.length, expired: expiredEndpoints.length, errors }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (err) {
