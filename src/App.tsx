@@ -1,4 +1,4 @@
-import { Suspense, lazy, memo, useEffect, useState } from "react";
+import { Suspense, lazy, memo, useEffect, useRef, useState } from "react";
 import { ErrorBoundary } from "@/components/common/ErrorBoundary";
 import AccountActivationGuard from "@/components/guards/AccountActivationGuard";
 import { Toaster } from "@/components/ui/toaster";
