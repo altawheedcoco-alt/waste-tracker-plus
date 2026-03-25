@@ -309,6 +309,10 @@ Deno.serve(async (req) => {
     const vapidPublicKey = Deno.env.get("VAPID_PUBLIC_KEY");
     const vapidPrivateKey = Deno.env.get("VAPID_PRIVATE_KEY");
 
+    console.log("[send-push] VAPID_PUBLIC_KEY starts with:", vapidPublicKey?.substring(0, 10));
+    console.log("[send-push] VAPID_PUBLIC_KEY length:", vapidPublicKey?.length);
+    console.log("[send-push] Expected client key starts with: BAUii7gQ7f");
+
     if (!vapidPublicKey || !vapidPrivateKey) {
       return new Response(
         JSON.stringify({ error: "VAPID keys not configured" }),
