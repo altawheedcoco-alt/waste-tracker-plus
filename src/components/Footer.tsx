@@ -277,7 +277,7 @@ const StatMini = ({ label, value }: { label: string; value: string }) => (
 );
 
 const ContactItem = ({ icon: Icon, children }: { icon: typeof MapPin; children: React.ReactNode }) => (
-  <li className="flex items-start gap-1.5 text-background/55 text-[11px]">
+  <li className="flex items-start gap-1.5 text-white/55 text-[11px]">
     <Icon className="w-3 h-3 text-primary flex-shrink-0 mt-0.5" />
     <span>{children}</span>
   </li>
