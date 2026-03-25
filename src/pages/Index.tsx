@@ -79,7 +79,7 @@ const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode;
     // Use requestIdleCallback to observe after paint
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { rootMargin: '800px' }
+      { rootMargin: '300px' }
     );
     observer.observe(el);
     return () => observer.disconnect();
