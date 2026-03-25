@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText, Sun, Moon } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, User, FileText, Sun, Moon, Newspaper } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
@@ -276,6 +276,14 @@ const Header = memo(() => {
 
             {/* Right Actions */}
             <div className="hidden lg:flex items-center gap-1.5 flex-shrink-0">
+              {/* Latest News Button */}
+              <button
+                onClick={() => handleNavClick('#ticker')}
+                className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-primary/20 bg-primary/5 text-xs font-bold text-primary hover:bg-primary/10 hover:border-primary/30 transition-all duration-200"
+              >
+                <Newspaper className="w-3.5 h-3.5" />
+                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+              </button>
               {/* Dark Mode Toggle */}
               <button
                 onClick={toggleDarkMode}
@@ -327,6 +335,14 @@ const Header = memo(() => {
         <div className="lg:hidden bg-background border-t border-border/40 animate-fade-in max-h-[80vh] overflow-y-auto shadow-2xl relative z-50 overscroll-contain">
           <div className="container mx-auto px-4 py-4">
             <nav className="flex flex-col gap-1">
+              {/* زر آخر الأخبار */}
+              <button
+                onClick={() => handleNavClick('#ticker')}
+                className="flex items-center gap-2.5 w-full px-3.5 py-3.5 text-sm font-bold rounded-xl text-primary bg-primary/8 hover:bg-primary/15 transition-all touch-manipulation"
+              >
+                <Newspaper className="w-4 h-4 text-primary" />
+                {language === 'ar' ? 'آخر الأخبار' : 'Latest News'}
+              </button>
               {/* زر المنشورات المستقل */}
               <button
                 onClick={() => handleNavClick('/posts')}

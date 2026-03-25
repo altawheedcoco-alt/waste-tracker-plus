@@ -35,7 +35,7 @@ const NewsTicker = memo(() => {
   const tickerItems = [...displayItems, ...displayItems, ...displayItems];
 
   return (
-    <>
+    <div id="ticker">
       {/* Mobile */}
       <div className="fixed top-14 left-0 right-0 w-full overflow-hidden z-40 h-[34px] sm:hidden" dir="rtl">
         <div className="absolute inset-0 bg-background/60 backdrop-blur-xl border-b border-border/30" />
@@ -93,7 +93,7 @@ const NewsTicker = memo(() => {
           </Link>
         </div>
       </div>
-    </>
+    </div>
   );
 });
 
