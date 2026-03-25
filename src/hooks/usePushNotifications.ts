@@ -77,7 +77,7 @@ export function usePushNotifications() {
       }, async (payload) => {
         const msg = payload.new as any;
         if (msg.sender_id === user.id) return;
-        if (document.hasFocus()) return; // Don't notify if app is focused
+        // Show notification even if app is focused
 
         // Get sender info
         const { data: sender } = await supabase
