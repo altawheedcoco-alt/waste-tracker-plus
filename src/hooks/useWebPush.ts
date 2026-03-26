@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { useFirebaseMessaging } from './useFirebaseMessaging';
 
 const VAPID_PUBLIC_KEY = 'BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs';
 
@@ -21,11 +22,12 @@ function getAppServerKey(): Uint8Array {
 
 export function useWebPush() {
   const { user } = useAuth();
+  const { initializeFCM } = useFirebaseMessaging();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [loading, setLoading] = useState(false);
-  const subscribingRef = useRef(false); // guard against double-calls
+  const subscribingRef = useRef(false);
 
   // Check support & existing subscription on mount
   useEffect(() => {
@@ -125,6 +127,9 @@ export function useWebPush() {
 
       if (saved) {
         toast.success('تم تفعيل الإشعارات ✅');
+
+        // Initialize FCM alongside VAPID
+        initializeFCM().catch(e => console.warn('[WebPush] FCM init skipped:', e));
 
         // Send confirmation via all channels
         const confirmTitle = '🔔 تم تفعيل الإشعارات بنجاح';
