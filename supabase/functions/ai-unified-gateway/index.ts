@@ -124,6 +124,19 @@ serve(async (req) => {
       });
     }
 
+    // === Global Rate Limiting (13 RPM across all users) ===
+    if (isGlobalRateLimited()) {
+      const retryAfter = getRetryAfterSeconds();
+      console.warn(`[ai-gateway] Global rate limit hit (${GLOBAL_RPM_LIMIT} RPM). Retry after ${retryAfter}s`);
+      return new Response(JSON.stringify({ 
+        error: `تم تجاوز الحد العام للطلبات (${GLOBAL_RPM_LIMIT}/دقيقة). يرجى المحاولة بعد ${retryAfter} ثانية`,
+        retryAfter,
+      }), {
+        status: 429,
+        headers: { ...corsHeaders, "Content-Type": "application/json", "Retry-After": String(retryAfter) },
+      });
+    }
+
     // === Load AI Config ===
     const adminClient = createClient(supabaseUrl, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, {
       auth: { persistSession: false },
