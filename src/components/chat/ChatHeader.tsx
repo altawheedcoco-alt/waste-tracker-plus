@@ -124,7 +124,7 @@ const ChatHeader = ({
               </Avatar>
             </ClickableImage>
             {isOnline && (
-              <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-400 border-2 border-emerald-700 rounded-full" />
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-400 border-2 border-wa-header rounded-full" />
             )}
           </div>
 
