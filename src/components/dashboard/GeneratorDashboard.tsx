@@ -68,6 +68,16 @@ const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
 const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
 const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 
+// Generator Intelligence Suite
+const GeneratorSmartKPIs = lazy(() => import('./generator/GeneratorSmartKPIs'));
+const WasteGenerationIntelligence = lazy(() => import('./generator/WasteGenerationIntelligence'));
+const FinancialFlowAnalyzer = lazy(() => import('./generator/FinancialFlowAnalyzer'));
+const WasteGenerationForecast = lazy(() => import('./generator/WasteGenerationForecast'));
+const WasteClassificationAI = lazy(() => import('./generator/WasteClassificationAI'));
+const SmartCollectionScheduler = lazy(() => import('./generator/SmartCollectionScheduler'));
+const InstantPickupPortal = lazy(() => import('./generator/InstantPickupPortal'));
+const EnvironmentalScorecard = lazy(() => import('./generator/EnvironmentalScorecard'));
+
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
     <Skeleton className="h-32 w-full" />
@@ -368,6 +378,27 @@ const GeneratorDashboard = () => {
               <FinancialSummaryWidget />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Generator Intelligence Suite */}
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorSmartKPIs />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <WasteGenerationIntelligence />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <FinancialFlowAnalyzer />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <InstantPickupPortal />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <EnvironmentalScorecard />
+          </Suspense>
         </TabsContent>
 
         {/* ── الشحنات ── */}

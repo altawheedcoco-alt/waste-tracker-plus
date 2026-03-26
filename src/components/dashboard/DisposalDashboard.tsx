@@ -18,6 +18,11 @@ const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
 const RegulatoryDocumentsCenter = lazy(() => import('@/components/regulatory/RegulatoryDocumentsCenter'));
 const DisposalAnnualPlan = lazy(() => import('@/components/disposal/DisposalAnnualPlan'));
 
+const DisposalSmartKPIs = lazy(() => import('@/components/dashboard/disposal/DisposalSmartKPIs'));
+const DisposalFinancialFlow = lazy(() => import('@/components/dashboard/disposal/DisposalFinancialFlow'));
+const DisposalInputIntelligence = lazy(() => import('@/components/dashboard/disposal/DisposalInputIntelligence'));
+const DisposalScorecard = lazy(() => import('@/components/dashboard/disposal/DisposalScorecard'));
+
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -326,6 +331,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
               <OrgPerformanceRadar />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Disposal Intelligence Suite */}
+          <Suspense fallback={<Skeleton className="h-[180px]" />}>
+            <DisposalSmartKPIs />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[300px]" />}>
+            <DisposalFinancialFlow />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[300px]" />}>
+            <DisposalInputIntelligence />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[280px]" />}>
+            <DisposalScorecard />
+          </Suspense>
         </TabsContent>
 
         {/* 2. Incoming Shipments Tab */}
