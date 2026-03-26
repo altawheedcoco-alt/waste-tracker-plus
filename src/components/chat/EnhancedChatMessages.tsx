@@ -498,24 +498,18 @@ const EnhancedChatMessages = ({
                                   {message.message_type === 'file' && fileUrl && !isVoiceMessage(fileName) && !isVideoFile(fileName) && (
                                     <a 
                                       href={fileUrl} target="_blank" rel="noopener noreferrer"
-                                      className={cn(
-                                        "flex items-center gap-3 p-2 rounded-xl min-w-[200px] transition-colors",
-                                        isOwn ? "hover:bg-white/10" : "hover:bg-muted"
-                                      )}
+                                      className="flex items-center gap-3 p-2 rounded-xl min-w-[200px] transition-colors hover:bg-black/5"
                                     >
-                                      <div className={cn(
-                                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                                        isOwn ? "bg-white/20" : "bg-emerald-500/10"
-                                      )}>
-                                        <FileIcon className={cn("w-5 h-5", isOwn ? "text-white" : "text-emerald-600")} />
+                                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
+                                        <FileIcon className="w-5 h-5 text-primary" />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <p className="text-[13px] font-medium truncate">{fileName}</p>
-                                        <p className={cn("text-[10px]", isOwn ? "text-white/60" : "text-muted-foreground")}>
+                                        <p className="text-[10px] text-wa-time">
                                           مستند • اضغط للتحميل
                                         </p>
                                       </div>
-                                      <Download className={cn("w-4 h-4 shrink-0", isOwn ? "text-white/60" : "text-muted-foreground")} />
+                                      <Download className="w-4 h-4 shrink-0 text-wa-time" />
                                     </a>
                                   )}
                                 </>
