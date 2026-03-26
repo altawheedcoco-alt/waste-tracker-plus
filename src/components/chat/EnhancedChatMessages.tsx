@@ -241,23 +241,20 @@ const EnhancedChatMessages = ({
   const getMessageStatus = (message: ChatMessage, isOwn: boolean) => {
     if (!isOwn) return null;
     
-    // Check optimistic status first
     const optStatus = (message as any).optimistic_status;
     if (optStatus === 'sending') {
-      return <Loader2 className="w-[14px] h-[14px] text-white/40 animate-spin" />;
+      return <Loader2 className="w-[14px] h-[14px] text-wa-time animate-spin" />;
     }
     if (optStatus === 'failed') {
-      return <span className="text-[10px] text-red-400">!</span>;
+      return <span className="text-[10px] text-destructive">!</span>;
     }
     
-    // WhatsApp-style: read = ✓✓ blue, delivered = ✓✓ grey, sent = ✓ grey
-    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-400" />;
+    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-500" />;
     
-    // Check message_status field for delivered vs sent
     const msgStatus = (message as any).message_status || (message as any).status;
-    if (msgStatus === 'delivered') return <CheckCheck className="w-[14px] h-[14px] text-white/50" />;
+    if (msgStatus === 'delivered') return <CheckCheck className="w-[14px] h-[14px] text-wa-time" />;
     
-    return <Check className="w-[14px] h-[14px] text-white/50" />;
+    return <Check className="w-[14px] h-[14px] text-wa-time" />;
   };
 
   const findMessage = (id: string) => messages.find(m => m.id === id);
