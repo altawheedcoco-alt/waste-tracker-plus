@@ -224,6 +224,7 @@ const EnhancedChatWidget = () => {
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
     stopTyping();
+    soundEngine.play('message_sent');
     const expiresAt = getExpiryDate();
     if (replyTo) {
       const payload = JSON.stringify({ text: content, reply_to_id: replyTo.id });
@@ -232,9 +233,7 @@ const EnhancedChatWidget = () => {
     } else {
       await sendMessage(content, selectedPartner.id);
     }
-    // Set expiry if disappearing is active
     if (expiresAt) {
-      // Get latest message and set expiry
       const { data: latest } = await supabase
         .from('direct_messages')
         .select('id')
@@ -249,6 +248,7 @@ const EnhancedChatWidget = () => {
 
   const handleSendFile = async (file: File) => {
     if (!selectedPartner) return;
+    soundEngine.play('message_sent');
     await sendFileMessage(file, selectedPartner.id);
     setReplyTo(null);
   };
