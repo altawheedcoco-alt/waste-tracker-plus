@@ -68,6 +68,9 @@ const TransporterIntelligenceTabs = () => (
         <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
           <DynamicPricingEngine />
         </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تحليل تكاليف الرحلات">
+          <TripCostAnalytics />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
           <FraudDetectionPanel />
         </ErrorBoundary>
