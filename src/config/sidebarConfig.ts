@@ -858,16 +858,35 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ الخرائط ═══════════════
+  // ═══════════════ مركز التتبع والخرائط (مدمج) ═══════════════
   {
-    id: 'maps',
+    id: 'tracking-maps-center',
     icon: MapPin,
-    labelAr: 'الخرائط',
-    labelEn: 'Maps',
+    labelAr: 'التتبع والخرائط',
+    labelEn: 'Tracking & Maps',
     visibleFor: [],
     items: [
+      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'unified-tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'unified-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'], visibleFor: ['transporter'] },
+      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'unified-shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'], visibleFor: ['transporter'] },
       { icon: Search, labelAr: 'مستكشف الخريطة', labelEn: 'Map Explorer', path: '/dashboard/map-explorer', key: 'map-explorer', bindingType: 'hybrid' as const },
       { icon: Bookmark, labelAr: 'المواقع المحفوظة', labelEn: 'Saved Locations', path: '/dashboard/saved-locations', key: 'saved-locations', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ مركز الطباعة والتصدير (مدمج) ═══════════════
+  {
+    id: 'print-export-center',
+    icon: Printer,
+    labelAr: 'مركز الطباعة والتصدير',
+    labelEn: 'Print & Export Center',
+    visibleFor: [],
+    items: [
+      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'print-center', bindingType: 'internal' as const, requiredPermissions: ['view_shipments', 'export_reports'] },
+      { icon: Receipt, labelAr: 'الفاتورة الإلكترونية', labelEn: 'E-Invoice', path: '/dashboard/e-invoice', key: 'e-invoice', bindingType: 'hybrid' as const, requiredPermissions: ['view_accounts'] },
+      { icon: FileSpreadsheet, labelAr: 'تصدير Excel', labelEn: 'Export Excel', path: '/dashboard/reports', key: 'export-excel', bindingType: 'internal' as const, requiredPermissions: ['export_reports'] },
+      { icon: FileText, labelAr: 'طباعة المانيفست', labelEn: 'Print Manifest', path: '/dashboard/print-center', key: 'print-manifest', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: Award, labelAr: 'طباعة الشهادات', labelEn: 'Print Certificates', path: '/dashboard/print-center', key: 'print-certificates', bindingType: 'hybrid' as const },
     ],
   },
 
