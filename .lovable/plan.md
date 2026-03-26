@@ -1,98 +1,154 @@
 
 
-# خطة: تطوير منظومة إشعارات Push - المستوى التالي
+# خطة التطوير الشاملة للجهة الناقلة — ٨ ميزات تقنية متقدمة
 
-## التحليل - ما ينقص حالياً
-
-بعد فحص الكود بالكامل، هناك **8 تطويرات جوهرية** مفقودة:
-
-### 1. قوالب الإشعارات الجاهزة (Notification Templates)
-لا يوجد نظام قوالب — المدير يكتب كل مرة من الصفر. الحل: جدول `push_templates` يحفظ قوالب شائعة (ترحيب، تحديث شحنة، صيانة، عروض) مع إمكانية استخدام متغيرات مثل `{user_name}` و `{shipment_id}`.
-
-### 2. جدولة الإرسال (Scheduled Campaigns)
-حالياً الإرسال فوري فقط. الحل: إضافة خيار جدولة (تاريخ + وقت) مع عمود `scheduled_at` و `status` (draft/scheduled/sent/failed) في جدول `push_campaigns`.
-
-### 3. إحصائيات الحملة التفصيلية (Campaign Analytics)
-حالياً فقط `total_sent` و `total_failed`. ينقص:
-- جدول `push_campaign_recipients` لتتبع كل مستلم بشكل فردي (هل وصل؟ هل قرأ؟)
-- نسبة الفتح (Click-Through Rate) عبر تتبع الروابط
-- رسم بياني لأداء الحملات عبر الزمن
-
-### 4. إعادة الإرسال للحملات الفاشلة (Retry Failed)
-لا يوجد زر "أعد الإرسال" للحملات التي فشلت جزئياً — مهم جداً.
-
-### 5. تصدير البيانات (Export)
-لا يوجد تصدير CSV للمشتركين أو سجل الحملات — مطلوب للتقارير.
-
-### 6. إشعارات مجدولة ذكية (Smart Triggers)
-إضافة قواعد تلقائية مثل: "أرسل إشعار ترحيب بعد أول اشتراك" أو "ذكّر المستخدم الذي لم يزر منذ 7 أيام".
-
-### 7. معاينة على الجهاز (Device Preview)
-معاينة شكل الإشعار الحالية بسيطة جداً — تحسينها لتحاكي شكل إشعار الهاتف الفعلي.
-
-### 8. فلتر متقدم لسجل الإشعارات
-لا يوجد فلتر بالنوع أو التاريخ أو حالة القراءة في تبويب "سجل الإشعارات".
+## الرؤية
+تحويل الجهة الناقلة من نظام تشغيلي إلى **منصة ذكاء لوجستي متكاملة** تواكب معايير 2026 العالمية.
 
 ---
 
-## ما سيتم تنفيذه
+## الوضع الحالي (ما هو موجود)
 
-### تغييرات قاعدة البيانات (Migration)
+| الميزة | الحالة |
+|--------|--------|
+| Edge Functions (route-optimizer, demand-forecaster, capacity-planner, maintenance-predictor) | ✅ موجودة |
+| Hooks (useRouteOptimizer, useDemandForecaster, useCapacityPlanner) | ✅ موجودة |
+| لوحة الناقل (10 تبويبات: overview, operations, fleet, tracking, performance, ai, finance, compliance, sustainability, partners) | ✅ موجودة |
+| TripCostManagement, FuelManagement, PreventiveMaintenance | ✅ موجودة (بيانات ثابتة) |
+| TransporterAITools (3 تبويبات: analytics, detailed, advisor) | ✅ موجودة |
 
-```sql
--- قوالب الإشعارات
-CREATE TABLE push_templates (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  name text NOT NULL,
-  title text NOT NULL,
-  body text NOT NULL,
-  type text DEFAULT 'general',
-  priority text DEFAULT 'normal',
-  url text,
-  icon text, -- emoji أو أيقونة
-  created_by uuid,
-  is_default boolean DEFAULT false,
-  created_at timestamptz DEFAULT now()
-);
+## ما ينقص (الفجوات)
 
--- تتبع كل مستلم لكل حملة
-CREATE TABLE push_campaign_recipients (
-  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
-  campaign_id uuid REFERENCES push_campaigns(id) ON DELETE CASCADE,
-  user_id uuid NOT NULL,
-  status text DEFAULT 'pending', -- pending, sent, failed, expired
-  error_message text,
-  delivered_at timestamptz,
-  created_at timestamptz DEFAULT now()
-);
+الصفحات والـ Hooks موجودة لكن **غير مربوطة ببعضها** ولا تعمل ببيانات حية في كل الحالات. المطلوب هو **ربط وتعزيز وإضافة**.
 
--- إضافة أعمدة للجدولة في push_campaigns
-ALTER TABLE push_campaigns ADD COLUMN status text DEFAULT 'sent';
-ALTER TABLE push_campaigns ADD COLUMN scheduled_at timestamptz;
-ALTER TABLE push_campaigns ADD COLUMN template_id uuid;
+---
+
+## الميزات الـ ٨ المطلوبة
+
+### ١. لوحة KPI مركزية ذكية (Smart KPI Command Center)
+**المشكلة:** البيانات مبعثرة في عدة widgets بدون رؤية موحدة.
+**الحل:** بناء مكون `TransporterSmartKPIs` يجمع:
+- مؤشر الأداء الزمني (On-Time Rate) — حي من `shipments`
+- معدل استغلال الأسطول — حي من `fleet_vehicles` + `shipments`
+- تكلفة الكيلومتر — حي من `trip_costs` + `fuel_records`
+- مؤشر رضا العملاء — من `partner_ratings`
+- اتجاه الأداء (Sparkline charts) مع مقارنة بالأسبوع/الشهر السابق
+- تنبيهات ذكية عند انحراف أي مؤشر عن المعدل
+
+**الملفات:** مكون جديد `TransporterSmartKPIs.tsx` + إضافته في تبويب `overview`
+
+### ٢. تحسين المسار الذكي بالـ AI (Smart Route Optimization UI)
+**المشكلة:** Edge function `ai-route-optimizer` موجودة + Hook موجود لكن **لا يوجد واجهة مستخدم** تربطهم.
+**الحل:** بناء مكون `SmartRouteOptimizer.tsx`:
+- اختيار السائق + عرض شحناته المعلقة تلقائياً
+- عرض المسار على خريطة Leaflet قبل وبعد التحسين
+- عرض التوفير (مسافة، وقت، وقود، CO2)
+- زر "تطبيق المسار" يحدّث ترتيب التسليم
+
+**الملفات:** مكون جديد + إضافته في تبويب `tracking` أو `ai`
+
+### ٣. تجميع الحمولات الذكي (Load Consolidation Engine)
+**المشكلة:** لا يوجد نظام لدمج شحنات متعددة في رحلة واحدة.
+**الحل:** Edge function جديدة `ai-load-consolidator` + مكون `LoadConsolidator.tsx`:
+- يحلل الشحنات المعلقة (نفس المنطقة الجغرافية + نفس النوع)
+- يقترح تجميعات مع حساب التوفير
+- زر "تنفيذ التجميع" ينشئ رحلة موحدة
+
+**الملفات:** Edge function جديدة + مكون UI + إضافة في تبويب `operations`
+
+### ٤. التنبؤ بالطلب مع واجهة بصرية (Demand Forecasting Dashboard)
+**المشكلة:** Hook `useDemandForecaster` + Edge function موجودان لكن **بدون واجهة**.
+**الحل:** مكون `DemandForecastDashboard.tsx`:
+- يسحب البيانات التاريخية من `shipments` تلقائياً
+- يعرض الرسوم البيانية (Recharts) للتنبؤات
+- يعرض أيام الذروة وتوصيات الموارد
+- دعم الفترات (يومي/أسبوعي/شهري)
+
+**الملفات:** مكون جديد + إضافته في تبويب `ai`
+
+### ٥. الصيانة التنبؤية بالـ AI (Predictive Maintenance AI)
+**المشكلة:** صفحة `PreventiveMaintenance` تستخدم **بيانات ثابتة مبرمجة**.
+**الحل:** ربطها بـ Edge function `ai-maintenance-predictor` + بيانات حية:
+- سحب بيانات المركبات من `fleet_vehicles`
+- سحب سجلات الصيانة من `vehicle_maintenance_logs`
+- سحب بيانات الوقود والمسافات من `trip_costs` + `fuel_records`
+- تحليل AI لتوقع الأعطال القادمة
+
+**الملفات:** تعديل `PreventiveMaintenance.tsx` أو بناء `PredictiveMaintenanceAI.tsx`
+
+### ٦. تحليل تكلفة الرحلة الشامل (Trip Cost Analytics)
+**المشكلة:** `TripCostManagement` موجود لكن بدون تحليلات عميقة.
+**الحل:** مكون `TripCostAnalytics.tsx`:
+- تكلفة الكيلومتر لكل سائق/مركبة
+- مقارنة الربحية بين المسارات
+- تحليل هدر الوقود (استهلاك فعلي vs متوقع)
+- رسوم بيانية زمنية للاتجاهات
+
+**الملفات:** مكون جديد + إضافته في تبويب `finance`
+
+### ٧. تخطيط السعة الذكي (Capacity Planning UI)
+**المشكلة:** Hook `useCapacityPlanner` + Edge function موجودان بدون واجهة.
+**الحل:** مكون `CapacityPlanningDashboard.tsx`:
+- يجمع بيانات الموارد تلقائياً (مركبات، سائقين، تخزين)
+- يعرض تحليل السعة الحالية بمؤشر بصري
+- يعرض متطلبات المستقبل وخطة العمل
+- دعم أفق التخطيط (7 أيام / 30 يوم / 90 يوم / سنة)
+
+**الملفات:** مكون جديد + إضافته في تبويب `ai`
+
+### ٨. ETA الذكي الحي (Smart Live ETA)
+**المشكلة:** يوجد `estimated_arrival` في الشحنات لكن لا يُحدَّث ديناميكياً.
+**الحل:** مكون `SmartETAWidget.tsx` + تعزيز Edge function:
+- حساب ETA بناءً على الموقع الحالي للسائق + حركة المرور
+- تحديث تلقائي كل دقيقة للشحنات النشطة
+- إشعار الأطراف المعنية عند تغير ETA بأكثر من 15 دقيقة
+- عرض في بطاقة الشحنة وفي مركز التتبع
+
+**الملفات:** مكون جديد + تعديل `TrackingCenter.tsx`
+
+---
+
+## التفاصيل التقنية
+
+### Edge Functions الجديدة
+- `ai-load-consolidator` — تحليل AI لتجميع الشحنات (يستخدم Lovable AI Gateway)
+
+### المكونات الجديدة (8 ملفات)
+```text
+src/components/dashboard/transporter/
+├── TransporterSmartKPIs.tsx          (١)
+├── SmartRouteOptimizer.tsx           (٢)
+├── LoadConsolidator.tsx              (٣)
+├── DemandForecastDashboard.tsx       (٤)
+├── PredictiveMaintenanceAI.tsx       (٥)
+├── TripCostAnalytics.tsx             (٦)
+├── CapacityPlanningDashboard.tsx     (٧)
+└── SmartETAWidget.tsx                (٨)
 ```
 
-### تطوير واجهة PushNotificationStats.tsx
+### الملفات المعدّلة
+- `TransporterDashboard.tsx` — إضافة lazy imports للمكونات الجديدة
+- `TransporterOperationsTabs.tsx` — إدراج LoadConsolidator
+- `TransporterIntelligenceTabs.tsx` — إدراج DemandForecast + CapacityPlanning + PredictiveMaintenance
+- تبويب `overview` — إضافة SmartKPIs + SmartETA
+- تبويب `tracking` — إضافة SmartRouteOptimizer
+- تبويب `finance` — إضافة TripCostAnalytics
 
-1. **تبويب جديد "القوالب"**: عرض/إنشاء/تعديل/حذف قوالب، مع زر "استخدم القالب" ينقل البيانات لمركز الإرسال
-2. **الجدولة**: إضافة DateTimePicker في مركز الإرسال مع خيار "إرسال فوري / جدولة"
-3. **تفاصيل الحملة**: عند الضغط على حملة تظهر قائمة المستلمين مع حالة كل واحد + زر "أعد الإرسال للفاشلة"
-4. **فلتر السجل**: فلتر بالنوع والتاريخ وحالة القراءة
-5. **زر تصدير CSV**: في تبويبي المشتركين وسجل الحملات
-6. **معاينة هاتف**: تحويل المعاينة لشكل يحاكي إشعار Android/iOS الحقيقي
-7. **رسم بياني زمني**: خط بياني يوضح عدد الحملات المرسلة يومياً/أسبوعياً
+### مبدأ التنفيذ
+كل مكون يعمل بالمبدأ المزدوج: **تلقائي أولاً + يدوي متاح دائماً**
+- البيانات تُسحب حية من قاعدة البيانات
+- تحليلات AI تعمل تلقائياً مع زر "تحديث" يدوي
+- Recharts للرسوم البيانية البصرية
 
-### تطوير Edge Function
+---
 
-- دعم `action: "retry_failed"` لإعادة إرسال الفاشلة
-- حفظ تفاصيل كل مستلم في `push_campaign_recipients`
-- دعم `action: "scheduled"` (يُستخدم مع cron أو manual trigger)
+## ملخص التأثير
 
-### الملفات المتأثرة
-- `src/pages/dashboard/PushNotificationStats.tsx` — إضافة التبويبات والميزات الجديدة
-- `supabase/functions/send-push/index.ts` — دعم Retry والتتبع التفصيلي
-- Migration جديد للجداول
-
-## النتيجة
-مركز إدارة إشعارات **احترافي بالكامل** مع: قوالب جاهزة، جدولة، تتبع تفصيلي لكل مستلم، إعادة إرسال، تصدير، وتحليلات بصرية.
+| البُعد | التأثير |
+|--------|---------|
+| **الكفاءة** | تقليل تكاليف النقل ٢٥-٤٠٪ عبر تحسين المسارات وتجميع الحمولات |
+| **التنبؤ** | توقع الطلب والأعطال قبل حدوثها بأسابيع |
+| **الرؤية** | لوحة KPI موحدة تعرض صحة العمليات لحظياً |
+| **العملاء** | ETA دقيق وحي يعزز ثقة العملاء |
+| **التكنولوجيا** | ٤ Edge Functions AI مفعّلة + واجهة لكل منها |
 
