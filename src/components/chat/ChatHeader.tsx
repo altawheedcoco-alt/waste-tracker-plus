@@ -159,7 +159,7 @@ const ChatHeader = ({
                 <Info className="w-4 h-4 ml-2" />
                 {t('chat.orgInfo')}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={onSearch}>
                 <Search className="w-4 h-4 ml-2" />
                 {t('chat.searchChat')}
               </DropdownMenuItem>
