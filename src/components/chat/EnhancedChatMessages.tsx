@@ -156,6 +156,8 @@ const EnhancedChatMessages = ({
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [newMessageCount, setNewMessageCount] = useState(0);
   const [longPressMsg, setLongPressMsg] = useState<string | null>(null);
+  const [bottomSheetMsg, setBottomSheetMsg] = useState<ChatMessage | null>(null);
+  const { toast } = useToast();
 
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
