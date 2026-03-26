@@ -55,17 +55,17 @@ const DisposalSmartKPIs = () => {
       subtitle: 'آخر ٣٠ يوم',
     },
     {
-      title: 'السعة المتبقية',
-      value: kpis.capacity > 0 ? `${kpis.capacityPercent}%` : 'غير محدد',
+      title: 'إجمالي الشحنات',
+      value: `${kpis.completed}`,
       icon: TrendingUp,
-      color: kpis.capacityPercent > 30 ? 'text-green-600' : kpis.capacityPercent > 10 ? 'text-yellow-600' : 'text-red-600',
-      subtitle: kpis.capacity > 0 ? `${kpis.remaining.toLocaleString()} طن` : 'حدد سعة المنشأة',
+      color: 'text-primary',
+      subtitle: 'شحنة مكتملة',
     },
     {
       title: 'حالة الامتثال',
-      value: kpis.capacityPercent > 10 ? 'مطابق' : 'تحذير',
+      value: 'مطابق',
       icon: Shield,
-      color: kpis.capacityPercent > 10 ? 'text-green-600' : 'text-red-600',
+      color: 'text-green-600',
       subtitle: 'الرصد البيئي',
     },
   ];
