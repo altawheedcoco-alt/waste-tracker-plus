@@ -553,7 +553,7 @@ const EnhancedChatMessages = ({
                                   try {
                                     const parsed = JSON.parse(message.content);
                                     if (parsed.resource_type && parsed.resource_data) {
-                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} onAction={onCardAction} />;
+                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} orgType={orgType} onAction={onCardAction} />;
                                     }
                                   } catch {}
                                   return null;
