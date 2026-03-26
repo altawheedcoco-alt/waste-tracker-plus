@@ -511,7 +511,7 @@ const EnhancedChatMessages = ({
                                   try {
                                     const parsed = JSON.parse(text);
                                     if (parsed.resource_type && parsed.resource_data) {
-                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} onAction={onCardAction} />;
+                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} orgType={orgType} onAction={onCardAction} />;
                                     }
                                   } catch {}
                                   const bcMatch = text.match(/\/dashboard\/broadcast-channels\?channel=([a-f0-9-]+)(?:&post=([a-f0-9-]+))?/);
