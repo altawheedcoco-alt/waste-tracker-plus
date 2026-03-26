@@ -35,6 +35,7 @@ import CreateGroupDialog from './CreateGroupDialog';
 import CallScreen from './CallScreen';
 import ChatPartnerInfo from './ChatPartnerInfo';
 import StoryCircles from '../stories/StoryCircles';
+import ChatActionPanel from './ChatActionPanel';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -71,7 +72,7 @@ const EnhancedChatWidget = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
-
+  const [actionPanel, setActionPanel] = useState<{ action: 'sign' | 'stamp' | 'track' | 'status' | 'approve' | null; resourceId: string; resourceType: string; resourceData?: any }>({ action: null, resourceId: '', resourceType: '' });
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
   const { pinnedMessages, fetchPinned, togglePin } = usePinnedMessages(selectedPartner?.id);
@@ -324,6 +325,35 @@ const EnhancedChatWidget = () => {
     sendTyping();
   };
 
+  const handleCardAction = useCallback((action: string, id: string, data?: any) => {
+    switch (action) {
+      case 'track':
+        setActionPanel({ action: 'track', resourceId: id, resourceType: 'shipment', resourceData: data });
+        break;
+      case 'change_status':
+        setActionPanel({ action: 'status', resourceId: id, resourceType: 'shipment', resourceData: data });
+        break;
+      case 'sign_shipment':
+      case 'sign_now':
+      case 'sign_doc':
+        setActionPanel({ action: 'sign', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
+        break;
+      case 'stamp_shipment':
+      case 'stamp_now':
+      case 'stamp_doc':
+        setActionPanel({ action: 'stamp', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
+        break;
+      case 'approve_invoice':
+        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
+        break;
+      case 'reject_invoice':
+        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
+        break;
+      default:
+        break;
+    }
+  }, []);
+
   if (!user) return null;
 
   const widgetSize = isExpanded
@@ -544,7 +574,23 @@ const EnhancedChatWidget = () => {
                       onPinMessage={handlePinMessage}
                       isPartnerTyping={isPartnerTyping}
                       scrollToMessageId={scrollToMessageId}
+                      onCardAction={handleCardAction}
                     />
+
+                    {/* Chat Action Panel (Sign, Track, Status, Approve) */}
+                    {actionPanel.action && (
+                      <ChatActionPanel
+                        action={actionPanel.action}
+                        resourceId={actionPanel.resourceId}
+                        resourceType={actionPanel.resourceType}
+                        resourceData={actionPanel.resourceData}
+                        onClose={() => setActionPanel({ action: null, resourceId: '', resourceType: '' })}
+                        onComplete={(act, id) => {
+                          toast.success('تم تنفيذ العملية بنجاح');
+                          if (selectedPartner) fetchMessagesForPartner(selectedPartner.id);
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* Reply Preview */}

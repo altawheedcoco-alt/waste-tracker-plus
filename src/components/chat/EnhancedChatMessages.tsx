@@ -52,6 +52,7 @@ interface EnhancedChatMessagesProps {
   onPinMessage?: (messageId: string) => void;
   scrollToMessageId?: string | null;
   firstUnreadMessageId?: string | null;
+  onCardAction?: (action: string, id: string, data?: any) => void;
 }
 
 // URL detection and rendering
@@ -144,6 +145,7 @@ const EnhancedChatMessages = ({
   onPinMessage,
   scrollToMessageId,
   firstUnreadMessageId,
+  onCardAction,
 }: EnhancedChatMessagesProps) => {
   const navigate = useAppNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -507,7 +509,7 @@ const EnhancedChatMessages = ({
                                   try {
                                     const parsed = JSON.parse(text);
                                     if (parsed.resource_type && parsed.resource_data) {
-                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} />;
+                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} onAction={onCardAction} />;
                                     }
                                   } catch {}
                                   const bcMatch = text.match(/\/dashboard\/broadcast-channels\?channel=([a-f0-9-]+)(?:&post=([a-f0-9-]+))?/);
@@ -549,7 +551,7 @@ const EnhancedChatMessages = ({
                                   try {
                                     const parsed = JSON.parse(message.content);
                                     if (parsed.resource_type && parsed.resource_data) {
-                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} />;
+                                      return <ChatMessageCardRenderer resourceType={parsed.resource_type} resourceData={parsed.resource_data} isOwn={isOwn} onAction={onCardAction} />;
                                     }
                                   } catch {}
                                   return null;

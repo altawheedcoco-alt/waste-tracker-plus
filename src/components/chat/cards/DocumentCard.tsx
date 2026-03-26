@@ -1,5 +1,5 @@
 import { memo } from 'react';
-import { FileText, Download, ExternalLink } from 'lucide-react';
+import { FileText, Download, FileSignature, Stamp } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -13,12 +13,13 @@ interface DocumentCardProps {
     status?: string;
   };
   isOwn: boolean;
+  onAction?: (action: string, id: string, data?: any) => void;
 }
 
-const DocumentCard = memo(({ data, isOwn }: DocumentCardProps) => {
+const DocumentCard = memo(({ data, isOwn, onAction }: DocumentCardProps) => {
   return (
     <div className={cn(
-      'rounded-xl border p-3 min-w-[220px] max-w-[280px] space-y-2',
+      'rounded-xl border p-3 min-w-[240px] max-w-[300px] space-y-2',
       isOwn ? 'bg-white/10 border-white/20' : 'bg-muted/50 border-border'
     )}>
       <div className="flex items-center justify-between">
@@ -32,29 +33,41 @@ const DocumentCard = memo(({ data, isOwn }: DocumentCardProps) => {
       <p className={cn('text-xs font-bold truncate', isOwn ? 'text-white' : 'text-foreground')}>
         {data.document_name || 'مستند'}
       </p>
-      <div className="flex gap-1.5">
+
+      {/* Interactive buttons */}
+      <div className="grid grid-cols-3 gap-1">
         {data.file_url && (
           <Button
             size="sm"
             variant={isOwn ? 'secondary' : 'outline'}
-            className="flex-1 h-7 text-[11px] gap-1"
+            className="h-7 text-[10px] gap-0.5"
             asChild
           >
             <a href={data.file_url} target="_blank" rel="noopener noreferrer">
-              <Download className="w-3 h-3" /> تحميل
+              <Download className="w-3 h-3" /> حمّل
             </a>
           </Button>
         )}
-        <Button
-          size="sm"
-          variant={isOwn ? 'secondary' : 'outline'}
-          className="flex-1 h-7 text-[11px] gap-1"
-          asChild
-        >
-          <a href={data.file_url || '#'} target="_blank" rel="noopener noreferrer">
-            <ExternalLink className="w-3 h-3" /> معاينة
-          </a>
-        </Button>
+        {onAction && (
+          <>
+            <Button
+              size="sm"
+              variant={isOwn ? 'secondary' : 'outline'}
+              className="h-7 text-[10px] gap-0.5"
+              onClick={() => onAction('sign_doc', data.id, data)}
+            >
+              <FileSignature className="w-3 h-3" /> وقّع
+            </Button>
+            <Button
+              size="sm"
+              variant={isOwn ? 'secondary' : 'outline'}
+              className="h-7 text-[10px] gap-0.5"
+              onClick={() => onAction('stamp_doc', data.id, data)}
+            >
+              <Stamp className="w-3 h-3" /> اختم
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,11 +1,11 @@
-import { FileText, Truck, Receipt, FileSignature, Stamp, MapPin, BarChart3, Bot, Hash, Timer } from 'lucide-react';
+import { FileText, Truck, Receipt, FileSignature, Stamp, MapPin, BarChart3, Bot, Hash, Timer, RefreshCw, CheckSquare, FileStack, List } from 'lucide-react';
 
 export interface SlashCommand {
   command: string;
   label: string;
   description: string;
   icon: any;
-  resourceType: 'shipment' | 'invoice' | 'document' | 'signing_request' | 'stamp' | 'tracking' | 'poll' | 'ai' | 'channel' | 'disappear';
+  resourceType: 'shipment' | 'invoice' | 'document' | 'signing_request' | 'stamp' | 'tracking' | 'poll' | 'ai' | 'channel' | 'disappear' | 'status' | 'approve' | 'bulk_sign' | 'list';
   color: string;
 }
 
@@ -57,6 +57,38 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     icon: MapPin,
     resourceType: 'tracking',
     color: 'text-teal-600 bg-teal-500/10',
+  },
+  {
+    command: '/status',
+    label: 'تغيير حالة',
+    description: 'تغيير حالة شحنة من المحادثة',
+    icon: RefreshCw,
+    resourceType: 'status',
+    color: 'text-indigo-600 bg-indigo-500/10',
+  },
+  {
+    command: '/approve',
+    label: 'اعتماد',
+    description: 'اعتماد مستند أو فاتورة مباشرة',
+    icon: CheckSquare,
+    resourceType: 'approve',
+    color: 'text-emerald-600 bg-emerald-500/10',
+  },
+  {
+    command: '/bulk-sign',
+    label: 'توقيع جماعي',
+    description: 'توقيع مجموعة مستندات دفعة واحدة',
+    icon: FileStack,
+    resourceType: 'bulk_sign',
+    color: 'text-amber-600 bg-amber-500/10',
+  },
+  {
+    command: '/list',
+    label: 'قائمة',
+    description: 'عرض قائمة شحنات أو فواتير',
+    icon: List,
+    resourceType: 'list',
+    color: 'text-gray-600 bg-gray-500/10',
   },
   {
     command: '/poll',
