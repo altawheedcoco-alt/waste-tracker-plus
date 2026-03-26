@@ -188,8 +188,8 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
     return (
       <div className="h-full flex items-center justify-center bg-background">
         <div className="text-center text-muted-foreground">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/10 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-emerald-500 animate-pulse" />
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+            <MessageCircle className="w-6 h-6 text-primary animate-pulse" />
           </div>
           <p className="text-sm">جاري تحميل المحادثات...</p>
         </div>

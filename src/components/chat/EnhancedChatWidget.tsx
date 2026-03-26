@@ -393,7 +393,7 @@ const EnhancedChatWidget = () => {
             ) : view === 'group' && selectedGroup ? (
               null // GroupChatView has its own header
             ) : selectedPartner && (
-              <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
+              <div className="flex items-center justify-between bg-wa-header shrink-0">
                 <ChatHeader
                   partnerName={selectedPartner.name}
                   partnerType={selectedPartner.organization_type}
