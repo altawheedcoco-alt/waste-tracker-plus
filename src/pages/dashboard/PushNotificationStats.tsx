@@ -356,7 +356,7 @@ const PushNotificationStats = () => {
     setSelectedCampaign(campaign);
     const { data: recipients } = await (supabase.from('push_campaign_recipients') as any)
       .select('*').eq('campaign_id', campaign.id).order('created_at', { ascending: false });
-    const recipientUserIds = [...new Set((recipients || []).map((r: any) => r.user_id))];
+    const recipientUserIds = [...new Set((recipients || []).map((r: any) => r.user_id))] as string[];
     let recProfiles: any[] = [];
     if (recipientUserIds.length > 0) {
       const { data: rp } = await supabase.from('profiles').select('user_id, full_name').in('user_id', recipientUserIds);
