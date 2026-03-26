@@ -195,6 +195,7 @@ const Index = () => {
     <Suspense fallback={null}>
       <LandingWrapper>
         <div className="min-h-screen-safe bg-background smooth-scroll selection:bg-primary/15 selection:text-foreground">
+          <EnableNotificationsButton />
           {isVisible('header') && (
             <ErrorBoundary fallbackTitle="خطأ في تحميل الرأس">
               <Header />
