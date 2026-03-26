@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
 import { cn } from '@/lib/utils';
 
-const DISMISSED_KEY = 'push_banner_dismissed';
+const DISMISSED_KEY = 'push_banner_dismissed_session';
 
 export default function PushPermissionBanner() {
   const { user } = useAuth();
