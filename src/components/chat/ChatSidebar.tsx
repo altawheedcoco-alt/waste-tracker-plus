@@ -271,7 +271,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         {lastMsg && (
                           <span className={cn(
                             "text-[11px] shrink-0",
-                            partner.unreadCount > 0 ? "text-emerald-600 font-semibold" : "text-muted-foreground"
+                            partner.unreadCount > 0 ? "text-wa-unread-badge font-semibold" : "text-muted-foreground"
                           )}>
                             {formatMessageTime(lastMsg.time)}
                           </span>
