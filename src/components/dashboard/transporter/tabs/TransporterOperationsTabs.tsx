@@ -148,9 +148,12 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 2. العمليات (calendar مدمج) ══════ */}
+    {/* ══════ 2. العمليات (calendar + load consolidation مدمج) ══════ */}
     <TabsContent value="operations" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في تجميع الحمولات">
+          <LoadConsolidator />
+        </ErrorBoundary>
         <ShipmentCalendarWidget />
       </Suspense>
     </TabsContent>
