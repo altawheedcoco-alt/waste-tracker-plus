@@ -296,10 +296,27 @@ const EnhancedChatMessages = ({
   const handleTouchStart = (msgId: string) => {
     longPressTimerRef.current = setTimeout(() => {
       setLongPressMsg(msgId);
+      // Open bottom sheet on mobile
+      if (isMobile) {
+        const msg = messages.find(m => m.id === msgId);
+        if (msg) setBottomSheetMsg(msg);
+      }
     }, 500);
   };
   const handleTouchEnd = () => {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+  };
+
+  const handleBottomSheetCopy = async () => {
+    if (!bottomSheetMsg) return;
+    try {
+      let textToCopy = bottomSheetMsg.content;
+      try { const parsed = JSON.parse(textToCopy); textToCopy = parsed.text || textToCopy; } catch {}
+      await navigator.clipboard.writeText(textToCopy);
+      toast({ title: 'تم النسخ', description: 'تم نسخ الرسالة إلى الحافظة' });
+    } catch {
+      toast({ title: 'خطأ', description: 'فشل نسخ الرسالة', variant: 'destructive' });
+    }
   };
 
   if (messages.length === 0) {
