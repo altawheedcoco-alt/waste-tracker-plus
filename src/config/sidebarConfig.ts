@@ -252,19 +252,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ التتبع والمسارات — الناقل ═══════════════
-  {
-    id: 'fleet-tracking',
-    icon: MapPin,
-    labelAr: 'التتبع والمسارات',
-    labelEn: 'Tracking & Routes',
-    visibleFor: ['transporter'],
-    items: [
-      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments', 'view_drivers'] },
-      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'] },
-      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
-    ],
-  },
+  // ═══════════════ (fleet-tracking merged into tracking-maps-center below) ═══════════════
 
   // ═══════════════ المركبات والحاويات — الناقل ═══════════════
   {
