@@ -21,6 +21,7 @@ const PWAUpdatePrompt = lazy(() => import("./components/pwa/PWAUpdatePrompt"));
 const ProductionReadiness = lazy(() => import("./components/production/ProductionReadiness"));
 const AutoPushSubscriber = lazy(() => import("./components/pwa/AutoPushSubscriber").then(m => ({ default: m.AutoPushSubscriber })));
 const PushPermissionBanner = lazy(() => import("./components/pwa/PushPermissionBanner"));
+const SoundIntegrator = lazy(() => import("./components/SoundIntegrator"));
 
 // Minimal loading component
 const PageLoader = memo(() => (
