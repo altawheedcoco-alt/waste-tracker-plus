@@ -761,45 +761,23 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ تقارير الشحنات ═══════════════
+  // ═══════════════ التقارير التشغيلية (مدمج: شحنات + سجلات + تحليل) ═══════════════
   {
-    id: 'shipment-reports',
-    icon: FileText,
-    labelAr: 'تقارير الشحنات',
-    labelEn: 'Shipment Reports',
+    id: 'operational-reports',
+    icon: BarChart3,
+    labelAr: 'التقارير التشغيلية',
+    labelEn: 'Operational Reports',
     visibleFor: [],
     items: [
       { icon: BarChart3, labelAr: 'التقارير', labelEn: 'Reports', path: '/dashboard/reports', key: 'reports', bindingType: 'internal' as const, requiredPermissions: ['view_reports', 'create_reports'] },
       { icon: FileText, labelAr: 'تقارير الشحنات', labelEn: 'Shipment Reports', path: '/dashboard/shipment-reports', key: 'shipment-reports', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: ClipboardList, labelAr: 'التقرير التجميعي', labelEn: 'Aggregate', path: '/dashboard/aggregate-report', key: 'aggregate-report', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
-      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
-    ],
-  },
-
-  // ═══════════════ سجلات المخلفات ═══════════════
-  {
-    id: 'waste-registers',
-    icon: Layers,
-    labelAr: 'سجلات المخلفات',
-    labelEn: 'Waste Registers',
-    visibleFor: [],
-    items: [
       { icon: FileSpreadsheet, labelAr: 'سجل غير خطرة', labelEn: 'Non-Hazardous', path: '/dashboard/non-hazardous-register', key: 'non-hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: AlertTriangle, labelAr: 'سجل خطرة', labelEn: 'Hazardous', path: '/dashboard/hazardous-register', key: 'hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
-    ],
-  },
-
-  // ═══════════════ تحليل النفايات ═══════════════
-  {
-    id: 'waste-analysis',
-    icon: Activity,
-    labelAr: 'تحليل النفايات',
-    labelEn: 'Waste Analysis',
-    visibleFor: [],
-    items: [
       { icon: BarChart3, labelAr: 'التحليل التفصيلي', labelEn: 'Detailed Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: Activity, labelAr: 'خريطة التدفق', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
     ],
   },
 
