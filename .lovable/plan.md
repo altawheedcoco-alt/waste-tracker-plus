@@ -1,46 +1,80 @@
 
 
-# خطة تنفيذ باقي عناصر واتساب (Status/Stories + 14 عنصر)
+# خطة: تحويل الدردشة إلى مركز عمليات متكامل (Chat Operations Hub)
+
+## الفكرة
+
+تحويل الدردشة من مجرد نظام مراسلة إلى **مركز قيادة وسيطرة كامل** يمكن من خلاله تنفيذ كافة العمليات التشغيلية دون مغادرة المحادثة.
+
+---
+
+## الوضع الحالي
+
+موجود بالفعل:
+- `@mention` لذكر المستخدمين والجهات (يرسل إشعار فقط)
+- `/slash` أوامر (10 أوامر) تفتح `ChatResourcePicker` لمشاركة بطاقات فقط
+- بطاقات عرض (شحنة، فاتورة، عقد، توقيع) لكنها **للعرض فقط** مع زر "فتح التفاصيل" يخرجك من الدردشة
+- `useMentionSigning` موجود لكن **غير مربوط** ببطاقات الدردشة
+
+**المشكلة**: كل البطاقات تنقلك خارج الدردشة عبر `navigate()`. لا يمكنك التوقيع أو الختم أو تتبع الشحنة أو تغيير حالتها من داخل المحادثة.
+
+---
 
 ## ما سيتم تنفيذه
 
-### 1. إضافة StoryCircles أعلى قائمة المحادثات في الـ Widget
-- إضافة `StoryCircles` في `EnhancedChatWidget.tsx` فوق قسم المجموعات مباشرة في view === 'sidebar'
-- المكون موجود بالفعل ويعمل - فقط يحتاج ربط بالـ Chat Widget
+### 1. بطاقات تفاعلية (Interactive Cards) بدل بطاقات العرض
 
-### 2. ربط Long Press بـ ChatBottomSheet (عنصر #1)
-- `ChatBottomSheet` موجود ومربوط بالفعل في `EnhancedChatMessages.tsx` (سطر 159: `bottomSheetMsg` state + سطر 296-308: `handleTouchStart`)
-- التأكد من أن الربط يعمل بشكل صحيح وإضافة `onTouchStart`/`onTouchEnd` على كل فقاعة رسالة
+تحويل كل بطاقة من "عرض + زر فتح خارجي" إلى بطاقة تفاعلية كاملة:
 
-### 3. ربط Emoji Reactions بالـ Bottom Sheet (عنصر #2)
-- إضافة `onReact` callback في `ChatBottomSheet` لاستدعاء `toggleReaction` من `useChatReactions`
+- **ShipmentCard**: إضافة أزرار (تتبع مباشر، تغيير حالة، توقيع، ختم) مباشرة في البطاقة
+- **SigningRequestCard**: إضافة زر "وقّع الآن" يفتح `UniversalSignatureDialog` داخل الدردشة مباشرة
+- **InvoiceCard**: إضافة زر "اعتمد" أو "ارفض" مباشرة
+- **DocumentCard**: إضافة أزرار (توقيع، ختم، تحميل) مباشرة
 
-### 4. أصوات الإرسال والاستقبال (عنصر #7)
-- `soundEngine` مستورد بالفعل في `EnhancedChatWidget.tsx` (سطر 19)
-- إضافة `soundEngine.play('messageSent')` عند الإرسال و `soundEngine.play('messageReceived')` عند الاستقبال
+### 2. أوامر Slash جديدة للعمليات التشغيلية
 
-### 5. Waveform حي أثناء التسجيل (عنصر #14)
-- إضافة `AnalyserNode` من Web Audio API أثناء التسجيل في `EnhancedChatInput.tsx`
-- رسم أشرطة متحركة (24 بار) تتفاعل مع الصوت الحقيقي
+إضافة أوامر جديدة في `chatSlashCommands.ts`:
+- `/status` - تغيير حالة شحنة مباشرة من المحادثة
+- `/approve` - اعتماد مستند أو فاتورة
+- `/bulk-sign` - توقيع مجموعة مستندات دفعة واحدة
+- `/list` - عرض قائمة شحنات/فواتير مع فلترة سريعة
 
-### 6. "تم التحويل" Label (عنصر #12)
-- إضافة كشف تلقائي للرسائل التي تبدأ بـ `⤵️` وعرض label "تم التحويل" أعلى الفقاعة
+### 3. نظام الإجراءات داخل الدردشة (In-Chat Actions)
 
-### 7. أيقونات نوع الرسالة في Sidebar (عنصر #5)
-- `getMessagePreview` موجود بالفعل ويُرجع أيقونات - التأكد من عرضها في واجهة الـ Sidebar
+إنشاء مكون `ChatActionPanel.tsx` يعمل كـ overlay داخل الدردشة:
+- عند الضغط على "وقّع" في بطاقة → يفتح نافذة توقيع داخل الدردشة (بدون navigate)
+- عند الضغط على "تتبع" → يفتح خريطة مصغرة داخل الدردشة
+- عند الضغط على "تغيير حالة" → يفتح قائمة حالات مع تأكيد
 
-### 8. تحسين Unread Count (عنصر #11)
-- إضافة `invalidateQueries` أو تحديث فوري عند فتح محادثة
+### 4. ربط `useMentionSigning` بالبطاقات
+
+- عند `@mention` شخص مع `/sign` → يُرسل طلب توقيع تلقائي + بطاقة توقيع تفاعلية للطرف الآخر
+- الطرف الآخر يرى بطاقة بزر "وقّع الآن" → يوقع مباشرة من الدردشة
+- بعد التوقيع: البطاقة تتحدث تلقائياً لـ "تم التوقيع ✓"
+
+### 5. تحديث حي للبطاقات (Live Card Updates)
+
+- استخدام Supabase Realtime لتحديث حالة البطاقات فوراً
+- مثال: بعد توقيع الطرف الآخر، البطاقة عندك تتغير من "بانتظار التوقيع" إلى "تم التوقيع"
 
 ---
 
 ## التفاصيل الفنية
 
-### الملفات المتأثرة:
-1. **`EnhancedChatWidget.tsx`** - إضافة StoryCircles + أصوات إرسال/استقبال
-2. **`EnhancedChatMessages.tsx`** - تأكيد ربط long press + forwarded label + emoji reactions من Bottom Sheet
-3. **`EnhancedChatInput.tsx`** - Waveform حي أثناء التسجيل
-4. **`ChatSidebar.tsx`** - عرض أيقونات نوع الرسالة الأخيرة
+### الملفات الجديدة:
+1. **`ChatActionPanel.tsx`** - لوحة إجراءات overlay داخل الدردشة (توقيع، ختم، تتبع، تغيير حالة)
+2. **`ChatInlineSignature.tsx`** - مكون توقيع مصغر يعمل داخل المحادثة
+
+### الملفات المعدّلة:
+1. **`cards/ShipmentCard.tsx`** - إضافة أزرار تفاعلية (تتبع، حالة، توقيع)
+2. **`cards/SigningRequestCard.tsx`** - إضافة زر "وقّع الآن" يفتح التوقيع inline
+3. **`cards/InvoiceCard.tsx`** - إضافة أزرار اعتماد/رفض
+4. **`cards/DocumentCard.tsx`** - إضافة أزرار توقيع/ختم
+5. **`chatSlashCommands.ts`** - إضافة 4 أوامر جديدة
+6. **`EnhancedChatInput.tsx`** - ربط الأوامر الجديدة بالـ ActionPanel
+7. **`EnhancedChatWidget.tsx`** - إضافة `onAction` handler + ربط Realtime للبطاقات
+8. **`ChatMessageCardRenderer.tsx`** - تمرير `onAction` لكل البطاقات
 
 ### لا تغييرات في قاعدة البيانات
+كل الجداول المطلوبة موجودة (signing_requests, document_signatures, shipments, etc.)
 
