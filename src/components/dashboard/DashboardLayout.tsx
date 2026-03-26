@@ -107,6 +107,7 @@ import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
+import SidebarSectionHeader from './SidebarSectionHeader';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
 import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
