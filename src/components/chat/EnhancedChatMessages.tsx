@@ -145,6 +145,7 @@ const EnhancedChatMessages = ({
   onPinMessage,
   scrollToMessageId,
   firstUnreadMessageId,
+  onCardAction,
 }: EnhancedChatMessagesProps) => {
   const navigate = useAppNavigate();
   const messagesEndRef = useRef<HTMLDivElement>(null);
