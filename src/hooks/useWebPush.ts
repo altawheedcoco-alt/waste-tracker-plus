@@ -128,6 +128,9 @@ export function useWebPush() {
       if (saved) {
         toast.success('تم تفعيل الإشعارات ✅');
 
+        // Initialize FCM alongside VAPID
+        initializeFCM().catch(e => console.warn('[WebPush] FCM init skipped:', e));
+
         // Send confirmation via all channels
         const confirmTitle = '🔔 تم تفعيل الإشعارات بنجاح';
         const confirmBody = 'مرحباً! تم تفعيل الإشعارات لديك — ستصلك جميع التنبيهات والتحديثات المهمة فوراً.';
