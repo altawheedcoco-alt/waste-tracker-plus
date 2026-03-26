@@ -216,6 +216,7 @@ const AdminDashboard = () => {
             <Switch checked={aiEnabled} onCheckedChange={(checked) => { toggleAI(checked); sonnerToast(checked ? t('dashboard.smartAssistantEnabled') : t('dashboard.smartAssistantDisabled')); }} />
           </div>
           <DashboardPrintReports />
+          <AICapabilitiesInfoDialog />
           <AdminCredentialControl />
           <AdminDashboardSwitcher />
           <SmartRequestDialog buttonText={t('dashboard.requestReports')} buttonVariant="outline" />
