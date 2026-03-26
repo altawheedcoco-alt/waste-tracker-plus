@@ -257,7 +257,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         </AvatarFallback>
                       </Avatar>
                       {partner.isOnline && (
-                        <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full" />
+                        <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-primary border-2 border-background rounded-full" />
                       )}
                     </div>
 
