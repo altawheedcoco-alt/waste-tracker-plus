@@ -96,6 +96,7 @@ const EnhancedChatInput = ({
   const [isRecordingLocked, setIsRecordingLocked] = useState(false);
   const [recordSlideX, setRecordSlideX] = useState(0);
   
+  const { organization } = useAuth();
   const { entities: mentionableEntities } = useMentionableEntities();
   const { users: mentionableUsers } = useMentionableUsers();
   const { notify: notifyMentions } = useMentionNotifier();
