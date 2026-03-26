@@ -91,6 +91,7 @@ const ApiManagement = lazy(() => import("@/pages/dashboard/ApiManagement"));
 const SecurityPenetrationTesting = lazy(() => import("@/pages/dashboard/SecurityPenetrationTesting"));
 const DatabaseQueryOptimization = lazy(() => import("@/pages/dashboard/DatabaseQueryOptimization"));
 const AdvancedAnalytics = lazy(() => import("@/pages/dashboard/AdvancedAnalytics"));
+const PushNotificationStats = lazy(() => import("@/pages/dashboard/PushNotificationStats"));
 const GDPRCompliance = lazy(() => import("@/pages/dashboard/GDPRCompliance"));
 const QuickDriverLinks = lazy(() => import("@/pages/dashboard/QuickDriverLinks"));
 const QuickDepositLinks = lazy(() => import("@/pages/dashboard/QuickDepositLinks"));
@@ -316,6 +317,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/admin-attestations" element={<AdminAttestations />} />
     <Route path="/dashboard/organization-documents" element={<OrganizationDocuments />} />
     <Route path="/dashboard/system-overview" element={<AdminSystemOverview />} />
+    <Route path="/dashboard/push-notification-stats" element={<PushNotificationStats />} />
     <Route path="/dashboard/admin-revenue" element={<AdminRevenueManagement />} />
     <Route path="/dashboard/c2b-management" element={<C2BManagement />} />
     <Route path="/dashboard/news-manager" element={<NewsManager />} />
