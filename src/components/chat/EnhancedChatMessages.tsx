@@ -380,15 +380,26 @@ const EnhancedChatMessages = ({
 
                           {/* Message Bubble + Reactions */}
                           <div className="relative">
+                            {/* WhatsApp Bubble Tail */}
+                            {showAvatar || (isOwn && (index === 0 || group.messages[index - 1]?.sender_id !== message.sender_id)) ? (
+                              <div className={cn(
+                                "absolute top-0 w-3 h-3",
+                                isOwn ? "-left-1.5" : "-right-1.5"
+                              )}>
+                                <svg viewBox="0 0 8 13" width="8" height="13" className={isOwn ? "scale-x-[-1]" : ""}>
+                                  <path d="M1.533 3.568 8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z" fill={isOwn ? 'hsl(var(--wa-outgoing))' : 'hsl(var(--wa-incoming))'} />
+                                </svg>
+                              </div>
+                            ) : null}
                             <div
                               className={cn(
                                 "rounded-lg overflow-hidden relative",
                                 isDeleted
                                   ? "bg-muted/50 border border-border/30 italic"
                                   : isOwn
-                                    ? "bg-wa-outgoing text-wa-outgoing-foreground rounded-tr-none"
-                                    : "bg-wa-incoming text-wa-incoming-foreground border border-border/20 rounded-tl-none shadow-sm",
-                                message.message_type === 'image' ? "p-1" : "px-3 py-1.5"
+                                    ? "bg-wa-outgoing text-wa-outgoing-foreground"
+                                    : "bg-wa-incoming text-wa-incoming-foreground shadow-[0_1px_0.5px_rgba(0,0,0,0.08)]",
+                                message.message_type === 'image' ? "p-1" : "px-2.5 py-1.5"
                               )}
                             >
                               {/* Quoted Reply */}
