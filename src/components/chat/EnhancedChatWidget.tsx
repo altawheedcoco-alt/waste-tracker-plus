@@ -574,7 +574,23 @@ const EnhancedChatWidget = () => {
                       onPinMessage={handlePinMessage}
                       isPartnerTyping={isPartnerTyping}
                       scrollToMessageId={scrollToMessageId}
+                      onCardAction={handleCardAction}
                     />
+
+                    {/* Chat Action Panel (Sign, Track, Status, Approve) */}
+                    {actionPanel.action && (
+                      <ChatActionPanel
+                        action={actionPanel.action}
+                        resourceId={actionPanel.resourceId}
+                        resourceType={actionPanel.resourceType}
+                        resourceData={actionPanel.resourceData}
+                        onClose={() => setActionPanel({ action: null, resourceId: '', resourceType: '' })}
+                        onComplete={(act, id) => {
+                          toast.success('تم تنفيذ العملية بنجاح');
+                          if (selectedPartner) fetchMessagesForPartner(selectedPartner.id);
+                        }}
+                      />
+                    )}
                   </div>
 
                   {/* Reply Preview */}
