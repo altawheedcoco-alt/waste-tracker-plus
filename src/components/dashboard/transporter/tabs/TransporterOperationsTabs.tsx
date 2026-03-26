@@ -80,6 +80,20 @@ const TransporterOperationsTabs = ({
   <>
     {/* ══════ 1. نظرة عامة ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
+      {/* Smart KPIs */}
+      <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في مؤشرات الأداء الذكية">
+          <TransporterSmartKPIs />
+        </ErrorBoundary>
+      </Suspense>
+
+      {/* Smart ETA */}
+      <Suspense fallback={<Skeleton className="h-40 rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في وقت الوصول الذكي">
+          <SmartETAWidget />
+        </ErrorBoundary>
+      </Suspense>
+
       <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
       <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
