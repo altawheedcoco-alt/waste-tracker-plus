@@ -62,6 +62,9 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [docsCount, setDocsCount] = useState(0);
+  const [autoSaved, setAutoSaved] = useState(false);
+  const hasAutoRun = useRef(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.from('entity_documents').select('id', { count: 'exact', head: true })
@@ -69,8 +72,9 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
       .then(({ count }) => setDocsCount(count || 0));
   }, [organizationId]);
 
-  const runAnalysis = async () => {
+  const runAnalysis = useCallback(async () => {
     setLoading(true);
+    setAutoSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-organization', {
         body: { organization_id: organizationId },
@@ -79,14 +83,32 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
       if (data?.success && data.result) {
         setAnalysis(data.result);
         toast.success('تم إنجاز التحليل الشامل العميق');
+        return data.result;
       } else {
         throw new Error(data?.error || 'فشل التحليل');
       }
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || 'حدث خطأ في التحليل');
+      return null;
     } finally { setLoading(false); }
-  };
+  }, [organizationId]);
+
+  // تشغيل التحليل تلقائياً عند فتح التبويب
+  useEffect(() => {
+    if (!hasAutoRun.current && organizationId && profile) {
+      hasAutoRun.current = true;
+      runAnalysis();
+    }
+  }, [organizationId, profile, runAnalysis]);
+
+  // حفظ ومشاركة تلقائياً بعد اكتمال التحليل
+  useEffect(() => {
+    if (analysis && !autoSaved && profile) {
+      setAutoSaved(true);
+      saveAndShareWithAdmin(true);
+    }
+  }, [analysis, autoSaved, profile]);
 
   const saveAndShareWithAdmin = async () => {
     if (!analysis || !profile) return;
