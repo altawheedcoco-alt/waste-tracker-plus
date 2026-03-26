@@ -33,9 +33,9 @@ const PredictiveMaintenanceAI = () => {
     setLoading(true);
     try {
       const [fleetRes, logsRes] = await Promise.all([
-        supabase.from('fleet_vehicles').select('id, plate_number, vehicle_type, status, mileage, last_maintenance_date, next_maintenance_date')
+        supabase.from('fleet_vehicles').select('id, plate_number, vehicle_type, status')
           .eq('organization_id', organization.id),
-        supabase.from('vehicle_maintenance_logs').select('vehicle_id, maintenance_type, performed_at, cost, notes')
+        supabase.from('vehicle_maintenance').select('vehicle_plate, maintenance_type, performed_at, cost, notes')
           .eq('organization_id', organization.id).order('performed_at', { ascending: false }).limit(100),
       ]);
 
