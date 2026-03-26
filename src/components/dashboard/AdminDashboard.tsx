@@ -29,6 +29,7 @@ import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
+import AICapabilitiesInfoDialog from '@/components/admin/AICapabilitiesInfoDialog';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
@@ -215,6 +216,7 @@ const AdminDashboard = () => {
             <Switch checked={aiEnabled} onCheckedChange={(checked) => { toggleAI(checked); sonnerToast(checked ? t('dashboard.smartAssistantEnabled') : t('dashboard.smartAssistantDisabled')); }} />
           </div>
           <DashboardPrintReports />
+          <AICapabilitiesInfoDialog />
           <AdminCredentialControl />
           <AdminDashboardSwitcher />
           <SmartRequestDialog buttonText={t('dashboard.requestReports')} buttonVariant="outline" />
