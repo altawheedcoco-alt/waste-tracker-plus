@@ -303,7 +303,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         
                         <div className="flex items-center gap-1.5 shrink-0">
                           {partner.unreadCount > 0 && (
-                            <Badge className="h-5 min-w-[20px] px-1.5 text-[10px] bg-emerald-500 text-white rounded-full border-0">
+                            <Badge className="h-5 min-w-[20px] px-1.5 text-[10px] bg-wa-unread-badge text-white rounded-full border-0">
                               {partner.unreadCount > 99 ? '99+' : partner.unreadCount}
                             </Badge>
                           )}
