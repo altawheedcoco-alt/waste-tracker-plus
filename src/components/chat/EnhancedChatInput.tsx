@@ -51,7 +51,6 @@ interface EnhancedChatInputProps {
   uploadProgress?: number;
   disabled?: boolean;
   onTyping?: () => void;
-  /** Filter @mentions to only show this partner org + my org */
   chatPartnerOrgId?: string;
 }
 
@@ -92,6 +91,8 @@ const EnhancedChatInput = ({
   const [slashIndex, setSlashIndex] = useState(0);
   const [showResourcePicker, setShowResourcePicker] = useState(false);
   const [resourcePickerTab, setResourcePickerTab] = useState<'outgoing' | 'incoming'>('outgoing');
+  const [isRecordingLocked, setIsRecordingLocked] = useState(false);
+  const [recordSlideX, setRecordSlideX] = useState(0);
   
   const { entities: mentionableEntities } = useMentionableEntities();
   const { users: mentionableUsers } = useMentionableUsers();
@@ -106,6 +107,8 @@ const EnhancedChatInput = ({
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
+  const micBtnRef = useRef<HTMLButtonElement>(null);
+  const recordStartPosRef = useRef<{ x: number; y: number } | null>(null);
   
   const { isMobile } = useDisplayMode();
   const { toast } = useToast();
@@ -134,80 +137,39 @@ const EnhancedChatInput = ({
     if (!inputValue.trim()) return;
     const msgText = inputValue.trim();
     await onSendMessage(msgText);
-    // Send mention notifications if text contains @[name](id)
     if (msgText.includes('@[')) {
-      notifyMentions({
-        text: msgText,
-        users: mentionableUsers,
-        context: 'دردشة',
-      });
+      notifyMentions({ text: msgText, users: mentionableUsers, context: 'دردشة' });
     }
     setInputValue('');
     if (textareaRef.current) textareaRef.current.style.height = 'auto';
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Handle slash command dropdown navigation
     if (showSlashMenu && filteredSlashCommands.length > 0) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setSlashIndex(i => (i + 1) % filteredSlashCommands.length);
-        return;
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setSlashIndex(i => (i - 1 + filteredSlashCommands.length) % filteredSlashCommands.length);
-        return;
-      } else if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault();
-        handleSlashSelect(filteredSlashCommands[slashIndex]);
-        return;
-      } else if (e.key === 'Escape') {
-        setShowSlashMenu(false);
-        return;
-      }
+      if (e.key === 'ArrowDown') { e.preventDefault(); setSlashIndex(i => (i + 1) % filteredSlashCommands.length); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setSlashIndex(i => (i - 1 + filteredSlashCommands.length) % filteredSlashCommands.length); return; }
+      if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); handleSlashSelect(filteredSlashCommands[slashIndex]); return; }
+      if (e.key === 'Escape') { setShowSlashMenu(false); return; }
     }
-
-    // Handle mention dropdown navigation
     if (showMentionDropdown && filteredMentions.length > 0) {
-      if (e.key === 'ArrowDown') {
-        e.preventDefault();
-        setMentionIndex(i => (i + 1) % filteredMentions.length);
-        return;
-      } else if (e.key === 'ArrowUp') {
-        e.preventDefault();
-        setMentionIndex(i => (i - 1 + filteredMentions.length) % filteredMentions.length);
-        return;
-      } else if (e.key === 'Enter' || e.key === 'Tab') {
-        e.preventDefault();
-        insertMention(filteredMentions[mentionIndex]);
-        return;
-      } else if (e.key === 'Escape') {
-        setShowMentionDropdown(false);
-        return;
-      }
+      if (e.key === 'ArrowDown') { e.preventDefault(); setMentionIndex(i => (i + 1) % filteredMentions.length); return; }
+      if (e.key === 'ArrowUp') { e.preventDefault(); setMentionIndex(i => (i - 1 + filteredMentions.length) % filteredMentions.length); return; }
+      if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); insertMention(filteredMentions[mentionIndex]); return; }
+      if (e.key === 'Escape') { setShowMentionDropdown(false); return; }
     }
-    
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      handleSend();
-    }
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>, type: 'file' | 'image' | 'video') => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
-
-    // If multiple files, send each one directly
     if (files.length > 1) {
       setShowAttachMenu(false);
       clearAudioRecording();
-      for (let i = 0; i < files.length; i++) {
-        await onSendFile(files[i]);
-      }
+      for (let i = 0; i < files.length; i++) await onSendFile(files[i]);
       e.target.value = '';
       return;
     }
-
     const file = files[0];
     setSelectedFile(file);
     setShowAttachMenu(false);
@@ -234,6 +196,7 @@ const EnhancedChatInput = ({
     setAudioUrl(null);
     setRecordingTime(0);
     setIsPlayingPreview(false);
+    setIsRecordingLocked(false);
   };
 
   const startRecording = async () => {
@@ -265,7 +228,60 @@ const EnhancedChatInput = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      setIsRecordingLocked(false);
       if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
+    }
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorderRef.current && isRecording) {
+      mediaRecorderRef.current.stop();
+      setIsRecording(false);
+      setIsRecordingLocked(false);
+      if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
+      // Clear the audio immediately
+      setTimeout(() => {
+        setAudioBlob(null);
+        setAudioUrl(null);
+        setRecordingTime(0);
+      }, 50);
+    }
+  };
+
+  // Hold-to-record touch handlers
+  const handleMicTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    recordStartPosRef.current = { x: touch.clientX, y: touch.clientY };
+    startRecording();
+  };
+
+  const handleMicTouchMove = (e: React.TouchEvent) => {
+    if (!isRecording || !recordStartPosRef.current || isRecordingLocked) return;
+    const touch = e.touches[0];
+    const dx = recordStartPosRef.current.x - touch.clientX;
+    const dy = recordStartPosRef.current.y - touch.clientY;
+    
+    setRecordSlideX(Math.max(0, dx));
+    
+    // Slide left to cancel (>120px)
+    if (dx > 120) {
+      cancelRecording();
+      setRecordSlideX(0);
+      return;
+    }
+    
+    // Slide up to lock (>60px)
+    if (dy > 60) {
+      setIsRecordingLocked(true);
+      setRecordSlideX(0);
+    }
+  };
+
+  const handleMicTouchEnd = () => {
+    recordStartPosRef.current = null;
+    setRecordSlideX(0);
+    if (isRecording && !isRecordingLocked) {
+      stopRecording();
     }
   };
 
@@ -297,8 +313,6 @@ const EnhancedChatInput = ({
     textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
     
     const before = newValue.slice(0, pos);
-
-    // Detect / slash command trigger
     if (before === '/' || (before.startsWith('/') && !before.includes(' '))) {
       setSlashSearch(before);
       setShowSlashMenu(true);
@@ -307,8 +321,6 @@ const EnhancedChatInput = ({
       return;
     }
     setShowSlashMenu(false);
-
-    // Detect @ mention trigger
     const atIndex = before.lastIndexOf('@');
     if (atIndex !== -1) {
       const afterAt = before.slice(atIndex + 1);
@@ -327,7 +339,6 @@ const EnhancedChatInput = ({
   const handleSlashSelect = useCallback((cmd: SlashCommand) => {
     setInputValue('');
     setShowSlashMenu(false);
-    // Open resource picker - default to outgoing
     setResourcePickerTab('outgoing');
     setShowResourcePicker(true);
     textareaRef.current?.focus();
@@ -335,17 +346,12 @@ const EnhancedChatInput = ({
 
   const handleResourceSelect = useCallback(async (resource: { type: string; data: any }) => {
     setShowResourcePicker(false);
-    if (onSendResourceCard) {
-      await onSendResourceCard(resource.type, resource.data);
-    }
+    if (onSendResourceCard) await onSendResourceCard(resource.type, resource.data);
   }, [onSendResourceCard]);
 
-  // Filter mentions: if chatPartnerOrgId is set, only show my org + partner org entities
   const contextMentions = chatPartnerOrgId
     ? mentionableEntities.filter(e => {
-        // Always show organizations that match partner org
         if (e.type === 'organization') return e.id === chatPartnerOrgId;
-        // For users: show internal (is_external=false) + users from partner org (subtitle matches)
         return !e.is_external || mentionableEntities.some(
           org => org.type === 'organization' && org.id === chatPartnerOrgId && e.subtitle === org.name
         );
@@ -399,7 +405,7 @@ const EnhancedChatInput = ({
   ];
 
   return (
-    <div className={cn("border-t border-border/30 bg-wa-chat-bg", isMobile ? "p-1.5" : "p-2")}>
+    <div className={cn("border-t border-border/20 bg-[hsl(var(--wa-chat-bg))]", isMobile ? "p-1.5" : "p-2")}>
       {/* Hidden File Inputs */}
       <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.csv,.pptx,.ppt" multiple onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
       <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
@@ -452,18 +458,18 @@ const EnhancedChatInput = ({
       <AnimatePresence>
         {audioBlob && audioUrl && !isRecording && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-2">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <div className="w-11 h-11 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
-                <Mic className="w-5 h-5 text-emerald-600" />
+            <div className="flex items-center gap-3 p-3 rounded-xl bg-[hsl(var(--wa-light-green))]/10 border border-[hsl(var(--wa-light-green))]/20">
+              <div className="w-11 h-11 rounded-full bg-[hsl(var(--wa-light-green))]/20 flex items-center justify-center shrink-0">
+                <Mic className="w-5 h-5 text-[hsl(var(--wa-teal-green))]" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">رسالة صوتية</p>
-                <p className="text-xs text-emerald-600/70">{formatTime(recordingTime)}</p>
+                <p className="text-sm font-medium text-[hsl(var(--wa-teal-green))]">رسالة صوتية</p>
+                <p className="text-xs text-[hsl(var(--wa-teal-green))]/70">{formatTime(recordingTime)}</p>
               </div>
-              <Button size="icon" variant="ghost" className="h-9 w-9 text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10" onClick={toggleAudioPreview}>
+              <Button size="icon" variant="ghost" className="h-9 w-9 text-[hsl(var(--wa-teal-green))]" onClick={toggleAudioPreview}>
                 {isPlayingPreview ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
               </Button>
-              <Button size="icon" variant="ghost" className="h-9 w-9 text-destructive hover:text-destructive hover:bg-destructive/10" onClick={clearAudioRecording}>
+              <Button size="icon" variant="ghost" className="h-9 w-9 text-destructive hover:bg-destructive/10" onClick={clearAudioRecording}>
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
@@ -471,19 +477,42 @@ const EnhancedChatInput = ({
         )}
       </AnimatePresence>
 
-      {/* Recording Indicator */}
+      {/* Recording UI - WhatsApp slide-to-cancel */}
       <AnimatePresence>
         {isRecording && (
-          <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-2">
-            <div className="flex items-center gap-3 p-3 rounded-xl bg-destructive/10 border border-destructive/20">
-              <motion.div animate={{ scale: [1, 1.3, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="w-3 h-3 rounded-full bg-destructive shrink-0" />
-              <span className="text-sm font-medium text-destructive">جاري التسجيل</span>
-              <span className="text-sm font-mono text-destructive/70">{formatTime(recordingTime)}</span>
-              <div className="flex-1" />
-              <Button size="sm" variant="destructive" className="h-8 gap-1.5" onClick={stopRecording}>
-                <Square className="w-3.5 h-3.5" />
-                إيقاف
-              </Button>
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }} 
+            animate={{ opacity: 1, height: 'auto' }} 
+            exit={{ opacity: 0, height: 0 }} 
+            className="mb-2"
+          >
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-background border border-border shadow-sm">
+              <motion.div 
+                animate={{ scale: [1, 1.3, 1] }} 
+                transition={{ repeat: Infinity, duration: 1 }} 
+                className="w-3 h-3 rounded-full bg-destructive shrink-0" 
+              />
+              <span className="text-sm font-mono text-destructive font-medium">{formatTime(recordingTime)}</span>
+              
+              {!isRecordingLocked ? (
+                <>
+                  <motion.span 
+                    className="flex-1 text-center text-xs text-muted-foreground"
+                    animate={{ opacity: [0.4, 1, 0.4] }}
+                    transition={{ repeat: Infinity, duration: 1.5 }}
+                  >
+                    ◀ اسحب للإلغاء
+                  </motion.span>
+                </>
+              ) : (
+                <>
+                  <span className="flex-1 text-center text-xs text-muted-foreground">🔒 مقفل - اضغط إيقاف للإنهاء</span>
+                  <Button size="sm" variant="destructive" className="h-8 gap-1.5 rounded-full" onClick={stopRecording}>
+                    <Square className="w-3 h-3" />
+                    إيقاف
+                  </Button>
+                </>
+              )}
             </div>
           </motion.div>
         )}
@@ -491,7 +520,6 @@ const EnhancedChatInput = ({
 
       {/* Input Area - WhatsApp Style */}
       <div className="flex items-end gap-1.5">
-        {/* Main Input Row */}
         <div className={cn(
           "flex-1 flex items-end gap-1 rounded-[25px] bg-background border border-border/30 shadow-sm",
           isMobile ? "px-1 py-0.5" : "px-2 py-0.5"
@@ -504,7 +532,6 @@ const EnhancedChatInput = ({
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-72 p-2" side="top" align="start">
-              {/* Quick access */}
               <div className="flex flex-wrap gap-0.5 pb-2 mb-2 border-b border-border/50">
                 {EMOJI_QUICK.map((emoji, i) => (
                   <button key={i} onClick={() => insertEmoji(emoji)} className="w-9 h-9 flex items-center justify-center hover:bg-muted rounded-lg transition-colors text-lg">
@@ -534,41 +561,28 @@ const EnhancedChatInput = ({
             </PopoverContent>
           </Popover>
 
-          {/* Text Input with Slash Commands + Mention + Resource Picker */}
+          {/* Text Input */}
           <div className="flex-1 relative">
             <Textarea
               ref={textareaRef}
               value={inputValue}
               onChange={handleTextareaChange}
               onKeyDown={handleKeyDown}
-              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة... (/ للأوامر، @ للإشارة)"}
+              placeholder={isRecording ? "جاري التسجيل..." : "اكتب رسالة..."}
               className="min-h-[36px] max-h-[120px] resize-none py-2 px-1 border-0 shadow-none bg-transparent focus-visible:ring-0 text-sm"
               disabled={sending || disabled || isRecording}
               dir="rtl"
               rows={1}
             />
             
-            {/* Slash Command Menu */}
             <AnimatePresence>
               {showSlashMenu && filteredSlashCommands.length > 0 && (
-                <SlashCommandMenu
-                  commands={filteredSlashCommands}
-                  selectedIndex={slashIndex}
-                  onSelect={handleSlashSelect}
-                  onHover={setSlashIndex}
-                />
+                <SlashCommandMenu commands={filteredSlashCommands} selectedIndex={slashIndex} onSelect={handleSlashSelect} onHover={setSlashIndex} />
               )}
             </AnimatePresence>
 
-            {/* Resource Picker */}
-            <ChatResourcePicker
-              isOpen={showResourcePicker}
-              onClose={() => setShowResourcePicker(false)}
-              onSelect={handleResourceSelect}
-              initialTab={resourcePickerTab}
-            />
+            <ChatResourcePicker isOpen={showResourcePicker} onClose={() => setShowResourcePicker(false)} onSelect={handleResourceSelect} initialTab={resourcePickerTab} />
 
-            {/* @Mention Dropdown */}
             <AnimatePresence>
               {showMentionDropdown && filteredMentions.length > 0 && (
                 <motion.div
@@ -593,32 +607,20 @@ const EnhancedChatInput = ({
                         <Avatar className="h-7 w-7 shrink-0">
                           <AvatarImage src={entity.avatar_url || undefined} />
                           <AvatarFallback className="text-[10px]">
-                            {entity.type === 'organization' ? (
-                              <Building2 className="h-3.5 w-3.5" />
-                            ) : (
-                              entity.name.slice(0, 2)
-                            )}
+                            {entity.type === 'organization' ? <Building2 className="h-3.5 w-3.5" /> : entity.name.slice(0, 2)}
                           </AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0 text-right">
                           <p className="font-medium text-xs truncate">{entity.name}</p>
                           {entity.subtitle && (
                             <div className="flex items-center gap-1 justify-end">
-                              {entity.type === 'organization' ? (
-                                <Building2 className="w-2.5 h-2.5 text-muted-foreground" />
-                              ) : (
-                                <User className="w-2.5 h-2.5 text-muted-foreground" />
-                              )}
+                              {entity.type === 'organization' ? <Building2 className="w-2.5 h-2.5 text-muted-foreground" /> : <User className="w-2.5 h-2.5 text-muted-foreground" />}
                               <span className="text-[10px] text-muted-foreground truncate">{entity.subtitle}</span>
                             </div>
                           )}
                         </div>
-                        {entity.type === 'organization' && (
-                          <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">جهة</Badge>
-                        )}
-                        {entity.is_external && entity.type === 'user' && (
-                          <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">خارجي</Badge>
-                        )}
+                        {entity.type === 'organization' && <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">جهة</Badge>}
+                        {entity.is_external && entity.type === 'user' && <Badge variant="outline" className="text-[8px] py-0 h-3.5 shrink-0">خارجي</Badge>}
                       </button>
                     ))}
                   </div>
@@ -631,21 +633,15 @@ const EnhancedChatInput = ({
             </AnimatePresence>
           </div>
 
-          {/* Resource Search Button */}
+          {/* Resource Search */}
           {onSendResourceCard && (
-            <Button
-              size="icon"
-              variant="ghost"
-              className="h-9 w-9 shrink-0 rounded-full"
-              disabled={sending || disabled || isRecording}
-              onClick={() => setShowResourcePicker(true)}
-              title="إرفاق مورد (شحنة، فاتورة، مستند...)"
-            >
+            <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-full" disabled={sending || disabled || isRecording}
+              onClick={() => setShowResourcePicker(true)} title="إرفاق مورد">
               <SearchIcon className="w-4.5 h-4.5 text-muted-foreground" />
             </Button>
           )}
 
-          {/* Attachment Plus Button */}
+          {/* Attachment */}
           <Popover open={showAttachMenu} onOpenChange={setShowAttachMenu}>
             <PopoverTrigger asChild>
               <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 rounded-full" disabled={sending || disabled || isRecording}>
@@ -654,50 +650,54 @@ const EnhancedChatInput = ({
             </PopoverTrigger>
             <PopoverContent className="w-auto p-3" side="top" align="end">
               <div className="grid grid-cols-3 gap-3">
-                {attachmentItems
-                  .filter(item => !item.mobileOnly || isMobile)
-                  .map((item) => (
-                    <button
-                      key={item.label}
-                      onClick={() => { item.onClick(); setShowAttachMenu(false); }}
-                      className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted transition-colors"
-                    >
-                      <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-white", item.color)}>
-                        <item.icon className="w-5 h-5" />
-                      </div>
-                      <span className="text-[11px] text-muted-foreground font-medium">{item.label}</span>
-                    </button>
-                  ))}
+                {attachmentItems.filter(item => !item.mobileOnly || isMobile).map((item) => (
+                  <button key={item.label} onClick={() => { item.onClick(); setShowAttachMenu(false); }}
+                    className="flex flex-col items-center gap-1.5 p-2 rounded-xl hover:bg-muted transition-colors">
+                    <div className={cn("w-12 h-12 rounded-full flex items-center justify-center text-white", item.color)}>
+                      <item.icon className="w-5 h-5" />
+                    </div>
+                    <span className="text-[11px] text-muted-foreground font-medium">{item.label}</span>
+                  </button>
+                ))}
               </div>
             </PopoverContent>
           </Popover>
         </div>
 
-        {/* Send / Record Button */}
+        {/* Send / Record Button - WhatsApp green circle */}
         {hasContent ? (
           <Button
             size="icon"
-            className={cn("shrink-0 rounded-full bg-wa-light-green hover:bg-wa-teal-green text-white shadow-sm", isMobile ? "h-11 w-11" : "h-11 w-11")}
+            className="shrink-0 rounded-full h-11 w-11 bg-[hsl(var(--wa-light-green))] hover:bg-[hsl(var(--wa-teal-green))] text-white shadow-md"
             onClick={handleSend}
             disabled={sending || disabled}
           >
             {sending ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-5 h-5" />}
           </Button>
         ) : (
-          <Button
-            size="icon"
-            variant={isRecording ? "destructive" : "default"}
+          <button
+            ref={micBtnRef}
             className={cn(
-              "shrink-0 rounded-full transition-all shadow-sm",
-              isMobile ? "h-11 w-11" : "h-11 w-11",
-              !isRecording && "bg-wa-light-green hover:bg-wa-teal-green text-white",
-              isRecording && "animate-pulse"
+              "shrink-0 rounded-full h-11 w-11 flex items-center justify-center transition-all shadow-md select-none",
+              isRecording 
+                ? "bg-destructive text-white animate-pulse scale-110" 
+                : "bg-[hsl(var(--wa-light-green))] text-white hover:bg-[hsl(var(--wa-teal-green))]"
             )}
-            onClick={isRecording ? stopRecording : startRecording}
+            // Desktop: click to toggle
+            onClick={() => {
+              if (!isMobile) {
+                if (isRecording) stopRecording();
+                else startRecording();
+              }
+            }}
+            // Mobile: hold to record
+            onTouchStart={isMobile ? handleMicTouchStart : undefined}
+            onTouchMove={isMobile ? handleMicTouchMove : undefined}
+            onTouchEnd={isMobile ? handleMicTouchEnd : undefined}
             disabled={sending || disabled}
           >
             {isRecording ? <Square className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-          </Button>
+          </button>
         )}
       </div>
     </div>
