@@ -72,7 +72,7 @@ const EnhancedChatWidget = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
-
+  const [actionPanel, setActionPanel] = useState<{ action: 'sign' | 'stamp' | 'track' | 'status' | 'approve' | null; resourceId: string; resourceType: string; resourceData?: any }>({ action: null, resourceId: '', resourceType: '' });
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
   const { pinnedMessages, fetchPinned, togglePin } = usePinnedMessages(selectedPartner?.id);
