@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import {
   Brain, Shield, AlertTriangle, CheckCircle2, XCircle, Clock,
   FileText, Loader2, RefreshCw, TrendingUp, Scale, Leaf, BarChart3,
-  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2
+  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2, Printer
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { notifyAdmins } from '@/services/unifiedNotifier';
