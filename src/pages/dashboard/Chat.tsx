@@ -1242,10 +1242,7 @@ const EncryptedChatInner = () => {
                         <button
                           className="text-[10px] text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
                           onClick={() => {
-                            // Navigate to org profile
-                            if (selectedConvo.partner?.organization_id) {
-                              navigate(`/dashboard/org-profile/${selectedConvo.partner.organization_id}`);
-                            }
+                            navigate('/dashboard/organization-profile');
                           }}
                         >
                           <Building2 className="w-2.5 h-2.5" />

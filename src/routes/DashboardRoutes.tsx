@@ -312,6 +312,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/recycler-ai-tools" element={<RecyclerAITools />} />
     <Route path="/dashboard/transporter-ai-tools" element={<TransporterAITools />} />
     <Route path="/dashboard/notifications" element={<Notifications />} />
+    <Route path="/dashboard/org-profile/:id" element={<Navigate to="/dashboard/organization-profile" replace />} />
     <Route path="/dashboard/organization-profile" element={<OrganizationProfile />} />
     <Route path="/dashboard/organization-attestation" element={<OrganizationAttestation />} />
     <Route path="/dashboard/admin-attestations" element={<AdminAttestations />} />
