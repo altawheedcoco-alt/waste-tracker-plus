@@ -178,16 +178,18 @@
     --shadow-hero: 0 4px 24px hsl(0 0% 0% / 0.3), 0 8px 48px hsl(160, 64%, 48%, 0.06);
     --shadow-premium: 0 4px 20px hsl(160, 64%, 48%, 0.1), 0 1px 4px hsl(205, 70%, 50%, 0.08);
 
-    /* WhatsApp-style Chat Tokens — Dark */
-    --wa-header: 160 50% 20%;
-    --wa-header-dark: 160 55% 15%;
-    --wa-outgoing: 160 35% 22%;
-    --wa-outgoing-foreground: 160 10% 92%;
-    --wa-incoming: 225 14% 16%;
-    --wa-incoming-foreground: 210 10% 92%;
-    --wa-chat-bg: 225 16% 10%;
-    --wa-chat-pattern: 225 12% 14%;
-    --wa-time: 0 0% 55%;
-    --wa-unread-badge: 160 64% 48%;
+    /* WhatsApp-style Chat Tokens — Dark (exact WhatsApp dark mode) */
+    --wa-header: 200 19% 12%;        /* #1F2C33 */
+    --wa-header-dark: 200 19% 18%;   /* #2A3942 */
+    --wa-outgoing: 168 29% 16%;      /* #005C4B */
+    --wa-outgoing-foreground: 0 0% 93%;
+    --wa-incoming: 200 16% 16%;      /* #202C33 */
+    --wa-incoming-foreground: 0 0% 93%;
+    --wa-chat-bg: 200 18% 7%;        /* #0B141A */
+    --wa-chat-pattern: 200 15% 11%;
+    --wa-time: 0 0% 58%;
+    --wa-unread-badge: 150 76% 49%;
+    --wa-teal-green: 168 100% 18%;
+    --wa-light-green: 150 76% 49%;
   }
 }
