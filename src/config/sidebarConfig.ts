@@ -634,17 +634,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ التوقيعات والأمان ═══════════════
+  // ═══════════════ مركز التوقيعات والتوثيق (مدمج) ═══════════════
   {
-    id: 'docs-signatures',
+    id: 'signatures-center',
     icon: PenTool,
-    labelAr: 'التوقيعات والأختام',
-    labelEn: 'Signatures & Stamps',
+    labelAr: 'مركز التوقيعات والتوثيق',
+    labelEn: 'Signatures & Verification Center',
     visibleFor: [],
     items: [
-      { icon: PenTool, labelAr: 'التوقيعات', labelEn: 'Signatures', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures', bindingType: 'internal' as const },
+      { icon: PenTool, labelAr: 'التوقيعات الرقمية', labelEn: 'Digital Signatures', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures', bindingType: 'internal' as const },
+      { icon: Inbox, labelAr: 'صندوق التوقيعات', labelEn: 'Signing Inbox', path: '/dashboard/signing-inbox', key: 'signing-inbox', badgeKey: 'signing-inbox', bindingType: 'hybrid' as const },
+      { icon: Fingerprint, labelAr: 'ختم المستندات', labelEn: 'Document Stamping', path: '/dashboard/admin-document-stamping', key: 'doc-stamping', bindingType: 'internal' as const },
       { icon: CircleDot, labelAr: 'QR وباركود', labelEn: 'QR & Barcode', path: '/dashboard/document-center?tab=qr-barcode', key: 'doc-center-qr', bindingType: 'internal' as const },
       { icon: Shield, labelAr: 'التحقق والأمان', labelEn: 'Verification', path: '/dashboard/document-center?tab=verification', key: 'doc-center-verification', bindingType: 'internal' as const },
+      { icon: FileCheck, labelAr: 'التحقق من المستندات', labelEn: 'Document Verify', path: '/dashboard/document-verification', key: 'doc-verification', bindingType: 'internal' as const },
     ],
   },
 
