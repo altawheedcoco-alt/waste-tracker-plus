@@ -392,7 +392,7 @@ const PartnersView = () => {
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
           <DialogHeader className="p-4 pb-0">
             <DialogTitle className="flex items-center gap-2 justify-end">
-              <span>الصفحة التجارية - {businessPageOrg?.name}</span>
+              <span>صفحة المنظمة - {businessPageOrg?.name}</span>
               <Globe className="w-5 h-5 text-primary" />
             </DialogTitle>
           </DialogHeader>
@@ -483,7 +483,7 @@ const PartnerDetailPanel = ({
             <StickyNote className="w-4 h-4" /> الملاحظات
           </Button>
           <Button variant="outline" onClick={onViewBusinessPage} className="gap-2">
-            <Globe className="w-4 h-4" /> الصفحة التجارية
+            <Globe className="w-4 h-4" /> صفحة المنظمة
           </Button>
           <PartnerRestrictionManager targetOrgId={org.id} targetOrgName={org.name} />
         </div>

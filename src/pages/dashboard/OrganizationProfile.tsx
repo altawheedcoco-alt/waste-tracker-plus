@@ -107,24 +107,25 @@ const DocumentInlinePreview = ({ doc, isPdf, isImage }: { doc: OrganizationDocum
 
 // Tab configuration — ordered by logical groups
 const ORG_PROFILE_TABS: TabItem[] = [
-  // الهوية والعرض
-  { value: 'page', label: 'الصفحة التجارية', icon: Globe },
-  { value: 'portfolio', label: 'البورتفوليو', icon: Target },
-  { value: 'business', label: 'الملف التجاري', icon: Briefcase },
-  { value: 'posts', label: 'المنشورات', icon: PenSquare },
-  // البيانات الأساسية
-  { value: 'basic', label: 'البيانات الأساسية', icon: Building2 },
-  { value: 'representatives', label: 'الممثلون', icon: Users },
-  { value: 'contact', label: 'التواصل', icon: Phone },
-  { value: 'location', label: 'الموقع والصور', icon: MapPin },
-  // الوثائق والتوثيق
-  { value: 'documents', label: 'الوثائق', icon: FileText },
-  { value: 'doc-analysis', label: 'تحليل الوثائق', icon: FileSearch },
-  { value: 'analysis', label: 'تحليل الجهة', icon: Brain },
-  { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp },
-  { value: 'certificates', label: 'الشهادات', icon: Award },
-  { value: 'attestation', label: 'الإفادة', icon: Shield },
-  { value: 'sharing', label: 'المشاركة', icon: Share2 },
+  // 📌 الهوية والعرض
+  { value: 'page', label: 'صفحة المنظمة', icon: Globe, group: 'الهوية والعرض' },
+  { value: 'portfolio', label: 'البورتفوليو', icon: Target, group: 'الهوية والعرض' },
+  { value: 'business', label: 'الملف التجاري', icon: Briefcase, group: 'الهوية والعرض' },
+  { value: 'posts', label: 'المنشورات', icon: PenSquare, group: 'الهوية والعرض' },
+  // 📋 البيانات والتواصل
+  { value: 'basic', label: 'البيانات الأساسية', icon: Building2, group: 'البيانات والتواصل' },
+  { value: 'representatives', label: 'الممثلون', icon: Users, group: 'البيانات والتواصل' },
+  { value: 'contact', label: 'التواصل', icon: Phone, group: 'البيانات والتواصل' },
+  { value: 'location', label: 'الموقع والصور', icon: MapPin, group: 'البيانات والتواصل' },
+  // 📄 الوثائق والتحليل
+  { value: 'documents', label: 'الوثائق', icon: FileText, group: 'الوثائق والتحليل' },
+  { value: 'doc-analysis', label: 'تحليل الوثائق', icon: FileSearch, group: 'الوثائق والتحليل' },
+  { value: 'analysis', label: 'تحليل الجهة', icon: Brain, group: 'الوثائق والتحليل' },
+  // 🔐 التوثيق والمصداقية
+  { value: 'stamps', label: 'الختم والتوقيع', icon: Stamp, group: 'التوثيق والمصداقية' },
+  { value: 'certificates', label: 'الشهادات', icon: Award, group: 'التوثيق والمصداقية' },
+  { value: 'attestation', label: 'الإفادة', icon: Shield, group: 'التوثيق والمصداقية' },
+  { value: 'sharing', label: 'المشاركة', icon: Share2, group: 'التوثيق والمصداقية' },
 ];
 
 const OrganizationProfile = () => {
@@ -632,9 +633,9 @@ const OrganizationProfile = () => {
         >
           <V2TabsNav tabs={ORG_PROFILE_TABS} />
 
-          {/* الصفحة التجارية */}
+          {/* صفحة المنظمة */}
           <TabsContent value="page">
-            <ErrorBoundary fallbackTitle="خطأ في الصفحة التجارية">
+            <ErrorBoundary fallbackTitle="خطأ في صفحة المنظمة">
               <Suspense fallback={<TabFallback />}>
                 <BusinessPagePreview
                   organizationId={organization.id}

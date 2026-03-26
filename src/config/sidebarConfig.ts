@@ -108,15 +108,15 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ══════ 04. ملف المنظمة — الصفحة التجارية ══════
+  // ══════ 04. ملف المنظمة — صفحة المنظمة ══════
   {
     id: 'org-page',
     icon: Building2,
-    labelAr: 'الصفحة التجارية',
-    labelEn: 'Business Page',
+    labelAr: 'صفحة المنظمة',
+    labelEn: 'Organization Page',
     visibleFor: [],
     items: [
-      { icon: Building2, labelAr: 'الصفحة التجارية', labelEn: 'Business Page', path: '/dashboard/organization-profile?tab=page', key: 'org-page', bindingType: 'internal' as const },
+      { icon: Building2, labelAr: 'صفحة المنظمة', labelEn: 'Organization Page', path: '/dashboard/organization-profile?tab=page', key: 'org-page', bindingType: 'internal' as const },
       { icon: Image, labelAr: 'البورتفوليو', labelEn: 'Portfolio', path: '/dashboard/organization-profile?tab=portfolio', key: 'org-portfolio', bindingType: 'internal' as const },
       { icon: Briefcase, labelAr: 'الملف التجاري', labelEn: 'Business Profile', path: '/dashboard/organization-profile?tab=business', key: 'org-business', bindingType: 'internal' as const },
       { icon: Newspaper, labelAr: 'المنشورات', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'org-posts', bindingType: 'internal' as const },

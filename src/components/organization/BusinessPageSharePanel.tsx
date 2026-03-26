@@ -127,7 +127,7 @@ const BusinessPageSharePanel = ({ organizationId, organizationName }: BusinessPa
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Share2 className="w-5 h-5 text-primary" />
-          مشاركة الصفحة التجارية
+          مشاركة صفحة المنظمة
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-5">
