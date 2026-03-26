@@ -21,7 +21,7 @@ const MyNotificationsTab = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-
+  const [showPrefs, setShowPrefs] = useState(false);
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['my-workspace-notifications', user?.id],
     queryFn: async () => {
