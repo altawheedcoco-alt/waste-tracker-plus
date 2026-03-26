@@ -252,7 +252,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                     <div className="relative shrink-0">
                       <Avatar className="h-[50px] w-[50px]">
                         {partner.logo_url ? <AvatarImage src={partner.logo_url} /> : null}
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 text-emerald-700">
+                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/30 text-primary">
                           <Icon className="w-5 h-5" />
                         </AvatarFallback>
                       </Avatar>
