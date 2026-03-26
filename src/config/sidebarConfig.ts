@@ -59,7 +59,6 @@ export const standaloneItems: SidebarItemConfig[] = [
   { icon: LayoutDashboard, labelAr: 'لوحة التحكم', labelEn: 'Dashboard', path: '/dashboard', key: 'dashboard' },
   { icon: User, labelAr: 'مساحة العمل', labelEn: 'Workspace', path: '/dashboard/my-workspace', key: 'my-workspace' },
   { icon: UserPlus, labelAr: 'ملفي الشخصي', labelEn: 'My Profile', path: '/dashboard/my-profile', key: 'my-profile' },
-  { icon: Rss, labelAr: 'آخر الأخبار', labelEn: 'News Feed', path: '/dashboard/feed', key: 'social-feed' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
