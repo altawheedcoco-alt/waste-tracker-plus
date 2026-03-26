@@ -8,7 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useWebPush } from '@/hooks/useWebPush';
 import { cn } from '@/lib/utils';
 
-const DISMISSED_KEY = 'push_banner_dismissed';
+const DISMISSED_KEY = 'push_banner_dismissed_session';
 
 export default function PushPermissionBanner() {
   const { user } = useAuth();
@@ -18,6 +18,8 @@ export default function PushPermissionBanner() {
   useEffect(() => {
     if (!user || !isSupported) return;
     if (isSubscribed || permission === 'denied') return;
+    // Show every session unless dismissed in this session
+    if (sessionStorage.getItem(DISMISSED_KEY)) return;
 
     setVisible(true);
   }, [user, isSupported, isSubscribed, permission]);
@@ -33,13 +35,13 @@ export default function PushPermissionBanner() {
     const ok = await subscribe();
     if (ok) {
       setVisible(false);
-      localStorage.setItem(DISMISSED_KEY, '1');
+      sessionStorage.setItem(DISMISSED_KEY, '1');
     }
   };
 
   const handleDismiss = () => {
     setVisible(false);
-    localStorage.setItem(DISMISSED_KEY, '1');
+    sessionStorage.setItem(DISMISSED_KEY, '1');
   };
 
   return (
