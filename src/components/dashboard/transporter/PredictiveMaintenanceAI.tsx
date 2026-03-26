@@ -68,7 +68,7 @@ const PredictiveMaintenanceAI = () => {
         if (daysToNext <= 0) predictions.push('⚠️ تجاوزت موعد الصيانة!');
         if (daysToNext > 0 && daysToNext <= 7) predictions.push(`🔧 صيانة مجدولة خلال ${daysToNext} أيام`);
         if (daysSinceLastMaint > 90) predictions.push('📅 لم تتم صيانة منذ أكثر من 3 أشهر');
-        if ((v.mileage || 0) > 200000) predictions.push('🛞 المسافة المقطوعة تتجاوز 200,000 كم');
+        if (daysSinceLastMaint > 120) predictions.push('🛞 لم تتم صيانة منذ أكثر من 4 أشهر');
 
         return {
           id: v.id,
