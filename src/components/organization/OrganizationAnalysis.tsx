@@ -331,7 +331,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Scoring Breakdown */}
+        <div ref={printRef}>
         {analysis.scoring_breakdown && (
           <Card>
             <CardHeader className="pb-2">
