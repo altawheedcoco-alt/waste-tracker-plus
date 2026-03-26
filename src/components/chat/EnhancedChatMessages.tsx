@@ -52,6 +52,7 @@ interface EnhancedChatMessagesProps {
   onPinMessage?: (messageId: string) => void;
   scrollToMessageId?: string | null;
   firstUnreadMessageId?: string | null;
+  onCardAction?: (action: string, id: string, data?: any) => void;
 }
 
 // URL detection and rendering
