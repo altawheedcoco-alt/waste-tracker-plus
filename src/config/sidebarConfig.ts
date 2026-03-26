@@ -59,7 +59,6 @@ export const standaloneItems: SidebarItemConfig[] = [
   { icon: LayoutDashboard, labelAr: 'لوحة التحكم', labelEn: 'Dashboard', path: '/dashboard', key: 'dashboard' },
   { icon: User, labelAr: 'مساحة العمل', labelEn: 'Workspace', path: '/dashboard/my-workspace', key: 'my-workspace' },
   { icon: UserPlus, labelAr: 'ملفي الشخصي', labelEn: 'My Profile', path: '/dashboard/my-profile', key: 'my-profile' },
-  { icon: Rss, labelAr: 'آخر الأخبار', labelEn: 'News Feed', path: '/dashboard/feed', key: 'social-feed' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
@@ -67,18 +66,21 @@ export const standaloneItems: SidebarItemConfig[] = [
 // ═══════════════════════════════════════════════════════════════
 export const sidebarGroups: SidebarGroupConfig[] = [
 
-  // ══════ 01. الرسائل المباشرة ══════
+  // ══════ 01. التواصل والمنشورات (مدمج) ══════
   {
-    id: 'direct-messages',
+    id: 'communication-social',
     icon: MessageCircle,
-    labelAr: 'الرسائل المباشرة',
-    labelEn: 'Direct Messages',
+    labelAr: 'التواصل والمنشورات',
+    labelEn: 'Communication & Social',
     visibleFor: [],
     items: [
       { icon: MessageCircle, labelAr: 'الدردشة', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
       { icon: Users, labelAr: 'المجموعات', labelEn: 'Group Chats', path: '/dashboard/chat?view=groups', key: 'group-chats', bindingType: 'partner' as const },
       { icon: Radio, labelAr: 'قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'broadcast-channels', badgeKey: 'broadcastChannels', bindingType: 'internal' as const },
       { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
+      { icon: CircleDot, labelAr: 'الحالات (Stories)', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
+      { icon: Rss, labelAr: 'آخر الأخبار', labelEn: 'News Feed', path: '/dashboard/feed', key: 'social-feed', bindingType: 'internal' as const },
+      { icon: Newspaper, labelAr: 'المنشورات', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'social-posts', bindingType: 'internal' as const },
     ],
   },
 
@@ -95,16 +97,15 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ══════ 03. الطلبات والحالات ══════
+  // ══════ 03. الطلبات ══════
   {
-    id: 'requests-stories',
+    id: 'requests',
     icon: Send,
-    labelAr: 'الطلبات والحالات',
-    labelEn: 'Requests & Stories',
+    labelAr: 'الطلبات',
+    labelEn: 'Requests',
     visibleFor: [],
     items: [
       { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
-      { icon: CircleDot, labelAr: 'الحالات (Stories)', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
       { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
     ],
   },
@@ -207,17 +208,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ تتبع المولّد ═══════════════
-  {
-    id: 'generator-tracking',
-    icon: MapPin,
-    labelAr: 'التتبع المباشر',
-    labelEn: 'Live Tracking',
-    visibleFor: ['generator'],
-    items: [
-      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'generator-tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
-    ],
-  },
+  // ═══════════════ (generator-tracking merged into tracking-maps-center below) ═══════════════
 
   // ═══════════════ عمليات الشحن — الناقل ═══════════════
   {
@@ -258,23 +249,10 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Create Manual', path: '/dashboard/manual-shipment', key: 'manual-shipment', bindingType: 'hybrid' as const, requiredPermissions: ['create_shipments'] },
       { icon: FileText, labelAr: 'أرشيف النماذج', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche', bindingType: 'internal' as const },
-      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center', bindingType: 'internal' as const, requiredPermissions: ['view_shipments', 'export_reports'] },
     ],
   },
 
-  // ═══════════════ التتبع والمسارات — الناقل ═══════════════
-  {
-    id: 'fleet-tracking',
-    icon: MapPin,
-    labelAr: 'التتبع والمسارات',
-    labelEn: 'Tracking & Routes',
-    visibleFor: ['transporter'],
-    items: [
-      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments', 'view_drivers'] },
-      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'] },
-      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
-    ],
-  },
+  // ═══════════════ (fleet-tracking merged into tracking-maps-center below) ═══════════════
 
   // ═══════════════ المركبات والحاويات — الناقل ═══════════════
   {
@@ -656,17 +634,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ التوقيعات والأمان ═══════════════
+  // ═══════════════ مركز التوقيعات والتوثيق (مدمج) ═══════════════
   {
-    id: 'docs-signatures',
+    id: 'signatures-center',
     icon: PenTool,
-    labelAr: 'التوقيعات والأختام',
-    labelEn: 'Signatures & Stamps',
+    labelAr: 'مركز التوقيعات والتوثيق',
+    labelEn: 'Signatures & Verification Center',
     visibleFor: [],
     items: [
-      { icon: PenTool, labelAr: 'التوقيعات', labelEn: 'Signatures', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures', bindingType: 'internal' as const },
+      { icon: PenTool, labelAr: 'التوقيعات الرقمية', labelEn: 'Digital Signatures', path: '/dashboard/document-center?tab=signatures', key: 'doc-center-signatures', bindingType: 'internal' as const },
+      { icon: Inbox, labelAr: 'صندوق التوقيعات', labelEn: 'Signing Inbox', path: '/dashboard/signing-inbox', key: 'signing-inbox', badgeKey: 'signing-inbox', bindingType: 'hybrid' as const },
+      { icon: Fingerprint, labelAr: 'ختم المستندات', labelEn: 'Document Stamping', path: '/dashboard/admin-document-stamping', key: 'doc-stamping', bindingType: 'internal' as const },
       { icon: CircleDot, labelAr: 'QR وباركود', labelEn: 'QR & Barcode', path: '/dashboard/document-center?tab=qr-barcode', key: 'doc-center-qr', bindingType: 'internal' as const },
       { icon: Shield, labelAr: 'التحقق والأمان', labelEn: 'Verification', path: '/dashboard/document-center?tab=verification', key: 'doc-center-verification', bindingType: 'internal' as const },
+      { icon: FileCheck, labelAr: 'التحقق من المستندات', labelEn: 'Document Verify', path: '/dashboard/document-verification', key: 'doc-verification', bindingType: 'internal' as const },
     ],
   },
 
@@ -780,45 +761,23 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ تقارير الشحنات ═══════════════
+  // ═══════════════ التقارير التشغيلية (مدمج: شحنات + سجلات + تحليل) ═══════════════
   {
-    id: 'shipment-reports',
-    icon: FileText,
-    labelAr: 'تقارير الشحنات',
-    labelEn: 'Shipment Reports',
+    id: 'operational-reports',
+    icon: BarChart3,
+    labelAr: 'التقارير التشغيلية',
+    labelEn: 'Operational Reports',
     visibleFor: [],
     items: [
       { icon: BarChart3, labelAr: 'التقارير', labelEn: 'Reports', path: '/dashboard/reports', key: 'reports', bindingType: 'internal' as const, requiredPermissions: ['view_reports', 'create_reports'] },
       { icon: FileText, labelAr: 'تقارير الشحنات', labelEn: 'Shipment Reports', path: '/dashboard/shipment-reports', key: 'shipment-reports', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: ClipboardList, labelAr: 'التقرير التجميعي', labelEn: 'Aggregate', path: '/dashboard/aggregate-report', key: 'aggregate-report', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
-      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
-    ],
-  },
-
-  // ═══════════════ سجلات المخلفات ═══════════════
-  {
-    id: 'waste-registers',
-    icon: Layers,
-    labelAr: 'سجلات المخلفات',
-    labelEn: 'Waste Registers',
-    visibleFor: [],
-    items: [
       { icon: FileSpreadsheet, labelAr: 'سجل غير خطرة', labelEn: 'Non-Hazardous', path: '/dashboard/non-hazardous-register', key: 'non-hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: AlertTriangle, labelAr: 'سجل خطرة', labelEn: 'Hazardous', path: '/dashboard/hazardous-register', key: 'hazardous', bindingType: 'admin' as const, requiredPermissions: ['view_reports', 'view_shipments'] },
       { icon: Layers, labelAr: 'تصنيف النفايات', labelEn: 'Waste Types', path: '/dashboard/waste-types', key: 'waste-types', bindingType: 'admin' as const, requiredPermissions: ['view_reports'] },
-    ],
-  },
-
-  // ═══════════════ تحليل النفايات ═══════════════
-  {
-    id: 'waste-analysis',
-    icon: Activity,
-    labelAr: 'تحليل النفايات',
-    labelEn: 'Waste Analysis',
-    visibleFor: [],
-    items: [
       { icon: BarChart3, labelAr: 'التحليل التفصيلي', labelEn: 'Detailed Analysis', path: '/dashboard/detailed-waste-analysis', key: 'detailed-waste-analysis', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
       { icon: Activity, labelAr: 'خريطة التدفق', labelEn: 'Waste Flow', path: '/dashboard/waste-flow-heatmap', key: 'waste-flow-heatmap', bindingType: 'hybrid' as const, requiredPermissions: ['view_reports'] },
+      { icon: BookOpen, labelAr: 'دليل التقارير', labelEn: 'Guide', path: '/dashboard/reports-guide', key: 'reports-guide', bindingType: 'internal' as const, requiredPermissions: ['view_reports'] },
     ],
   },
 
@@ -899,16 +858,35 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ الخرائط ═══════════════
+  // ═══════════════ مركز التتبع والخرائط (مدمج) ═══════════════
   {
-    id: 'maps',
+    id: 'tracking-maps-center',
     icon: MapPin,
-    labelAr: 'الخرائط',
-    labelEn: 'Maps',
+    labelAr: 'التتبع والخرائط',
+    labelEn: 'Tracking & Maps',
     visibleFor: [],
     items: [
+      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'unified-tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'unified-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'], visibleFor: ['transporter'] },
+      { icon: Truck, labelAr: 'خريطة المسارات', labelEn: 'Routes Map', path: '/dashboard/shipment-routes', key: 'unified-shipment-routes', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'], visibleFor: ['transporter'] },
       { icon: Search, labelAr: 'مستكشف الخريطة', labelEn: 'Map Explorer', path: '/dashboard/map-explorer', key: 'map-explorer', bindingType: 'hybrid' as const },
       { icon: Bookmark, labelAr: 'المواقع المحفوظة', labelEn: 'Saved Locations', path: '/dashboard/saved-locations', key: 'saved-locations', bindingType: 'internal' as const },
+    ],
+  },
+
+  // ═══════════════ مركز الطباعة والتصدير (مدمج) ═══════════════
+  {
+    id: 'print-export-center',
+    icon: Printer,
+    labelAr: 'مركز الطباعة والتصدير',
+    labelEn: 'Print & Export Center',
+    visibleFor: [],
+    items: [
+      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'print-center', bindingType: 'internal' as const, requiredPermissions: ['view_shipments', 'export_reports'] },
+      { icon: Receipt, labelAr: 'الفاتورة الإلكترونية', labelEn: 'E-Invoice', path: '/dashboard/e-invoice', key: 'e-invoice', bindingType: 'hybrid' as const, requiredPermissions: ['view_accounts'] },
+      { icon: FileSpreadsheet, labelAr: 'تصدير Excel', labelEn: 'Export Excel', path: '/dashboard/reports', key: 'export-excel', bindingType: 'internal' as const, requiredPermissions: ['export_reports'] },
+      { icon: FileText, labelAr: 'طباعة المانيفست', labelEn: 'Print Manifest', path: '/dashboard/print-center', key: 'print-manifest', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
+      { icon: Award, labelAr: 'طباعة الشهادات', labelEn: 'Print Certificates', path: '/dashboard/print-center', key: 'print-certificates', bindingType: 'hybrid' as const },
     ],
   },
 
@@ -1157,11 +1135,9 @@ const CATEGORY_ORDER: string[] = [
   // ═══ 2. العمليات حسب نوع الجهة ═══
   'generator-shipments',
   'generator-certificates',
-  'generator-tracking',
   'transporter-shipments',
   'transporter-records',
   'transporter-manual',
-  'fleet-tracking',
   'vehicles-containers',
   'driver-management',
   'driver-development',
@@ -1170,57 +1146,64 @@ const CATEGORY_ORDER: string[] = [
   'recycler-production',
   'disposal-ops',
   'disposal-certs-facilities',
-  'driver-shipments',
   'consultant-ops',
   'consulting-office-ops',
+  'municipal-operations',
+  'municipal-contracts',
+  'municipal-workforce',
+  'municipal-assets',
 
-  // ═══ 3. لوحة العمليات والأجهزة ═══
+  // ═══ 3. أدوات التشغيل ═══
   'operations-board',
   'device-settings',
 
-  // ═══ 4. المستندات ═══
+  // ═══ 4. التتبع والخرائط (مدمج) ═══
+  'tracking-maps-center',
+
+  // ═══ 5. المستندات ═══
   'docs-upload-archive',
   'docs-ai-studio',
-  'docs-signatures',
+  'signatures-center',
   'docs-contracts',
   'docs-certs-invoices',
 
-  // ═══ 5. التقارير والتحليلات ═══
-  'shipment-reports',
-  'waste-registers',
-  'waste-analysis',
+  // ═══ 6. الطباعة والتصدير (مدمج) ═══
+  'print-export-center',
+
+  // ═══ 7. التقارير (مدمج) ═══
+  'operational-reports',
   'environmental-reports',
 
-  // ═══ 6. المالية والمحاسبة ═══
+  // ═══ 8. المالية والمحاسبة ═══
   'accounting-core',
   'inventory-purchasing',
   'financial-reports',
   'wallet-insurance',
 
-  // ═══ 7. الموارد البشرية ═══
+  // ═══ 9. الموارد البشرية ═══
   'hr-core',
   'hr-payroll-performance',
 
-  // ═══ 8. التواصل والإشعارات ═══
-  'direct-messages',
+  // ═══ 10. التواصل (مدمج) ═══
+  'communication-social',
   'notifications-notes',
-  'requests-stories',
+  'requests',
 
-  // ═══ 9. السوق ═══
+  // ═══ 11. السوق ═══
+  'waste-exchange',
   'b2b-marketplace',
   'global-exchange',
   'quotations-plans',
 
-  // ═══ 10. الخرائط والروابط ═══
-  'maps',
+  // ═══ 12. الروابط السريعة ═══
   'quick-links',
 
-  // ═══ 11. AI والتعلم ═══
+  // ═══ 13. AI والتعلم ═══
   'ai-tools',
   'learning',
   'achievements',
 
-  // ═══ 12. الرقابة والهيئات ═══
+  // ═══ 14. الرقابة والهيئات ═══
   'regulator-command',
   'regulator-enforcement',
   'regulator-licensing',
@@ -1229,7 +1212,7 @@ const CATEGORY_ORDER: string[] = [
   'ltra-tools',
   'ida-tools',
 
-  // ═══ 13. مركز القيادة (أدمن) ═══
+  // ═══ 15. مركز القيادة (أدمن) ═══
   'admin-command-center',
   'admin-entity-management',
   'admin-org-docs',
@@ -1239,7 +1222,7 @@ const CATEGORY_ORDER: string[] = [
   'admin-content',
   'admin-infrastructure',
 
-  // ═══ 14. الدعم والإعدادات ═══
+  // ═══ 16. الدعم والإعدادات ═══
   'support',
   'settings-system',
 ];
@@ -1275,13 +1258,12 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelEn: 'Operations',
     icon: Package,
     groupIds: [
-      'generator-shipments', 'generator-certificates', 'generator-tracking',
+      'generator-shipments', 'generator-certificates',
       'transporter-shipments', 'transporter-records', 'transporter-manual',
-      'fleet-tracking', 'vehicles-containers', 'driver-management', 'driver-development',
+      'vehicles-containers', 'driver-management', 'driver-development',
       'transporter-regulatory',
       'recycler-shipments', 'recycler-production',
       'disposal-ops', 'disposal-certs-facilities',
-      'driver-shipments',
       'consultant-ops', 'consulting-office-ops',
       'municipal-operations', 'municipal-contracts', 'municipal-workforce', 'municipal-assets',
       'regulator-command', 'regulator-enforcement', 'regulator-licensing',
@@ -1295,18 +1277,32 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     groupIds: ['operations-board', 'device-settings'],
   },
   {
+    id: 'sec-tracking-maps',
+    labelAr: 'التتبع والخرائط',
+    labelEn: 'Tracking & Maps',
+    icon: MapPin,
+    groupIds: ['tracking-maps-center'],
+  },
+  {
     id: 'sec-documents',
     labelAr: 'المستندات والتوثيق',
     labelEn: 'Documents & Records',
     icon: FolderOpen,
-    groupIds: ['docs-upload-archive', 'docs-ai-studio', 'docs-signatures', 'docs-contracts', 'docs-certs-invoices'],
+    groupIds: ['docs-upload-archive', 'docs-ai-studio', 'signatures-center', 'docs-contracts', 'docs-certs-invoices'],
+  },
+  {
+    id: 'sec-print-export',
+    labelAr: 'الطباعة والتصدير',
+    labelEn: 'Print & Export',
+    icon: Printer,
+    groupIds: ['print-export-center'],
   },
   {
     id: 'sec-reports',
     labelAr: 'التقارير والتحليلات',
     labelEn: 'Reports & Analytics',
     icon: BarChart3,
-    groupIds: ['shipment-reports', 'waste-registers', 'waste-analysis', 'environmental-reports'],
+    groupIds: ['operational-reports', 'environmental-reports'],
   },
   {
     id: 'sec-finance',
@@ -1327,21 +1323,21 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'التواصل',
     labelEn: 'Communication',
     icon: MessageCircle,
-    groupIds: ['direct-messages', 'notifications-notes', 'requests-stories'],
+    groupIds: ['communication-social', 'notifications-notes', 'requests'],
   },
   {
     id: 'sec-marketplace',
     labelAr: 'السوق والتجارة',
     labelEn: 'Marketplace',
     icon: Store,
-    groupIds: ['b2b-marketplace', 'global-exchange', 'quotations-plans'],
+    groupIds: ['waste-exchange', 'b2b-marketplace', 'global-exchange', 'quotations-plans'],
   },
   {
-    id: 'sec-maps',
-    labelAr: 'الخرائط والروابط',
-    labelEn: 'Maps & Links',
-    icon: MapPin,
-    groupIds: ['maps', 'quick-links'],
+    id: 'sec-links',
+    labelAr: 'الروابط السريعة',
+    labelEn: 'Quick Links',
+    icon: LinkIcon,
+    groupIds: ['quick-links'],
   },
   {
     id: 'sec-ai-learning',
