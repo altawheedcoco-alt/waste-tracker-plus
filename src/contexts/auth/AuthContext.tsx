@@ -383,6 +383,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Auto-subscribe to push notifications on sign-in
             if (event === 'SIGNED_IN') {
               autoPushSubscribe(session.user.id);
+              // إشعار تسجيل الدخول
+              import('@/utils/notifyAction').then(({ notifyAction }) => {
+                notifyAction({
+                  title: '🔓 تسجيل دخول جديد',
+                  message: `تم تسجيل الدخول بنجاح - ${new Date().toLocaleString('ar-EG')}`,
+                  type: 'auth_login',
+                  targetUserId: session.user.id,
+                });
+              });
             }
           }
         } else {
