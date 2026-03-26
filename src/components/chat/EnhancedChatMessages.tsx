@@ -557,10 +557,10 @@ const EnhancedChatMessages = ({
           {isPartnerTyping && (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-start">
               <div className="flex items-center gap-1.5">
-                <div className="bg-background border border-border/50 rounded-2xl rounded-tr-[4px] px-4 py-2.5 shadow-sm">
+                <div className="bg-wa-incoming border border-border/20 rounded-lg rounded-tl-none px-4 py-2.5 shadow-sm">
                   <div className="flex items-center gap-1">
                     {[0, 0.2, 0.4].map((delay, i) => (
-                      <motion.span key={i} className="w-2 h-2 rounded-full bg-emerald-500"
+                      <motion.span key={i} className="w-2 h-2 rounded-full bg-primary"
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{ repeat: Infinity, duration: 1.2, delay }}
                       />
