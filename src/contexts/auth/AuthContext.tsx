@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
+import { autoPushSubscribe } from '@/utils/autoPushSubscribe';
 
 // Types
 export interface Profile {
@@ -379,6 +380,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 fetchUserData(session.user.id);
               }
             }, 0);
+            // Auto-subscribe to push notifications on sign-in
+            if (event === 'SIGNED_IN') {
+              autoPushSubscribe(session.user.id);
+            }
           }
         } else {
           setProfile(null);
