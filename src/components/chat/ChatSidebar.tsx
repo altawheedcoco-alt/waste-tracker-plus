@@ -245,7 +245,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                     className={cn(
                       "w-full px-3 py-3 flex items-center gap-3 transition-all relative group",
                       "hover:bg-muted/60 active:bg-muted/80",
-                      isSelected && "bg-emerald-500/8"
+                      isSelected && "bg-wa-outgoing/40"
                     )}
                   >
                     {/* Avatar */}
