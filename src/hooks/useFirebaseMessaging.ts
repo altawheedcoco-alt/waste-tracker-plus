@@ -8,6 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { getFirebaseMessaging, getToken, onMessage } from '@/lib/firebase';
+import { showSystemNotification } from '@/lib/systemNotifications';
 
 const FCM_VAPID_KEY = 'BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs';
 
@@ -31,6 +32,15 @@ export function useFirebaseMessaging() {
         const title = payload.notification?.title || 'iRecycle';
         const body = payload.notification?.body || '';
         toast.info(`${title}: ${body}`, { duration: 5000 });
+
+        showSystemNotification(title, {
+          body,
+          tag: payload.data?.tag || `fcm-foreground-${Date.now()}`,
+          url: payload.data?.url || '/',
+          data: payload.data || {},
+        }).catch((error) => {
+          console.warn('[FCM] Foreground system notification failed:', error);
+        });
       });
     })();
 
