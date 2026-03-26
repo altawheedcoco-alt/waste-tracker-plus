@@ -249,7 +249,6 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Plus, labelAr: 'إنشاء شحنة يدوية', labelEn: 'Create Manual', path: '/dashboard/manual-shipment', key: 'manual-shipment', bindingType: 'hybrid' as const, requiredPermissions: ['create_shipments'] },
       { icon: FileText, labelAr: 'أرشيف النماذج', labelEn: 'Manual Drafts', path: '/dashboard/manual-shipment-drafts', key: 'manual-shipment-drafts', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: Fingerprint, labelAr: 'أنماط الجيلوش', labelEn: 'Guilloche', path: '/dashboard/guilloche-patterns', key: 'transporter-guilloche', bindingType: 'internal' as const },
-      { icon: Printer, labelAr: 'مركز الطباعة', labelEn: 'Print Center', path: '/dashboard/print-center', key: 'transporter-print-center', bindingType: 'internal' as const, requiredPermissions: ['view_shipments', 'export_reports'] },
     ],
   },
 
