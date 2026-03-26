@@ -401,7 +401,7 @@ const EnhancedChatMessages = ({
 
                               {/* Sender Name */}
                               {!isOwn && showAvatar && message.sender && !isDeleted && (
-                                <p className="text-[11px] text-emerald-600 font-semibold mb-0.5">
+                                <p className="text-[11px] text-primary font-semibold mb-0.5">
                                   {message.sender.full_name}
                                 </p>
                               )}
