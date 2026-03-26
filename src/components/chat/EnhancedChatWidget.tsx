@@ -349,7 +349,7 @@ const EnhancedChatWidget = () => {
           >
             {/* Header */}
             {view === 'sidebar' ? (
-              <div className="flex items-center justify-between px-4 py-3 bg-gradient-to-l from-emerald-600 to-emerald-700 text-white shrink-0">
+              <div className="flex items-center justify-between px-4 py-3 bg-wa-header text-white shrink-0">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
                     <MessageCircle className="w-5 h-5" />
@@ -393,7 +393,7 @@ const EnhancedChatWidget = () => {
             ) : view === 'group' && selectedGroup ? (
               null // GroupChatView has its own header
             ) : selectedPartner && (
-              <div className="flex items-center justify-between bg-gradient-to-l from-emerald-600 to-emerald-700 shrink-0">
+              <div className="flex items-center justify-between bg-wa-header shrink-0">
                 <ChatHeader
                   partnerName={selectedPartner.name}
                   partnerType={selectedPartner.organization_type}
@@ -516,7 +516,7 @@ const EnhancedChatWidget = () => {
                     />
                   )}
 
-                  <div className="flex-1 overflow-hidden relative" style={getWallpaperStyle()}>
+                  <div className="flex-1 overflow-hidden relative bg-wa-chat-bg" style={getWallpaperStyle()}>
                     <EnhancedChatMessages
                       messages={messages}
                       currentUserId={user.id}

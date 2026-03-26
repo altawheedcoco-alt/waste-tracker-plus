@@ -106,6 +106,18 @@ export default {
   				'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
   				border: 'hsl(var(--sidebar-border))',
   				ring: 'hsl(var(--sidebar-ring))'
+  			},
+  			wa: {
+  				header: 'hsl(var(--wa-header))',
+  				'header-dark': 'hsl(var(--wa-header-dark))',
+  				outgoing: 'hsl(var(--wa-outgoing))',
+  				'outgoing-foreground': 'hsl(var(--wa-outgoing-foreground))',
+  				incoming: 'hsl(var(--wa-incoming))',
+  				'incoming-foreground': 'hsl(var(--wa-incoming-foreground))',
+  				'chat-bg': 'hsl(var(--wa-chat-bg))',
+  				'chat-pattern': 'hsl(var(--wa-chat-pattern))',
+  				time: 'hsl(var(--wa-time))',
+  				'unread-badge': 'hsl(var(--wa-unread-badge))',
   			}
   		},
   		borderRadius: {

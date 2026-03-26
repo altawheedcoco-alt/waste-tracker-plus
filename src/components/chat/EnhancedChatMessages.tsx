@@ -241,23 +241,20 @@ const EnhancedChatMessages = ({
   const getMessageStatus = (message: ChatMessage, isOwn: boolean) => {
     if (!isOwn) return null;
     
-    // Check optimistic status first
     const optStatus = (message as any).optimistic_status;
     if (optStatus === 'sending') {
-      return <Loader2 className="w-[14px] h-[14px] text-white/40 animate-spin" />;
+      return <Loader2 className="w-[14px] h-[14px] text-wa-time animate-spin" />;
     }
     if (optStatus === 'failed') {
-      return <span className="text-[10px] text-red-400">!</span>;
+      return <span className="text-[10px] text-destructive">!</span>;
     }
     
-    // WhatsApp-style: read = ✓✓ blue, delivered = ✓✓ grey, sent = ✓ grey
-    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-400" />;
+    if (message.is_read) return <CheckCheck className="w-[14px] h-[14px] text-sky-500" />;
     
-    // Check message_status field for delivered vs sent
     const msgStatus = (message as any).message_status || (message as any).status;
-    if (msgStatus === 'delivered') return <CheckCheck className="w-[14px] h-[14px] text-white/50" />;
+    if (msgStatus === 'delivered') return <CheckCheck className="w-[14px] h-[14px] text-wa-time" />;
     
-    return <Check className="w-[14px] h-[14px] text-white/50" />;
+    return <Check className="w-[14px] h-[14px] text-wa-time" />;
   };
 
   const findMessage = (id: string) => messages.find(m => m.id === id);
@@ -287,10 +284,13 @@ const EnhancedChatMessages = ({
   return (
     <>
       <div 
-        className="h-full overflow-y-auto relative" 
+        className="h-full overflow-y-auto relative bg-wa-chat-bg" 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ scrollbarWidth: 'thin' }}
+        style={{ 
+          scrollbarWidth: 'thin',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '2a3a35' : 'c8d6cf'}' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
       >
         <div className={cn("space-y-0.5", isMobile ? "p-3" : "p-4")}>
           {hasMore && (
@@ -382,13 +382,13 @@ const EnhancedChatMessages = ({
                           <div className="relative">
                             <div
                               className={cn(
-                                "rounded-2xl overflow-hidden shadow-sm relative",
+                                "rounded-lg overflow-hidden relative",
                                 isDeleted
                                   ? "bg-muted/50 border border-border/30 italic"
                                   : isOwn
-                                    ? "bg-emerald-600 text-white rounded-tl-[4px]"
-                                    : "bg-background border border-border/50 rounded-tr-[4px]",
-                                message.message_type === 'image' ? "p-1" : "px-3 py-2"
+                                    ? "bg-wa-outgoing text-wa-outgoing-foreground rounded-tr-none"
+                                    : "bg-wa-incoming text-wa-incoming-foreground border border-border/20 rounded-tl-none shadow-sm",
+                                message.message_type === 'image' ? "p-1" : "px-3 py-1.5"
                               )}
                             >
                               {/* Quoted Reply */}
@@ -398,7 +398,7 @@ const EnhancedChatMessages = ({
 
                               {/* Sender Name */}
                               {!isOwn && showAvatar && message.sender && !isDeleted && (
-                                <p className="text-[11px] text-emerald-600 font-semibold mb-0.5">
+                                <p className="text-[11px] text-primary font-semibold mb-0.5">
                                   {message.sender.full_name}
                                 </p>
                               )}
@@ -498,32 +498,26 @@ const EnhancedChatMessages = ({
                                   {message.message_type === 'file' && fileUrl && !isVoiceMessage(fileName) && !isVideoFile(fileName) && (
                                     <a 
                                       href={fileUrl} target="_blank" rel="noopener noreferrer"
-                                      className={cn(
-                                        "flex items-center gap-3 p-2 rounded-xl min-w-[200px] transition-colors",
-                                        isOwn ? "hover:bg-white/10" : "hover:bg-muted"
-                                      )}
+                                      className="flex items-center gap-3 p-2 rounded-xl min-w-[200px] transition-colors hover:bg-black/5"
                                     >
-                                      <div className={cn(
-                                        "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                                        isOwn ? "bg-white/20" : "bg-emerald-500/10"
-                                      )}>
-                                        <FileIcon className={cn("w-5 h-5", isOwn ? "text-white" : "text-emerald-600")} />
+                                      <div className="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
+                                        <FileIcon className="w-5 h-5 text-primary" />
                                       </div>
                                       <div className="flex-1 min-w-0">
                                         <p className="text-[13px] font-medium truncate">{fileName}</p>
-                                        <p className={cn("text-[10px]", isOwn ? "text-white/60" : "text-muted-foreground")}>
+                                        <p className="text-[10px] text-wa-time">
                                           مستند • اضغط للتحميل
                                         </p>
                                       </div>
-                                      <Download className={cn("w-4 h-4 shrink-0", isOwn ? "text-white/60" : "text-muted-foreground")} />
+                                      <Download className="w-4 h-4 shrink-0 text-wa-time" />
                                     </a>
                                   )}
                                 </>
                               )}
 
                               {/* Timestamp & Status */}
-                              <div className="flex items-center gap-1 mt-1 justify-end">
-                                <span className={cn("text-[10px]", isOwn ? "text-white/60" : "text-muted-foreground")}>
+                              <div className="flex items-center gap-1 mt-0.5 justify-end">
+                                <span className="text-[10px] text-wa-time">
                                   {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                                 </span>
                                 {getMessageStatus(message, isOwn)}
@@ -563,10 +557,10 @@ const EnhancedChatMessages = ({
           {isPartnerTyping && (
             <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }} className="flex justify-start">
               <div className="flex items-center gap-1.5">
-                <div className="bg-background border border-border/50 rounded-2xl rounded-tr-[4px] px-4 py-2.5 shadow-sm">
+                <div className="bg-wa-incoming border border-border/20 rounded-lg rounded-tl-none px-4 py-2.5 shadow-sm">
                   <div className="flex items-center gap-1">
                     {[0, 0.2, 0.4].map((delay, i) => (
-                      <motion.span key={i} className="w-2 h-2 rounded-full bg-emerald-500"
+                      <motion.span key={i} className="w-2 h-2 rounded-full bg-primary"
                         animate={{ opacity: [0.3, 1, 0.3] }}
                         transition={{ repeat: Infinity, duration: 1.2, delay }}
                       />

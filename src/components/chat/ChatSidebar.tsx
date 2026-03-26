@@ -188,8 +188,8 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
     return (
       <div className="h-full flex items-center justify-center bg-background">
         <div className="text-center text-muted-foreground">
-          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-emerald-500/10 flex items-center justify-center">
-            <MessageCircle className="w-6 h-6 text-emerald-500 animate-pulse" />
+          <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-primary/10 flex items-center justify-center">
+            <MessageCircle className="w-6 h-6 text-primary animate-pulse" />
           </div>
           <p className="text-sm">جاري تحميل المحادثات...</p>
         </div>
@@ -245,19 +245,19 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                     className={cn(
                       "w-full px-3 py-3 flex items-center gap-3 transition-all relative group",
                       "hover:bg-muted/60 active:bg-muted/80",
-                      isSelected && "bg-emerald-500/8"
+                      isSelected && "bg-wa-outgoing/40"
                     )}
                   >
                     {/* Avatar */}
                     <div className="relative shrink-0">
                       <Avatar className="h-[50px] w-[50px]">
                         {partner.logo_url ? <AvatarImage src={partner.logo_url} /> : null}
-                        <AvatarFallback className="bg-gradient-to-br from-emerald-500/20 to-emerald-600/30 text-emerald-700">
+                        <AvatarFallback className="bg-gradient-to-br from-primary/20 to-primary/30 text-primary">
                           <Icon className="w-5 h-5" />
                         </AvatarFallback>
                       </Avatar>
                       {partner.isOnline && (
-                        <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-emerald-500 border-2 border-background rounded-full" />
+                        <span className="absolute bottom-0.5 right-0.5 w-3 h-3 bg-primary border-2 border-background rounded-full" />
                       )}
                     </div>
 
@@ -271,7 +271,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         {lastMsg && (
                           <span className={cn(
                             "text-[11px] shrink-0",
-                            partner.unreadCount > 0 ? "text-emerald-600 font-semibold" : "text-muted-foreground"
+                            partner.unreadCount > 0 ? "text-wa-unread-badge font-semibold" : "text-muted-foreground"
                           )}>
                             {formatMessageTime(lastMsg.time)}
                           </span>
@@ -282,7 +282,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         <div className="flex items-center gap-1.5 min-w-0">
                           {/* Typing indicator in sidebar */}
                           {partner.isTyping ? (
-                            <span className="text-xs text-emerald-600 font-medium italic">يكتب...</span>
+                            <span className="text-xs text-primary font-medium italic">يكتب...</span>
                           ) : (
                             <>
                               {lastMsg?.isMine && (
@@ -303,7 +303,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         
                         <div className="flex items-center gap-1.5 shrink-0">
                           {partner.unreadCount > 0 && (
-                            <Badge className="h-5 min-w-[20px] px-1.5 text-[10px] bg-emerald-500 text-white rounded-full border-0">
+                            <Badge className="h-5 min-w-[20px] px-1.5 text-[10px] bg-wa-unread-badge text-white rounded-full border-0">
                               {partner.unreadCount > 99 ? '99+' : partner.unreadCount}
                             </Badge>
                           )}
