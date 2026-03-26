@@ -31,7 +31,7 @@ const InstantPickupPortal = () => {
       const { error } = await supabase.from('collection_requests').insert({
         organization_id: organization.id,
         customer_name: organization.name || 'طلب جمع فوري',
-        pickup_address: organization.address || 'عنوان المنشأة',
+        pickup_address: (organization as any)?.address || 'عنوان المنشأة',
         waste_type: form.waste_type,
         estimated_weight_kg: parseFloat(form.quantity) * 1000,
         notes: form.notes ? `${form.notes} | استعجال: ${form.urgency}` : `استعجال: ${form.urgency}`,
