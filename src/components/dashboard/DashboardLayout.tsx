@@ -371,29 +371,31 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
     }));
 
-    // Track where admin-only groups start (for visual separator when viewing as org)
-    const ADMIN_GROUP_IDS = new Set([
-      'admin-command-center', 'admin-entity-management', 'admin-users-fleet',
-      'admin-finance', 'admin-content', 'admin-infrastructure',
-    ]);
-    let adminSectionStarted = false;
+    // Build a set of visible group IDs for section rendering
+    const visibleGroupIds = new Set(sidebarConfigGroups.map(g => g.id));
 
-    // Add each group
+    // Track which sections have been rendered
+    const renderedSections = new Set<string>();
+
+    // For each group, check if its section header should be inserted first
     for (const group of sidebarConfigGroups) {
+      // Find the section this group belongs to
+      const section = SIDEBAR_SECTIONS.find(s => s.groupIds.includes(group.id));
+      
+      // Insert section header if not yet rendered and section has visible groups
+      if (section && !renderedSections.has(section.id)) {
+        renderedSections.add(section.id);
+        items.push({
+          icon: section.icon,
+          label: language === 'ar' ? section.labelAr : section.labelEn,
+          path: `#section-${section.id}`,
+          key: `__section__${section.id}`,
+        });
+      }
+
       const groupBadge = group.items.reduce((sum, item) => {
         return sum + (item.badgeKey ? (sectionBadges[item.badgeKey] || 0) : 0);
       }, 0);
-
-      // Insert separator before admin groups when viewing as org
-      if (adminViewingOrg && ADMIN_GROUP_IDS.has(group.id) && !adminSectionStarted) {
-        adminSectionStarted = true;
-        items.push({
-          icon: Shield,
-          label: language === 'ar' ? '─── أدوات المدير ───' : '─── Admin Tools ───',
-          path: '#admin-separator',
-          key: '__admin-separator__',
-        });
-      }
 
       items.push({
         icon: group.icon,
@@ -413,7 +415,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
 
     return items;
-  }, [sidebarConfigGroups, language, sectionBadges, adminViewingOrg]);
+  }, [sidebarConfigGroups, language, sectionBadges]);
 
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : configBasedMenuItems;
