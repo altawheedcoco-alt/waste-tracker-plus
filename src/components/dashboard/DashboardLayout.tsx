@@ -617,17 +617,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {filteredMenuItems.length > 0 ? (
               filteredMenuItems.map((item: SidebarMenuItem) => {
-                // Render admin separator
-                if (item.key === '__admin-separator__') {
+                // Render section header
+                if (item.key.startsWith('__section__')) {
                   return (
-                    <div key={item.key} className="flex items-center gap-2 pt-4 pb-2 px-2">
-                      <div className="flex-1 h-px bg-primary/20" />
-                      <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        {language === 'ar' ? 'أدوات المدير' : 'Admin Tools'}
-                      </span>
-                      <div className="flex-1 h-px bg-primary/20" />
-                    </div>
+                    <SidebarSectionHeader
+                      key={item.key}
+                      label={item.label}
+                      icon={item.icon}
+                      isCollapsed={false}
+                    />
                   );
                 }
                 return (
