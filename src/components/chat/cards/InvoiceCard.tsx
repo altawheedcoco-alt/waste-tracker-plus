@@ -1,6 +1,5 @@
 import { memo } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Receipt, ExternalLink, CheckCircle } from 'lucide-react';
+import { Receipt, CheckCircle, XCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -15,22 +14,23 @@ interface InvoiceCardProps {
     due_date?: string;
   };
   isOwn: boolean;
-  onAction?: (action: string, id: string) => void;
+  onAction?: (action: string, id: string, data?: any) => void;
 }
 
 const STATUS_MAP: Record<string, { label: string; color: string }> = {
   pending: { label: 'بانتظار الدفع', color: 'bg-amber-500/10 text-amber-600 border-amber-500/20' },
-  paid: { label: 'مدفوعة', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
+  paid: { label: 'مدفوعة ✓', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
   overdue: { label: 'متأخرة', color: 'bg-red-500/10 text-red-600 border-red-500/20' },
+  rejected: { label: 'مرفوضة', color: 'bg-red-500/10 text-red-600 border-red-500/20' },
 };
 
 const InvoiceCard = memo(({ data, isOwn, onAction }: InvoiceCardProps) => {
-  const navigate = useNavigate();
   const st = STATUS_MAP[data.status || ''] || { label: data.status || 'غير محدد', color: 'bg-muted text-muted-foreground' };
+  const isPending = data.status === 'pending';
 
   return (
     <div className={cn(
-      'rounded-xl border p-3 min-w-[220px] max-w-[280px] space-y-2',
+      'rounded-xl border p-3 min-w-[240px] max-w-[300px] space-y-2',
       isOwn ? 'bg-white/10 border-white/20' : 'bg-muted/50 border-border'
     )}>
       <div className="flex items-center justify-between">
@@ -54,25 +54,27 @@ const InvoiceCard = memo(({ data, isOwn, onAction }: InvoiceCardProps) => {
           استحقاق: {new Date(data.due_date).toLocaleDateString('ar-EG')}
         </p>
       )}
-      <div className="flex gap-1.5">
-        <Button
-          size="sm"
-          variant={isOwn ? 'secondary' : 'outline'}
-          className="flex-1 h-7 text-[11px] gap-1"
-          onClick={() => navigate(`/dashboard/invoices`)}
-        >
-          <ExternalLink className="w-3 h-3" /> عرض
-        </Button>
-        {data.status === 'pending' && onAction && (
+
+      {/* Interactive buttons */}
+      {isPending && onAction && (
+        <div className="flex gap-1.5">
           <Button
             size="sm"
-            className="h-7 text-[11px] gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
-            onClick={() => onAction('approve_invoice', data.id)}
+            className="flex-1 h-7 text-[10px] gap-1 bg-emerald-600 hover:bg-emerald-700 text-white"
+            onClick={() => onAction('approve_invoice', data.id, data)}
           >
-            <CheckCircle className="w-3 h-3" /> اعتماد
+            <CheckCircle className="w-3 h-3" /> اعتمد
           </Button>
-        )}
-      </div>
+          <Button
+            size="sm"
+            variant="destructive"
+            className="flex-1 h-7 text-[10px] gap-1"
+            onClick={() => onAction('reject_invoice', data.id, data)}
+          >
+            <XCircle className="w-3 h-3" /> ارفض
+          </Button>
+        </div>
+      )}
     </div>
   );
 });

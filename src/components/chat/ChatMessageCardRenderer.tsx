@@ -12,7 +12,7 @@ interface CardRendererProps {
   resourceType: string;
   resourceData: any;
   isOwn: boolean;
-  onAction?: (action: string, id: string) => void;
+  onAction?: (action: string, id: string, data?: any) => void;
 }
 
 const ChatMessageCardRenderer = memo(({ resourceType, resourceData, isOwn, onAction }: CardRendererProps) => {
@@ -21,7 +21,7 @@ const ChatMessageCardRenderer = memo(({ resourceType, resourceData, isOwn, onAct
   switch (resourceType) {
     case 'shipment':
     case 'tracking':
-      return <ShipmentCard data={resourceData} isOwn={isOwn} compact={resourceType === 'tracking'} />;
+      return <ShipmentCard data={resourceData} isOwn={isOwn} compact={resourceType === 'tracking'} onAction={onAction} />;
     case 'invoice':
       return <InvoiceCard data={resourceData} isOwn={isOwn} onAction={onAction} />;
     case 'signing_request':
@@ -30,7 +30,7 @@ const ChatMessageCardRenderer = memo(({ resourceType, resourceData, isOwn, onAct
       return <SigningRequestCard data={resourceData} isOwn={isOwn} onAction={onAction} />;
     case 'document':
     case 'doc':
-      return <DocumentCard data={resourceData} isOwn={isOwn} />;
+      return <DocumentCard data={resourceData} isOwn={isOwn} onAction={onAction} />;
     case 'contract':
       return <ContractCard data={resourceData} isOwn={isOwn} onAction={onAction} />;
     case 'award_letter':
