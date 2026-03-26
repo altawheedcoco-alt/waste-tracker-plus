@@ -1135,11 +1135,9 @@ const CATEGORY_ORDER: string[] = [
   // ═══ 2. العمليات حسب نوع الجهة ═══
   'generator-shipments',
   'generator-certificates',
-  'generator-tracking',
   'transporter-shipments',
   'transporter-records',
   'transporter-manual',
-  'fleet-tracking',
   'vehicles-containers',
   'driver-management',
   'driver-development',
@@ -1148,57 +1146,64 @@ const CATEGORY_ORDER: string[] = [
   'recycler-production',
   'disposal-ops',
   'disposal-certs-facilities',
-  'driver-shipments',
   'consultant-ops',
   'consulting-office-ops',
+  'municipal-operations',
+  'municipal-contracts',
+  'municipal-workforce',
+  'municipal-assets',
 
-  // ═══ 3. لوحة العمليات والأجهزة ═══
+  // ═══ 3. أدوات التشغيل ═══
   'operations-board',
   'device-settings',
 
-  // ═══ 4. المستندات ═══
+  // ═══ 4. التتبع والخرائط (مدمج) ═══
+  'tracking-maps-center',
+
+  // ═══ 5. المستندات ═══
   'docs-upload-archive',
   'docs-ai-studio',
-  'docs-signatures',
+  'signatures-center',
   'docs-contracts',
   'docs-certs-invoices',
 
-  // ═══ 5. التقارير والتحليلات ═══
-  'shipment-reports',
-  'waste-registers',
-  'waste-analysis',
+  // ═══ 6. الطباعة والتصدير (مدمج) ═══
+  'print-export-center',
+
+  // ═══ 7. التقارير (مدمج) ═══
+  'operational-reports',
   'environmental-reports',
 
-  // ═══ 6. المالية والمحاسبة ═══
+  // ═══ 8. المالية والمحاسبة ═══
   'accounting-core',
   'inventory-purchasing',
   'financial-reports',
   'wallet-insurance',
 
-  // ═══ 7. الموارد البشرية ═══
+  // ═══ 9. الموارد البشرية ═══
   'hr-core',
   'hr-payroll-performance',
 
-  // ═══ 8. التواصل والإشعارات ═══
-  'direct-messages',
+  // ═══ 10. التواصل (مدمج) ═══
+  'communication-social',
   'notifications-notes',
-  'requests-stories',
+  'requests',
 
-  // ═══ 9. السوق ═══
+  // ═══ 11. السوق ═══
+  'waste-exchange',
   'b2b-marketplace',
   'global-exchange',
   'quotations-plans',
 
-  // ═══ 10. الخرائط والروابط ═══
-  'maps',
+  // ═══ 12. الروابط السريعة ═══
   'quick-links',
 
-  // ═══ 11. AI والتعلم ═══
+  // ═══ 13. AI والتعلم ═══
   'ai-tools',
   'learning',
   'achievements',
 
-  // ═══ 12. الرقابة والهيئات ═══
+  // ═══ 14. الرقابة والهيئات ═══
   'regulator-command',
   'regulator-enforcement',
   'regulator-licensing',
@@ -1207,7 +1212,7 @@ const CATEGORY_ORDER: string[] = [
   'ltra-tools',
   'ida-tools',
 
-  // ═══ 13. مركز القيادة (أدمن) ═══
+  // ═══ 15. مركز القيادة (أدمن) ═══
   'admin-command-center',
   'admin-entity-management',
   'admin-org-docs',
@@ -1217,7 +1222,7 @@ const CATEGORY_ORDER: string[] = [
   'admin-content',
   'admin-infrastructure',
 
-  // ═══ 14. الدعم والإعدادات ═══
+  // ═══ 16. الدعم والإعدادات ═══
   'support',
   'settings-system',
 ];
