@@ -404,10 +404,16 @@ Deno.serve(async (req) => {
 
       await Promise.allSettled(
         subscriptions.map(async (sub: any) => {
-          const result = await sendPushNotification(
-            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-            payload, vapidPublicKey, vapidPrivateKey
-          );
+          let result: { success: boolean; error?: string };
+          if (isFCMSubscription(sub)) {
+            const parsedPayload = JSON.parse(payload);
+            result = await sendFCMNotification(getFCMToken(sub), { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          } else {
+            result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              payload, vapidPublicKey, vapidPrivateKey
+            );
+          }
           if (result.success) {
             sent++;
             userResults[sub.user_id] = { status: 'sent' };
