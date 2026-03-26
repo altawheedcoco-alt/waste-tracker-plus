@@ -399,7 +399,7 @@ const EnhancedChatInput = ({
   ];
 
   return (
-    <div className={cn("border-t border-border bg-background", isMobile ? "p-2" : "p-3")}>
+    <div className={cn("border-t border-border/30 bg-wa-chat-bg", isMobile ? "p-1.5" : "p-2")}>
       {/* Hidden File Inputs */}
       <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.csv,.pptx,.ppt" multiple onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
       <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
