@@ -32,7 +32,7 @@ const AICapabilitiesInfoDialog = () => {
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'طلبات/دقيقة (RPM)', value: '15' },
+                  { label: 'طلبات/دقيقة (عام)', value: '13' },
                   { label: 'طلبات/يوم (RPD)', value: '1,500' },
                   { label: 'Tokens/دقيقة', value: '1,000,000' },
                   { label: 'نافذة السياق', value: '1,048,576 token' },
