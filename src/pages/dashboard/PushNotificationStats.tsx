@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, subDays } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
@@ -16,15 +16,17 @@ import { Progress } from '@/components/ui/progress';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
 import {
   Bell, BellRing, Users, Smartphone, Monitor, Globe, Search, RefreshCcw, Send,
   Loader2, CheckCircle, XCircle, Clock, TrendingUp, BarChart3, Wifi, WifiOff,
   Trash2, ChevronDown, ChevronUp, Activity, Zap, Shield, Eye, Ban, Megaphone,
-  Target, UserX, History, Link, AlertTriangle,
+  Target, UserX, History, Link, AlertTriangle, FileText, Download, RotateCcw,
+  Plus, Save, BookTemplate, Calendar, Filter, X,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line } from 'recharts';
 
 interface Subscriber {
   id: string; user_id: string; endpoint: string; p256dh: string; auth_key: string;
@@ -42,11 +44,24 @@ interface Campaign {
   priority: string; target_type: string; target_ids: string[] | null;
   target_org_type: string | null; total_sent: number; total_failed: number;
   url: string | null; created_at: string; sender_name?: string;
+  status?: string; scheduled_at?: string; template_id?: string;
+}
+
+interface CampaignRecipient {
+  id: string; campaign_id: string; user_id: string; status: string;
+  error_message: string | null; delivered_at: string | null; created_at: string;
+  full_name?: string;
 }
 
 interface BlacklistEntry {
   id: string; user_id: string; blocked_by: string | null; reason: string | null;
   created_at: string; full_name?: string;
+}
+
+interface PushTemplate {
+  id: string; name: string; title: string; body: string; type: string;
+  priority: string; url: string | null; icon: string | null;
+  created_by: string | null; is_default: boolean; created_at: string;
 }
 
 const PLATFORM_COLORS: Record<string, string> = {
@@ -88,6 +103,7 @@ const PushNotificationStats = () => {
   const [notificationLogs, setNotificationLogs] = useState<NotificationLog[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>([]);
   const [blacklist, setBlacklist] = useState<BlacklistEntry[]>([]);
+  const [templates, setTemplates] = useState<PushTemplate[]>([]);
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,6 +119,22 @@ const PushNotificationStats = () => {
   const [campTargetIds, setCampTargetIds] = useState<string[]>([]);
   const [campOrgType, setCampOrgType] = useState('');
   const [campUrl, setCampUrl] = useState('');
+  const [campScheduled, setCampScheduled] = useState(false);
+  const [campScheduleDate, setCampScheduleDate] = useState('');
+
+  // Template dialog
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [editingTemplate, setEditingTemplate] = useState<PushTemplate | null>(null);
+
+  // Campaign detail dialog
+  const [selectedCampaign, setSelectedCampaign] = useState<Campaign | null>(null);
+  const [campaignRecipients, setCampaignRecipients] = useState<CampaignRecipient[]>([]);
+  const [retrying, setRetrying] = useState(false);
+
+  // Log filters
+  const [logFilterType, setLogFilterType] = useState('all');
+  const [logFilterRead, setLogFilterRead] = useState('all');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -130,7 +162,7 @@ const PushNotificationStats = () => {
         return { ...s, full_name: prof?.full_name || 'غير معروف', phone: prof?.phone, avatar_url: prof?.avatar_url, org_name: org?.name, org_type: org?.type };
       }));
 
-      const { data: logs } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(100);
+      const { data: logs } = await supabase.from('notifications').select('*').order('created_at', { ascending: false }).limit(200);
       const logUserIds = [...new Set((logs || []).map(l => l.user_id))];
       let logProfiles: any[] = [];
       if (logUserIds.length > 0) {
@@ -141,29 +173,31 @@ const PushNotificationStats = () => {
         ...l, full_name: logProfiles.find(p => p.user_id === l.user_id)?.full_name || 'غير معروف',
       })));
 
-      // Fetch campaigns
-      const { data: camps } = await supabase.from('push_campaigns').select('*').order('created_at', { ascending: false }).limit(50);
-      const campSenderIds = [...new Set((camps || []).map(c => c.sender_id).filter(Boolean))];
+      const { data: camps } = await (supabase.from('push_campaigns') as any).select('*').order('created_at', { ascending: false }).limit(50);
+      const campSenderIds = [...new Set((camps || []).map((c: any) => c.sender_id).filter(Boolean))] as string[];
       let campProfiles: any[] = [];
       if (campSenderIds.length > 0) {
         const { data: cp } = await supabase.from('profiles').select('user_id, full_name').in('user_id', campSenderIds);
         campProfiles = cp || [];
       }
-      setCampaigns((camps || []).map(c => ({
+      setCampaigns((camps || []).map((c: any) => ({
         ...c, sender_name: campProfiles.find(p => p.user_id === c.sender_id)?.full_name || 'نظام',
       })));
 
-      // Fetch blacklist
       const { data: bl } = await supabase.from('push_blacklist').select('*').order('created_at', { ascending: false });
-      const blUserIds = [...new Set((bl || []).map(b => b.user_id))];
+      const blUserIds = [...new Set((bl || []).map((b: any) => b.user_id))];
       let blProfiles: any[] = [];
       if (blUserIds.length > 0) {
         const { data: bp } = await supabase.from('profiles').select('user_id, full_name').in('user_id', blUserIds);
         blProfiles = bp || [];
       }
-      setBlacklist((bl || []).map(b => ({
+      setBlacklist((bl || []).map((b: any) => ({
         ...b, full_name: blProfiles.find(p => p.user_id === b.user_id)?.full_name || 'غير معروف',
       })));
+
+      // Fetch templates
+      const { data: tmpl } = await (supabase.from('push_templates') as any).select('*').order('created_at', { ascending: false });
+      setTemplates(tmpl || []);
     } catch (err) {
       console.error('Error fetching push stats:', err);
       toast.error('خطأ في جلب البيانات');
@@ -216,9 +250,29 @@ const PushNotificationStats = () => {
   const readRate = notificationLogs.length > 0
     ? Math.round((notificationLogs.filter(n => n.is_read).length / notificationLogs.length) * 100) : 0;
 
+  // Campaign timeline chart
+  const campaignTimelineData = (() => {
+    const last14 = Array.from({ length: 14 }, (_, i) => {
+      const d = subDays(new Date(), 13 - i);
+      const key = format(d, 'MM/dd');
+      const dayCamps = campaigns.filter(c => format(new Date(c.created_at), 'MM/dd') === key);
+      return { date: key, حملات: dayCamps.length, نجح: dayCamps.reduce((s, c) => s + c.total_sent, 0), فشل: dayCamps.reduce((s, c) => s + c.total_failed, 0) };
+    });
+    return last14;
+  })();
+
+  // Filtered logs
+  const filteredLogs = notificationLogs.filter(l => {
+    if (logFilterType !== 'all' && l.type !== logFilterType) return false;
+    if (logFilterRead === 'read' && !l.is_read) return false;
+    if (logFilterRead === 'unread' && l.is_read) return false;
+    return true;
+  });
+
   // === Actions ===
   const sendCampaign = async () => {
     if (!campTitle || !campBody) { toast.error('أدخل العنوان والنص'); return; }
+    if (campScheduled && !campScheduleDate) { toast.error('حدد تاريخ الجدولة'); return; }
     setSending(true);
     try {
       const { data, error } = await supabase.functions.invoke('send-push', {
@@ -231,11 +285,16 @@ const PushNotificationStats = () => {
           target_ids: campTargetType === 'specific' ? campTargetIds : campTargetType === 'organization' ? campTargetIds : undefined,
           target_org_type: campTargetType === 'org_type' ? campOrgType : undefined,
           url: campUrl || undefined,
+          scheduled_at: campScheduled ? campScheduleDate : undefined,
         },
       });
       if (error) throw error;
-      toast.success(`✅ تم الإرسال: ${data?.sent || 0} نجح، ${data?.failed || 0} فشل`);
-      setCampTitle(''); setCampBody(''); setCampUrl('');
+      if (data?.scheduled) {
+        toast.success(`📅 تم جدولة الحملة: ${data.recipients} مستلم`);
+      } else {
+        toast.success(`✅ تم الإرسال: ${data?.sent || 0} نجح، ${data?.failed || 0} فشل`);
+      }
+      setCampTitle(''); setCampBody(''); setCampUrl(''); setCampScheduled(false); setCampScheduleDate('');
       fetchData();
     } catch (err: any) {
       toast.error('فشل الإرسال: ' + (err.message || 'خطأ'));
@@ -260,6 +319,100 @@ const PushNotificationStats = () => {
     fetchData();
   };
 
+  // Template actions
+  const saveTemplate = async () => {
+    if (!templateName || !campTitle || !campBody) { toast.error('أدخل اسم القالب والعنوان والنص'); return; }
+    const templateData = {
+      name: templateName, title: campTitle, body: campBody,
+      type: campType, priority: campPriority, url: campUrl || null,
+      icon: null, created_by: user?.id, is_default: false,
+    };
+    if (editingTemplate) {
+      await (supabase.from('push_templates') as any).update(templateData).eq('id', editingTemplate.id);
+      toast.success('تم تحديث القالب');
+    } else {
+      await (supabase.from('push_templates') as any).insert(templateData);
+      toast.success('تم حفظ القالب');
+    }
+    setShowTemplateDialog(false); setTemplateName(''); setEditingTemplate(null);
+    fetchData();
+  };
+
+  const applyTemplate = (t: PushTemplate) => {
+    setCampTitle(t.title); setCampBody(t.body); setCampType(t.type);
+    setCampPriority(t.priority); setCampUrl(t.url || '');
+    setActiveTab('send');
+    toast.success(`تم تحميل قالب "${t.name}"`);
+  };
+
+  const deleteTemplate = async (id: string) => {
+    await (supabase.from('push_templates') as any).delete().eq('id', id);
+    toast.success('تم حذف القالب');
+    fetchData();
+  };
+
+  // Campaign details
+  const viewCampaignDetails = async (campaign: Campaign) => {
+    setSelectedCampaign(campaign);
+    const { data: recipients } = await (supabase.from('push_campaign_recipients') as any)
+      .select('*').eq('campaign_id', campaign.id).order('created_at', { ascending: false });
+    const recipientUserIds = [...new Set((recipients || []).map((r: any) => r.user_id))] as string[];
+    let recProfiles: any[] = [];
+    if (recipientUserIds.length > 0) {
+      const { data: rp } = await supabase.from('profiles').select('user_id, full_name').in('user_id', recipientUserIds);
+      recProfiles = rp || [];
+    }
+    setCampaignRecipients((recipients || []).map((r: any) => ({
+      ...r, full_name: recProfiles.find(p => p.user_id === r.user_id)?.full_name || 'غير معروف',
+    })));
+  };
+
+  const retryFailed = async (campaignId: string) => {
+    setRetrying(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-push', {
+        body: { action: 'retry_failed', campaign_id: campaignId },
+      });
+      if (error) throw error;
+      toast.success(`✅ إعادة الإرسال: ${data?.sent || 0} نجح، ${data?.failed || 0} فشل`);
+      if (selectedCampaign) viewCampaignDetails(selectedCampaign);
+      fetchData();
+    } catch (err: any) {
+      toast.error('فشل إعادة الإرسال: ' + (err.message || 'خطأ'));
+    } finally { setRetrying(false); }
+  };
+
+  // Export CSV
+  const exportSubscribersCSV = () => {
+    const bom = '\uFEFF';
+    const headers = ['الاسم', 'الهاتف', 'الجهة', 'نوع الجهة', 'الأجهزة', 'المنصة', 'الحالة', 'تاريخ الاشتراك'];
+    const rows = userGroups.map(u => [
+      u.full_name, u.phone || '', u.org_name || '', ORG_TYPES[u.org_type || ''] || '',
+      u.devices, u.platforms.join(', '), u.isBlacklisted ? 'محظور' : 'نشط',
+      format(new Date(u.firstSub), 'yyyy-MM-dd HH:mm'),
+    ]);
+    const csv = bom + [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `push-subscribers-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click();
+    toast.success('تم تصدير المشتركين');
+  };
+
+  const exportCampaignsCSV = () => {
+    const bom = '\uFEFF';
+    const headers = ['العنوان', 'النص', 'النوع', 'الأولوية', 'المستهدف', 'نجح', 'فشل', 'المرسل', 'التاريخ', 'الحالة'];
+    const rows = campaigns.map(c => [
+      c.title, c.body, c.type, c.priority, c.target_type,
+      c.total_sent, c.total_failed, c.sender_name || '',
+      format(new Date(c.created_at), 'yyyy-MM-dd HH:mm'), c.status || 'sent',
+    ]);
+    const csv = bom + [headers.join(','), ...rows.map(r => r.map(v => `"${v}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+    a.download = `push-campaigns-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click();
+    toast.success('تم تصدير سجل الحملات');
+  };
+
   return (
     <DashboardLayout>
       <div className="p-4 md:p-6 space-y-6" dir="rtl">
@@ -282,13 +435,14 @@ const PushNotificationStats = () => {
         </div>
 
         {/* KPI Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
           {[
             { icon: Users, value: uniqueUsers.length, label: 'مشتركين', color: 'text-primary', bg: 'bg-primary/5 border-primary/20' },
             { icon: Smartphone, value: totalDevices, label: 'أجهزة مسجلة', color: 'text-blue-500', bg: 'bg-blue-500/5 border-blue-500/20' },
-            { icon: Wifi, value: validSubs.length, label: 'اشتراكات صالحة', color: 'text-emerald-500', bg: 'bg-emerald-500/5 border-emerald-500/20' },
+            { icon: Wifi, value: validSubs.length, label: 'صالحة', color: 'text-emerald-500', bg: 'bg-emerald-500/5 border-emerald-500/20' },
             { icon: Ban, value: blacklist.length, label: 'محظورين', color: 'text-amber-500', bg: 'bg-amber-500/5 border-amber-500/20' },
-            { icon: Megaphone, value: campaigns.length, label: 'حملات مرسلة', color: 'text-purple-500', bg: 'bg-purple-500/5 border-purple-500/20' },
+            { icon: Megaphone, value: campaigns.length, label: 'حملات', color: 'text-purple-500', bg: 'bg-purple-500/5 border-purple-500/20' },
+            { icon: FileText, value: templates.length, label: 'قوالب', color: 'text-cyan-500', bg: 'bg-cyan-500/5 border-cyan-500/20' },
           ].map((kpi, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.05 }}>
               <Card className={kpi.bg}>
@@ -311,14 +465,17 @@ const PushNotificationStats = () => {
             <TabsTrigger value="send" className="flex items-center gap-1 text-xs">
               <Megaphone className="h-3.5 w-3.5" /> مركز الإرسال
             </TabsTrigger>
+            <TabsTrigger value="templates" className="flex items-center gap-1 text-xs">
+              <FileText className="h-3.5 w-3.5" /> القوالب
+            </TabsTrigger>
             <TabsTrigger value="subscribers" className="flex items-center gap-1 text-xs">
-              <Users className="h-3.5 w-3.5" /> التحكم بالمشتركين
+              <Users className="h-3.5 w-3.5" /> المشتركين
             </TabsTrigger>
             <TabsTrigger value="campaigns" className="flex items-center gap-1 text-xs">
-              <History className="h-3.5 w-3.5" /> سجل الحملات
+              <History className="h-3.5 w-3.5" /> الحملات
             </TabsTrigger>
             <TabsTrigger value="logs" className="flex items-center gap-1 text-xs">
-              <Activity className="h-3.5 w-3.5" /> سجل الإشعارات
+              <Activity className="h-3.5 w-3.5" /> السجل
             </TabsTrigger>
           </TabsList>
 
@@ -349,19 +506,20 @@ const PushNotificationStats = () => {
               <Card>
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                    <Bell className="h-4 w-4 text-primary" /> أنواع الإشعارات (آخر 100)
+                    <TrendingUp className="h-4 w-4 text-primary" /> أداء الحملات (14 يوم)
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {notifTypeChartData.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={220}>
-                      <BarChart data={notifTypeChartData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-                        <XAxis type="number" /> <YAxis type="category" dataKey="name" width={80} tick={{ fontSize: 11 }} />
-                        <Tooltip /> <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  ) : <div className="flex items-center justify-center h-[220px] text-muted-foreground text-sm">لا توجد بيانات</div>}
+                  <ResponsiveContainer width="100%" height={220}>
+                    <LineChart data={campaignTimelineData}>
+                      <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                      <XAxis dataKey="date" tick={{ fontSize: 10 }} />
+                      <YAxis tick={{ fontSize: 10 }} />
+                      <Tooltip />
+                      <Line type="monotone" dataKey="نجح" stroke="hsl(var(--primary))" strokeWidth={2} dot={{ r: 3 }} />
+                      <Line type="monotone" dataKey="فشل" stroke="hsl(var(--destructive))" strokeWidth={2} dot={{ r: 3 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
                 </CardContent>
               </Card>
 
@@ -509,39 +667,138 @@ const PushNotificationStats = () => {
                   </div>
                 )}
 
-                {/* Preview */}
+                {/* Scheduling */}
+                <div className="flex items-center gap-3 p-3 rounded-lg bg-muted/30 border border-border">
+                  <Calendar className="h-5 w-5 text-muted-foreground" />
+                  <div className="flex items-center gap-2 flex-1">
+                    <label className="text-sm font-medium">جدولة الإرسال</label>
+                    <Switch checked={campScheduled} onCheckedChange={setCampScheduled} />
+                  </div>
+                  {campScheduled && (
+                    <Input type="datetime-local" value={campScheduleDate}
+                      onChange={e => setCampScheduleDate(e.target.value)}
+                      className="w-auto text-sm" />
+                  )}
+                </div>
+
+                {/* Mobile Preview */}
                 {(campTitle || campBody) && (
-                  <Card className="bg-muted/50 border-dashed">
-                    <CardContent className="p-4">
-                      <p className="text-xs text-muted-foreground mb-2">معاينة الإشعار:</p>
-                      <div className="bg-background rounded-lg p-3 border shadow-sm">
-                        <p className="font-bold text-sm">{campTitle || '(بدون عنوان)'}</p>
-                        <p className="text-xs text-muted-foreground mt-1">{campBody || '(بدون نص)'}</p>
-                        {campUrl && <p className="text-[10px] text-primary mt-1">🔗 {campUrl}</p>}
+                  <div className="flex justify-center">
+                    <div className="w-[320px] bg-gradient-to-b from-muted/80 to-muted/40 rounded-[20px] p-3 border border-border shadow-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="w-2 h-2 rounded-full bg-emerald-500" />
+                        <span className="text-[10px] text-muted-foreground">iRecycle • الآن</span>
                       </div>
-                    </CardContent>
-                  </Card>
+                      <div className="bg-background rounded-xl p-3 border shadow-sm">
+                        <div className="flex items-start gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                            <BellRing className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-bold text-sm text-foreground">{campTitle || '(بدون عنوان)'}</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-3">{campBody || '(بدون نص)'}</p>
+                            {campUrl && <p className="text-[10px] text-primary mt-1 truncate">🔗 {campUrl}</p>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex justify-between mt-2 px-2">
+                        <span className="text-[9px] text-muted-foreground">📱 معاينة إشعار الهاتف</span>
+                        <Badge variant="outline" className="text-[9px]">{NOTIF_TYPES.find(t => t.value === campType)?.label}</Badge>
+                      </div>
+                    </div>
+                  </div>
                 )}
 
-                <Button className="w-full" size="lg" onClick={sendCampaign}
-                  disabled={sending || !campTitle || !campBody}>
-                  {sending ? <Loader2 className="h-5 w-5 animate-spin ml-2" /> : <Send className="h-5 w-5 ml-2" />}
-                  {sending ? 'جاري الإرسال...' : `إرسال الآن (${campTargetType === 'all' ? uniqueUsers.length : campTargetType === 'specific' ? campTargetIds.length : '؟'} مستلم)`}
-                </Button>
+                <div className="flex gap-2">
+                  <Button className="flex-1" size="lg" onClick={sendCampaign}
+                    disabled={sending || !campTitle || !campBody}>
+                    {sending ? <Loader2 className="h-5 w-5 animate-spin ml-2" /> : campScheduled ? <Calendar className="h-5 w-5 ml-2" /> : <Send className="h-5 w-5 ml-2" />}
+                    {sending ? 'جاري الإرسال...' : campScheduled ? 'جدولة الحملة' : `إرسال الآن (${campTargetType === 'all' ? uniqueUsers.length : campTargetType === 'specific' ? campTargetIds.length : '؟'} مستلم)`}
+                  </Button>
+                  <Button variant="outline" size="lg" onClick={() => {
+                    setTemplateName(''); setEditingTemplate(null); setShowTemplateDialog(true);
+                  }} disabled={!campTitle || !campBody} title="حفظ كقالب">
+                    <Save className="h-5 w-5" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
 
+          {/* ===== Templates Tab ===== */}
+          <TabsContent value="templates" className="space-y-4 mt-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold flex items-center gap-2">
+                <FileText className="h-4 w-4 text-primary" /> قوالب الإشعارات الجاهزة
+              </h3>
+              <Button size="sm" variant="outline" onClick={() => {
+                setCampTitle(''); setCampBody(''); setCampType('general'); setCampPriority('normal'); setCampUrl('');
+                setTemplateName(''); setEditingTemplate(null); setShowTemplateDialog(true); setActiveTab('send');
+              }}>
+                <Plus className="h-4 w-4 ml-1" /> قالب جديد
+              </Button>
+            </div>
+            {templates.length === 0 ? (
+              <Card>
+                <CardContent className="py-12 text-center text-muted-foreground">
+                  <FileText className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                  <p>لا توجد قوالب بعد</p>
+                  <p className="text-xs mt-1">أنشئ إشعاراً في "مركز الإرسال" ثم احفظه كقالب</p>
+                </CardContent>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {templates.map(t => (
+                  <Card key={t.id} className="hover:border-primary/30 transition-colors">
+                    <CardContent className="p-4 space-y-2">
+                      <div className="flex items-start justify-between">
+                        <div>
+                          <p className="font-bold text-sm text-foreground">{t.name}</p>
+                          <div className="flex gap-1 mt-1">
+                            <Badge variant="outline" className="text-[10px]">{NOTIF_TYPES.find(n => n.value === t.type)?.label || t.type}</Badge>
+                            <Badge variant="secondary" className="text-[10px]">{PRIORITIES.find(p => p.value === t.priority)?.label || t.priority}</Badge>
+                          </div>
+                        </div>
+                        <Button size="sm" variant="ghost" className="text-destructive h-7 w-7 p-0" onClick={() => deleteTemplate(t.id)}>
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                      <div className="bg-muted/30 rounded-lg p-2">
+                        <p className="text-xs font-semibold">{t.title}</p>
+                        <p className="text-[11px] text-muted-foreground mt-1 line-clamp-2">{t.body}</p>
+                      </div>
+                      <div className="flex gap-2">
+                        <Button size="sm" className="flex-1 h-8 text-xs" onClick={() => applyTemplate(t)}>
+                          <Send className="h-3 w-3 ml-1" /> استخدم القالب
+                        </Button>
+                        <Button size="sm" variant="outline" className="h-8 text-xs" onClick={() => {
+                          setCampTitle(t.title); setCampBody(t.body); setCampType(t.type);
+                          setCampPriority(t.priority); setCampUrl(t.url || '');
+                          setTemplateName(t.name); setEditingTemplate(t); setShowTemplateDialog(true);
+                        }}>
+                          تعديل
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
+
           {/* ===== Subscriber Control Tab ===== */}
           <TabsContent value="subscribers" className="space-y-4 mt-4">
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <div className="relative flex-1 min-w-[200px]">
                 <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="بحث بالاسم أو الهاتف أو الجهة..." value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)} className="pr-10" />
               </div>
               <Badge variant="outline">{filteredUsers.length} مشترك</Badge>
               <Badge variant="destructive" className="text-[10px]">{blacklist.length} محظور</Badge>
+              <Button size="sm" variant="outline" onClick={exportSubscribersCSV}>
+                <Download className="h-4 w-4 ml-1" /> CSV
+              </Button>
             </div>
 
             <ScrollArea className="h-[500px]">
@@ -575,7 +832,6 @@ const PushNotificationStats = () => {
                                 <p className="text-lg font-bold text-foreground">{u.devices}</p>
                                 <p className="text-[10px] text-muted-foreground">جهاز</p>
                               </div>
-                              {/* Blacklist toggle */}
                               <div onClick={e => e.stopPropagation()}>
                                 <Switch
                                   checked={!u.isBlacklisted}
@@ -641,115 +897,232 @@ const PushNotificationStats = () => {
 
           {/* ===== Campaigns Log Tab ===== */}
           <TabsContent value="campaigns" className="space-y-4 mt-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <History className="h-4 w-4 text-primary" /> سجل الحملات المرسلة
-                </CardTitle>
-                <CardDescription>تتبع كل حملة: مَن أرسلها، لمَن، ونتيجتها</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-3">
-                    {campaigns.map(c => (
-                      <motion.div key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                        <div className="p-4 rounded-lg border border-border bg-muted/20 space-y-2">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <p className="font-bold text-sm text-foreground">{c.title}</p>
-                              <p className="text-xs text-muted-foreground mt-1">{c.body}</p>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <Badge variant={c.priority === 'urgent' ? 'destructive' : c.priority === 'important' ? 'default' : 'secondary'} className="text-[10px]">
-                                {PRIORITIES.find(p => p.value === c.priority)?.label || c.priority}
-                              </Badge>
-                              <Badge variant="outline" className="text-[10px]">
-                                {NOTIF_TYPES.find(t => t.value === c.type)?.label || c.type}
-                              </Badge>
-                            </div>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                <History className="h-4 w-4 text-primary" /> سجل الحملات المرسلة
+              </CardTitle>
+              <Button size="sm" variant="outline" onClick={exportCampaignsCSV}>
+                <Download className="h-4 w-4 ml-1" /> CSV
+              </Button>
+            </div>
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-3">
+                {campaigns.map(c => (
+                  <motion.div key={c.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    <Card className="hover:border-primary/30 transition-colors cursor-pointer" onClick={() => viewCampaignDetails(c)}>
+                      <CardContent className="p-4 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <p className="font-bold text-sm text-foreground">{c.title}</p>
+                            <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{c.body}</p>
                           </div>
-                          <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
-                            <span className="flex items-center gap-1">
-                              <Target className="h-3 w-3" />
-                              {c.target_type === 'all' ? 'الجميع' : c.target_type === 'specific' ? `${c.target_ids?.length || 0} مستخدم` : c.target_org_type ? ORG_TYPES[c.target_org_type] || c.target_org_type : c.target_type}
-                            </span>
-                            <span className="flex items-center gap-1">
-                              <CheckCircle className="h-3 w-3 text-emerald-500" /> {c.total_sent} نجح
-                            </span>
-                            {c.total_failed > 0 && (
-                              <span className="flex items-center gap-1">
-                                <XCircle className="h-3 w-3 text-destructive" /> {c.total_failed} فشل
-                              </span>
-                            )}
-                            <span className="flex items-center gap-1">
-                              <Clock className="h-3 w-3" />
-                              {formatDistanceToNow(new Date(c.created_at), { locale: ar, addSuffix: true })}
-                            </span>
-                            <span>👤 {c.sender_name}</span>
-                            {c.url && <span className="flex items-center gap-1 text-primary"><Link className="h-3 w-3" /> {c.url.slice(0, 40)}</span>}
+                          <div className="flex items-center gap-2">
+                            {c.status === 'scheduled' && <Badge variant="secondary" className="text-[10px]">📅 مجدولة</Badge>}
+                            <Badge variant={c.priority === 'urgent' ? 'destructive' : c.priority === 'important' ? 'default' : 'secondary'} className="text-[10px]">
+                              {PRIORITIES.find(p => p.value === c.priority)?.label || c.priority}
+                            </Badge>
+                            <Badge variant="outline" className="text-[10px]">
+                              {NOTIF_TYPES.find(t => t.value === c.type)?.label || c.type}
+                            </Badge>
                           </div>
                         </div>
-                      </motion.div>
-                    ))}
-                    {campaigns.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Megaphone className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p>لم يتم إرسال أي حملة بعد</p>
-                        <p className="text-xs mt-1">استخدم "مركز الإرسال" لبدء حملتك الأولى</p>
-                      </div>
-                    )}
+                        <div className="flex items-center gap-4 text-xs text-muted-foreground flex-wrap">
+                          <span className="flex items-center gap-1">
+                            <Target className="h-3 w-3" />
+                            {c.target_type === 'all' ? 'الجميع' : c.target_type === 'specific' ? `${c.target_ids?.length || 0} مستخدم` : c.target_org_type ? ORG_TYPES[c.target_org_type] || c.target_org_type : c.target_type}
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <CheckCircle className="h-3 w-3 text-emerald-500" /> {c.total_sent} نجح
+                          </span>
+                          {c.total_failed > 0 && (
+                            <span className="flex items-center gap-1">
+                              <XCircle className="h-3 w-3 text-destructive" /> {c.total_failed} فشل
+                            </span>
+                          )}
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatDistanceToNow(new Date(c.created_at), { locale: ar, addSuffix: true })}
+                          </span>
+                          <span>👤 {c.sender_name}</span>
+                          {c.url && <span className="flex items-center gap-1 text-primary"><Link className="h-3 w-3" /> رابط</span>}
+                        </div>
+                        {c.total_failed > 0 && (
+                          <div className="flex justify-end" onClick={e => e.stopPropagation()}>
+                            <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => retryFailed(c.id)} disabled={retrying}>
+                              {retrying ? <Loader2 className="h-3 w-3 animate-spin ml-1" /> : <RotateCcw className="h-3 w-3 ml-1" />}
+                              إعادة إرسال الفاشلة
+                            </Button>
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+                {campaigns.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Megaphone className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>لم يتم إرسال أي حملة بعد</p>
+                    <p className="text-xs mt-1">استخدم "مركز الإرسال" لبدء حملتك الأولى</p>
                   </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                )}
+              </div>
+            </ScrollArea>
           </TabsContent>
 
           {/* ===== Notification Logs Tab ===== */}
           <TabsContent value="logs" className="space-y-4 mt-4">
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                  <Activity className="h-4 w-4 text-primary" /> آخر 100 إشعار
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-2">
-                    {notificationLogs.map(log => (
-                      <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 border border-border/50">
-                        <div className="mt-1">
-                          {log.is_read ? <Eye className="h-4 w-4 text-emerald-500" /> : <Bell className="h-4 w-4 text-amber-500" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <p className="text-sm font-semibold text-foreground">{log.title}</p>
-                            <Badge variant={log.is_read ? 'secondary' : 'default'} className="text-[10px]">
-                              {log.is_read ? 'مقروء' : 'غير مقروء'}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px]">{translateType(log.type)}</Badge>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{log.message}</p>
-                          <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
-                            <span>👤 {log.full_name}</span>
-                            <span>•</span>
-                            <Clock className="h-3 w-3" />
-                            <span>{formatDistanceToNow(new Date(log.created_at), { locale: ar, addSuffix: true })}</span>
-                          </div>
-                        </div>
+            <div className="flex items-center gap-2 flex-wrap">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <Select value={logFilterType} onValueChange={setLogFilterType}>
+                <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">كل الأنواع</SelectItem>
+                  {NOTIF_TYPES.map(t => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <Select value={logFilterRead} onValueChange={setLogFilterRead}>
+                <SelectTrigger className="w-32 h-8 text-xs"><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">الكل</SelectItem>
+                  <SelectItem value="read">مقروء</SelectItem>
+                  <SelectItem value="unread">غير مقروء</SelectItem>
+                </SelectContent>
+              </Select>
+              <Badge variant="outline" className="text-[10px]">{filteredLogs.length} نتيجة</Badge>
+            </div>
+            <ScrollArea className="h-[500px]">
+              <div className="space-y-2">
+                {filteredLogs.map(log => (
+                  <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg bg-muted/30 border border-border/50">
+                    <div className="mt-1">
+                      {log.is_read ? <Eye className="h-4 w-4 text-emerald-500" /> : <Bell className="h-4 w-4 text-amber-500" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-semibold text-foreground">{log.title}</p>
+                        <Badge variant={log.is_read ? 'secondary' : 'default'} className="text-[10px]">
+                          {log.is_read ? 'مقروء' : 'غير مقروء'}
+                        </Badge>
+                        <Badge variant="outline" className="text-[10px]">{translateType(log.type)}</Badge>
                       </div>
-                    ))}
-                    {notificationLogs.length === 0 && (
-                      <div className="text-center py-12 text-muted-foreground">
-                        <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
-                        <p>لا توجد إشعارات مسجلة</p>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{log.message}</p>
+                      <div className="flex items-center gap-2 mt-1 text-[10px] text-muted-foreground">
+                        <span>👤 {log.full_name}</span>
+                        <span>•</span>
+                        <Clock className="h-3 w-3" />
+                        <span>{formatDistanceToNow(new Date(log.created_at), { locale: ar, addSuffix: true })}</span>
                       </div>
-                    )}
+                    </div>
                   </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
+                ))}
+                {filteredLogs.length === 0 && (
+                  <div className="text-center py-12 text-muted-foreground">
+                    <Bell className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                    <p>لا توجد إشعارات مطابقة</p>
+                  </div>
+                )}
+              </div>
+            </ScrollArea>
           </TabsContent>
         </Tabs>
+
+        {/* Template Save Dialog */}
+        <Dialog open={showTemplateDialog} onOpenChange={setShowTemplateDialog}>
+          <DialogContent dir="rtl">
+            <DialogHeader>
+              <DialogTitle>{editingTemplate ? 'تعديل القالب' : 'حفظ كقالب'}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">اسم القالب</label>
+                <Input value={templateName} onChange={e => setTemplateName(e.target.value)} placeholder="مثال: إشعار ترحيب، تحديث شحنة..." />
+              </div>
+              <div className="bg-muted/30 rounded-lg p-3 text-sm">
+                <p className="font-semibold">{campTitle || '(بدون عنوان)'}</p>
+                <p className="text-xs text-muted-foreground mt-1">{campBody || '(بدون نص)'}</p>
+                <div className="flex gap-1 mt-2">
+                  <Badge variant="outline" className="text-[10px]">{NOTIF_TYPES.find(t => t.value === campType)?.label}</Badge>
+                  <Badge variant="secondary" className="text-[10px]">{PRIORITIES.find(p => p.value === campPriority)?.label}</Badge>
+                </div>
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setShowTemplateDialog(false)}>إلغاء</Button>
+              <Button onClick={saveTemplate} disabled={!templateName}>
+                <Save className="h-4 w-4 ml-1" /> {editingTemplate ? 'تحديث' : 'حفظ'}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
+        {/* Campaign Detail Dialog */}
+        <Dialog open={!!selectedCampaign} onOpenChange={() => setSelectedCampaign(null)}>
+          <DialogContent dir="rtl" className="max-w-lg">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <Megaphone className="h-5 w-5 text-primary" />
+                تفاصيل الحملة
+              </DialogTitle>
+            </DialogHeader>
+            {selectedCampaign && (
+              <div className="space-y-4">
+                <div className="bg-muted/30 rounded-lg p-3">
+                  <p className="font-bold text-sm">{selectedCampaign.title}</p>
+                  <p className="text-xs text-muted-foreground mt-1">{selectedCampaign.body}</p>
+                  <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                    <span>👤 {selectedCampaign.sender_name}</span>
+                    <span>•</span>
+                    <span>{format(new Date(selectedCampaign.created_at), 'dd/MM/yyyy HH:mm', { locale: ar })}</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div className="bg-emerald-500/10 rounded-lg p-2 text-center">
+                    <p className="text-lg font-bold text-emerald-600">{selectedCampaign.total_sent}</p>
+                    <p className="text-[10px] text-muted-foreground">نجح</p>
+                  </div>
+                  <div className="bg-destructive/10 rounded-lg p-2 text-center">
+                    <p className="text-lg font-bold text-destructive">{selectedCampaign.total_failed}</p>
+                    <p className="text-[10px] text-muted-foreground">فشل</p>
+                  </div>
+                  <div className="bg-primary/10 rounded-lg p-2 text-center">
+                    <p className="text-lg font-bold text-primary">{selectedCampaign.total_sent + selectedCampaign.total_failed}</p>
+                    <p className="text-[10px] text-muted-foreground">الإجمالي</p>
+                  </div>
+                </div>
+
+                {campaignRecipients.length > 0 && (
+                  <div>
+                    <p className="text-sm font-semibold mb-2">المستلمين ({campaignRecipients.length})</p>
+                    <ScrollArea className="h-[200px]">
+                      <div className="space-y-1">
+                        {campaignRecipients.map(r => (
+                          <div key={r.id} className="flex items-center gap-2 p-2 rounded bg-muted/30 text-xs">
+                            {r.status === 'sent' ? <CheckCircle className="h-3.5 w-3.5 text-emerald-500 shrink-0" /> :
+                              r.status === 'failed' ? <XCircle className="h-3.5 w-3.5 text-destructive shrink-0" /> :
+                                <Clock className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
+                            <span className="flex-1">{r.full_name}</span>
+                            <Badge variant={r.status === 'sent' ? 'secondary' : r.status === 'failed' ? 'destructive' : 'outline'} className="text-[9px]">
+                              {r.status === 'sent' ? 'وصل' : r.status === 'failed' ? 'فشل' : 'معلق'}
+                            </Badge>
+                            {r.error_message && <span className="text-destructive text-[9px] truncate max-w-[100px]">{r.error_message}</span>}
+                          </div>
+                        ))}
+                      </div>
+                    </ScrollArea>
+                  </div>
+                )}
+
+                {selectedCampaign.total_failed > 0 && (
+                  <Button className="w-full" variant="outline" onClick={() => retryFailed(selectedCampaign.id)} disabled={retrying}>
+                    {retrying ? <Loader2 className="h-4 w-4 animate-spin ml-1" /> : <RotateCcw className="h-4 w-4 ml-1" />}
+                    إعادة إرسال الفاشلة ({selectedCampaign.total_failed})
+                  </Button>
+                )}
+              </div>
+            )}
+          </DialogContent>
+        </Dialog>
       </div>
     </DashboardLayout>
   );

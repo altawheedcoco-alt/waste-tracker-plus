@@ -32012,16 +32012,57 @@ export type Database = {
         }
         Relationships: []
       }
+      push_campaign_recipients: {
+        Row: {
+          campaign_id: string | null
+          created_at: string | null
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string | null
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "push_campaign_recipients_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "push_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       push_campaigns: {
         Row: {
           body: string
           created_at: string | null
           id: string
           priority: string | null
+          scheduled_at: string | null
           sender_id: string
+          status: string | null
           target_ids: string[] | null
           target_org_type: string | null
           target_type: string | null
+          template_id: string | null
           title: string
           total_failed: number | null
           total_sent: number | null
@@ -32033,10 +32074,13 @@ export type Database = {
           created_at?: string | null
           id?: string
           priority?: string | null
+          scheduled_at?: string | null
           sender_id: string
+          status?: string | null
           target_ids?: string[] | null
           target_org_type?: string | null
           target_type?: string | null
+          template_id?: string | null
           title: string
           total_failed?: number | null
           total_sent?: number | null
@@ -32048,17 +32092,28 @@ export type Database = {
           created_at?: string | null
           id?: string
           priority?: string | null
+          scheduled_at?: string | null
           sender_id?: string
+          status?: string | null
           target_ids?: string[] | null
           target_org_type?: string | null
           target_type?: string | null
+          template_id?: string | null
           title?: string
           total_failed?: number | null
           total_sent?: number | null
           type?: string | null
           url?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "push_campaigns_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "push_templates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       push_subscriptions: {
         Row: {
@@ -32084,6 +32139,48 @@ export type Database = {
           id?: string
           p256dh?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      push_templates: {
+        Row: {
+          body: string
+          created_at: string | null
+          created_by: string | null
+          icon: string | null
+          id: string
+          is_default: boolean | null
+          name: string
+          priority: string | null
+          title: string
+          type: string | null
+          url: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean | null
+          name: string
+          priority?: string | null
+          title: string
+          type?: string | null
+          url?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          created_by?: string | null
+          icon?: string | null
+          id?: string
+          is_default?: boolean | null
+          name?: string
+          priority?: string | null
+          title?: string
+          type?: string | null
+          url?: string | null
         }
         Relationships: []
       }
