@@ -107,6 +107,7 @@ import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
+import SidebarSectionHeader from './SidebarSectionHeader';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
 import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
@@ -135,7 +136,7 @@ import QuickActionsCustomizer from '@/components/dashboard/QuickActionsCustomize
 import SidebarCustomizer from '@/components/dashboard/SidebarCustomizer';
 import { useQuickActionPreferences } from '@/hooks/useQuickActionPreferences';
 import OnboardingGuard from '@/components/dashboard/OnboardingGuard';
-import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg } from '@/config/sidebarConfig';
+import { SidebarGroupConfig, SidebarItemConfig, standaloneItems, isAdminSovereignView, getAdminViewingOrg, SIDEBAR_SECTIONS } from '@/config/sidebarConfig';
 import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 
@@ -371,29 +372,31 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
       badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
     }));
 
-    // Track where admin-only groups start (for visual separator when viewing as org)
-    const ADMIN_GROUP_IDS = new Set([
-      'admin-command-center', 'admin-entity-management', 'admin-users-fleet',
-      'admin-finance', 'admin-content', 'admin-infrastructure',
-    ]);
-    let adminSectionStarted = false;
+    // Build a set of visible group IDs for section rendering
+    const visibleGroupIds = new Set(sidebarConfigGroups.map(g => g.id));
 
-    // Add each group
+    // Track which sections have been rendered
+    const renderedSections = new Set<string>();
+
+    // For each group, check if its section header should be inserted first
     for (const group of sidebarConfigGroups) {
+      // Find the section this group belongs to
+      const section = SIDEBAR_SECTIONS.find(s => s.groupIds.includes(group.id));
+      
+      // Insert section header if not yet rendered and section has visible groups
+      if (section && !renderedSections.has(section.id)) {
+        renderedSections.add(section.id);
+        items.push({
+          icon: section.icon,
+          label: language === 'ar' ? section.labelAr : section.labelEn,
+          path: `#section-${section.id}`,
+          key: `__section__${section.id}`,
+        });
+      }
+
       const groupBadge = group.items.reduce((sum, item) => {
         return sum + (item.badgeKey ? (sectionBadges[item.badgeKey] || 0) : 0);
       }, 0);
-
-      // Insert separator before admin groups when viewing as org
-      if (adminViewingOrg && ADMIN_GROUP_IDS.has(group.id) && !adminSectionStarted) {
-        adminSectionStarted = true;
-        items.push({
-          icon: Shield,
-          label: language === 'ar' ? '─── أدوات المدير ───' : '─── Admin Tools ───',
-          path: '#admin-separator',
-          key: '__admin-separator__',
-        });
-      }
 
       items.push({
         icon: group.icon,
@@ -413,7 +416,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     }
 
     return items;
-  }, [sidebarConfigGroups, language, sectionBadges, adminViewingOrg]);
+  }, [sidebarConfigGroups, language, sectionBadges]);
 
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : configBasedMenuItems;
@@ -614,17 +617,15 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
             {filteredMenuItems.length > 0 ? (
               filteredMenuItems.map((item: SidebarMenuItem) => {
-                // Render admin separator
-                if (item.key === '__admin-separator__') {
+                // Render section header
+                if (item.key.startsWith('__section__')) {
                   return (
-                    <div key={item.key} className="flex items-center gap-2 pt-4 pb-2 px-2">
-                      <div className="flex-1 h-px bg-primary/20" />
-                      <span className="text-[10px] font-bold text-primary/60 uppercase tracking-wider whitespace-nowrap flex items-center gap-1">
-                        <Shield className="w-3 h-3" />
-                        {language === 'ar' ? 'أدوات المدير' : 'Admin Tools'}
-                      </span>
-                      <div className="flex-1 h-px bg-primary/20" />
-                    </div>
+                    <SidebarSectionHeader
+                      key={item.key}
+                      label={item.label}
+                      icon={item.icon}
+                      isCollapsed={false}
+                    />
                   );
                 }
                 return (
