@@ -41,8 +41,7 @@ const TransporterSmartKPIs = () => {
         supabase.from('shipments').select('id, status, created_at, delivered_at, expected_delivery_date, in_transit_at')
           .eq('transporter_id', organization.id).gte('created_at', monthAgo.toISOString()),
         supabase.from('fleet_vehicles').select('id, status').eq('organization_id', organization.id),
-        supabase.from('partner_ratings').select('rating').eq('rated_organization_id', organization.id).gte('created_at', monthAgo.toISOString()),
-      ]);
+        supabase.from('partner_ratings').select('overall_rating').eq('rated_organization_id', organization.id).gte('created_at', monthAgo.toISOString()),
 
       const shipments = shipmentsRes.data || [];
       const fleet = fleetRes.data || [];
