@@ -399,7 +399,7 @@ const EnhancedChatInput = ({
   ];
 
   return (
-    <div className={cn("border-t border-border bg-background", isMobile ? "p-2" : "p-3")}>
+    <div className={cn("border-t border-border/30 bg-wa-chat-bg", isMobile ? "p-1.5" : "p-2")}>
       {/* Hidden File Inputs */}
       <input ref={fileInputRef} type="file" accept=".pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar,.csv,.pptx,.ppt" multiple onChange={(e) => handleFileSelect(e, 'file')} className="hidden" />
       <input ref={imageInputRef} type="file" accept="image/*" multiple onChange={(e) => handleFileSelect(e, 'image')} className="hidden" />
@@ -493,8 +493,8 @@ const EnhancedChatInput = ({
       <div className="flex items-end gap-1.5">
         {/* Main Input Row */}
         <div className={cn(
-          "flex-1 flex items-end gap-1 rounded-3xl bg-muted/50 border border-border/50",
-          isMobile ? "px-1 py-0.5" : "px-2 py-1"
+          "flex-1 flex items-end gap-1 rounded-[25px] bg-background border border-border/30 shadow-sm",
+          isMobile ? "px-1 py-0.5" : "px-2 py-0.5"
         )}>
           {/* Emoji */}
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
@@ -677,7 +677,7 @@ const EnhancedChatInput = ({
         {hasContent ? (
           <Button
             size="icon"
-            className={cn("shrink-0 rounded-full bg-wa-header hover:bg-wa-header-dark text-white", isMobile ? "h-10 w-10" : "h-11 w-11")}
+            className={cn("shrink-0 rounded-full bg-wa-light-green hover:bg-wa-teal-green text-white shadow-sm", isMobile ? "h-11 w-11" : "h-11 w-11")}
             onClick={handleSend}
             disabled={sending || disabled}
           >
@@ -688,9 +688,9 @@ const EnhancedChatInput = ({
             size="icon"
             variant={isRecording ? "destructive" : "default"}
             className={cn(
-              "shrink-0 rounded-full transition-all",
-              isMobile ? "h-10 w-10" : "h-11 w-11",
-              !isRecording && "bg-wa-header hover:bg-wa-header-dark text-white",
+              "shrink-0 rounded-full transition-all shadow-sm",
+              isMobile ? "h-11 w-11" : "h-11 w-11",
+              !isRecording && "bg-wa-light-green hover:bg-wa-teal-green text-white",
               isRecording && "animate-pulse"
             )}
             onClick={isRecording ? stopRecording : startRecording}

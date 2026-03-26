@@ -199,15 +199,15 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
 
   return (
     <div className="h-full flex flex-col bg-background">
-      {/* Search */}
-      <div className="px-3 py-2.5 bg-muted/30">
+      {/* Search — WhatsApp style */}
+      <div className="px-2 py-2 bg-background border-b border-border/30">
         <div className="relative">
           <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input
             placeholder="ابحث أو ابدأ محادثة جديدة"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pr-9 h-9 bg-background border-0 shadow-sm rounded-lg text-sm"
+            className="pr-9 h-[35px] bg-muted/40 border-0 shadow-none rounded-lg text-[13px]"
           />
           {searchQuery && (
             <Button 

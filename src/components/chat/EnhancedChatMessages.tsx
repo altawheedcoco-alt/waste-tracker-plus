@@ -289,7 +289,7 @@ const EnhancedChatMessages = ({
         onScroll={handleScroll}
         style={{ 
           scrollbarWidth: 'thin',
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '2a3a35' : 'c8d6cf'}' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='412' height='412' viewBox='0 0 412 412' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3Cpattern id='p' width='100' height='100' patternUnits='userSpaceOnUse' patternTransform='rotate(45)'%3E%3Ccircle cx='10' cy='10' r='1.5' fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' fill-opacity='0.35'/%3E%3Ccircle cx='50' cy='30' r='1' fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' fill-opacity='0.25'/%3E%3Cpath d='M30 60 Q35 55 40 60 Q35 65 30 60z' fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' fill-opacity='0.2'/%3E%3Cpath d='M70 80 l5-8 5 8z' fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' fill-opacity='0.2'/%3E%3Cpath d='M80 20 Q85 15 90 20' stroke='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' stroke-opacity='0.2' fill='none' stroke-width='1.5'/%3E%3Crect x='15' y='85' width='6' height='6' rx='1' fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '1a2e28' : 'c8d6cf'}' fill-opacity='0.15'/%3E%3C/pattern%3E%3C/defs%3E%3Crect width='412' height='412' fill='url(%23p)'/%3E%3C/svg%3E")`,
         }}
       >
         <div className={cn("space-y-0.5", isMobile ? "p-3" : "p-4")}>
@@ -380,15 +380,26 @@ const EnhancedChatMessages = ({
 
                           {/* Message Bubble + Reactions */}
                           <div className="relative">
+                            {/* WhatsApp Bubble Tail */}
+                            {showAvatar || (isOwn && (index === 0 || group.messages[index - 1]?.sender_id !== message.sender_id)) ? (
+                              <div className={cn(
+                                "absolute top-0 w-3 h-3",
+                                isOwn ? "-left-1.5" : "-right-1.5"
+                              )}>
+                                <svg viewBox="0 0 8 13" width="8" height="13" className={isOwn ? "scale-x-[-1]" : ""}>
+                                  <path d="M1.533 3.568 8 12.193V1H2.812C1.042 1 .474 2.156 1.533 3.568z" fill={isOwn ? 'hsl(var(--wa-outgoing))' : 'hsl(var(--wa-incoming))'} />
+                                </svg>
+                              </div>
+                            ) : null}
                             <div
                               className={cn(
                                 "rounded-lg overflow-hidden relative",
                                 isDeleted
                                   ? "bg-muted/50 border border-border/30 italic"
                                   : isOwn
-                                    ? "bg-wa-outgoing text-wa-outgoing-foreground rounded-tr-none"
-                                    : "bg-wa-incoming text-wa-incoming-foreground border border-border/20 rounded-tl-none shadow-sm",
-                                message.message_type === 'image' ? "p-1" : "px-3 py-1.5"
+                                    ? "bg-wa-outgoing text-wa-outgoing-foreground"
+                                    : "bg-wa-incoming text-wa-incoming-foreground shadow-[0_1px_0.5px_rgba(0,0,0,0.08)]",
+                                message.message_type === 'image' ? "p-1" : "px-2.5 py-1.5"
                               )}
                             >
                               {/* Quoted Reply */}
