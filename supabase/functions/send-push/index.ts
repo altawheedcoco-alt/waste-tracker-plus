@@ -11,6 +11,113 @@ const corsHeaders = {
  * Uses VAPID (Voluntary Application Server Identification) with ECDSA P-256.
  */
 
+// ===== FCM (Firebase Cloud Messaging) v1 API Helper =====
+interface FCMPayload {
+  title: string;
+  body: string;
+  data?: Record<string, string>;
+}
+
+let _fcmAccessToken: string | null = null;
+let _fcmTokenExpiry = 0;
+
+async function getFCMAccessToken(): Promise<string | null> {
+  if (_fcmAccessToken && Date.now() < _fcmTokenExpiry) return _fcmAccessToken;
+
+  const serviceAccountRaw = Deno.env.get("FIREBASE_SERVICE_ACCOUNT");
+  if (!serviceAccountRaw) return null;
+
+  try {
+    const sa = JSON.parse(serviceAccountRaw);
+    const now = Math.floor(Date.now() / 1000);
+    const exp = now + 3600;
+
+    // Create JWT for Google OAuth2
+    const header = btoa(JSON.stringify({ alg: "RS256", typ: "JWT" })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const claimSet = btoa(JSON.stringify({
+      iss: sa.client_email,
+      scope: "https://www.googleapis.com/auth/firebase.messaging",
+      aud: "https://oauth2.googleapis.com/token",
+      iat: now,
+      exp,
+    })).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+
+    const unsignedToken = `${header}.${claimSet}`;
+
+    // Import RSA private key
+    const pemBody = sa.private_key.replace(/-----BEGIN PRIVATE KEY-----/g, "").replace(/-----END PRIVATE KEY-----/g, "").replace(/\s/g, "");
+    const keyData = Uint8Array.from(atob(pemBody), c => c.charCodeAt(0));
+    const privateKey = await crypto.subtle.importKey("pkcs8", keyData, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["sign"]);
+
+    const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", privateKey, new TextEncoder().encode(unsignedToken));
+    const sig = btoa(String.fromCharCode(...new Uint8Array(signature))).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+    const jwt = `${unsignedToken}.${sig}`;
+
+    // Exchange JWT for access token
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: `grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=${jwt}`,
+    });
+
+    if (!tokenRes.ok) {
+      console.error("[FCM] Token exchange failed:", await tokenRes.text());
+      return null;
+    }
+
+    const tokenData = await tokenRes.json();
+    _fcmAccessToken = tokenData.access_token;
+    _fcmTokenExpiry = Date.now() + (tokenData.expires_in - 60) * 1000;
+    return _fcmAccessToken;
+  } catch (err) {
+    console.error("[FCM] Auth error:", err);
+    return null;
+  }
+}
+
+async function sendFCMNotification(fcmToken: string, payload: FCMPayload): Promise<{ success: boolean; error?: string }> {
+  const accessToken = await getFCMAccessToken();
+  if (!accessToken) return { success: false, error: "fcm_auth_failed" };
+
+  try {
+    const res = await fetch("https://fcm.googleapis.com/v1/projects/irecycle-waste-management/messages:send", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: {
+          token: fcmToken,
+          notification: { title: payload.title, body: payload.body },
+          data: payload.data || {},
+          webpush: {
+            notification: { icon: "/favicon.png", badge: "/favicon.png", dir: "rtl", lang: "ar" },
+          },
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      const isExpired = errText.includes("NOT_FOUND") || errText.includes("UNREGISTERED");
+      return { success: false, error: isExpired ? "subscription_expired" : `fcm_${res.status}` };
+    }
+
+    return { success: true };
+  } catch (err) {
+    return { success: false, error: (err as Error).message };
+  }
+}
+
+function isFCMSubscription(sub: any): boolean {
+  return sub.endpoint?.startsWith("fcm_token://") || sub.auth_key === "fcm";
+}
+
+function getFCMToken(sub: any): string {
+  return sub.p256dh; // FCM token stored in p256dh field
+}
+
 function base64UrlDecode(s: string): Uint8Array {
   const padded = s.replace(/-/g, "+").replace(/_/g, "/");
   const bin = atob(padded);
@@ -297,10 +404,16 @@ Deno.serve(async (req) => {
 
       await Promise.allSettled(
         subscriptions.map(async (sub: any) => {
-          const result = await sendPushNotification(
-            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-            payload, vapidPublicKey, vapidPrivateKey
-          );
+          let result: { success: boolean; error?: string };
+          if (isFCMSubscription(sub)) {
+            const parsedPayload = JSON.parse(payload);
+            result = await sendFCMNotification(getFCMToken(sub), { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          } else {
+            result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              payload, vapidPublicKey, vapidPrivateKey
+            );
+          }
           if (result.success) {
             sent++;
             userResults[sub.user_id] = { status: 'sent' };
@@ -604,6 +717,7 @@ Deno.serve(async (req) => {
         const batch = allSubs.slice(i, i + 20);
         await Promise.allSettled(
           batch.map(async (sub: any) => {
+            if (isFCMSubscription(sub)) return; // Skip FCM tokens in VAPID cleanup
             const result = await sendPushNotification(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
               testPayload, vapidPublicKey, vapidPrivateKey
@@ -746,13 +860,24 @@ Deno.serve(async (req) => {
 
     await Promise.allSettled(
       subscriptions.map(async (sub: any) => {
-        const result = await sendPushNotification(
-          { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-          payload, vapidPublicKey, vapidPrivateKey
-        );
-        if (result.success) { sent++; }
-        else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
-        else { errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result }); }
+        if (isFCMSubscription(sub)) {
+          // Send via FCM
+          const fcmToken = getFCMToken(sub);
+          const parsedPayload = JSON.parse(payload);
+          const result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          if (result.success) { sent++; }
+          else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
+          else { errors.push({ endpoint: "fcm", error: result.error }); }
+        } else {
+          // Send via VAPID Web Push
+          const result = await sendPushNotification(
+            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+            payload, vapidPublicKey, vapidPrivateKey
+          );
+          if (result.success) { sent++; }
+          else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
+          else { errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result }); }
+        }
       })
     );
 
