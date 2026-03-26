@@ -31988,6 +31988,78 @@ export type Database = {
           },
         ]
       }
+      push_blacklist: {
+        Row: {
+          blocked_by: string | null
+          created_at: string | null
+          id: string
+          reason: string | null
+          user_id: string
+        }
+        Insert: {
+          blocked_by?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id: string
+        }
+        Update: {
+          blocked_by?: string | null
+          created_at?: string | null
+          id?: string
+          reason?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      push_campaigns: {
+        Row: {
+          body: string
+          created_at: string | null
+          id: string
+          priority: string | null
+          sender_id: string
+          target_ids: string[] | null
+          target_org_type: string | null
+          target_type: string | null
+          title: string
+          total_failed: number | null
+          total_sent: number | null
+          type: string | null
+          url: string | null
+        }
+        Insert: {
+          body: string
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          sender_id: string
+          target_ids?: string[] | null
+          target_org_type?: string | null
+          target_type?: string | null
+          title: string
+          total_failed?: number | null
+          total_sent?: number | null
+          type?: string | null
+          url?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string | null
+          id?: string
+          priority?: string | null
+          sender_id?: string
+          target_ids?: string[] | null
+          target_org_type?: string | null
+          target_type?: string | null
+          title?: string
+          total_failed?: number | null
+          total_sent?: number | null
+          type?: string | null
+          url?: string | null
+        }
+        Relationships: []
+      }
       push_subscriptions: {
         Row: {
           auth_key: string
