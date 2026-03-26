@@ -28,6 +28,7 @@ function lazyRetry<T extends React.ComponentType<any>>(
 
 // Critical above-fold: load eagerly
 import Header from "@/components/Header";
+import EnableNotificationsButton from "@/components/EnableNotificationsButton";
 
 import Hero from "@/components/Hero";
 
