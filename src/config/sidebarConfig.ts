@@ -19,6 +19,7 @@ import {
   Image, Clock, ChevronRight, Blocks, ListOrdered, Fuel,
 } from 'lucide-react';
 import { LucideIcon } from 'lucide-react';
+import type { SidebarSectionConfig } from '@/config/sidebar/sidebarTypes';
 
 export interface SidebarGroupConfig {
   id: string;
