@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Loader2, Inbox, Filter } from 'lucide-react';
+import { Bell, CheckCheck, Loader2, Inbox, Filter, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
@@ -20,7 +21,7 @@ const MyNotificationsTab = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
-
+  const [showPrefs, setShowPrefs] = useState(false);
   const { data: notifications = [], isLoading } = useQuery({
     queryKey: ['my-workspace-notifications', user?.id],
     queryFn: async () => {
@@ -116,8 +117,28 @@ const MyNotificationsTab = () => {
               تعليم الكل
             </Button>
           )}
+          <Button
+            size="sm"
+            variant={showPrefs ? "default" : "outline"}
+            className="gap-1 text-xs h-8"
+            onClick={() => setShowPrefs(!showPrefs)}
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            القنوات
+          </Button>
         </div>
       </div>
+
+      {/* Channel Preferences Panel */}
+      {showPrefs && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+        >
+          <NotificationChannelPreferences />
+        </motion.div>
+      )}
 
       {/* Notifications grouped by date */}
       {filtered.length === 0 ? (

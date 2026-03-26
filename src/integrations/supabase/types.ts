@@ -25224,6 +25224,60 @@ export type Database = {
           },
         ]
       }
+      notification_channel_preferences: {
+        Row: {
+          created_at: string | null
+          email_enabled: boolean | null
+          id: string
+          in_app_enabled: boolean | null
+          notification_email: string | null
+          push_enabled: boolean | null
+          quiet_hours_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          sms_enabled: boolean | null
+          sms_phone: string | null
+          updated_at: string | null
+          user_id: string
+          whatsapp_enabled: boolean | null
+          whatsapp_phone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          notification_email?: string | null
+          push_enabled?: boolean | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_enabled?: boolean | null
+          sms_phone?: string | null
+          updated_at?: string | null
+          user_id: string
+          whatsapp_enabled?: boolean | null
+          whatsapp_phone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email_enabled?: boolean | null
+          id?: string
+          in_app_enabled?: boolean | null
+          notification_email?: string | null
+          push_enabled?: boolean | null
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          sms_enabled?: boolean | null
+          sms_phone?: string | null
+          updated_at?: string | null
+          user_id?: string
+          whatsapp_enabled?: boolean | null
+          whatsapp_phone?: string | null
+        }
+        Relationships: []
+      }
       notification_channels: {
         Row: {
           channel_type: string
@@ -25357,6 +25411,39 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      notification_dispatch_log: {
+        Row: {
+          channel: string
+          delivered_at: string | null
+          dispatched_at: string | null
+          error_message: string | null
+          id: string
+          notification_id: string
+          status: string | null
+          user_id: string
+        }
+        Insert: {
+          channel: string
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          error_message?: string | null
+          id?: string
+          notification_id: string
+          status?: string | null
+          user_id: string
+        }
+        Update: {
+          channel?: string
+          delivered_at?: string | null
+          dispatched_at?: string | null
+          error_message?: string | null
+          id?: string
+          notification_id?: string
+          status?: string | null
+          user_id?: string
+        }
+        Relationships: []
       }
       notifications: {
         Row: {
