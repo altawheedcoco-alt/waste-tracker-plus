@@ -41,7 +41,7 @@ export default function PushPermissionBanner() {
 
   const handleDismiss = () => {
     setVisible(false);
-    localStorage.setItem(DISMISSED_KEY, '1');
+    sessionStorage.setItem(DISMISSED_KEY, '1');
   };
 
   return (
