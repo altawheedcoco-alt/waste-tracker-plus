@@ -1380,6 +1380,8 @@ export function getSectionForGroup(groupId: string): SidebarSectionConfig | unde
   return SIDEBAR_SECTIONS.find(s => s.groupIds.includes(groupId));
 }
 
+/**
+ * Sort groups by CATEGORY_ORDER
  */
 function sortByCategory(groups: SidebarGroupConfig[]): SidebarGroupConfig[] {
   const orderMap = new Map(CATEGORY_ORDER.map((id, idx) => [id, idx]));
