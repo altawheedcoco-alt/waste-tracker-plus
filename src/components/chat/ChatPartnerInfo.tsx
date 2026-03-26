@@ -110,7 +110,7 @@ const ChatPartnerInfo = ({
             variant="outline"
             size="sm"
             className="text-xs gap-1.5"
-            onClick={() => navigate(`/dashboard/org-profile/${partner.id}`)}
+            onClick={() => navigate('/dashboard/organization-profile')}
           >
             <ExternalLink className="w-3.5 h-3.5" />
             عرض الملف الكامل
