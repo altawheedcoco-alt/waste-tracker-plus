@@ -38,7 +38,7 @@ const TripCostAnalytics = () => {
       const totalTripCost = trips.reduce((a, t) => a + (t.total_cost || 0), 0);
       const totalDistance = trips.reduce((a, t) => a + (t.distance_km || 0), 0);
       const costPerKm = totalDistance > 0 ? totalTripCost / totalDistance : 0;
-      const totalLiters = fuel.reduce((a, f) => a + (f.quantity_liters || 0), 0);
+      const totalLiters = fuel.reduce((a, f) => a + (f.liters || 0), 0);
       const avgConsumption = totalDistance > 0 ? (totalLiters / totalDistance) * 100 : 0;
 
       // Cost breakdown by category

@@ -35,7 +35,7 @@ const CapacityPlanningDashboard = () => {
       const shipments = shipmentsRes.data || [];
 
       const activeVehicles = fleet.filter(v => v.status === 'active' || v.status === 'in_use').length;
-      const activeDrivers = drivers.filter(d => d.status === 'active').length;
+      const activeDrivers = drivers.filter(d => d.is_available === true).length;
       const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length;
 
       const vehicleUtil = fleet.length > 0 ? Math.round((activeVehicles / fleet.length) * 100) : 0;

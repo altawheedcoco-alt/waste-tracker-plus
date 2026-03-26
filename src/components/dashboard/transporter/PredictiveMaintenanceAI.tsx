@@ -76,7 +76,7 @@ const PredictiveMaintenanceAI = () => {
           type: v.vehicle_type || 'شاحنة',
           healthScore,
           nextMaintenanceIn: Math.max(0, daysToNext),
-          lastMaintenance: lastLog?.performed_at || v.last_maintenance_date || null,
+          lastMaintenance: lastLog?.performed_at || null,
           riskLevel,
           predictions,
         };

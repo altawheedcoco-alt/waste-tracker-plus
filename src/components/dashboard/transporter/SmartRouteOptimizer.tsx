@@ -27,7 +27,7 @@ const SmartRouteOptimizer = () => {
         .from('drivers')
         .select('id, profile:profiles(full_name), vehicle_type, vehicle_plate')
         .eq('organization_id', organization.id)
-        .eq('status', 'active');
+        .eq('is_available', true);
       setDrivers(data || []);
     };
     fetchDrivers();
