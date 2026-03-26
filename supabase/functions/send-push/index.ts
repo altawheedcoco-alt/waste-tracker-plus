@@ -196,7 +196,7 @@ Deno.serve(async (req) => {
 
     // ===== Campaign Action =====
     if (action === "campaign") {
-      const { sender_id, title, body: msgBody, type, priority, target_type, target_ids, target_org_type, url } = body;
+      const { sender_id, title, body: msgBody, type, priority, target_type, target_ids, target_org_type, url, scheduled_at, template_id } = body;
 
       if (!title || !msgBody) {
         return new Response(
@@ -229,7 +229,6 @@ Deno.serve(async (req) => {
           .eq("status", "active");
         targetUserIds = [...new Set((members || []).map((m: any) => m.user_id))];
       } else {
-        // all subscribers
         const { data: allSubs } = await supabase.from("push_subscriptions").select("user_id");
         targetUserIds = [...new Set((allSubs || []).map((s: any) => s.user_id))];
       }
@@ -240,6 +239,37 @@ Deno.serve(async (req) => {
       if (!targetUserIds.length) {
         return new Response(
           JSON.stringify({ sent: 0, message: "No eligible recipients" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Create campaign record first
+      const campaignStatus = scheduled_at ? 'scheduled' : 'sent';
+      const { data: campaignRecord, error: campError } = await supabase.from("push_campaigns").insert({
+        sender_id: sender_id || null,
+        title, body: msgBody, type, priority,
+        target_type, target_ids, target_org_type,
+        total_sent: 0, total_failed: 0, url,
+        status: campaignStatus,
+        scheduled_at: scheduled_at || null,
+        template_id: template_id || null,
+      } as any).select('id').single();
+
+      const campaignId = campaignRecord?.id;
+
+      // If scheduled, don't send now
+      if (scheduled_at) {
+        // Insert recipient records as pending
+        const recipientRows = targetUserIds.map(uid => ({
+          campaign_id: campaignId,
+          user_id: uid,
+          status: 'pending',
+        }));
+        for (let i = 0; i < recipientRows.length; i += 100) {
+          await supabase.from("push_campaign_recipients").insert(recipientRows.slice(i, i + 100) as any);
+        }
+        return new Response(
+          JSON.stringify({ scheduled: true, campaign_id: campaignId, recipients: targetUserIds.length }),
           { headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -262,15 +292,30 @@ Deno.serve(async (req) => {
       let sent = 0;
       let failed = 0;
 
+      // Track per-user results
+      const userResults: Record<string, { status: string; error?: string }> = {};
+
       await Promise.allSettled(
         subscriptions.map(async (sub: any) => {
           const result = await sendPushNotification(
             { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
             payload, vapidPublicKey, vapidPrivateKey
           );
-          if (result.success) { sent++; }
-          else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); failed++; }
-          else { failed++; }
+          if (result.success) {
+            sent++;
+            userResults[sub.user_id] = { status: 'sent' };
+          } else if (result.error === "subscription_expired") {
+            expiredEndpoints.push(sub.endpoint);
+            failed++;
+            if (!userResults[sub.user_id] || userResults[sub.user_id].status !== 'sent') {
+              userResults[sub.user_id] = { status: 'failed', error: 'subscription_expired' };
+            }
+          } else {
+            failed++;
+            if (!userResults[sub.user_id] || userResults[sub.user_id].status !== 'sent') {
+              userResults[sub.user_id] = { status: 'failed', error: result.error };
+            }
+          }
         })
       );
 
@@ -279,29 +324,150 @@ Deno.serve(async (req) => {
         await supabase.from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
       }
 
+      // Save recipient tracking
+      if (campaignId) {
+        const recipientRows = targetUserIds.map(uid => ({
+          campaign_id: campaignId,
+          user_id: uid,
+          status: userResults[uid]?.status || 'failed',
+          error_message: userResults[uid]?.error || null,
+          delivered_at: userResults[uid]?.status === 'sent' ? new Date().toISOString() : null,
+        }));
+        for (let i = 0; i < recipientRows.length; i += 100) {
+          await supabase.from("push_campaign_recipients").insert(recipientRows.slice(i, i + 100) as any);
+        }
+        // Update campaign totals
+        await supabase.from("push_campaigns").update({
+          total_sent: sent, total_failed: failed, status: 'sent',
+        } as any).eq("id", campaignId);
+      }
+
       // Also create in-app notifications for each user
       const notifRows = targetUserIds.map(uid => ({
-        user_id: uid,
-        title,
-        message: msgBody,
-        type: type || "general",
-        is_read: false,
+        user_id: uid, title, message: msgBody, type: type || "general", is_read: false,
       }));
-      // Insert in batches of 100
       for (let i = 0; i < notifRows.length; i += 100) {
         await supabase.from("notifications").insert(notifRows.slice(i, i + 100) as any);
       }
 
-      // Save campaign record
-      await supabase.from("push_campaigns").insert({
-        sender_id: sender_id || null,
-        title, body: msgBody, type, priority,
-        target_type, target_ids, target_org_type,
-        total_sent: sent, total_failed: failed, url,
-      } as any);
+      return new Response(
+        JSON.stringify({ sent, failed, total: subscriptions.length, expired: expiredEndpoints.length, campaign_id: campaignId }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ===== Retry Failed Action =====
+    if (action === "retry_failed") {
+      const { campaign_id } = body;
+      if (!campaign_id) {
+        return new Response(
+          JSON.stringify({ error: "campaign_id required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Get failed recipients
+      const { data: failedRecipients } = await supabase
+        .from("push_campaign_recipients")
+        .select("*")
+        .eq("campaign_id", campaign_id)
+        .eq("status", "failed");
+
+      if (!failedRecipients?.length) {
+        return new Response(
+          JSON.stringify({ sent: 0, message: "No failed recipients to retry" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Get campaign info
+      const { data: campaign } = await supabase
+        .from("push_campaigns")
+        .select("*")
+        .eq("id", campaign_id)
+        .single();
+
+      if (!campaign) {
+        return new Response(
+          JSON.stringify({ error: "Campaign not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const failedUserIds = failedRecipients.map((r: any) => r.user_id);
+      
+      // Check blacklist
+      const { data: bl } = await supabase.from("push_blacklist").select("user_id").in("user_id", failedUserIds);
+      const blSet = new Set((bl || []).map((b: any) => b.user_id));
+      const retryUserIds = failedUserIds.filter((id: string) => !blSet.has(id));
+
+      const { data: subscriptions } = await supabase
+        .from("push_subscriptions")
+        .select("*")
+        .in("user_id", retryUserIds);
+
+      if (!subscriptions?.length) {
+        return new Response(
+          JSON.stringify({ sent: 0, message: "No active subscriptions for failed users" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const payload = JSON.stringify({
+        title: campaign.title,
+        body: campaign.body,
+        data: { url: campaign.url, type: campaign.type, priority: campaign.priority },
+        tag: `retry-${campaign_id}`,
+      });
+
+      let sent = 0;
+      let failed = 0;
+      const expiredEndpoints: string[] = [];
+
+      await Promise.allSettled(
+        subscriptions.map(async (sub: any) => {
+          const result = await sendPushNotification(
+            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+            payload, vapidPublicKey, vapidPrivateKey
+          );
+          if (result.success) {
+            sent++;
+            await supabase.from("push_campaign_recipients")
+              .update({ status: 'sent', delivered_at: new Date().toISOString(), error_message: null } as any)
+              .eq("campaign_id", campaign_id)
+              .eq("user_id", sub.user_id);
+          } else if (result.error === "subscription_expired") {
+            expiredEndpoints.push(sub.endpoint);
+            failed++;
+          } else {
+            failed++;
+            await supabase.from("push_campaign_recipients")
+              .update({ error_message: result.error } as any)
+              .eq("campaign_id", campaign_id)
+              .eq("user_id", sub.user_id);
+          }
+        })
+      );
+
+      if (expiredEndpoints.length) {
+        await supabase.from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
+      }
+
+      // Update campaign totals
+      const { data: updatedRecipients } = await supabase
+        .from("push_campaign_recipients")
+        .select("status")
+        .eq("campaign_id", campaign_id);
+      
+      const totalSent = (updatedRecipients || []).filter((r: any) => r.status === 'sent').length;
+      const totalFailed = (updatedRecipients || []).filter((r: any) => r.status === 'failed').length;
+      
+      await supabase.from("push_campaigns").update({
+        total_sent: totalSent, total_failed: totalFailed,
+      } as any).eq("id", campaign_id);
 
       return new Response(
-        JSON.stringify({ sent, failed, total: subscriptions.length, expired: expiredEndpoints.length }),
+        JSON.stringify({ sent, failed, retried: failedRecipients.length }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
