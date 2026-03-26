@@ -98,7 +98,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
       const { error: saveError } = await supabase.from('entity_documents').insert({
         organization_id: organizationId,
         document_type: 'report',
-        document_category: 'analysis',
+        document_category: 'other',
         title: reportTitle,
         file_name: `${reportTitle}.json`,
         file_url: '',
