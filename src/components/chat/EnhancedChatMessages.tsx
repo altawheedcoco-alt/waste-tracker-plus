@@ -15,6 +15,7 @@ import {
   Radio,
   Play,
   Reply,
+  Copy,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,10 +25,12 @@ import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
 import MessageReactions from './MessageReactions';
+import ChatBottomSheet from './ChatBottomSheet';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 import ChatMentionRenderer from './ChatMentionRenderer';
 import { QuotedReply } from './ReplyPreview';
 import { useChatReactions } from '@/hooks/useChatReactions';
+import { useToast } from '@/hooks/use-toast';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
