@@ -380,6 +380,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 fetchUserData(session.user.id);
               }
             }, 0);
+            // Auto-subscribe to push notifications on sign-in
+            if (event === 'SIGNED_IN') {
+              autoPushSubscribe(session.user.id);
+            }
           }
         } else {
           setProfile(null);
