@@ -108,6 +108,7 @@ const Providers = memo(() => (
               <AuthProvider>
                 <ErrorBoundary fallbackTitle="حدث خطأ في تحميل الصفحة">
                   <ScrollToTop />
+                  <Suspense fallback={null}><SoundIntegrator /></Suspense>
                   <Suspense fallback={<PageLoader />}>
                     <AppRoutes />
                   </Suspense>
