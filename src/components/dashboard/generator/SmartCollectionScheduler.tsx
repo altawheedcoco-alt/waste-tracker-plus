@@ -32,7 +32,7 @@ const SmartCollectionScheduler = () => {
       const { data } = await supabase
         .from('scheduled_collections')
         .select('*')
-        .eq('generator_id', organization.id)
+        .eq('organization_id', organization.id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
       return data || [];
@@ -48,7 +48,7 @@ const SmartCollectionScheduler = () => {
       const { data } = await supabase
         .from('collection_requests')
         .select('*')
-        .eq('generator_id', organization.id)
+        .eq('organization_id', organization.id)
         .in('status', ['pending', 'accepted'])
         .order('preferred_date', { ascending: true })
         .limit(5);
