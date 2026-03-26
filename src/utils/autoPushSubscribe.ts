@@ -48,9 +48,17 @@ export async function autoPushSubscribe(userId: string): Promise<void> {
 
     if (!subscription) return;
 
+    // Wait for auth session to be ready
+    await new Promise(r => setTimeout(r, 500));
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      console.warn('[AutoPush] No session yet, skipping save');
+      return;
+    }
+
     // Save to DB (upsert)
     const subJson = subscription.toJSON();
-    await supabase.from('push_subscriptions').upsert(
+    const { error } = await supabase.from('push_subscriptions').upsert(
       {
         user_id: userId,
         endpoint: subscription.endpoint,
@@ -60,7 +68,11 @@ export async function autoPushSubscribe(userId: string): Promise<void> {
       { onConflict: 'user_id,endpoint' }
     );
 
-    console.log('[AutoPush] Subscription saved for user', userId);
+    if (error) {
+      console.error('[AutoPush] Save error:', error.message, error.code);
+    } else {
+      console.log('[AutoPush] Subscription saved for user', userId);
+    }
   } catch (err) {
     console.warn('[AutoPush] Silent error:', err);
   }

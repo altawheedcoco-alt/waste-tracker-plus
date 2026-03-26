@@ -101,7 +101,15 @@ export function useWebPush() {
         }
       }
 
-      // 4. Save to DB (upsert with retry)
+      // 4. Ensure auth session is ready before DB write
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error('[WebPush] No active session — cannot save subscription');
+        toast.error('يجب تسجيل الدخول أولاً لحفظ الاشتراك');
+        return false;
+      }
+
+      // 5. Save to DB (upsert with retry)
       const subJson = subscription.toJSON();
       const payload = {
         user_id: user.id,
@@ -115,9 +123,9 @@ export function useWebPush() {
         const { error } = await supabase.from('push_subscriptions').upsert(
           payload as any, { onConflict: 'user_id,endpoint' }
         );
-        if (error) console.error('[WebPush] Save error attempt', i + 1, error.message);
+        if (error) console.error('[WebPush] Save error attempt', i + 1, error.message, error.details, error.code);
         if (!error) { saved = true; break; }
-        if (i < 2) await new Promise(r => setTimeout(r, 800));
+        if (i < 2) await new Promise(r => setTimeout(r, 1000));
       }
 
       // 5. Verify
