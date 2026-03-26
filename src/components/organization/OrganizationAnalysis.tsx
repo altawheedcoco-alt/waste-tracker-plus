@@ -677,6 +677,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
             </AccordionItem>
           )}
         </Accordion>
+        </div>
       </div>
     </div>
   );
