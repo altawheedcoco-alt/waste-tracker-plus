@@ -45,20 +45,18 @@ const PredictiveMaintenanceAI = () => {
 
       const healthData: VehicleHealth[] = fleet.map(v => {
         const vehicleLogs = logs.filter((l: any) => l.vehicle_plate === v.plate_number);
-        const lastLog = vehicleLogs[0];
+        const lastLog = vehicleLogs[0] as any;
         const daysSinceLastMaint = lastLog?.performed_at
           ? Math.floor((now.getTime() - new Date(lastLog.performed_at).getTime()) / (1000 * 60 * 60 * 24))
           : 999;
 
-        const nextMaint = v.next_maintenance_date ? new Date(v.next_maintenance_date) : null;
-        const daysToNext = nextMaint ? Math.floor((nextMaint.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)) : 30;
+        const daysToNext = 30;
 
         let healthScore = 100;
         if (daysSinceLastMaint > 90) healthScore -= 30;
         else if (daysSinceLastMaint > 60) healthScore -= 15;
         if (daysToNext < 0) healthScore -= 40;
         else if (daysToNext < 7) healthScore -= 20;
-        if ((v.mileage || 0) > 200000) healthScore -= 15;
         healthScore = Math.max(0, Math.min(100, healthScore));
 
         let riskLevel: 'low' | 'medium' | 'high' | 'critical' = 'low';
