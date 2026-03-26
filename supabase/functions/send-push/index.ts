@@ -853,13 +853,24 @@ Deno.serve(async (req) => {
 
     await Promise.allSettled(
       subscriptions.map(async (sub: any) => {
-        const result = await sendPushNotification(
-          { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-          payload, vapidPublicKey, vapidPrivateKey
-        );
-        if (result.success) { sent++; }
-        else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
-        else { errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result }); }
+        if (isFCMSubscription(sub)) {
+          // Send via FCM
+          const fcmToken = getFCMToken(sub);
+          const parsedPayload = JSON.parse(payload);
+          const result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          if (result.success) { sent++; }
+          else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
+          else { errors.push({ endpoint: "fcm", error: result.error }); }
+        } else {
+          // Send via VAPID Web Push
+          const result = await sendPushNotification(
+            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+            payload, vapidPublicKey, vapidPrivateKey
+          );
+          if (result.success) { sent++; }
+          else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
+          else { errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result }); }
+        }
       })
     );
 
