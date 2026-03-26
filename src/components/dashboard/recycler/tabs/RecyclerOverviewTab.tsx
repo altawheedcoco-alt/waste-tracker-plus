@@ -163,6 +163,20 @@ const RecyclerOverviewTab = ({
         <DriverComplianceManager />
         <IncidentReportManager />
       </Suspense>
+
+      {/* Recycler Intelligence Suite */}
+      <Suspense fallback={<Skeleton className="h-[180px]" />}>
+        <RecyclerSmartKPIs />
+      </Suspense>
+      <Suspense fallback={<Skeleton className="h-[300px]" />}>
+        <RecyclerFinancialFlow />
+      </Suspense>
+      <Suspense fallback={<Skeleton className="h-[300px]" />}>
+        <RecyclerInputIntelligence />
+      </Suspense>
+      <Suspense fallback={<Skeleton className="h-[280px]" />}>
+        <RecyclerScorecard />
+      </Suspense>
     </TabsContent>
   );
 };
