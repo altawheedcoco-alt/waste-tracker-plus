@@ -633,9 +633,9 @@ const OrganizationProfile = () => {
         >
           <V2TabsNav tabs={ORG_PROFILE_TABS} />
 
-          {/* الصفحة التجارية */}
+          {/* صفحة المنظمة */}
           <TabsContent value="page">
-            <ErrorBoundary fallbackTitle="خطأ في الصفحة التجارية">
+            <ErrorBoundary fallbackTitle="خطأ في صفحة المنظمة">
               <Suspense fallback={<TabFallback />}>
                 <BusinessPagePreview
                   organizationId={organization.id}

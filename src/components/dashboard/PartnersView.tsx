@@ -483,7 +483,7 @@ const PartnerDetailPanel = ({
             <StickyNote className="w-4 h-4" /> الملاحظات
           </Button>
           <Button variant="outline" onClick={onViewBusinessPage} className="gap-2">
-            <Globe className="w-4 h-4" /> الصفحة التجارية
+            <Globe className="w-4 h-4" /> صفحة المنظمة
           </Button>
           <PartnerRestrictionManager targetOrgId={org.id} targetOrgName={org.name} />
         </div>

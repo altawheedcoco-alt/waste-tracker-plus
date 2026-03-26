@@ -1,5 +1,5 @@
 /**
- * صفحة الملف العام للمنشأة - عرض الصفحة التجارية الكاملة
+ * صفحة الملف العام للمنشأة - عرض صفحة المنظمة الكاملة
  */
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
