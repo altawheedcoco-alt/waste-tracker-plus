@@ -493,8 +493,8 @@ const EnhancedChatInput = ({
       <div className="flex items-end gap-1.5">
         {/* Main Input Row */}
         <div className={cn(
-          "flex-1 flex items-end gap-1 rounded-3xl bg-muted/50 border border-border/50",
-          isMobile ? "px-1 py-0.5" : "px-2 py-1"
+          "flex-1 flex items-end gap-1 rounded-[25px] bg-background border border-border/30 shadow-sm",
+          isMobile ? "px-1 py-0.5" : "px-2 py-0.5"
         )}>
           {/* Emoji */}
           <Popover open={showEmojiPicker} onOpenChange={setShowEmojiPicker}>
