@@ -45679,6 +45679,7 @@ export type Database = {
           unresolved_events: number
         }[]
       }
+      get_sovereign_admin_ids: { Args: never; Returns: string[] }
       get_transporter_kpis: { Args: { p_org_id: string }; Returns: Json }
       get_transporter_shipments_paginated: {
         Args: {
