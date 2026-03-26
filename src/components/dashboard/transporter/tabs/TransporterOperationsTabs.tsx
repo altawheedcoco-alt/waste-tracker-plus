@@ -38,6 +38,10 @@ const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/
 const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 const TransporterSectionsSummary = lazy(() => import('@/components/dashboard/transporter/TransporterSectionsSummary'));
 const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
+const TransporterSmartKPIs = lazy(() => import('@/components/dashboard/transporter/TransporterSmartKPIs'));
+const SmartETAWidget = lazy(() => import('@/components/dashboard/transporter/SmartETAWidget'));
+const SmartRouteOptimizer = lazy(() => import('@/components/dashboard/transporter/SmartRouteOptimizer'));
+const LoadConsolidator = lazy(() => import('@/components/dashboard/transporter/LoadConsolidator'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
