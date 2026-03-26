@@ -29,11 +29,12 @@ const InstantPickupPortal = () => {
     setIsSubmitting(true);
     try {
       const { error } = await supabase.from('collection_requests').insert({
-        generator_id: organization.id,
+        organization_id: organization.id,
+        customer_name: organization.name || 'طلب جمع فوري',
+        pickup_address: organization.address || 'عنوان المنشأة',
         waste_type: form.waste_type,
-        estimated_quantity: parseFloat(form.quantity),
-        urgency: form.urgency,
-        notes: form.notes || null,
+        estimated_weight_kg: parseFloat(form.quantity) * 1000,
+        notes: form.notes ? `${form.notes} | استعجال: ${form.urgency}` : `استعجال: ${form.urgency}`,
         status: 'pending',
         preferred_date: new Date().toISOString(),
       });

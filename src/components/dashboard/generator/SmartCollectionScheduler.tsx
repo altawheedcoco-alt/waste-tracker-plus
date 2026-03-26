@@ -60,12 +60,13 @@ const SmartCollectionScheduler = () => {
   const handleCreateSchedule = async () => {
     if (!organization?.id || !formData.waste_type) return;
     const { error } = await supabase.from('scheduled_collections').insert({
-      generator_id: organization.id,
+      organization_id: organization.id,
+      title: `جمع ${formData.waste_type}`,
       waste_type: formData.waste_type,
       frequency: formData.frequency,
       preferred_day: formData.preferred_day,
-      preferred_time: formData.preferred_time,
-      quantity_estimate: formData.quantity_estimate ? parseFloat(formData.quantity_estimate) : null,
+      start_date: new Date().toISOString().split('T')[0],
+      estimated_quantity: formData.quantity_estimate ? parseFloat(formData.quantity_estimate) : null,
       is_active: true,
     });
     if (error) {
