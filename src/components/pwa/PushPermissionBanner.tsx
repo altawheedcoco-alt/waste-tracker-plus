@@ -35,7 +35,7 @@ export default function PushPermissionBanner() {
     const ok = await subscribe();
     if (ok) {
       setVisible(false);
-      localStorage.setItem(DISMISSED_KEY, '1');
+      sessionStorage.setItem(DISMISSED_KEY, '1');
     }
   };
 
