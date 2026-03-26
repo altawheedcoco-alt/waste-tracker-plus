@@ -310,8 +310,16 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
                 <Progress value={analysis.compliance_score} className="w-24 mt-1" />
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="default" size="sm" onClick={saveAndShareWithAdmin} disabled={saving} className="gap-1">
+            <div className="mt-4 flex justify-end gap-2 flex-wrap">
+              {autoSaved && (
+                <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300 gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> تم الحفظ والمشاركة تلقائياً
+                </Badge>
+              )}
+              <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1">
+                <Printer className="h-3 w-3" />طباعة التقرير
+              </Button>
+              <Button variant="default" size="sm" onClick={() => saveAndShareWithAdmin()} disabled={saving} className="gap-1">
                 {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                 {saving ? 'جاري الحفظ...' : 'حفظ ومشاركة مع المدير'}
                 <Share2 className="h-3 w-3" />
