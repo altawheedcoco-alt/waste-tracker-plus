@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { showSystemNotification } from '@/lib/systemNotifications';
 
 export function usePushNotifications() {
   const { user } = useAuth();
@@ -38,29 +39,12 @@ export function usePushNotifications() {
 
   const showNotification = useCallback((title: string, options?: NotificationOptions) => {
     if (permission !== 'granted') return;
-    
-    try {
-      new Notification(title, {
-        icon: '/favicon.png',
-        badge: '/favicon.png',
-        dir: 'rtl',
-        lang: 'ar',
-        ...options,
-      });
-    } catch {
-      // Fallback for mobile
-      if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.ready.then(registration => {
-          registration.showNotification(title, {
-            icon: '/favicon.png',
-            badge: '/favicon.png',
-            dir: 'rtl',
-            lang: 'ar',
-            ...options,
-          });
-        });
-      }
-    }
+    showSystemNotification(title, {
+      ...options,
+      url: (options?.data as Record<string, unknown> | undefined)?.url as string | undefined,
+    }).catch(() => {
+      toast.error('تعذر إظهار الإشعار على الجهاز');
+    });
   }, [permission]);
 
   // Listen for new messages and show notifications
