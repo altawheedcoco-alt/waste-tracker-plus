@@ -72,13 +72,15 @@ export function useWebPush() {
       // 2. Get SW registration with timeout
       let registration: ServiceWorkerRegistration;
       try {
-        // First ensure SW is registered
-        if (!navigator.serviceWorker.controller) {
+        // Check for existing registrations first (VitePWA auto-registers)
+        const existingRegs = await navigator.serviceWorker.getRegistrations();
+        if (existingRegs.length === 0) {
+          // Only register manually if VitePWA hasn't done it
           await navigator.serviceWorker.register('/sw.js', { scope: '/' });
         }
         registration = await Promise.race([
           navigator.serviceWorker.ready,
-          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('sw_timeout')), 10000)),
+          new Promise<never>((_, reject) => setTimeout(() => reject(new Error('sw_timeout')), 20000)),
         ]);
       } catch (swErr) {
         console.error('[WebPush] SW not ready:', swErr);
