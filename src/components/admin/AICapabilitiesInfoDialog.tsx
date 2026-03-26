@@ -113,8 +113,10 @@ const AICapabilitiesInfoDialog = () => {
               <p><strong>💡 باختصار:</strong></p>
               <p>• <strong>Tokens</strong> = وحدة قياس حجم النص</p>
               <p>• <strong>السياق</strong> = حجم "الذاكرة" في المحادثة الواحدة</p>
-              <p>• <strong>RPM/RPD</strong> = عدد المرات اللي تقدر تطلب فيها في الدقيقة/اليوم</p>
+              <p>• <strong>RPM</strong> = الحد الأقصى ١٣ طلب/دقيقة مشترك بين جميع المستخدمين</p>
+              <p>• <strong>RPD</strong> = ١,٥٠٠ طلب/يوم لكل جهة</p>
               <p>• عند تجاوز الحد → يتم التبديل تلقائياً إلى Lovable AI كنظام احتياطي</p>
+              <p>• النظام يوزع الطلبات تلقائياً بين المستخدمين لضمان العدالة</p>
             </div>
           </div>
         </DialogContent>
