@@ -29,6 +29,7 @@ import { usePlatformSetting } from '@/hooks/usePlatformSetting';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import DashboardPrintReports from './shared/DashboardPrintReports';
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
+import AICapabilitiesInfoDialog from '@/components/admin/AICapabilitiesInfoDialog';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
 
