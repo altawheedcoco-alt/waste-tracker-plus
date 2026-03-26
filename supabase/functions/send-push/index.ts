@@ -717,6 +717,7 @@ Deno.serve(async (req) => {
         const batch = allSubs.slice(i, i + 20);
         await Promise.allSettled(
           batch.map(async (sub: any) => {
+            if (isFCMSubscription(sub)) return; // Skip FCM tokens in VAPID cleanup
             const result = await sendPushNotification(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
               testPayload, vapidPublicKey, vapidPrivateKey
