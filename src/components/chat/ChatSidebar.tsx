@@ -294,6 +294,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                                   <Check className="w-4 h-4 text-muted-foreground shrink-0" />
                                 )
                               )}
+                              {preview?.icon && <preview.icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
                               <p className="text-xs text-muted-foreground truncate">
                                 {preview?.text || 'ابدأ المحادثة'}
                               </p>
