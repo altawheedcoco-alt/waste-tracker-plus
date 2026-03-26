@@ -20,6 +20,10 @@ const SustainabilityReportGenerator = lazy(() => import('@/components/dashboard/
 const SLADashboard = lazy(() => import('@/components/transporter/SLADashboard'));
 const ProfitabilityReport = lazy(() => import('@/components/transporter/ProfitabilityReport'));
 const ShiftScheduler = lazy(() => import('@/components/transporter/ShiftScheduler'));
+const DemandForecastDashboard = lazy(() => import('@/components/dashboard/transporter/DemandForecastDashboard'));
+const CapacityPlanningDashboard = lazy(() => import('@/components/dashboard/transporter/CapacityPlanningDashboard'));
+const PredictiveMaintenanceAI = lazy(() => import('@/components/dashboard/transporter/PredictiveMaintenanceAI'));
+const TripCostAnalytics = lazy(() => import('@/components/dashboard/transporter/TripCostAnalytics'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -46,6 +50,15 @@ const TransporterIntelligenceTabs = () => (
         <ErrorBoundary fallbackTitle="خطأ في تحليل الربحية">
           <PartnerProfitabilityPanel />
         </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في التنبؤ بالطلب">
+          <DemandForecastDashboard />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تخطيط السعة">
+          <CapacityPlanningDashboard />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في الصيانة التنبؤية">
+          <PredictiveMaintenanceAI />
+        </ErrorBoundary>
       </Suspense>
     </TabsContent>
 
@@ -54,6 +67,9 @@ const TransporterIntelligenceTabs = () => (
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
           <DynamicPricingEngine />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تحليل تكاليف الرحلات">
+          <TripCostAnalytics />
         </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في كشف الاحتيال">
           <FraudDetectionPanel />

@@ -38,6 +38,10 @@ const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/
 const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
 const TransporterSectionsSummary = lazy(() => import('@/components/dashboard/transporter/TransporterSectionsSummary'));
 const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
+const TransporterSmartKPIs = lazy(() => import('@/components/dashboard/transporter/TransporterSmartKPIs'));
+const SmartETAWidget = lazy(() => import('@/components/dashboard/transporter/SmartETAWidget'));
+const SmartRouteOptimizer = lazy(() => import('@/components/dashboard/transporter/SmartRouteOptimizer'));
+const LoadConsolidator = lazy(() => import('@/components/dashboard/transporter/LoadConsolidator'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -76,6 +80,20 @@ const TransporterOperationsTabs = ({
   <>
     {/* ══════ 1. نظرة عامة ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
+      {/* Smart KPIs */}
+      <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في مؤشرات الأداء الذكية">
+          <TransporterSmartKPIs />
+        </ErrorBoundary>
+      </Suspense>
+
+      {/* Smart ETA */}
+      <Suspense fallback={<Skeleton className="h-40 rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في وقت الوصول الذكي">
+          <SmartETAWidget />
+        </ErrorBoundary>
+      </Suspense>
+
       <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
       <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
@@ -130,9 +148,12 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 2. العمليات (calendar مدمج) ══════ */}
+    {/* ══════ 2. العمليات (calendar + load consolidation مدمج) ══════ */}
     <TabsContent value="operations" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في تجميع الحمولات">
+          <LoadConsolidator />
+        </ErrorBoundary>
         <ShipmentCalendarWidget />
       </Suspense>
     </TabsContent>
@@ -154,6 +175,7 @@ const TransporterOperationsTabs = ({
     {/* ══════ 4. التتبع (+ geofence مدمج) ══════ */}
     <TabsContent value="tracking" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في محسّن المسار"><SmartRouteOptimizer /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في مراقبة الإشارات"><SignalMonitorWidget /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في ربط السائقين"><DriverLinkingCode /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
