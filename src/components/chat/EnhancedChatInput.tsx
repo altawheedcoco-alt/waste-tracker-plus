@@ -37,7 +37,9 @@ import {
 } from '@/components/ui/popover';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import type { MentionableEntity } from '@/components/ui/mentionable-field';
-import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
+import { filterCommands, SLASH_COMMANDS, type SlashCommand } from '@/config/chatSlashCommands';
+import { getOrgCommands, filterOrgCommands, type OrgSlashCommand } from '@/config/chatOrgCommands';
+import { useAuth } from '@/contexts/AuthContext';
 import SlashCommandMenu from './SlashCommandMenu';
 import ChatResourcePicker from './ChatResourcePicker';
 import { useMentionableUsers } from '@/hooks/useMentionableUsers';
