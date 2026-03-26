@@ -81,6 +81,7 @@ export function usePushNotifications() {
         if (msg.message_type === 'image') body = '📷 صورة';
         if (msg.message_type === 'file') body = '📎 ملف';
 
+        soundEngine.play('message_received');
         showNotification(`رسالة من ${senderName}`, {
           body,
           tag: `msg-${msg.id}`,
