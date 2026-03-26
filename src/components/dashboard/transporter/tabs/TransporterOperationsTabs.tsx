@@ -175,6 +175,7 @@ const TransporterOperationsTabs = ({
     {/* ══════ 4. التتبع (+ geofence مدمج) ══════ */}
     <TabsContent value="tracking" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في محسّن المسار"><SmartRouteOptimizer /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في مراقبة الإشارات"><SignalMonitorWidget /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في ربط السائقين"><DriverLinkingCode /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
