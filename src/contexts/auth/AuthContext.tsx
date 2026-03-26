@@ -383,6 +383,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Auto-subscribe to push notifications on sign-in
             if (event === 'SIGNED_IN') {
               autoPushSubscribe(session.user.id);
+              // إشعار تسجيل الدخول
+              import('@/utils/notifyAction').then(({ notifyAction }) => {
+                notifyAction({
+                  title: '🔓 تسجيل دخول جديد',
+                  message: `تم تسجيل الدخول بنجاح - ${new Date().toLocaleString('ar-EG')}`,
+                  type: 'auth_login',
+                  targetUserId: session.user.id,
+                });
+              });
             }
           }
         } else {
@@ -485,6 +494,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signOut = useCallback(async () => {
     stopFocusMusicOnLogout();
 
+    // إشعار تسجيل الخروج قبل مسح الجلسة
+    const currentUserId = user?.id;
+    if (currentUserId) {
+      try {
+        const { notifyAction } = await import('@/utils/notifyAction');
+        await notifyAction({
+          title: '🔒 تسجيل خروج',
+          message: `تم تسجيل الخروج - ${new Date().toLocaleString('ar-EG')}`,
+          type: 'auth_logout',
+          targetUserId: currentUserId,
+        });
+      } catch (e) {
+        console.error('Logout notification failed:', e);
+      }
+    }
+
     try {
       await supabase.auth.signOut({ scope: 'local' });
     } catch (error) {
@@ -498,7 +523,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setRoles([]);
       sessionStorage.removeItem('__tab_active_org_id');
     }
-  }, []);
+  }, [user?.id]);
 
   const refreshProfile = useCallback(async () => {
     if (user) {
