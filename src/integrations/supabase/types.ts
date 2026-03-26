@@ -43400,6 +43400,57 @@ export type Database = {
           },
         ]
       }
+      waste_inventory_settings: {
+        Row: {
+          alert_threshold_percent: number | null
+          capacity_tons: number
+          created_at: string | null
+          id: string
+          notes: string | null
+          organization_id: string
+          unit: string | null
+          updated_at: string | null
+          waste_type: string
+        }
+        Insert: {
+          alert_threshold_percent?: number | null
+          capacity_tons?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id: string
+          unit?: string | null
+          updated_at?: string | null
+          waste_type: string
+        }
+        Update: {
+          alert_threshold_percent?: number | null
+          capacity_tons?: number
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          organization_id?: string
+          unit?: string | null
+          updated_at?: string | null
+          waste_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "waste_inventory_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "waste_inventory_settings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weight_disputes: {
         Row: {
           admin_notes: string | null
