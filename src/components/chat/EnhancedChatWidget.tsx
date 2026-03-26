@@ -16,6 +16,7 @@ import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import { useWebRTCCall } from '@/hooks/useWebRTCCall';
+import { soundEngine } from '@/lib/soundEngine';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
@@ -191,6 +192,15 @@ const EnhancedChatWidget = () => {
     if (isOpen) fetchPartners();
   }, [isOpen, fetchPartners]);
 
+  // Play sound on new incoming message
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.sender_id !== user?.id) {
+      soundEngine.play('message_received');
+    }
+  }, [messages.length]);
+
   const handleSelectPartner = async (partner: ChatPartner) => {
     setSelectedPartner(partner);
     setView('chat');
@@ -223,6 +233,7 @@ const EnhancedChatWidget = () => {
   const handleSendMessage = async (content: string) => {
     if (!selectedPartner) return;
     stopTyping();
+    soundEngine.play('message_sent');
     const expiresAt = getExpiryDate();
     if (replyTo) {
       const payload = JSON.stringify({ text: content, reply_to_id: replyTo.id });
@@ -231,9 +242,7 @@ const EnhancedChatWidget = () => {
     } else {
       await sendMessage(content, selectedPartner.id);
     }
-    // Set expiry if disappearing is active
     if (expiresAt) {
-      // Get latest message and set expiry
       const { data: latest } = await supabase
         .from('direct_messages')
         .select('id')
@@ -248,6 +257,7 @@ const EnhancedChatWidget = () => {
 
   const handleSendFile = async (file: File) => {
     if (!selectedPartner) return;
+    soundEngine.play('message_sent');
     await sendFileMessage(file, selectedPartner.id);
     setReplyTo(null);
   };

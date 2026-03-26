@@ -10,6 +10,7 @@ export { default as EnhancedChatMessages } from './EnhancedChatMessages';
 export { default as VoiceMessagePlayer } from './VoiceMessagePlayer';
 export { default as MessageActions } from './MessageActions';
 export { default as MessageReactions } from './MessageReactions';
+export { default as ChatBottomSheet } from './ChatBottomSheet';
 
 // Input Components
 export { default as ChatInput } from './ChatInput';

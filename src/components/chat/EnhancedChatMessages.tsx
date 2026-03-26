@@ -15,6 +15,7 @@ import {
   Radio,
   Play,
   Reply,
+  Copy,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,10 +25,12 @@ import VoiceMessagePlayer from './VoiceMessagePlayer';
 import ImageLightbox from './ImageLightbox';
 import MessageActions from './MessageActions';
 import MessageReactions from './MessageReactions';
+import ChatBottomSheet from './ChatBottomSheet';
 import ChatMessageCardRenderer from './ChatMessageCardRenderer';
 import ChatMentionRenderer from './ChatMentionRenderer';
 import { QuotedReply } from './ReplyPreview';
 import { useChatReactions } from '@/hooks/useChatReactions';
+import { useToast } from '@/hooks/use-toast';
 import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
@@ -153,6 +156,8 @@ const EnhancedChatMessages = ({
   const [isNearBottom, setIsNearBottom] = useState(true);
   const [newMessageCount, setNewMessageCount] = useState(0);
   const [longPressMsg, setLongPressMsg] = useState<string | null>(null);
+  const [bottomSheetMsg, setBottomSheetMsg] = useState<ChatMessage | null>(null);
+  const { toast } = useToast();
 
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
@@ -291,10 +296,27 @@ const EnhancedChatMessages = ({
   const handleTouchStart = (msgId: string) => {
     longPressTimerRef.current = setTimeout(() => {
       setLongPressMsg(msgId);
+      // Open bottom sheet on mobile
+      if (isMobile) {
+        const msg = messages.find(m => m.id === msgId);
+        if (msg) setBottomSheetMsg(msg);
+      }
     }, 500);
   };
   const handleTouchEnd = () => {
     if (longPressTimerRef.current) clearTimeout(longPressTimerRef.current);
+  };
+
+  const handleBottomSheetCopy = async () => {
+    if (!bottomSheetMsg) return;
+    try {
+      let textToCopy = bottomSheetMsg.content;
+      try { const parsed = JSON.parse(textToCopy); textToCopy = parsed.text || textToCopy; } catch {}
+      await navigator.clipboard.writeText(textToCopy);
+      toast({ title: 'تم النسخ', description: 'تم نسخ الرسالة إلى الحافظة' });
+    } catch {
+      toast({ title: 'خطأ', description: 'فشل نسخ الرسالة', variant: 'destructive' });
+    }
   };
 
   if (messages.length === 0) {
@@ -452,6 +474,21 @@ const EnhancedChatMessages = ({
                             {replyContent && replySender && (
                               <QuotedReply senderName={replySender} content={replyContent} isOwn={isOwn} />
                             )}
+
+                            {/* Forwarded Label */}
+                            {(() => {
+                              try {
+                                const txt = typeof text === 'string' ? text : '';
+                                if (txt.includes('⤵️ رسالة مُعاد توجيهها')) {
+                                  return (
+                                    <p className="text-[11px] text-muted-foreground italic mb-[2px] flex items-center gap-1">
+                                      <span>⤵️</span> تم التحويل
+                                    </p>
+                                  );
+                                }
+                              } catch {}
+                              return null;
+                            })()}
 
                             {/* Sender Name - first message in group */}
                             {!isOwn && isFirstInGroup && message.sender && !isDeleted && (
@@ -703,6 +740,22 @@ const EnhancedChatMessages = ({
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
       />
+
+      {/* Mobile Bottom Sheet for long press */}
+      {bottomSheetMsg && (
+        <ChatBottomSheet
+          open={!!bottomSheetMsg}
+          onClose={() => setBottomSheetMsg(null)}
+          isOwn={bottomSheetMsg.sender_id === currentUserId}
+          messageContent={bottomSheetMsg.content}
+          onReply={onReply ? () => { onReply(bottomSheetMsg); setBottomSheetMsg(null); } : undefined}
+          onForward={onForwardMessage ? () => { onForwardMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onCopy={handleBottomSheetCopy}
+          onDelete={bottomSheetMsg.sender_id === currentUserId && onDeleteMessage ? () => { onDeleteMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onPin={onPinMessage ? () => { onPinMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onReact={(emoji) => { toggleReaction(bottomSheetMsg.id, emoji); }}
+        />
+      )}
     </>
   );
 };
