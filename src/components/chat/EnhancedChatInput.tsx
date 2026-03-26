@@ -337,7 +337,14 @@ const EnhancedChatInput = ({
     setShowMentionDropdown(false);
   };
 
-  const filteredSlashCommands = filterCommands(slashSearch);
+  const orgCommands = getOrgCommands(organization?.organization_type as string);
+  const filteredBaseCommands = filterCommands(slashSearch);
+  const filteredOrgCmds = filterOrgCommands(orgCommands, slashSearch);
+  // Merge: org-specific first, then base commands, adapt OrgSlashCommand to SlashCommand shape
+  const filteredSlashCommands: SlashCommand[] = [
+    ...filteredOrgCmds.map(c => ({ command: c.command, label: c.label, description: c.description, icon: c.icon, resourceType: c.actionType as any, color: c.color })),
+    ...filteredBaseCommands,
+  ];
 
   const handleSlashSelect = useCallback((cmd: SlashCommand) => {
     setInputValue('');
