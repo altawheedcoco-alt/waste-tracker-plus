@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Bell, CheckCheck, Loader2, Inbox, Filter } from 'lucide-react';
+import { Bell, CheckCheck, Loader2, Inbox, Filter, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
