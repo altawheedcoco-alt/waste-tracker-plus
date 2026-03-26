@@ -331,6 +331,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
               <OrgPerformanceRadar />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Disposal Intelligence Suite */}
+          <Suspense fallback={<Skeleton className="h-[180px]" />}>
+            <DisposalSmartKPIs />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[300px]" />}>
+            <DisposalFinancialFlow />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[300px]" />}>
+            <DisposalInputIntelligence />
+          </Suspense>
+          <Suspense fallback={<Skeleton className="h-[280px]" />}>
+            <DisposalScorecard />
+          </Suspense>
         </TabsContent>
 
         {/* 2. Incoming Shipments Tab */}
