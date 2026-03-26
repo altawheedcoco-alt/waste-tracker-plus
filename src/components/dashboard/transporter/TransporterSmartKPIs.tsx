@@ -42,10 +42,11 @@ const TransporterSmartKPIs = () => {
           .eq('transporter_id', organization.id).gte('created_at', monthAgo.toISOString()),
         supabase.from('fleet_vehicles').select('id, status').eq('organization_id', organization.id),
         supabase.from('partner_ratings').select('overall_rating').eq('rated_organization_id', organization.id).gte('created_at', monthAgo.toISOString()),
+      ]);
 
       const shipments = shipmentsRes.data || [];
       const fleet = fleetRes.data || [];
-      const ratings = ratingsRes.data || [];
+      const ratings = (ratingsRes.data || []) as any[];
 
       const delivered = shipments.filter(s => s.status === 'delivered' || s.status === 'confirmed');
       const onTime = delivered.filter(s => {
@@ -57,7 +58,7 @@ const TransporterSmartKPIs = () => {
       const activeVehicles = fleet.filter(v => v.status === 'active' || v.status === 'in_use').length;
       const fleetUtilization = fleet.length > 0 ? Math.round((activeVehicles / fleet.length) * 100) : 0;
 
-      const avgRating = ratings.length > 0 ? ratings.reduce((a, r) => a + (r.rating || 0), 0) / ratings.length : 0;
+      const avgRating = ratings.length > 0 ? ratings.reduce((a: number, r: any) => a + (r.overall_rating || 0), 0) / ratings.length : 0;
 
       const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status)).length;
 
