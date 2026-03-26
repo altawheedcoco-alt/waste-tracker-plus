@@ -378,6 +378,27 @@ const GeneratorDashboard = () => {
               <FinancialSummaryWidget />
             </Suspense>
           </ErrorBoundary>
+
+          {/* Generator Intelligence Suite */}
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorSmartKPIs />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <WasteGenerationIntelligence />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <FinancialFlowAnalyzer />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <InstantPickupPortal />
+          </Suspense>
+
+          <Suspense fallback={<TabFallback />}>
+            <EnvironmentalScorecard />
+          </Suspense>
         </TabsContent>
 
         {/* ── الشحنات ── */}
