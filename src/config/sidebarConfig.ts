@@ -1,7 +1,7 @@
 /**
- * Sidebar menu configuration — Ultra-granular v4.0
- * Every internal tab is exposed as a direct sidebar item.
- * ~50 groups with fine-grained navigation.
+ * Sidebar menu configuration — Ultra-granular v5.0
+ * Hierarchical: Section → Group → Item
+ * ~50 groups organized into 14 sections.
  */
 import {
   LayoutDashboard, Package, Truck, Users, Settings, Bell, Building2, Recycle, Wrench,
