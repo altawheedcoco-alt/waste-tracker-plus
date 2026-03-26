@@ -3,6 +3,7 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { stopFocusMusicOnLogout } from '../FocusMusicContext';
+import { autoPushSubscribe } from '@/utils/autoPushSubscribe';
 
 // Types
 export interface Profile {
