@@ -2,7 +2,7 @@
  * SoundIntegrator — مكون عالمي يربط الأصوات بأحداث التطبيق
  * يُضاف مرة واحدة في App.tsx داخل BrowserRouter
  */
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { soundEngine } from '@/lib/soundEngine';
 
@@ -43,5 +43,3 @@ export default function SoundIntegrator() {
 
   return null;
 }
-
-import { useRef } from 'react';
