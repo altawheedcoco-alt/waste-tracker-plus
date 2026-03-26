@@ -66,18 +66,21 @@ export const standaloneItems: SidebarItemConfig[] = [
 // ═══════════════════════════════════════════════════════════════
 export const sidebarGroups: SidebarGroupConfig[] = [
 
-  // ══════ 01. الرسائل المباشرة ══════
+  // ══════ 01. التواصل والمنشورات (مدمج) ══════
   {
-    id: 'direct-messages',
+    id: 'communication-social',
     icon: MessageCircle,
-    labelAr: 'الرسائل المباشرة',
-    labelEn: 'Direct Messages',
+    labelAr: 'التواصل والمنشورات',
+    labelEn: 'Communication & Social',
     visibleFor: [],
     items: [
       { icon: MessageCircle, labelAr: 'الدردشة', labelEn: 'Chat', path: '/dashboard/chat', key: 'chat', badgeKey: 'chat', bindingType: 'partner' as const },
       { icon: Users, labelAr: 'المجموعات', labelEn: 'Group Chats', path: '/dashboard/chat?view=groups', key: 'group-chats', bindingType: 'partner' as const },
       { icon: Radio, labelAr: 'قنوات البث', labelEn: 'Broadcast Channels', path: '/dashboard/broadcast-channels', key: 'broadcast-channels', badgeKey: 'broadcastChannels', bindingType: 'internal' as const },
       { icon: Video, labelAr: 'الاجتماعات المرئية', labelEn: 'Video Meetings', path: '/dashboard/meetings', key: 'meetings', bindingType: 'partner' as const },
+      { icon: CircleDot, labelAr: 'الحالات (Stories)', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
+      { icon: Rss, labelAr: 'آخر الأخبار', labelEn: 'News Feed', path: '/dashboard/feed', key: 'social-feed', bindingType: 'internal' as const },
+      { icon: Newspaper, labelAr: 'المنشورات', labelEn: 'Posts', path: '/dashboard/organization-profile?tab=posts', key: 'social-posts', bindingType: 'internal' as const },
     ],
   },
 
@@ -94,16 +97,15 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ══════ 03. الطلبات والحالات ══════
+  // ══════ 03. الطلبات ══════
   {
-    id: 'requests-stories',
+    id: 'requests',
     icon: Send,
-    labelAr: 'الطلبات والحالات',
-    labelEn: 'Requests & Stories',
+    labelAr: 'الطلبات',
+    labelEn: 'Requests',
     visibleFor: [],
     items: [
       { icon: Send, labelAr: 'طلباتي', labelEn: 'My Requests', path: '/dashboard/my-requests', key: 'my-requests', badgeKey: 'my-requests', bindingType: 'hybrid' as const },
-      { icon: CircleDot, labelAr: 'الحالات (Stories)', labelEn: 'Stories', path: '/dashboard/stories', key: 'stories', bindingType: 'internal' as const },
       { icon: Users, labelAr: 'بوابة العملاء', labelEn: 'Customer Portal', path: '/dashboard/customer-portal', key: 'customer-portal', bindingType: 'partner' as const },
     ],
   },
