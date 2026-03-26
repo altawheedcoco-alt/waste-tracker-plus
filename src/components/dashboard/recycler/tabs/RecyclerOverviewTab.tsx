@@ -6,6 +6,11 @@ import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
+
+const RecyclerSmartKPIs = lazy(() => import('@/components/dashboard/recycler/RecyclerSmartKPIs'));
+const RecyclerFinancialFlow = lazy(() => import('@/components/dashboard/recycler/RecyclerFinancialFlow'));
+const RecyclerInputIntelligence = lazy(() => import('@/components/dashboard/recycler/RecyclerInputIntelligence'));
+const RecyclerScorecard = lazy(() => import('@/components/dashboard/recycler/RecyclerScorecard'));
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
