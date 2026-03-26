@@ -44,7 +44,7 @@ const PredictiveMaintenanceAI = () => {
       const now = new Date();
 
       const healthData: VehicleHealth[] = fleet.map(v => {
-        const vehicleLogs = logs.filter(l => l.vehicle_id === v.id);
+        const vehicleLogs = logs.filter((l: any) => l.vehicle_plate === v.plate_number);
         const lastLog = vehicleLogs[0];
         const daysSinceLastMaint = lastLog?.performed_at
           ? Math.floor((now.getTime() - new Date(lastLog.performed_at).getTime()) / (1000 * 60 * 60 * 24))
