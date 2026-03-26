@@ -18,6 +18,8 @@ export default function PushPermissionBanner() {
   useEffect(() => {
     if (!user || !isSupported) return;
     if (isSubscribed || permission === 'denied') return;
+    // Show every session unless dismissed in this session
+    if (sessionStorage.getItem(DISMISSED_KEY)) return;
 
     setVisible(true);
   }, [user, isSupported, isSubscribed, permission]);
