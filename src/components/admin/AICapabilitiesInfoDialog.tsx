@@ -32,7 +32,7 @@ const AICapabilitiesInfoDialog = () => {
               </h3>
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { label: 'طلبات/دقيقة (RPM)', value: '15' },
+                  { label: 'طلبات/دقيقة (عام)', value: '13' },
                   { label: 'طلبات/يوم (RPD)', value: '1,500' },
                   { label: 'Tokens/دقيقة', value: '1,000,000' },
                   { label: 'نافذة السياق', value: '1,048,576 token' },
@@ -113,8 +113,10 @@ const AICapabilitiesInfoDialog = () => {
               <p><strong>💡 باختصار:</strong></p>
               <p>• <strong>Tokens</strong> = وحدة قياس حجم النص</p>
               <p>• <strong>السياق</strong> = حجم "الذاكرة" في المحادثة الواحدة</p>
-              <p>• <strong>RPM/RPD</strong> = عدد المرات اللي تقدر تطلب فيها في الدقيقة/اليوم</p>
+              <p>• <strong>RPM</strong> = الحد الأقصى ١٣ طلب/دقيقة مشترك بين جميع المستخدمين</p>
+              <p>• <strong>RPD</strong> = ١,٥٠٠ طلب/يوم لكل جهة</p>
               <p>• عند تجاوز الحد → يتم التبديل تلقائياً إلى Lovable AI كنظام احتياطي</p>
+              <p>• النظام يوزع الطلبات تلقائياً بين المستخدمين لضمان العدالة</p>
             </div>
           </div>
         </DialogContent>
