@@ -688,9 +688,9 @@ const EnhancedChatInput = ({
             size="icon"
             variant={isRecording ? "destructive" : "default"}
             className={cn(
-              "shrink-0 rounded-full transition-all",
-              isMobile ? "h-10 w-10" : "h-11 w-11",
-              !isRecording && "bg-wa-header hover:bg-wa-header-dark text-white",
+              "shrink-0 rounded-full transition-all shadow-sm",
+              isMobile ? "h-11 w-11" : "h-11 w-11",
+              !isRecording && "bg-wa-light-green hover:bg-wa-teal-green text-white",
               isRecording && "animate-pulse"
             )}
             onClick={isRecording ? stopRecording : startRecording}
