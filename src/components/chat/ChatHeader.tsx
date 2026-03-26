@@ -141,16 +141,12 @@ const ChatHeader = ({
 
         {/* Left Side - Actions */}
         <div className="flex items-center gap-0.5">
-          {!isMobile && (
-            <>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVoiceCall}>
-                <Phone className="w-4 h-4" />
-              </Button>
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVideoCall}>
-                <Video className="w-4 h-4" />
-              </Button>
-            </>
-          )}
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVideoCall}>
+            <Video className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-white/80 hover:text-white hover:bg-white/15" onClick={onVoiceCall}>
+            <Phone className="w-4 h-4" />
+          </Button>
 
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
