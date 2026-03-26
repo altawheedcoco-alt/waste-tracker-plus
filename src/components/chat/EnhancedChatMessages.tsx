@@ -475,6 +475,21 @@ const EnhancedChatMessages = ({
                               <QuotedReply senderName={replySender} content={replyContent} isOwn={isOwn} />
                             )}
 
+                            {/* Forwarded Label */}
+                            {(() => {
+                              try {
+                                const txt = typeof text === 'string' ? text : '';
+                                if (txt.includes('⤵️ رسالة مُعاد توجيهها')) {
+                                  return (
+                                    <p className="text-[11px] text-muted-foreground italic mb-[2px] flex items-center gap-1">
+                                      <span>⤵️</span> تم التحويل
+                                    </p>
+                                  );
+                                }
+                              } catch {}
+                              return null;
+                            })()}
+
                             {/* Sender Name - first message in group */}
                             {!isOwn && isFirstInGroup && message.sender && !isDeleted && (
                               <p className="text-[11px] text-primary font-bold mb-[2px] leading-tight">
