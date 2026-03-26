@@ -174,7 +174,7 @@ const PushNotificationStats = () => {
       })));
 
       const { data: camps } = await (supabase.from('push_campaigns') as any).select('*').order('created_at', { ascending: false }).limit(50);
-      const campSenderIds = [...new Set((camps || []).map((c: any) => c.sender_id).filter(Boolean))];
+      const campSenderIds = [...new Set((camps || []).map((c: any) => c.sender_id).filter(Boolean))] as string[];
       let campProfiles: any[] = [];
       if (campSenderIds.length > 0) {
         const { data: cp } = await supabase.from('profiles').select('user_id, full_name').in('user_id', campSenderIds);
