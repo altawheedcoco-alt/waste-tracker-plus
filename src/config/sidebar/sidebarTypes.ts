@@ -33,3 +33,15 @@ export type OrgType = 'generator' | 'transporter' | 'recycler' | 'disposal' | 'r
  * يشمل الجهات + الكيانات الخاصة (سائق، مدير، موظف)
  */
 export type DashboardEntityType = OrgType | 'admin' | 'driver' | 'employee';
+
+/**
+ * قسم في القائمة الجانبية — يجمع عدة مجموعات تحت عنوان واحد
+ */
+export interface SidebarSectionConfig {
+  id: string;
+  labelAr: string;
+  labelEn: string;
+  icon: LucideIcon;
+  /** IDs of groups belonging to this section */
+  groupIds: string[];
+}
