@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { showSystemNotification } from '@/lib/systemNotifications';
+import { soundEngine } from '@/lib/soundEngine';
 
 export function usePushNotifications() {
   const { user } = useAuth();
