@@ -1259,7 +1259,127 @@ const ADMIN_GROUP_IDS = new Set([
 ]);
 
 /**
- * Sort groups by CATEGORY_ORDER
+ * 14 أقسام هرمية — كل قسم يجمع مجموعات متشابهة تحت عنوان واحد
+ */
+export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
+  {
+    id: 'sec-org-identity',
+    labelAr: 'المؤسسة والهوية',
+    labelEn: 'Organization & Identity',
+    icon: Building2,
+    groupIds: ['org-page', 'identity-attestation', 'org-structure', 'partners', 'governance-security'],
+  },
+  {
+    id: 'sec-operations',
+    labelAr: 'العمليات التشغيلية',
+    labelEn: 'Operations',
+    icon: Package,
+    groupIds: [
+      'generator-shipments', 'generator-certificates', 'generator-tracking',
+      'transporter-shipments', 'transporter-records', 'transporter-manual',
+      'fleet-tracking', 'vehicles-containers', 'driver-management', 'driver-development',
+      'transporter-regulatory',
+      'recycler-shipments', 'recycler-production',
+      'disposal-ops', 'disposal-certs-facilities',
+      'driver-shipments',
+      'consultant-ops', 'consulting-office-ops',
+      'municipal-operations', 'municipal-contracts', 'municipal-workforce', 'municipal-assets',
+      'regulator-command', 'regulator-enforcement', 'regulator-licensing',
+    ],
+  },
+  {
+    id: 'sec-ops-tools',
+    labelAr: 'أدوات التشغيل',
+    labelEn: 'Operations Tools',
+    icon: Gauge,
+    groupIds: ['operations-board', 'device-settings'],
+  },
+  {
+    id: 'sec-documents',
+    labelAr: 'المستندات والتوثيق',
+    labelEn: 'Documents & Records',
+    icon: FolderOpen,
+    groupIds: ['docs-upload-archive', 'docs-ai-studio', 'docs-signatures', 'docs-contracts', 'docs-certs-invoices'],
+  },
+  {
+    id: 'sec-reports',
+    labelAr: 'التقارير والتحليلات',
+    labelEn: 'Reports & Analytics',
+    icon: BarChart3,
+    groupIds: ['shipment-reports', 'waste-registers', 'waste-analysis', 'environmental-reports'],
+  },
+  {
+    id: 'sec-finance',
+    labelAr: 'المالية والمحاسبة',
+    labelEn: 'Finance & Accounting',
+    icon: Calculator,
+    groupIds: ['accounting-core', 'inventory-purchasing', 'financial-reports', 'wallet-insurance'],
+  },
+  {
+    id: 'sec-hr',
+    labelAr: 'الموارد البشرية',
+    labelEn: 'Human Resources',
+    icon: Users,
+    groupIds: ['hr-core', 'hr-payroll-performance'],
+  },
+  {
+    id: 'sec-communication',
+    labelAr: 'التواصل',
+    labelEn: 'Communication',
+    icon: MessageCircle,
+    groupIds: ['direct-messages', 'notifications-notes', 'requests-stories'],
+  },
+  {
+    id: 'sec-marketplace',
+    labelAr: 'السوق والتجارة',
+    labelEn: 'Marketplace',
+    icon: Store,
+    groupIds: ['b2b-marketplace', 'global-exchange', 'quotations-plans'],
+  },
+  {
+    id: 'sec-maps',
+    labelAr: 'الخرائط والروابط',
+    labelEn: 'Maps & Links',
+    icon: MapPin,
+    groupIds: ['maps', 'quick-links'],
+  },
+  {
+    id: 'sec-ai-learning',
+    labelAr: 'الذكاء الاصطناعي والتعلم',
+    labelEn: 'AI & Learning',
+    icon: Brain,
+    groupIds: ['ai-tools', 'learning', 'achievements'],
+  },
+  {
+    id: 'sec-regulators',
+    labelAr: 'الجهات الرقابية',
+    labelEn: 'Regulatory Bodies',
+    icon: Shield,
+    groupIds: ['wmra-tools', 'eeaa-tools', 'ltra-tools', 'ida-tools'],
+  },
+  {
+    id: 'sec-admin',
+    labelAr: 'مركز القيادة',
+    labelEn: 'Command Center',
+    icon: Zap,
+    groupIds: ['admin-command-center', 'admin-entity-management', 'admin-org-docs', 'admin-users-fleet', 'admin-communication', 'admin-finance', 'admin-content', 'admin-infrastructure'],
+  },
+  {
+    id: 'sec-support',
+    labelAr: 'الدعم والإعدادات',
+    labelEn: 'Support & Settings',
+    icon: Settings,
+    groupIds: ['support', 'settings-system'],
+  },
+];
+
+/**
+ * Get the section a group belongs to
+ */
+export function getSectionForGroup(groupId: string): SidebarSectionConfig | undefined {
+  return SIDEBAR_SECTIONS.find(s => s.groupIds.includes(groupId));
+}
+
  */
 function sortByCategory(groups: SidebarGroupConfig[]): SidebarGroupConfig[] {
   const orderMap = new Map(CATEGORY_ORDER.map((id, idx) => [id, idx]));
