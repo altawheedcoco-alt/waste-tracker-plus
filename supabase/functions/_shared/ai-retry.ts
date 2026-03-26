@@ -23,8 +23,8 @@ export async function callAIWithRetry(
   apiKeyOrLovableKey: string,
   options: AIRequestOptions
 ): Promise<Response> {
-  // Check if we have a direct Google Gemini API key
-  const geminiKey = Deno.env.get("GOOGLE_GEMINI_API_KEY");
+  // Check if we have a direct Google Gemini API key (support both naming conventions)
+  const geminiKey = Deno.env.get("GEMINI_API_KEY") || Deno.env.get("GOOGLE_GEMINI_API_KEY");
   
   if (geminiKey) {
     try {
