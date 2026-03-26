@@ -221,7 +221,7 @@ const ChatActionPanel = memo(({
           loading={loading}
           signerDefaults={{
             name: profile?.full_name || '',
-            title: profile?.role || '',
+            title: '',
           }}
         />
       )}
