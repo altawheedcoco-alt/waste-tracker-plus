@@ -129,6 +129,17 @@ const MyNotificationsTab = () => {
         </div>
       </div>
 
+      {/* Channel Preferences Panel */}
+      {showPrefs && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: 'auto' }}
+          exit={{ opacity: 0, height: 0 }}
+        >
+          <NotificationChannelPreferences />
+        </motion.div>
+      )}
+
       {/* Notifications grouped by date */}
       {filtered.length === 0 ? (
         <Card>
