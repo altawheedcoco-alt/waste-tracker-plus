@@ -477,7 +477,7 @@ const EnhancedChatInput = ({
         )}
       </AnimatePresence>
 
-      {/* Recording UI - WhatsApp slide-to-cancel */}
+      {/* Recording UI - WhatsApp slide-to-cancel with live waveform */}
       <AnimatePresence>
         {isRecording && (
           <motion.div 
@@ -494,19 +494,36 @@ const EnhancedChatInput = ({
               />
               <span className="text-sm font-mono text-destructive font-medium">{formatTime(recordingTime)}</span>
               
+              {/* Live Waveform */}
+              <div className="flex-1 flex items-center justify-center gap-[2px] h-6 overflow-hidden">
+                {Array.from({ length: 24 }).map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="w-[3px] rounded-full bg-destructive/60"
+                    animate={{
+                      height: [4, Math.random() * 20 + 4, 4],
+                    }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 0.4 + Math.random() * 0.4,
+                      delay: i * 0.03,
+                      ease: 'easeInOut',
+                    }}
+                  />
+                ))}
+              </div>
+
               {!isRecordingLocked ? (
-                <>
-                  <motion.span 
-                    className="flex-1 text-center text-xs text-muted-foreground"
-                    animate={{ opacity: [0.4, 1, 0.4] }}
-                    transition={{ repeat: Infinity, duration: 1.5 }}
-                  >
-                    ◀ اسحب للإلغاء
-                  </motion.span>
-                </>
+                <motion.span 
+                  className="text-xs text-muted-foreground shrink-0"
+                  animate={{ opacity: [0.4, 1, 0.4] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
+                >
+                  ◀ اسحب للإلغاء
+                </motion.span>
               ) : (
                 <>
-                  <span className="flex-1 text-center text-xs text-muted-foreground">🔒 مقفل - اضغط إيقاف للإنهاء</span>
+                  <span className="text-xs text-muted-foreground shrink-0">🔒 مقفل</span>
                   <Button size="sm" variant="destructive" className="h-8 gap-1.5 rounded-full" onClick={stopRecording}>
                     <Square className="w-3 h-3" />
                     إيقاف

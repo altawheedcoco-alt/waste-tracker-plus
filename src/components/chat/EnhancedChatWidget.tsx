@@ -192,6 +192,15 @@ const EnhancedChatWidget = () => {
     if (isOpen) fetchPartners();
   }, [isOpen, fetchPartners]);
 
+  // Play sound on new incoming message
+  useEffect(() => {
+    if (messages.length === 0) return;
+    const last = messages[messages.length - 1];
+    if (last.sender_id !== user?.id) {
+      soundEngine.play('message_received');
+    }
+  }, [messages.length]);
+
   const handleSelectPartner = async (partner: ChatPartner) => {
     setSelectedPartner(partner);
     setView('chat');
