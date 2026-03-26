@@ -85,8 +85,8 @@ const NotificationChannelPreferences = () => {
         updated_at: new Date().toISOString(),
       };
 
-      const { error } = await supabase
-        .from('notification_channel_preferences' as any)
+      const { error } = await (supabase as any)
+        .from('notification_channel_preferences')
         .upsert(payload, { onConflict: 'user_id' });
 
       if (error) throw error;
