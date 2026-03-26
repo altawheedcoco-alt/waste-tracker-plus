@@ -208,17 +208,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
-  // ═══════════════ تتبع المولّد ═══════════════
-  {
-    id: 'generator-tracking',
-    icon: MapPin,
-    labelAr: 'التتبع المباشر',
-    labelEn: 'Live Tracking',
-    visibleFor: ['generator'],
-    items: [
-      { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'generator-tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
-    ],
-  },
+  // ═══════════════ (generator-tracking merged into tracking-maps-center below) ═══════════════
 
   // ═══════════════ عمليات الشحن — الناقل ═══════════════
   {
