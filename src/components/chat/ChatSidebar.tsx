@@ -282,7 +282,7 @@ const ChatSidebar = ({ partners, selectedPartnerId, onSelectPartner, loading }: 
                         <div className="flex items-center gap-1.5 min-w-0">
                           {/* Typing indicator in sidebar */}
                           {partner.isTyping ? (
-                            <span className="text-xs text-emerald-600 font-medium italic">يكتب...</span>
+                            <span className="text-xs text-primary font-medium italic">يكتب...</span>
                           ) : (
                             <>
                               {lastMsg?.isMine && (
