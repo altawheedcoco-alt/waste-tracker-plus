@@ -91,6 +91,7 @@ const ApiManagement = lazy(() => import("@/pages/dashboard/ApiManagement"));
 const SecurityPenetrationTesting = lazy(() => import("@/pages/dashboard/SecurityPenetrationTesting"));
 const DatabaseQueryOptimization = lazy(() => import("@/pages/dashboard/DatabaseQueryOptimization"));
 const AdvancedAnalytics = lazy(() => import("@/pages/dashboard/AdvancedAnalytics"));
+const PushNotificationStats = lazy(() => import("@/pages/dashboard/PushNotificationStats"));
 const GDPRCompliance = lazy(() => import("@/pages/dashboard/GDPRCompliance"));
 const QuickDriverLinks = lazy(() => import("@/pages/dashboard/QuickDriverLinks"));
 const QuickDepositLinks = lazy(() => import("@/pages/dashboard/QuickDepositLinks"));
