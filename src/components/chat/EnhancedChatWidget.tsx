@@ -348,6 +348,7 @@ const EnhancedChatWidget = () => {
             )}
           >
             {/* Header */}
+            {view === 'sidebar' ? (
               <div className="flex items-center justify-between px-4 py-3 bg-wa-header text-white shrink-0" style={{ minHeight: 56 }}>
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-white/15 flex items-center justify-center">
