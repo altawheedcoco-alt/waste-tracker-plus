@@ -132,7 +132,7 @@ const ChatHeader = ({
             <h3 className="font-bold text-white text-sm truncate">{partnerName}</h3>
             <p className={cn(
               "text-[11px] truncate",
-              isTyping ? "text-emerald-200 font-medium" : isOnline ? "text-emerald-200" : "text-white/60"
+              isTyping ? "text-green-200 font-medium" : isOnline ? "text-green-200" : "text-white/60"
             )}>
               {getStatusText()}
             </p>
