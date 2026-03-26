@@ -22,11 +22,12 @@ function getAppServerKey(): Uint8Array {
 
 export function useWebPush() {
   const { user } = useAuth();
+  const { initializeFCM } = useFirebaseMessaging();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [loading, setLoading] = useState(false);
-  const subscribingRef = useRef(false); // guard against double-calls
+  const subscribingRef = useRef(false);
 
   // Check support & existing subscription on mount
   useEffect(() => {
