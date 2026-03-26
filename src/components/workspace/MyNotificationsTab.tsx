@@ -117,6 +117,15 @@ const MyNotificationsTab = () => {
               تعليم الكل
             </Button>
           )}
+          <Button
+            size="sm"
+            variant={showPrefs ? "default" : "outline"}
+            className="gap-1 text-xs h-8"
+            onClick={() => setShowPrefs(!showPrefs)}
+          >
+            <Settings2 className="w-3.5 h-3.5" />
+            القنوات
+          </Button>
         </div>
       </div>
 
