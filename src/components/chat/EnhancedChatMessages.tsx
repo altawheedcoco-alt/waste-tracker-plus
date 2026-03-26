@@ -287,10 +287,13 @@ const EnhancedChatMessages = ({
   return (
     <>
       <div 
-        className="h-full overflow-y-auto relative" 
+        className="h-full overflow-y-auto relative bg-wa-chat-bg" 
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        style={{ scrollbarWidth: 'thin' }}
+        style={{ 
+          scrollbarWidth: 'thin',
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23${typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? '2a3a35' : 'c8d6cf'}' fill-opacity='0.25'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+        }}
       >
         <div className={cn("space-y-0.5", isMobile ? "p-3" : "p-4")}>
           {hasMore && (
