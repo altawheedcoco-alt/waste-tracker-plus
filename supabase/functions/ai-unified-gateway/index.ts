@@ -25,6 +25,31 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+// === Global Rate Limiter (13 RPM across all users) ===
+const GLOBAL_RPM_LIMIT = 13;
+const WINDOW_MS = 60_000; // 1 minute
+const requestTimestamps: number[] = [];
+
+function isGlobalRateLimited(): boolean {
+  const now = Date.now();
+  // Remove timestamps older than 1 minute
+  while (requestTimestamps.length > 0 && requestTimestamps[0] < now - WINDOW_MS) {
+    requestTimestamps.shift();
+  }
+  if (requestTimestamps.length >= GLOBAL_RPM_LIMIT) {
+    return true;
+  }
+  requestTimestamps.push(now);
+  return false;
+}
+
+function getRetryAfterSeconds(): number {
+  if (requestTimestamps.length === 0) return 0;
+  const oldestInWindow = requestTimestamps[0];
+  const msUntilSlotFrees = (oldestInWindow + WINDOW_MS) - Date.now();
+  return Math.max(1, Math.ceil(msUntilSlotFrees / 1000));
+}
+
 const PLATFORM_SYSTEM_PROMPT = `أنت "آي ريسايكل" - المساعد الذكي الرسمي لمنصة إدارة النفايات وإعادة التدوير.
 
 ## دورك:
