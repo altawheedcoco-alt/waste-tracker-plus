@@ -24,7 +24,7 @@ const CapacityPlanningDashboard = () => {
     try {
       const [fleetRes, driversRes, shipmentsRes] = await Promise.all([
         supabase.from('fleet_vehicles').select('id, status, vehicle_type, capacity_tons').eq('organization_id', organization.id),
-        supabase.from('drivers').select('id, status').eq('organization_id', organization.id),
+        supabase.from('drivers').select('id, is_available').eq('organization_id', organization.id),
         supabase.from('shipments').select('id, status, created_at, quantity')
           .eq('transporter_id', organization.id)
           .gte('created_at', new Date(Date.now() - parseInt(horizon) * 24 * 60 * 60 * 1000).toISOString()),
