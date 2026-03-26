@@ -118,6 +118,8 @@ export default {
   				'chat-pattern': 'hsl(var(--wa-chat-pattern))',
   				time: 'hsl(var(--wa-time))',
   				'unread-badge': 'hsl(var(--wa-unread-badge))',
+  				'teal-green': 'hsl(var(--wa-teal-green))',
+  				'light-green': 'hsl(var(--wa-light-green))',
   			}
   		},
   		borderRadius: {
