@@ -591,9 +591,10 @@ const EnhancedChatWidget = () => {
                       isPartnerTyping={isPartnerTyping}
                       scrollToMessageId={scrollToMessageId}
                       onCardAction={handleCardAction}
+                      orgType={organization?.organization_type as string}
                     />
 
-                    {/* Chat Action Panel (Sign, Track, Status, Approve) */}
+                    {/* Chat Action Panel */}
                     {actionPanel.action && (
                       <ChatActionPanel
                         action={actionPanel.action}
@@ -613,6 +614,13 @@ const EnhancedChatWidget = () => {
                   {replyPreviewInfo && (
                     <ReplyPreview replyToMessage={replyPreviewInfo} onCancel={() => setReplyTo(null)} />
                   )}
+
+                  {/* Quick Actions Bar */}
+                  <ChatQuickActions
+                    orgType={organization?.organization_type as string}
+                    partnerType={selectedPartner?.organization_type}
+                    onAction={handleQuickAction}
+                  />
 
                   <EnhancedChatInput
                     onSendMessage={handleSendMessage}
