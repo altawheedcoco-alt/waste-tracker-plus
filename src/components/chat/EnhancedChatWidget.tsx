@@ -34,6 +34,7 @@ import GroupChatView from './GroupChatView';
 import CreateGroupDialog from './CreateGroupDialog';
 import CallScreen from './CallScreen';
 import ChatPartnerInfo from './ChatPartnerInfo';
+import StoryCircles from '../stories/StoryCircles';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
