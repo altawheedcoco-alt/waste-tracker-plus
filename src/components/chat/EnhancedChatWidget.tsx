@@ -325,6 +325,35 @@ const EnhancedChatWidget = () => {
     sendTyping();
   };
 
+  const handleCardAction = useCallback((action: string, id: string, data?: any) => {
+    switch (action) {
+      case 'track':
+        setActionPanel({ action: 'track', resourceId: id, resourceType: 'shipment', resourceData: data });
+        break;
+      case 'change_status':
+        setActionPanel({ action: 'status', resourceId: id, resourceType: 'shipment', resourceData: data });
+        break;
+      case 'sign_shipment':
+      case 'sign_now':
+      case 'sign_doc':
+        setActionPanel({ action: 'sign', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
+        break;
+      case 'stamp_shipment':
+      case 'stamp_now':
+      case 'stamp_doc':
+        setActionPanel({ action: 'stamp', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
+        break;
+      case 'approve_invoice':
+        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
+        break;
+      case 'reject_invoice':
+        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
+        break;
+      default:
+        break;
+    }
+  }, []);
+
   if (!user) return null;
 
   const widgetSize = isExpanded
