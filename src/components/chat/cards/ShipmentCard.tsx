@@ -1,8 +1,9 @@
-import { memo, useState } from 'react';
-import { Truck, MapPin, Navigation, RefreshCw, FileSignature, Stamp as StampIcon } from 'lucide-react';
+import { memo } from 'react';
+import { Truck, MapPin } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { getShipmentCardActions } from '@/config/chatOrgCommands';
 
 interface ShipmentCardProps {
   data: {
@@ -16,6 +17,7 @@ interface ShipmentCardProps {
   };
   isOwn: boolean;
   compact?: boolean;
+  orgType?: string;
   onAction?: (action: string, id: string, data?: any) => void;
 }
 
@@ -28,8 +30,9 @@ const STATUS_MAP: Record<string, { label: string; color: string }> = {
   confirmed: { label: 'مؤكدة', color: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' },
 };
 
-const ShipmentCard = memo(({ data, isOwn, compact, onAction }: ShipmentCardProps) => {
+const ShipmentCard = memo(({ data, isOwn, compact, orgType, onAction }: ShipmentCardProps) => {
   const st = STATUS_MAP[data.status || ''] || { label: data.status || 'غير محدد', color: 'bg-muted text-muted-foreground' };
+  const actions = getShipmentCardActions(orgType);
 
   return (
     <div className={cn(
@@ -62,41 +65,23 @@ const ShipmentCard = memo(({ data, isOwn, compact, onAction }: ShipmentCardProps
         </p>
       )}
 
-      {/* Interactive Action Buttons */}
+      {/* Org-Aware Action Buttons */}
       {onAction && (
         <div className="grid grid-cols-2 gap-1.5 pt-1">
-          <Button
-            size="sm"
-            variant={isOwn ? 'secondary' : 'outline'}
-            className="h-7 text-[10px] gap-1"
-            onClick={() => onAction('track', data.id, data)}
-          >
-            <Navigation className="w-3 h-3" /> تتبع
-          </Button>
-          <Button
-            size="sm"
-            variant={isOwn ? 'secondary' : 'outline'}
-            className="h-7 text-[10px] gap-1"
-            onClick={() => onAction('change_status', data.id, data)}
-          >
-            <RefreshCw className="w-3 h-3" /> حالة
-          </Button>
-          <Button
-            size="sm"
-            variant={isOwn ? 'secondary' : 'outline'}
-            className="h-7 text-[10px] gap-1"
-            onClick={() => onAction('sign_shipment', data.id, data)}
-          >
-            <FileSignature className="w-3 h-3" /> وقّع
-          </Button>
-          <Button
-            size="sm"
-            variant={isOwn ? 'secondary' : 'outline'}
-            className="h-7 text-[10px] gap-1"
-            onClick={() => onAction('stamp_shipment', data.id, data)}
-          >
-            <StampIcon className="w-3 h-3" /> اختم
-          </Button>
+          {actions.map(act => {
+            const Icon = act.icon;
+            return (
+              <Button
+                key={act.action}
+                size="sm"
+                variant={act.variant === 'destructive' ? 'destructive' : isOwn ? 'secondary' : 'outline'}
+                className="h-7 text-[10px] gap-1"
+                onClick={() => onAction(act.action, data.id, data)}
+              >
+                <Icon className="w-3 h-3" /> {act.label}
+              </Button>
+            );
+          })}
         </div>
       )}
 

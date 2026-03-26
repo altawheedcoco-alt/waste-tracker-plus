@@ -37,7 +37,9 @@ import {
 } from '@/components/ui/popover';
 import { useMentionableEntities } from '@/hooks/useMentionableEntities';
 import type { MentionableEntity } from '@/components/ui/mentionable-field';
-import { filterCommands, type SlashCommand } from '@/config/chatSlashCommands';
+import { filterCommands, SLASH_COMMANDS, type SlashCommand } from '@/config/chatSlashCommands';
+import { getOrgCommands, filterOrgCommands, type OrgSlashCommand } from '@/config/chatOrgCommands';
+import { useAuth } from '@/contexts/AuthContext';
 import SlashCommandMenu from './SlashCommandMenu';
 import ChatResourcePicker from './ChatResourcePicker';
 import { useMentionableUsers } from '@/hooks/useMentionableUsers';
@@ -94,6 +96,7 @@ const EnhancedChatInput = ({
   const [isRecordingLocked, setIsRecordingLocked] = useState(false);
   const [recordSlideX, setRecordSlideX] = useState(0);
   
+  const { organization } = useAuth();
   const { entities: mentionableEntities } = useMentionableEntities();
   const { users: mentionableUsers } = useMentionableUsers();
   const { notify: notifyMentions } = useMentionNotifier();
@@ -334,7 +337,14 @@ const EnhancedChatInput = ({
     setShowMentionDropdown(false);
   };
 
-  const filteredSlashCommands = filterCommands(slashSearch);
+  const orgCommands = getOrgCommands(organization?.organization_type as string);
+  const filteredBaseCommands = filterCommands(slashSearch);
+  const filteredOrgCmds = filterOrgCommands(orgCommands, slashSearch);
+  // Merge: org-specific first, then base commands, adapt OrgSlashCommand to SlashCommand shape
+  const filteredSlashCommands: SlashCommand[] = [
+    ...filteredOrgCmds.map(c => ({ command: c.command, label: c.label, description: c.description, icon: c.icon, resourceType: c.actionType as any, color: c.color })),
+    ...filteredBaseCommands,
+  ];
 
   const handleSlashSelect = useCallback((cmd: SlashCommand) => {
     setInputValue('');

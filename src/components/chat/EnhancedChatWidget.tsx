@@ -36,6 +36,8 @@ import CallScreen from './CallScreen';
 import ChatPartnerInfo from './ChatPartnerInfo';
 import StoryCircles from '../stories/StoryCircles';
 import ChatActionPanel from './ChatActionPanel';
+import ChatQuickActions from './ChatQuickActions';
+import type { ActionType } from './ChatActionPanel';
 
 const EnhancedChatWidget = () => {
   const { user, organization } = useAuth();
@@ -72,7 +74,7 @@ const EnhancedChatWidget = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState<any>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
-  const [actionPanel, setActionPanel] = useState<{ action: 'sign' | 'stamp' | 'track' | 'status' | 'approve' | null; resourceId: string; resourceType: string; resourceData?: any }>({ action: null, resourceId: '', resourceType: '' });
+  const [actionPanel, setActionPanel] = useState<{ action: ActionType; resourceId: string; resourceType: string; resourceData?: any }>({ action: null, resourceId: '', resourceType: '' });
   const { getWallpaperStyle } = useChatWallpaper(selectedPartner?.id);
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedPartner?.id);
   const { pinnedMessages, fetchPinned, togglePin } = usePinnedMessages(selectedPartner?.id);
@@ -326,32 +328,46 @@ const EnhancedChatWidget = () => {
   };
 
   const handleCardAction = useCallback((action: string, id: string, data?: any) => {
-    switch (action) {
-      case 'track':
-        setActionPanel({ action: 'track', resourceId: id, resourceType: 'shipment', resourceData: data });
-        break;
-      case 'change_status':
-        setActionPanel({ action: 'status', resourceId: id, resourceType: 'shipment', resourceData: data });
-        break;
-      case 'sign_shipment':
-      case 'sign_now':
-      case 'sign_doc':
-        setActionPanel({ action: 'sign', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
-        break;
-      case 'stamp_shipment':
-      case 'stamp_now':
-      case 'stamp_doc':
-        setActionPanel({ action: 'stamp', resourceId: id, resourceType: data?.document_type || 'shipment', resourceData: data });
-        break;
-      case 'approve_invoice':
-        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
-        break;
-      case 'reject_invoice':
-        setActionPanel({ action: 'approve', resourceId: id, resourceType: 'invoice', resourceData: data });
-        break;
-      default:
-        break;
+    const directActions: ActionType[] = [
+      'track', 'sign', 'stamp', 'approve', 'receive', 'weigh', 'quality',
+      'dispose', 'monitor', 'assign_driver', 'schedule_collect', 'reject_shipment',
+      'classify_waste', 'request_cert', 'recycle_cert', 'dispose_cert',
+      'handover', 'update_capacity', 'leachate_report', 'fleet_check',
+      'optimize_route', 'log_fuel', 'schedule', 'work_order', 'report',
+    ];
+
+    // Map aliases
+    const actionMap: Record<string, ActionType> = {
+      change_status: 'status',
+      sign_shipment: 'sign',
+      sign_now: 'sign',
+      sign_doc: 'sign',
+      stamp_shipment: 'stamp',
+      stamp_now: 'stamp',
+      stamp_doc: 'stamp',
+      approve_invoice: 'approve',
+      reject_invoice: 'approve',
+      approve_doc: 'approve',
+    };
+
+    const resolvedAction = actionMap[action] || (directActions.includes(action as ActionType) ? action as ActionType : null);
+    if (resolvedAction) {
+      setActionPanel({
+        action: resolvedAction,
+        resourceId: id,
+        resourceType: data?.document_type || data?.resource_type || 'shipment',
+        resourceData: data,
+      });
     }
+  }, []);
+
+  const handleQuickAction = useCallback((actionType: string) => {
+    // Quick actions without a specific resource - open panel with empty resource
+    setActionPanel({
+      action: actionType as ActionType,
+      resourceId: '',
+      resourceType: 'shipment',
+    });
   }, []);
 
   if (!user) return null;
@@ -575,9 +591,10 @@ const EnhancedChatWidget = () => {
                       isPartnerTyping={isPartnerTyping}
                       scrollToMessageId={scrollToMessageId}
                       onCardAction={handleCardAction}
+                      orgType={organization?.organization_type as string}
                     />
 
-                    {/* Chat Action Panel (Sign, Track, Status, Approve) */}
+                    {/* Chat Action Panel */}
                     {actionPanel.action && (
                       <ChatActionPanel
                         action={actionPanel.action}
@@ -597,6 +614,13 @@ const EnhancedChatWidget = () => {
                   {replyPreviewInfo && (
                     <ReplyPreview replyToMessage={replyPreviewInfo} onCancel={() => setReplyTo(null)} />
                   )}
+
+                  {/* Quick Actions Bar */}
+                  <ChatQuickActions
+                    orgType={organization?.organization_type as string}
+                    partnerType={selectedPartner?.organization_type}
+                    onAction={handleQuickAction}
+                  />
 
                   <EnhancedChatInput
                     onSendMessage={handleSendMessage}
