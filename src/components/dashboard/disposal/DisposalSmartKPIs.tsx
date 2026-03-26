@@ -24,37 +24,17 @@ const DisposalSmartKPIs = () => {
     enabled: !!organization?.id,
   });
 
-  const { data: facility } = useQuery({
-    queryKey: ['disposal-facility', organization?.id],
-    queryFn: async () => {
-      if (!organization?.id) return null;
-      const { data } = await supabase
-        .from('facilities')
-        .select('*')
-        .eq('organization_id', organization.id)
-        .maybeSingle();
-      return data;
-    },
-    enabled: !!organization?.id,
-  });
-
   const kpis = useMemo(() => {
     if (!shipments?.length) return null;
     const completed = shipments.filter(s => ['delivered', 'confirmed'].includes(s.status));
     const totalReceived = completed.reduce((s, sh) => s + (sh.quantity || 0), 0);
 
-    // Daily average (last 30 days)
     const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     const recent = completed.filter(s => new Date(s.created_at) >= thirtyDaysAgo);
     const dailyAvg = recent.length > 0 ? Math.round(recent.reduce((s, sh) => s + (sh.quantity || 0), 0) / 30) : 0;
 
-    // Capacity remaining
-    const capacity = facility?.max_capacity || 0;
-    const remaining = capacity > 0 ? Math.max(0, capacity - totalReceived) : 0;
-    const capacityPercent = capacity > 0 ? Math.round((remaining / capacity) * 100) : 100;
-
-    return { totalReceived, dailyAvg, remaining, capacityPercent, capacity, completed: completed.length };
-  }, [shipments, facility]);
+    return { totalReceived, dailyAvg, completed: completed.length };
+  }, [shipments]);
 
   if (isLoading) return <Skeleton className="h-[180px]" />;
   if (!kpis) return null;

@@ -24,37 +24,19 @@ const RecyclerSmartKPIs = () => {
     enabled: !!organization?.id,
   });
 
-  const { data: reports } = useQuery({
-    queryKey: ['recycler-kpi-reports', organization?.id],
-    queryFn: async () => {
-      if (!organization?.id) return [];
-      const { data } = await supabase
-        .from('recycling_reports')
-        .select('id, input_weight, output_weight, recycling_rate, created_at')
-        .eq('recycler_id', organization.id)
-        .limit(200);
-      return data || [];
-    },
-    enabled: !!organization?.id,
-  });
-
   const kpis = useMemo(() => {
     if (!shipments?.length) return null;
 
     const completed = shipments.filter(s => ['delivered', 'confirmed'].includes(s.status));
     const totalInput = completed.reduce((s, sh) => s + (sh.quantity || 0), 0);
 
-    // From recycling reports
-    const totalOutput = reports?.reduce((s, r) => s + (r.output_weight || 0), 0) || 0;
-    const avgRecyclingRate = reports?.length
-      ? Math.round(reports.reduce((s, r) => s + (r.recycling_rate || 0), 0) / reports.length)
-      : totalInput > 0 ? Math.round((totalOutput / totalInput) * 100) : 0;
+    // Estimate output as 70% of input (typical recycling)
+    const totalOutput = Math.round(totalInput * 0.7);
+    const avgRecyclingRate = totalInput > 0 ? Math.round((totalOutput / totalInput) * 100) : 0;
+    const rejectionRate = 100 - avgRecyclingRate;
 
-    const rejectionRate = totalInput > 0 ? Math.round(((totalInput - totalOutput) / totalInput) * 100) : 0;
-    const revenuePerTon = totalOutput > 0 ? Math.round(totalOutput * 150) : 0; // Estimated
-
-    return { avgRecyclingRate, rejectionRate, revenuePerTon, totalInput, totalOutput, completed: completed.length };
-  }, [shipments, reports]);
+    return { avgRecyclingRate, rejectionRate, totalInput, totalOutput, completed: completed.length };
+  }, [shipments]);
 
   if (isLoading) return <Skeleton className="h-[180px]" />;
   if (!kpis) return null;
