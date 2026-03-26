@@ -740,6 +740,22 @@ const EnhancedChatMessages = ({
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
       />
+
+      {/* Mobile Bottom Sheet for long press */}
+      {bottomSheetMsg && (
+        <ChatBottomSheet
+          open={!!bottomSheetMsg}
+          onClose={() => setBottomSheetMsg(null)}
+          isOwn={bottomSheetMsg.sender_id === currentUserId}
+          messageContent={bottomSheetMsg.content}
+          onReply={onReply ? () => { onReply(bottomSheetMsg); setBottomSheetMsg(null); } : undefined}
+          onForward={onForwardMessage ? () => { onForwardMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onCopy={handleBottomSheetCopy}
+          onDelete={bottomSheetMsg.sender_id === currentUserId && onDeleteMessage ? () => { onDeleteMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onPin={onPinMessage ? () => { onPinMessage(bottomSheetMsg.id); setBottomSheetMsg(null); } : undefined}
+          onReact={(emoji) => { toggleReaction(bottomSheetMsg.id, emoji); }}
+        />
+      )}
     </>
   );
 };

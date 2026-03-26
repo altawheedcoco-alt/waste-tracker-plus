@@ -16,6 +16,7 @@ import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useGroupChat } from '@/hooks/useGroupChat';
 import { useWebRTCCall } from '@/hooks/useWebRTCCall';
+import { soundEngine } from '@/lib/soundEngine';
 import { formatDistanceToNow } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
