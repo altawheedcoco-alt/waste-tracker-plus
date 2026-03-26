@@ -472,6 +472,231 @@ Deno.serve(async (req) => {
       );
     }
 
+    // ===== Process Scheduled Campaigns (Cron) =====
+    if (action === "process_scheduled") {
+      const now = new Date().toISOString();
+      const { data: scheduledCampaigns } = await supabase
+        .from("push_campaigns")
+        .select("*")
+        .eq("status", "scheduled")
+        .lte("scheduled_at", now);
+
+      if (!scheduledCampaigns?.length) {
+        return new Response(
+          JSON.stringify({ processed: 0, message: "No scheduled campaigns due" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      let totalProcessed = 0;
+      for (const campaign of scheduledCampaigns) {
+        // Get pending recipients
+        const { data: recipients } = await supabase
+          .from("push_campaign_recipients")
+          .select("user_id")
+          .eq("campaign_id", campaign.id)
+          .eq("status", "pending");
+
+        const userIds = (recipients || []).map((r: any) => r.user_id);
+        if (!userIds.length) {
+          await supabase.from("push_campaigns").update({ status: "sent", total_sent: 0, total_failed: 0 } as any).eq("id", campaign.id);
+          totalProcessed++;
+          continue;
+        }
+
+        // Check blacklist
+        const { data: bl } = await supabase.from("push_blacklist").select("user_id").in("user_id", userIds);
+        const blSet = new Set((bl || []).map((b: any) => b.user_id));
+        const eligibleIds = userIds.filter((id: string) => !blSet.has(id));
+
+        const { data: subs } = await supabase.from("push_subscriptions").select("*").in("user_id", eligibleIds);
+        const payload = JSON.stringify({
+          title: campaign.title, body: campaign.body,
+          data: { url: campaign.url, type: campaign.type, priority: campaign.priority },
+          tag: `scheduled-${campaign.id}`,
+        });
+
+        let sent = 0, failed = 0;
+        const expiredEndpoints: string[] = [];
+        const userResults: Record<string, { status: string; error?: string }> = {};
+
+        await Promise.allSettled(
+          (subs || []).map(async (sub: any) => {
+            const result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              payload, vapidPublicKey, vapidPrivateKey
+            );
+            if (result.success) {
+              sent++;
+              userResults[sub.user_id] = { status: "sent" };
+            } else if (result.error === "subscription_expired") {
+              expiredEndpoints.push(sub.endpoint);
+              failed++;
+              if (!userResults[sub.user_id] || userResults[sub.user_id].status !== "sent")
+                userResults[sub.user_id] = { status: "failed", error: "subscription_expired" };
+            } else {
+              failed++;
+              if (!userResults[sub.user_id] || userResults[sub.user_id].status !== "sent")
+                userResults[sub.user_id] = { status: "failed", error: result.error };
+            }
+          })
+        );
+
+        if (expiredEndpoints.length) {
+          await supabase.from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
+        }
+
+        // Update recipients
+        for (const uid of eligibleIds) {
+          const res = userResults[uid] || { status: "failed", error: "no_subscription" };
+          await supabase.from("push_campaign_recipients").update({
+            status: res.status, error_message: res.error || null,
+            delivered_at: res.status === "sent" ? new Date().toISOString() : null,
+          } as any).eq("campaign_id", campaign.id).eq("user_id", uid);
+        }
+
+        // Mark blocked recipients
+        for (const uid of userIds.filter((id: string) => blSet.has(id))) {
+          await supabase.from("push_campaign_recipients").update({
+            status: "failed", error_message: "blacklisted",
+          } as any).eq("campaign_id", campaign.id).eq("user_id", uid);
+        }
+
+        // In-app notifications
+        const notifRows = eligibleIds.map((uid: string) => ({
+          user_id: uid, title: campaign.title, message: campaign.body,
+          type: campaign.type || "general", is_read: false,
+        }));
+        for (let i = 0; i < notifRows.length; i += 100) {
+          await supabase.from("notifications").insert(notifRows.slice(i, i + 100) as any);
+        }
+
+        await supabase.from("push_campaigns").update({
+          total_sent: sent, total_failed: failed, status: "sent",
+        } as any).eq("id", campaign.id);
+
+        totalProcessed++;
+      }
+
+      return new Response(
+        JSON.stringify({ processed: totalProcessed }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ===== Auto Cleanup Expired Subscriptions (Cron) =====
+    if (action === "auto_cleanup") {
+      // Test all subscriptions by checking if endpoint is still valid
+      const { data: allSubs } = await supabase.from("push_subscriptions").select("*");
+      if (!allSubs?.length) {
+        return new Response(
+          JSON.stringify({ cleaned: 0, total: 0 }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const expiredEndpoints: string[] = [];
+      // Send a silent test push to check validity
+      const testPayload = JSON.stringify({ title: "", body: "", silent: true });
+
+      // Check in batches of 20
+      for (let i = 0; i < allSubs.length; i += 20) {
+        const batch = allSubs.slice(i, i + 20);
+        await Promise.allSettled(
+          batch.map(async (sub: any) => {
+            const result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              testPayload, vapidPublicKey, vapidPrivateKey
+            );
+            if (result.error === "subscription_expired" || result.status === 410 || result.status === 404) {
+              expiredEndpoints.push(sub.endpoint);
+            }
+          })
+        );
+      }
+
+      if (expiredEndpoints.length) {
+        await supabase.from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
+      }
+
+      return new Response(
+        JSON.stringify({ cleaned: expiredEndpoints.length, total: allSubs.length }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // ===== Auto Retry Failed (Cron) =====
+    if (action === "auto_retry") {
+      // Find campaigns sent in last 24h with failed recipients, max 3 retries
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const { data: recentCampaigns } = await supabase
+        .from("push_campaigns")
+        .select("id, title, body, url, type, priority")
+        .eq("status", "sent")
+        .gte("created_at", oneDayAgo);
+
+      if (!recentCampaigns?.length) {
+        return new Response(
+          JSON.stringify({ retried: 0, message: "No recent campaigns with failures" }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      let totalRetried = 0;
+      for (const campaign of recentCampaigns) {
+        const { data: failedRecips } = await supabase
+          .from("push_campaign_recipients")
+          .select("user_id")
+          .eq("campaign_id", campaign.id)
+          .eq("status", "failed")
+          .neq("error_message", "subscription_expired")
+          .neq("error_message", "blacklisted");
+
+        if (!failedRecips?.length) continue;
+
+        const failedIds = failedRecips.map((r: any) => r.user_id);
+        const { data: bl } = await supabase.from("push_blacklist").select("user_id").in("user_id", failedIds);
+        const blSet = new Set((bl || []).map((b: any) => b.user_id));
+        const retryIds = failedIds.filter((id: string) => !blSet.has(id));
+
+        const { data: subs } = await supabase.from("push_subscriptions").select("*").in("user_id", retryIds);
+        if (!subs?.length) continue;
+
+        const payload = JSON.stringify({
+          title: campaign.title, body: campaign.body,
+          data: { url: campaign.url, type: campaign.type, priority: campaign.priority },
+          tag: `autoretry-${campaign.id}`,
+        });
+
+        await Promise.allSettled(
+          subs.map(async (sub: any) => {
+            const result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              payload, vapidPublicKey, vapidPrivateKey
+            );
+            if (result.success) {
+              await supabase.from("push_campaign_recipients").update({
+                status: "sent", delivered_at: new Date().toISOString(), error_message: null,
+              } as any).eq("campaign_id", campaign.id).eq("user_id", sub.user_id);
+              totalRetried++;
+            }
+          })
+        );
+
+        // Recount
+        const { data: allRecips } = await supabase
+          .from("push_campaign_recipients").select("status").eq("campaign_id", campaign.id);
+        const sentCount = (allRecips || []).filter((r: any) => r.status === "sent").length;
+        const failCount = (allRecips || []).filter((r: any) => r.status === "failed").length;
+        await supabase.from("push_campaigns").update({ total_sent: sentCount, total_failed: failCount } as any).eq("id", campaign.id);
+      }
+
+      return new Response(
+        JSON.stringify({ retried: totalRetried }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     // ===== Default: Simple send (backward compatible) =====
     const { user_id, user_ids, title, body: msgBody2, data, tag } = body;
     const targetUserIds: string[] = user_ids || (user_id ? [user_id] : []);
