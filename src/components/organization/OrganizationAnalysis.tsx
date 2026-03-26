@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,7 +10,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import {
   Brain, Shield, AlertTriangle, CheckCircle2, XCircle, Clock,
   FileText, Loader2, RefreshCw, TrendingUp, Scale, Leaf, BarChart3,
-  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2
+  DollarSign, Truck, Activity, Gavel, FileWarning, Users, Save, Share2, Printer
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { notifyAdmins } from '@/services/unifiedNotifier';
@@ -62,6 +62,9 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [docsCount, setDocsCount] = useState(0);
+  const [autoSaved, setAutoSaved] = useState(false);
+  const hasAutoRun = useRef(false);
+  const printRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     supabase.from('entity_documents').select('id', { count: 'exact', head: true })
@@ -69,8 +72,9 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
       .then(({ count }) => setDocsCount(count || 0));
   }, [organizationId]);
 
-  const runAnalysis = async () => {
+  const runAnalysis = useCallback(async () => {
     setLoading(true);
+    setAutoSaved(false);
     try {
       const { data, error } = await supabase.functions.invoke('analyze-organization', {
         body: { organization_id: organizationId },
@@ -79,16 +83,34 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
       if (data?.success && data.result) {
         setAnalysis(data.result);
         toast.success('تم إنجاز التحليل الشامل العميق');
+        return data.result;
       } else {
         throw new Error(data?.error || 'فشل التحليل');
       }
     } catch (err: any) {
       console.error(err);
       toast.error(err.message || 'حدث خطأ في التحليل');
+      return null;
     } finally { setLoading(false); }
-  };
+  }, [organizationId]);
 
-  const saveAndShareWithAdmin = async () => {
+  // تشغيل التحليل تلقائياً عند فتح التبويب
+  useEffect(() => {
+    if (!hasAutoRun.current && organizationId && profile) {
+      hasAutoRun.current = true;
+      runAnalysis();
+    }
+  }, [organizationId, profile, runAnalysis]);
+
+  // حفظ ومشاركة تلقائياً بعد اكتمال التحليل
+  useEffect(() => {
+    if (analysis && !autoSaved && profile) {
+      setAutoSaved(true);
+      saveAndShareWithAdmin(true);
+    }
+  }, [analysis, autoSaved, profile]);
+
+  const saveAndShareWithAdmin = async (isAuto = false) => {
     if (!analysis || !profile) return;
     setSaving(true);
     try {
@@ -122,11 +144,64 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
         }
       );
 
-      toast.success('✅ تم حفظ التقرير ومشاركته مع مدير النظام');
+      toast.success(isAuto ? '✅ تم الحفظ والمشاركة تلقائياً مع مدير النظام' : '✅ تم حفظ التقرير ومشاركته مع مدير النظام');
     } catch (err: any) {
       console.error(err);
-      toast.error('فشل حفظ التقرير: ' + (err.message || ''));
+      if (!isAuto) toast.error('فشل حفظ التقرير: ' + (err.message || ''));
     } finally { setSaving(false); }
+  };
+
+  const handlePrint = () => {
+    if (!printRef.current) return;
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) { toast.error('يرجى السماح بالنوافذ المنبثقة للطباعة'); return; }
+    const orgName = organization?.name || 'جهة';
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+      <head>
+        <meta charset="utf-8">
+        <title>تقرير تحليل - ${orgName}</title>
+        <style>
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: 'Segoe UI', Tahoma, sans-serif; padding: 20px; color: #333; direction: rtl; }
+          h1 { font-size: 18px; margin-bottom: 4px; }
+          h2 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; color: #1a5; border-bottom: 1px solid #eee; padding-bottom: 4px; }
+          .score { font-size: 36px; font-weight: bold; text-align: center; margin: 12px 0; }
+          .score.good { color: #16a34a; }
+          .score.warn { color: #ca8a04; }
+          .score.bad { color: #dc2626; }
+          .summary { background: #f9fafb; padding: 12px; border-radius: 8px; margin: 12px 0; font-size: 13px; line-height: 1.8; }
+          .item { padding: 8px; border: 1px solid #eee; border-radius: 6px; margin-bottom: 6px; font-size: 12px; }
+          .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+          .badge-green { background: #dcfce7; color: #166534; }
+          .badge-red { background: #fee2e2; color: #991b1b; }
+          .badge-yellow { background: #fef9c3; color: #854d0e; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+          .bar-bg { background: #e5e7eb; height: 8px; border-radius: 4px; overflow: hidden; }
+          .bar-fill { height: 100%; border-radius: 4px; background: #16a34a; }
+          .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+          .meta { font-size: 11px; color: #666; }
+          @media print { body { padding: 10px; } }
+        </style>
+      </head>
+      <body>
+        <div class="header-info">
+          <div>
+            <h1>📊 تقرير التحليل الشامل والعميق</h1>
+            <p class="meta">${orgName} — ${new Date().toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
+          </div>
+          <div class="score ${analysis!.compliance_score >= 80 ? 'good' : analysis!.compliance_score >= 60 ? 'warn' : 'bad'}">
+            ${analysis!.compliance_score}%
+          </div>
+        </div>
+        <div class="summary"><strong>الملخص التنفيذي:</strong><br>${analysis!.executive_summary}</div>
+        ${printRef.current.innerHTML}
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
+    setTimeout(() => { printWindow.print(); }, 500);
   };
 
   const getScoreColor = (score: number) => {
@@ -235,8 +310,16 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
                 <Progress value={analysis.compliance_score} className="w-24 mt-1" />
               </div>
             </div>
-            <div className="mt-4 flex justify-end gap-2">
-              <Button variant="default" size="sm" onClick={saveAndShareWithAdmin} disabled={saving} className="gap-1">
+            <div className="mt-4 flex justify-end gap-2 flex-wrap">
+              {autoSaved && (
+                <Badge variant="outline" className="text-xs text-emerald-600 border-emerald-300 gap-1">
+                  <CheckCircle2 className="h-3 w-3" /> تم الحفظ والمشاركة تلقائياً
+                </Badge>
+              )}
+              <Button variant="outline" size="sm" onClick={handlePrint} className="gap-1">
+                <Printer className="h-3 w-3" />طباعة التقرير
+              </Button>
+              <Button variant="default" size="sm" onClick={() => saveAndShareWithAdmin()} disabled={saving} className="gap-1">
                 {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
                 {saving ? 'جاري الحفظ...' : 'حفظ ومشاركة مع المدير'}
                 <Share2 className="h-3 w-3" />
@@ -248,7 +331,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
           </CardContent>
         </Card>
 
-        {/* Scoring Breakdown */}
+        <div ref={printRef}>
         {analysis.scoring_breakdown && (
           <Card>
             <CardHeader className="pb-2">
@@ -594,6 +677,7 @@ const OrganizationAnalysis = ({ organizationId }: Props) => {
             </AccordionItem>
           )}
         </Accordion>
+        </div>
       </div>
     </div>
   );
