@@ -525,8 +525,8 @@ const EnhancedChatMessages = ({
                               )}
 
                               {/* Timestamp & Status */}
-                              <div className="flex items-center gap-1 mt-1 justify-end">
-                                <span className={cn("text-[10px]", isOwn ? "text-white/60" : "text-muted-foreground")}>
+                              <div className="flex items-center gap-1 mt-0.5 justify-end">
+                                <span className="text-[10px] text-wa-time">
                                   {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
                                 </span>
                                 {getMessageStatus(message, isOwn)}
