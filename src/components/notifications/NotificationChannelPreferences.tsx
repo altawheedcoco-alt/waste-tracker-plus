@@ -48,12 +48,12 @@ const NotificationChannelPreferences = () => {
     queryKey: ['notification-channel-prefs', user?.id],
     queryFn: async () => {
       if (!user?.id) return null;
-      const { data } = await supabase
-        .from('notification_channel_preferences' as any)
+      const { data } = await (supabase as any)
+        .from('notification_channel_preferences')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
-      return data;
+      return data as any;
     },
     enabled: !!user?.id,
   });
