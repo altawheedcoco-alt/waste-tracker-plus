@@ -447,6 +447,11 @@ const EnhancedChatWidget = () => {
             <div className="flex-1 overflow-hidden flex flex-col min-h-0">
               {view === 'sidebar' ? (
                 <div className="flex-1 overflow-hidden flex flex-col">
+                  {/* Stories / Status Section */}
+                  <div className="px-2 pt-2 pb-1 border-b border-border/30">
+                    <StoryCircles />
+                  </div>
+
                   {/* Groups Section */}
                   {rooms.length > 0 && (
                     <div className="px-3 pt-2 pb-1">
