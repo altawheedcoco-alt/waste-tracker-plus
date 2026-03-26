@@ -983,6 +983,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Activity, labelAr: 'حالة النظام', labelEn: 'Status', path: '/dashboard/system-status', key: 'system-status', bindingType: 'admin' as const },
       { icon: BarChart3, labelAr: 'تحليلات متقدمة', labelEn: 'Analytics', path: '/dashboard/advanced-analytics', key: 'advanced-analytics', bindingType: 'admin' as const },
       { icon: Scale, labelAr: 'لوحة الرقابة', labelEn: 'Regulator', path: '/dashboard/regulator', key: 'regulator', bindingType: 'admin' as const },
+      { icon: Bell, labelAr: 'إدارة الإشعارات', labelEn: 'Push Notifications', path: '/dashboard/push-notification-stats', key: 'push-notification-stats', bindingType: 'admin' as const },
     ],
   },
 
