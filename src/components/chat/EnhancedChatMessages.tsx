@@ -385,13 +385,13 @@ const EnhancedChatMessages = ({
                           <div className="relative">
                             <div
                               className={cn(
-                                "rounded-2xl overflow-hidden shadow-sm relative",
+                                "rounded-lg overflow-hidden relative",
                                 isDeleted
                                   ? "bg-muted/50 border border-border/30 italic"
                                   : isOwn
-                                    ? "bg-emerald-600 text-white rounded-tl-[4px]"
-                                    : "bg-background border border-border/50 rounded-tr-[4px]",
-                                message.message_type === 'image' ? "p-1" : "px-3 py-2"
+                                    ? "bg-wa-outgoing text-wa-outgoing-foreground rounded-tr-none"
+                                    : "bg-wa-incoming text-wa-incoming-foreground border border-border/20 rounded-tl-none shadow-sm",
+                                message.message_type === 'image' ? "p-1" : "px-3 py-1.5"
                               )}
                             >
                               {/* Quoted Reply */}
