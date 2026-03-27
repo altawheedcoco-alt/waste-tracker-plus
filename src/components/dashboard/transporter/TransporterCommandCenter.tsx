@@ -713,8 +713,8 @@ const TransporterCommandCenter = () => {
                     })}
                   </div>
                   <div className="flex justify-between text-[8px] text-muted-foreground/50 px-1">
-                    <span>اليوم</span>
                     <span>قبل ٧ أيام</span>
+                    <span>اليوم</span>
                   </div>
                 </div>
               </div>

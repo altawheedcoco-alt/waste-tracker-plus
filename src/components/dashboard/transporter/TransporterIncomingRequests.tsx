@@ -146,6 +146,15 @@ const TransporterIncomingRequests = () => {
                 قبول
               </IdempotentButton>
               <Button
+                variant="destructive"
+                size="sm"
+                className="text-xs h-7"
+                onClick={() => handleReject(req.id)}
+              >
+                <X className="ml-1 h-3 w-3" />
+                رفض
+              </Button>
+              <Button
                 variant="ghost"
                 size="sm"
                 className="text-xs h-7"
