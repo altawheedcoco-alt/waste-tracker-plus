@@ -1,123 +1,55 @@
 
 
-# تحليل شامل: لوحة تحكم الجهة الناقلة + التحقق من كل زر وقسم ووظيفة
+# خطة: نظام إعدادات أصوات شامل مع نغمات متعددة قابلة للاختيار
 
-## الوضع الحالي بعد آخر التعديلات
+## ما سيتم تنفيذه
 
-لوحة التحكم تتكون من **9 أقسام رئيسية** + **10 تبويبات فرعية** تحتوي على **~60 مكون** إجمالي.
+### 1. توسيع محرك الأصوات بـ 6 نغمات لكل فئة
+حالياً كل نوع إشعار له صوت واحد فقط. سيتم إضافة **6 نغمات بديلة** لكل فئة صوتية (إشعارات، دردشة، واجهة) — جميعها **مرتفعة الصوت وواضحة**.
 
-```text
-┌─────── TransporterSectionNav (sticky) ───────┐
-│ [الهيدر][القيادة][الإجراءات][النبض][التنبيهات]│
-│ [التواصل][التوثيق] │ [نظرة عامة][العمليات]   │
-│ [الأسطول][التتبع][الأداء][الذكاء][المالية]   │
-│ [الامتثال][الاستدامة][الشركاء]                │
-└───────────────────────────────────────────────┘
-```
+**النغمات الـ 6:**
+- `bold` — نغمة قوية وصريحة (الافتراضية)
+- `chime` — رنين معدني واضح
+- `alert` — تنبيه حاد
+- `melody` — لحن صاعد مميز
+- `pulse` — نبضات سريعة
+- `echo` — صدى عميق
 
----
+### 2. تقسيم الأصوات لـ 3 فئات مع تحكم منفصل
 
-## ١. الهيدر (section-header)
+| الفئة | الأصوات | التحكم |
+|-------|---------|--------|
+| **إشعارات واردة** | notification, success, error, warning, broadcast | اختيار نغمة + مستوى صوت + تفعيل/تعطيل |
+| **إشعارات صادرة / دردشة** | message_sent, message_received, recording_*, reaction, call_* | اختيار نغمة + مستوى صوت + تفعيل/تعطيل |
+| **أصوات الواجهة** | click, tap, toggle, navigate, delete, upload, download | اختيار نغمة + مستوى صوت + تفعيل/تعطيل |
 
-| المكون | الوظيفة | حالة التوجيه |
-|--------|---------|-------------|
-| `ConnectedSmartBrief` | ملخص يومي ذكي | يعمل — بيانات حية |
-| `StoryCircles` | قصص/حالات | يعمل |
-| `DashboardV2Header` | رادار أداء 6 مؤشرات + طقس GPS + خريطة حرارية | كل مؤشر → route محدد |
-| `TransporterHeader` | 6 أزرار | كل زر → مسار أو dialog |
-| `GlobalCommodityTicker` | بورصة سلع | يعمل |
+### 3. مكون `SidebarSoundControl` في القائمة الجانبية
+- **أيقونة 🔊** فوق زر تسجيل الخروج مباشرة
+- عند الضغط يفتح **Popover** يحتوي:
+  - مفتاح رئيسي (تفعيل/تعطيل الكل)
+  - 3 أقسام (إشعارات واردة / صادرة-دردشة / واجهة):
+    - لكل قسم: مفتاح تفعيل + اختيار النغمة من 6 خيارات + زر تجربة ▶️ + شريط مستوى صوت
+  - رابط "إعدادات متقدمة" → صفحة الإعدادات الكاملة
+- يعمل في الوضع الموسع والمصغر (في المصغر: أيقونة فقط)
 
-**أزرار الهيدر:**
-- مركز الطباعة (`DashboardPrintReports`) → dialog
-- الأتمتة (`AutomationSettingsDialog`) → dialog
-- مراجعة الارتباط AI (`BindingAuditPanel`) → panel
-- رفع الوزن الذكي → dialog `SmartWeightUpload`
-- عرض شحنات الشركة → `/dashboard/transporter-shipments`
-- إنشاء شحنة → `/dashboard/shipments/new`
+### 4. رفع مستوى الصوت الافتراضي
+- تغيير `volume` الافتراضي من `0.4` إلى `0.7`
+- رفع مضاعفات الصوت (volume multipliers) في كل الأصوات لتكون أعلى وأوضح
+- الحد الأقصى يصل لـ `1.0` (أعلى ما يسمح به المتصفح)
 
-## ٢. مركز المنشورات (section-posts)
+## الملفات المتأثرة
 
-4 تبويبات: منشورات جهتي | تايم لاين الشركاء | قنوات البث | منشورات المنصة
+| ملف | تغيير |
+|-----|--------|
+| `src/lib/soundEngine.ts` | إضافة فئات + 6 نغمات بديلة + فحص الفئة + رفع الصوت |
+| `src/components/dashboard/SidebarSoundControl.tsx` | **جديد** — Popover التحكم السريع |
+| `src/components/dashboard/DashboardLayout.tsx` | إضافة المكون فوق زر الخروج (desktop + mobile) |
+| `src/hooks/useNotificationSound.ts` | رفع مستوى الصوت الافتراضي + ربط النغمات البديلة |
+| `src/components/settings/NotificationSoundSettings.tsx` | إضافة اختيار النغمة لكل فئة |
 
-## ٣. مركز القيادة (section-command) — 749 سطر
+## التفاصيل الفنية
 
-**التحسينات المنفذة مؤخراً:**
-- فلتر زمني (اليوم/الأسبوع/الشهر) ← يعمل
-- تصدير PDF ← يعمل (html2canvas + jsPDF)
-- 17 استعلام DB متوازي
-
-**4 مستويات عرض:**
-1. شريط حالة (Health Score + trend + badges)
-2. 4 Hero Cards (رحلات، على الطريق، تم التسليم، السائقون) — كل بطاقة → navigate
-3. 14 StatMicro مع drill-down popovers — كل بطاقة → navigate
-4. Arc Gauges + ملخص شهري + أعمدة أسبوعية
-
-## ٤-٨. الأقسام الثابتة
-
-| القسم | المكونات |
-|-------|----------|
-| الإجراءات | `QuickActionsGrid` — أزرار قابلة للتخصيص |
-| النبض | `TransporterDailyPulse` + `DailyOperationsSummary` |
-| التنبيهات | `DashboardAlertsHub` (4 تبويبات دوارة) |
-| التواصل | `CommunicationHubWidget` (12 رابط + badges حية) |
-| التوثيق | `UnifiedDocumentSearch` + `DocumentVerificationWidget` |
-
-## ٩. التبويبات الفرعية (10 تبويبات)
-
-| التبويب | عدد المكونات | المكونات الرئيسية |
-|---------|-------------|-------------------|
-| نظرة عامة | ~10 | SmartKPIs, SmartETA, StatsGrid, KPICards, LiveOps, LicenseExpiry, Charts, PriorityQueue, ShipmentsList, AggregateReport, SectionsSummary |
-| العمليات | 2 | LoadConsolidator, ShipmentCalendar |
-| الأسطول | 6 | FleetStatusMini, FleetUtilization, PredictiveMaintenance, ContainerMgmt, VehicleReassignment, IoT |
-| التتبع | 5 | SmartRouteOptimizer, SignalMonitor, DriverLinking, DriverTracking, Geofence |
-| الأداء | 5 | EnhancedDriverPerf, DriverPerfPanel, SmartNotif, MaintenanceScheduler, OrgRadar, DriverCopilot |
-| الذكاء | 5 | AIDocAnalyzer, AIInsights, ShiftScheduler, SmartScheduler, DemandForecast, CapacityPlanning |
-| المالية | 4 | RevenueSnapshot, DynamicPricing, TripCostAnalytics, FraudDetection |
-| الامتثال | 9 أقسام | تبويبات فرعية داخلية (أفضل تنظيم) |
-| الاستدامة | 3 | EnvironmentalKPI, CarbonCredits, ESG |
-| الشركاء | 6 | PartnerSummary, Marketplace, SustainabilityReport, SLA, Profitability, PartnerRatings, PartnersView |
-
----
-
-## المشاكل المكتشفة والاقتراحات
-
-### مشاكل تحتاج تحقق فوري:
-1. **تبويب نظرة عامة لا يزال ثقيل** — ~10 مكونات رغم التخفيف السابق
-2. **17 استعلام DB متوازي** في مركز القيادة — لم يتم تجميعها بعد
-3. **بعض الأزرار قد لا تعمل** — الـ navigate لمسارات مثل `/dashboard/transporter-receipts` أو `/dashboard/contracts` قد لا تكون مسجلة في الـ router
-
-### اقتراحات للتطوير:
-1. **تجميع استعلامات مركز القيادة** في Edge Function واحدة
-2. **تخفيف إضافي لنظرة عامة** — نقل `SmartPriorityQueue` للعمليات و`TransporterSectionsSummary` لمكان آخر
-3. **إضافة lazy loading بشروط** — التبويبات غير المرئية لا تُحمل حتى يُفتح التبويب (موجود جزئياً)
-4. **التحقق من كل مسار navigate** في مركز القيادة (14 مسار) للتأكد من وجودها في الـ router
-
----
-
-## خطة التحقق والتنفيذ
-
-### المرحلة 1: التحقق من عمل كل الأزرار والمسارات
-- فحص كل `navigate()` في مركز القيادة (14 مسار)
-- فحص كل `onClick` في الـ Hero Cards
-- التأكد من عمل أزرار الهيدر الـ 6
-- التأكد من عمل فلتر الفترة الزمنية
-- التأكد من عمل تصدير PDF
-
-### المرحلة 2: التحقق من التبويبات الـ 10
-- فتح كل تبويب والتأكد من تحميل مكوناته بدون أخطاء
-- التأكد من عمل ErrorBoundary لكل مكون
-
-### المرحلة 3: إصلاح المسارات المعطلة (إن وُجدت)
-- ربط أي مسار غير موجود في الـ router
-- إضافة fallback للمسارات المفقودة
-
-### الملفات المتأثرة:
-- `src/components/dashboard/TransporterDashboard.tsx` (332 سطر)
-- `src/components/dashboard/transporter/TransporterCommandCenter.tsx` (749 سطر)
-- `src/components/dashboard/transporter/tabs/TransporterOperationsTabs.tsx` (193 سطر)
-- `src/components/dashboard/transporter/tabs/TransporterIntelligenceTabs.tsx` (120 سطر)
-- `src/components/dashboard/transporter/TransporterSectionNav.tsx`
-- `src/components/dashboard/transporter/TransporterHeader.tsx`
-- `src/components/dashboard/transporter/PostsHub.tsx`
-- ملفات الـ Router (للتحقق من المسارات)
+- النغمات تُولّد بـ Web Audio API (بدون ملفات صوتية خارجية) — كل نغمة تستخدم ترددات وأشكال موجية مختلفة
+- الإعدادات تُحفظ في `user_preferences` (مرتبطة بالحساب، تنتقل بين الأجهزة) مع مزامنة `localStorage` للتوافق
+- مفاتيح الحفظ: `sound_tone_notifications`, `sound_tone_chat`, `sound_tone_ui`, `sound_cat_notifications_enabled`, `sound_cat_chat_enabled`, `sound_cat_ui_enabled`, `sound_cat_notifications_volume`, `sound_cat_chat_volume`, `sound_cat_ui_volume`
 
