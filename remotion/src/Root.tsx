@@ -7,6 +7,10 @@ import { Video4Dark, Video4Light } from "./videos/Video4Journey";
 import { Video5Dark, Video5Light } from "./videos/Video5CTA";
 import { TawheedReel } from "./TawheedReel";
 import { PlatformShowcase } from "./videos/PlatformShowcase";
+import { Ep2Dark, Ep2Light } from "./videos/episodes/Ep2Shipments";
+import { Ep3Dark, Ep3Light } from "./videos/episodes/Ep3AI";
+import { Ep4Dark, Ep4Light } from "./videos/episodes/Ep4Fleet";
+import { Ep5Dark, Ep5Light } from "./videos/episodes/Ep5Reports";
 
 export const RemotionRoot = () => (
   <>
@@ -22,5 +26,14 @@ export const RemotionRoot = () => (
     <Composition id="v5-light" component={Video5Light} durationInFrames={900} fps={30} width={1920} height={1080} />
     <Composition id="tawheed-reel" component={TawheedReel} durationInFrames={600} fps={30} width={1080} height={1920} />
     <Composition id="platform-showcase" component={PlatformShowcase} durationInFrames={1350} fps={30} width={1920} height={1080} />
+    {/* Series Episodes */}
+    <Composition id="ep2-dark" component={Ep2Dark} durationInFrames={1140} fps={30} width={1920} height={1080} />
+    <Composition id="ep2-light" component={Ep2Light} durationInFrames={1140} fps={30} width={1920} height={1080} />
+    <Composition id="ep3-dark" component={Ep3Dark} durationInFrames={1160} fps={30} width={1920} height={1080} />
+    <Composition id="ep3-light" component={Ep3Light} durationInFrames={1160} fps={30} width={1920} height={1080} />
+    <Composition id="ep4-dark" component={Ep4Dark} durationInFrames={1160} fps={30} width={1920} height={1080} />
+    <Composition id="ep4-light" component={Ep4Light} durationInFrames={1160} fps={30} width={1920} height={1080} />
+    <Composition id="ep5-dark" component={Ep5Dark} durationInFrames={1160} fps={30} width={1920} height={1080} />
+    <Composition id="ep5-light" component={Ep5Light} durationInFrames={1160} fps={30} width={1920} height={1080} />
   </>
 );
