@@ -220,6 +220,7 @@ const EnhancedChatInput = ({
       };
       mediaRecorder.start();
       setIsRecording(true);
+      soundEngine.play('recording_start');
       setRecordingTime(0);
       clearSelectedFile();
       recordingIntervalRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
