@@ -127,6 +127,7 @@ const VideoTheater = ({ url, isOpen, onClose, title }: VideoTheaterProps) => {
             ref={videoRef}
             src={url}
             className="w-full h-full object-contain"
+            preload="auto"
             onTimeUpdate={handleTimeUpdate}
             onLoadedMetadata={() => {
               if (videoRef.current) setDuration(videoRef.current.duration);

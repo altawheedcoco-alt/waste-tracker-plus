@@ -187,11 +187,24 @@ export const useStories = () => {
       let mediaType = 'text';
 
       if (file) {
-        const ext = file.name.split('.').pop();
+        let fileToUpload = file;
+
+        // ضغط الفيديو تلقائياً إذا كان كبيراً
+        if (shouldCompressVideo(file)) {
+          try {
+            toast.info('جاري ضغط الفيديو...');
+            const result = await compressVideo(file, { maxWidth: 720, maxHeight: 1280, videoBitrate: 1_500_000 });
+            fileToUpload = result.file;
+          } catch (err) {
+            console.warn('⚠️ فشل ضغط الفيديو، سيتم رفع الأصلي:', err);
+          }
+        }
+
+        const ext = fileToUpload.name.split('.').pop();
         const path = `${user!.id}/${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
           .from('stories')
-          .upload(path, file);
+          .upload(path, fileToUpload);
 
         if (uploadError) throw uploadError;
 

@@ -166,12 +166,28 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
                   autoPlay
                   playsInline
                   controls
+                  preload="auto"
+                  onWaiting={(e) => {
+                    const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner');
+                    if (spinner) (spinner as HTMLElement).style.display = 'flex';
+                  }}
+                  onPlaying={(e) => {
+                    const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner');
+                    if (spinner) (spinner as HTMLElement).style.display = 'none';
+                  }}
                 />
-              ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              )
+              ) : null
+            ) : story.media_type === 'video' || !resolvedMediaUrl ? (
+              <div className="w-full h-full bg-black flex items-center justify-center video-spinner">
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : null
+            }
+            {story.media_type === 'video' && (
+              <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10" style={{ display: 'none' }}>
+                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              </div>
+            )
             ) : (
               resolvedMediaUrl ? (
                 <img
