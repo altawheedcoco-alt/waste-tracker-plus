@@ -496,9 +496,9 @@ function PublicPostCard({ post, orgName, orgLogo }: { post: any; orgName: string
               {mediaUrls.slice(0, 4).map((url: string, i: number) => {
                 const isVideo = url.match(/\.(mp4|webm|mov)/i);
                 return isVideo ? (
-                  <video key={i} src={url} controls className="w-full max-h-96 object-cover bg-black" />
+                  <video key={i} src={url} controls className="w-full max-h-96 object-contain bg-black" />
                 ) : (
-                  <img key={i} src={url} alt="" className="w-full max-h-96 object-cover" loading="lazy" />
+                  <img key={i} src={url} alt="" className="w-full max-h-96 object-contain bg-muted" loading="lazy" />
                 );
               })}
             </div>
