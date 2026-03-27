@@ -634,7 +634,7 @@ const TransporterCommandCenter = () => {
                   onClick={() => navigate('/dashboard/transporter-receipts')} />
                 <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-violet-500"
                   sub={`${stats?.activeMembers || 0} نشط`}
-                  onClick={() => navigate('/dashboard/employees')} />
+                  onClick={() => navigate('/dashboard/org-structure')} />
                 <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
                   sub={`${stats?.activeVehicles || 0} فعّال`}
                   onClick={() => navigate('/dashboard/transporter-drivers')} />

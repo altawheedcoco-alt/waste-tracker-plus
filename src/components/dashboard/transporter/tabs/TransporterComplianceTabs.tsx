@@ -1,6 +1,6 @@
 /**
- * تبويبات المخاطر والامتثال والاستدامة (مدمجة)
- * compliance (regulatory_hub + ohs + risk + custody) | sustainability (carbon + esg)
+ * تبويبات المخاطر والامتثال (مدمجة)
+ * compliance (regulatory_hub + ohs + risk + custody)
  */
 import { lazy, Suspense, useState } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -15,8 +15,6 @@ const VehicleComplianceManager = lazy(() => import('@/components/compliance/Vehi
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
 const GovernmentReportingPanel = lazy(() => import('@/components/dashboard/transporter/GovernmentReportingPanel'));
-const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
-const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
@@ -120,15 +118,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
         </Suspense>
       </TabsContent>
 
-      {/* ══════ 9. البيئة والاستدامة (carbon + esg) ══════ */}
-      <TabsContent value="sustainability" className="space-y-4 mt-6">
-        <Suspense fallback={<TabFallback />}>
-          <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
-            <CarbonCreditsPanel />
-          </ErrorBoundary>
-          <ESGReportPanel />
-        </Suspense>
-      </TabsContent>
+      {/* sustainability tab moved to TransporterIntelligenceTabs */}
     </>
   );
 };
