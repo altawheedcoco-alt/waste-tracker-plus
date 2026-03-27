@@ -621,6 +621,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Navigation */}
           <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
+            {/* Pinned Items */}
+            {!sidebarSearch && (
+              <SidebarPinnedItems pinnedItems={pinnedMenuItems} isCollapsed={false} />
+            )}
+
             {/* Return to Admin Banner (when viewing as org) */}
             {adminViewingOrg && (
               <motion.button
@@ -643,26 +648,40 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
 
             {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item: SidebarMenuItem) => {
-                // Render section header
-                if (item.key.startsWith('__section__')) {
+              (() => {
+                let currentSectionId: string | null = null;
+                let isSectionHidden = false;
+
+                return filteredMenuItems.map((item: SidebarMenuItem) => {
+                  // Render section header
+                  if (item.key.startsWith('__section__')) {
+                    const sectionId = item.key.replace('__section__', '');
+                    currentSectionId = sectionId;
+                    isSectionHidden = collapsedSections.has(sectionId);
+                    return (
+                      <SidebarSectionHeader
+                        key={item.key}
+                        label={item.label}
+                        icon={item.icon}
+                        isCollapsed={false}
+                        isSectionFolded={isSectionHidden}
+                        onToggleFold={() => toggleSectionCollapse(sectionId)}
+                      />
+                    );
+                  }
+                  // Skip groups in collapsed sections (but not when searching)
+                  if (isSectionHidden && !sidebarSearch) {
+                    return null;
+                  }
                   return (
-                    <SidebarSectionHeader
+                    <SidebarNavGroup
                       key={item.key}
-                      label={item.label}
-                      icon={item.icon}
+                      item={item}
                       isCollapsed={false}
                     />
                   );
-                }
-                return (
-                  <SidebarNavGroup
-                    key={item.key}
-                    item={item}
-                    isCollapsed={false}
-                  />
-                );
-              })
+                });
+              })()
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 {t('commandPalette.noResults')}
