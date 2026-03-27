@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { motion } from 'framer-motion';
-import { Play, Clock, Eye, Film, ChevronLeft } from 'lucide-react';
+import { Play, Clock, Film } from 'lucide-react';
 import LandingWrapper from '@/components/LandingWrapper';
+import Header from '@/components/Header';
 import BackButton from '@/components/ui/back-button';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 
 interface VideoItem {
@@ -77,7 +78,8 @@ const VideoSeries = () => {
 
   return (
     <LandingWrapper>
-      <div className="space-y-6 p-4 sm:p-6">
+      <Header />
+      <div className="space-y-6 p-4 sm:p-6 pt-24 sm:pt-28">
         <BackButton />
 
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -158,6 +160,7 @@ const VideoSeries = () => {
         {/* Video Player Dialog */}
         <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
           <DialogContent className="max-w-4xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">{selectedVideo?.title || 'فيديو'}</DialogTitle>
             {selectedVideo && (
               <div>
                 <div className="aspect-video bg-black flex items-center justify-center">
