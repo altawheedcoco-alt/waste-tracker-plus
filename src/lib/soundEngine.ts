@@ -22,7 +22,22 @@ type SoundName =
   | 'download'     // تحميل ملف
   | 'scan'         // مسح QR
   | 'popup_open'   // فتح نافذة
-  | 'popup_close'; // إغلاق نافذة
+  | 'popup_close'  // إغلاق نافذة
+  | 'recording_start'  // بدء التسجيل الصوتي
+  | 'recording_stop'   // إيقاف التسجيل
+  | 'recording_cancel' // إلغاء التسجيل
+  | 'reaction'     // إضافة تفاعل إيموجي
+  | 'copy'         // نسخ رسالة
+  | 'pin'          // تثبيت رسالة
+  | 'forward'      // إعادة توجيه
+  | 'typing'       // صوت الكتابة
+  | 'call_ring'    // رنين مكالمة
+  | 'call_end'     // إنهاء مكالمة
+  | 'join_room'    // دخول غرفة/مجموعة
+  | 'leave_room'   // مغادرة غرفة
+  | 'mention'      // إشارة @
+  | 'broadcast'    // إرسال بث
+  | 'poll_vote';   // تصويت في استطلاع
 
 const STORAGE_KEY = 'app_sound_enabled';
 const VOLUME_KEY = 'app_sound_volume';
