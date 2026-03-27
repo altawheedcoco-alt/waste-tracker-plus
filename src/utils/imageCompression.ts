@@ -160,12 +160,13 @@ export const compressImage = async (
   // تحرير عنوان URL
   URL.revokeObjectURL(img.src);
 
-  // ضغط تدريجي إذا تجاوز الحجم المطلوب
+  // ضغط مرة واحدة فقط — بدون حلقة تكرارية لتجنب البطء
   let quality = opts.quality;
   let blob = await canvasToBlob(canvas, opts.outputFormat, quality);
 
-  while (blob.size > opts.maxSizeBytes && quality > 0.3) {
-    quality -= 0.1;
+  // إعادة ضغط مرة واحدة فقط إذا كان الحجم كبيراً جداً
+  if (blob.size > opts.maxSizeBytes && quality > 0.4) {
+    quality = 0.5;
     blob = await canvasToBlob(canvas, opts.outputFormat, quality);
   }
 
