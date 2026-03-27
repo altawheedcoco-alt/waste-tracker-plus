@@ -452,7 +452,7 @@ const Header = memo(() => {
                   {language === 'ar' ? 'المنشورات' : 'Posts'}
                 </button>
                 <button
-                  onClick={() => handleNavClick('/dashboard/video-series')}
+                  onClick={() => handleNavClick('/video-series')}
                   className="flex items-center gap-2 px-3 py-2.5 text-[11px] font-bold rounded-lg text-primary bg-gradient-to-br from-primary/8 to-primary/3 border border-primary/15 transition-all touch-manipulation"
                 >
                   <Film className="w-3 h-3 flex-shrink-0" />
