@@ -103,25 +103,42 @@ export function useFirebaseMessaging() {
       // 2. Register the Firebase messaging service worker
       let swReg: ServiceWorkerRegistration;
       try {
-        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-          scope: FCM_SERVICE_WORKER_SCOPE,
-        });
+        // Try to get existing registration first
+        const existingReg = await navigator.serviceWorker.getRegistration(FCM_SERVICE_WORKER_SCOPE);
+        if (existingReg) {
+          swReg = existingReg;
+          console.log('[FCM] Using existing SW registration:', swReg.scope);
+        } else {
+          swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+            scope: FCM_SERVICE_WORKER_SCOPE,
+          });
+          console.log('[FCM] New SW registered:', swReg.scope);
+        }
         await waitForServiceWorkerActivation(swReg);
-        console.log('[FCM] Service worker registered:', swReg.scope);
-      } catch (swErr) {
-        console.error('[FCM] SW registration failed:', swErr);
+        console.log('[FCM] SW active:', swReg.active?.state);
+      } catch (swErr: any) {
+        console.error('[FCM] SW registration failed:', swErr?.message || swErr);
+        toast.error('فشل تسجيل Service Worker: ' + (swErr?.message || 'خطأ غير معروف'));
         return null;
       }
 
       // 3. Get FCM token
-      console.log('[FCM] Requesting token...');
-      const token = await getToken(messaging, {
-        vapidKey: FCM_VAPID_KEY,
-        serviceWorkerRegistration: swReg,
-      });
+      console.log('[FCM] Requesting token with VAPID key...');
+      let token: string;
+      try {
+        token = await getToken(messaging, {
+          vapidKey: FCM_VAPID_KEY,
+          serviceWorkerRegistration: swReg,
+        });
+      } catch (tokenErr: any) {
+        console.error('[FCM] getToken error:', tokenErr?.message || tokenErr, tokenErr?.code);
+        toast.error('فشل الحصول على التوكن: ' + (tokenErr?.message || 'خطأ غير معروف'));
+        return null;
+      }
 
       if (!token) {
-        console.error('[FCM] No token returned');
+        console.error('[FCM] No token returned (empty)');
+        toast.error('لم يتم إرجاع توكن — تأكد من السماح بالإشعارات');
         return null;
       }
 
