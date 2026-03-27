@@ -21,6 +21,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import ChatMentionRenderer from './ChatMentionRenderer';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface GroupChatViewProps {
   room: ChatRoom;
