@@ -255,23 +255,32 @@ export const getAllSoundSettings = (): Record<NotificationSoundType, boolean> =>
 };
 export const resetSoundSettings = () => { localStorage.removeItem(NOTIF_SETTINGS_KEY); localStorage.removeItem('notification_sound_enabled'); };
 
-// Map DB notification type to sound type
+// Map DB notification type to sound type — uses central registry
+import { getNotificationTypeMeta } from '@/lib/notificationTypes';
+
+const SOUND_GROUP_MAP: Record<string, NotificationSoundType> = {
+  shipment_created: 'shipment_created',
+  shipment_status: 'shipment_status',
+  shipment_approved: 'shipment_approved',
+  shipment_delivered: 'shipment_delivered',
+  shipment_assigned: 'shipment_assigned',
+  recycling_report: 'recycling_report',
+  document_uploaded: 'document_uploaded',
+  document_signed: 'document_signed',
+  approval_request: 'approval_request',
+  chat_message: 'chat_message',
+  warning: 'warning',
+  financial: 'financial',
+  broadcast: 'broadcast',
+  partner_linked: 'partner_linked',
+  default: 'default',
+};
+
 export const mapNotificationTypeToSound = (dbType: string | null): NotificationSoundType => {
-  switch (dbType) {
-    case 'shipment_created': return 'shipment_created';
-    case 'shipment_status': case 'status_update': return 'shipment_status';
-    case 'shipment_approved': return 'shipment_approved';
-    case 'shipment_delivered': return 'shipment_delivered';
-    case 'shipment_assigned': case 'driver_assignment': return 'shipment_assigned';
-    case 'recycling_report': case 'report': case 'certificate': return 'recycling_report';
-    case 'document_uploaded': case 'document_issued': case 'signing_request': return 'document_uploaded';
-    case 'document_signed': case 'stamp_applied': return 'document_signed';
-    case 'approval_request': return 'approval_request';
-    case 'chat_message': case 'message': case 'mention': case 'partner_message': case 'partner_note': case 'partner_post': return 'chat_message';
-    case 'warning': case 'signal_lost': return 'warning';
-    case 'invoice': case 'payment': case 'deposit': case 'financial': return 'financial';
-    case 'broadcast': return 'broadcast';
-    case 'partner_linked': return 'partner_linked';
-    default: return 'default';
+  if (!dbType) return 'default';
+  const meta = getNotificationTypeMeta(dbType);
+  if (meta) {
+    return SOUND_GROUP_MAP[meta.soundGroup] || 'default';
   }
+  return 'default';
 };
