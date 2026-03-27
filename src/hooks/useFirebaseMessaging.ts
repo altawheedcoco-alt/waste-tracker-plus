@@ -10,6 +10,36 @@ import { getFirebaseMessaging, getToken, onMessage } from '@/lib/firebase';
 import { showSystemNotification } from '@/lib/systemNotifications';
 
 const FCM_VAPID_KEY = 'BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs';
+const FCM_SERVICE_WORKER_SCOPE = '/firebase-cloud-messaging-push-scope/';
+
+async function waitForServiceWorkerActivation(registration: ServiceWorkerRegistration) {
+  if (registration.active?.state === 'activated') return registration;
+
+  const worker = registration.installing || registration.waiting || registration.active;
+  if (!worker) return registration;
+
+  await new Promise<void>((resolve, reject) => {
+    const timeout = window.setTimeout(() => reject(new Error('FCM service worker activation timed out')), 10000);
+
+    const handleStateChange = () => {
+      if (worker.state === 'activated') {
+        window.clearTimeout(timeout);
+        worker.removeEventListener('statechange', handleStateChange);
+        resolve();
+      }
+    };
+
+    if (worker.state === 'activated') {
+      window.clearTimeout(timeout);
+      resolve();
+      return;
+    }
+
+    worker.addEventListener('statechange', handleStateChange);
+  });
+
+  return registration;
+}
 
 export function useFirebaseMessaging() {
   const { user } = useAuth();
@@ -63,8 +93,9 @@ export function useFirebaseMessaging() {
       let swReg: ServiceWorkerRegistration;
       try {
         swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-          scope: '/firebase-cloud-messaging-push-scope',
+          scope: FCM_SERVICE_WORKER_SCOPE,
         });
+        await waitForServiceWorkerActivation(swReg);
         console.log('[FCM] Service worker registered:', swReg.scope);
       } catch (swErr) {
         console.error('[FCM] SW registration failed:', swErr);
@@ -98,6 +129,16 @@ export function useFirebaseMessaging() {
       if (!session) {
         console.error('[FCM] No active session — cannot save token');
         return token; // Return token even if can't save
+      }
+
+      const { error: cleanupError } = await supabase
+        .from('push_subscriptions')
+        .delete()
+        .eq('user_id', user.id)
+        .not('endpoint', 'like', 'fcm_token://%');
+
+      if (cleanupError) {
+        console.warn('[FCM] Legacy subscription cleanup failed:', cleanupError.message);
       }
 
       // 5. Save FCM token to push_subscriptions with fcm_ prefix
