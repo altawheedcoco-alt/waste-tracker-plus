@@ -136,7 +136,7 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
               {isMyStory && (
                 <button
                   onClick={handleDelete}
-                  className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-red-500/60 transition-colors"
+                  className="w-8 h-8 rounded-full bg-black/40 flex items-center justify-center text-white hover:bg-destructive/60 transition-colors"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
