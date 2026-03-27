@@ -59,12 +59,15 @@ const TransporterIntelligenceTabs = () => (
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 7. المالية والتسعير (+ ملخص مالي) ══════ */}
+    {/* ══════ 7. المالية والتسعير (+ ملخص مالي + ربحية + نوبات) ══════ */}
     <TabsContent value="finance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
           <ErrorBoundary fallbackTitle="خطأ في الملخص المالي"><RevenueSnapshotMini /></ErrorBoundary>
         </Suspense>
+        <ErrorBoundary fallbackTitle="خطأ في تقرير الربحية">
+          <ProfitabilityReport />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
           <DynamicPricingEngine />
         </ErrorBoundary>
