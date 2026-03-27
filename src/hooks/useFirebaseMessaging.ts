@@ -81,6 +81,10 @@ export function useFirebaseMessaging() {
       console.warn('[FCM] No user — skipping init');
       return null;
     }
+    if (!('serviceWorker' in navigator)) {
+      console.warn('[FCM] Service workers are not available in this browser');
+      return null;
+    }
     // Allow re-init if previous attempt failed (no token saved)
     if (initRef.current && fcmToken) return fcmToken;
     initRef.current = true;
@@ -89,7 +93,14 @@ export function useFirebaseMessaging() {
     try {
       console.log('[FCM] Starting initialization...');
 
-      // 1. Register the Firebase messaging SW
+      // 1. Verify browser/engine support before touching the service worker
+      const messaging = await getFirebaseMessaging();
+      if (!messaging) {
+        console.warn('[FCM] Firebase Messaging is not supported in this browser/context');
+        return null;
+      }
+
+      // 2. Register the Firebase messaging service worker
       let swReg: ServiceWorkerRegistration;
       try {
         swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
@@ -99,13 +110,6 @@ export function useFirebaseMessaging() {
         console.log('[FCM] Service worker registered:', swReg.scope);
       } catch (swErr) {
         console.error('[FCM] SW registration failed:', swErr);
-        return null;
-      }
-
-      // 2. Get Firebase Messaging instance
-      const messaging = await getFirebaseMessaging();
-      if (!messaging) {
-        console.warn('[FCM] Not supported in this browser');
         return null;
       }
 
@@ -128,7 +132,7 @@ export function useFirebaseMessaging() {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         console.error('[FCM] No active session — cannot save token');
-        return token; // Return token even if can't save
+        return token;
       }
 
       const { error: cleanupError } = await supabase
@@ -146,11 +150,10 @@ export function useFirebaseMessaging() {
       const payload = {
         user_id: user.id,
         endpoint,
-        p256dh: token,  // full token in p256dh field
+        p256dh: token,
         auth_key: 'fcm',
       };
 
-      // Retry save up to 3 times
       let saved = false;
       for (let i = 0; i < 3; i++) {
         const { error } = await supabase.from('push_subscriptions').upsert(
@@ -172,7 +175,7 @@ export function useFirebaseMessaging() {
       return token;
     } catch (err) {
       console.error('[FCM] Init error:', err);
-      initRef.current = false; // Allow retry on error
+      initRef.current = false;
       return null;
     } finally {
       setLoading(false);
