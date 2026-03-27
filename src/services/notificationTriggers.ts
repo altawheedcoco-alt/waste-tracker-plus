@@ -240,6 +240,7 @@ export async function notifySocialEvent(params: {
     profile_photo_updated: '📸 تحديث صورة شخصية',
     cover_photo_updated: '🖼️ تحديث صورة الغلاف',
     broadcast_new_post: '📢 منشور بث جديد',
+    new_follower: '👤 متابع جديد',
     announcement: '📣 إعلان جديد',
     news_published: '📰 خبر جديد',
   };
