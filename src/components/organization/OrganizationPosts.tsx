@@ -163,21 +163,21 @@ const OrganizationPosts = ({
 
   const uploadFiles = async (): Promise<string[]> => {
     const { uploadFile } = await import('@/utils/optimizedUpload');
-    const urls: string[] = [];
     
-    for (const file of selectedFiles) {
-      const ext = file.name.split('.').pop();
-      const fileName = `${organizationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-      
-      const result = await uploadFile(file, {
-        bucket: 'organization-posts',
-        path: fileName,
-      });
+    // رفع جميع الملفات بالتوازي بدلاً من التسلسل
+    const results = await Promise.all(
+      selectedFiles.map((file) => {
+        const ext = file.name.split('.').pop();
+        const fileName = `${organizationId}/${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
+        return uploadFile(file, {
+          bucket: 'organization-posts',
+          path: fileName,
+          compress: file.type.startsWith('image/'), // ضغط الصور فقط
+        });
+      })
+    );
 
-      urls.push(result.publicUrl);
-    }
-
-    return urls;
+    return results.map((r) => r.publicUrl);
   };
 
   const determinePostType = (): 'text' | 'image' | 'video' | 'gallery' => {
