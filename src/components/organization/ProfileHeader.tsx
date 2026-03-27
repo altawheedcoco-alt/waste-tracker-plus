@@ -210,7 +210,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   return (
     <div className="relative">
       {/* Cover Photo */}
-      <div className="relative w-full aspect-[16/7] sm:aspect-[3/1] min-h-[10rem] sm:min-h-[12rem] max-h-[14rem] sm:max-h-[22rem] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+      <div className="relative w-full h-40 sm:h-48 md:h-56 rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
         {organization.cover_url ? (
           <ClickableImage
             src={organization.cover_url}
@@ -221,7 +221,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
-            <OrgIcon className="w-16 h-16 sm:w-24 sm:h-24 text-primary/30" />
+            <OrgIcon className="w-16 h-16 sm:w-20 sm:h-20 text-primary/30" />
           </div>
         )}
         
@@ -262,7 +262,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
 
       {/* Profile Section */}
       <div className="relative px-3 sm:px-6 pb-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 -mt-12 sm:-mt-20">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 -mt-10 sm:-mt-14">
           {/* Profile Picture */}
           <div className="relative">
             <motion.div
@@ -274,7 +274,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
                 gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
                 protected={isProtected}
               >
-                <Avatar className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
+                <Avatar className={`w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
                   <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
                   <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
                     {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
