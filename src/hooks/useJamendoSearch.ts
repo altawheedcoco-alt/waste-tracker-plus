@@ -72,10 +72,12 @@ export function useJamendoSearch() {
     }
   }, []);
 
-  const getPopular = useCallback(async (tags?: string) => {
+  const getPopular = useCallback(async (genreId?: string) => {
     setLoading(true);
     setError(null);
     try {
+      const genre = JAMENDO_GENRES.find(g => g.id === genreId);
+      const tags = genre?.searchTag || genreId || '';
       const params = new URLSearchParams({ action: 'popular' });
       if (tags) params.set('tags', tags);
 
