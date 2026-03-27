@@ -46,7 +46,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           </div>
         </div>
       ),
-      link: '/dashboard/accounting',
+      link: '/dashboard/erp/accounting',
     },
   ];
 
