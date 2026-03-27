@@ -104,12 +104,8 @@ const TransporterIntelligenceTabs = () => (
         <ErrorBoundary fallbackTitle="خطأ في السوق">
           <WasteMarketplace />
         </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في تقارير الاستدامة">
-          <SustainabilityReportGenerator />
-        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في اتفاقيات مستوى الخدمة">
           <SLADashboard />
-          <ProfitabilityReport />
         </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تقييمات الشركاء">
           <PartnerRatingsWidget />
