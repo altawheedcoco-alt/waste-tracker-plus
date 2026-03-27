@@ -135,7 +135,7 @@ const FloatingSidePanel = memo(() => {
       id: 'call-log',
       icon: <Phone size={iconSize} />,
       label: 'تسجيل مكالمة',
-      gradient: 'from-blue-500 to-indigo-500',
+      gradient: 'from-primary to-primary/60',
       onClick: () => { setShowCallDialog(true); if (isMobile) setIsOpen(false); },
       visible: isAdmin || isTransporter,
       category: 'operations',
