@@ -21,6 +21,8 @@ export interface UploadOptions {
   upsert?: boolean;
   /** مدة التخزين المؤقت بالثواني */
   cacheControl?: string;
+  /** دالة تتبع التقدم (0-100) */
+  onProgress?: (percent: number) => void;
 }
 
 export interface UploadResult {
