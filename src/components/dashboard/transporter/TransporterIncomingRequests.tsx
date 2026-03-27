@@ -76,9 +76,25 @@ const TransporterIncomingRequests = () => {
 
     if (error) {
       toast.error('حدث خطأ أثناء قبول الشحنة');
-      throw error; // rethrow so IdempotentButton can rollback
+      throw error;
     }
     toast.success('تم قبول الشحنة');
+    queryClient.invalidateQueries({ queryKey: ['transporter-incoming-requests'] });
+    queryClient.invalidateQueries({ queryKey: ['transporter-shipments'] });
+    queryClient.invalidateQueries({ queryKey: ['transporter-stats'] });
+  };
+
+  const handleReject = async (id: string) => {
+    const { error } = await supabase
+      .from('shipments')
+      .update({ status: 'cancelled' })
+      .eq('id', id);
+
+    if (error) {
+      toast.error('حدث خطأ أثناء رفض الشحنة');
+      return;
+    }
+    toast.success('تم رفض الشحنة');
     queryClient.invalidateQueries({ queryKey: ['transporter-incoming-requests'] });
     queryClient.invalidateQueries({ queryKey: ['transporter-shipments'] });
     queryClient.invalidateQueries({ queryKey: ['transporter-stats'] });
