@@ -210,7 +210,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   return (
     <div className="relative">
       {/* Cover Photo */}
-      <div className="relative aspect-[3/1] min-h-[12rem] max-h-[22rem] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+      <div className="relative w-full aspect-[16/7] sm:aspect-[3/1] min-h-[10rem] sm:min-h-[12rem] max-h-[14rem] sm:max-h-[22rem] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
         {organization.cover_url ? (
           <ClickableImage
             src={organization.cover_url}
@@ -221,7 +221,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
-            <OrgIcon className="w-24 h-24 text-primary/30" />
+            <OrgIcon className="w-16 h-16 sm:w-24 sm:h-24 text-primary/30" />
           </div>
         )}
         
@@ -233,7 +233,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="absolute top-4 left-4"
+            className="absolute top-3 left-3 sm:top-4 sm:left-4"
           >
             <input
               ref={coverInputRef}
@@ -247,12 +247,12 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
               size="sm"
               onClick={() => coverInputRef.current?.click()}
               disabled={uploadingCover}
-              className="shadow-lg"
+              className="shadow-lg text-xs sm:text-sm"
             >
               {uploadingCover ? (
-                <Loader2 className="w-4 h-4 ml-2 animate-spin" />
+                <Loader2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2 animate-spin" />
               ) : (
-                <Camera className="w-4 h-4 ml-2" />
+                <Camera className="w-3.5 h-3.5 sm:w-4 sm:h-4 ml-1.5 sm:ml-2" />
               )}
               تغيير الغلاف
             </Button>
@@ -261,8 +261,8 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
       </div>
 
       {/* Profile Section */}
-      <div className="relative px-4 sm:px-6 pb-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4 -mt-16 sm:-mt-20">
+      <div className="relative px-3 sm:px-6 pb-4">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 -mt-12 sm:-mt-20">
           {/* Profile Picture */}
           <div className="relative">
             <motion.div
@@ -274,7 +274,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
                 gallery={[organization.logo_url, organization.cover_url].filter(Boolean) as string[]}
                 protected={isProtected}
               >
-                <Avatar className={`w-32 h-32 sm:w-40 sm:h-40 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
+                <Avatar className={`w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 border-4 shadow-xl ${isLocked ? 'border-blue-500 ring-4 ring-blue-500/30' : 'border-background'}`}>
                   <AvatarImage src={organization.logo_url || ''} alt={organization.name} />
                   <AvatarFallback className="bg-primary/10 text-primary text-3xl sm:text-4xl font-bold">
                     {organization.name?.charAt(0) || <OrgIcon className="w-12 h-12" />}
@@ -320,7 +320,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           {/* Organization Info */}
           <div className="flex-1 text-center sm:text-right sm:pb-2">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold">{organization.name}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{organization.name}</h1>
               <TooltipProvider>
                 <div className="flex items-center gap-2">
                   <Badge variant={organization.is_verified ? 'default' : 'secondary'}>
