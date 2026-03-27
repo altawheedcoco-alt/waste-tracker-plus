@@ -33207,6 +33207,178 @@ export type Database = {
           },
         ]
       }
+      reel_bookmarks: {
+        Row: {
+          created_at: string | null
+          id: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_bookmarks_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          like_count: number | null
+          parent_id: string | null
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          like_count?: number | null
+          parent_id?: string | null
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          like_count?: number | null
+          parent_id?: string | null
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_comments_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "reel_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reel_comments_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_likes: {
+        Row: {
+          created_at: string | null
+          id: string
+          reel_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          reel_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          reel_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_likes_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reels: {
+        Row: {
+          caption: string | null
+          comment_count: number | null
+          created_at: string | null
+          duration_seconds: number | null
+          hashtags: string[] | null
+          id: string
+          is_active: boolean | null
+          like_count: number | null
+          organization_id: string | null
+          thumbnail_url: string | null
+          updated_at: string | null
+          user_id: string
+          video_url: string
+          view_count: number | null
+          visibility: string | null
+        }
+        Insert: {
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          hashtags?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          like_count?: number | null
+          organization_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id: string
+          video_url: string
+          view_count?: number | null
+          visibility?: string | null
+        }
+        Update: {
+          caption?: string | null
+          comment_count?: number | null
+          created_at?: string | null
+          duration_seconds?: number | null
+          hashtags?: string[] | null
+          id?: string
+          is_active?: boolean | null
+          like_count?: number | null
+          organization_id?: string | null
+          thumbnail_url?: string | null
+          updated_at?: string | null
+          user_id?: string
+          video_url?: string
+          view_count?: number | null
+          visibility?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "reels_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       regulated_companies: {
         Row: {
           activity_description: string | null
@@ -45478,6 +45650,10 @@ export type Database = {
       can_org_access_dashboard: { Args: { org_id: string }; Returns: boolean }
       can_org_operate: { Args: { org_id: string }; Returns: boolean }
       can_view_organization: { Args: { _org_id: string }; Returns: boolean }
+      can_view_reel: {
+        Args: { reel_org_id: string; reel_user_id: string }
+        Returns: boolean
+      }
       can_view_shipment: {
         Args: {
           _generator_id: string
