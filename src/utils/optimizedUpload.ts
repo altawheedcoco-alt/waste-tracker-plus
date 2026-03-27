@@ -75,22 +75,17 @@ export const uploadFile = async (
     finalPath = path.replace(/\.[^.]+$/, `.${newExt}`);
   }
 
-  const { error: uploadError } = await supabase.storage
-    .from(bucket)
-    .upload(finalPath, fileToUpload, {
-      contentType: options.contentType || fileToUpload.type,
-      upsert,
-      cacheControl,
-    });
-
-  if (uploadError) throw uploadError;
-
-  const { data: urlData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(finalPath);
+  // استخدام الرفع المقسم للملفات الكبيرة (> 5MB)
+  const result = await smartChunkedUpload(fileToUpload, {
+    bucket,
+    path: finalPath,
+    contentType: options.contentType || fileToUpload.type,
+    upsert,
+    onProgress: options.onProgress,
+  });
 
   return {
-    publicUrl: urlData.publicUrl,
+    publicUrl: result.publicUrl,
     path: finalPath,
     originalSize,
     finalSize: fileToUpload.size,
