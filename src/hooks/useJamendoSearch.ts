@@ -16,16 +16,18 @@ export interface JamendoTrack {
 }
 
 export const JAMENDO_GENRES = [
-  { id: 'pop', label: 'بوب', emoji: '🎤' },
-  { id: 'rock', label: 'روك', emoji: '🎸' },
-  { id: 'electronic', label: 'إلكتروني', emoji: '🎧' },
-  { id: 'hiphop', label: 'هيب هوب', emoji: '🎤' },
-  { id: 'jazz', label: 'جاز', emoji: '🎷' },
-  { id: 'classical', label: 'كلاسيك', emoji: '🎻' },
-  { id: 'rnb', label: 'آر أند بي', emoji: '💜' },
-  { id: 'ambient', label: 'هادئة', emoji: '🌙' },
-  { id: 'reggae', label: 'ريغي', emoji: '🌴' },
-  { id: 'world', label: 'عالمية', emoji: '🌍' },
+  { id: 'arabic', label: 'عربي', emoji: '🇪🇬', searchTag: 'arabic+oriental+middle+eastern' },
+  { id: 'oriental', label: 'شرقي', emoji: '🎵', searchTag: 'oriental+belly+dance' },
+  { id: 'world', label: 'شعبي/عالمي', emoji: '🌍', searchTag: 'world+folk+ethnic' },
+  { id: 'hiphop', label: 'راب/هيب هوب', emoji: '🎤', searchTag: 'hiphop+rap+trap' },
+  { id: 'electronic', label: 'إلكتروني', emoji: '🎧', searchTag: 'electronic+edm+dance' },
+  { id: 'pop', label: 'بوب', emoji: '💃', searchTag: 'pop' },
+  { id: 'rock', label: 'روك', emoji: '🎸', searchTag: 'rock' },
+  { id: 'rnb', label: 'آر أند بي', emoji: '💜', searchTag: 'rnb+soul' },
+  { id: 'jazz', label: 'جاز', emoji: '🎷', searchTag: 'jazz' },
+  { id: 'classical', label: 'كلاسيك', emoji: '🎻', searchTag: 'classical+orchestral' },
+  { id: 'reggae', label: 'ريغي', emoji: '🌴', searchTag: 'reggae+reggaeton+latin' },
+  { id: 'ambient', label: 'هادئة', emoji: '🌙', searchTag: 'ambient+chillout+lounge' },
 ];
 
 export function useJamendoSearch() {
@@ -33,10 +35,12 @@ export function useJamendoSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const search = useCallback(async (query: string, tags?: string) => {
+  const search = useCallback(async (query: string, genreId?: string) => {
     setLoading(true);
     setError(null);
     try {
+      const genre = JAMENDO_GENRES.find(g => g.id === genreId);
+      const tags = genre?.searchTag || genreId || '';
       const params = new URLSearchParams({ action: 'search' });
       if (query) params.set('q', query);
       if (tags) params.set('tags', tags);
@@ -68,10 +72,12 @@ export function useJamendoSearch() {
     }
   }, []);
 
-  const getPopular = useCallback(async (tags?: string) => {
+  const getPopular = useCallback(async (genreId?: string) => {
     setLoading(true);
     setError(null);
     try {
+      const genre = JAMENDO_GENRES.find(g => g.id === genreId);
+      const tags = genre?.searchTag || genreId || '';
       const params = new URLSearchParams({ action: 'popular' });
       if (tags) params.set('tags', tags);
 
