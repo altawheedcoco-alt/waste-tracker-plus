@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { getTabChannelName } from '@/lib/tabSession';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface ChatMessage {
   id: string;
@@ -67,6 +68,7 @@ const MeetingChat = ({ meetingId }: { meetingId: string }) => {
           ...msg,
           sender_name: sender?.full_name || 'مستخدم',
         }]);
+        soundEngine.play('message_received');
       })
       .subscribe();
 
@@ -88,6 +90,7 @@ const MeetingChat = ({ meetingId }: { meetingId: string }) => {
       message_type: 'text',
     });
 
+    soundEngine.play('message_sent');
     setInput('');
     setSending(false);
   };

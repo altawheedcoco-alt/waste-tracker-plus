@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { soundEngine } from '@/lib/soundEngine';
 import { BarChart3, Check, Lock, Users } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,7 @@ export default function ChatPollCard({ poll, currentUserId, onVote, onClose }: C
   const handleVote = (idx: number) => {
     if (poll.is_closed || hasVoted) return;
     setSelectedOption(idx);
+    soundEngine.play('poll_vote');
     onVote(poll.id, idx);
   };
 

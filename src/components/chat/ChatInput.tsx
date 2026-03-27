@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { soundEngine } from '@/lib/soundEngine';
 import {
   Tooltip,
   TooltipContent,
@@ -177,6 +178,7 @@ const ChatInput = ({ onSendMessage, onSendFile, sending, uploadProgress = 0, dis
 
       mediaRecorder.start();
       setIsRecording(true);
+      soundEngine.play('recording_start');
       setRecordingTime(0);
       clearSelectedFile();
 
@@ -202,6 +204,7 @@ const ChatInput = ({ onSendMessage, onSendFile, sending, uploadProgress = 0, dis
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      soundEngine.play('recording_stop');
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SmilePlus } from 'lucide-react';
+import { soundEngine } from '@/lib/soundEngine';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
@@ -30,7 +31,7 @@ const MessageReactionsDisplay = ({ reactions, onReact, isOwn }: MessageReactions
       {reactions.map((r) => (
         <button
           key={r.emoji}
-          onClick={() => onReact(r.emoji)}
+          onClick={() => { soundEngine.play('reaction'); onReact(r.emoji); }}
           className={cn(
             "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors",
             r.reacted
@@ -68,7 +69,7 @@ export const ReactionPicker = ({ onReact, isOwn }: { onReact: (emoji: string) =>
           {QUICK_REACTIONS.map((emoji) => (
             <button
               key={emoji}
-              onClick={() => onReact(emoji)}
+              onClick={() => { soundEngine.play('reaction'); onReact(emoji); }}
               className="w-8 h-8 flex items-center justify-center hover:bg-muted rounded-md transition-colors text-lg hover:scale-125"
             >
               {emoji}

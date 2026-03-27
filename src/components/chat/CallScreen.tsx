@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { CallInfo } from '@/hooks/useWebRTCCall';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface CallScreenProps {
   callInfo: CallInfo;
@@ -60,6 +61,18 @@ const CallScreen = memo(({
   const isVideo = callInfo.callType === 'video';
   const isActive = callInfo.state === 'connected';
   const isRinging = callInfo.state === 'ringing' || callInfo.state === 'calling';
+
+  // Play call sounds based on state
+  useEffect(() => {
+    if (isRinging) {
+      soundEngine.play('call_ring');
+      const interval = setInterval(() => soundEngine.play('call_ring'), 3000);
+      return () => clearInterval(interval);
+    }
+    if (callInfo.state === 'ended') {
+      soundEngine.play('call_end');
+    }
+  }, [callInfo.state, isRinging]);
 
   const getStatusText = () => {
     switch (callInfo.state) {

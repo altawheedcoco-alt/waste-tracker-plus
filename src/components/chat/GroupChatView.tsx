@@ -21,6 +21,7 @@ import { format, isToday, isYesterday } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import ChatMentionRenderer from './ChatMentionRenderer';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface GroupChatViewProps {
   room: ChatRoom;
@@ -67,6 +68,7 @@ const GroupChatView = ({ room, onBack }: GroupChatViewProps) => {
     setSending(true);
     try {
       await sendRoomMessage(room.id, inputValue.trim());
+      soundEngine.play('message_sent');
       setInputValue('');
       queryClient.invalidateQueries({ queryKey: ['group-messages', room.id] });
     } finally {

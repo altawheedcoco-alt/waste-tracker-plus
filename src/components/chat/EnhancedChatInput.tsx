@@ -30,6 +30,7 @@ import { Badge } from '@/components/ui/badge';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { soundEngine } from '@/lib/soundEngine';
 import {
   Popover,
   PopoverContent,
@@ -219,6 +220,7 @@ const EnhancedChatInput = ({
       };
       mediaRecorder.start();
       setIsRecording(true);
+      soundEngine.play('recording_start');
       setRecordingTime(0);
       clearSelectedFile();
       recordingIntervalRef.current = setInterval(() => setRecordingTime(prev => prev + 1), 1000);
@@ -231,6 +233,7 @@ const EnhancedChatInput = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      soundEngine.play('recording_stop');
       setIsRecordingLocked(false);
       if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
     }
@@ -240,6 +243,7 @@ const EnhancedChatInput = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      soundEngine.play('recording_cancel');
       setIsRecordingLocked(false);
       if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
       // Clear the audio immediately

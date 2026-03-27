@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface MessageActionsProps {
   messageContent: string;
@@ -52,6 +53,7 @@ const MessageActions = ({
         textToCopy = parsed.text || messageContent;
       } catch { /* Use original */ }
       await navigator.clipboard.writeText(textToCopy);
+      soundEngine.play('copy');
       toast({ title: 'تم النسخ', description: 'تم نسخ الرسالة إلى الحافظة' });
     } catch {
       toast({ title: 'خطأ', description: 'فشل نسخ الرسالة', variant: 'destructive' });
@@ -75,13 +77,13 @@ const MessageActions = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align={isOwn ? "start" : "end"} className="min-w-[140px]">
         {onReply && (
-          <DropdownMenuItem onClick={onReply}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('tap'); onReply(); }}>
             <Reply className="w-4 h-4 ml-2" />
             رد
           </DropdownMenuItem>
         )}
         {onForward && (
-          <DropdownMenuItem onClick={onForward}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('forward'); onForward(); }}>
             <Forward className="w-4 h-4 ml-2" />
             إعادة توجيه
           </DropdownMenuItem>
@@ -91,13 +93,13 @@ const MessageActions = ({
           نسخ
         </DropdownMenuItem>
         {onPin && (
-          <DropdownMenuItem onClick={onPin}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('pin'); onPin(); }}>
             <Pin className="w-4 h-4 ml-2" />
             {isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}
           </DropdownMenuItem>
         )}
         {onStar && (
-          <DropdownMenuItem onClick={onStar}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('tap'); onStar(); }}>
             <Star className="w-4 h-4 ml-2" />
             تمييز بنجمة
           </DropdownMenuItem>
@@ -105,7 +107,7 @@ const MessageActions = ({
         {isOwn && onDelete && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+            <DropdownMenuItem onClick={() => { soundEngine.play('delete'); onDelete(); }} className="text-destructive">
               <Trash2 className="w-4 h-4 ml-2" />
               حذف
             </DropdownMenuItem>

@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import type { ChatPartner } from './ChatSidebar';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface ForwardMessageDialogProps {
   open: boolean;
@@ -73,6 +74,7 @@ const ForwardMessageDialog = ({
               <button
                 key={partner.id}
                 onClick={() => {
+                  soundEngine.play('forward');
                   onForward(partner.id);
                   onOpenChange(false);
                 }}
