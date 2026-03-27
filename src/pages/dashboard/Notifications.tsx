@@ -32,6 +32,7 @@ import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { normalizeRelation } from '@/lib/supabaseHelpers';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 // ═══════════════════════════════════════════════════════
 // Metadata labels
