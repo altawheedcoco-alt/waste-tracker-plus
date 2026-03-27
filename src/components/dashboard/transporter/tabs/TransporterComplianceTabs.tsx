@@ -15,8 +15,6 @@ const VehicleComplianceManager = lazy(() => import('@/components/compliance/Vehi
 const DriverComplianceManager = lazy(() => import('@/components/compliance/DriverComplianceManager'));
 const IncidentReportManager = lazy(() => import('@/components/compliance/IncidentReportManager'));
 const GovernmentReportingPanel = lazy(() => import('@/components/dashboard/transporter/GovernmentReportingPanel'));
-const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
-const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
 const WMISEventsFeed = lazy(() => import('@/components/wmis/WMISEventsFeed'));
 const LicensedWasteTypesEditor = lazy(() => import('@/components/wmis/LicensedWasteTypesEditor'));
 const TransporterLicenseRenewal = lazy(() => import('@/components/transporter/TransporterLicenseRenewal'));
