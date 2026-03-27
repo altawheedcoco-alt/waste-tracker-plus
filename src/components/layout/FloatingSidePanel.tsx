@@ -86,7 +86,7 @@ const FloatingSidePanel = memo(() => {
       id: 'support',
       icon: <Headphones size={iconSize} />,
       label: 'الدعم الفني',
-      gradient: 'from-primary to-emerald-500',
+      gradient: 'from-primary to-primary/70',
       onClick: () => handleWidgetOpen('support'),
       visible: true,
       category: 'assistant',
