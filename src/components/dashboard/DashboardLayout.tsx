@@ -108,6 +108,7 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import SidebarSectionHeader from './SidebarSectionHeader';
+import SidebarPinnedItems from './SidebarPinnedItems';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
 import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
