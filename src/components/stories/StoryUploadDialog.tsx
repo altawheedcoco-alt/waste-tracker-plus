@@ -260,6 +260,9 @@ const StoryUploadDialog = ({ open, onOpenChange }: StoryUploadDialogProps) => {
                   )}
                 </AnimatePresence>
 
+                {/* Music Picker */}
+                <MusicPicker selectedTrack={selectedMusic} onSelect={setSelectedMusic} compact />
+
                 <Button
                   onClick={handleSubmit}
                   disabled={uploadStory.isPending}
