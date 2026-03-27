@@ -192,8 +192,13 @@ export function useReelActions() {
 
   const incrementView = useMutation({
     mutationFn: async (reelId: string) => {
-      // Simple view count - just note it was viewed
-      // Could be enhanced with a proper RPC later
+      if (!user) return;
+      await supabase.from('reel_views').insert({
+        reel_id: reelId,
+        viewer_id: user.id,
+        watch_duration_seconds: 0,
+        completed: false,
+      });
     },
   });
 

@@ -33349,11 +33349,47 @@ export type Database = {
           },
         ]
       }
+      reel_views: {
+        Row: {
+          completed: boolean | null
+          created_at: string | null
+          id: string
+          reel_id: string
+          viewer_id: string | null
+          watch_duration_seconds: number | null
+        }
+        Insert: {
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          reel_id: string
+          viewer_id?: string | null
+          watch_duration_seconds?: number | null
+        }
+        Update: {
+          completed?: boolean | null
+          created_at?: string | null
+          id?: string
+          reel_id?: string
+          viewer_id?: string | null
+          watch_duration_seconds?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_views_reel_id_fkey"
+            columns: ["reel_id"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reels: {
         Row: {
           caption: string | null
           comment_count: number | null
           created_at: string | null
+          duet_of: string | null
           duration_seconds: number | null
           hashtags: string[] | null
           id: string
@@ -33363,6 +33399,7 @@ export type Database = {
           thumbnail_url: string | null
           updated_at: string | null
           user_id: string
+          video_filter: string | null
           video_url: string
           view_count: number | null
           visibility: string | null
@@ -33371,6 +33408,7 @@ export type Database = {
           caption?: string | null
           comment_count?: number | null
           created_at?: string | null
+          duet_of?: string | null
           duration_seconds?: number | null
           hashtags?: string[] | null
           id?: string
@@ -33380,6 +33418,7 @@ export type Database = {
           thumbnail_url?: string | null
           updated_at?: string | null
           user_id: string
+          video_filter?: string | null
           video_url: string
           view_count?: number | null
           visibility?: string | null
@@ -33388,6 +33427,7 @@ export type Database = {
           caption?: string | null
           comment_count?: number | null
           created_at?: string | null
+          duet_of?: string | null
           duration_seconds?: number | null
           hashtags?: string[] | null
           id?: string
@@ -33397,11 +33437,19 @@ export type Database = {
           thumbnail_url?: string | null
           updated_at?: string | null
           user_id?: string
+          video_filter?: string | null
           video_url?: string
           view_count?: number | null
           visibility?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "reels_duet_of_fkey"
+            columns: ["duet_of"]
+            isOneToOne: false
+            referencedRelation: "reels"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "reels_organization_id_fkey"
             columns: ["organization_id"]
