@@ -156,7 +156,6 @@ export function useWebPush() {
 
       const token = await initializeFCM();
       if (!token) {
-        toast.error('فشل تفعيل الإشعارات لأن هذا المتصفح لا يكمّل تسجيل التوكن بشكل صحيح');
         return false;
       }
 
@@ -182,9 +181,9 @@ export function useWebPush() {
       });
 
       return true;
-    } catch (e) {
+    } catch (e: any) {
       console.error('[Push] Subscribe error:', e);
-      toast.error('حدث خطأ — حاول مرة أخرى');
+      toast.error(e?.message || 'فشل تفعيل الإشعارات');
       return false;
     } finally {
       setSubscribing(false);

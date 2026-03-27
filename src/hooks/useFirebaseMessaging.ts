@@ -117,29 +117,37 @@ export function useFirebaseMessaging() {
         await waitForServiceWorkerActivation(swReg);
         console.log('[FCM] SW active:', swReg.active?.state);
       } catch (swErr: any) {
-        console.error('[FCM] SW registration failed:', swErr?.message || swErr);
-        toast.error('فشل تسجيل Service Worker: ' + (swErr?.message || 'خطأ غير معروف'));
-        return null;
+        const message = swErr?.message || 'تعذر تسجيل Service Worker الخاص بالإشعارات';
+        console.error('[FCM] SW registration failed:', message);
+        toast.error(message);
+        throw new Error(message);
       }
 
       // 3. Get FCM token
       console.log('[FCM] Requesting token with VAPID key...');
       let token: string;
       try {
-        token = await getToken(messaging, {
-          vapidKey: FCM_VAPID_KEY,
-          serviceWorkerRegistration: swReg,
-        });
+        token = await Promise.race([
+          getToken(messaging, {
+            vapidKey: FCM_VAPID_KEY,
+            serviceWorkerRegistration: swReg,
+          }),
+          new Promise<never>((_, reject) =>
+            window.setTimeout(() => reject(new Error('انتهت مهلة إنشاء FCM token — غالباً يوجد تعارض في Web Push أو مفتاح VAPID غير مطابق')), 12000)
+          ),
+        ]);
       } catch (tokenErr: any) {
-        console.error('[FCM] getToken error:', tokenErr?.message || tokenErr, tokenErr?.code);
-        toast.error('فشل الحصول على التوكن: ' + (tokenErr?.message || 'خطأ غير معروف'));
-        return null;
+        const message = tokenErr?.message || 'فشل إنشاء FCM token';
+        console.error('[FCM] getToken error:', message, tokenErr?.code);
+        toast.error(message);
+        throw new Error(message);
       }
 
       if (!token) {
+        const message = 'لم يتم إنشاء FCM token — غالباً إعداد Web Push في Firebase غير مكتمل';
         console.error('[FCM] No token returned (empty)');
-        toast.error('لم يتم إرجاع توكن — تأكد من السماح بالإشعارات');
-        return null;
+        toast.error(message);
+        throw new Error(message);
       }
 
       console.log('[FCM] Token received:', token.slice(0, 20) + '...');
