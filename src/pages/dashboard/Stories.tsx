@@ -63,7 +63,7 @@ const Stories = () => {
                       className="flex items-center gap-3 p-3 rounded-xl border bg-card hover:bg-muted/50 transition-colors"
                     >
                       {story.media_type === 'text' ? (
-                        <div className={`w-14 h-14 rounded-lg ${story.background_color || 'bg-gradient-to-br from-emerald-500 to-teal-700'} flex items-center justify-center`}>
+                        <div className={`w-14 h-14 rounded-lg ${story.background_color || 'bg-gradient-to-br from-primary to-primary/60'} flex items-center justify-center`}>
                           <span className="text-white text-[8px] font-bold text-center px-1 line-clamp-2">
                             {story.text_content?.slice(0, 20)}
                           </span>

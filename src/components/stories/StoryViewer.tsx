@@ -178,7 +178,7 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
                     }}
                   />
                 ) : null}
-                <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10 flex">
+                <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10 hidden">
                   <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 </div>
               </>
