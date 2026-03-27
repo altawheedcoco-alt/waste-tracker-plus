@@ -77,13 +77,13 @@ const MessageActions = ({
       </DropdownMenuTrigger>
       <DropdownMenuContent align={isOwn ? "start" : "end"} className="min-w-[140px]">
         {onReply && (
-          <DropdownMenuItem onClick={onReply}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('tap'); onReply(); }}>
             <Reply className="w-4 h-4 ml-2" />
             رد
           </DropdownMenuItem>
         )}
         {onForward && (
-          <DropdownMenuItem onClick={onForward}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('forward'); onForward(); }}>
             <Forward className="w-4 h-4 ml-2" />
             إعادة توجيه
           </DropdownMenuItem>
