@@ -10,9 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MusicPicker from '@/components/media/MusicPicker';
 import type { MusicTrack } from '@/lib/musicLibrary';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
 
 interface Props {
   open: boolean;
