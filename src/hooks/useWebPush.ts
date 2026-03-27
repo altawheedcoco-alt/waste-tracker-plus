@@ -57,7 +57,7 @@ export function useWebPush() {
         message: 'ستصلك جميع التنبيهات والتحديثات المهمة فوراً.',
         type: 'system',
         is_read: false,
-      } as any).then(() => {}).catch(() => {});
+      } as any).then(() => {});
 
       return true;
     } catch (e) {
