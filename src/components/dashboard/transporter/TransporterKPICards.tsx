@@ -46,7 +46,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           </div>
         </div>
       ),
-      link: '/dashboard/accounting',
+      link: '/dashboard/erp/accounting',
     },
   ];
 
@@ -62,7 +62,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           <p>{t('transporterKPI.pendingFollowUp')}</p>
         </div>
       ),
-      link: '/dashboard/accounting',
+      link: '/dashboard/erp/accounting',
     },
   ];
 
@@ -116,7 +116,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           )}
         </div>
       ),
-      link: '/dashboard/shipments',
+      link: '/dashboard/transporter-shipments',
     },
   ];
 
