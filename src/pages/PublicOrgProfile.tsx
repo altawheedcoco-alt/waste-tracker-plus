@@ -224,7 +224,7 @@ export default function PublicOrgProfile() {
         <Card className="overflow-hidden rounded-none border-x-0 border-t-0">
           <div className="relative h-48 sm:h-56 bg-gradient-to-bl from-primary/30 via-primary/10 to-background">
             {org.cover_url && (
-              <img src={org.cover_url} alt="غلاف" className="w-full h-full object-cover" />
+              <img src={org.cover_url} alt="غلاف" className="w-full h-full object-contain bg-muted" />
             )}
           </div>
 
