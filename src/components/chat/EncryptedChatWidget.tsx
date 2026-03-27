@@ -158,6 +158,17 @@ const EncryptedChatWidget = () => {
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
 
+  // Listen for widget bus events (team-chat from FloatingSidePanel/UnifiedFloatingMenu)
+  useEffect(() => {
+    const unsubscribe = onWidgetToggle((widgetId) => {
+      if (widgetId === 'team-chat') {
+        setIsOpen(true);
+        setSelectedConvoId(null); // show conversations list
+      }
+    });
+    return unsubscribe;
+  }, []);
+
   // Filter by search
   const filteredConversations = useMemo(() => {
     if (!searchQuery.trim()) return conversations;
