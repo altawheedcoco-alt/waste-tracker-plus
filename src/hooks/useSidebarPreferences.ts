@@ -9,6 +9,8 @@ interface SidebarPrefs {
   group_order: string[];
   hidden_groups: string[];
   collapsed_groups: string[];
+  collapsed_sections?: string[];
+  pinned_items?: string[];
 }
 
 export function useSidebarPreferences() {
