@@ -7,6 +7,52 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useFirebaseMessaging } from './useFirebaseMessaging';
+import { getFirebaseMessaging } from '@/lib/firebase';
+
+type PushSupportState = {
+  checked: boolean;
+  supported: boolean;
+  reason: string | null;
+};
+
+function isIOSDevice() {
+  if (typeof navigator === 'undefined') return false;
+  return /iPad|iPhone|iPod/.test(navigator.userAgent);
+}
+
+function isStandalonePwa() {
+  if (typeof window === 'undefined') return false;
+  return window.matchMedia('(display-mode: standalone)').matches || Boolean((window.navigator as Navigator & { standalone?: boolean }).standalone);
+}
+
+async function detectPushSupport(): Promise<PushSupportState> {
+  if (typeof window === 'undefined') {
+    return { checked: true, supported: false, reason: 'المتصفح غير متاح حالياً' };
+  }
+
+  if (!window.isSecureContext) {
+    return { checked: true, supported: false, reason: 'الإشعارات تحتاج اتصالاً آمناً HTTPS' };
+  }
+
+  if (!('Notification' in window) || !('serviceWorker' in navigator) || !('PushManager' in window)) {
+    return { checked: true, supported: false, reason: 'هذا المتصفح لا يدعم إشعارات الهاتف لهذا الموقع' };
+  }
+
+  if (isIOSDevice() && !isStandalonePwa()) {
+    return {
+      checked: true,
+      supported: false,
+      reason: 'على iPhone افتح الموقع من Safari ثم اختر إضافة إلى الشاشة الرئيسية لتفعيل الإشعارات',
+    };
+  }
+
+  const messaging = await getFirebaseMessaging();
+  if (!messaging) {
+    return { checked: true, supported: false, reason: 'Firebase Messaging غير مدعوم في هذا المتصفح أو هذا السياق' };
+  }
+
+  return { checked: true, supported: true, reason: null };
+}
 
 async function clearLegacyBrowserPushSubscriptions() {
   if (!('serviceWorker' in navigator)) return;
@@ -31,22 +77,38 @@ export function useWebPush() {
   const { initializeFCM, fcmToken, loading: fcmLoading } = useFirebaseMessaging();
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [subscribing, setSubscribing] = useState(false);
+  const [supportState, setSupportState] = useState<PushSupportState>({
+    checked: false,
+    supported: false,
+    reason: null,
+  });
 
-  // Check if already subscribed (permission granted + has token)
+  const refreshSupport = useCallback(async () => {
+    const result = await detectPushSupport();
+    setSupportState(result);
+    return result;
+  }, []);
+
+  useEffect(() => {
+    refreshSupport().catch(() => {
+      setSupportState({ checked: true, supported: false, reason: 'تعذر فحص دعم الإشعارات على هذا الجهاز' });
+    });
+  }, [refreshSupport]);
+
   useEffect(() => {
     if ('Notification' in window && Notification.permission === 'granted' && fcmToken) {
       setIsSubscribed(true);
     }
   }, [fcmToken]);
 
-  // Auto-init FCM if permission already granted
   useEffect(() => {
+    if (!supportState.supported) return;
     if (user && 'Notification' in window && Notification.permission === 'granted' && !fcmToken) {
       initializeFCM().then(token => {
         if (token) setIsSubscribed(true);
       }).catch(() => {});
     }
-  }, [user, fcmToken, initializeFCM]);
+  }, [user, fcmToken, initializeFCM, supportState.supported]);
 
   const subscribe = useCallback(async () => {
     if (!user) { toast.error('يجب تسجيل الدخول أولاً'); return false; }
@@ -54,7 +116,12 @@ export function useWebPush() {
     setSubscribing(true);
 
     try {
-      // 1. Request notification permission
+      const support = await refreshSupport();
+      if (!support.supported) {
+        toast.error(support.reason || 'هذا الجهاز أو المتصفح لا يدعم إشعارات الهاتف حالياً');
+        return false;
+      }
+
       let perm: NotificationPermission;
       try {
         perm = await Notification.requestPermission();
@@ -73,17 +140,15 @@ export function useWebPush() {
         .eq('user_id', user.id)
         .not('endpoint', 'like', 'fcm_token://%');
 
-      // 2. Initialize FCM and get token
       const token = await initializeFCM();
       if (!token) {
-        toast.error('فشل تفعيل الإشعارات — حاول مرة أخرى');
+        toast.error('فشل تفعيل الإشعارات لأن هذا المتصفح لا يكمّل تسجيل التوكن بشكل صحيح');
         return false;
       }
 
       setIsSubscribed(true);
       toast.success('تم تفعيل الإشعارات ✅');
 
-      // 3. Send confirmation notification
       supabase.from('notifications').insert({
         user_id: user.id,
         title: '🔔 تم تفعيل الإشعارات بنجاح',
@@ -92,7 +157,6 @@ export function useWebPush() {
         is_read: false,
       } as any).then(() => {});
 
-      // 4. Test push via edge function
       supabase.functions.invoke('send-push', {
         body: {
           user_ids: [user.id],
@@ -111,12 +175,11 @@ export function useWebPush() {
     } finally {
       setSubscribing(false);
     }
-  }, [user, initializeFCM, subscribing]);
+  }, [user, initializeFCM, subscribing, refreshSupport]);
 
   const unsubscribe = useCallback(async () => {
     if (!user) return;
     try {
-      // Delete FCM subscriptions from DB
       await supabase.from('push_subscriptions').delete()
         .eq('user_id', user.id)
         .like('endpoint', 'fcm_token://%');
@@ -128,7 +191,9 @@ export function useWebPush() {
   }, [user]);
 
   return {
-    isSupported: 'Notification' in window && 'serviceWorker' in navigator,
+    isSupported: supportState.supported,
+    supportChecked: supportState.checked,
+    unsupportedReason: supportState.reason,
     isSubscribed,
     permission: ('Notification' in window ? Notification.permission : 'default') as NotificationPermission,
     loading: subscribing || fcmLoading,
