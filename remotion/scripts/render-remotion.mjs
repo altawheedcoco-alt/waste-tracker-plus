@@ -15,7 +15,7 @@ const bundled = await bundle({
 
 console.log("🌐 Opening browser...");
 const browser = await openBrowser("chrome", {
-  browserExecutable: "/nix/var/nix/profiles/sandbox/bin/chromium",
+  browserExecutable: "/bin/chromium",
   chromiumOptions: { args: ["--no-sandbox", "--disable-gpu", "--disable-dev-shm-usage"] },
   chromeMode: "headless-shell",
 });
