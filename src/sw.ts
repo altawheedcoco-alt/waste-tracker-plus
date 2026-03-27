@@ -100,11 +100,11 @@ self.addEventListener('push', (event) => {
   if (payload.silent || (!payload.title && !payload.body)) return;
 
   const title = payload.title || 'iRecycle';
-  const options: NotificationOptions = {
+  const options: Record<string, unknown> = {
     body: payload.body || '',
     icon: '/favicon.png',
     badge: '/favicon.png',
-    dir: 'rtl' as const,
+    dir: 'rtl',
     lang: 'ar',
     tag: payload.tag || `push-${Date.now()}`,
     renotify: true,
@@ -113,7 +113,7 @@ self.addEventListener('push', (event) => {
     vibrate: [200, 100, 200],
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(self.registration.showNotification(title, options as NotificationOptions));
 });
 
 // Handle notification click — open or focus the app
