@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useCallback, useMemo, ReactNode, u
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
+import { showSystemNotification } from '@/lib/systemNotifications';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface Notification {
   id: string;
@@ -168,7 +170,24 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
           filter: `user_id=eq.${user.id}`,
         },
         (payload) => {
-          setNotifications(prev => [payload.new as Notification, ...prev]);
+          const incoming = payload.new as Notification;
+          setNotifications(prev => [incoming, ...prev]);
+
+          if (typeof window !== 'undefined' && document.visibilityState !== 'visible') {
+            soundEngine.play('notification');
+            showSystemNotification(incoming.title, {
+              body: incoming.message,
+              tag: `notification-${incoming.id}`,
+              url: incoming.action_url || '/',
+              data: {
+                notificationId: incoming.id,
+                type: incoming.type,
+                shipment_id: incoming.shipment_id,
+                request_id: incoming.request_id,
+                url: incoming.action_url || '/',
+              },
+            }).catch(() => undefined);
+          }
         }
       )
       .subscribe();
