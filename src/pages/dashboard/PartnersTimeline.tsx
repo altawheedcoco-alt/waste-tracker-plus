@@ -334,28 +334,15 @@ const PartnersTimeline = () => {
                         'grid-cols-2 md:grid-cols-3'
                       }`}>
                         {post.media_urls.map((url, idx) => (
-                          <div key={idx} className="relative rounded-lg overflow-hidden bg-muted aspect-video">
-                            {post.post_type === 'video' ? (
-                              <video 
-                                ref={(el) => {
-                                  if (el) videoRefs.current.set(`${post.id}-${idx}`, el);
-                                }}
-                                src={url} 
-                                controls
-                                playsInline
-                                preload="metadata"
-                                className="w-full h-full object-cover"
-                                onPlay={(e) => handleVideoPlay(`${post.id}-${idx}`, e.currentTarget)}
-                              />
-                            ) : (
-                              <img 
-                                src={url} 
-                                alt="" 
-                                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300 cursor-pointer"
-                                onClick={() => window.open(url, '_blank')}
-                              />
-                            )}
-                          </div>
+                          <MediaThumbnail
+                            key={idx}
+                            url={url}
+                            urls={post.post_type === 'image' || post.post_type === 'gallery' ? post.media_urls : undefined}
+                            title={post.content?.slice(0, 50) || ''}
+                            size="lg"
+                            aspectRatio="video"
+                            className="w-full"
+                          />
                         ))}
                       </div>
                     )}
