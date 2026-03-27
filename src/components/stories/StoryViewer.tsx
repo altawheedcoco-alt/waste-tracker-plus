@@ -164,8 +164,8 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
                   src={resolvedMediaUrl}
                   className="w-full h-full object-cover"
                   autoPlay
-                  muted
                   playsInline
+                  controls
                 />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center">

@@ -801,13 +801,14 @@ CommentSection.displayName = 'CommentSection';
 // AutoPlay Video — plays on scroll into view, pauses when out
 const AutoPlayVideo = ({ src }: { src: string }) => {
   const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
+  const [muted, setMuted] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
     setHasError(false);
+    el.muted = muted;
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {
@@ -820,7 +821,7 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
     );
     observer.observe(el);
     return () => observer.disconnect();
-  }, [src]);
+  }, [src, muted]);
 
   if (hasError) {
     return (
@@ -852,7 +853,8 @@ const AutoPlayVideo = ({ src }: { src: string }) => {
         onError={() => setHasError(true)}
       />
       <button
-        onClick={() => setMuted(m => !m)}
+        type="button"
+        onClick={() => setMuted((m) => !m)}
         className="absolute bottom-3 left-3 bg-black/60 backdrop-blur-sm rounded-full p-1.5 text-white opacity-0 group-hover:opacity-100 transition-opacity text-[10px] px-2.5"
       >
         {muted ? '🔇 كتم' : '🔊 صوت'}
