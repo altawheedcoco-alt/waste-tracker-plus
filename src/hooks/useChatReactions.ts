@@ -68,6 +68,21 @@ export function useChatReactions(messageIds: string[]) {
     }
 
     queryClient.invalidateQueries({ queryKey: ['message-reactions'] });
+
+    // Fire reaction_added notification (only for adding, not removing)
+    if (!existing) {
+      try {
+        import('@/services/notificationTriggers').then(({ notifyChatEvent }) => {
+          notifyChatEvent({
+            type: 'reaction_added',
+            actorName: emoji,
+            actorUserId: user.id,
+            targetUserIds: [], // Will be handled by DB trigger
+            messagePreview: emoji,
+          });
+        });
+      } catch {}
+    }
   }, [user, reactionsMap, queryClient]);
 
   return { reactionsMap, toggleReaction };

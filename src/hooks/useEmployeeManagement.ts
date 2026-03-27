@@ -191,10 +191,24 @@ export function useEmployeeManagement() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       toast.success('تم إنشاء حساب الموظف بنجاح');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setIsCreating(false);
+
+      // Fire employee_invitation notification
+      try {
+        import('@/services/notificationTriggers').then(({ notifyMemberEvent }) => {
+          if (data?.userId) {
+            notifyMemberEvent({
+              type: 'employee_invitation',
+              targetUserId: data.userId,
+              memberName: variables.fullName,
+              orgId: profile?.organization_id || '',
+            });
+          }
+        });
+      } catch {}
     },
     onError: (error: Error) => {
       toast.error(error.message || 'فشل في إنشاء الموظف');
@@ -251,6 +265,21 @@ export function useEmployeeManagement() {
     onSuccess: (_, variables) => {
       toast.success(variables.isActive ? 'تم تفعيل الموظف' : 'تم تعطيل الموظف');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+
+      // Notify the employee about activation/deactivation
+      try {
+        const emp = employees?.find(e => e.id === variables.profileId);
+        if (emp) {
+          import('@/services/notificationTriggers').then(({ notifyMemberEvent }) => {
+            notifyMemberEvent({
+              type: variables.isActive ? 'employee_activated' : 'employee_deactivated',
+              targetUserId: emp.user_id,
+              memberName: emp.full_name,
+              orgId: profile?.organization_id || '',
+            });
+          });
+        }
+      } catch {}
     },
     onError: () => {
       toast.error('فشل في تحديث حالة الموظف');

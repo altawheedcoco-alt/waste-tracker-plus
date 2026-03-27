@@ -231,6 +231,19 @@ export const useStories = () => {
     onSuccess: () => {
       toast.success('تم نشر الحالة بنجاح!');
       queryClient.invalidateQueries({ queryKey: ['stories'] });
+
+      // Fire story_posted notification to followers
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'story_posted',
+            actorName: 'قصة جديدة',
+            actorUserId: user?.id || '',
+            targetOrgId: organization?.id,
+            organizationId: organization?.id,
+          });
+        });
+      } catch {}
     },
     onError: () => {
       toast.error('فشل في نشر الحالة');

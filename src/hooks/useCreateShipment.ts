@@ -857,6 +857,23 @@ export const useCreateShipment = () => {
 
       toast.success('تم إنشاء الشحنة بنجاح');
 
+      // Fire shipment_created notifications to all parties
+      if (shipmentData) {
+        try {
+          const { notifyShipmentEvent } = await import('@/services/notificationTriggers');
+          const targetOrgIds = [generatorId, transporterId, recyclerId, disposalFacilityId].filter(Boolean) as string[];
+          await notifyShipmentEvent({
+            type: 'shipment_created',
+            shipmentId: shipmentData.id,
+            shipmentNumber: shipmentData.shipment_number,
+            targetOrgIds,
+            excludeUserId: profile?.id,
+            details: `شحنة جديدة #${shipmentData.shipment_number} — ${formData.waste_type || ''} — ${formData.quantity} ${formData.unit}`,
+            organizationId: organization?.id,
+          });
+        } catch (e) { console.error('Notification error (non-blocking):', e); }
+      }
+
       // Save form data for repeat functionality
       try {
         const savedData = { ...formData, pickup_date: '', expected_delivery_date: '' };

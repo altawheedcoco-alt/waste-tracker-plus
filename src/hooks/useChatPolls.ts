@@ -75,9 +75,24 @@ export function useChatPolls(contextId?: string) {
       });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['chat-polls'] });
       toast.success('تم إنشاء التصويت');
+
+      // Fire poll_created notification
+      try {
+        import('@/services/notificationTriggers').then(({ notifyChatEvent }) => {
+          notifyChatEvent({
+            type: 'poll_created',
+            actorName: 'استطلاع جديد',
+            actorUserId: user?.id || '',
+            targetUserIds: [],
+            conversationId: variables.roomId || variables.channelId,
+            messagePreview: variables.question,
+            organizationId: organization?.id,
+          });
+        });
+      } catch {}
     },
   });
 
