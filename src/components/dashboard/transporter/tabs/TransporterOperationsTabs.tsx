@@ -124,6 +124,9 @@ const TransporterOperationsTabs = ({
     {/* ══════ 2. العمليات (calendar + load consolidation مدمج) ══════ */}
     <TabsContent value="operations" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في قائمة الأولويات">
+          <SmartPriorityQueue shipments={shipments} />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تجميع الحمولات">
           <LoadConsolidator />
         </ErrorBoundary>

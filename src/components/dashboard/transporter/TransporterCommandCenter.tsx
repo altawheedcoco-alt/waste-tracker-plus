@@ -641,7 +641,8 @@ const TransporterCommandCenter = () => {
                 <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
-                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`} />
+                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`}
+                  onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
               </div>
             </motion.div>
 
