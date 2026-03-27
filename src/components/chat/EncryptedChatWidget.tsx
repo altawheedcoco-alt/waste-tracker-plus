@@ -511,7 +511,7 @@ const EncryptedChatWidget = () => {
                         >
                           <Avatar className="w-9 h-9 shrink-0">
                             <AvatarImage src={c.partner?.avatar_url || ''} />
-                            <AvatarFallback className="bg-emerald-100 text-emerald-700 text-xs">
+                            <AvatarFallback className="bg-primary/10 text-primary text-xs">
                               {c.partner?.full_name?.charAt(0) || '?'}
                             </AvatarFallback>
                           </Avatar>
