@@ -443,7 +443,7 @@ const EncryptedChatWidget = () => {
             <div className="h-12 px-3 flex items-center justify-between bg-primary text-primary-foreground shrink-0 rounded-t-2xl">
               {selectedConvoId ? (
                 <>
-                  <button onClick={() => setSelectedConvoId(null)} className="text-white/80 hover:text-white">
+                  <button onClick={() => setSelectedConvoId(null)} className="text-primary-foreground/80 hover:text-primary-foreground">
                     <Maximize2 className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-2">
@@ -457,7 +457,7 @@ const EncryptedChatWidget = () => {
                     >
                       {selectedConvo?.partner?.full_name || 'محادثة'}
                     </button>
-                    <Lock className="w-3 h-3 text-white/60" />
+                    <Lock className="w-3 h-3 text-primary-foreground/60" />
                   </div>
                   <div className="flex items-center gap-1">
                     <ChatVideoCallButtonMini partnerName={selectedConvo?.partner?.full_name || ''} partnerUserId={selectedConvo?.partner?.user_id} />
@@ -470,8 +470,8 @@ const EncryptedChatWidget = () => {
                     <span className="text-sm font-semibold">المحادثات</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Users className="w-3.5 h-3.5 text-white/70" />
-                    <span className="text-[10px] text-white/70">{linkedPartners.length} جهة</span>
+                    <Users className="w-3.5 h-3.5 text-primary-foreground/70" />
+                    <span className="text-[10px] text-primary-foreground/70">{linkedPartners.length} جهة</span>
                   </div>
                 </div>
               )}
