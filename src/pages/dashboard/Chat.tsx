@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import VoiceMessagePlayer from '@/components/chat/VoiceMessagePlayer';
+import { MediaThumbnail } from '@/components/media';
+import { detectMediaType } from '@/lib/mediaUtils';
 import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
