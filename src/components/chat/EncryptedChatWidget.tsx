@@ -159,16 +159,16 @@ const EncryptedChatWidget = () => {
   const totalUnread = conversations.reduce((sum, c) => sum + (c.unread_count || 0), 0);
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
 
-  // Listen for widget bus events (team-chat from FloatingSidePanel/UnifiedFloatingMenu)
+  // Listen for widget bus events — but skip on main dashboard where EnhancedChatWidget handles it
   useEffect(() => {
     const unsubscribe = onWidgetToggle((widgetId) => {
-      if (widgetId === 'team-chat') {
+      if (widgetId === 'team-chat' && location.pathname !== '/dashboard') {
         setIsOpen(true);
-        setSelectedConvoId(null); // show conversations list
+        setSelectedConvoId(null);
       }
     });
     return unsubscribe;
-  }, []);
+  }, [location.pathname]);
 
   // Filter by search
   const filteredConversations = useMemo(() => {
