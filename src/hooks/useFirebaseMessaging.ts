@@ -133,12 +133,16 @@ export function useFirebaseMessaging() {
             serviceWorkerRegistration: swReg,
           }),
           new Promise<never>((_, reject) =>
-            window.setTimeout(() => reject(new Error('انتهت مهلة إنشاء FCM token — غالباً يوجد تعارض في Web Push أو مفتاح VAPID غير مطابق')), 12000)
+            window.setTimeout(() => reject(new Error('timeout')), 25000)
           ),
         ]);
       } catch (tokenErr: any) {
-        const message = tokenErr?.message || 'فشل إنشاء FCM token';
-        console.error('[FCM] getToken error:', message, tokenErr?.code);
+        const raw = tokenErr?.message || '';
+        const isNetwork = raw.includes('Failed to fetch') || raw.includes('token-subscribe-failed') || raw === 'timeout';
+        const message = isNetwork
+          ? 'تعذر تفعيل الإشعارات — تأكد من اتصال الإنترنت وحاول مرة أخرى'
+          : 'فشل تفعيل الإشعارات — حاول مرة أخرى لاحقاً';
+        console.error('[FCM] getToken error:', raw, tokenErr?.code);
         toast.error(message);
         throw new Error(message);
       }
