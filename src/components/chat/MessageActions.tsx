@@ -93,13 +93,13 @@ const MessageActions = ({
           نسخ
         </DropdownMenuItem>
         {onPin && (
-          <DropdownMenuItem onClick={onPin}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('pin'); onPin(); }}>
             <Pin className="w-4 h-4 ml-2" />
             {isPinned ? 'إلغاء التثبيت' : 'تثبيت الرسالة'}
           </DropdownMenuItem>
         )}
         {onStar && (
-          <DropdownMenuItem onClick={onStar}>
+          <DropdownMenuItem onClick={() => { soundEngine.play('tap'); onStar(); }}>
             <Star className="w-4 h-4 ml-2" />
             تمييز بنجمة
           </DropdownMenuItem>
