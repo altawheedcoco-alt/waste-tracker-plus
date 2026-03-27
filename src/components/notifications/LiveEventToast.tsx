@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTabChannelName } from '@/lib/tabSession';
 import { playNotificationSound, mapNotificationTypeToSound } from '@/hooks/useNotificationSound';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 interface LiveNotification {
   id: string;
