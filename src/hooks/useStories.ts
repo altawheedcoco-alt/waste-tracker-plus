@@ -188,13 +188,28 @@ export const useStories = () => {
       let mediaType = 'text';
 
       if (file) {
-        const ext = file.name.split('.').pop();
+        let fileToUpload = file;
+
+        // ضغط الفيديو تلقائياً
+        if (needsCompression(file)) {
+          try {
+            toast.info('جاري ضغط الفيديو...');
+            const compressed = await quickCompressVideo(file);
+            fileToUpload = compressed.file;
+            if (compressed.compressionRatio > 0) {
+              toast.success(`تم ضغط الفيديو ${compressed.compressionRatio}%`);
+            }
+          } catch {
+            console.warn('⚠️ فشل ضغط الفيديو');
+          }
+        }
+
+        const ext = fileToUpload.name.split('.').pop();
         const path = `${user!.id}/${Date.now()}.${ext}`;
 
-        const result = await smartChunkedUpload(file, {
+        const result = await smartChunkedUpload(fileToUpload, {
           bucket: 'stories',
           path,
-          onProgress: (p) => console.log(`📤 Story upload: ${p}%`),
         });
 
         mediaUrl = result.publicUrl;
