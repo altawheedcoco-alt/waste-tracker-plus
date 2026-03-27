@@ -60,7 +60,22 @@ export function usePinnedMessages(partnerId?: string) {
 
     toast.success(currentlyPinned ? 'تم إلغاء التثبيت' : 'تم تثبيت الرسالة');
     fetchPinned();
-  }, [fetchPinned]);
+
+    // Fire pinned_message notification
+    if (!currentlyPinned) {
+      try {
+        import('@/services/notificationTriggers').then(({ notifyChatEvent }) => {
+          notifyChatEvent({
+            type: 'pinned_message',
+            actorName: 'رسالة مثبتة',
+            actorUserId: user?.id || '',
+            targetUserIds: [],
+            messagePreview: 'تم تثبيت رسالة',
+          });
+        });
+      } catch {}
+    }
+  }, [fetchPinned, user]);
 
   return { pinnedMessages, loading, fetchPinned, togglePin };
 }

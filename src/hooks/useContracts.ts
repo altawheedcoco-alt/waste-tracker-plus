@@ -170,12 +170,28 @@ export const useContracts = () => {
         if (error) throw error;
         toast.success('تم تحديث العقد بنجاح');
       } else {
-        const { error } = await supabase
+        const { data: newContract, error } = await supabase
           .from('contracts')
-          .insert(contractData);
+          .insert(contractData)
+          .select('id')
+          .single();
 
         if (error) throw error;
         toast.success('تم إضافة العقد بنجاح');
+
+        // Fire contract_created notification
+        if (newContract) {
+          try {
+            const { notifyContractEvent } = await import('@/services/notificationTriggers');
+            await notifyContractEvent({
+              type: 'contract_created',
+              contractId: newContract.id,
+              contractTitle: formData.title,
+              orgId: organization?.id || '',
+              partnerOrgId: contractData.partner_organization_id,
+            });
+          } catch (e) { console.error('Contract notification error:', e); }
+        }
       }
 
       setShowAddDialog(false);

@@ -265,6 +265,21 @@ export function useEmployeeManagement() {
     onSuccess: (_, variables) => {
       toast.success(variables.isActive ? 'تم تفعيل الموظف' : 'تم تعطيل الموظف');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
+
+      // Notify the employee about activation/deactivation
+      try {
+        const emp = employees?.find(e => e.id === variables.profileId);
+        if (emp) {
+          import('@/services/notificationTriggers').then(({ notifyMemberEvent }) => {
+            notifyMemberEvent({
+              type: variables.isActive ? 'employee_activated' : 'employee_deactivated',
+              targetUserId: emp.user_id,
+              memberName: emp.full_name,
+              orgId: profile?.organization_id || '',
+            });
+          });
+        }
+      } catch {}
     },
     onError: () => {
       toast.error('فشل في تحديث حالة الموظف');

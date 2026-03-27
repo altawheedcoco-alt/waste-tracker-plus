@@ -124,6 +124,18 @@ export function useBroadcastPosts(channelId: string | undefined) {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['broadcast-posts', channelId] });
       toast.success('تم نشر المنشور');
+
+      // Fire broadcast_new_post notification
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'broadcast_new_post',
+            actorName: 'منشور بث',
+            actorUserId: user?.id || '',
+            entityId: channelId,
+          });
+        });
+      } catch {}
     },
     onError: () => toast.error('فشل نشر المنشور'),
   });
