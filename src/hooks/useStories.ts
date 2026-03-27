@@ -189,16 +189,14 @@ export const useStories = () => {
       if (file) {
         const ext = file.name.split('.').pop();
         const path = `${user!.id}/${Date.now()}.${ext}`;
-        const { error: uploadError } = await supabase.storage
-          .from('stories')
-          .upload(path, file);
 
-        if (uploadError) throw uploadError;
+        const result = await smartChunkedUpload(file, {
+          bucket: 'stories',
+          path,
+          onProgress: (p) => console.log(`📤 Story upload: ${p}%`),
+        });
 
-        const { data: urlData } = supabase.storage
-          .from('stories')
-          .getPublicUrl(path);
-        mediaUrl = urlData.publicUrl;
+        mediaUrl = result.publicUrl;
         mediaType = file.type.startsWith('video') ? 'video' : 'image';
       }
 
