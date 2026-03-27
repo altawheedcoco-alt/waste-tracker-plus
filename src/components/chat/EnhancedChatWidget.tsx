@@ -234,6 +234,7 @@ const EnhancedChatWidget = () => {
     setShowSearch(false);
     setShowPinned(false);
     setShowPartnerInfo(false);
+    setActionPanel({ action: null, resourceId: '', resourceType: '' });
     setView('sidebar');
     stopTyping();
   };
