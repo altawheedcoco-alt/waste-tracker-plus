@@ -107,7 +107,7 @@ const LiveOperationsBoard = () => {
           {/* Header */}
           <div className="flex items-center justify-between mb-3">
             <button 
-              onClick={() => navigate('/dashboard/shipments')}
+              onClick={() => navigate('/dashboard/transporter-shipments')}
               className="flex items-center gap-1 text-xs text-primary hover:underline"
             >
               عرض الكل
