@@ -39,10 +39,12 @@ export function useWebPush() {
 
     (async () => {
       try {
-        const reg = await navigator.serviceWorker.ready;
-        const sub = await reg.pushManager.getSubscription();
+        const reg = (await navigator.serviceWorker.getRegistration('/')) || (await navigator.serviceWorker.getRegistration()) || null;
+        const sub = reg ? await reg.pushManager.getSubscription() : null;
         setIsSubscribed(!!sub);
-      } catch { /* ignore */ }
+      } catch {
+        /* ignore */
+      }
     })();
   }, []);
 

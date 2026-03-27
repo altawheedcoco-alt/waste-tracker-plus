@@ -2,6 +2,8 @@ import { createContext, useContext, useState, useCallback, useMemo, ReactNode, u
 import { supabase } from '@/integrations/supabase/client';
 import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
+import { showSystemNotification } from '@/lib/systemNotifications';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface Notification {
   id: string;
