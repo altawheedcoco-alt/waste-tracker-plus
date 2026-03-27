@@ -35,10 +35,12 @@ export function useJamendoSearch() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const search = useCallback(async (query: string, tags?: string) => {
+  const search = useCallback(async (query: string, genreId?: string) => {
     setLoading(true);
     setError(null);
     try {
+      const genre = JAMENDO_GENRES.find(g => g.id === genreId);
+      const tags = genre?.searchTag || genreId || '';
       const params = new URLSearchParams({ action: 'search' });
       if (query) params.set('q', query);
       if (tags) params.set('tags', tags);
