@@ -858,28 +858,42 @@ Deno.serve(async (req) => {
     let sent = 0;
     const errors: any[] = [];
 
+    console.log(`[send-push] Sending to ${subscriptions.length} subscriptions for ${filteredIds.length} users`);
+    
+    // Log subscription types
+    const fcmCount = subscriptions.filter((s: any) => isFCMSubscription(s)).length;
+    const vapidCount = subscriptions.length - fcmCount;
+    console.log(`[send-push] FCM: ${fcmCount}, VAPID: ${vapidCount}`);
+
     await Promise.allSettled(
       subscriptions.map(async (sub: any) => {
         if (isFCMSubscription(sub)) {
           // Send via FCM
           const fcmToken = getFCMToken(sub);
           const parsedPayload = JSON.parse(payload);
+          console.log(`[send-push] Sending FCM to user ${sub.user_id}, token: ${fcmToken.slice(0, 20)}...`);
           const result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          console.log(`[send-push] FCM result for ${sub.user_id}:`, result.success ? 'OK' : result.error);
           if (result.success) { sent++; }
           else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
-          else { errors.push({ endpoint: "fcm", error: result.error }); }
+          else { errors.push({ endpoint: "fcm", error: result.error, user_id: sub.user_id }); }
         } else {
           // Send via VAPID Web Push
+          console.log(`[send-push] Sending VAPID to user ${sub.user_id}, endpoint: ${sub.endpoint.slice(0, 60)}...`);
           const result = await sendPushNotification(
             { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
             payload, vapidPublicKey, vapidPrivateKey
           );
+          console.log(`[send-push] VAPID result for ${sub.user_id}:`, result.success ? 'OK' : `${result.error} (${result.status})`);
           if (result.success) { sent++; }
           else if (result.error === "subscription_expired") { expiredEndpoints.push(sub.endpoint); }
           else { errors.push({ endpoint: sub.endpoint.substring(0, 50), ...result }); }
         }
       })
     );
+
+    console.log(`[send-push] Results: sent=${sent}, errors=${errors.length}, expired=${expiredEndpoints.length}`);
+    if (errors.length) console.log(`[send-push] Errors:`, JSON.stringify(errors));
 
     if (expiredEndpoints.length) {
       await supabase.from("push_subscriptions").delete().in("endpoint", expiredEndpoints);
