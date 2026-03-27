@@ -153,7 +153,7 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
           {/* Story Content */}
           <div className="w-full h-full relative">
             {story.media_type === 'text' ? (
-              <div className={`w-full h-full ${story.background_color || 'bg-gradient-to-br from-emerald-500 to-teal-700'} flex items-center justify-center p-8`}>
+              <div className={`w-full h-full ${story.background_color || 'bg-gradient-to-br from-primary to-primary/60'} flex items-center justify-center p-8`}>
                 <p className="text-white text-2xl font-bold text-center leading-relaxed">
                   {story.text_content}
                 </p>
