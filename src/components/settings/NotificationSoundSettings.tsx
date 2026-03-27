@@ -103,7 +103,7 @@ const NotificationSoundSettings = () => {
 
   const handlePreview = (type: NotificationSoundType) => {
     setPlayingSound(type);
-    playThemeSound(type, soundTheme, globalVolume);
+    previewNotificationSound(type);
     setTimeout(() => setPlayingSound(null), 1200);
   };
 
