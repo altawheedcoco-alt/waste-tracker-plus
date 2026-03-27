@@ -18,7 +18,6 @@ import {
   NotificationSoundType, 
   SOUND_LABELS,
   previewNotificationSound,
-  playThemeSound,
 } from '@/hooks/useNotificationSound';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { cn } from '@/lib/utils';
@@ -104,7 +103,7 @@ const NotificationSoundSettings = () => {
 
   const handlePreview = (type: NotificationSoundType) => {
     setPlayingSound(type);
-    playThemeSound(type, soundTheme, globalVolume);
+    previewNotificationSound(type);
     setTimeout(() => setPlayingSound(null), 1200);
   };
 
