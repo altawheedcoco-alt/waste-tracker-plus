@@ -44,7 +44,7 @@ const TransporterHeader = ({ organizationName }: TransporterHeaderProps) => {
               <ChevronDown className="h-3 w-3 mr-1 opacity-50" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56" dir="rtl">
+          <DropdownMenuContent align="end" className="w-56">
             <DropdownMenuItem onClick={() => navigate('/dashboard/transporter-drivers')}>
               <Users className="ml-2 h-4 w-4" />
               إدارة السائقين
