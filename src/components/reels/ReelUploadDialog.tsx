@@ -8,6 +8,8 @@ import { useReelActions } from '@/hooks/useReels';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import MusicPicker from '@/components/media/MusicPicker';
+import type { MusicTrack } from '@/lib/musicLibrary';
 
 interface Props {
   open: boolean;
@@ -21,6 +23,7 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
   const [hashtags, setHashtags] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { createReel } = useReelActions();
   const { user, organization } = useAuth();
@@ -137,6 +140,9 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
             className="resize-none"
             rows={2}
           />
+
+          {/* Music Picker */}
+          <MusicPicker selectedTrack={selectedMusic} onSelect={setSelectedMusic} />
 
           <Input
             value={hashtags}

@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useStories } from '@/hooks/useStories';
 import { toast } from 'sonner';
+import MusicPicker from '@/components/media/MusicPicker';
+import type { MusicTrack } from '@/lib/musicLibrary';
 
 const GRADIENT_OPTIONS = [
   { bg: 'bg-gradient-to-br from-primary to-primary/60', label: 'أساسي' },
@@ -54,6 +56,7 @@ const StoryUploadDialog = ({ open, onOpenChange }: StoryUploadDialogProps) => {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadStory } = useStories();
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
@@ -257,6 +260,9 @@ const StoryUploadDialog = ({ open, onOpenChange }: StoryUploadDialogProps) => {
                   )}
                 </AnimatePresence>
 
+                {/* Music Picker */}
+                <MusicPicker selectedTrack={selectedMusic} onSelect={setSelectedMusic} compact />
+
                 <Button
                   onClick={handleSubmit}
                   disabled={uploadStory.isPending}
@@ -378,6 +384,10 @@ const StoryUploadDialog = ({ open, onOpenChange }: StoryUploadDialogProps) => {
                     </button>
                   ))}
                 </div>
+
+                {/* Music Picker */}
+                <MusicPicker selectedTrack={selectedMusic} onSelect={setSelectedMusic} compact />
+
                 <Button
                   onClick={handleSubmit}
                   disabled={!textContent.trim() || uploadStory.isPending}
