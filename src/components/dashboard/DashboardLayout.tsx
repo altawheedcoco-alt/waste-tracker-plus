@@ -419,6 +419,32 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
     return items;
   }, [sidebarConfigGroups, language, sectionBadges]);
 
+  // Build pinned items from preferences
+  const pinnedMenuItems: SidebarMenuItem[] = useMemo(() => {
+    const pinnedPaths = sidebarPrefsData?.pinned_items || [];
+    if (pinnedPaths.length === 0) return [];
+    const allItems: SidebarMenuItem[] = [];
+    for (const group of sidebarConfigGroups) {
+      for (const item of group.items) {
+        if (pinnedPaths.includes(item.path)) {
+          allItems.push({
+            icon: item.icon,
+            label: language === 'ar' ? item.labelAr : item.labelEn,
+            path: item.path,
+            key: `pinned-${item.key}`,
+            badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
+          });
+        }
+      }
+    }
+    return allItems;
+  }, [sidebarConfigGroups, sidebarPrefsData?.pinned_items, language, sectionBadges]);
+
+  // Collapsed sections set
+  const collapsedSections = useMemo(() => 
+    new Set(sidebarPrefsData?.collapsed_sections || []),
+  [sidebarPrefsData?.collapsed_sections]);
+
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : configBasedMenuItems;
 
