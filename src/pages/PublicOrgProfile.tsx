@@ -224,7 +224,7 @@ export default function PublicOrgProfile() {
         <Card className="overflow-hidden rounded-none border-x-0 border-t-0">
           <div className="relative h-48 sm:h-56 bg-gradient-to-bl from-primary/30 via-primary/10 to-background">
             {org.cover_url && (
-              <img src={org.cover_url} alt="غلاف" className="w-full h-full object-cover" />
+              <img src={org.cover_url} alt="غلاف" className="w-full h-full object-contain bg-muted" />
             )}
           </div>
 
@@ -431,7 +431,7 @@ export default function PublicOrgProfile() {
                           whileHover={{ scale: 1.02 }}
                           className="aspect-square rounded-lg overflow-hidden cursor-pointer border"
                         >
-                          <img src={photo.photo_url} alt={photo.caption || 'صورة'} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={photo.photo_url} alt={photo.caption || 'صورة'} className="w-full h-full object-contain bg-muted" loading="lazy" />
                         </motion.div>
                       </DialogTrigger>
                       <DialogContent className="max-w-3xl p-2">
@@ -496,9 +496,9 @@ function PublicPostCard({ post, orgName, orgLogo }: { post: any; orgName: string
               {mediaUrls.slice(0, 4).map((url: string, i: number) => {
                 const isVideo = url.match(/\.(mp4|webm|mov)/i);
                 return isVideo ? (
-                  <video key={i} src={url} controls className="w-full max-h-96 object-cover bg-black" />
+                  <video key={i} src={url} controls className="w-full max-h-96 object-contain bg-black" />
                 ) : (
-                  <img key={i} src={url} alt="" className="w-full max-h-96 object-cover" loading="lazy" />
+                  <img key={i} src={url} alt="" className="w-full max-h-96 object-contain bg-muted" loading="lazy" />
                 );
               })}
             </div>
