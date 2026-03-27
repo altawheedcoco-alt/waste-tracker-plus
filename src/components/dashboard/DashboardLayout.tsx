@@ -356,7 +356,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   }));
 
   // Use config-based sidebar groups via preferences hook
-  const { orderedGroups: sidebarConfigGroups } = useSidebarPreferences();
+  const { orderedGroups: sidebarConfigGroups, effectivePrefs: sidebarPrefsData, toggleSectionCollapse, togglePinItem } = useSidebarPreferences();
 
   // Admin viewing state
   const adminViewingOrg = isAdmin ? getAdminViewingOrg() : null;
