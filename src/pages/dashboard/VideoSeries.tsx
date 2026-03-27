@@ -76,7 +76,7 @@ const VideoSeries = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
 
   return (
-    <DashboardLayout>
+    <LandingWrapper>
       <div className="space-y-6 p-4 sm:p-6">
         <BackButton />
 
