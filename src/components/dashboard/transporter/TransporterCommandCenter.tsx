@@ -184,22 +184,39 @@ const StatMicro = ({ icon: Icon, label, value, color, alert, onClick, sub, detai
   );
 };
 
+type TimePeriod = 'today' | 'week' | 'month';
+const PERIOD_LABELS: Record<TimePeriod, string> = { today: 'اليوم', week: 'الأسبوع', month: 'الشهر' };
+
 const TransporterCommandCenter = () => {
   const { organization } = useAuth();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
+  const [period, setPeriod] = useState<TimePeriod>('today');
+  const [isExporting, setIsExporting] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(t);
   }, []);
 
-  const { data: stats, isLoading } = useQuery({
-    queryKey: ['transporter-command-center-v4', organization?.id],
-    queryFn: async () => {
-      const today = new Date(); today.setHours(0, 0, 0, 0);
-      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
-      const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+  const handleExportPDF = useCallback(async () => {
+    if (!cardRef.current || isExporting) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(pdfHeight, pdf.internal.pageSize.getHeight()));
+      pdf.save(`مركز-القيادة-${format(now, 'yyyy-MM-dd')}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting, now]);
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
