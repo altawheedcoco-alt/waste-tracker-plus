@@ -210,7 +210,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
   return (
     <div className="relative">
       {/* Cover Photo */}
-      <div className="relative w-full aspect-[16/7] sm:aspect-[3/1] min-h-[10rem] sm:min-h-[12rem] max-h-[14rem] sm:max-h-[22rem] rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
+      <div className="relative w-full h-40 sm:h-48 md:h-56 rounded-t-xl overflow-hidden bg-gradient-to-br from-primary/20 via-primary/10 to-background">
         {organization.cover_url ? (
           <ClickableImage
             src={organization.cover_url}
@@ -221,7 +221,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/30 via-primary/20 to-primary/10 flex items-center justify-center">
-            <OrgIcon className="w-16 h-16 sm:w-24 sm:h-24 text-primary/30" />
+            <OrgIcon className="w-16 h-16 sm:w-20 sm:h-20 text-primary/30" />
           </div>
         )}
         
@@ -262,7 +262,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
 
       {/* Profile Section */}
       <div className="relative px-3 sm:px-6 pb-4">
-        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 -mt-12 sm:-mt-20">
+        <div className="flex flex-col sm:flex-row items-center sm:items-end gap-3 sm:gap-4 -mt-10 sm:-mt-14">
           {/* Profile Picture */}
           <div className="relative">
             <motion.div
