@@ -19,6 +19,7 @@ export function useCSPHeaders() {
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' https://fonts.gstatic.com data:",
       "img-src 'self' data: blob: https://*.supabase.co https://*.unsplash.com https://*.googleapis.com https://images.unsplash.com",
+      "media-src 'self' blob: data: https://*.supabase.co https://*.lovable.app",
       "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://*.lovable.app https://connector-gateway.lovable.dev",
       "frame-src 'self' https://docs.google.com",
       "object-src 'none'",
