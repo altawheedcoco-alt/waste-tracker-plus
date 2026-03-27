@@ -191,10 +191,24 @@ export function useEmployeeManagement() {
 
       return response.data;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       toast.success('تم إنشاء حساب الموظف بنجاح');
       queryClient.invalidateQueries({ queryKey: ['employees'] });
       setIsCreating(false);
+
+      // Fire employee_invitation notification
+      try {
+        import('@/services/notificationTriggers').then(({ notifyMemberEvent }) => {
+          if (data?.userId) {
+            notifyMemberEvent({
+              type: 'employee_invitation',
+              targetUserId: data.userId,
+              memberName: variables.fullName,
+              orgId: profile?.organization_id || '',
+            });
+          }
+        });
+      } catch {}
     },
     onError: (error: Error) => {
       toast.error(error.message || 'فشل في إنشاء الموظف');
