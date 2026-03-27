@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { MessageCircle, X, Maximize2, Minimize2, Users, Plus, Timer, Bell, BellOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -197,13 +197,17 @@ const EnhancedChatWidget = () => {
   }, [isOpen, fetchPartners]);
 
   // Play sound on new incoming message
+  // Play sound only on NEW incoming messages (not own, not initial load)
+  const prevMsgCountRef = useRef(messages.length);
   useEffect(() => {
-    if (messages.length === 0) return;
-    const last = messages[messages.length - 1];
-    if (last.sender_id !== user?.id) {
-      soundEngine.play('message_received');
+    if (messages.length > prevMsgCountRef.current) {
+      const last = messages[messages.length - 1];
+      if (last && last.sender_id !== user?.id) {
+        soundEngine.play('message_received');
+      }
     }
-  }, [messages.length]);
+    prevMsgCountRef.current = messages.length;
+  }, [messages.length, user?.id]);
 
   const handleSelectPartner = async (partner: ChatPartner) => {
     setSelectedPartner(partner);
@@ -230,6 +234,7 @@ const EnhancedChatWidget = () => {
     setShowSearch(false);
     setShowPinned(false);
     setShowPartnerInfo(false);
+    setActionPanel({ action: null, resourceId: '', resourceType: '' });
     setView('sidebar');
     stopTyping();
   };
