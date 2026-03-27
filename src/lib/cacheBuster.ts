@@ -2,13 +2,13 @@
  * Cache Buster — تنظيف خلفي للكاش القديم بدون reload
  */
 
-import { isPreviewRuntime, shouldEnablePWA } from './pwaRuntime';
+import { isPreviewRuntime } from './pwaRuntime';
 
 /** Non-blocking background cache cleanup. Never reloads the page. */
 export async function bustStaleCaches() {
   try {
-    // In preview, silently clear caches without reload
-    if (isPreviewRuntime() || shouldEnablePWA()) {
+    // Only clear caches in preview/dev — never for installed PWA users
+    if (isPreviewRuntime()) {
       if ('caches' in window) {
         const names = await caches.keys();
         if (names.length > 0) {

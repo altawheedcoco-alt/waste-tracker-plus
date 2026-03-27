@@ -79,7 +79,7 @@ export default defineConfig(({ mode }) => ({
         theme_color: '#0d9488',
         background_color: '#ffffff',
         display: 'standalone',
-        orientation: 'any',
+        orientation: 'portrait',
         dir: 'rtl',
         lang: 'ar',
         start_url: '/',
@@ -116,6 +116,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       },
       devOptions: {
+        enabled: false,
         navigateFallbackAllowlist: [/^\/$/],
       },
     }),
