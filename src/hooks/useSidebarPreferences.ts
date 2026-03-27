@@ -28,7 +28,7 @@ export function useSidebarPreferences() {
     try {
       const { data, error } = await supabase
         .from('sidebar_preferences')
-        .select('group_order, hidden_groups, collapsed_groups')
+        .select('group_order, hidden_groups, collapsed_groups, collapsed_sections, pinned_items')
         .eq('user_id', user.id)
         .maybeSingle();
 
