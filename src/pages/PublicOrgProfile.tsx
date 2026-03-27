@@ -431,7 +431,7 @@ export default function PublicOrgProfile() {
                           whileHover={{ scale: 1.02 }}
                           className="aspect-square rounded-lg overflow-hidden cursor-pointer border"
                         >
-                          <img src={photo.photo_url} alt={photo.caption || 'صورة'} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={photo.photo_url} alt={photo.caption || 'صورة'} className="w-full h-full object-contain bg-muted" loading="lazy" />
                         </motion.div>
                       </DialogTrigger>
                       <DialogContent className="max-w-3xl p-2">
