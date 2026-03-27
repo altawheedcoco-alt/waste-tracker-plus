@@ -604,7 +604,7 @@ const EncryptedChatWidget = () => {
                                           <p className="text-[9px] text-muted-foreground truncate">{m.position}</p>
                                         )}
                                       </div>
-                                      <MessageCircle className="w-3 h-3 text-emerald-500 shrink-0" />
+                                      <MessageCircle className="w-3 h-3 text-primary shrink-0" />
                                     </button>
                                   )) : (
                                     <div className="px-4 py-3 text-center">
