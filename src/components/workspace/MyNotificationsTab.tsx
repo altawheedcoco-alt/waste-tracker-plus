@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Bell, CheckCheck, Loader2, Inbox, Filter, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
