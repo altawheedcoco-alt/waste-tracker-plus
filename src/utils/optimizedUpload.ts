@@ -5,6 +5,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { compressImage, CompressionOptions, formatFileSize } from './imageCompression';
 import { smartChunkedUpload } from './chunkedUpload';
+import { needsCompression, quickCompressVideo } from './quickVideoCompress';
 
 export interface UploadOptions {
   /** اسم الـ bucket */
@@ -62,9 +63,20 @@ export const uploadFile = async (
       fileToUpload = result.file;
       compressed = result.compressionRatio > 0;
       compressionRatio = result.compressionRatio;
-
     } catch (err) {
       console.warn('⚠️ فشل ضغط الصورة، سيتم رفع الأصلية:', err);
+    }
+  }
+
+  // ضغط الفيديو تلقائياً (تقليل أبعاد + bitrate)
+  if (compress && needsCompression(file)) {
+    try {
+      const result = await quickCompressVideo(file, { onProgress: options.onProgress });
+      fileToUpload = result.file;
+      compressed = result.compressionRatio > 0;
+      compressionRatio = result.compressionRatio;
+    } catch (err) {
+      console.warn('⚠️ فشل ضغط الفيديو، سيتم رفع الأصلي:', err);
     }
   }
 
