@@ -1,6 +1,6 @@
 /**
- * تبويبات الذكاء والمالية والشركاء (مدمجة)
- * ai (+ intelligence) | finance (+ pricing + fraud) | partners (+ marketplace)
+ * تبويبات الذكاء والمالية والاستدامة والشركاء (مدمجة)
+ * ai | finance | sustainability | partners
  */
 import { lazy, Suspense } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
@@ -13,17 +13,20 @@ const DynamicPricingEngine = lazy(() => import('@/components/dashboard/transport
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
 const FraudDetectionPanel = lazy(() => import('@/components/dashboard/transporter/FraudDetectionPanel'));
 const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
-const PartnerProfitabilityPanel = lazy(() => import('@/components/dashboard/transporter/PartnerProfitabilityPanel'));
 const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
 const PartnersView = lazy(() => import('@/components/dashboard/PartnersView'));
+const TransporterPartnerSummary = lazy(() => import('@/components/dashboard/transporter/TransporterPartnerSummary'));
 const SustainabilityReportGenerator = lazy(() => import('@/components/dashboard/transporter/SustainabilityReportGenerator'));
 const SLADashboard = lazy(() => import('@/components/transporter/SLADashboard'));
 const ProfitabilityReport = lazy(() => import('@/components/transporter/ProfitabilityReport'));
 const ShiftScheduler = lazy(() => import('@/components/transporter/ShiftScheduler'));
 const DemandForecastDashboard = lazy(() => import('@/components/dashboard/transporter/DemandForecastDashboard'));
 const CapacityPlanningDashboard = lazy(() => import('@/components/dashboard/transporter/CapacityPlanningDashboard'));
-const PredictiveMaintenanceAI = lazy(() => import('@/components/dashboard/transporter/PredictiveMaintenanceAI'));
 const TripCostAnalytics = lazy(() => import('@/components/dashboard/transporter/TripCostAnalytics'));
+const RevenueSnapshotMini = lazy(() => import('@/components/dashboard/transporter/RevenueSnapshotMini'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
+const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -34,7 +37,7 @@ const TabFallback = () => (
 
 const TransporterIntelligenceTabs = () => (
   <>
-    {/* ══════ 6. الذكاء الاصطناعي (+ intelligence مدمج) ══════ */}
+    {/* ══════ 6. الذكاء الاصطناعي ══════ */}
     <TabsContent value="ai" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في تحليل المستندات">
@@ -47,24 +50,21 @@ const TransporterIntelligenceTabs = () => (
           <ShiftScheduler />
           <SmartSchedulerPanel />
         </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في تحليل الربحية">
-          <PartnerProfitabilityPanel />
-        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في التنبؤ بالطلب">
           <DemandForecastDashboard />
         </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تخطيط السعة">
           <CapacityPlanningDashboard />
         </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في الصيانة التنبؤية">
-          <PredictiveMaintenanceAI />
-        </ErrorBoundary>
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 7. المالية والتسعير (+ fraud مدمج) ══════ */}
+    {/* ══════ 7. المالية والتسعير (+ ملخص مالي) ══════ */}
     <TabsContent value="finance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
+          <ErrorBoundary fallbackTitle="خطأ في الملخص المالي"><RevenueSnapshotMini /></ErrorBoundary>
+        </Suspense>
         <ErrorBoundary fallbackTitle="خطأ في التسعير الذكي">
           <DynamicPricingEngine />
         </ErrorBoundary>
@@ -77,9 +77,27 @@ const TransporterIntelligenceTabs = () => (
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 10. الشركاء والسوق (+ marketplace مدمج) ══════ */}
+    {/* ══════ 9. الاستدامة (مؤشرات بيئية + كربون + ESG) ══════ */}
+    <TabsContent value="sustainability" className="space-y-4 mt-6">
+      <Suspense fallback={<TabFallback />}>
+        <Suspense fallback={<Skeleton className="h-[280px]" />}>
+          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة"><EnvironmentalKPIWidget /></ErrorBoundary>
+        </Suspense>
+        <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
+          <CarbonCreditsPanel />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في تقارير ESG">
+          <ESGReportPanel />
+        </ErrorBoundary>
+      </Suspense>
+    </TabsContent>
+
+    {/* ══════ 10. الشركاء والسوق ══════ */}
     <TabsContent value="partners" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <Suspense fallback={<Skeleton className="h-[200px] rounded-xl" />}>
+          <ErrorBoundary fallbackTitle="خطأ في ملخص الشركاء"><TransporterPartnerSummary /></ErrorBoundary>
+        </Suspense>
         <ErrorBoundary fallbackTitle="خطأ في السوق">
           <WasteMarketplace />
         </ErrorBoundary>

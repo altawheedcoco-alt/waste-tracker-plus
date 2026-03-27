@@ -8,7 +8,6 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import TransporterStatsGrid from '@/components/dashboard/transporter/TransporterStatsGrid';
 import TransporterKPICards from '@/components/dashboard/transporter/TransporterKPICards';
-import TransporterPartnerSummary from '@/components/dashboard/transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from '@/components/dashboard/transporter/TransporterShipmentsList';
 import TransporterAggregateReport from '@/components/dashboard/transporter/TransporterAggregateReport';
 import TransporterPerformanceCharts from '@/components/dashboard/transporter/TransporterPerformanceCharts';
@@ -19,7 +18,7 @@ const LiveOperationsBoard = lazy(() => import('@/components/dashboard/transporte
 const FleetStatusMini = lazy(() => import('@/components/dashboard/transporter/FleetStatusMini'));
 const RevenueSnapshotMini = lazy(() => import('@/components/dashboard/transporter/RevenueSnapshotMini'));
 const DriverPerformancePanel = lazy(() => import('@/components/dashboard/transporter/DriverPerformancePanel'));
-const TripCostManagement = lazy(() => import('@/components/dashboard/transporter/TripCostManagement'));
+const TransporterPartnerSummary = lazy(() => import('@/components/dashboard/transporter/TransporterPartnerSummary'));
 const MaintenanceScheduler = lazy(() => import('@/components/dashboard/transporter/MaintenanceScheduler'));
 const ShipmentCalendarWidget = lazy(() => import('@/components/dashboard/transporter/ShipmentCalendarWidget'));
 const SmartDriverNotifications = lazy(() => import('@/components/dashboard/transporter/SmartDriverNotifications'));
@@ -78,7 +77,7 @@ const TransporterOperationsTabs = ({
   shipmentStatusFilter,
 }: OperationsTabsProps) => (
   <>
-    {/* ══════ 1. نظرة عامة ══════ */}
+    {/* ══════ 1. نظرة عامة (مخففة) ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
       {/* Smart KPIs */}
       <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
@@ -97,41 +96,21 @@ const TransporterOperationsTabs = ({
       <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
       <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div className="lg:col-span-2">
-          <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
-            <ErrorBoundary fallbackTitle="خطأ في لوحة العمليات">
-              <LiveOperationsBoard />
-            </ErrorBoundary>
-          </Suspense>
-        </div>
-        <div className="space-y-4">
-          <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
-            <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول"><FleetStatusMini /></ErrorBoundary>
-          </Suspense>
-          <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
-            <ErrorBoundary fallbackTitle="خطأ في الملخص المالي"><RevenueSnapshotMini /></ErrorBoundary>
-          </Suspense>
-        </div>
-      </div>
+      <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
+        <ErrorBoundary fallbackTitle="خطأ في لوحة العمليات">
+          <LiveOperationsBoard />
+        </ErrorBoundary>
+      </Suspense>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Suspense fallback={<Skeleton className="h-[280px]" />}>
-          <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة"><EnvironmentalKPIWidget /></ErrorBoundary>
-        </Suspense>
         <Suspense fallback={<Skeleton className="h-[280px]" />}>
           <ErrorBoundary fallbackTitle="خطأ في تنبيهات التراخيص"><LicenseExpiryWidget /></ErrorBoundary>
         </Suspense>
       </div>
 
-      <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول"><FleetUtilizationWidget /></ErrorBoundary>
       <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية"><TransporterPerformanceCharts /></ErrorBoundary>
 
       <Suspense fallback={<TabFallback />}><SmartPriorityQueue shipments={shipments} /></Suspense>
-      <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
-        <Suspense fallback={<Skeleton className="h-[400px] w-full" />}><OrgPerformanceRadar /></Suspense>
-      </ErrorBoundary>
-      <TransporterPartnerSummary />
 
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
         <TransporterShipmentsList
@@ -158,9 +137,13 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 3. الأسطول والصيانة (+ IoT مدمج) ══════ */}
+    {/* ══════ 3. الأسطول والصيانة (+ IoT + استخدام الأسطول) ══════ */}
     <TabsContent value="fleet" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
+          <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول"><FleetStatusMini /></ErrorBoundary>
+        </Suspense>
+        <ErrorBoundary fallbackTitle="خطأ في استخدام الأسطول"><FleetUtilizationWidget /></ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في صيانة الأسطول">
           <PredictiveFleetMaintenance />
           <ContainerManagement />
@@ -187,15 +170,17 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 5. الأداء والتحليلات (+ copilot مدمج) ══════ */}
+    {/* ══════ 5. الأداء والتحليلات (+ copilot + رادار) ══════ */}
     <TabsContent value="performance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
           <EnhancedDriverPerformance />
           <DriverPerformancePanel />
-          <TripCostManagement />
           <SmartDriverNotifications />
           <MaintenanceScheduler />
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في رادار الأداء">
+          <Suspense fallback={<Skeleton className="h-[400px] w-full" />}><OrgPerformanceRadar /></Suspense>
         </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في مساعد السائق">
           <DriverCopilot />

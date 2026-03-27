@@ -17,8 +17,10 @@ import {
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 // ─── Animated counter ───
 const useAnimatedNumber = (target: number, duration = 1200) => {
@@ -182,22 +184,50 @@ const StatMicro = ({ icon: Icon, label, value, color, alert, onClick, sub, detai
   );
 };
 
+type TimePeriod = 'today' | 'week' | 'month';
+const PERIOD_LABELS: Record<TimePeriod, string> = { today: 'اليوم', week: 'الأسبوع', month: 'الشهر' };
+
 const TransporterCommandCenter = () => {
   const { organization } = useAuth();
   const navigate = useNavigate();
   const [now, setNow] = useState(new Date());
+  const [period, setPeriod] = useState<TimePeriod>('today');
+  const [isExporting, setIsExporting] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(t);
   }, []);
 
+  const handleExportPDF = useCallback(async () => {
+    if (!cardRef.current || isExporting) return;
+    setIsExporting(true);
+    try {
+      const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true, backgroundColor: null });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, Math.min(pdfHeight, pdf.internal.pageSize.getHeight()));
+      pdf.save(`مركز-القيادة-${format(now, 'yyyy-MM-dd')}.pdf`);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsExporting(false);
+    }
+  }, [isExporting, now]);
+
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['transporter-command-center-v4', organization?.id],
+    queryKey: ['transporter-command-center-v5', organization?.id, period],
     queryFn: async () => {
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
       const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+      // Period-based start date
+      const periodStart = new Date(today);
+      if (period === 'week') periodStart.setDate(periodStart.getDate() - 7);
+      else if (period === 'month') periodStart.setDate(periodStart.getDate() - 30);
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
@@ -205,7 +235,7 @@ const TransporterCommandCenter = () => {
         todayR, yesterdayR, activeR, driversR, weekR, ledgerR, pendingR, overdueR, monthR, partnersR,
         invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR
       ] = await Promise.all([
-        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', today.toISOString()).lt('created_at', tomorrow.toISOString()),
+        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', periodStart.toISOString()).lt('created_at', tomorrow.toISOString()),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
         supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
         supabase.from('drivers').select('id, is_available').eq('organization_id', organization!.id),
@@ -385,7 +415,7 @@ const TransporterCommandCenter = () => {
 
   return (
     <TooltipProvider>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
+      <motion.div ref={cardRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
         <Card className="overflow-hidden border border-border/40 shadow-2xl bg-card relative">
           {/* Background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -454,6 +484,29 @@ const TransporterCommandCenter = () => {
                     <CreditCard className="w-3 h-3" /> {stats?.unpaidInvoices} فاتورة معلقة
                   </Badge>
                 )}
+                {/* Period Toggle */}
+                <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30">
+                  {(['today', 'week', 'month'] as TimePeriod[]).map(p => (
+                    <button key={p} onClick={() => setPeriod(p)}
+                      className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                        period === p ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                      }`}>
+                      {PERIOD_LABELS[p]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* PDF Export */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={handleExportPDF} disabled={isExporting}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-muted/30 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all text-[10px] font-bold disabled:opacity-50">
+                      <FileText className="w-3 h-3" />
+                      {isExporting ? '...' : 'PDF'}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>تصدير كـ PDF</TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="flex items-center gap-3">
@@ -484,7 +537,7 @@ const TransporterCommandCenter = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {[
                 {
-                  label: 'رحلات اليوم', value: a.trips, raw: stats?.todayTrips || 0,
+                  label: `رحلات ${PERIOD_LABELS[period]}`, value: a.trips, raw: stats?.todayTrips || 0,
                   icon: Truck, gradient: 'from-blue-500 to-cyan-400', color: '#3B82F6',
                   sub: `${stats?.yesterdayTrips || 0} أمس`, sparkData: stats?.weeklySparkline,
                   onClick: () => navigate('/dashboard/transporter-shipments'),
