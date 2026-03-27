@@ -194,7 +194,7 @@ const OrganizationPhotoGallery = ({ organizationId, isEditable }: OrganizationPh
                     <img
                       src={photo.photo_url}
                       alt={photo.caption || 'صورة الموقع'}
-                      className="w-full h-40 object-cover cursor-pointer hover:opacity-90 transition"
+                      className="w-full h-40 object-contain cursor-pointer hover:opacity-90 transition bg-muted"
                       loading="lazy"
                     />
                   </DialogTrigger>

@@ -135,7 +135,7 @@ const PartnersTimelineEmbed = () => {
             {post.media_urls?.length > 0 && (
               <div className="grid grid-cols-2 gap-1 rounded-lg overflow-hidden">
                 {post.media_urls.slice(0, 4).map((url: string, i: number) => (
-                  <img key={i} src={url} alt="" className="w-full h-24 object-cover rounded" loading="lazy" />
+                  <img key={i} src={url} alt="" className="w-full h-24 object-contain bg-muted rounded" loading="lazy" />
                 ))}
               </div>
             )}
