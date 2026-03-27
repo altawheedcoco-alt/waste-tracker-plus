@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { smartChunkedUpload } from '@/utils/chunkedUpload';
+import { needsCompression, quickCompressVideo } from '@/utils/quickVideoCompress';
 
 export interface Story {
   id: string;
