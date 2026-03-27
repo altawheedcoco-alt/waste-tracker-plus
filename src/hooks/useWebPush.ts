@@ -8,6 +8,24 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import { useFirebaseMessaging } from './useFirebaseMessaging';
 
+async function clearLegacyBrowserPushSubscriptions() {
+  if (!('serviceWorker' in navigator)) return;
+
+  const registrations = await navigator.serviceWorker.getRegistrations();
+  await Promise.all(
+    registrations.map(async (registration) => {
+      try {
+        const subscription = await registration.pushManager?.getSubscription();
+        if (subscription) {
+          await subscription.unsubscribe();
+        }
+      } catch (error) {
+        console.warn('[Push] Failed to clear legacy browser subscription:', error);
+      }
+    })
+  );
+}
+
 export function useWebPush() {
   const { user } = useAuth();
   const { initializeFCM, fcmToken, loading: fcmLoading } = useFirebaseMessaging();
@@ -48,6 +66,12 @@ export function useWebPush() {
         toast.error(perm === 'denied' ? 'الإشعارات محظورة من إعدادات المتصفح' : 'لم يتم قبول الإذن');
         return false;
       }
+
+      await clearLegacyBrowserPushSubscriptions();
+
+      await supabase.from('push_subscriptions').delete()
+        .eq('user_id', user.id)
+        .not('endpoint', 'like', 'fcm_token://%');
 
       // 2. Initialize FCM and get token
       const token = await initializeFCM();
