@@ -580,7 +580,7 @@ const EnhancedChatMessages = ({
                                 {/* Video with play overlay */}
                                 {message.message_type === 'file' && fileUrl && isVideoFile(fileName) && (
                                   <div className="max-w-[260px] relative group/vid">
-                                    <video src={fileUrl} controls className="rounded-lg w-full" preload="metadata" />
+                                    <video src={fileUrl} controls className="rounded-lg w-full" preload="auto" playsInline />
                                     {/* Inline time on video */}
                                     <div className="absolute bottom-1.5 right-1.5 flex items-center gap-0.5 bg-black/50 rounded-full px-1.5 py-0.5 pointer-events-none">
                                       <span className="text-[10px] text-white/90">{format(new Date(message.created_at), 'hh:mm a', { locale: ar })}</span>
