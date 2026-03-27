@@ -89,26 +89,31 @@ registerRoute(
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
-  let payload: { title?: string; body?: string; data?: any; tag?: string };
+  let payload: { title?: string; body?: string; data?: any; tag?: string; silent?: boolean };
   try {
     payload = event.data.json();
   } catch {
     payload = { title: 'إشعار جديد', body: event.data.text() };
   }
 
+  // Skip silent test pushes (used by auto_cleanup)
+  if (payload.silent || (!payload.title && !payload.body)) return;
+
   const title = payload.title || 'iRecycle';
-  const options: Record<string, any> = {
+  const options: Record<string, unknown> = {
     body: payload.body || '',
     icon: '/favicon.png',
     badge: '/favicon.png',
     dir: 'rtl',
     lang: 'ar',
     tag: payload.tag || `push-${Date.now()}`,
+    renotify: true,
+    requireInteraction: true,
     data: payload.data || {},
     vibrate: [200, 100, 200],
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(self.registration.showNotification(title, options as NotificationOptions));
 });
 
 // Handle notification click — open or focus the app
