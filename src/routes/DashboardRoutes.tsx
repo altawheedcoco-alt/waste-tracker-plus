@@ -415,6 +415,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/disposal/mission-control" element={<DisposalMissionControl />} />
     <Route path="/dashboard/gamification" element={<Gamification />} />
     <Route path="/dashboard/stories" element={<Stories />} />
+    <Route path="/dashboard/reels" element={<Reels />} />
     <Route path="/dashboard/org-structure" element={<OrgStructure />} />
     <Route path="/dashboard/iot-settings" element={<IoTSettings />} />
     <Route path="/dashboard/e-invoice" element={<EInvoice />} />
