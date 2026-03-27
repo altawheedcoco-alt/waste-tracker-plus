@@ -218,6 +218,75 @@ const SOUNDS: Record<SoundName, (ctx: AudioContext, vol: number) => void> = {
   popup_close: (ctx, vol) => {
     osc(ctx, vol * 0.5, 700, 'sine', 0.08, 400);
   },
+
+  // ── تسجيل صوتي ──
+  recording_start: (ctx, vol) => {
+    osc(ctx, vol * 0.6, 600, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.6, 800, 'sine', 0.1), 80);
+  },
+  recording_stop: (ctx, vol) => {
+    osc(ctx, vol * 0.6, 800, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.6, 600, 'sine', 0.1), 80);
+  },
+  recording_cancel: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 400, 'sawtooth', 0.1, 200);
+  },
+
+  // ── تفاعلات الدردشة ──
+  reaction: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 1000, 'sine', 0.06);
+    setTimeout(() => osc(ctx, vol * 0.4, 1200, 'sine', 0.05), 50);
+  },
+  copy: (ctx, vol) => {
+    osc(ctx, vol * 0.4, 700, 'sine', 0.05);
+    osc(ctx, vol * 0.3, 900, 'sine', 0.05);
+  },
+  pin: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 800, 'sine', 0.08, 1200);
+  },
+  forward: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 500, 'sine', 0.1, 900);
+  },
+  typing: (ctx, vol) => {
+    osc(ctx, vol * 0.15, 1200, 'sine', 0.02);
+    noise(ctx, vol * 0.1, 0.02);
+  },
+
+  // ── مكالمات ──
+  call_ring: (ctx, vol) => {
+    osc(ctx, vol, 880, 'sine', 0.15);
+    setTimeout(() => osc(ctx, vol, 880, 'sine', 0.15), 200);
+    setTimeout(() => osc(ctx, vol, 1100, 'sine', 0.2), 400);
+  },
+  call_end: (ctx, vol) => {
+    osc(ctx, vol * 0.7, 600, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.7, 400, 'sine', 0.15), 100);
+    setTimeout(() => osc(ctx, vol * 0.5, 300, 'sine', 0.2), 200);
+  },
+
+  // ── غرف ومجموعات ──
+  join_room: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 500, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.6, 700, 'sine', 0.1), 80);
+  },
+  leave_room: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 700, 'sine', 0.08);
+    setTimeout(() => osc(ctx, vol * 0.4, 400, 'sine', 0.12), 80);
+  },
+
+  // ── إشارة ومنشورات ──
+  mention: (ctx, vol) => {
+    osc(ctx, vol * 0.6, 900, 'sine', 0.06);
+    setTimeout(() => osc(ctx, vol * 0.5, 1100, 'sine', 0.08), 60);
+  },
+  broadcast: (ctx, vol) => {
+    osc(ctx, vol * 0.6, 440, 'sine', 0.1);
+    setTimeout(() => osc(ctx, vol * 0.6, 554, 'sine', 0.1), 100);
+    setTimeout(() => osc(ctx, vol * 0.7, 660, 'sine', 0.15), 200);
+  },
+  poll_vote: (ctx, vol) => {
+    osc(ctx, vol * 0.5, 700, 'sine', 0.06, 1000);
+  },
 };
 
 // Singleton
