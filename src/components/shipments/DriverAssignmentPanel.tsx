@@ -91,6 +91,22 @@ export default function DriverAssignmentPanel({ shipmentId, shipmentStatus, curr
       setSelectedDriver('');
       fetchData();
       onAssigned?.();
+
+      // Fire driver assignment notification
+      try {
+        const driver = drivers.find(d => d.id === selectedDriver);
+        const driverName = (driver as any)?.profiles?.full_name || 'سائق';
+        import('@/services/notificationTriggers').then(({ notifyDriverEvent }) => {
+          notifyDriverEvent({
+            type: 'driver_assignment',
+            driverUserId: selectedDriver,
+            driverName,
+            details: `تم تعيينك لمهمة شحنة جديدة`,
+            shipmentId,
+            organizationId,
+          });
+        });
+      } catch {}
     } catch (err: any) {
       toast.error(err.message || 'خطأ في تعيين السائق');
     } finally {

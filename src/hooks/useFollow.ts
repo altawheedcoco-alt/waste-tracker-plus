@@ -102,6 +102,21 @@ export const useFollow = (targetProfileId?: string, targetOrgId?: string) => {
       queryClient.invalidateQueries({ queryKey: ['follow-counts-org'] });
       queryClient.invalidateQueries({ queryKey: ['follow-feed'] });
       toast.success(isFollowing ? 'تم إلغاء المتابعة' : 'تمت المتابعة');
+
+      // Notify followed user (only on follow, not unfollow)
+      if (!isFollowing && (targetProfileId || targetOrgId)) {
+        try {
+          import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+            notifySocialEvent({
+              type: 'new_follower',
+              actorName: 'متابع جديد',
+              actorUserId: userId || '',
+              targetUserId: targetProfileId || undefined,
+              targetOrgId: targetOrgId || undefined,
+            });
+          });
+        } catch {}
+      }
     },
     onError: () => toast.error('فشلت العملية'),
   });
