@@ -537,7 +537,7 @@ const TransporterCommandCenter = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
               {[
                 {
-                  label: 'رحلات اليوم', value: a.trips, raw: stats?.todayTrips || 0,
+                  label: `رحلات ${PERIOD_LABELS[period]}`, value: a.trips, raw: stats?.todayTrips || 0,
                   icon: Truck, gradient: 'from-blue-500 to-cyan-400', color: '#3B82F6',
                   sub: `${stats?.yesterdayTrips || 0} أمس`, sparkData: stats?.weeklySparkline,
                   onClick: () => navigate('/dashboard/transporter-shipments'),
