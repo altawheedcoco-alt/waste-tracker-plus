@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, memo, useMemo, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, X, Lock, Loader2, Shield, Maximize2, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download, Check, CheckCheck } from 'lucide-react';
+import { MessageCircle, X, Lock, Loader2, Shield, ArrowRight, Search, Users, Building2, ChevronDown, ChevronUp, FileText, Download, Check, CheckCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -418,7 +418,7 @@ const EncryptedChatWidget = () => {
       {/* FAB */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-3 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-14 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
@@ -438,14 +438,14 @@ const EncryptedChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-24 left-3 sm:left-6 z-50 w-[calc(100vw-1.5rem)] sm:w-80 h-[28rem] sm:h-[32rem] rounded-2xl border border-border bg-background shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-24 left-3 sm:left-6 z-50 w-[calc(100vw-1.5rem)] sm:w-80 h-[28rem] sm:h-[32rem] rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="h-12 px-3 flex items-center justify-between bg-primary text-primary-foreground shrink-0 rounded-t-2xl">
               {selectedConvoId ? (
                 <>
                   <button onClick={() => setSelectedConvoId(null)} className="text-primary-foreground/80 hover:text-primary-foreground">
-                    <Maximize2 className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-2">
                     <button
