@@ -6,6 +6,7 @@ import { Video3Dark, Video3Light } from "./videos/Video3OrgTypes";
 import { Video4Dark, Video4Light } from "./videos/Video4Journey";
 import { Video5Dark, Video5Light } from "./videos/Video5CTA";
 import { TawheedReel } from "./TawheedReel";
+import { PlatformShowcase } from "./videos/PlatformShowcase";
 
 export const RemotionRoot = () => (
   <>
@@ -20,5 +21,6 @@ export const RemotionRoot = () => (
     <Composition id="v5-dark" component={Video5Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
     <Composition id="v5-light" component={Video5Light} durationInFrames={900} fps={30} width={1920} height={1080} />
     <Composition id="tawheed-reel" component={TawheedReel} durationInFrames={600} fps={30} width={1080} height={1920} />
+    <Composition id="platform-showcase" component={PlatformShowcase} durationInFrames={1350} fps={30} width={1920} height={1080} />
   </>
 );
