@@ -48,7 +48,7 @@ const TransporterDailyPulse = () => {
       };
     },
     enabled: !!organization?.id,
-    refetchInterval: 30000,
+    refetchInterval: 120000, // every 2 minutes instead of 30s to reduce load
   });
 
   // Realtime: invalidate on shipment changes

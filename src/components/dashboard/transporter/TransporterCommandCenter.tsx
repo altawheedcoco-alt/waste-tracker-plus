@@ -308,8 +308,24 @@ const TransporterCommandCenter = () => {
       const activeVehicles = vehicles.filter(v => v.status === 'active').length;
 
       const docs = docsR.data || [];
-      const expiringDocs = 0; // entity_documents doesn't have expires_at
-      const expiredDocs = 0;
+      // Check for contracts expiring within 30 days (entity_documents has no expiry_date)
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      const { count: expiringContractsCount } = await supabase
+        .from('contracts')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organization!.id)
+        .lte('end_date', thirtyDaysFromNow.toISOString())
+        .gte('end_date', new Date().toISOString());
+      const expiringDocs = expiringContractsCount || 0;
+      
+      const { count: expiredContractsCount } = await supabase
+        .from('contracts')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organization!.id)
+        .lt('end_date', new Date().toISOString())
+        .in('status', ['active', 'signed'] as any);
+      const expiredDocs = expiredContractsCount || 0;
 
       const contracts = contractsR.data || [];
       const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
@@ -698,8 +714,8 @@ const TransporterCommandCenter = () => {
                     })}
                   </div>
                   <div className="flex justify-between text-[8px] text-muted-foreground/50 px-1">
-                    <span>اليوم</span>
                     <span>قبل ٧ أيام</span>
+                    <span>اليوم</span>
                   </div>
                 </div>
               </div>

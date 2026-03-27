@@ -15,6 +15,7 @@ interface SectionItem {
 
 const FIXED_SECTIONS: SectionItem[] = [
   { id: 'section-header', label: 'الهيدر', icon: LayoutDashboard },
+  { id: 'section-posts', label: 'المنشورات', icon: MessageSquare },
   { id: 'section-command', label: 'القيادة', icon: Target },
   { id: 'section-actions', label: 'الإجراءات', icon: Zap },
   { id: 'section-pulse', label: 'النبض', icon: Activity },
