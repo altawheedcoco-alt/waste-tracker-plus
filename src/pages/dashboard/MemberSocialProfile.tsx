@@ -335,10 +335,8 @@ export default function MemberSocialProfile() {
       if (!myProfile || !organization) throw new Error('Not auth');
       let mediaUrls: string[] = [];
       if (selectedFiles.length > 0) {
-        for (const file of selectedFiles) {
-          const url = await uploadFile(file, 'posts');
-          mediaUrls.push(url);
-        }
+        // رفع جميع الملفات بالتوازي
+        mediaUrls = await Promise.all(selectedFiles.map((file) => uploadFile(file, 'posts')));
       }
       const { error } = await (supabase.from('member_posts') as any).insert({
         author_id: myProfile.id,
