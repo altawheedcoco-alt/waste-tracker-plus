@@ -1,6 +1,5 @@
 /**
- * useFirebaseMessaging — FCM integration hook
- * Works alongside existing VAPID Web Push as an additional channel.
+ * useFirebaseMessaging — FCM integration hook (PRIMARY push channel)
  * Saves FCM tokens to push_subscriptions for server-side sending.
  */
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -28,7 +27,6 @@ export function useFirebaseMessaging() {
 
       unsubscribe = onMessage(messaging, (payload) => {
         console.log('[FCM] Foreground message:', payload);
-        // Show as toast for foreground messages
         const title = payload.notification?.title || 'iRecycle';
         const body = payload.notification?.body || '';
         toast.info(`${title}: ${body}`, { duration: 5000 });
@@ -48,55 +46,97 @@ export function useFirebaseMessaging() {
   }, []);
 
   // Register FCM service worker and get token
-  const initializeFCM = useCallback(async () => {
-    if (!user || initRef.current) return null;
+  const initializeFCM = useCallback(async (): Promise<string | null> => {
+    if (!user) {
+      console.warn('[FCM] No user — skipping init');
+      return null;
+    }
+    // Allow re-init if previous attempt failed (no token saved)
+    if (initRef.current && fcmToken) return fcmToken;
     initRef.current = true;
     setLoading(true);
 
     try {
-      // Register the Firebase messaging SW
-      const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-        scope: '/firebase-cloud-messaging-push-scope',
-      });
+      console.log('[FCM] Starting initialization...');
 
+      // 1. Register the Firebase messaging SW
+      let swReg: ServiceWorkerRegistration;
+      try {
+        swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
+          scope: '/firebase-cloud-messaging-push-scope',
+        });
+        console.log('[FCM] Service worker registered:', swReg.scope);
+      } catch (swErr) {
+        console.error('[FCM] SW registration failed:', swErr);
+        return null;
+      }
+
+      // 2. Get Firebase Messaging instance
       const messaging = await getFirebaseMessaging();
       if (!messaging) {
         console.warn('[FCM] Not supported in this browser');
         return null;
       }
 
+      // 3. Get FCM token
+      console.log('[FCM] Requesting token...');
       const token = await getToken(messaging, {
         vapidKey: FCM_VAPID_KEY,
         serviceWorkerRegistration: swReg,
       });
 
-      if (token) {
-        setFcmToken(token);
-        
-        // Save FCM token to push_subscriptions with fcm_ prefix endpoint
-        const { error } = await supabase.from('push_subscriptions').upsert({
-          user_id: user.id,
-          endpoint: `fcm_token://${token.slice(0, 40)}`,
-          p256dh: token,  // store full token in p256dh field
-          auth_key: 'fcm',
-        } as any, { onConflict: 'user_id,endpoint' });
+      if (!token) {
+        console.error('[FCM] No token returned');
+        return null;
+      }
 
-        if (error) {
-          console.error('[FCM] Token save error:', error);
-        } else {
-          console.log('[FCM] Token saved successfully');
+      console.log('[FCM] Token received:', token.slice(0, 20) + '...');
+      setFcmToken(token);
+
+      // 4. Ensure auth session is active
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        console.error('[FCM] No active session — cannot save token');
+        return token; // Return token even if can't save
+      }
+
+      // 5. Save FCM token to push_subscriptions with fcm_ prefix
+      const endpoint = `fcm_token://${token.slice(0, 40)}`;
+      const payload = {
+        user_id: user.id,
+        endpoint,
+        p256dh: token,  // full token in p256dh field
+        auth_key: 'fcm',
+      };
+
+      // Retry save up to 3 times
+      let saved = false;
+      for (let i = 0; i < 3; i++) {
+        const { error } = await supabase.from('push_subscriptions').upsert(
+          payload as any, { onConflict: 'user_id,endpoint' }
+        );
+        if (!error) {
+          saved = true;
+          console.log('[FCM] Token saved successfully to DB');
+          break;
         }
+        console.error(`[FCM] Token save attempt ${i + 1} failed:`, error.message);
+        if (i < 2) await new Promise(r => setTimeout(r, 1000));
+      }
+
+      if (!saved) {
+        console.error('[FCM] Failed to save token after 3 attempts');
       }
 
       return token;
     } catch (err) {
       console.error('[FCM] Init error:', err);
+      initRef.current = false; // Allow retry on error
       return null;
     } finally {
       setLoading(false);
-      initRef.current = false;
     }
-  }, [user]);
+  }, [user, fcmToken]);
 
   return { fcmToken, loading, initializeFCM };
 }
