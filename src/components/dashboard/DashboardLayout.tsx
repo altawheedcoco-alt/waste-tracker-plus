@@ -142,6 +142,7 @@ import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 
 import ViewModeToolbar from './ViewModeToolbar';
+import SidebarSoundControl from './SidebarSoundControl';
 import { useDriverType } from '@/hooks/useDriverType';
 import { getDriverMenuItems } from '@/hooks/useDriverMenu';
 
