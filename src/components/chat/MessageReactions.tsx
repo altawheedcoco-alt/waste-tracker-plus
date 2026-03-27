@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { SmilePlus } from 'lucide-react';
+import { soundEngine } from '@/lib/soundEngine';
 import { Button } from '@/components/ui/button';
 import {
   Popover,
