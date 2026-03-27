@@ -6,7 +6,7 @@ import { showSystemNotification } from '@/lib/systemNotifications';
 import { soundEngine } from '@/lib/soundEngine';
 
 export function usePushNotifications() {
-  const { user } = useAuth();
+  const { user, organization } = useAuth();
   const [isSupported, setIsSupported] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
@@ -50,7 +50,7 @@ export function usePushNotifications() {
 
   // Listen for new messages and show notifications
   useEffect(() => {
-    if (!user || permission !== 'granted') return;
+    if (!user || !organization || permission !== 'granted') return;
 
     const channel = supabase
       .channel('push-notifications')
@@ -58,11 +58,10 @@ export function usePushNotifications() {
         event: 'INSERT',
         schema: 'public',
         table: 'direct_messages',
-        filter: `receiver_organization_id=eq.${user.id}`,
+        filter: `receiver_organization_id=eq.${organization.id}`,
       }, async (payload) => {
         const msg = payload.new as any;
         if (msg.sender_id === user.id) return;
-        // Show notification even if app is focused
 
         // Get sender info
         const { data: sender } = await supabase
@@ -90,7 +89,7 @@ export function usePushNotifications() {
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [user, permission, showNotification]);
+  }, [user, organization, permission, showNotification]);
 
   return {
     isSupported,
