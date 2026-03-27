@@ -171,7 +171,11 @@ const MyNotificationsTab = () => {
                           className={`border-border/30 transition-all cursor-pointer hover:shadow-sm ${
                             !n.is_read ? 'bg-primary/5 border-primary/20 hover:bg-primary/8' : 'hover:bg-muted/30'
                           }`}
-                          onClick={() => !n.is_read && markOneRead.mutate(n.id)}
+                          onClick={() => {
+                            if (!n.is_read) markOneRead.mutate(n.id);
+                            const route = getNotificationRoute(n);
+                            if (route) navigate(route);
+                          }}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
