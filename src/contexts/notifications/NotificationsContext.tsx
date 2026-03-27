@@ -173,20 +173,32 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
           const incoming = payload.new as Notification;
           setNotifications(prev => [incoming, ...prev]);
 
-          if (typeof window !== 'undefined' && document.visibilityState !== 'visible') {
-            soundEngine.play('notification');
+          // Always play sound + show toast for instant feedback
+          soundEngine.play('notification');
+
+          const isBackground = typeof document !== 'undefined' && document.visibilityState !== 'visible';
+
+          if (isBackground) {
+            // App in background → system notification (instant, no FCM delay)
             showSystemNotification(incoming.title, {
               body: incoming.message,
               tag: `notification-${incoming.id}`,
-              url: incoming.action_url || '/',
+              url: incoming.action_url || '/dashboard/notifications',
               data: {
                 notificationId: incoming.id,
                 type: incoming.type,
                 shipment_id: incoming.shipment_id,
                 request_id: incoming.request_id,
-                url: incoming.action_url || '/',
+                url: incoming.action_url || '/dashboard/notifications',
               },
             }).catch(() => undefined);
+          } else {
+            // App in foreground → toast notification
+            const { toast } = await import('sonner');
+            toast.info(`${incoming.title}`, {
+              description: incoming.message,
+              duration: 6000,
+            });
           }
         }
       )
