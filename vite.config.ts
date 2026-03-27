@@ -116,6 +116,7 @@ export default defineConfig(({ mode }) => ({
         globPatterns: ['**/*.{js,css,html,ico,png,svg,woff2}'],
       },
       devOptions: {
+        enabled: false,
         navigateFallbackAllowlist: [/^\/$/],
       },
     }),
