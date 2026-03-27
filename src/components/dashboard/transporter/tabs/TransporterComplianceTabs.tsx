@@ -120,15 +120,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
         </Suspense>
       </TabsContent>
 
-      {/* ══════ 9. البيئة والاستدامة (carbon + esg) ══════ */}
-      <TabsContent value="sustainability" className="space-y-4 mt-6">
-        <Suspense fallback={<TabFallback />}>
-          <ErrorBoundary fallbackTitle="خطأ في أرصدة الكربون">
-            <CarbonCreditsPanel />
-          </ErrorBoundary>
-          <ESGReportPanel />
-        </Suspense>
-      </TabsContent>
+      {/* sustainability tab moved to TransporterIntelligenceTabs */}
     </>
   );
 };
