@@ -142,6 +142,7 @@ import { useDashboardRealtime } from '@/hooks/useDashboardRealtime';
 import { lazy, Suspense } from 'react';
 
 import ViewModeToolbar from './ViewModeToolbar';
+import SidebarSoundControl from './SidebarSoundControl';
 import { useDriverType } from '@/hooks/useDriverType';
 import { getDriverMenuItems } from '@/hooks/useDriverMenu';
 
@@ -758,8 +759,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
           </nav>
 
-          {/* Bottom Logout + Hide Button */}
-          <div className="p-2.5 border-t border-sidebar-border space-y-1.5">
+          {/* Bottom Sound Control + Logout */}
+          <div className="p-2.5 border-t border-sidebar-border space-y-1">
+            <SidebarSoundControl isCollapsed={!isSidebarOpen} />
             <Button
               variant="ghost"
               onClick={handleSignOut}
@@ -1121,8 +1123,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     )}
                   </nav>
 
-                  {/* Bottom - Music Player & Logout */}
+                  {/* Bottom - Sound Control, Music Player & Logout */}
                   <div className="px-4 py-3 border-t border-border/40 shrink-0 space-y-2">
+                    <SidebarSoundControl isCollapsed={false} />
                     <div className="flex items-center justify-center">
                       <FocusMusicPlayer />
                     </div>
