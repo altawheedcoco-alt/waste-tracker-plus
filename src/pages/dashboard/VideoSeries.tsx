@@ -180,7 +180,7 @@ const VideoSeries = () => {
           </DialogContent>
         </Dialog>
       </div>
-    </DashboardLayout>
+    </LandingWrapper>
   );
 };
 
