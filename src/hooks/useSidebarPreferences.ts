@@ -9,6 +9,8 @@ interface SidebarPrefs {
   group_order: string[];
   hidden_groups: string[];
   collapsed_groups: string[];
+  collapsed_sections?: string[];
+  pinned_items?: string[];
 }
 
 export function useSidebarPreferences() {
@@ -26,7 +28,7 @@ export function useSidebarPreferences() {
     try {
       const { data, error } = await supabase
         .from('sidebar_preferences')
-        .select('group_order, hidden_groups, collapsed_groups')
+        .select('group_order, hidden_groups, collapsed_groups, collapsed_sections, pinned_items')
         .eq('user_id', user.id)
         .maybeSingle();
 
@@ -35,6 +37,8 @@ export function useSidebarPreferences() {
         group_order: data.group_order || [],
         hidden_groups: data.hidden_groups || [],
         collapsed_groups: data.collapsed_groups || [],
+        collapsed_sections: (data as any).collapsed_sections || [],
+        pinned_items: (data as any).pinned_items || [],
       } : null);
     } catch (err) {
       console.error('Error fetching sidebar prefs:', err);
@@ -57,8 +61,10 @@ export function useSidebarPreferences() {
           group_order: newPrefs.group_order,
           hidden_groups: newPrefs.hidden_groups,
           collapsed_groups: newPrefs.collapsed_groups,
+          collapsed_sections: newPrefs.collapsed_sections || [],
+          pinned_items: newPrefs.pinned_items || [],
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,organization_id' });
+        } as any, { onConflict: 'user_id,organization_id' });
 
       if (error) throw error;
       setPrefs(newPrefs);
@@ -144,7 +150,25 @@ export function useSidebarPreferences() {
     group_order: prefs?.group_order?.length ? prefs.group_order : defaultOrder,
     hidden_groups: prefs?.hidden_groups || [],
     collapsed_groups: prefs?.collapsed_groups || [],
+    collapsed_sections: prefs?.collapsed_sections || [],
+    pinned_items: prefs?.pinned_items || [],
   };
+
+  const toggleSectionCollapse = useCallback(async (sectionId: string) => {
+    const sections = effectivePrefs.collapsed_sections || [];
+    const newSections = sections.includes(sectionId)
+      ? sections.filter(id => id !== sectionId)
+      : [...sections, sectionId];
+    await savePrefs({ ...effectivePrefs, collapsed_sections: newSections });
+  }, [effectivePrefs, savePrefs]);
+
+  const togglePinItem = useCallback(async (itemPath: string) => {
+    const pinned = effectivePrefs.pinned_items || [];
+    const newPinned = pinned.includes(itemPath)
+      ? pinned.filter(p => p !== itemPath)
+      : [...pinned, itemPath];
+    await savePrefs({ ...effectivePrefs, pinned_items: newPinned });
+  }, [effectivePrefs, savePrefs]);
 
   return {
     orderedGroups,
@@ -156,5 +180,7 @@ export function useSidebarPreferences() {
     toggleGroupVisibility,
     resetToDefaults,
     hasCustomization: prefs !== null,
+    toggleSectionCollapse,
+    togglePinItem,
   };
 }

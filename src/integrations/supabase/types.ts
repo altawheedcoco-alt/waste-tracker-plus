@@ -37674,31 +37674,37 @@ export type Database = {
       sidebar_preferences: {
         Row: {
           collapsed_groups: string[] | null
+          collapsed_sections: string[] | null
           created_at: string
           group_order: string[] | null
           hidden_groups: string[] | null
           id: string
           organization_id: string | null
+          pinned_items: string[] | null
           updated_at: string
           user_id: string
         }
         Insert: {
           collapsed_groups?: string[] | null
+          collapsed_sections?: string[] | null
           created_at?: string
           group_order?: string[] | null
           hidden_groups?: string[] | null
           id?: string
           organization_id?: string | null
+          pinned_items?: string[] | null
           updated_at?: string
           user_id: string
         }
         Update: {
           collapsed_groups?: string[] | null
+          collapsed_sections?: string[] | null
           created_at?: string
           group_order?: string[] | null
           hidden_groups?: string[] | null
           id?: string
           organization_id?: string | null
+          pinned_items?: string[] | null
           updated_at?: string
           user_id?: string
         }

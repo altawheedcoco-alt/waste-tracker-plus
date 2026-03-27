@@ -108,6 +108,7 @@ import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
 import SidebarNavGroup, { SidebarMenuItem } from './SidebarNavGroup';
 import SidebarSectionHeader from './SidebarSectionHeader';
+import SidebarPinnedItems from './SidebarPinnedItems';
 import BindingLegend from '@/components/shared/BindingLegend';
 import ActionChainsButton from './ActionChainsButton';
 import { KeyboardShortcutProvider } from '@/contexts/KeyboardShortcutContext';
@@ -355,7 +356,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   }));
 
   // Use config-based sidebar groups via preferences hook
-  const { orderedGroups: sidebarConfigGroups } = useSidebarPreferences();
+  const { orderedGroups: sidebarConfigGroups, effectivePrefs: sidebarPrefsData, toggleSectionCollapse, togglePinItem } = useSidebarPreferences();
 
   // Admin viewing state
   const adminViewingOrg = isAdmin ? getAdminViewingOrg() : null;
@@ -417,6 +418,32 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
     return items;
   }, [sidebarConfigGroups, language, sectionBadges]);
+
+  // Build pinned items from preferences
+  const pinnedMenuItems: SidebarMenuItem[] = useMemo(() => {
+    const pinnedPaths = sidebarPrefsData?.pinned_items || [];
+    if (pinnedPaths.length === 0) return [];
+    const allItems: SidebarMenuItem[] = [];
+    for (const group of sidebarConfigGroups) {
+      for (const item of group.items) {
+        if (pinnedPaths.includes(item.path)) {
+          allItems.push({
+            icon: item.icon,
+            label: language === 'ar' ? item.labelAr : item.labelEn,
+            path: item.path,
+            key: `pinned-${item.key}`,
+            badge: item.badgeKey ? sectionBadges[item.badgeKey] : undefined,
+          });
+        }
+      }
+    }
+    return allItems;
+  }, [sidebarConfigGroups, sidebarPrefsData?.pinned_items, language, sectionBadges]);
+
+  // Collapsed sections set
+  const collapsedSections = useMemo(() => 
+    new Set(sidebarPrefsData?.collapsed_sections || []),
+  [sidebarPrefsData?.collapsed_sections]);
 
   // Use driver menu if user is a driver (not admin)
   const menuItems = isDriver && !isAdmin ? driverMenuItems : configBasedMenuItems;
@@ -594,6 +621,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
 
           {/* Navigation */}
           <nav className="flex-1 p-2.5 space-y-0.5 overflow-y-auto">
+            {/* Pinned Items */}
+            {!sidebarSearch && (
+              <SidebarPinnedItems pinnedItems={pinnedMenuItems} isCollapsed={false} />
+            )}
+
             {/* Return to Admin Banner (when viewing as org) */}
             {adminViewingOrg && (
               <motion.button
@@ -616,26 +648,40 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
 
             {filteredMenuItems.length > 0 ? (
-              filteredMenuItems.map((item: SidebarMenuItem) => {
-                // Render section header
-                if (item.key.startsWith('__section__')) {
+              (() => {
+                let currentSectionId: string | null = null;
+                let isSectionHidden = false;
+
+                return filteredMenuItems.map((item: SidebarMenuItem) => {
+                  // Render section header
+                  if (item.key.startsWith('__section__')) {
+                    const sectionId = item.key.replace('__section__', '');
+                    currentSectionId = sectionId;
+                    isSectionHidden = collapsedSections.has(sectionId);
+                    return (
+                      <SidebarSectionHeader
+                        key={item.key}
+                        label={item.label}
+                        icon={item.icon}
+                        isCollapsed={false}
+                        isSectionFolded={isSectionHidden}
+                        onToggleFold={() => toggleSectionCollapse(sectionId)}
+                      />
+                    );
+                  }
+                  // Skip groups in collapsed sections (but not when searching)
+                  if (isSectionHidden && !sidebarSearch) {
+                    return null;
+                  }
                   return (
-                    <SidebarSectionHeader
+                    <SidebarNavGroup
                       key={item.key}
-                      label={item.label}
-                      icon={item.icon}
+                      item={item}
                       isCollapsed={false}
                     />
                   );
-                }
-                return (
-                  <SidebarNavGroup
-                    key={item.key}
-                    item={item}
-                    isCollapsed={false}
-                  />
-                );
-              })
+                });
+              })()
             ) : (
               <div className="text-center py-4 text-sm text-muted-foreground">
                 {t('commandPalette.noResults')}
