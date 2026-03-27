@@ -18,7 +18,7 @@ const LiveOperationsBoard = lazy(() => import('@/components/dashboard/transporte
 const FleetStatusMini = lazy(() => import('@/components/dashboard/transporter/FleetStatusMini'));
 const RevenueSnapshotMini = lazy(() => import('@/components/dashboard/transporter/RevenueSnapshotMini'));
 const DriverPerformancePanel = lazy(() => import('@/components/dashboard/transporter/DriverPerformancePanel'));
-const TripCostManagement = lazy(() => import('@/components/dashboard/transporter/TripCostManagement'));
+const TransporterPartnerSummary = lazy(() => import('@/components/dashboard/transporter/TransporterPartnerSummary'));
 const MaintenanceScheduler = lazy(() => import('@/components/dashboard/transporter/MaintenanceScheduler'));
 const ShipmentCalendarWidget = lazy(() => import('@/components/dashboard/transporter/ShipmentCalendarWidget'));
 const SmartDriverNotifications = lazy(() => import('@/components/dashboard/transporter/SmartDriverNotifications'));
