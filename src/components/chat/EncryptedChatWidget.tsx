@@ -623,7 +623,7 @@ const EncryptedChatWidget = () => {
                   {/* Empty state */}
                   {(conversationsLoading || partnersLoading) ? (
                     <div className="flex justify-center py-8">
-                      <Loader2 className="animate-spin text-emerald-600" size={20} />
+                      <Loader2 className="animate-spin text-primary" size={20} />
                     </div>
                   ) : filteredConversations.length === 0 && filteredPartners.length === 0 && (
                     <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
