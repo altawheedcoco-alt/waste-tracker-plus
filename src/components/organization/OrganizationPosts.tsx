@@ -320,9 +320,9 @@ const OrganizationPosts = ({
               }`}
             >
               {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
-                <video src={fixStorageUrl(url)} className="w-full h-48 object-cover" playsInline preload="metadata" />
+                <video src={fixStorageUrl(url)} className="w-full h-48 object-contain bg-black/5" playsInline preload="metadata" controls />
               ) : (
-                <img src={fixStorageUrl(url)} alt="" className="w-full h-48 object-cover" />
+                <img src={fixStorageUrl(url)} alt="" className="w-full h-48 object-contain bg-black/5" />
               )}
               {index === 3 && post.media_urls.length > 4 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
@@ -340,7 +340,7 @@ const OrganizationPosts = ({
         <img 
           src={fixStorageUrl(post.media_urls[0])} 
           alt="" 
-          className="w-full max-h-[500px] object-cover"
+          className="w-full max-h-[500px] object-contain"
         />
       </div>
     );

@@ -418,12 +418,12 @@ const PostCard = ({ post, orgName, orgLogo, isPinned = false }: { post: any; org
               {mediaUrls.slice(0, 4).map((url: string, i: number) => {
                 const isVideo = url.match(/\.(mp4|webm|mov)/i);
                 return isVideo ? (
-                  <video key={i} src={url} controls className="w-full max-h-96 object-cover bg-black" />
+                  <video key={i} src={url} controls className="w-full max-h-96 object-contain bg-black" />
                 ) : (
                   <Dialog key={i}>
                     <DialogTrigger asChild>
                       <div className="relative cursor-pointer">
-                        <img src={url} alt="" className="w-full max-h-96 object-cover" loading="lazy" />
+                        <img src={url} alt="" className="w-full max-h-96 object-contain" loading="lazy" />
                         {i === 3 && mediaUrls.length > 4 && (
                           <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white text-2xl font-bold">
                             +{mediaUrls.length - 4}
