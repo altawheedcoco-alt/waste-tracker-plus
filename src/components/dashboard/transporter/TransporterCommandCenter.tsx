@@ -308,8 +308,23 @@ const TransporterCommandCenter = () => {
       const activeVehicles = vehicles.filter(v => v.status === 'active').length;
 
       const docs = docsR.data || [];
-      const expiringDocs = 0; // entity_documents doesn't have expires_at
-      const expiredDocs = 0;
+      // Check for documents expiring within 30 days
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      const { count: expiringDocsCount } = await supabase
+        .from('entity_documents')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organization!.id)
+        .lte('expiry_date', thirtyDaysFromNow.toISOString())
+        .gte('expiry_date', new Date().toISOString());
+      const expiringDocs = expiringDocsCount || 0;
+      
+      const { count: expiredDocsCount } = await supabase
+        .from('entity_documents')
+        .select('id', { count: 'exact', head: true })
+        .eq('organization_id', organization!.id)
+        .lt('expiry_date', new Date().toISOString());
+      const expiredDocs = expiredDocsCount || 0;
 
       const contracts = contractsR.data || [];
       const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
