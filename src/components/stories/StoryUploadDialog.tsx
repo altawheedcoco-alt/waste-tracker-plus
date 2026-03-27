@@ -56,6 +56,7 @@ const StoryUploadDialog = ({ open, onOpenChange }: StoryUploadDialogProps) => {
   const [showLinkInput, setShowLinkInput] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { uploadStory } = useStories();
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
 
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
