@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Clock, Eye, Film, ChevronLeft } from 'lucide-react';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
+import LandingWrapper from '@/components/LandingWrapper';
 import BackButton from '@/components/ui/back-button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
