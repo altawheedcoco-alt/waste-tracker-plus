@@ -113,15 +113,15 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
           </span>
           {isMine && (
             msg.status === 'sending' ? (
-              <Loader2 className="w-3 h-3 text-white/40 animate-spin" />
+              <Loader2 className="w-3 h-3 text-primary-foreground/40 animate-spin" />
             ) : msg.status === 'failed' ? (
-              <span className="text-[8px] text-red-400">!</span>
+              <span className="text-[8px] text-destructive">!</span>
             ) : msg.status === 'read' ? (
-              <CheckCheck className="w-3 h-3 text-sky-400" />
+              <CheckCheck className="w-3 h-3 text-accent" />
             ) : msg.status === 'delivered' ? (
-              <CheckCheck className="w-3 h-3 text-white/50" />
+              <CheckCheck className="w-3 h-3 text-primary-foreground/50" />
             ) : (
-              <Check className="w-3 h-3 text-white/50" />
+              <Check className="w-3 h-3 text-primary-foreground/50" />
             )
           )}
         </div>
