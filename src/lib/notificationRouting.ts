@@ -3,12 +3,12 @@
  * Maps notification type + metadata to a direct navigation path.
  */
 
-interface NotificationRouteInput {
+export interface NotificationRouteInput {
   type: string | null;
   shipment_id?: string | null;
   request_id?: string | null;
   pdf_url?: string | null;
-  metadata?: Record<string, any> | null;
+  metadata?: Record<string, any> | null | string | number | boolean;
 }
 
 /**
