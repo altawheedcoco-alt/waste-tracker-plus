@@ -37,6 +37,8 @@ export function useSidebarPreferences() {
         group_order: data.group_order || [],
         hidden_groups: data.hidden_groups || [],
         collapsed_groups: data.collapsed_groups || [],
+        collapsed_sections: (data as any).collapsed_sections || [],
+        pinned_items: (data as any).pinned_items || [],
       } : null);
     } catch (err) {
       console.error('Error fetching sidebar prefs:', err);
