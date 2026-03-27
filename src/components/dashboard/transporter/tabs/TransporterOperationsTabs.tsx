@@ -35,7 +35,7 @@ const SmartPriorityQueue = lazy(() => import('@/components/transporter/SmartPrio
 const OrgPerformanceRadar = lazy(() => import('@/components/dashboard/shared/OrgPerformanceRadar'));
 const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
 const LicenseExpiryWidget = lazy(() => import('@/components/dashboard/shared/LicenseExpiryWidget'));
-const TransporterSectionsSummary = lazy(() => import('@/components/dashboard/transporter/TransporterSectionsSummary'));
+
 const IoTMonitoringPanel = lazy(() => import('@/components/dashboard/transporter/IoTMonitoringPanel'));
 const TransporterSmartKPIs = lazy(() => import('@/components/dashboard/transporter/TransporterSmartKPIs'));
 const SmartETAWidget = lazy(() => import('@/components/dashboard/transporter/SmartETAWidget'));
@@ -110,8 +110,6 @@ const TransporterOperationsTabs = ({
 
       <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية"><TransporterPerformanceCharts /></ErrorBoundary>
 
-      <Suspense fallback={<TabFallback />}><SmartPriorityQueue shipments={shipments} /></Suspense>
-
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
         <TransporterShipmentsList
           shipments={shipments} isLoading={shipmentsLoading} onRefresh={onRefresh}
@@ -121,15 +119,14 @@ const TransporterOperationsTabs = ({
       <ErrorBoundary fallbackTitle="خطأ في التقرير التجميعي">
         <TransporterAggregateReport shipments={shipments} />
       </ErrorBoundary>
-
-      <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-        <ErrorBoundary fallbackTitle="خطأ في دليل الأقسام"><TransporterSectionsSummary /></ErrorBoundary>
-      </Suspense>
     </TabsContent>
 
     {/* ══════ 2. العمليات (calendar + load consolidation مدمج) ══════ */}
     <TabsContent value="operations" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
+        <ErrorBoundary fallbackTitle="خطأ في قائمة الأولويات">
+          <SmartPriorityQueue shipments={shipments} />
+        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في تجميع الحمولات">
           <LoadConsolidator />
         </ErrorBoundary>

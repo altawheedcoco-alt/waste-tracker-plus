@@ -633,14 +633,16 @@ const TransporterCommandCenter = () => {
 
               {/* Row 3: Financial & Compliance Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
+                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500"
+                  onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
                   sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
                   onClick={() => navigate('/dashboard/quick-deposit-links')} />
                 <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
-                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`} />
+                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`}
+                  onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
               </div>
             </motion.div>
 
