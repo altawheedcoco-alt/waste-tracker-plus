@@ -1123,8 +1123,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                     )}
                   </nav>
 
-                  {/* Bottom - Music Player & Logout */}
+                  {/* Bottom - Sound Control, Music Player & Logout */}
                   <div className="px-4 py-3 border-t border-border/40 shrink-0 space-y-2">
+                    <SidebarSoundControl isCollapsed={false} />
                     <div className="flex items-center justify-center">
                       <FocusMusicPlayer />
                     </div>
