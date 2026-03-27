@@ -15,7 +15,8 @@ export interface NotificationRouteInput {
  * Returns the direct route path for a notification, or null if no specific route exists (fallback to dialog).
  */
 export function getNotificationRoute(notification: NotificationRouteInput): string | null {
-  const { type, shipment_id, request_id, pdf_url, metadata } = notification;
+  const { type, shipment_id, request_id, pdf_url, metadata: rawMeta } = notification;
+  const metadata = (typeof rawMeta === 'object' && rawMeta !== null && !Array.isArray(rawMeta)) ? rawMeta as Record<string, any> : {};
   const convId = metadata?.conversation_id;
   const postId = metadata?.post_id;
   const documentId = metadata?.document_id;
