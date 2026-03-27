@@ -320,7 +320,7 @@ const ProfileHeader = ({ organization, isEditable = false, onUpdate }: ProfileHe
           {/* Organization Info */}
           <div className="flex-1 text-center sm:text-right sm:pb-2">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 sm:gap-3">
-              <h1 className="text-2xl sm:text-3xl font-bold">{organization.name}</h1>
+              <h1 className="text-xl sm:text-2xl md:text-3xl font-bold">{organization.name}</h1>
               <TooltipProvider>
                 <div className="flex items-center gap-2">
                   <Badge variant={organization.is_verified ? 'default' : 'secondary'}>
