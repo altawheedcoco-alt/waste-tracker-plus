@@ -9,7 +9,7 @@ import { toast } from 'sonner';
 import { getFirebaseMessaging, getToken, onMessage } from '@/lib/firebase';
 import { showSystemNotification } from '@/lib/systemNotifications';
 
-const FCM_VAPID_KEY = 'BGUbGLdxCbsZR7ZZQNdZAkpusnhxFrYdQcKSh1oBorhVSeJC7GWb2jTLX17YW40gRn7EWJp0wLe4847KtgGXHcs';
+const FCM_VAPID_KEY = 'BG4HSc0wFyjsD2l4tHc5K_QCoWwA_xfc_fJQentkLTWulWkNEqZKt3MMILTyN_PBhsvx2BCTyhrOjo3nac_bfQ0';
 const FCM_SERVICE_WORKER_SCOPE = '/firebase-cloud-messaging-push-scope/';
 
 async function waitForServiceWorkerActivation(registration: ServiceWorkerRegistration) {
