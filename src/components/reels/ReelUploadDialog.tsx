@@ -144,6 +144,9 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
             rows={2}
           />
 
+          {/* Music Picker */}
+          <MusicPicker selectedTrack={selectedMusic} onSelect={setSelectedMusic} />
+
           <Input
             value={hashtags}
             onChange={(e) => setHashtags(e.target.value)}
