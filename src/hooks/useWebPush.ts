@@ -2,7 +2,7 @@
  * useWebPush — Subscribe to Web Push notifications (VAPID)
  * One-tap: permission dialog → subscribe → save → done
  */
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
