@@ -539,10 +539,17 @@ Deno.serve(async (req) => {
 
       await Promise.allSettled(
         subscriptions.map(async (sub: any) => {
-          const result = await sendPushNotification(
-            { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-            payload, vapidPublicKey, vapidPrivateKey
-          );
+          let result: { success: boolean; error?: string; status?: number };
+          if (isFCMSubscription(sub)) {
+            const fcmToken = getFCMToken(sub);
+            const parsedPayload = JSON.parse(payload);
+            result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+          } else {
+            result = await sendPushNotification(
+              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+              payload, vapidPublicKey, vapidPrivateKey
+            );
+          }
           if (result.success) {
             sent++;
             await supabase.from("push_campaign_recipients")
@@ -635,10 +642,17 @@ Deno.serve(async (req) => {
 
         await Promise.allSettled(
           (subs || []).map(async (sub: any) => {
-            const result = await sendPushNotification(
-              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-              payload, vapidPublicKey, vapidPrivateKey
-            );
+            let result: { success: boolean; error?: string; status?: number };
+            if (isFCMSubscription(sub)) {
+              const fcmToken = getFCMToken(sub);
+              const parsedPayload = JSON.parse(payload);
+              result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+            } else {
+              result = await sendPushNotification(
+                { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+                payload, vapidPublicKey, vapidPrivateKey
+              );
+            }
             if (result.success) {
               sent++;
               userResults[sub.user_id] = { status: "sent" };
@@ -717,7 +731,15 @@ Deno.serve(async (req) => {
         const batch = allSubs.slice(i, i + 20);
         await Promise.allSettled(
           batch.map(async (sub: any) => {
-            if (isFCMSubscription(sub)) return; // Skip FCM tokens in VAPID cleanup
+            if (isFCMSubscription(sub)) {
+              // Validate FCM token by sending a silent data-only message
+              const fcmToken = getFCMToken(sub);
+              const result = await sendFCMNotification(fcmToken, { title: "", body: "", data: { silent: "true" } });
+              if (result.error === "subscription_expired") {
+                expiredEndpoints.push(sub.endpoint);
+              }
+              return;
+            }
             const result = await sendPushNotification(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
               testPayload, vapidPublicKey, vapidPrivateKey
@@ -784,10 +806,17 @@ Deno.serve(async (req) => {
 
         await Promise.allSettled(
           subs.map(async (sub: any) => {
-            const result = await sendPushNotification(
-              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-              payload, vapidPublicKey, vapidPrivateKey
-            );
+            let result: { success: boolean; error?: string; status?: number };
+            if (isFCMSubscription(sub)) {
+              const fcmToken = getFCMToken(sub);
+              const parsedPayload = JSON.parse(payload);
+              result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+            } else {
+              result = await sendPushNotification(
+                { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+                payload, vapidPublicKey, vapidPrivateKey
+              );
+            }
             if (result.success) {
               await supabase.from("push_campaign_recipients").update({
                 status: "sent", delivered_at: new Date().toISOString(), error_message: null,
