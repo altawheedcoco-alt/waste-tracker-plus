@@ -217,6 +217,17 @@ const TransporterCommandCenter = () => {
       setIsExporting(false);
     }
   }, [isExporting, now]);
+
+  const { data: stats, isLoading } = useQuery({
+    queryKey: ['transporter-command-center-v5', organization?.id, period],
+    queryFn: async () => {
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
+      // Period-based start date
+      const periodStart = new Date(today);
+      if (period === 'week') periodStart.setDate(periodStart.getDate() - 7);
+      else if (period === 'month') periodStart.setDate(periodStart.getDate() - 30);
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
