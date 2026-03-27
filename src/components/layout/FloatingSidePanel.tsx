@@ -125,7 +125,7 @@ const FloatingSidePanel = memo(() => {
       id: 'driver-conversations',
       icon: <Users size={iconSize} />,
       label: 'محادثات السائقين',
-      gradient: 'from-blue-500 to-indigo-500',
+      gradient: 'from-primary to-primary/60',
       onClick: () => handleNavigate('/dashboard/chat?filter=drivers'),
       visible: isTransporter && !isDriver,
       category: 'operations',
