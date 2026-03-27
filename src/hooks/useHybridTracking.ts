@@ -275,6 +275,7 @@ export const useHybridTracking = ({
     if (enabled) {
       fetchConfig();
     }
+    return () => { configAbortRef.current?.abort(); };
   }, [enabled, fetchConfig]);
 
   return {
