@@ -18,7 +18,6 @@ import {
   NotificationSoundType, 
   SOUND_LABELS,
   previewNotificationSound,
-  playThemeSound,
 } from '@/hooks/useNotificationSound';
 import { useUserPreferences } from '@/hooks/useUserPreferences';
 import { cn } from '@/lib/utils';
