@@ -276,6 +276,41 @@ export const useChat = () => {
             : m
         ));
       }
+
+      // Send server-side push notification to receiver org members
+      try {
+        const { data: members } = await supabase
+          .from('organization_members')
+          .select('user_id')
+          .eq('organization_id', receiverOrgId)
+          .eq('status', 'active');
+
+        const recipientIds = (members || [])
+          .map((m: any) => m.user_id)
+          .filter((id: string) => id !== user.id);
+
+        if (recipientIds.length > 0) {
+          let pushBody = content;
+          if (messageType === 'image') pushBody = '📷 صورة';
+          else if (messageType === 'file') pushBody = '📎 ملف';
+          else {
+            try { pushBody = JSON.parse(content).text || content; } catch { /* use raw */ }
+          }
+
+          const senderName = user.user_metadata?.full_name || 'مستخدم';
+          supabase.functions.invoke('send-push', {
+            body: {
+              user_ids: recipientIds,
+              title: `💬 رسالة من ${senderName}`,
+              body: pushBody,
+              tag: `msg-${newMessage.id}`,
+              data: { url: '/dashboard/chat', type: 'message' },
+            },
+          }).catch(err => console.warn('[Chat] Push notification failed:', err));
+        }
+      } catch (pushErr) {
+        console.warn('[Chat] Push lookup failed:', pushErr);
+      }
     } catch (error: any) {
       console.error('Error sending message:', error);
       
