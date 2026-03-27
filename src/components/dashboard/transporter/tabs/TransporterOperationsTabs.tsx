@@ -110,8 +110,6 @@ const TransporterOperationsTabs = ({
 
       <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية"><TransporterPerformanceCharts /></ErrorBoundary>
 
-      <Suspense fallback={<TabFallback />}><SmartPriorityQueue shipments={shipments} /></Suspense>
-
       <ErrorBoundary fallbackTitle="خطأ في قائمة الشحنات">
         <TransporterShipmentsList
           shipments={shipments} isLoading={shipmentsLoading} onRefresh={onRefresh}
@@ -121,10 +119,6 @@ const TransporterOperationsTabs = ({
       <ErrorBoundary fallbackTitle="خطأ في التقرير التجميعي">
         <TransporterAggregateReport shipments={shipments} />
       </ErrorBoundary>
-
-      <Suspense fallback={<Skeleton className="h-[400px] w-full rounded-xl" />}>
-        <ErrorBoundary fallbackTitle="خطأ في دليل الأقسام"><TransporterSectionsSummary /></ErrorBoundary>
-      </Suspense>
     </TabsContent>
 
     {/* ══════ 2. العمليات (calendar + load consolidation مدمج) ══════ */}
