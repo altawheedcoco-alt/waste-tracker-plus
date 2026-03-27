@@ -520,7 +520,7 @@ const EncryptedChatWidget = () => {
                             <p className="text-[10px] text-muted-foreground truncate">{c.partner?.organization_name}</p>
                           </div>
                           {(c.unread_count || 0) > 0 && (
-                            <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-emerald-600 text-white">
+                            <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-primary text-primary-foreground">
                               {c.unread_count}
                             </Badge>
                           )}
