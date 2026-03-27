@@ -13,17 +13,20 @@ const DynamicPricingEngine = lazy(() => import('@/components/dashboard/transport
 const WasteMarketplace = lazy(() => import('@/components/marketplace/WasteMarketplace'));
 const FraudDetectionPanel = lazy(() => import('@/components/dashboard/transporter/FraudDetectionPanel'));
 const SmartSchedulerPanel = lazy(() => import('@/components/ai/SmartSchedulerPanel'));
-const PartnerProfitabilityPanel = lazy(() => import('@/components/dashboard/transporter/PartnerProfitabilityPanel'));
 const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
 const PartnersView = lazy(() => import('@/components/dashboard/PartnersView'));
+const TransporterPartnerSummary = lazy(() => import('@/components/dashboard/transporter/TransporterPartnerSummary'));
 const SustainabilityReportGenerator = lazy(() => import('@/components/dashboard/transporter/SustainabilityReportGenerator'));
 const SLADashboard = lazy(() => import('@/components/transporter/SLADashboard'));
 const ProfitabilityReport = lazy(() => import('@/components/transporter/ProfitabilityReport'));
 const ShiftScheduler = lazy(() => import('@/components/transporter/ShiftScheduler'));
 const DemandForecastDashboard = lazy(() => import('@/components/dashboard/transporter/DemandForecastDashboard'));
 const CapacityPlanningDashboard = lazy(() => import('@/components/dashboard/transporter/CapacityPlanningDashboard'));
-const PredictiveMaintenanceAI = lazy(() => import('@/components/dashboard/transporter/PredictiveMaintenanceAI'));
 const TripCostAnalytics = lazy(() => import('@/components/dashboard/transporter/TripCostAnalytics'));
+const RevenueSnapshotMini = lazy(() => import('@/components/dashboard/transporter/RevenueSnapshotMini'));
+const EnvironmentalKPIWidget = lazy(() => import('@/components/dashboard/shared/EnvironmentalKPIWidget'));
+const CarbonCreditsPanel = lazy(() => import('@/components/dashboard/transporter/CarbonCreditsPanel'));
+const ESGReportPanel = lazy(() => import('@/components/dashboard/transporter/ESGReportPanel'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
