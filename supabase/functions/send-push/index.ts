@@ -731,7 +731,15 @@ Deno.serve(async (req) => {
         const batch = allSubs.slice(i, i + 20);
         await Promise.allSettled(
           batch.map(async (sub: any) => {
-            if (isFCMSubscription(sub)) return; // Skip FCM tokens in VAPID cleanup
+            if (isFCMSubscription(sub)) {
+              // Validate FCM token by sending a silent data-only message
+              const fcmToken = getFCMToken(sub);
+              const result = await sendFCMNotification(fcmToken, { title: "", body: "", data: { silent: "true" } });
+              if (result.error === "subscription_expired") {
+                expiredEndpoints.push(sub.endpoint);
+              }
+              return;
+            }
             const result = await sendPushNotification(
               { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
               testPayload, vapidPublicKey, vapidPrivateKey
