@@ -168,6 +168,7 @@ const ReelsFeed = memo(() => {
                 onBookmark={() => toggleBookmark.mutate({ reelId: reel.id, isBookmarked: !!reel.is_bookmarked })}
                 onShare={() => handleShare(reel)}
                 onDelete={() => deleteReel.mutate(reel.id)}
+                onDuet={() => handleDuet(reel)}
               />
             </div>
           ))}
