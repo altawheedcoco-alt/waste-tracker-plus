@@ -93,6 +93,7 @@ async function sendFCMNotification(fcmToken: string, payload: FCMPayload): Promi
           data: payload.data || {},
           webpush: {
             notification: { icon: "/favicon.png", badge: "/favicon.png", dir: "rtl", lang: "ar" },
+            fcm_options: { link: payload.data?.url || "/" },
           },
         },
       }),
