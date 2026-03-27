@@ -181,7 +181,7 @@ function osc(
   const g = ctx.createGain();
   o.type = type;
   o.frequency.value = freq;
-  g.gain.value = vol * 0.5; // raised from 0.3
+  g.gain.value = vol * 0.8; // raised for louder output
   if (ramp) {
     o.frequency.linearRampToValueAtTime(ramp, ctx.currentTime + duration);
   }
