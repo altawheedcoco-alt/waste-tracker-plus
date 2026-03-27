@@ -53,6 +53,7 @@ const MessageActions = ({
         textToCopy = parsed.text || messageContent;
       } catch { /* Use original */ }
       await navigator.clipboard.writeText(textToCopy);
+      soundEngine.play('copy');
       toast({ title: 'تم النسخ', description: 'تم نسخ الرسالة إلى الحافظة' });
     } catch {
       toast({ title: 'خطأ', description: 'فشل نسخ الرسالة', variant: 'destructive' });
