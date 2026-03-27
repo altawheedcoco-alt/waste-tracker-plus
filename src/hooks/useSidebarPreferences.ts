@@ -61,8 +61,10 @@ export function useSidebarPreferences() {
           group_order: newPrefs.group_order,
           hidden_groups: newPrefs.hidden_groups,
           collapsed_groups: newPrefs.collapsed_groups,
+          collapsed_sections: newPrefs.collapsed_sections || [],
+          pinned_items: newPrefs.pinned_items || [],
           updated_at: new Date().toISOString(),
-        }, { onConflict: 'user_id,organization_id' });
+        } as any, { onConflict: 'user_id,organization_id' });
 
       if (error) throw error;
       setPrefs(newPrefs);
