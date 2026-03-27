@@ -18,6 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface MessageActionsProps {
   messageContent: string;
