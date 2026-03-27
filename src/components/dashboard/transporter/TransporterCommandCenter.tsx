@@ -633,7 +633,8 @@ const TransporterCommandCenter = () => {
 
               {/* Row 3: Financial & Compliance Bar */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500" />
+                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500"
+                  onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
                   sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
                   onClick={() => navigate('/dashboard/quick-deposit-links')} />
