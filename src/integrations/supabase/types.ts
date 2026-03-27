@@ -18403,6 +18403,45 @@ export type Database = {
           },
         ]
       }
+      favorite_tracks: {
+        Row: {
+          album_image: string | null
+          artist_name: string | null
+          audio_url: string | null
+          created_at: string | null
+          duration: number | null
+          id: string
+          track_id: string
+          track_name: string | null
+          track_source: string
+          user_id: string
+        }
+        Insert: {
+          album_image?: string | null
+          artist_name?: string | null
+          audio_url?: string | null
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          track_id: string
+          track_name?: string | null
+          track_source?: string
+          user_id: string
+        }
+        Update: {
+          album_image?: string | null
+          artist_name?: string | null
+          audio_url?: string | null
+          created_at?: string | null
+          duration?: number | null
+          id?: string
+          track_id?: string
+          track_name?: string | null
+          track_source?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       field_inspections: {
         Row: {
           compliance_score: number | null
