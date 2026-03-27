@@ -69,7 +69,7 @@ export const ReactionPicker = ({ onReact, isOwn }: { onReact: (emoji: string) =>
           {QUICK_REACTIONS.map((emoji) => (
             <button
               key={emoji}
-              onClick={() => onReact(emoji)}
+              onClick={() => { soundEngine.play('reaction'); onReact(emoji); }}
               className="w-8 h-8 flex items-center justify-center hover:bg-muted rounded-md transition-colors text-lg hover:scale-125"
             >
               {emoji}
