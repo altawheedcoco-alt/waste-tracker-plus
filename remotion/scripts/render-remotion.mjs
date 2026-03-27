@@ -21,7 +21,7 @@ const browser = await openBrowser("chrome", {
 });
 
 const composition = await selectComposition({ serveUrl: bundled, id: compositionId, puppeteerInstance: browser });
-console.log(`🎥 Rendering ${composition.durationInFrames} frames...`);
+console.log(`🎥 Rendering ${composition.durationInFrames} frames (${compositionId})...`);
 
 await renderMedia({
   composition, serveUrl: bundled, codec: "h264",
