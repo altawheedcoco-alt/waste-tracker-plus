@@ -438,7 +438,7 @@ const EncryptedChatWidget = () => {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-24 left-3 sm:left-6 z-50 w-[calc(100vw-1.5rem)] sm:w-80 h-[28rem] sm:h-[32rem] rounded-2xl border border-border bg-background shadow-2xl flex flex-col overflow-hidden"
+            className="fixed bottom-[calc(9rem+env(safe-area-inset-bottom))] sm:bottom-24 left-3 sm:left-6 z-50 w-[calc(100vw-1.5rem)] sm:w-80 h-[28rem] sm:h-[32rem] rounded-2xl border border-border bg-card shadow-2xl flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="h-12 px-3 flex items-center justify-between bg-primary text-primary-foreground shrink-0 rounded-t-2xl">
