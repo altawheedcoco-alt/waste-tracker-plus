@@ -29,7 +29,7 @@ const RevenueSnapshotMini = () => {
       transition={{ delay: 0.35 }}
     >
       <Card className="border border-border/50 bg-card overflow-hidden cursor-pointer hover:border-primary/30 transition-colors"
-        onClick={() => navigate('/dashboard/accounting')}
+        onClick={() => navigate('/dashboard/erp/accounting')}}
       >
         <CardContent className="p-3 sm:p-4">
           <div className="flex items-center justify-between mb-3">

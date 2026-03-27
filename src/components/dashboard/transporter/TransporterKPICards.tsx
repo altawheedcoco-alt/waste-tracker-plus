@@ -62,7 +62,7 @@ const TransporterKPICards = ({ financials, kpis, financialsLoading, kpisLoading 
           <p>{t('transporterKPI.pendingFollowUp')}</p>
         </div>
       ),
-      link: '/dashboard/accounting',
+      link: '/dashboard/erp/accounting',
     },
   ];
 
