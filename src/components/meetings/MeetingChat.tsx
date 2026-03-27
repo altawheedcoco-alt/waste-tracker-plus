@@ -68,6 +68,7 @@ const MeetingChat = ({ meetingId }: { meetingId: string }) => {
           ...msg,
           sender_name: sender?.full_name || 'مستخدم',
         }]);
+        soundEngine.play('message_received');
       })
       .subscribe();
 
