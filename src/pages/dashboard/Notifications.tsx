@@ -32,6 +32,7 @@ import BackButton from '@/components/ui/back-button';
 import NotificationDetailDialog from '@/components/notifications/NotificationDetailDialog';
 import { previewNotificationSound, isNotificationSoundEnabled } from '@/hooks/useNotificationSound';
 import { normalizeRelation } from '@/lib/supabaseHelpers';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 // ═══════════════════════════════════════════════════════
 // Metadata labels
@@ -513,6 +514,15 @@ const Notifications = () => {
 
   const handleNotificationClick = (notification: Notification) => {
     markAsRead(notification.id);
+    
+    // Smart Routing: try direct navigation first
+    const route = getNotificationRoute(notification);
+    if (route) {
+      navigate(route);
+      return;
+    }
+    
+    // Fallback: open detail dialog
     setSelectedNotification(notification);
     setDetailDialogOpen(true);
   };

@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { getTabChannelName } from '@/lib/tabSession';
 import { playNotificationSound, mapNotificationTypeToSound } from '@/hooks/useNotificationSound';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 interface LiveNotification {
   id: string;
@@ -120,13 +121,8 @@ const LiveEventToast = () => {
 
   const handleClick = (event: LiveNotification) => {
     dismissEvent(event.id);
-    if (event.shipment_id) {
-      navigate(`/dashboard/shipments/${event.shipment_id}`);
-    } else if (event.request_id) {
-      navigate(`/dashboard/my-requests`);
-    } else {
-      navigate('/dashboard/notifications');
-    }
+    const route = getNotificationRoute(event);
+    navigate(route || '/dashboard/notifications');
   };
 
   return (

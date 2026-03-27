@@ -7,8 +7,10 @@ import { Button } from '@/components/ui/button';
 import { Bell, CheckCheck, Loader2, Inbox, Filter, Settings2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import NotificationChannelPreferences from '@/components/notifications/NotificationChannelPreferences';
+import { getNotificationRoute } from '@/lib/notificationRouting';
 
 const priorityConfig: Record<string, { label: string; className: string }> = {
   urgent: { label: 'عاجل', className: 'bg-destructive/10 text-destructive border-destructive/20' },
@@ -20,6 +22,7 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
 const MyNotificationsTab = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
   const { data: notifications = [], isLoading } = useQuery({
@@ -168,7 +171,11 @@ const MyNotificationsTab = () => {
                           className={`border-border/30 transition-all cursor-pointer hover:shadow-sm ${
                             !n.is_read ? 'bg-primary/5 border-primary/20 hover:bg-primary/8' : 'hover:bg-muted/30'
                           }`}
-                          onClick={() => !n.is_read && markOneRead.mutate(n.id)}
+                          onClick={() => {
+                            if (!n.is_read) markOneRead.mutate(n.id);
+                            const route = getNotificationRoute(n);
+                            if (route) navigate(route);
+                          }}
                         >
                           <CardContent className="p-4">
                             <div className="flex items-start gap-3">
