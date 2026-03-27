@@ -62,6 +62,18 @@ const CallScreen = memo(({
   const isActive = callInfo.state === 'connected';
   const isRinging = callInfo.state === 'ringing' || callInfo.state === 'calling';
 
+  // Play call sounds based on state
+  useEffect(() => {
+    if (isRinging) {
+      soundEngine.play('call_ring');
+      const interval = setInterval(() => soundEngine.play('call_ring'), 3000);
+      return () => clearInterval(interval);
+    }
+    if (callInfo.state === 'ended') {
+      soundEngine.play('call_end');
+    }
+  }, [callInfo.state, isRinging]);
+
   const getStatusText = () => {
     switch (callInfo.state) {
       case 'calling': return 'جاري الاتصال...';

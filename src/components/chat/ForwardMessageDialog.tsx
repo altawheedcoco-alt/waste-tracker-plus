@@ -74,6 +74,7 @@ const ForwardMessageDialog = ({
               <button
                 key={partner.id}
                 onClick={() => {
+                  soundEngine.play('forward');
                   onForward(partner.id);
                   onOpenChange(false);
                 }}
