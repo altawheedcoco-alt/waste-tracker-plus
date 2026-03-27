@@ -217,6 +217,19 @@ const DeliveryProofFlow = ({ open, onOpenChange, shipment, onCompleted }: Delive
       onCompleted?.();
       onOpenChange(false);
       resetForm();
+
+      // Fire delivery confirmation notification
+      try {
+        import('@/services/notificationTriggers').then(({ notifyShipmentEvent }) => {
+          notifyShipmentEvent({
+            type: 'shipment_delivered',
+            shipmentId: shipment.id,
+            shipmentNumber: shipment.shipment_number,
+            excludeUserId: user?.id,
+            organizationId: organization?.id,
+          });
+        });
+      } catch {}
     } catch (err: any) {
       console.error('Delivery proof error:', err);
       toast.error('حدث خطأ أثناء تأكيد التسليم');

@@ -127,9 +127,22 @@ export function useComments(entityType: EntityType, entityId: string) {
         });
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       queryClient.invalidateQueries({ queryKey });
       toast.success('تم إضافة التعليق');
+
+      // Notify entity owner about comment
+      try {
+        import('@/services/notificationTriggers').then(({ notifySocialEvent }) => {
+          notifySocialEvent({
+            type: 'post_commented',
+            actorName: user?.email || 'مستخدم',
+            actorUserId: user?.id || '',
+            entityId: entityId,
+            organizationId: organization?.id,
+          });
+        });
+      } catch {}
     },
     onError: () => toast.error('فشل في إضافة التعليق'),
   });
