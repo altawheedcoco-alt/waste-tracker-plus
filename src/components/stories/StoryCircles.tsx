@@ -59,12 +59,12 @@ const StoryCircles = () => {
                 setSelectedGroup(group);
               }
             }}
-            className="flex flex-col items-center gap-1 min-w-[70px]"
+            className="flex flex-col items-center gap-1 min-w-[70px] relative"
           >
             <div
               className={`w-16 h-16 rounded-full p-[3px] ${
                 group.hasUnviewed
-                  ? 'bg-gradient-to-br from-emerald-400 via-primary to-cyan-500'
+                  ? 'bg-gradient-to-br from-primary via-primary/80 to-accent-foreground'
                   : group.user_id === user?.id
                   ? 'bg-gradient-to-br from-primary/40 to-primary/20'
                   : 'bg-muted'

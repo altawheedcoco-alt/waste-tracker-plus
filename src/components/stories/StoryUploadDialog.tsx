@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { useStories } from '@/hooks/useStories';
 
 const GRADIENT_OPTIONS = [
-  'bg-gradient-to-br from-emerald-500 to-teal-700',
+  'bg-gradient-to-br from-primary to-primary/60',
   'bg-gradient-to-br from-blue-500 to-purple-700',
   'bg-gradient-to-br from-rose-500 to-pink-700',
   'bg-gradient-to-br from-amber-500 to-orange-700',
