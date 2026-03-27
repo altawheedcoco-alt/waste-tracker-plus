@@ -915,6 +915,304 @@ const NotificationCard = ({
             {notification.message}
           </p>
 
+          {/* Shipment-specific detail card */}
+          {['shipment_created', 'shipment_assigned', 'shipment_status', 'status_update', 'shipment_approved', 'shipment_delivered'].includes(notification.type || '') && !shipmentDetails && notification.metadata && (
+            <div className="bg-blue-500/5 rounded-lg p-2.5 border border-blue-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Package className="w-3.5 h-3.5 text-blue-500" />
+                <span className="font-semibold text-blue-600 dark:text-blue-400">تفاصيل الشحنة</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                {notification.metadata.shipment_number && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="text-muted-foreground/60">رقم الشحنة:</span>
+                    <span className="font-medium font-mono">{notification.metadata.shipment_number}</span>
+                  </div>
+                )}
+                {notification.metadata.waste_type && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="text-muted-foreground/60">نوع المخلفات:</span>
+                    <span className="font-medium">{notification.metadata.waste_type}</span>
+                  </div>
+                )}
+                {notification.metadata.quantity && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="text-muted-foreground/60">الكمية:</span>
+                    <span className="font-medium">{notification.metadata.quantity} {notification.metadata.unit || 'كجم'}</span>
+                  </div>
+                )}
+                {(notification.metadata.new_status || notification.metadata.status) && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <span className="text-muted-foreground/60">الحالة:</span>
+                    <span className="font-medium">{notification.metadata.new_status || notification.metadata.status}</span>
+                  </div>
+                )}
+                {notification.metadata.driver_name && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <User className="w-3 h-3" />
+                    <span className="font-medium">{notification.metadata.driver_name}</span>
+                  </div>
+                )}
+                {notification.metadata.generator_name && (
+                  <div className="flex items-center gap-1.5 text-muted-foreground">
+                    <Building2 className="w-3 h-3" />
+                    <span className="font-medium">{notification.metadata.generator_name}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Document-specific detail card */}
+          {['document_uploaded', 'document_issued', 'signing_request', 'signature_request', 'document_signed', 'stamp_applied'].includes(notification.type || '') && (
+            <div className="bg-indigo-500/5 rounded-lg p-2.5 border border-indigo-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <FileText className="w-3.5 h-3.5 text-indigo-500" />
+                <span className="font-semibold text-indigo-600 dark:text-indigo-400">
+                  {notification.type === 'signing_request' || notification.type === 'signature_request' ? 'طلب توقيع' : 
+                   notification.type === 'document_signed' ? 'تم التوقيع' :
+                   notification.type === 'stamp_applied' ? 'تم الختم' : 'تفاصيل المستند'}
+                </span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.document_name && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">المستند:</span>
+                      <span className="font-medium">{notification.metadata.document_name}</span>
+                    </div>
+                  )}
+                  {notification.metadata.document_type && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">النوع:</span>
+                      <span className="font-medium">{notification.metadata.document_type}</span>
+                    </div>
+                  )}
+                  {notification.metadata.sender_name && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <User className="w-3 h-3" />
+                      <span className="font-medium">{notification.metadata.sender_name}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Finance-specific detail card */}
+          {['invoice', 'payment', 'deposit', 'financial'].includes(notification.type || '') && (
+            <div className="bg-emerald-500/5 rounded-lg p-2.5 border border-emerald-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Wallet className="w-3.5 h-3.5 text-emerald-500" />
+                <span className="font-semibold text-emerald-600 dark:text-emerald-400">تفاصيل مالية</span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.amount && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">المبلغ:</span>
+                      <span className="font-bold text-emerald-600">{notification.metadata.amount} {notification.metadata.currency || 'ج.م'}</span>
+                    </div>
+                  )}
+                  {notification.metadata.invoice_number && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">رقم الفاتورة:</span>
+                      <span className="font-medium font-mono">{notification.metadata.invoice_number}</span>
+                    </div>
+                  )}
+                  {notification.metadata.payment_method && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">طريقة الدفع:</span>
+                      <span className="font-medium">{notification.metadata.payment_method}</span>
+                    </div>
+                  )}
+                  {notification.metadata.organization_name && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Building2 className="w-3 h-3" />
+                      <span className="font-medium">{notification.metadata.organization_name}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Compliance/License detail card */}
+          {['license_expiry', 'license_warning', 'compliance_alert', 'compliance_update', 'violation', 'inspection'].includes(notification.type || '') && (
+            <div className="bg-violet-500/5 rounded-lg p-2.5 border border-violet-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Shield className="w-3.5 h-3.5 text-violet-500" />
+                <span className="font-semibold text-violet-600 dark:text-violet-400">
+                  {notification.type === 'violation' ? 'تفاصيل المخالفة' : 
+                   notification.type === 'inspection' ? 'تفاصيل التفتيش' : 'تفاصيل الامتثال'}
+                </span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.expires_at && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Clock className="w-3 h-3 text-red-500" />
+                      <span className="font-medium text-red-500">{notification.metadata.expires_at}</span>
+                    </div>
+                  )}
+                  {notification.metadata.reason && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground col-span-full">
+                      <span className="text-muted-foreground/60">السبب:</span>
+                      <span className="font-medium">{notification.metadata.reason}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Fleet/GPS detail card */}
+          {['fleet_alert', 'maintenance', 'geofence_alert', 'gps_alert'].includes(notification.type || '') && (
+            <div className="bg-slate-500/5 rounded-lg p-2.5 border border-slate-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Car className="w-3.5 h-3.5 text-slate-500" />
+                <span className="font-semibold text-slate-600 dark:text-slate-400">تفاصيل الأسطول</span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.plate_number && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">لوحة المركبة:</span>
+                      <Badge variant="outline" className="text-[9px] font-mono">{notification.metadata.plate_number}</Badge>
+                    </div>
+                  )}
+                  {notification.metadata.driver_name && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <User className="w-3 h-3" />
+                      <span className="font-medium">{notification.metadata.driver_name}</span>
+                    </div>
+                  )}
+                  {notification.metadata.location && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground col-span-full">
+                      <MapPin className="w-3 h-3" />
+                      <span className="font-medium">{notification.metadata.location}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Work Order detail card */}
+          {['work_order', 'work_order_update'].includes(notification.type || '') && (
+            <div className="bg-sky-500/5 rounded-lg p-2.5 border border-sky-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <ClipboardCheck className="w-3.5 h-3.5 text-sky-500" />
+                <span className="font-semibold text-sky-600 dark:text-sky-400">تفاصيل أمر الشغل</span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.reference_number && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">الرقم المرجعي:</span>
+                      <span className="font-medium font-mono">{notification.metadata.reference_number}</span>
+                    </div>
+                  )}
+                  {notification.metadata.status && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">الحالة:</span>
+                      <span className="font-medium">{notification.metadata.status}</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* AI/Smart detail card */}
+          {['ai_alert', 'ai_insight'].includes(notification.type || '') && (
+            <div className="bg-fuchsia-500/5 rounded-lg p-2.5 border border-fuchsia-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Sparkles className="w-3.5 h-3.5 text-fuchsia-500" />
+                <span className="font-semibold text-fuchsia-600 dark:text-fuchsia-400">تحليل ذكي</span>
+              </div>
+              {notification.metadata?.description && (
+                <p className="text-xs text-muted-foreground">{notification.metadata.description}</p>
+              )}
+              {notification.metadata?.confidence_score && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <span className="text-muted-foreground/60">نسبة الثقة:</span>
+                  <span className="font-bold">{notification.metadata.confidence_score}%</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Environmental detail card */}
+          {['environmental', 'carbon_report'].includes(notification.type || '') && (
+            <div className="bg-lime-500/5 rounded-lg p-2.5 border border-lime-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Leaf className="w-3.5 h-3.5 text-lime-600" />
+                <span className="font-semibold text-lime-700 dark:text-lime-400">تفاصيل بيئية</span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.recycling_rate && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">معدل التدوير:</span>
+                      <span className="font-bold text-lime-600">{notification.metadata.recycling_rate}%</span>
+                    </div>
+                  )}
+                  {notification.metadata.weight && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">الوزن:</span>
+                      <span className="font-medium">{notification.metadata.weight} كجم</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Partner detail card */}
+          {notification.type === 'partner_linked' && (
+            <div className="bg-purple-500/5 rounded-lg p-2.5 border border-purple-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <Handshake className="w-3.5 h-3.5 text-purple-500" />
+                <span className="font-semibold text-purple-600 dark:text-purple-400">تفاصيل الشريك</span>
+              </div>
+              {notification.metadata?.partner_name && (
+                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <Building2 className="w-3 h-3" />
+                  <span className="font-medium">{notification.metadata.partner_name}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Recycling Report detail card */}
+          {['recycling_report', 'report', 'certificate'].includes(notification.type || '') && (
+            <div className="bg-cyan-500/5 rounded-lg p-2.5 border border-cyan-500/20 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs">
+                <BarChart3 className="w-3.5 h-3.5 text-cyan-500" />
+                <span className="font-semibold text-cyan-600 dark:text-cyan-400">
+                  {notification.type === 'certificate' ? 'تفاصيل الشهادة' : 'تفاصيل التقرير'}
+                </span>
+              </div>
+              {notification.metadata && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1 text-xs">
+                  {notification.metadata.recycler_name && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <Recycle className="w-3 h-3 text-green-500" />
+                      <span className="font-medium">{notification.metadata.recycler_name}</span>
+                    </div>
+                  )}
+                  {notification.metadata.recycling_rate && (
+                    <div className="flex items-center gap-1.5 text-muted-foreground">
+                      <span className="text-muted-foreground/60">معدل التدوير:</span>
+                      <span className="font-bold text-cyan-600">{notification.metadata.recycling_rate}%</span>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* Shipment Details */}
           {shipmentDetails && (
             <div className="bg-muted/30 rounded-lg p-2.5 space-y-1.5 mt-1">

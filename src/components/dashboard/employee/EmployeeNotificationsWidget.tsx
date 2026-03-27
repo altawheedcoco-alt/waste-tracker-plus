@@ -61,12 +61,12 @@ const EmployeeNotificationsWidget = ({ notifications }: { notifications: Notific
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-medium truncate">{n.title}</p>
+                  <p className="text-sm font-medium">{n.title}</p>
                   {!n.is_read && (
                     <Badge variant="default" className="text-[10px] px-1.5 py-0">جديد</Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground line-clamp-1 mt-0.5">{n.message}</p>
+                <p className="text-xs text-muted-foreground mt-0.5 whitespace-pre-wrap leading-relaxed">{n.message}</p>
                 <p className="text-[10px] text-muted-foreground mt-1">
                   {formatDistanceToNow(new Date(n.created_at), { addSuffix: true, locale: ar })}
                 </p>

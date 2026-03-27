@@ -99,7 +99,7 @@ const TransporterNotifications = ({ notifications }: TransporterNotificationsPro
                     <IconComponent className={`w-4 h-4 ${config.color}`} />
                     <span className="font-medium text-sm break-words whitespace-normal">{notification.shipment_number}</span>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words whitespace-normal">{notification.message}</p>
+                  <p className="text-sm text-muted-foreground mt-1 leading-relaxed break-words whitespace-pre-wrap">{notification.message}</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     {notification.created_at && format(new Date(notification.created_at), 'PPp', { locale: ar })}
                   </p>
