@@ -1,7 +1,10 @@
 /**
  * Smart Notification Routing — التوجيه الذكي للإشعارات
  * Maps notification type + metadata to a direct navigation path.
+ * Supports all ~188 notification types.
  */
+
+import { getNotificationTypeMeta } from './notificationTypes';
 
 export interface NotificationRouteInput {
   type: string | null;
@@ -18,11 +21,10 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
   const { type, shipment_id, request_id, pdf_url, metadata: rawMeta } = notification;
   const metadata = (typeof rawMeta === 'object' && rawMeta !== null && !Array.isArray(rawMeta)) ? rawMeta as Record<string, any> : {};
   const convId = metadata?.conversation_id;
-  const postId = metadata?.post_id;
-  const documentId = metadata?.document_id;
 
+  // ═══ Special cases that need dynamic routing ═══
   switch (type) {
-    // ═══ Shipments ═══
+    // Shipments with ID → detail page
     case 'shipment_created':
     case 'shipment_status':
     case 'status_update':
@@ -30,104 +32,69 @@ export function getNotificationRoute(notification: NotificationRouteInput): stri
     case 'shipment_delivered':
     case 'shipment_approved':
     case 'shipment':
+    case 'shipment_auto_approved':
+    case 'shipment_rejected':
+    case 'shipment_cancelled':
+    case 'shipment_disputed':
+    case 'shipment_confirmed':
+    case 'shipment_delayed':
+    case 'shipment_approval_request':
+    case 'shipment_document':
     case 'driver_assignment':
+    case 'driver_reassigned':
+    case 'pickup_started':
+    case 'pickup_completed':
+    case 'delivery_started':
+    case 'delivery_eta_update':
+    case 'weight_mismatch':
+    case 'custody_generator_handover':
+    case 'custody_transporter_pickup':
+    case 'custody_transporter_delivery':
+    case 'custody_recycler_receipt':
+    case 'custody_chain_complete':
+    case 'weight_dispute':
+    case 'dispute_resolved':
+    case 'dispute_escalated':
+    case 'dispute_created':
       return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/shipments';
 
-    // ═══ Documents & Signing ═══
-    case 'signing_request':
-    case 'signature_request':
-      return '/dashboard/signing-inbox';
-    case 'document_uploaded':
-    case 'document_issued':
-    case 'document_signed':
-    case 'stamp_applied':
-      return '/dashboard/document-center';
-
-    // ═══ Approvals ═══
-    case 'approval_request':
-      return request_id ? `/dashboard/my-requests` : '/dashboard/my-requests';
-
-    // ═══ Chat & Messages ═══
+    // Chat with conversation ID
     case 'chat_message':
     case 'message':
     case 'mention':
-      return convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat';
     case 'partner_message':
+    case 'group_message':
+    case 'channel_message':
+    case 'thread_reply':
+    case 'reaction_added':
+    case 'pinned_message':
+    case 'scheduled_message_sent':
+    case 'meeting_invitation':
+    case 'meeting_starting':
+    case 'meeting_cancelled':
+    case 'video_call_incoming':
+    case 'call_missed':
       return convId ? `/dashboard/chat?conv=${convId}` : '/dashboard/chat';
-    case 'broadcast':
-      return '/dashboard/broadcast-channels';
 
-    // ═══ Partners ═══
-    case 'partner_post':
-      return '/dashboard/partners';
-    case 'partner_note':
-      return '/dashboard/notes';
-    case 'partner_linked':
-      return '/dashboard/partners';
-
-    // ═══ Finance ═══
-    case 'invoice':
-    case 'payment':
-    case 'deposit':
-    case 'financial':
-      return '/dashboard/erp/accounting';
-
-    // ═══ Recycling & Reports ═══
+    // Recycling reports may open PDF
     case 'recycling_report':
       if (pdf_url) return null; // Will open PDF in dialog
       return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/reports';
-    case 'report':
-    case 'certificate':
-      return '/dashboard/reports';
 
-    // ═══ Compliance & Licenses ═══
-    case 'license_expiry':
-    case 'license_warning':
-      return '/dashboard/organization-profile';
-    case 'compliance_alert':
-    case 'compliance_update':
-    case 'inspection':
-    case 'violation':
-      return '/dashboard/compliance';
-
-    // ═══ Fleet & Tracking ═══
-    case 'fleet_alert':
-    case 'maintenance':
-      return '/dashboard/fleet';
-    case 'geofence_alert':
-    case 'gps_alert':
-      return '/dashboard/fleet-tracking';
-
-    // ═══ Work Orders ═══
-    case 'work_order':
-    case 'work_order_update':
-      return '/dashboard/work-orders';
-
-    // ═══ Environmental ═══
-    case 'carbon_report':
-    case 'environmental':
-      return '/dashboard/carbon-footprint';
-
-    // ═══ AI ═══
-    case 'ai_alert':
-    case 'ai_insight':
-      return '/dashboard/ai-tools';
-
-    // ═══ Identity ═══
-    case 'identity_verified':
-    case 'kyc_update':
-      return '/dashboard/organization-profile';
-
-    // ═══ Announcements ═══
-    case 'announcement':
-      return '/dashboard/news-feed';
-
-    // ═══ Warnings / System ═══
-    case 'warning':
+    // Signal lost with shipment
     case 'signal_lost':
-      return shipment_id ? `/dashboard/shipments/${shipment_id}` : null;
+    case 'warning':
+      return shipment_id ? `/dashboard/shipments/${shipment_id}` : '/dashboard/fleet-tracking';
 
     default:
-      return null;
+      break;
   }
+
+  // ═══ Fallback: use registry default route ═══
+  if (type) {
+    const meta = getNotificationTypeMeta(type);
+    if (meta?.defaultRoute) return meta.defaultRoute;
+  }
+
+  return null;
 }
