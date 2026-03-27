@@ -25,6 +25,7 @@ const videos: VideoItem[] = [
     description: 'فيديو تعريفي شامل بالمنصة — واجهة المستخدم على اللابتوب والهاتف، لوحة التحكم، التقارير، تتبع الشاحنات، والأرقام والإحصائيات الحية. رحلة التحول الرقمي من الورق إلى الذكاء الاصطناعي.',
     duration: '0:45',
     thumbnail: '',
+    videoUrl: '/videos/irecycle-series-ep1.mp4',
     status: 'available',
     episode: 1,
     tags: ['تعريف', 'المنصة', 'رقمنة'],
