@@ -1,72 +1,66 @@
 
 
-# خطة: أصوات إشعارات متعددة وعالية مع تحكم كامل
+## تشخيص المشكلتين
 
-## المشكلة الحالية
+### المشكلة 1: التأخير (~2+ دقائق)
+السبب: الإشعارات تُرسل عبر **database trigger** (`trg_dispatch_channels`) الذي يستخدم `net.http_post` (pg_net). هذه الدالة غير متزامنة وتعمل بنظام طوابير داخل PostgreSQL — قد تتأخر من 30 ثانية إلى عدة دقائق حسب الحمل. هذا تأخير بنيوي في pg_net وليس في FCM نفسه.
 
-- أصوات الإشعارات في `useNotificationSound.ts` ضعيفة (volume 0.2-0.35)
-- كل نوع إشعار له صوت واحد فقط بدون بدائل
-- لا يوجد تحكم فردي لكل نوع إشعار (صوت + مستوى)
-- النظامان (`soundEngine` و `useNotificationSound`) منفصلان ومتداخلان
+### المشكلة 2: الضغط على الإشعار لا يفتح الصفحة المناسبة
+السبب: الـ DB trigger يُرسل `data` بدون حقل `url`:
+```json
+{"notification_id": "...", "type": "info"}
+```
+وفي `sendFCMNotification` يتم تمرير `data` كما هي بدون إضافة `url`. وفي `firebase-messaging-sw.js` يقرأ `event.notification.data?.url || '/'` — فلا يجد URL فيفتح الصفحة الرئيسية دائماً.
 
-## ما سيتم تنفيذه
+---
 
-### 1. رفع مستوى كل الأصوات + إضافة 6 نغمات بديلة لكل نوع إشعار
+## خطة الإصلاح
 
-كل نوع إشعار (شحنة جديدة، تحديث حالة، موافقة، تسليم، إسناد، تقرير، وثيقة، طلب موافقة، رسالة، تحذير، مالي، عام) سيحصل على **6 نغمات بديلة** بدل صوت واحد:
+### 1. إصلاح التوجيه عند الضغط على الإشعار
+- **في DB trigger** (`dispatch_notification_to_channels`): إضافة حقل `url` للـ push payload بناءً على نوع الإشعار (`type`). مثلاً: `shipment` → `/shipments`, `message` → `/chat`, `financial` → `/financial`.
+- **في `sendFCMNotification`** (دالة send-push): تمرير `data.url` في حقل `webpush.fcm_options.link` وفي `data` لضمان وصوله للـ Service Worker.
+- **في `firebase-messaging-sw.js`**: التأكد من قراءة `payload.data.url` وفتحه عند النقر (موجود بالفعل).
 
-| النغمة | الوصف |
-|--------|-------|
-| `strong` | صوت قوي وحاد (الافتراضي) |
-| `bell` | جرس واضح |
-| `alarm` | إنذار متكرر |
-| `rising` | لحن صاعد |
-| `triple` | 3 نبضات سريعة |
-| `deep` | صدى عميق |
+### 2. تقليل التأخير
+- **في DB trigger**: استبدال `net.http_post` بنسخة تضيف `timeout` أقل أو إرسال مباشر من الكود (client-side) عند إنشاء الإشعارات من واجهة المستخدم.
+- بديل: إضافة استدعاء مباشر لـ `send-push` من كود الـ React عند الأحداث التفاعلية (الرسائل، الشحنات) بدلاً من الاعتماد فقط على الـ trigger — وهذا مطبق جزئياً في `useChat` بالفعل.
 
-**كل النغمات بصوت مرتفع** — volume يبدأ من 0.6 ويصل لـ 1.0
+### 3. تفاصيل تقنية
 
-### 2. تحكم فردي لكل نوع إشعار في SidebarSoundControl
+**Migration جديدة** — تحديث دالة `dispatch_notification_to_channels`:
+```sql
+-- إضافة url بناءً على النوع
+v_url := CASE 
+  WHEN NEW.type = 'shipment' THEN '/shipments'
+  WHEN NEW.type = 'message' THEN '/chat'
+  WHEN NEW.type = 'financial' THEN '/financial'
+  WHEN NEW.type = 'system' THEN '/notifications'
+  ELSE '/notifications'
+END;
 
-داخل قسم "الإشعارات" في الـ Popover، إضافة **قائمة تفصيلية** تحتوي على كل نوع إشعار:
-- مفتاح تفعيل/تعطيل
-- اختيار النغمة من 6 خيارات مع زر تجربة ▶️
-- شريط تحكم بمستوى الصوت
+v_push_payload := jsonb_build_object(
+  'user_id', NEW.user_id::text,
+  'title', NEW.title,
+  'body', NEW.message,
+  'data', jsonb_build_object(
+    'notification_id', NEW.id::text,
+    'type', COALESCE(NEW.type, 'info'),
+    'url', v_url
+  )
+);
+```
 
-### 3. أنواع الإشعارات الجديدة (توسيع)
+**تحديث `sendFCMNotification`** في `send-push/index.ts`:
+```typescript
+webpush: {
+  notification: { icon: "/favicon.png", badge: "/favicon.png", dir: "rtl", lang: "ar" },
+  fcm_options: { link: payload.data?.url || "/" },
+  data: payload.data || {},
+},
+```
 
-إضافة أنواع إضافية لتغطية كل الإشعارات:
-
-| النوع | الوصف |
-|-------|-------|
-| `shipment_created` | شحنة جديدة |
-| `shipment_status` | تحديث حالة |
-| `shipment_approved` | موافقة |
-| `shipment_delivered` | تم التسليم |
-| `shipment_assigned` | إسناد شحنة |
-| `recycling_report` | تقرير تدوير |
-| `document_uploaded` | رفع وثيقة |
-| `document_signed` | توقيع وثيقة |
-| `approval_request` | طلب موافقة |
-| `chat_message` | رسالة دردشة |
-| `warning` | تحذير / طوارئ |
-| `financial` | مالي (فاتورة/دفع) |
-| `partner_linked` | ربط شريك |
-| `broadcast` | بث عام |
-| `default` | إشعار عام |
-
-## الملفات المتأثرة
-
-| ملف | تغيير |
-|-----|--------|
-| `src/hooks/useNotificationSound.ts` | رفع الأصوات بشكل كبير + إضافة 6 نغمات بديلة لكل نوع + تحكم فردي |
-| `src/components/dashboard/SidebarSoundControl.tsx` | إضافة قسم تفصيلي لكل نوع إشعار مع اختيار النغمة والصوت |
-| `src/lib/soundEngine.ts` | رفع volume multiplier في `osc()` من 0.5 لـ 0.8 |
-
-## التفاصيل الفنية
-
-- كل النغمات تُولّد بـ Web Audio API مع gain مرتفع (0.6-1.0)
-- مدة كل صوت إشعار: 300-500ms (أطول من الحالي ليكون مسموعاً أكثر)
-- الإعدادات تُحفظ في localStorage بمفتاح `notif_sound_{type}_tone` و `notif_sound_{type}_volume`
-- قسم الإشعارات في Popover يتوسع لعرض كل الأنواع مع تصميم مدمج
+**الملفات المتأثرة:**
+1. `supabase/functions/send-push/index.ts` — إضافة `url` في FCM webpush options
+2. Migration SQL — تحديث الـ trigger لتضمين URL
+3. `public/firebase-messaging-sw.js` — لا تغيير (يدعم `data.url` بالفعل)
 
