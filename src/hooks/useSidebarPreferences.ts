@@ -148,7 +148,25 @@ export function useSidebarPreferences() {
     group_order: prefs?.group_order?.length ? prefs.group_order : defaultOrder,
     hidden_groups: prefs?.hidden_groups || [],
     collapsed_groups: prefs?.collapsed_groups || [],
+    collapsed_sections: prefs?.collapsed_sections || [],
+    pinned_items: prefs?.pinned_items || [],
   };
+
+  const toggleSectionCollapse = useCallback(async (sectionId: string) => {
+    const sections = effectivePrefs.collapsed_sections || [];
+    const newSections = sections.includes(sectionId)
+      ? sections.filter(id => id !== sectionId)
+      : [...sections, sectionId];
+    await savePrefs({ ...effectivePrefs, collapsed_sections: newSections });
+  }, [effectivePrefs, savePrefs]);
+
+  const togglePinItem = useCallback(async (itemPath: string) => {
+    const pinned = effectivePrefs.pinned_items || [];
+    const newPinned = pinned.includes(itemPath)
+      ? pinned.filter(p => p !== itemPath)
+      : [...pinned, itemPath];
+    await savePrefs({ ...effectivePrefs, pinned_items: newPinned });
+  }, [effectivePrefs, savePrefs]);
 
   return {
     orderedGroups,
@@ -160,5 +178,7 @@ export function useSidebarPreferences() {
     toggleGroupVisibility,
     resetToDefaults,
     hasCustomization: prefs !== null,
+    toggleSectionCollapse,
+    togglePinItem,
   };
 }
