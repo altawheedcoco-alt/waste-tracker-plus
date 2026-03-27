@@ -606,7 +606,7 @@ const OrganizationProfile = () => {
         <BackButton />
 
         {/* Profile Header - negative margins to extend cover full width */}
-        <Card className="overflow-hidden p-0 -mx-3 sm:-mx-4 md:-mx-5 lg:-mx-6 rounded-none sm:rounded-xl sm:mx-0">
+        <Card className="overflow-hidden p-0 -mx-3 sm:-mx-4 md:-mx-5 lg:-mx-6 xl:-mx-8 rounded-none sm:rounded-lg">
           <ProfileHeader
             organization={{
               id: organization.id, name: organization.name, name_en: orgData?.name_en,
