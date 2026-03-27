@@ -90,6 +90,7 @@ const MeetingChat = ({ meetingId }: { meetingId: string }) => {
       message_type: 'text',
     });
 
+    soundEngine.play('message_sent');
     setInput('');
     setSending(false);
   };

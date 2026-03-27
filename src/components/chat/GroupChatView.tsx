@@ -68,6 +68,7 @@ const GroupChatView = ({ room, onBack }: GroupChatViewProps) => {
     setSending(true);
     try {
       await sendRoomMessage(room.id, inputValue.trim());
+      soundEngine.play('message_sent');
       setInputValue('');
       queryClient.invalidateQueries({ queryKey: ['group-messages', room.id] });
     } finally {

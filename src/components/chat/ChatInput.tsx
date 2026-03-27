@@ -204,6 +204,7 @@ const ChatInput = ({ onSendMessage, onSendFile, sending, uploadProgress = 0, dis
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      soundEngine.play('recording_stop');
       if (recordingIntervalRef.current) {
         clearInterval(recordingIntervalRef.current);
         recordingIntervalRef.current = null;

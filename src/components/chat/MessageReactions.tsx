@@ -31,7 +31,7 @@ const MessageReactionsDisplay = ({ reactions, onReact, isOwn }: MessageReactions
       {reactions.map((r) => (
         <button
           key={r.emoji}
-          onClick={() => onReact(r.emoji)}
+          onClick={() => { soundEngine.play('reaction'); onReact(r.emoji); }}
           className={cn(
             "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors",
             r.reacted

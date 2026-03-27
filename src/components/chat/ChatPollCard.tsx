@@ -30,6 +30,7 @@ export default function ChatPollCard({ poll, currentUserId, onVote, onClose }: C
   const handleVote = (idx: number) => {
     if (poll.is_closed || hasVoted) return;
     setSelectedOption(idx);
+    soundEngine.play('poll_vote');
     onVote(poll.id, idx);
   };
 

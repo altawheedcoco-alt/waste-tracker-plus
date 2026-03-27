@@ -107,7 +107,7 @@ const MessageActions = ({
         {isOwn && onDelete && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+            <DropdownMenuItem onClick={() => { soundEngine.play('delete'); onDelete(); }} className="text-destructive">
               <Trash2 className="w-4 h-4 ml-2" />
               حذف
             </DropdownMenuItem>

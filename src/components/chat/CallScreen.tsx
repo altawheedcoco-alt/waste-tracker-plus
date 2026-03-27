@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import type { CallInfo } from '@/hooks/useWebRTCCall';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface CallScreenProps {
   callInfo: CallInfo;
