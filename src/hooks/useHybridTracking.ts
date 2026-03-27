@@ -34,17 +34,25 @@ export const useHybridTracking = ({
   const [linkedDevice, setLinkedDevice] = useState<GPSDevice | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
+  const configAbortRef = useRef<AbortController | null>(null);
+
   // Fetch tracking config
   const fetchConfig = useCallback(async () => {
     if (!shipmentId) return;
+
+    configAbortRef.current?.abort();
+    const controller = new AbortController();
+    configAbortRef.current = controller;
 
     const { data, error } = await supabase
       .from('shipment_tracking_config')
       .select('*')
       .eq('shipment_id', shipmentId)
+      .abortSignal(controller.signal)
       .maybeSingle();
 
     if (error) {
+      if (error.message?.includes('AbortError') || error.message?.includes('aborted')) return;
       console.error('Error fetching tracking config:', error);
       return;
     }
