@@ -26,6 +26,7 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
   const [hashtags, setHashtags] = useState('');
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { createReel } = useReelActions();
   const { user, organization } = useAuth();
