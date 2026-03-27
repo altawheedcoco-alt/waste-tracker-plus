@@ -122,6 +122,7 @@ const CustomerPortal = lazy(() => import("@/pages/dashboard/CustomerPortal"));
 const OnboardingReview = lazy(() => import("@/pages/dashboard/OnboardingReview"));
 const C2BManagement = lazy(() => import("@/pages/dashboard/C2BManagement"));
 const Stories = lazy(() => import("@/pages/dashboard/Stories"));
+const Reels = lazy(() => import("@/pages/dashboard/Reels"));
 const DeliveryDeclarations = lazy(() => import("@/pages/dashboard/DeliveryDeclarations"));
 const RejectedShipments = lazy(() => import("@/pages/dashboard/RejectedShipments"));
 const ERPAccounting = lazy(() => import("@/pages/dashboard/erp/ERPAccounting"));
