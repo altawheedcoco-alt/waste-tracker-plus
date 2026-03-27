@@ -170,7 +170,7 @@ const EnhancedChatInput = ({
     if (files.length > 1) {
       setShowAttachMenu(false);
       clearAudioRecording();
-      for (let i = 0; i < files.length; i++) await onSendFile(files[i]);
+      await Promise.all(Array.from(files).map((f) => onSendFile(f)));
       e.target.value = '';
       return;
     }
