@@ -58,6 +58,7 @@ const AddOrganization = lazy(() => import("@/pages/dashboard/AddOrganization"));
 const ShipmentReports = lazy(() => import("@/pages/dashboard/ShipmentReports"));
 const AdminDriversMap = lazy(() => import("@/pages/dashboard/AdminDriversMap"));
 const VideoGenerator = lazy(() => import("@/pages/dashboard/VideoGenerator"));
+const VideoSeries = lazy(() => import("@/pages/dashboard/VideoSeries"));
 const WoodMarketIntelligence = lazy(() => import("@/pages/dashboard/WoodMarketIntelligence"));
 const OrgStructure = lazy(() => import("@/pages/dashboard/OrgStructure"));
 const MyLocation = lazy(() => import("@/pages/dashboard/MyLocation"));
