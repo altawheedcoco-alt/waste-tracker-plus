@@ -11,16 +11,16 @@ import { ThemeSettingsProvider } from "@/contexts/ThemeSettingsContext";
 import { ViewModeProvider } from "@/contexts/ViewModeContext";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { shouldEnablePWA } from "@/lib/pwaRuntime";
+import InstallPWA from "./components/pwa/InstallPWA";
+import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt";
+import { AutoPushSubscriber } from "./components/pwa/AutoPushSubscriber";
+import PushPermissionBanner from "./components/pwa/PushPermissionBanner";
 
 // Offline components (lightweight, keep global)
 const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
 const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
 const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
-const InstallPWA = lazy(() => import("./components/pwa/InstallPWA"));
-const PWAUpdatePrompt = lazy(() => import("./components/pwa/PWAUpdatePrompt"));
 const ProductionReadiness = lazy(() => import("./components/production/ProductionReadiness"));
-const AutoPushSubscriber = lazy(() => import("./components/pwa/AutoPushSubscriber").then(m => ({ default: m.AutoPushSubscriber })));
-const PushPermissionBanner = lazy(() => import("./components/pwa/PushPermissionBanner"));
 const SoundIntegrator = lazy(() => import("./components/SoundIntegrator"));
 
 // Minimal loading component
@@ -117,12 +117,12 @@ const Providers = memo(() => (
                   <OfflineBanner />
                   {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
-                  {shouldEnablePWA() ? <InstallPWA /> : null}
-                  {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
-                  <AutoPushSubscriber />
-                  <PushPermissionBanner />
                   <ProductionReadiness />
                 </Suspense>
+                {shouldEnablePWA() ? <InstallPWA /> : null}
+                {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
+                <AutoPushSubscriber />
+                <PushPermissionBanner />
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
