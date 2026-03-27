@@ -60,9 +60,12 @@ const ReelsFeed = memo(() => {
   }, [filteredReels, incrementView]);
 
   const handleShare = useCallback((reel: typeof reels[0]) => {
-    if (navigator.share) {
-      navigator.share({ title: reel.caption || 'ريل', url: window.location.href }).catch(() => {});
-    }
+    // Share is now handled inside ReelItem via ReelShareSheet
+  }, []);
+
+  const handleDuet = useCallback((reel: typeof reels[0]) => {
+    // Open upload dialog with duet reference
+    setShowUpload(true);
   }, []);
 
   if (isLoading) {
