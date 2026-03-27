@@ -484,6 +484,29 @@ const TransporterCommandCenter = () => {
                     <CreditCard className="w-3 h-3" /> {stats?.unpaidInvoices} فاتورة معلقة
                   </Badge>
                 )}
+                {/* Period Toggle */}
+                <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30">
+                  {(['today', 'week', 'month'] as TimePeriod[]).map(p => (
+                    <button key={p} onClick={() => setPeriod(p)}
+                      className={`px-2 py-1 rounded-md text-[10px] font-bold transition-all ${
+                        period === p ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                      }`}>
+                      {PERIOD_LABELS[p]}
+                    </button>
+                  ))}
+                </div>
+
+                {/* PDF Export */}
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button onClick={handleExportPDF} disabled={isExporting}
+                      className="flex items-center gap-1 px-2 py-1.5 rounded-lg bg-muted/30 border border-border/30 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-all text-[10px] font-bold disabled:opacity-50">
+                      <FileText className="w-3 h-3" />
+                      {isExporting ? '...' : 'PDF'}
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent>تصدير كـ PDF</TooltipContent>
+                </Tooltip>
               </div>
 
               <div className="flex items-center gap-3">
