@@ -320,7 +320,7 @@ const OrganizationPosts = ({
               }`}
             >
               {url.includes('.mp4') || url.includes('.webm') || url.includes('.mov') ? (
-                <video src={fixStorageUrl(url)} className="w-full h-48 object-contain bg-black/5" playsInline preload="metadata" controls />
+                <video src={fixStorageUrl(url)} className="w-full h-48 object-contain bg-black/5" playsInline preload="auto" controls />
               ) : (
                 <img src={fixStorageUrl(url)} alt="" className="w-full h-48 object-contain bg-black/5" />
               )}
