@@ -218,7 +218,7 @@ const Header = memo(() => {
               </button>
               <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
               <button
-                onClick={() => handleNavClick('/dashboard/video-series')}
+                onClick={() => handleNavClick('/video-series')}
                 className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10.5px] font-bold text-primary hover:bg-primary/15 dark:hover:bg-primary/20 transition-all duration-200"
               >
                 <span className="flex items-center justify-center w-5 h-5 rounded-md bg-gradient-to-br from-primary/20 to-primary/10 dark:from-primary/30 dark:to-primary/15 border border-primary/30 dark:border-primary/40 shadow-[0_0_6px_hsl(var(--primary)/0.15)]">
