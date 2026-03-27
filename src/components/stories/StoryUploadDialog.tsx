@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useStories } from '@/hooks/useStories';
 import { toast } from 'sonner';
+import MusicPicker from '@/components/media/MusicPicker';
+import type { MusicTrack } from '@/lib/musicLibrary';
 
 const GRADIENT_OPTIONS = [
   { bg: 'bg-gradient-to-br from-primary to-primary/60', label: 'أساسي' },
