@@ -37,12 +37,12 @@ export default function CommunicationHubWidget() {
     { icon: CircleDot, labelAr: 'الحالات', path: '/dashboard/stories', badgeCount: counts?.activeStories, color: 'text-primary', bgColor: 'bg-primary/10' },
     { icon: Video, labelAr: 'الاجتماعات', path: '/dashboard/meetings', badgeCount: counts?.activeMeetings, color: 'text-muted-foreground', bgColor: 'bg-muted' },
     { icon: Send, labelAr: 'طلباتي', path: '/dashboard/my-requests', badgeCount: counts?.pendingRequests, color: 'text-primary', bgColor: 'bg-primary/10', previewType: 'work_order' },
-    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-amber-600', bgColor: 'bg-amber-500/10', previewType: 'signature' },
-    { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-sky-600', bgColor: 'bg-sky-500/10' },
-    { icon: Radio, labelAr: 'البث', path: '/dashboard/broadcast-channels', badgeCount: counts?.broadcastChannels, color: 'text-green-600', bgColor: 'bg-green-500/10' },
-    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', badgeCount: counts?.activePolls, color: 'text-orange-600', bgColor: 'bg-orange-500/10' },
-    { icon: Bot, labelAr: 'المساعد', path: '/dashboard/ai-tools', color: 'text-purple-600', bgColor: 'bg-purple-500/10' },
-    { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/reports', color: 'text-indigo-600', bgColor: 'bg-indigo-500/10' },
+    { icon: PenTool, labelAr: 'التوقيعات', path: '/dashboard/signing-inbox', badgeCount: counts?.pendingSignatures, color: 'text-accent-foreground', bgColor: 'bg-accent/30', previewType: 'signature' },
+    { icon: Hash, labelAr: 'القنوات', path: '/dashboard/chat?tab=channels', color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: Radio, labelAr: 'البث', path: '/dashboard/broadcast-channels', badgeCount: counts?.broadcastChannels, color: 'text-primary', bgColor: 'bg-primary/10' },
+    { icon: BarChart3, labelAr: 'التصويت', path: '/dashboard/chat?tab=polls', badgeCount: counts?.activePolls, color: 'text-accent-foreground', bgColor: 'bg-accent/30' },
+    { icon: Bot, labelAr: 'المساعد', path: '/dashboard/ai-tools', color: 'text-muted-foreground', bgColor: 'bg-muted' },
+    { icon: TrendingUp, labelAr: 'التحليلات', path: '/dashboard/reports', color: 'text-primary', bgColor: 'bg-primary/10' },
   ];
 
   const goTo = (path: string) => startTransition(() => navigate(path));
