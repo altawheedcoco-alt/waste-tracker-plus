@@ -349,6 +349,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/shipment-reports" element={<ShipmentReports />} />
     <Route path="/dashboard/admin-drivers-map" element={<AdminDriversMap />} />
     <Route path="/dashboard/video-generator" element={<VideoGenerator />} />
+    <Route path="/dashboard/video-series" element={<VideoSeries />} />
     <Route path="/dashboard/my-location" element={<MyLocation />} />
     <Route path="/dashboard/recycling-certificates" element={<RecyclingCertificates />} />
     <Route path="/dashboard/issue-recycling-certificates" element={<IssueRecyclingCertificates />} />
