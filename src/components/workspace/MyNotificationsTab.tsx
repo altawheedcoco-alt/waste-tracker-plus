@@ -22,6 +22,7 @@ const priorityConfig: Record<string, { label: string; className: string }> = {
 const MyNotificationsTab = () => {
   const { user } = useAuth();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState<'all' | 'unread'>('all');
   const [showPrefs, setShowPrefs] = useState(false);
   const { data: notifications = [], isLoading } = useQuery({
