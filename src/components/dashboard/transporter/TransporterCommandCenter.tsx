@@ -235,7 +235,7 @@ const TransporterCommandCenter = () => {
         todayR, yesterdayR, activeR, driversR, weekR, ledgerR, pendingR, overdueR, monthR, partnersR,
         invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR
       ] = await Promise.all([
-        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', today.toISOString()).lt('created_at', tomorrow.toISOString()),
+        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', periodStart.toISOString()).lt('created_at', tomorrow.toISOString()),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
         supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
         supabase.from('drivers').select('id, is_available').eq('organization_id', organization!.id),
