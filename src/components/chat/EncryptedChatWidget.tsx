@@ -61,7 +61,7 @@ const MiniMessageBubble = memo(({ msg, isMine, allImages, onOpenLightbox }: {
     <div className={cn("flex mb-1", isMine ? "justify-start" : "justify-end")}>
       <div className={cn(
         "max-w-[80%] rounded-xl px-2.5 py-1.5 text-xs",
-        isMine ? "bg-emerald-600 text-white rounded-br-sm" : "bg-muted rounded-bl-sm"
+        isMine ? "bg-primary text-primary-foreground rounded-br-sm" : "bg-muted rounded-bl-sm"
       )}>
         {isImage ? (
           <button onClick={() => onOpenLightbox(msg.file_url!)} className="block">
