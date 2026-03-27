@@ -16,6 +16,7 @@ import { ar } from 'date-fns/locale';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
+import { onWidgetToggle } from '@/lib/widgetBus';
 import ChatVideoCallButton from '@/components/meetings/ChatVideoCallButton';
 import EnhancedChatInput from './EnhancedChatInput';
 import ImageLightbox from './ImageLightbox';
