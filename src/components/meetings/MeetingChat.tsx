@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { cn } from '@/lib/utils';
 import { getTabChannelName } from '@/lib/tabSession';
+import { soundEngine } from '@/lib/soundEngine';
 
 interface ChatMessage {
   id: string;
