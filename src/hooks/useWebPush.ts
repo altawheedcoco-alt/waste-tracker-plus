@@ -95,11 +95,25 @@ export function useWebPush() {
     });
   }, [refreshSupport]);
 
+  // Check subscription state from DB on mount
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'granted' && fcmToken) {
-      setIsSubscribed(true);
+    if (!user) return;
+    if ('Notification' in window && Notification.permission === 'granted') {
+      if (fcmToken) {
+        setIsSubscribed(true);
+      } else {
+        // Check DB for existing FCM subscription
+        supabase.from('push_subscriptions')
+          .select('id')
+          .eq('user_id', user.id)
+          .like('endpoint', 'fcm_token://%')
+          .limit(1)
+          .then(({ data }) => {
+            if (data && data.length > 0) setIsSubscribed(true);
+          });
+      }
     }
-  }, [fcmToken]);
+  }, [user, fcmToken]);
 
   useEffect(() => {
     if (!supportState.supported) return;
