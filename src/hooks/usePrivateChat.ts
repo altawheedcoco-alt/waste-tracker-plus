@@ -647,23 +647,14 @@ export function usePrivateChat() {
   const sendFileMessage = useCallback(async (conversationId: string, file: File) => {
     if (!user) return;
 
+    const { smartChunkedUpload } = await import('@/utils/chunkedUpload');
     const ext = file.name.split('.').pop() || 'bin';
     const filePath = `chat/${conversationId}/${crypto.randomUUID()}.${ext}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('organization-documents')
-      .upload(filePath, file, { upsert: false });
-
-    if (uploadError) {
-      toast.error('فشل رفع الملف');
-      throw uploadError;
-    }
-
-    const { data: urlData } = supabase.storage
-      .from('organization-documents')
-      .getPublicUrl(filePath);
-
-    const fileUrl = urlData.publicUrl;
+    const result = await smartChunkedUpload(file, {
+      bucket: 'organization-documents',
+      path: filePath,
+    });
 
     let messageType = 'file';
     if (file.type.startsWith('image/')) messageType = 'image';
@@ -671,7 +662,7 @@ export function usePrivateChat() {
     else if (file.type.startsWith('audio/')) messageType = 'voice';
 
     const plaintext = file.name;
-    await sendMessage(conversationId, plaintext, messageType, fileUrl, file.name);
+    await sendMessage(conversationId, plaintext, messageType, result.publicUrl, file.name);
   }, [user, sendMessage]);
 
   return {

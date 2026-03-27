@@ -193,12 +193,11 @@ export default function MemberSocialProfile() {
   // Upload helper
   const uploadFile = async (file: File, folder: string) => {
     if (!user?.id) throw new Error('Not authenticated');
+    const { smartChunkedUpload } = await import('@/utils/chunkedUpload');
     const ext = file.name.split('.').pop() || 'jpg';
     const path = `${user.id}/${folder}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from('profile-media').upload(path, file);
-    if (error) throw error;
-    const { data: urlData } = supabase.storage.from('profile-media').getPublicUrl(path);
-    return urlData.publicUrl;
+    const result = await smartChunkedUpload(file, { bucket: 'profile-media', path });
+    return result.publicUrl;
   };
 
   // Save photo to history

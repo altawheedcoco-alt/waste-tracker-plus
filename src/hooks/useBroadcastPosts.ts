@@ -186,14 +186,18 @@ export function useBroadcastPosts(channelId: string | undefined) {
   // ─── Upload file ───
   const uploadFile = async (file: File): Promise<{ url: string; name: string; type: string } | null> => {
     if (!channelId) return null;
-    const ext = file.name.split('.').pop();
-    const path = `broadcast/${channelId}/${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
-    const { error } = await supabase.storage.from('public-assets').upload(path, file);
-    if (error) { toast.error('فشل رفع الملف'); return null; }
-    const { data: urlData } = supabase.storage.from('public-assets').getPublicUrl(path);
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-    return { url: urlData.publicUrl, name: file.name, type: isImage ? 'image' : isVideo ? 'video' : 'document' };
+    try {
+      const { smartChunkedUpload } = await import('@/utils/chunkedUpload');
+      const ext = file.name.split('.').pop();
+      const path = `broadcast/${channelId}/${Date.now()}_${Math.random().toString(36).slice(2, 6)}.${ext}`;
+      const result = await smartChunkedUpload(file, { bucket: 'public-assets', path });
+      const isImage = file.type.startsWith('image/');
+      const isVideo = file.type.startsWith('video/');
+      return { url: result.publicUrl, name: file.name, type: isImage ? 'image' : isVideo ? 'video' : 'document' };
+    } catch {
+      toast.error('فشل رفع الملف');
+      return null;
+    }
   };
 
   // ─── Upload multiple files ───

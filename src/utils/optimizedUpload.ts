@@ -4,6 +4,7 @@
  */
 import { supabase } from '@/integrations/supabase/client';
 import { compressImage, CompressionOptions, formatFileSize } from './imageCompression';
+import { smartChunkedUpload } from './chunkedUpload';
 
 export interface UploadOptions {
   /** اسم الـ bucket */
@@ -20,6 +21,8 @@ export interface UploadOptions {
   upsert?: boolean;
   /** مدة التخزين المؤقت بالثواني */
   cacheControl?: string;
+  /** دالة تتبع التقدم (0-100) */
+  onProgress?: (percent: number) => void;
 }
 
 export interface UploadResult {
@@ -72,22 +75,17 @@ export const uploadFile = async (
     finalPath = path.replace(/\.[^.]+$/, `.${newExt}`);
   }
 
-  const { error: uploadError } = await supabase.storage
-    .from(bucket)
-    .upload(finalPath, fileToUpload, {
-      contentType: options.contentType || fileToUpload.type,
-      upsert,
-      cacheControl,
-    });
-
-  if (uploadError) throw uploadError;
-
-  const { data: urlData } = supabase.storage
-    .from(bucket)
-    .getPublicUrl(finalPath);
+  // استخدام الرفع المقسم للملفات الكبيرة (> 5MB)
+  const result = await smartChunkedUpload(fileToUpload, {
+    bucket,
+    path: finalPath,
+    contentType: options.contentType || fileToUpload.type,
+    upsert,
+    onProgress: options.onProgress,
+  });
 
   return {
-    publicUrl: urlData.publicUrl,
+    publicUrl: result.publicUrl,
     path: finalPath,
     originalSize,
     finalSize: fileToUpload.size,
