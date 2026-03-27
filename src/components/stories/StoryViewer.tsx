@@ -151,7 +151,7 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
           </div>
 
           {/* Story Content */}
-          <div className="w-full h-full">
+          <div className="w-full h-full relative">
             {story.media_type === 'text' ? (
               <div className={`w-full h-full ${story.background_color || 'bg-gradient-to-br from-emerald-500 to-teal-700'} flex items-center justify-center p-8`}>
                 <p className="text-white text-2xl font-bold text-center leading-relaxed">
@@ -159,41 +159,36 @@ const StoryViewer = ({ group, onClose }: StoryViewerProps) => {
                 </p>
               </div>
             ) : story.media_type === 'video' ? (
-              resolvedMediaUrl ? (
-                <video
-                  src={resolvedMediaUrl}
-                  className="w-full h-full object-cover"
-                  autoPlay
-                  playsInline
-                  controls
-                  preload="auto"
-                  onWaiting={(e) => {
-                    const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner');
-                    if (spinner) (spinner as HTMLElement).style.display = 'flex';
-                  }}
-                  onPlaying={(e) => {
-                    const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner');
-                    if (spinner) (spinner as HTMLElement).style.display = 'none';
-                  }}
-                />
-              ) : null
-            ) : story.media_type === 'video' || !resolvedMediaUrl ? (
-              <div className="w-full h-full bg-black flex items-center justify-center video-spinner">
-                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </div>
-            ) : null
-            }
-            {story.media_type === 'video' && (
-              <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10" style={{ display: 'none' }}>
-                <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              </div>
-            )
+              <>
+                {resolvedMediaUrl ? (
+                  <video
+                    src={resolvedMediaUrl}
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    playsInline
+                    controls
+                    preload="auto"
+                    onWaiting={(e) => {
+                      const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
+                      if (spinner) spinner.style.display = 'flex';
+                    }}
+                    onPlaying={(e) => {
+                      const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
+                      if (spinner) spinner.style.display = 'none';
+                    }}
+                  />
+                ) : null}
+                <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10 flex">
+                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                </div>
+              </>
             ) : (
               resolvedMediaUrl ? (
                 <img
                   src={resolvedMediaUrl}
                   className="w-full h-full object-cover"
                   alt="story"
+                  loading="eager"
                 />
               ) : (
                 <div className="w-full h-full bg-muted flex items-center justify-center">
