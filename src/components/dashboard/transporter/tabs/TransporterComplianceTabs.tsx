@@ -1,6 +1,6 @@
 /**
- * تبويبات المخاطر والامتثال والاستدامة (مدمجة)
- * compliance (regulatory_hub + ohs + risk + custody) | sustainability (carbon + esg)
+ * تبويبات المخاطر والامتثال (مدمجة)
+ * compliance (regulatory_hub + ohs + risk + custody)
  */
 import { lazy, Suspense, useState } from 'react';
 import { TabsContent } from '@/components/ui/tabs';
