@@ -8,7 +8,6 @@ import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
 import TransporterStatsGrid from '@/components/dashboard/transporter/TransporterStatsGrid';
 import TransporterKPICards from '@/components/dashboard/transporter/TransporterKPICards';
-import TransporterPartnerSummary from '@/components/dashboard/transporter/TransporterPartnerSummary';
 import TransporterShipmentsList from '@/components/dashboard/transporter/TransporterShipmentsList';
 import TransporterAggregateReport from '@/components/dashboard/transporter/TransporterAggregateReport';
 import TransporterPerformanceCharts from '@/components/dashboard/transporter/TransporterPerformanceCharts';
