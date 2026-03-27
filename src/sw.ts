@@ -34,7 +34,11 @@ registerRoute(
       plugins: [
         new CacheableResponsePlugin({ statuses: [0, 200] }),
       ],
-    })
+    }),
+    {
+      // Don't intercept OAuth callback routes
+      denylist: [/^\/~oauth/, /^\/auth\/callback/],
+    }
   )
 );
 
