@@ -195,7 +195,6 @@ export const NotificationsProvider = ({ children }: { children: ReactNode }) => 
             }).catch(() => undefined);
           } else {
             // App in foreground → toast notification
-            const { toast } = await import('sonner');
             toast.info(`${incoming.title}`, {
               description: incoming.message,
               duration: 6000,
