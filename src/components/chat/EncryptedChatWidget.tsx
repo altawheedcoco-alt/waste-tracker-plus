@@ -445,7 +445,7 @@ const EncryptedChatWidget = () => {
               {selectedConvoId ? (
                 <>
                   <button onClick={() => setSelectedConvoId(null)} className="text-primary-foreground/80 hover:text-primary-foreground">
-                    <Maximize2 className="w-4 h-4" />
+                    <ArrowRight className="w-4 h-4" />
                   </button>
                   <div className="flex items-center gap-2">
                     <button
