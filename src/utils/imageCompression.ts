@@ -29,9 +29,9 @@ export interface CompressionResult {
 const DEFAULT_OPTIONS: Required<CompressionOptions> = {
   maxWidth: 1920,
   maxHeight: 1920,
-  quality: 0.8,
+  quality: 0.75,
   outputFormat: 'image/webp',
-  maxSizeBytes: 1024 * 1024, // 1MB
+  maxSizeBytes: 3 * 1024 * 1024, // 3MB - حد أعلى لتجنب إعادة الضغط المتكررة
 };
 
 /**
