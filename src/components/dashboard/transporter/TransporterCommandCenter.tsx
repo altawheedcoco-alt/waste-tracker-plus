@@ -415,7 +415,7 @@ const TransporterCommandCenter = () => {
 
   return (
     <TooltipProvider>
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
+      <motion.div ref={cardRef} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }}>
         <Card className="overflow-hidden border border-border/40 shadow-2xl bg-card relative">
           {/* Background */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
