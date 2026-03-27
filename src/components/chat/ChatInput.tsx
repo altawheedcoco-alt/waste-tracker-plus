@@ -178,6 +178,7 @@ const ChatInput = ({ onSendMessage, onSendFile, sending, uploadProgress = 0, dis
 
       mediaRecorder.start();
       setIsRecording(true);
+      soundEngine.play('recording_start');
       setRecordingTime(0);
       clearSelectedFile();
 
