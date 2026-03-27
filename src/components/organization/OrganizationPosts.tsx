@@ -340,7 +340,7 @@ const OrganizationPosts = ({
         <img 
           src={fixStorageUrl(post.media_urls[0])} 
           alt="" 
-          className="w-full max-h-[500px] object-cover"
+          className="w-full max-h-[500px] object-contain"
         />
       </div>
     );

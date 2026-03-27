@@ -450,9 +450,9 @@ const EnhancedChatInput = ({
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="mb-2">
             <div className="flex items-center gap-3 p-2 rounded-xl bg-muted border border-border">
               {previewUrl && selectedFile.type.startsWith('image/') ? (
-                <img src={previewUrl} alt="Preview" className="w-14 h-14 rounded-lg object-cover" />
+                <img src={previewUrl} alt="Preview" className="w-14 h-14 rounded-lg object-contain bg-muted" />
               ) : previewUrl && selectedFile.type.startsWith('video/') ? (
-                <video src={previewUrl} className="w-14 h-14 rounded-lg object-cover" />
+                <video src={previewUrl} className="w-14 h-14 rounded-lg object-contain bg-muted" />
               ) : (
                 <div className="w-14 h-14 rounded-lg bg-primary/10 flex items-center justify-center">{getFileIcon()}</div>
               )}
