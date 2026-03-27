@@ -160,6 +160,7 @@ const VideoSeries = () => {
         {/* Video Player Dialog */}
         <Dialog open={!!selectedVideo} onOpenChange={() => setSelectedVideo(null)}>
           <DialogContent className="max-w-4xl p-0 overflow-hidden">
+            <DialogTitle className="sr-only">{selectedVideo?.title || 'فيديو'}</DialogTitle>
             {selectedVideo && (
               <div>
                 <div className="aspect-video bg-black flex items-center justify-center">
