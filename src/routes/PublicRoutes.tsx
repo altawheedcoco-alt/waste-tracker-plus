@@ -129,6 +129,7 @@ export const publicRoutes = (
     <Route path="/c2b/:code" element={<C2BPublicView />} />
     <Route path="/verify-seal" element={<VerifySeal />} />
     <Route path="/digitalization" element={<Digitalization />} />
+    <Route path="/video-series" element={<VideoSeries />} />
     <Route path="*" element={<NotFound />} />
   </>
 );
