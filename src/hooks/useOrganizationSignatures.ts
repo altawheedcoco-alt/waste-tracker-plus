@@ -84,7 +84,9 @@ export const useOrganizationSignatures = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchSignatures = useCallback(async () => {
+  const abortRef = useRef<AbortController | null>(null);
+
+  const fetchSignatures = useCallback(async (signal?: AbortSignal) => {
     if (!organization?.id) return;
 
     try {
@@ -93,17 +95,19 @@ export const useOrganizationSignatures = () => {
         .select('*')
         .eq('organization_id', organization.id)
         .order('is_primary', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .abortSignal(signal!);
 
       if (fetchError) throw fetchError;
       setSignatures((data || []) as OrganizationSignature[]);
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching signatures:', err);
       setError(err.message);
     }
   }, [organization?.id]);
 
-  const fetchStamps = useCallback(async () => {
+  const fetchStamps = useCallback(async (signal?: AbortSignal) => {
     if (!organization?.id) return;
 
     try {
@@ -112,25 +116,32 @@ export const useOrganizationSignatures = () => {
         .select('*')
         .eq('organization_id', organization.id)
         .order('is_primary', { ascending: false })
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .abortSignal(signal!);
 
       if (fetchError) throw fetchError;
       setStamps((data || []) as OrganizationStamp[]);
     } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.error('Error fetching stamps:', err);
       setError(err.message);
     }
   }, [organization?.id]);
 
   const fetchAll = useCallback(async () => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+
     setLoading(true);
     setError(null);
-    await Promise.all([fetchSignatures(), fetchStamps()]);
-    setLoading(false);
+    await Promise.all([fetchSignatures(controller.signal), fetchStamps(controller.signal)]);
+    if (!controller.signal.aborted) setLoading(false);
   }, [fetchSignatures, fetchStamps]);
 
   useEffect(() => {
     fetchAll();
+    return () => { abortRef.current?.abort(); };
   }, [fetchAll]);
 
   // Add signature
