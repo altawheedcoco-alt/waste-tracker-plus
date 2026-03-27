@@ -798,10 +798,17 @@ Deno.serve(async (req) => {
 
         await Promise.allSettled(
           subs.map(async (sub: any) => {
-            const result = await sendPushNotification(
-              { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
-              payload, vapidPublicKey, vapidPrivateKey
-            );
+            let result: { success: boolean; error?: string; status?: number };
+            if (isFCMSubscription(sub)) {
+              const fcmToken = getFCMToken(sub);
+              const parsedPayload = JSON.parse(payload);
+              result = await sendFCMNotification(fcmToken, { title: parsedPayload.title, body: parsedPayload.body, data: parsedPayload.data });
+            } else {
+              result = await sendPushNotification(
+                { endpoint: sub.endpoint, p256dh: sub.p256dh, auth: sub.auth_key },
+                payload, vapidPublicKey, vapidPrivateKey
+              );
+            }
             if (result.success) {
               await supabase.from("push_campaign_recipients").update({
                 status: "sent", delivered_at: new Date().toISOString(), error_message: null,
