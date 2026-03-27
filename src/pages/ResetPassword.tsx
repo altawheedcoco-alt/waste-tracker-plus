@@ -94,12 +94,41 @@ const ResetPassword = () => {
     }
     setLoading(true);
     try {
+      // Verify session is still valid before updating
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Try to recover session from URL hash
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        const refreshToken = hashParams.get('refresh_token');
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        } else {
+          toast({ title: 'انتهت الجلسة', description: 'رابط استعادة كلمة المرور انتهت صلاحيته. أعد طلب رابط جديد.', variant: 'destructive' });
+          setView('request');
+          setLoading(false);
+          return;
+        }
+      }
+
       const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
+      if (error) {
+        // If aborted, retry once
+        if (error.message?.includes('abort') || error.message?.includes('signal')) {
+          await new Promise(r => setTimeout(r, 1000));
+          const { error: retryError } = await supabase.auth.updateUser({ password });
+          if (retryError) throw retryError;
+        } else {
+          throw error;
+        }
+      }
       setView('success');
       toast({ title: 'تم التحديث', description: 'تم تحديث كلمة المرور بنجاح' });
     } catch (error: any) {
-      toast({ title: 'خطأ', description: error.message || 'حدث خطأ أثناء تحديث كلمة المرور', variant: 'destructive' });
+      const msg = error.message?.includes('abort') || error.message?.includes('signal')
+        ? 'انتهت مهلة الاتصال. تأكد من اتصالك بالإنترنت وأعد المحاولة.'
+        : (error.message || 'حدث خطأ أثناء تحديث كلمة المرور');
+      toast({ title: 'خطأ', description: msg, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
