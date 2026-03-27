@@ -308,23 +308,24 @@ const TransporterCommandCenter = () => {
       const activeVehicles = vehicles.filter(v => v.status === 'active').length;
 
       const docs = docsR.data || [];
-      // Check for documents expiring within 30 days
+      // Check for contracts expiring within 30 days (entity_documents has no expiry_date)
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-      const { count: expiringDocsCount } = await supabase
-        .from('entity_documents')
+      const { count: expiringContractsCount } = await supabase
+        .from('contracts')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', organization!.id)
-        .lte('expiry_date', thirtyDaysFromNow.toISOString())
-        .gte('expiry_date', new Date().toISOString());
-      const expiringDocs = expiringDocsCount || 0;
+        .lte('end_date', thirtyDaysFromNow.toISOString())
+        .gte('end_date', new Date().toISOString());
+      const expiringDocs = expiringContractsCount || 0;
       
-      const { count: expiredDocsCount } = await supabase
-        .from('entity_documents')
+      const { count: expiredContractsCount } = await supabase
+        .from('contracts')
         .select('id', { count: 'exact', head: true })
         .eq('organization_id', organization!.id)
-        .lt('expiry_date', new Date().toISOString());
-      const expiredDocs = expiredDocsCount || 0;
+        .lt('end_date', new Date().toISOString())
+        .in('status', ['active', 'signed'] as any);
+      const expiredDocs = expiredContractsCount || 0;
 
       const contracts = contractsR.data || [];
       const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
