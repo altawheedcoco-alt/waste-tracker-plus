@@ -503,6 +503,23 @@ export function usePrivateChat() {
 
     if (error) throw error;
 
+    // Send server-side push notification to the partner
+    try {
+      let pushBody = messageType === 'text' ? plaintext.slice(0, 200) : (messageType === 'image' ? '📷 صورة' : '📎 ملف');
+      const senderName = user.user_metadata?.full_name || 'مستخدم';
+      supabase.functions.invoke('send-push', {
+        body: {
+          user_ids: [partnerId],
+          title: `💬 رسالة من ${senderName}`,
+          body: pushBody,
+          tag: `private-msg-${conversationId}-${Date.now()}`,
+          data: { url: '/dashboard/chat', type: 'message' },
+        },
+      }).catch(err => console.warn('[PrivateChat] Push failed:', err));
+    } catch (pushErr) {
+      console.warn('[PrivateChat] Push error:', pushErr);
+    }
+
     // Invalidate queries after successful send
     queryClient.invalidateQueries({ queryKey: ['private-messages', conversationId] });
     queryClient.invalidateQueries({ queryKey: ['private-conversations'] });
