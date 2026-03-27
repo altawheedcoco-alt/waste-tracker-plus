@@ -417,13 +417,13 @@ const EncryptedChatWidget = () => {
       {/* FAB */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 left-6 z-50 w-14 h-14 rounded-full bg-emerald-600 text-white shadow-xl flex items-center justify-center hover:bg-emerald-700 transition-colors"
+        className="fixed bottom-[calc(5rem+env(safe-area-inset-bottom))] sm:bottom-6 left-3 sm:left-6 z-50 w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-primary text-primary-foreground shadow-xl flex items-center justify-center hover:bg-primary/90 transition-colors touch-manipulation"
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
       >
-        {isOpen ? <X className="w-6 h-6" /> : <MessageCircle className="w-6 h-6" />}
+        {isOpen ? <X className="w-5 h-5 sm:w-6 sm:h-6" /> : <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />}
         {!isOpen && totalUnread > 0 && (
-          <Badge className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full text-[10px] px-1 bg-red-500 text-white border-2 border-background">
+          <Badge className="absolute -top-1 -right-1 h-5 min-w-5 rounded-full text-[10px] px-1 bg-destructive text-destructive-foreground border-2 border-background">
             {totalUnread > 9 ? '9+' : totalUnread}
           </Badge>
         )}
