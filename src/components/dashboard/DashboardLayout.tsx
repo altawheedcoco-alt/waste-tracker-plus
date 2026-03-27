@@ -759,8 +759,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             )}
           </nav>
 
-          {/* Bottom Logout + Hide Button */}
-          <div className="p-2.5 border-t border-sidebar-border space-y-1.5">
+          {/* Bottom Sound Control + Logout */}
+          <div className="p-2.5 border-t border-sidebar-border space-y-1">
+            <SidebarSoundControl isCollapsed={!isSidebarOpen} />
             <Button
               variant="ghost"
               onClick={handleSignOut}
