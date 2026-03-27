@@ -117,12 +117,12 @@ const Providers = memo(() => (
                   <OfflineBanner />
                   {/* ScrollToTopButton moved to FloatingSidePanel */}
                   <CodeProtection />
-                  {shouldEnablePWA() ? <InstallPWA /> : null}
-                  {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
-                  <AutoPushSubscriber />
-                  <PushPermissionBanner />
                   <ProductionReadiness />
                 </Suspense>
+                {shouldEnablePWA() ? <InstallPWA /> : null}
+                {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
+                <AutoPushSubscriber />
+                <PushPermissionBanner />
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
