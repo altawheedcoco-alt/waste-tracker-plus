@@ -233,6 +233,7 @@ const EnhancedChatInput = ({
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      soundEngine.play('recording_stop');
       setIsRecordingLocked(false);
       if (recordingIntervalRef.current) { clearInterval(recordingIntervalRef.current); recordingIntervalRef.current = null; }
     }
