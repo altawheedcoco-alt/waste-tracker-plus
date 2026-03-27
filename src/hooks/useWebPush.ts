@@ -95,24 +95,22 @@ export function useWebPush() {
     });
   }, [refreshSupport]);
 
-  // Check subscription state from DB on mount
+  // Check subscription state from DB on mount — must have actual DB record
   useEffect(() => {
     if (!user) return;
-    if ('Notification' in window && Notification.permission === 'granted') {
-      if (fcmToken) {
-        setIsSubscribed(true);
-      } else {
-        // Check DB for existing FCM subscription
-        supabase.from('push_subscriptions')
-          .select('id')
-          .eq('user_id', user.id)
-          .like('endpoint', 'fcm_token://%')
-          .limit(1)
-          .then(({ data }) => {
-            if (data && data.length > 0) setIsSubscribed(true);
-          });
-      }
-    }
+    // Always verify from DB regardless of permission state
+    supabase.from('push_subscriptions')
+      .select('id')
+      .eq('user_id', user.id)
+      .like('endpoint', 'fcm_token://%')
+      .limit(1)
+      .then(({ data }) => {
+        if (data && data.length > 0) {
+          setIsSubscribed(true);
+        } else {
+          setIsSubscribed(false);
+        }
+      });
   }, [user, fcmToken]);
 
   useEffect(() => {
