@@ -4,6 +4,7 @@ import { getTabChannelName } from '@/lib/tabSession';
 import { useAuth } from '@/contexts/AuthContext';
 import { showSystemNotification } from '@/lib/systemNotifications';
 import { soundEngine } from '@/lib/soundEngine';
+import { toast } from 'sonner';
 
 interface Notification {
   id: string;
