@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Send } from 'lucide-react';
+import { Send } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 interface StoryReactionsProps {
@@ -14,9 +14,9 @@ interface StoryReactionsProps {
 const REACTION_EMOJIS = ['❤️', '😂', '😮', '😢', '🔥', '👏'];
 
 const StoryReactions = ({ storyId, ownerName, isMyStory, onReact, onReply }: StoryReactionsProps) => {
-  const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyText, setReplyText] = useState('');
   const [reactedEmoji, setReactedEmoji] = useState<string | null>(null);
+  const [showReactions, setShowReactions] = useState(false);
 
   const handleReact = (emoji: string) => {
     setReactedEmoji(emoji);
@@ -28,80 +28,87 @@ const StoryReactions = ({ storyId, ownerName, isMyStory, onReact, onReply }: Sto
     if (replyText.trim()) {
       onReply(replyText.trim());
       setReplyText('');
-      setShowReplyInput(false);
     }
   };
 
   if (isMyStory) return null;
 
   return (
-    <div className="absolute bottom-4 left-0 right-0 z-20 px-4" dir="rtl">
+    <div className="absolute bottom-0 left-0 right-0 z-20 px-3 pb-4" dir="rtl">
       {/* Floating reaction animation */}
       <AnimatePresence>
         {reactedEmoji && (
           <motion.div
             initial={{ scale: 0, y: 0, opacity: 1 }}
-            animate={{ scale: 2, y: -120, opacity: 0 }}
+            animate={{ scale: 2.5, y: -150, opacity: 0 }}
             exit={{ opacity: 0 }}
-            className="absolute bottom-16 left-1/2 -translate-x-1/2 text-4xl pointer-events-none"
+            transition={{ duration: 1.2, ease: 'easeOut' }}
+            className="absolute bottom-20 left-1/2 -translate-x-1/2 text-5xl pointer-events-none z-30"
           >
             {reactedEmoji}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Reply input */}
+      {/* Quick reactions row */}
       <AnimatePresence>
-        {showReplyInput ? (
+        {showReactions && (
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            className="flex items-center gap-2 mb-3"
+            initial={{ y: 20, opacity: 0, scale: 0.9 }}
+            animate={{ y: 0, opacity: 1, scale: 1 }}
+            exit={{ y: 20, opacity: 0, scale: 0.9 }}
+            className="flex items-center justify-center gap-2 mb-3"
           >
-            <Input
-              value={replyText}
-              onChange={(e) => setReplyText(e.target.value)}
-              placeholder={`رد على ${ownerName}...`}
-              className="flex-1 bg-black/50 border-white/20 text-white placeholder:text-white/50 text-sm rounded-full h-10"
-              autoFocus
-              dir="rtl"
-              onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
-            />
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={handleSendReply}
-              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground"
-            >
-              <Send className="w-4 h-4" />
-            </motion.button>
+            <div className="flex items-center gap-1 bg-black/40 backdrop-blur-xl rounded-full px-2 py-1.5 border border-white/5">
+              {REACTION_EMOJIS.map((emoji, i) => (
+                <motion.button
+                  key={emoji}
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  transition={{ delay: i * 0.04, type: 'spring', stiffness: 400 }}
+                  whileTap={{ scale: 0.7 }}
+                  onClick={() => { handleReact(emoji); setShowReactions(false); }}
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-xl hover:bg-white/10 active:bg-white/20 transition-colors"
+                >
+                  {emoji}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
-        ) : null}
+        )}
       </AnimatePresence>
 
-      {/* Reactions bar */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-1">
-          {REACTION_EMOJIS.map((emoji) => (
+      {/* Reply input bar */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1 relative">
+          <Input
+            value={replyText}
+            onChange={(e) => setReplyText(e.target.value)}
+            placeholder={`رد على ${ownerName}...`}
+            className="bg-black/30 backdrop-blur-xl border-white/10 text-white placeholder:text-white/40 text-[13px] rounded-full h-11 pr-4 pl-10 focus:border-white/20 focus:ring-0"
+            dir="rtl"
+            onKeyDown={(e) => e.key === 'Enter' && handleSendReply()}
+            onFocus={() => setShowReactions(false)}
+          />
+          {replyText.trim() ? (
             <motion.button
-              key={emoji}
-              whileHover={{ scale: 1.3 }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
               whileTap={{ scale: 0.8 }}
-              onClick={() => handleReact(emoji)}
-              className="w-9 h-9 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-lg hover:bg-black/60 transition-colors"
+              onClick={handleSendReply}
+              className="absolute left-1.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground"
             >
-              {emoji}
+              <Send className="w-3.5 h-3.5" />
             </motion.button>
-          ))}
+          ) : (
+            <button
+              onClick={() => setShowReactions(r => !r)}
+              className="absolute left-2 top-1/2 -translate-y-1/2 text-xl leading-none"
+            >
+              😊
+            </button>
+          )}
         </div>
-        <motion.button
-          whileTap={{ scale: 0.9 }}
-          onClick={() => setShowReplyInput(!showReplyInput)}
-          className="flex items-center gap-1.5 bg-black/40 backdrop-blur-sm rounded-full px-3 py-2 text-white text-xs"
-        >
-          <Send className="w-3.5 h-3.5" />
-          رد
-        </motion.button>
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { X, ChevronLeft, ChevronRight, Eye, Trash2, Clock, Pause, Play, Volume2, VolumeX, Share2, Bookmark, Download } from 'lucide-react';
+import { motion, AnimatePresence, useMotionValue, useTransform, PanInfo } from 'framer-motion';
+import { X, Eye, Trash2, Clock, Pause, Play, Volume2, VolumeX, Share2, Bookmark, MessageCircle, Heart, ChevronUp } from 'lucide-react';
 import { StoryGroup, useStories } from '@/hooks/useStories';
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,7 +20,7 @@ interface StoryViewerProps {
 const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerProps) => {
   const [currentGroupIndex, setCurrentGroupIndex] = useState(() => {
     if (!allGroups) return 0;
-    return allGroups.findIndex(g => g.user_id === initialGroup.user_id) || 0;
+    return Math.max(0, allGroups.findIndex(g => g.user_id === initialGroup.user_id));
   });
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showViewers, setShowViewers] = useState(false);
@@ -28,9 +28,16 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
   const [isPaused, setIsPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showActions, setShowActions] = useState(false);
+  const [liked, setLiked] = useState(false);
+  const [showDoubleTapHeart, setShowDoubleTapHeart] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
   const { user } = useAuth();
   const { recordView, deleteStory, myStoryViews } = useStories();
   const videoRef = useRef<HTMLVideoElement>(null);
+  const lastTapRef = useRef(0);
+  const dragY = useMotionValue(0);
+  const dragOpacity = useTransform(dragY, [0, 200], [1, 0.3]);
+  const dragScale = useTransform(dragY, [0, 200], [1, 0.85]);
 
   const group = allGroups ? allGroups[currentGroupIndex] : initialGroup;
   const story = group?.stories[currentIndex];
@@ -43,6 +50,11 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
     if (story && !isMyStory) {
       recordView.mutate(story.id);
     }
+  }, [story?.id]);
+
+  // Reset image loaded state
+  useEffect(() => {
+    setImageLoaded(false);
   }, [story?.id]);
 
   // Auto-progress
@@ -66,19 +78,14 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-        e.key === 'ArrowLeft' ? goNext() : goPrev();
-      } else if (e.key === ' ') {
-        e.preventDefault();
-        setIsPaused((p) => !p);
-      } else if (e.key === 'Escape') {
-        onClose();
-      } else if (e.key === 'ArrowUp' && allGroups) {
-        goNextGroup();
-      } else if (e.key === 'ArrowDown' && allGroups) {
-        goPrevGroup();
-      } else if (e.key === 'm') {
-        setIsMuted(m => !m);
+      switch (e.key) {
+        case 'ArrowLeft': goNext(); break;
+        case 'ArrowRight': goPrev(); break;
+        case ' ': e.preventDefault(); setIsPaused(p => !p); break;
+        case 'Escape': onClose(); break;
+        case 'ArrowUp': if (allGroups) goNextGroup(); break;
+        case 'ArrowDown': if (allGroups) goPrevGroup(); break;
+        case 'm': setIsMuted(m => !m); break;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -87,7 +94,7 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
 
   const goNext = useCallback(() => {
     if (currentIndex < (group?.stories.length || 1) - 1) {
-      setCurrentIndex((i) => i + 1);
+      setCurrentIndex(i => i + 1);
     } else if (allGroups && currentGroupIndex < allGroups.length - 1) {
       setCurrentGroupIndex(i => i + 1);
       setCurrentIndex(0);
@@ -98,7 +105,7 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
 
   const goPrev = useCallback(() => {
     if (currentIndex > 0) {
-      setCurrentIndex((i) => i - 1);
+      setCurrentIndex(i => i - 1);
     } else if (allGroups && currentGroupIndex > 0) {
       setCurrentGroupIndex(i => i - 1);
       setCurrentIndex(0);
@@ -122,11 +129,8 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
   const handleDelete = async () => {
     if (!story) return;
     await deleteStory.mutateAsync(story.id);
-    if (group.stories.length <= 1) {
-      onClose();
-    } else if (currentIndex >= group.stories.length - 1) {
-      setCurrentIndex(Math.max(0, currentIndex - 1));
-    }
+    if (group.stories.length <= 1) onClose();
+    else if (currentIndex >= group.stories.length - 1) setCurrentIndex(Math.max(0, currentIndex - 1));
   };
 
   const handleReact = (emoji: string) => {
@@ -150,33 +154,37 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
         await navigator.clipboard.writeText(window.location.href);
         toast.success('تم نسخ الرابط');
       }
-    } catch {
-      // user cancelled
+    } catch {}
+  };
+
+  // Double tap to like
+  const handleContentTap = (e: React.MouseEvent) => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      // Double tap
+      setLiked(true);
+      setShowDoubleTapHeart(true);
+      handleReact('❤️');
+      setTimeout(() => setShowDoubleTapHeart(false), 1200);
     }
+    lastTapRef.current = now;
   };
 
-  const handleSaveHighlight = () => {
-    toast.success('تم حفظ الحالة في المميزات');
-  };
-
-  // Touch/swipe support (horizontal + vertical)
+  // Touch/swipe
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const handleTouchStart = (e: React.TouchEvent) => {
     setTouchStart({ x: e.touches[0].clientX, y: e.touches[0].clientY });
   };
   const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStart === null) return;
+    if (!touchStart) return;
     const diffX = touchStart.x - e.changedTouches[0].clientX;
     const diffY = touchStart.y - e.changedTouches[0].clientY;
-
     if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
       diffX > 0 ? goNext() : goPrev();
-    } else if (Math.abs(diffY) > 80) {
-      if (diffY > 0 && allGroups) {
-        goNextGroup();
-      } else if (diffY < 0) {
-        onClose();
-      }
+    } else if (diffY < -80) {
+      onClose();
+    } else if (diffY > 80 && isMyStory) {
+      setShowViewers(true);
     }
     setTouchStart(null);
   };
@@ -188,12 +196,11 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
   };
   const handlePointerUp = () => {
     if (longPressTimer.current) clearTimeout(longPressTimer.current);
-    if (isPaused) setIsPaused(false);
   };
 
   if (!story || !group) return null;
 
-  const viewsForStory = myStoryViews.filter((v) => v.story_id === story.id);
+  const viewsForStory = myStoryViews.filter(v => v.story_id === story.id);
   const storyCounter = `${currentIndex + 1}/${group.stories.length}`;
 
   return (
@@ -205,251 +212,241 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
         className="fixed inset-0 z-[100] bg-black flex items-center justify-center"
         onClick={onClose}
       >
-        {/* Previous group preview (desktop) */}
-        {allGroups && currentGroupIndex > 0 && (
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 0.4, x: 0 }}
-            className="hidden md:block absolute left-4 w-20 h-36 rounded-xl bg-muted/20 overflow-hidden cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); goPrevGroup(); }}
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={allGroups[currentGroupIndex - 1].org_logo || allGroups[currentGroupIndex - 1].avatar_url || ''} />
-                <AvatarFallback className="text-xs bg-primary/20">{allGroups[currentGroupIndex - 1].user_name?.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </div>
-          </motion.div>
-        )}
-
-        {/* Next group preview (desktop) */}
-        {allGroups && currentGroupIndex < allGroups.length - 1 && (
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 0.4, x: 0 }}
-            className="hidden md:block absolute right-4 w-20 h-36 rounded-xl bg-muted/20 overflow-hidden cursor-pointer"
-            onClick={(e) => { e.stopPropagation(); goNextGroup(); }}
-          >
-            <div className="w-full h-full flex items-center justify-center">
-              <Avatar className="w-10 h-10">
-                <AvatarImage src={allGroups[currentGroupIndex + 1].org_logo || allGroups[currentGroupIndex + 1].avatar_url || ''} />
-                <AvatarFallback className="text-xs bg-primary/20">{allGroups[currentGroupIndex + 1].user_name?.charAt(0)}</AvatarFallback>
-              </Avatar>
-            </div>
-          </motion.div>
-        )}
-
         <motion.div
-          key={`${group.user_id}-${currentIndex}`}
-          initial={{ scale: 0.92, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.92, opacity: 0 }}
-          transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-          className="relative w-full max-w-sm h-[90vh] max-h-[750px] rounded-2xl overflow-hidden shadow-2xl"
+          key={`${group.user_id}`}
+          style={{ opacity: dragOpacity, scale: dragScale }}
+          drag="y"
+          dragConstraints={{ top: 0, bottom: 0 }}
+          dragElastic={0.4}
+          onDragEnd={(_, info: PanInfo) => {
+            if (info.offset.y > 120) onClose();
+          }}
+          initial={{ scale: 0.88, opacity: 0, y: 30 }}
+          animate={{ scale: 1, opacity: 1, y: 0 }}
+          exit={{ scale: 0.88, opacity: 0, y: 30 }}
+          transition={{ type: 'spring', stiffness: 280, damping: 26 }}
+          className="relative w-full max-w-[380px] h-[92vh] max-h-[780px] rounded-[20px] overflow-hidden shadow-2xl"
           onClick={(e) => e.stopPropagation()}
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
         >
           {/* Progress Bars */}
-          <div className="absolute top-0 left-0 right-0 z-20 flex gap-[3px] px-2 pt-2">
+          <div className="absolute top-0 left-0 right-0 z-30 flex gap-[3px] px-3 pt-2.5">
             {group.stories.map((_, i) => (
-              <div key={i} className="flex-1 h-[3px] bg-white/25 rounded-full overflow-hidden">
+              <div key={i} className="flex-1 h-[2.5px] bg-white/20 rounded-full overflow-hidden backdrop-blur-sm">
                 <motion.div
                   className="h-full bg-white rounded-full"
                   initial={false}
                   animate={{
                     width: i < currentIndex ? '100%' : i === currentIndex ? `${progress}%` : '0%',
                   }}
-                  transition={i === currentIndex ? { duration: 0.05 } : { duration: 0.3 }}
+                  transition={i === currentIndex ? { duration: 0.05, ease: 'linear' } : { duration: 0.3 }}
                 />
               </div>
             ))}
           </div>
 
           {/* Header */}
-          <div className="absolute top-4 left-0 right-0 z-20 flex items-center justify-between px-3 pt-2" dir="rtl">
-            <div className="flex items-center gap-2">
-              <Avatar className="w-9 h-9 border-2 border-white/80 shadow-lg">
-                <AvatarImage src={group.org_logo || group.avatar_url || ''} />
-                <AvatarFallback className="text-xs bg-primary text-primary-foreground">
-                  {group.user_name?.charAt(0)}
-                </AvatarFallback>
-              </Avatar>
+          <div className="absolute top-3 left-0 right-0 z-30 flex items-center justify-between px-3 pt-3" dir="rtl">
+            <div className="flex items-center gap-2.5">
+              <div className="relative">
+                <Avatar className="w-10 h-10 border-2 border-white/60 shadow-lg">
+                  <AvatarImage src={group.org_logo || group.avatar_url || ''} />
+                  <AvatarFallback className="text-xs bg-primary text-primary-foreground font-bold">
+                    {group.user_name?.charAt(0)}
+                  </AvatarFallback>
+                </Avatar>
+                {/* Online indicator */}
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-black" />
+              </div>
               <div className="text-white">
-                <p className="text-sm font-semibold leading-tight drop-shadow-md">
-                  {group.org_name || group.user_name}
+                <p className="text-[13px] font-semibold leading-tight drop-shadow-md">
+                  {isMyStory ? 'حالتي' : (group.org_name || group.user_name)}
                 </p>
-                <p className="text-[10px] text-white/80 flex items-center gap-1 drop-shadow-sm">
-                  <Clock className="w-3 h-3" />
+                <p className="text-[10px] text-white/70 flex items-center gap-1 drop-shadow-sm">
                   {formatDistanceToNow(new Date(story.created_at), { addSuffix: true, locale: ar })}
-                  <span className="mx-0.5">•</span>
-                  <span className="bg-white/20 rounded-full px-1.5 py-px">{storyCounter}</span>
+                  {group.stories.length > 1 && (
+                    <>
+                      <span className="mx-0.5 text-white/40">•</span>
+                      <span className="bg-white/15 rounded-full px-1.5 py-px text-[9px]">{storyCounter}</span>
+                    </>
+                  )}
                 </p>
               </div>
             </div>
             <div className="flex items-center gap-1">
-              {/* Pause/Play */}
               <button
-                onClick={() => setIsPaused((p) => !p)}
-                className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+                onClick={() => setIsPaused(p => !p)}
+                className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/90 active:scale-90 transition-transform"
               >
-                {isPaused ? <Play className="w-4 h-4" /> : <Pause className="w-4 h-4" />}
+                {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
               </button>
-              {/* Mute */}
               {story.media_type === 'video' && (
                 <button
-                  onClick={() => setIsMuted((m) => !m)}
-                  className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+                  onClick={() => setIsMuted(m => !m)}
+                  className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/90 active:scale-90 transition-transform"
                 >
-                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                  {isMuted ? <VolumeX className="w-3.5 h-3.5" /> : <Volume2 className="w-3.5 h-3.5" />}
                 </button>
               )}
-              {/* Actions menu */}
-              <button
-                onClick={() => setShowActions(a => !a)}
-                className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors text-lg leading-none"
-              >
-                ⋮
-              </button>
               <button
                 onClick={onClose}
-                className="w-8 h-8 rounded-full bg-black/40 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/60 transition-colors"
+                className="w-8 h-8 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white/90 active:scale-90 transition-transform"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
           </div>
 
-          {/* Actions dropdown */}
+          {/* Paused overlay */}
           <AnimatePresence>
-            {showActions && (
+            {isPaused && !showActions && !showViewers && (
               <motion.div
-                initial={{ opacity: 0, y: -10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -10, scale: 0.9 }}
-                className="absolute top-16 left-3 z-30 bg-black/70 backdrop-blur-lg rounded-xl overflow-hidden min-w-[140px]"
-                dir="rtl"
-                onClick={() => setShowActions(false)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none"
               >
-                <button onClick={handleShare} className="flex items-center gap-2 w-full px-4 py-2.5 text-white text-sm hover:bg-white/10 transition-colors">
-                  <Share2 className="w-4 h-4" /> مشاركة
-                </button>
-                {isMyStory && (
-                  <>
-                    <button onClick={handleSaveHighlight} className="flex items-center gap-2 w-full px-4 py-2.5 text-white text-sm hover:bg-white/10 transition-colors">
-                      <Bookmark className="w-4 h-4" /> حفظ في المميزات
-                    </button>
-                    <button onClick={handleDelete} className="flex items-center gap-2 w-full px-4 py-2.5 text-red-400 text-sm hover:bg-white/10 transition-colors">
-                      <Trash2 className="w-4 h-4" /> حذف الحالة
-                    </button>
-                  </>
-                )}
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  transition={{ type: 'spring', stiffness: 500, damping: 25 }}
+                  className="w-16 h-16 rounded-full bg-black/40 backdrop-blur-lg flex items-center justify-center"
+                >
+                  <Pause className="w-7 h-7 text-white" />
+                </motion.div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Paused indicator */}
+          {/* Double-tap heart animation */}
           <AnimatePresence>
-            {isPaused && !showActions && (
+            {showDoubleTapHeart && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ type: 'spring', stiffness: 400, damping: 20 }}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none"
+                initial={{ scale: 0, opacity: 1 }}
+                animate={{ scale: 1.5, opacity: 0 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 1 }}
+                className="absolute inset-0 z-25 flex items-center justify-center pointer-events-none"
               >
-                <div className="w-16 h-16 rounded-full bg-black/50 backdrop-blur-md flex items-center justify-center">
-                  <Pause className="w-8 h-8 text-white" />
-                </div>
+                <Heart className="w-24 h-24 text-red-500 fill-red-500 drop-shadow-2xl" />
               </motion.div>
             )}
           </AnimatePresence>
 
           {/* Story Content */}
-          <div className="w-full h-full relative">
-            {story.media_type === 'text' ? (
-              <motion.div
-                key={story.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className={`w-full h-full ${story.background_color || 'bg-gradient-to-br from-primary to-primary/60'} flex items-center justify-center p-8`}
-              >
-                <motion.p
-                  initial={{ opacity: 0, y: 20, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.15, type: 'spring' }}
-                  className="text-white text-2xl font-bold text-center leading-relaxed drop-shadow-lg"
-                  style={{ textShadow: '0 2px 10px rgba(0,0,0,0.3)' }}
-                >
-                  {story.text_content}
-                </motion.p>
-              </motion.div>
-            ) : story.media_type === 'video' ? (
-              <>
-                {resolvedMediaUrl ? (
-                  <video
-                    ref={videoRef}
-                    src={resolvedMediaUrl}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    playsInline
-                    muted={isMuted}
-                    preload="auto"
-                    onWaiting={(e) => {
-                      const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
-                      if (spinner) spinner.style.display = 'flex';
-                    }}
-                    onPlaying={(e) => {
-                      const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
-                      if (spinner) spinner.style.display = 'none';
-                    }}
-                    onPause={() => setIsPaused(true)}
-                    onPlay={() => setIsPaused(false)}
-                  />
-                ) : null}
-                <div className="video-spinner absolute inset-0 bg-black/50 items-center justify-center z-10 hidden">
-                  <div className="w-8 h-8 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                </div>
-              </>
-            ) : (
-              resolvedMediaUrl ? (
-                <motion.img
-                  key={story.id}
+          <div className="w-full h-full relative bg-black">
+            <AnimatePresence mode="wait">
+              {story.media_type === 'text' ? (
+                <motion.div
+                  key={`text-${story.id}`}
                   initial={{ opacity: 0, scale: 1.05 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.4 }}
-                  src={resolvedMediaUrl}
-                  className="w-full h-full object-cover"
-                  alt="story"
-                  loading="eager"
-                />
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.35 }}
+                  className={`w-full h-full ${story.background_color || 'bg-gradient-to-br from-primary to-primary/60'} flex items-center justify-center p-10`}
+                >
+                  <motion.p
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2, type: 'spring', damping: 20 }}
+                    className="text-white text-[22px] font-bold text-center leading-[1.8] drop-shadow-lg"
+                    style={{ textShadow: '0 3px 15px rgba(0,0,0,0.4)' }}
+                  >
+                    {story.text_content}
+                  </motion.p>
+                </motion.div>
+              ) : story.media_type === 'video' ? (
+                <motion.div
+                  key={`video-${story.id}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-full"
+                >
+                  {resolvedMediaUrl && (
+                    <video
+                      ref={videoRef}
+                      src={resolvedMediaUrl}
+                      className="w-full h-full object-contain bg-black"
+                      autoPlay
+                      playsInline
+                      muted={isMuted}
+                      preload="auto"
+                      onWaiting={(e) => {
+                        const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
+                        if (spinner) spinner.style.display = 'flex';
+                      }}
+                      onPlaying={(e) => {
+                        const spinner = e.currentTarget.parentElement?.querySelector('.video-spinner') as HTMLElement;
+                        if (spinner) spinner.style.display = 'none';
+                      }}
+                      onPause={() => setIsPaused(true)}
+                      onPlay={() => setIsPaused(false)}
+                    />
+                  )}
+                  <div className="video-spinner absolute inset-0 bg-black/30 items-center justify-center z-10 hidden">
+                    <div className="w-10 h-10 border-3 border-white border-t-transparent rounded-full animate-spin" />
+                  </div>
+                </motion.div>
               ) : (
-                <div className="w-full h-full bg-muted flex items-center justify-center">
-                  <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-                </div>
-              )
-            )}
+                <motion.div
+                  key={`image-${story.id}`}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="w-full h-full relative"
+                >
+                  {resolvedMediaUrl ? (
+                    <>
+                      {/* Blurred background fill */}
+                      <img
+                        src={resolvedMediaUrl}
+                        className="absolute inset-0 w-full h-full object-cover blur-2xl scale-110 opacity-40"
+                        alt=""
+                      />
+                      {/* Main image */}
+                      <motion.img
+                        initial={{ scale: 1.08, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ duration: 0.5, ease: 'easeOut' }}
+                        src={resolvedMediaUrl}
+                        className="relative w-full h-full object-contain z-[1]"
+                        alt="story"
+                        loading="eager"
+                        onLoad={() => setImageLoaded(true)}
+                      />
+                    </>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <div className="w-10 h-10 border-3 border-primary border-t-transparent rounded-full animate-spin" />
+                    </div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
 
-            {/* Gradient overlays for readability */}
-            <div className="absolute inset-x-0 top-0 h-28 bg-gradient-to-b from-black/60 to-transparent z-[5] pointer-events-none" />
-            <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-black/60 to-transparent z-[5] pointer-events-none" />
+            {/* Gradient overlays */}
+            <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent z-[5] pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-44 bg-gradient-to-t from-black/70 via-black/30 to-transparent z-[5] pointer-events-none" />
           </div>
 
           {/* Caption */}
           {story.caption && (
             <motion.div
-              initial={{ y: 10, opacity: 0 }}
+              initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
-              className="absolute bottom-28 left-0 right-0 z-20 px-4"
+              transition={{ delay: 0.25 }}
+              className="absolute bottom-32 left-0 right-0 z-20 px-5"
             >
-              <div className="bg-black/40 backdrop-blur-md rounded-xl px-4 py-2.5 border border-white/10">
-                <p className="text-white text-sm text-center leading-relaxed" dir="rtl">{story.caption}</p>
+              <div className="bg-black/30 backdrop-blur-lg rounded-2xl px-4 py-3 border border-white/5">
+                <p className="text-white text-[13px] text-center leading-relaxed" dir="rtl">{story.caption}</p>
               </div>
             </motion.div>
           )}
 
-          {/* Navigation Areas (tap zones) */}
+          {/* Navigation tap zones */}
           <div className="absolute inset-0 z-10 flex">
             <button
               className="w-1/3 h-full"
@@ -459,7 +456,7 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
             />
             <button
               className="w-1/3 h-full"
-              onClick={() => setIsPaused((p) => !p)}
+              onClick={handleContentTap}
               onPointerDown={handlePointerDown}
               onPointerUp={handlePointerUp}
             />
@@ -471,7 +468,35 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
             />
           </div>
 
-          {/* Reactions (for others' stories) */}
+          {/* Side actions (right side, like Instagram) */}
+          {!isMyStory && (
+            <motion.div
+              initial={{ opacity: 0, x: 10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="absolute left-3 bottom-36 z-20 flex flex-col items-center gap-3"
+            >
+              <button
+                onClick={() => { setLiked(l => !l); handleReact('❤️'); }}
+                className="flex flex-col items-center gap-0.5"
+              >
+                <motion.div
+                  whileTap={{ scale: 0.7 }}
+                  animate={liked ? { scale: [1, 1.3, 1] } : {}}
+                  className={`w-10 h-10 rounded-full ${liked ? 'bg-red-500/30' : 'bg-black/30'} backdrop-blur-md flex items-center justify-center`}
+                >
+                  <Heart className={`w-5 h-5 ${liked ? 'text-red-500 fill-red-500' : 'text-white'}`} />
+                </motion.div>
+              </button>
+              <button onClick={handleShare} className="flex flex-col items-center gap-0.5">
+                <div className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center">
+                  <Share2 className="w-4.5 h-4.5 text-white" />
+                </div>
+              </button>
+            </motion.div>
+          )}
+
+          {/* Reactions bar (for others' stories) */}
           {!isMyStory && (
             <StoryReactions
               storyId={story.id}
@@ -482,49 +507,64 @@ const StoryViewer = ({ group: initialGroup, onClose, allGroups }: StoryViewerPro
             />
           )}
 
-          {/* View Count (my stories only) */}
+          {/* My story bottom bar */}
           {isMyStory && (
-            <motion.button
-              initial={{ y: 10, opacity: 0 }}
+            <motion.div
+              initial={{ y: 15, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              onClick={() => setShowViewers(true)}
-              className="absolute bottom-4 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2 bg-black/40 backdrop-blur-md rounded-full px-5 py-2.5 text-white hover:bg-black/60 transition-colors border border-white/10"
+              className="absolute bottom-4 left-0 right-0 z-20 px-4 flex items-center justify-between"
+              dir="rtl"
             >
-              <Eye className="w-4 h-4" />
-              <span className="text-sm font-medium">{story.view_count} مشاهدة</span>
-            </motion.button>
+              {/* Viewers */}
+              <button
+                onClick={() => setShowViewers(true)}
+                className="flex items-center gap-2 bg-black/30 backdrop-blur-lg rounded-full px-4 py-2.5 text-white border border-white/5 active:scale-95 transition-transform"
+              >
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">{story.view_count}</span>
+                <ChevronUp className="w-3.5 h-3.5 text-white/60" />
+              </button>
+              {/* Actions */}
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleShare}
+                  className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/5"
+                >
+                  <Share2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={handleDelete}
+                  className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-md flex items-center justify-center text-white active:scale-90 transition-transform border border-white/5"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </motion.div>
           )}
 
-          {/* Navigation arrows */}
-          {currentIndex > 0 && (
-            <motion.button
+          {/* Swipe up hint for my stories */}
+          {isMyStory && viewsForStory.length > 0 && (
+            <motion.div
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              onClick={goPrev}
-              className="absolute right-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors"
+              animate={{ opacity: [0, 0.6, 0] }}
+              transition={{ delay: 1.5, duration: 2, repeat: 0 }}
+              className="absolute bottom-16 left-1/2 -translate-x-1/2 z-15 text-white/50 text-[10px] flex flex-col items-center pointer-events-none"
             >
-              <ChevronRight className="w-5 h-5" />
-            </motion.button>
-          )}
-          {currentIndex < group.stories.length - 1 && (
-            <motion.button
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              onClick={goNext}
-              className="absolute left-2 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/50 transition-colors"
-            >
-              <ChevronLeft className="w-5 h-5" />
-            </motion.button>
+              <ChevronUp className="w-4 h-4 animate-bounce" />
+              <span>اسحب لأعلى للمشاهدات</span>
+            </motion.div>
           )}
         </motion.div>
 
         {/* Viewers Panel */}
-        {showViewers && isMyStory && (
-          <StoryViewers
-            views={viewsForStory}
-            onClose={() => setShowViewers(false)}
-          />
-        )}
+        <AnimatePresence>
+          {showViewers && isMyStory && (
+            <StoryViewers
+              views={viewsForStory}
+              onClose={() => setShowViewers(false)}
+            />
+          )}
+        </AnimatePresence>
       </motion.div>
     </AnimatePresence>
   );
