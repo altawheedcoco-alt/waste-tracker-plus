@@ -16,6 +16,11 @@ import { Ep7Dark, Ep7Light } from "./videos/season2/Ep7Quality";
 import { Ep8Dark, Ep8Light } from "./videos/season2/Ep8Portal";
 import { Ep9Dark, Ep9Light } from "./videos/season2/Ep9API";
 import { Ep10Dark, Ep10Light } from "./videos/season2/Ep10Sustainability";
+import { Ep11Dark, Ep11Light } from "./videos/season3/Ep11Notifications";
+import { Ep12Dark, Ep12Light } from "./videos/season3/Ep12Finance";
+import { Ep13Dark, Ep13Light } from "./videos/season3/Ep13Workforce";
+import { Ep14Dark, Ep14Light } from "./videos/season3/Ep14CallCenter";
+import { Ep15Dark, Ep15Light } from "./videos/season3/Ep15Compliance";
 
 export const RemotionRoot = () => (
   <>
