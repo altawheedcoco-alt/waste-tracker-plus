@@ -113,7 +113,7 @@ export const S3Header = ({ frame, fps, dark, titleAr, titleEn, subtitle, episode
         <div style={{ width: lineW, height: 1, background: `linear-gradient(90deg, ${C.emerald}, ${C.cyan}50)` }} />
       </div>
       <div style={{
-        fontFamily: cairo, fontSize: 56, fontWeight: 900, color: th.text,
+        fontFamily: cairo, fontSize: 64, fontWeight: 900, color: th.text,
         lineHeight: 1.15, marginBottom: 10, letterSpacing: "-0.01em",
         opacity: s2, transform: `translateY(${interpolate(s2, [0, 1], [25, 0])}px)`,
       }}>{titleAr}</div>
