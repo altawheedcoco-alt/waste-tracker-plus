@@ -16,6 +16,11 @@ import { Ep7Dark, Ep7Light } from "./videos/season2/Ep7Quality";
 import { Ep8Dark, Ep8Light } from "./videos/season2/Ep8Portal";
 import { Ep9Dark, Ep9Light } from "./videos/season2/Ep9API";
 import { Ep10Dark, Ep10Light } from "./videos/season2/Ep10Sustainability";
+import { Ep11Dark, Ep11Light } from "./videos/season3/Ep11Notifications";
+import { Ep12Dark, Ep12Light } from "./videos/season3/Ep12Finance";
+import { Ep13Dark, Ep13Light } from "./videos/season3/Ep13Workforce";
+import { Ep14Dark, Ep14Light } from "./videos/season3/Ep14CallCenter";
+import { Ep15Dark, Ep15Light } from "./videos/season3/Ep15Compliance";
 
 export const RemotionRoot = () => (
   <>
@@ -51,5 +56,16 @@ export const RemotionRoot = () => (
     <Composition id="ep9-light" component={Ep9Light} durationInFrames={2035} fps={30} width={1920} height={1080} />
     <Composition id="ep10-dark" component={Ep10Dark} durationInFrames={2255} fps={30} width={1920} height={1080} />
     <Composition id="ep10-light" component={Ep10Light} durationInFrames={2255} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 3 (Clean Futuristic Style) */}
+    <Composition id="ep11-dark" component={Ep11Dark} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep11-light" component={Ep11Light} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep12-dark" component={Ep12Dark} durationInFrames={2980} fps={30} width={1920} height={1080} />
+    <Composition id="ep12-light" component={Ep12Light} durationInFrames={2980} fps={30} width={1920} height={1080} />
+    <Composition id="ep13-dark" component={Ep13Dark} durationInFrames={2970} fps={30} width={1920} height={1080} />
+    <Composition id="ep13-light" component={Ep13Light} durationInFrames={2970} fps={30} width={1920} height={1080} />
+    <Composition id="ep14-dark" component={Ep14Dark} durationInFrames={2990} fps={30} width={1920} height={1080} />
+    <Composition id="ep14-light" component={Ep14Light} durationInFrames={2990} fps={30} width={1920} height={1080} />
+    <Composition id="ep15-dark" component={Ep15Dark} durationInFrames={3000} fps={30} width={1920} height={1080} />
+    <Composition id="ep15-light" component={Ep15Light} durationInFrames={3000} fps={30} width={1920} height={1080} />
   </>
 );
