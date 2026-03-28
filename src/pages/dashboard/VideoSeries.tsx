@@ -69,7 +69,7 @@ const videos: VideoItem[] = [
   {
     id: '5', title: 'التقارير ولوحة التحكم', titleEn: 'Reports & Dashboard',
     description: 'لوحات تحكم تفاعلية، تقارير شاملة PDF وExcel، تحليلات متقدمة، تصدير ومشاركة.',
-    duration: '0:39', thumbnail: '',
+    duration: '0:39', thumbnail: '/thumbnails/ep5-cover.jpg',
     videoUrlDark: '/videos/irecycle-series-ep5-dark.mp4', videoUrlLight: '/videos/irecycle-series-ep5-light.mp4',
     status: 'available', episode: 5, season: 1, tags: ['تقارير', 'داشبورد', 'بيانات'],
   },
