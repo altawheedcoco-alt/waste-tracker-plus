@@ -152,7 +152,7 @@ const getVideoUrl = (video: VideoItem, isDark: boolean): string | undefined => {
   if (video.videoUrlDark && video.videoUrlLight) {
     return isDark ? video.videoUrlDark : video.videoUrlLight;
   }
-  return video.videoUrl;
+  return video.videoUrlDark || video.videoUrlLight || video.videoUrl;
 };
 
 const VideoSeries = () => {
