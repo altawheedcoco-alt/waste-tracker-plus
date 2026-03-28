@@ -209,9 +209,9 @@ export const S3Feature = ({ frame, fps, dark, delay, icon, titleAr, titleEn, des
         display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26,
       }}>{icon}</div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontFamily: cairo, fontSize: 22, fontWeight: 700, color: th.text, marginBottom: 2 }}>{titleAr}</div>
-        <div style={{ fontFamily: inter, fontSize: 12, color: c, letterSpacing: "0.05em", marginBottom: 6 }}>{titleEn}</div>
-        <div style={{ fontFamily: cairo, fontSize: 15, color: th.muted, lineHeight: 1.6 }}>{desc}</div>
+        <div style={{ fontFamily: cairo, fontSize: 28, fontWeight: 700, color: th.text, marginBottom: 2 }}>{titleAr}</div>
+        <div style={{ fontFamily: inter, fontSize: 16, color: c, letterSpacing: "0.05em", marginBottom: 6 }}>{titleEn}</div>
+        <div style={{ fontFamily: cairo, fontSize: 19, color: th.muted, lineHeight: 1.6 }}>{desc}</div>
       </div>
     </div>
   );
