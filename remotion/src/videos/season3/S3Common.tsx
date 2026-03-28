@@ -123,7 +123,7 @@ export const S3Header = ({ frame, fps, dark, titleAr, titleEn, subtitle, episode
       }}>{titleEn}</div>
       {subtitle && (
         <div style={{
-          fontFamily: cairo, fontSize: 18, color: th.muted, marginTop: 10,
+          fontFamily: cairo, fontSize: 22, color: th.muted, marginTop: 10,
           opacity: spring({ frame: frame - 40, fps, config: { damping: 18 } }),
         }}>{subtitle}</div>
       )}
