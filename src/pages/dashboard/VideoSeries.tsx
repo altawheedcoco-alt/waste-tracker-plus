@@ -64,9 +64,11 @@ const videos: VideoItem[] = [
     description: 'نظام GPS المتقدم لتتبع الشاحنات، إدارة السائقين، الخريطة الحية، صيانة الأسطول ونظام السلامة.',
     duration: '0:39',
     thumbnail: '',
-    status: 'coming_soon',
+    status: 'available',
     episode: 4,
     tags: ['أسطول', 'GPS', 'سائقين'],
+    videoUrlDark: '/videos/irecycle-series-ep4-dark.mp4',
+    videoUrlLight: '/videos/irecycle-series-ep4-light.mp4',
   },
   {
     id: '5',
