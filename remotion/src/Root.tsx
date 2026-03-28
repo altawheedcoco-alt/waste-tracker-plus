@@ -51,5 +51,16 @@ export const RemotionRoot = () => (
     <Composition id="ep9-light" component={Ep9Light} durationInFrames={2035} fps={30} width={1920} height={1080} />
     <Composition id="ep10-dark" component={Ep10Dark} durationInFrames={2255} fps={30} width={1920} height={1080} />
     <Composition id="ep10-light" component={Ep10Light} durationInFrames={2255} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 3 (Clean Futuristic Style) */}
+    <Composition id="ep11-dark" component={Ep11Dark} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep11-light" component={Ep11Light} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep12-dark" component={Ep12Dark} durationInFrames={2980} fps={30} width={1920} height={1080} />
+    <Composition id="ep12-light" component={Ep12Light} durationInFrames={2980} fps={30} width={1920} height={1080} />
+    <Composition id="ep13-dark" component={Ep13Dark} durationInFrames={2970} fps={30} width={1920} height={1080} />
+    <Composition id="ep13-light" component={Ep13Light} durationInFrames={2970} fps={30} width={1920} height={1080} />
+    <Composition id="ep14-dark" component={Ep14Dark} durationInFrames={2990} fps={30} width={1920} height={1080} />
+    <Composition id="ep14-light" component={Ep14Light} durationInFrames={2990} fps={30} width={1920} height={1080} />
+    <Composition id="ep15-dark" component={Ep15Dark} durationInFrames={3000} fps={30} width={1920} height={1080} />
+    <Composition id="ep15-light" component={Ep15Light} durationInFrames={3000} fps={30} width={1920} height={1080} />
   </>
 );
