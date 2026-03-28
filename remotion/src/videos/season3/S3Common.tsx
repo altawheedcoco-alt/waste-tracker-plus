@@ -234,9 +234,9 @@ export const S3Stat = ({ frame, fps, dark, delay, icon, value, label, labelEn, c
       minWidth: 180,
     }}>
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 2, background: `linear-gradient(90deg, transparent, ${c}, transparent)`, opacity: pulse * 0.5 }} />
-      <div style={{ fontSize: 32, marginBottom: 14 }}>{icon}</div>
-      <div style={{ fontFamily: mono, fontSize: 30, fontWeight: 700, color: c, marginBottom: 8 }}>{value}</div>
-      <div style={{ fontFamily: cairo, fontSize: 15, color: th.text, direction: "rtl" }}>{label}</div>
+      <div style={{ fontSize: 36, marginBottom: 14 }}>{icon}</div>
+      <div style={{ fontFamily: mono, fontSize: 38, fontWeight: 700, color: c, marginBottom: 8 }}>{value}</div>
+      <div style={{ fontFamily: cairo, fontSize: 19, color: th.text, direction: "rtl" }}>{label}</div>
       {labelEn && <div style={{ fontFamily: inter, fontSize: 11, color: th.muted, marginTop: 4 }}>{labelEn}</div>}
     </div>
   );
