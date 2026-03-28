@@ -207,7 +207,7 @@ const VideoSeries = () => {
                       {/* Thumbnail */}
                       <div className="relative aspect-video bg-gradient-to-br from-primary/10 to-accent/5 flex items-center justify-center overflow-hidden">
                         {video.thumbnail ? (
-                          <img src={`${video.thumbnail}?v=3`} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
+                          <img src={`${video.thumbnail}?v=4`} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
                         ) : null}
                         {!video.thumbnail && <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />}
 
