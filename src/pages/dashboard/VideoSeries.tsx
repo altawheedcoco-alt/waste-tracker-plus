@@ -209,12 +209,12 @@ const VideoSeries = () => {
                         {video.thumbnail ? (
                           <img src={`${video.thumbnail}?v=2`} alt={video.title} className="w-full h-full object-cover" loading="lazy" />
                         ) : null}
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />
+                        {!video.thumbnail && <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20" />}
 
                         {video.status === 'available' ? (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-14 h-14 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-                              <Play className="w-6 h-6 text-primary-foreground mr-[-2px]" />
+                          <div className="absolute top-3 left-3 z-10">
+                            <div className="w-10 h-10 rounded-full bg-primary/90 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                              <Play className="w-4 h-4 text-primary-foreground mr-[-1px]" />
                             </div>
                           </div>
                         ) : (
@@ -224,27 +224,22 @@ const VideoSeries = () => {
                           </div>
                         )}
 
-                        {/* Episode badge */}
-                        <div className="absolute top-3 right-3 z-10">
-                          <Badge variant="secondary" className="text-[10px] bg-black/70 text-white border-0 backdrop-blur-sm">
-                            S{video.season} · الحلقة {video.episode}
-                          </Badge>
-                        </div>
+                        {!video.thumbnail && (
+                          <>
+                            <div className="absolute top-3 right-3 z-10">
+                              <Badge variant="secondary" className="text-[10px] bg-black/70 text-white border-0 backdrop-blur-sm">
+                                S{video.season} · الحلقة {video.episode}
+                              </Badge>
+                            </div>
 
-                        {/* Duration */}
-                        {video.status === 'available' && (
-                          <div className="absolute bottom-3 left-3 z-10">
-                            <Badge variant="secondary" className="text-[10px] bg-black/70 text-white border-0 backdrop-blur-sm">
-                              {video.duration}
-                            </Badge>
-                          </div>
-                        )}
-
-                        {/* Title overlay on thumbnail */}
-                        {video.thumbnail && (
-                          <div className="absolute bottom-0 left-0 right-0 p-3 z-10">
-                            <div className="text-white font-bold text-sm drop-shadow-lg">{video.titleEn}</div>
-                          </div>
+                            {video.status === 'available' && (
+                              <div className="absolute bottom-3 left-3 z-10">
+                                <Badge variant="secondary" className="text-[10px] bg-black/70 text-white border-0 backdrop-blur-sm">
+                                  {video.duration}
+                                </Badge>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
 
