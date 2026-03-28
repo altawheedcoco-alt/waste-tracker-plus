@@ -48,7 +48,7 @@ const videos: VideoItem[] = [
   {
     id: '2', title: 'كيف تعمل الشحنات؟', titleEn: 'How Shipments Work',
     description: 'دورة حياة الشحنة من الإنشاء حتى التسليم — التتبع المباشر، الإشعارات، الفوترة التلقائية وشهادات التخلص الآمن.',
-    duration: '0:38', thumbnail: '',
+    duration: '0:38', thumbnail: '/thumbnails/ep2-cover.jpg',
     videoUrlDark: '/videos/irecycle-series-ep2-dark.mp4', videoUrlLight: '/videos/irecycle-series-ep2-light.mp4',
     status: 'available', episode: 2, season: 1, tags: ['شحنات', 'تتبع', 'فواتير'],
   },
