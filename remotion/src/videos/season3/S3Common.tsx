@@ -185,7 +185,7 @@ export const ProgressRing = ({ frame, fps, delay, percent, size, color, label, d
           style={{ transition: "none" }} />
       </svg>
       <div style={{ position: "absolute", marginTop: size * 0.3, fontFamily: mono, fontSize: size * 0.22, fontWeight: 700, color }}>{displayVal}%</div>
-      <div style={{ fontFamily: cairo, fontSize: 14, color: th.muted, textAlign: "center" }}>{label}</div>
+      <div style={{ fontFamily: cairo, fontSize: 18, color: th.muted, textAlign: "center" }}>{label}</div>
     </div>
   );
 };
