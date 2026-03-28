@@ -76,9 +76,11 @@ const videos: VideoItem[] = [
     description: 'لوحات تحكم تفاعلية، تقارير شاملة PDF وExcel، تحليلات متقدمة، تصدير ومشاركة بكل الطرق.',
     duration: '0:39',
     thumbnail: '',
-    status: 'coming_soon',
+    status: 'available',
     episode: 5,
     tags: ['تقارير', 'داشبورد', 'بيانات'],
+    videoUrlDark: '/videos/irecycle-series-ep5-dark.mp4',
+    videoUrlLight: '/videos/irecycle-series-ep5-light.mp4',
   },
 ];
 
