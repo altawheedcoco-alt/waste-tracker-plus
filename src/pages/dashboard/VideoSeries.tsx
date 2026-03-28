@@ -52,9 +52,11 @@ const videos: VideoItem[] = [
     description: 'كيف يساعدك الذكاء الاصطناعي في تصنيف المخلفات، توليد المستندات، الوكيل الذكي، تحليل البيانات والتنبؤ بالطلب.',
     duration: '0:39',
     thumbnail: '',
-    status: 'coming_soon',
+    status: 'available',
     episode: 3,
     tags: ['AI', 'تحليل', 'أتمتة'],
+    videoUrlDark: '/videos/irecycle-series-ep3-dark.mp4',
+    videoUrlLight: '/videos/irecycle-series-ep3-light.mp4',
   },
   {
     id: '4',
