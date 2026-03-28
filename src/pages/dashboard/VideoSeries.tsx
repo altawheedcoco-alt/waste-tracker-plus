@@ -42,7 +42,7 @@ const videos: VideoItem[] = [
   {
     id: '1', title: 'تعرّف على iRecycle', titleEn: 'Meet iRecycle',
     description: 'فيديو تعريفي شامل بالمنصة — واجهة المستخدم، لوحة التحكم، التقارير، تتبع الشاحنات، والإحصائيات الحية.',
-    duration: '0:45', thumbnail: '', videoUrl: '/videos/irecycle-series-ep1.mp4',
+    duration: '0:45', thumbnail: '/thumbnails/ep1-cover.jpg', videoUrl: '/videos/irecycle-series-ep1.mp4',
     status: 'available', episode: 1, season: 1, tags: ['تعريف', 'المنصة', 'رقمنة'],
   },
   {
