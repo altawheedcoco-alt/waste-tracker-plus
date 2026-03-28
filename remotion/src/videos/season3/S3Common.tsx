@@ -118,7 +118,7 @@ export const S3Header = ({ frame, fps, dark, titleAr, titleEn, subtitle, episode
         opacity: s2, transform: `translateY(${interpolate(s2, [0, 1], [25, 0])}px)`,
       }}>{titleAr}</div>
       <div style={{
-        fontFamily: inter, fontSize: 24, fontWeight: 300, color: C.emerald,
+        fontFamily: inter, fontSize: 30, fontWeight: 300, color: C.emerald,
         opacity: s3, letterSpacing: "0.03em",
       }}>{titleEn}</div>
       {subtitle && (
