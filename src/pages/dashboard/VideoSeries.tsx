@@ -1,6 +1,7 @@
-import { useState, lazy, Suspense } from 'react';
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Clock, Film } from 'lucide-react';
+import { useTheme } from 'next-themes';
 import LandingWrapper from '@/components/LandingWrapper';
 import Header from '@/components/Header';
 import BackButton from '@/components/ui/back-button';
@@ -14,6 +15,8 @@ interface VideoItem {
   duration: string;
   thumbnail: string;
   videoUrl?: string;
+  videoUrlDark?: string;
+  videoUrlLight?: string;
   status: 'available' | 'coming_soon';
   episode: number;
   tags: string[];
@@ -37,7 +40,9 @@ const videos: VideoItem[] = [
     description: 'شرح تفصيلي لدورة حياة الشحنة من الإنشاء حتى التسليم — التتبع المباشر، الإشعارات، الفوترة التلقائية وشهادات التخلص الآمن.',
     duration: '0:38',
     thumbnail: '',
-    status: 'coming_soon',
+    videoUrlDark: '/videos/irecycle-series-ep2-dark.mp4',
+    videoUrlLight: '/videos/irecycle-series-ep2-light.mp4',
+    status: 'available',
     episode: 2,
     tags: ['شحنات', 'تتبع', 'فواتير'],
   },
@@ -73,8 +78,17 @@ const videos: VideoItem[] = [
   },
 ];
 
+const getVideoUrl = (video: VideoItem, isDark: boolean): string | undefined => {
+  if (video.videoUrlDark && video.videoUrlLight) {
+    return isDark ? video.videoUrlDark : video.videoUrlLight;
+  }
+  return video.videoUrl;
+};
+
 const VideoSeries = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
 
   return (
     <LandingWrapper>
@@ -164,8 +178,8 @@ const VideoSeries = () => {
             {selectedVideo && (
               <div>
                 <div className="aspect-video bg-black flex items-center justify-center">
-                  {selectedVideo.videoUrl ? (
-                    <video src={selectedVideo.videoUrl} controls autoPlay className="w-full h-full" />
+                  {getVideoUrl(selectedVideo, isDark) ? (
+                    <video src={getVideoUrl(selectedVideo, isDark)} controls autoPlay className="w-full h-full" />
                   ) : (
                     <div className="text-center text-white/60 flex flex-col items-center gap-3">
                       <Film className="w-16 h-16" />
