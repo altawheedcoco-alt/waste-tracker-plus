@@ -55,7 +55,7 @@ const videos: VideoItem[] = [
   {
     id: '3', title: 'الذكاء الاصطناعي في iRecycle', titleEn: 'AI in iRecycle',
     description: 'تصنيف المخلفات، توليد المستندات، الوكيل الذكي، تحليل البيانات والتنبؤ بالطلب.',
-    duration: '0:39', thumbnail: '',
+    duration: '0:39', thumbnail: '/thumbnails/ep3-cover.jpg',
     videoUrlDark: '/videos/irecycle-series-ep3-dark.mp4', videoUrlLight: '/videos/irecycle-series-ep3-light.mp4',
     status: 'available', episode: 3, season: 1, tags: ['AI', 'تحليل', 'أتمتة'],
   },
