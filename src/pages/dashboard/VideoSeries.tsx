@@ -110,6 +110,42 @@ const videos: VideoItem[] = [
     videoUrlDark: '/videos/ep10-dark.mp4', videoUrlLight: '/videos/ep10-light.mp4',
     status: 'available', episode: 10, season: 2, tags: ['استدامة', 'ESG', 'بيئة'],
   },
+  // === Season 3 ===
+  {
+    id: '11', title: 'الإشعارات الذكية', titleEn: 'Smart Notifications',
+    description: 'نظام تنبيهات متقدم يبقيك على اطلاع بكل تفاصيل عملياتك — إشعارات فورية، فلترة ذكية، أولويات تلقائية.',
+    duration: '1:38', thumbnail: '/thumbnails/ep11-cover.jpg',
+    videoUrlDark: '/videos/ep11-dark.mp4',
+    status: 'available', episode: 11, season: 3, tags: ['إشعارات', 'تنبيهات', 'AI'],
+  },
+  {
+    id: '12', title: 'الإدارة المالية', titleEn: 'Financial Management',
+    description: 'إدارة شاملة للفواتير والمدفوعات والتسويات المالية — فوترة تلقائية، تحليلات مالية، أمان متقدم.',
+    duration: '1:39', thumbnail: '/thumbnails/ep12-cover.jpg',
+    videoUrlDark: '/videos/ep12-dark.mp4',
+    status: 'available', episode: 12, season: 3, tags: ['مالية', 'فواتير', 'تحليلات'],
+  },
+  {
+    id: '13', title: 'إدارة القوى العاملة', titleEn: 'Workforce Management',
+    description: 'نظام شامل لإدارة فريق العمل والمهام والأداء — توزيع ذكي، تتبع جغرافي، تدريب وتطوير.',
+    duration: '1:39', thumbnail: '/thumbnails/ep13-cover.jpg',
+    videoUrlDark: '/videos/ep13-dark.mp4',
+    status: 'available', episode: 13, season: 3, tags: ['موظفين', 'مهام', 'أداء'],
+  },
+  {
+    id: '14', title: 'مركز الاتصال الذكي', titleEn: 'Smart Call Center',
+    description: 'إدارة متكاملة لخدمة العملاء — رد آلي بالذكاء الاصطناعي، CRM، دعم متعدد القنوات.',
+    duration: '1:40', thumbnail: '/thumbnails/ep14-cover.jpg',
+    videoUrlDark: '/videos/ep14-dark.mp4',
+    status: 'available', episode: 14, season: 3, tags: ['اتصالات', 'CRM', 'دعم'],
+  },
+  {
+    id: '15', title: 'الامتثال والحوكمة', titleEn: 'Compliance & Governance',
+    description: 'ضمان الالتزام بالمعايير الدولية — تدقيق رقمي، شهادات ISO، نظام إنذار مبكر.',
+    duration: '1:40', thumbnail: '/thumbnails/ep15-cover.jpg',
+    videoUrlDark: '/videos/ep15-dark.mp4',
+    status: 'available', episode: 15, season: 3, tags: ['امتثال', 'ISO', 'حوكمة'],
+  },
 ];
 
 const getVideoUrl = (video: VideoItem, isDark: boolean): string | undefined => {
