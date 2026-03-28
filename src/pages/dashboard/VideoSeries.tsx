@@ -62,7 +62,7 @@ const videos: VideoItem[] = [
   {
     id: '4', title: 'إدارة الأسطول والسائقين', titleEn: 'Fleet Management',
     description: 'نظام GPS المتقدم لتتبع الشاحنات، إدارة السائقين، الخريطة الحية وصيانة الأسطول.',
-    duration: '0:39', thumbnail: '',
+    duration: '0:39', thumbnail: '/thumbnails/ep4-cover.jpg',
     videoUrlDark: '/videos/irecycle-series-ep4-dark.mp4', videoUrlLight: '/videos/irecycle-series-ep4-light.mp4',
     status: 'available', episode: 4, season: 1, tags: ['أسطول', 'GPS', 'سائقين'],
   },
