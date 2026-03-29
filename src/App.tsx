@@ -141,6 +141,7 @@ const App = memo(() => {
     if (cacheCleared.current) return;
     cacheCleared.current = true;
     import('@/lib/cacheBuster').then(m => m.bustStaleCaches());
+    initGA4();
   }, []);
   return <Providers />;
 });
