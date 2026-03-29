@@ -209,6 +209,13 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* iRecycle Health — PPG Showcase (moved up) */}
+          <div id="health-showcase">
+            <LazySection minH={400}>
+              <HealthShowcase />
+            </LazySection>
+          </div>
+
           {/* SaaS Tech Section - technical identity */}
           <div id="saas-tech">
             <LazySection minH={500}>
