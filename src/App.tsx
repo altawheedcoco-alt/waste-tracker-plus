@@ -43,8 +43,11 @@ const dashboardRoutesPromise = import('@/routes/DashboardRoutes');
 
 // Smart scroll restoration — saves position on leave, restores on back
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
+import { usePageTracking } from '@/hooks/usePageTracking';
+import { initGA4 } from '@/lib/analytics';
 const ScrollRestore = () => {
   useScrollRestoration();
+  usePageTracking();
   return null;
 };
 
@@ -138,6 +141,7 @@ const App = memo(() => {
     if (cacheCleared.current) return;
     cacheCleared.current = true;
     import('@/lib/cacheBuster').then(m => m.bustStaleCaches());
+    initGA4();
   }, []);
   return <Providers />;
 });
