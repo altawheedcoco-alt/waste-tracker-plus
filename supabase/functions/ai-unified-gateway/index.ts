@@ -93,28 +93,21 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
+    // Parse body early so it's available for both auth check and processing
+    const body = await req.json();
+    const { action, ...params } = body;
+
     // Allow public access for health-related actions (chat, etc.)
-    // by checking if token is the anon key itself (no user session)
     const token = authHeader.replace("Bearer ", "");
     let isPublicAccess = false;
+    const PUBLIC_ALLOWED_ACTIONS = ["chat"];
 
     const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
     if (authError || !claimsData?.claims) {
-      // Check if request body has a public-allowed action before rejecting
-      try {
-        const bodyClone = req.clone();
-        const bodyCheck = await bodyClone.json();
-        const PUBLIC_ALLOWED_ACTIONS = ["chat"];
-        if (PUBLIC_ALLOWED_ACTIONS.includes(bodyCheck?.action)) {
-          isPublicAccess = true;
-          console.log("[ai-gateway] Public access granted for action:", bodyCheck.action);
-        } else {
-          return new Response(JSON.stringify({ error: "Invalid authentication" }), {
-            status: 401,
-            headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      } catch {
+      if (PUBLIC_ALLOWED_ACTIONS.includes(action)) {
+        isPublicAccess = true;
+        console.log("[ai-gateway] Public access granted for action:", action);
+      } else {
         return new Response(JSON.stringify({ error: "Invalid authentication" }), {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -125,7 +118,6 @@ serve(async (req) => {
     if (!isPublicAccess && claimsData?.claims) {
       userId = claimsData.claims.sub as string;
 
-      // Get user's organization
       const { data: profile } = await supabase
         .from("profiles")
         .select("organization_id")
@@ -134,10 +126,6 @@ serve(async (req) => {
 
       organizationId = profile?.organization_id || null;
     }
-
-    // === Parse Request ===
-    const body = await req.json();
-    const { action, ...params } = body;
 
     if (!action) {
       return new Response(JSON.stringify({ error: "Action is required" }), {
