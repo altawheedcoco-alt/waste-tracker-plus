@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback } from "react";
-import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, FileText, Sun, Moon, Newspaper, ArrowLeft, ExternalLink, Command, Megaphone, Briefcase, Gavel, Binary, Film } from "lucide-react";
+import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, FileText, Sun, Moon, Newspaper, ArrowLeft, ExternalLink, Command, Megaphone, Briefcase, Gavel, Binary, Film, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import GuideButton from "@/components/guide/GuideButton";
