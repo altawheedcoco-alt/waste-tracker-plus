@@ -23,7 +23,7 @@ const HealthShowcase = memo(() => {
         <div className="max-w-3xl mx-auto text-center mb-8">
           <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-medium mb-4">
             <Sparkles className="h-3.5 w-3.5" />
-            5 تقنيات AI متقدمة
+            9 أدوات AI متقدمة
           </div>
           <h2 className="text-2xl sm:text-3xl font-bold text-foreground mb-3">
             iRecycle <span className="text-primary">Health</span>
