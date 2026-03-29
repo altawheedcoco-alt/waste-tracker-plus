@@ -20384,6 +20384,92 @@ export type Database = {
           },
         ]
       }
+      hazardous_exposure_records: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          created_by: string | null
+          duration_minutes: number | null
+          employee_id: string | null
+          employee_name: string
+          exposure_date: string
+          exposure_level: string | null
+          exposure_type: string
+          hazardous_material: string
+          id: string
+          medical_action: string | null
+          monitoring_result: string | null
+          organization_id: string
+          ppe_used: string | null
+          symptoms: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          employee_id?: string | null
+          employee_name: string
+          exposure_date: string
+          exposure_level?: string | null
+          exposure_type?: string
+          hazardous_material: string
+          id?: string
+          medical_action?: string | null
+          monitoring_result?: string | null
+          organization_id: string
+          ppe_used?: string | null
+          symptoms?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          duration_minutes?: number | null
+          employee_id?: string | null
+          employee_name?: string
+          exposure_date?: string
+          exposure_level?: string | null
+          exposure_type?: string
+          hazardous_material?: string
+          id?: string
+          medical_action?: string | null
+          monitoring_result?: string | null
+          organization_id?: string
+          ppe_used?: string | null
+          symptoms?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "hazardous_exposure_records_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hazardous_exposure_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "hazardous_exposure_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "hazardous_exposure_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homepage_custom_blocks: {
         Row: {
           background_color: string | null
@@ -24080,6 +24166,311 @@ export type Database = {
           view_name?: string
         }
         Relationships: []
+      }
+      medical_certificates: {
+        Row: {
+          certificate_type: string
+          created_at: string
+          employee_id: string | null
+          employee_name: string
+          examination_id: string | null
+          expiry_date: string | null
+          file_url: string | null
+          id: string
+          issue_date: string
+          issued_by: string | null
+          organization_id: string
+          restrictions: string | null
+          status: string
+        }
+        Insert: {
+          certificate_type?: string
+          created_at?: string
+          employee_id?: string | null
+          employee_name: string
+          examination_id?: string | null
+          expiry_date?: string | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          organization_id: string
+          restrictions?: string | null
+          status?: string
+        }
+        Update: {
+          certificate_type?: string
+          created_at?: string
+          employee_id?: string | null
+          employee_name?: string
+          examination_id?: string | null
+          expiry_date?: string | null
+          file_url?: string | null
+          id?: string
+          issue_date?: string
+          issued_by?: string | null
+          organization_id?: string
+          restrictions?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_certificates_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_examination_id_fkey"
+            columns: ["examination_id"]
+            isOneToOne: false
+            referencedRelation: "medical_examinations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "medical_certificates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_exam_results: {
+        Row: {
+          attachment_url: string | null
+          created_at: string
+          examination_id: string
+          id: string
+          iot_device_id: string | null
+          iot_reading_at: string | null
+          is_normal: boolean | null
+          normal_range: string | null
+          notes: string | null
+          result_value: string | null
+          test_name: string
+          test_type: string
+          unit: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          created_at?: string
+          examination_id: string
+          id?: string
+          iot_device_id?: string | null
+          iot_reading_at?: string | null
+          is_normal?: boolean | null
+          normal_range?: string | null
+          notes?: string | null
+          result_value?: string | null
+          test_name: string
+          test_type: string
+          unit?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          created_at?: string
+          examination_id?: string
+          id?: string
+          iot_device_id?: string | null
+          iot_reading_at?: string | null
+          is_normal?: boolean | null
+          normal_range?: string | null
+          notes?: string | null
+          result_value?: string | null
+          test_name?: string
+          test_type?: string
+          unit?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_exam_results_examination_id_fkey"
+            columns: ["examination_id"]
+            isOneToOne: false
+            referencedRelation: "medical_examinations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_examinations: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          employee_id: string | null
+          employee_name: string
+          examination_date: string
+          examination_type: string
+          examiner_name: string | null
+          examiner_specialty: string | null
+          id: string
+          next_examination_date: string | null
+          notes: string | null
+          organization_id: string
+          overall_result: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string | null
+          employee_name: string
+          examination_date?: string
+          examination_type?: string
+          examiner_name?: string | null
+          examiner_specialty?: string | null
+          id?: string
+          next_examination_date?: string | null
+          notes?: string | null
+          organization_id: string
+          overall_result?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          employee_id?: string | null
+          employee_name?: string
+          examination_date?: string
+          examination_type?: string
+          examiner_name?: string | null
+          examiner_specialty?: string | null
+          id?: string
+          next_examination_date?: string | null
+          notes?: string | null
+          organization_id?: string
+          overall_result?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_examinations_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_examinations_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_examinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "medical_examinations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medical_injuries: {
+        Row: {
+          attachment_url: string | null
+          body_part: string | null
+          created_at: string
+          created_by: string | null
+          days_lost: number | null
+          description: string | null
+          employee_id: string | null
+          employee_name: string
+          id: string
+          incident_report_id: string | null
+          injury_date: string
+          injury_type: string
+          is_work_related: boolean | null
+          organization_id: string
+          return_to_work_date: string | null
+          severity: string
+          treatment: string | null
+        }
+        Insert: {
+          attachment_url?: string | null
+          body_part?: string | null
+          created_at?: string
+          created_by?: string | null
+          days_lost?: number | null
+          description?: string | null
+          employee_id?: string | null
+          employee_name: string
+          id?: string
+          incident_report_id?: string | null
+          injury_date?: string
+          injury_type: string
+          is_work_related?: boolean | null
+          organization_id: string
+          return_to_work_date?: string | null
+          severity?: string
+          treatment?: string | null
+        }
+        Update: {
+          attachment_url?: string | null
+          body_part?: string | null
+          created_at?: string
+          created_by?: string | null
+          days_lost?: number | null
+          description?: string | null
+          employee_id?: string | null
+          employee_name?: string
+          id?: string
+          incident_report_id?: string | null
+          injury_date?: string
+          injury_type?: string
+          is_work_related?: boolean | null
+          organization_id?: string
+          return_to_work_date?: string | null
+          severity?: string
+          treatment?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "medical_injuries_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_injuries_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "medical_injuries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "medical_injuries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       meeting_notes: {
         Row: {
@@ -42123,6 +42514,79 @@ export type Database = {
           verified_at?: string | null
         }
         Relationships: []
+      }
+      vaccination_records: {
+        Row: {
+          administered_by: string | null
+          attachment_url: string | null
+          batch_number: string | null
+          created_at: string
+          dose_number: number | null
+          employee_id: string | null
+          employee_name: string
+          id: string
+          next_dose_date: string | null
+          organization_id: string
+          side_effects: string | null
+          vaccination_date: string
+          vaccine_name: string
+          vaccine_type: string | null
+        }
+        Insert: {
+          administered_by?: string | null
+          attachment_url?: string | null
+          batch_number?: string | null
+          created_at?: string
+          dose_number?: number | null
+          employee_id?: string | null
+          employee_name: string
+          id?: string
+          next_dose_date?: string | null
+          organization_id: string
+          side_effects?: string | null
+          vaccination_date: string
+          vaccine_name: string
+          vaccine_type?: string | null
+        }
+        Update: {
+          administered_by?: string | null
+          attachment_url?: string | null
+          batch_number?: string | null
+          created_at?: string
+          dose_number?: number | null
+          employee_id?: string | null
+          employee_name?: string
+          id?: string
+          next_dose_date?: string | null
+          organization_id?: string
+          side_effects?: string | null
+          vaccination_date?: string
+          vaccine_name?: string
+          vaccine_type?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vaccination_records_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vaccination_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "vaccination_records_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       vehicle_bookings: {
         Row: {
