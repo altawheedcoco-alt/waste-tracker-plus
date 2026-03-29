@@ -469,6 +469,7 @@ export const dashboardRoutes = (
     <Route path="/dashboard/digital-wallet" element={<DigitalWallet />} />
     <Route path="/dashboard/driver-academy" element={<DriverAcademy />} />
     <Route path="/dashboard/ohs-reports" element={<OHSReports />} />
+    <Route path="/dashboard/medical-program" element={<MedicalProgram />} />
     {/* Alias: sidebar links to /dashboard/safety → reuse OHSReports */}
     <Route path="/dashboard/safety" element={<OHSReports />} />
     <Route path="/dashboard/circular-economy" element={<CircularEconomy />} />
