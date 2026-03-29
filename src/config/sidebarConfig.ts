@@ -313,6 +313,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'الإقرارات الدورية', labelEn: 'Periodic', path: '/dashboard?tab=declarations', key: 'transporter-periodic-declarations', bindingType: 'admin' as const },
       { icon: ClipboardList, labelAr: 'الخطة السنوية', labelEn: 'Annual Plan', path: '/dashboard?tab=annual_plan', key: 'transporter-annual-plan', bindingType: 'admin' as const },
       { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'transporter-safety', bindingType: 'hybrid' as const },
+      { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health', bindingType: 'internal' as const },
     ],
   },
 
