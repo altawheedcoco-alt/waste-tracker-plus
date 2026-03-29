@@ -1264,6 +1264,13 @@ const ADMIN_GROUP_IDS = new Set([
  */
 export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
   {
+    id: 'sec-health',
+    labelAr: 'الصحة الذكية',
+    labelEn: 'Smart Health',
+    icon: Heart,
+    groupIds: ['occupational-health'],
+  },
+  {
     id: 'sec-org-identity',
     labelAr: 'المؤسسة والهوية',
     labelEn: 'Organization & Identity',
