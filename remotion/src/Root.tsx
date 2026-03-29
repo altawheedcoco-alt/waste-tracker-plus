@@ -27,6 +27,12 @@ import { Ep18Dark, Ep18Light } from "./videos/season4/Ep18Documentation";
 import { Ep19Dark, Ep19Light } from "./videos/season4/Ep19Weighbridge";
 import { Ep20Dark, Ep20Light } from "./videos/season4/Ep20Pricing";
 import { Ep21Dark, Ep21Light } from "./videos/season4/Ep21SafeDisposal";
+import { Ep22Dark, Ep22Light } from "./videos/season5/Ep22DocumentAI";
+import { Ep23Dark, Ep23Light } from "./videos/season5/Ep23WasteAI";
+import { Ep24Dark, Ep24Light } from "./videos/season5/Ep24HealthAI";
+import { Ep25Dark, Ep25Light } from "./videos/season5/Ep25ChatAgent";
+import { Ep26Dark, Ep26Light } from "./videos/season5/Ep26QualityAI";
+import { Ep27Dark, Ep27Light } from "./videos/season5/Ep27StrategicAI";
 
 export const RemotionRoot = () => (
   <>
