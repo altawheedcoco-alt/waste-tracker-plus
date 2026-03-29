@@ -183,6 +183,7 @@ const Dashboard = () => {
                   {!isDriver && <AIChatbot />}
                   {!isDriver && <EnhancedChatWidget />}
                   {!isDriver && <AccessibilityPanel />}
+                  <FloatingHealthButton />
                 </Suspense>
               </ErrorBoundary>
             )}
