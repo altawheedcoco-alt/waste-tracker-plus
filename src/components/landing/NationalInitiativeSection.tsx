@@ -80,7 +80,11 @@ const NationalInitiativeSection = () => {
 
         {/* CTA */}
         <div className="flex flex-wrap gap-3 justify-center">
-          <Button onClick={() => navigate('/laws')} size="lg" className="gap-2">
+          <Button onClick={() => navigate('/egypt-green')} size="lg" className="gap-2">
+            <Globe className="w-4 h-4" />
+            {isAr ? 'مصر والتحول البيئي' : 'Egypt & Green Transformation'}
+          </Button>
+          <Button onClick={() => navigate('/laws')} variant="outline" size="lg" className="gap-2">
             <Scale className="w-4 h-4" />
             {isAr ? 'التشريعات وتصنيف المخلفات' : 'Legislation & Waste Classification'}
           </Button>
