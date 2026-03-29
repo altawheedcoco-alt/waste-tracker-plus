@@ -66,6 +66,7 @@ const SharedDocumentView = lazyRetry(() => import("@/pages/SharedDocumentView"))
 const RecyclingHistory = lazyRetry(() => import("@/pages/RecyclingHistory"));
 const SharedResourcePage = lazyRetry(() => import("@/pages/SharedResourcePage"));
 const SharedShipmentEdit = lazyRetry(() => import("@/pages/SharedShipmentEdit"));
+const PublicHealth = lazyRetry(() => import("@/pages/PublicHealth"));
 const AccountPendingPage = lazyRetry(() => import("@/pages/AccountPendingPage"));
 const VerifySeal = lazyRetry(() => import("@/pages/VerifySeal"));
 const Digitalization = lazyRetry(() => import("@/pages/Digitalization"));
@@ -126,6 +127,7 @@ export const publicRoutes = (
     <Route path="/account-pending" element={<AccountPendingPage />} />
     <Route path="/shared/:token" element={<SharedDocumentView />} />
     <Route path="/scoped/:code" element={<ScopedAccessPortal />} />
+    <Route path="/health" element={<PublicHealth />} />
     <Route path="/recycling-history" element={<RecyclingHistory />} />
     <Route path="/s/:type/:code" element={<SharedResourcePage />} />
     <Route path="/c2b/:code" element={<C2BPublicView />} />

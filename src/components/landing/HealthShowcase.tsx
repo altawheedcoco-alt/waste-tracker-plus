@@ -47,7 +47,7 @@ const HealthShowcase = memo(() => {
 
         <div className="text-center">
           <Button
-            onClick={() => navigate('/dashboard/health')}
+            onClick={() => navigate('/health')}
             size="lg"
             className="gap-2 px-8"
           >
