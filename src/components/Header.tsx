@@ -87,6 +87,7 @@ const Header = memo(() => {
         { label: language === 'ar' ? 'سوق الإعلانات' : 'Marketplace', href: '#marketplace', icon: Megaphone, desc: language === 'ar' ? 'سوق الإعلانات والعروض التجارية' : 'Ads & commercial offers marketplace', badge: language === 'ar' ? 'إصدار جديد' : 'New Release' },
         { label: language === 'ar' ? 'التوظيف والوظائف' : 'Jobs & Recruitment', href: '#recruitment', icon: Briefcase, desc: language === 'ar' ? 'فرص العمل ونظام التوظيف الذكي' : 'Job opportunities & smart recruitment', badge: language === 'ar' ? 'إصدار جديد' : 'New Release' },
         { label: language === 'ar' ? 'المزادات' : 'Auctions', href: '#auctions', icon: Gavel, desc: language === 'ar' ? 'مزادات المخلفات والمعدات' : 'Waste & equipment auctions', badge: language === 'ar' ? 'إصدار جديد' : 'New Release' },
+        { label: 'iRecycle Health', href: '#health-showcase', icon: Heart, desc: language === 'ar' ? 'منظومة صحية ذكية — 9 أدوات AI' : 'Smart health system — 9 AI tools', badge: language === 'ar' ? 'جديد' : 'New' },
         { label: t('header.testimonials'), href: '#testimonials', icon: HelpCircle, desc: t('header.testimonialsDesc') },
       ],
     },
