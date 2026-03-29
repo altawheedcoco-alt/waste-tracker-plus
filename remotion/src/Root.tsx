@@ -73,5 +73,18 @@ export const RemotionRoot = () => (
     <Composition id="ep14-light" component={Ep14Light} durationInFrames={2990} fps={30} width={1920} height={1080} />
     <Composition id="ep15-dark" component={Ep15Dark} durationInFrames={3000} fps={30} width={1920} height={1080} />
     <Composition id="ep15-light" component={Ep15Light} durationInFrames={3000} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 4 (Shipments Deep Dive) */}
+    <Composition id="ep16-dark" component={Ep16Dark} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep16-light" component={Ep16Light} durationInFrames={2950} fps={30} width={1920} height={1080} />
+    <Composition id="ep17-dark" component={Ep17Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep17-light" component={Ep17Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep18-dark" component={Ep18Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep18-light" component={Ep18Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep19-dark" component={Ep19Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep19-light" component={Ep19Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep20-dark" component={Ep20Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep20-light" component={Ep20Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep21-dark" component={Ep21Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    <Composition id="ep21-light" component={Ep21Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
   </>
 );
