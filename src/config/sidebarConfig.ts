@@ -748,6 +748,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     ],
   },
 
+  // ═══════════════ الصحة المهنية ═══════════════
+  {
+    id: 'occupational-health',
+    icon: Heart,
+    labelAr: 'الصحة المهنية',
+    labelEn: 'Occupational Health',
+    visibleFor: [],
+    items: [
+      { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health-main', bindingType: 'internal' as const },
+      { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'ohs-safety', bindingType: 'hybrid' as const },
+      { icon: Activity, labelAr: 'البرنامج الطبي', labelEn: 'Medical Program', path: '/dashboard/medical-program', key: 'medical-program', bindingType: 'internal' as const },
+    ],
+  },
+
   // ═══════════════ المحفظة والتأمين ═══════════════
   {
     id: 'wallet-insurance',
