@@ -7,6 +7,7 @@ import ReelComments from './ReelComments';
 import ReelUploadDialog from './ReelUploadDialog';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useContainerScrollRestore } from '@/hooks/useScrollRestoration';
 
 type FeedTab = 'trending' | 'latest' | 'saved';
 
