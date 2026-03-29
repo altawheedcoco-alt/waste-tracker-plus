@@ -9,6 +9,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import MusicPicker from '@/components/media/MusicPicker';
+import VideoUploadProgress, { UploadStage } from '@/components/upload/VideoUploadProgress';
+import { ffmpegCompressVideo, isFFmpegSupported, generateThumbnail } from '@/utils/ffmpegCompress';
+import { needsCompression } from '@/utils/quickVideoCompress';
 import type { MusicTrack } from '@/lib/musicLibrary';
 
 interface Props {
@@ -19,17 +22,21 @@ interface Props {
 const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [thumbnailUrl, setThumbnailUrl] = useState<string | null>(null);
   const [caption, setCaption] = useState('');
   const [hashtags, setHashtags] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [stage, setStage] = useState<UploadStage>('idle');
   const [progress, setProgress] = useState(0);
+  const [originalSize, setOriginalSize] = useState(0);
+  const [compressedSize, setCompressedSize] = useState(0);
   const [selectedMusic, setSelectedMusic] = useState<MusicTrack | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { createReel } = useReelActions();
   const { user, organization } = useAuth();
   const { toast } = useToast();
 
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0];
     if (!f) return;
     if (!f.type.startsWith('video/')) {
@@ -42,26 +49,67 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
     }
     setFile(f);
     setPreview(URL.createObjectURL(f));
+    setOriginalSize(f.size);
+
+    // توليد صورة مصغرة تلقائياً
+    try {
+      const thumb = await generateThumbnail(f);
+      setThumbnailUrl(URL.createObjectURL(thumb));
+    } catch {
+      console.warn('لم يتم توليد صورة مصغرة');
+    }
   };
 
   const handleUpload = async () => {
     if (!file || !user) return;
     setUploading(true);
-    setProgress(20);
+    setStage('idle');
+    setProgress(0);
 
     try {
-      const ext = file.name.split('.').pop();
+      let fileToUpload = file;
+
+      // المرحلة 1: ضغط الفيديو
+      if (needsCompression(file)) {
+        setStage('compressing');
+        if (isFFmpegSupported()) {
+          const result = await ffmpegCompressVideo(file, {
+            maxWidth: 1080,
+            crf: 26,
+            onProgress: (p) => setProgress(p * 0.5), // 0-50%
+            onStage: (s) => { if (s === 'compressing') setStage('compressing'); },
+          });
+          fileToUpload = result.file;
+          setCompressedSize(result.compressedSize);
+        }
+      }
+
+      // المرحلة 2: رفع الفيديو
+      setStage('uploading');
+      const ext = fileToUpload.name.split('.').pop();
       const path = `reels/${user.id}/${Date.now()}.${ext}`;
 
-      setProgress(40);
+      setProgress(55);
       const { error: uploadError } = await supabase.storage
         .from('media')
-        .upload(path, file, { contentType: file.type, upsert: false });
+        .upload(path, fileToUpload, { contentType: fileToUpload.type, upsert: false });
 
       if (uploadError) throw uploadError;
-      setProgress(80);
+      setProgress(85);
 
       const { data: urlData } = supabase.storage.from('media').getPublicUrl(path);
+
+      // رفع الصورة المصغرة
+      let thumbPublicUrl: string | undefined;
+      if (thumbnailUrl) {
+        try {
+          const thumbBlob = await fetch(thumbnailUrl).then(r => r.blob());
+          const thumbPath = `reels/${user.id}/${Date.now()}_thumb.jpg`;
+          await supabase.storage.from('media').upload(thumbPath, thumbBlob, { contentType: 'image/jpeg' });
+          const { data: tData } = supabase.storage.from('media').getPublicUrl(thumbPath);
+          thumbPublicUrl = tData.publicUrl;
+        } catch { /* thumbnail upload optional */ }
+      }
 
       const tags = hashtags
         .split(/[,،\s#]+/)
@@ -76,9 +124,13 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
       });
 
       setProgress(100);
-      resetForm();
-      onOpenChange(false);
+      setStage('done');
+      setTimeout(() => {
+        resetForm();
+        onOpenChange(false);
+      }, 800);
     } catch (err: any) {
+      setStage('error');
       toast({ title: 'خطأ في الرفع', description: err.message, variant: 'destructive' });
     } finally {
       setUploading(false);
@@ -88,9 +140,13 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
   const resetForm = () => {
     setFile(null);
     setPreview(null);
+    setThumbnailUrl(null);
     setCaption('');
     setHashtags('');
     setProgress(0);
+    setStage('idle');
+    setOriginalSize(0);
+    setCompressedSize(0);
   };
 
   return (
@@ -112,6 +168,9 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
             >
               <Upload className="w-10 h-10 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">اختر فيديو (حتى 100MB)</p>
+              {isFFmpegSupported() && (
+                <p className="text-[10px] text-primary/70">⚡ ضغط H.264 تلقائي</p>
+              )}
             </button>
           ) : (
             <div className="relative w-full aspect-[9/16] max-h-[300px] rounded-2xl overflow-hidden bg-black">
@@ -122,6 +181,10 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
               >
                 <X className="w-4 h-4 text-white" />
               </button>
+              {/* File info */}
+              <div className="absolute bottom-2 left-2 bg-black/50 backdrop-blur-sm rounded-full px-2.5 py-1 text-white text-[10px]">
+                🎥 {(file!.size / 1024 / 1024).toFixed(1)} MB
+              </div>
             </div>
           )}
 
@@ -150,11 +213,13 @@ const ReelUploadDialog = memo(({ open, onOpenChange }: Props) => {
             placeholder="هاشتاقات (مفصولة بفاصلة): بيئة، تدوير"
           />
 
-          {uploading && (
-            <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
-              <div className="h-full bg-primary transition-all duration-300 rounded-full" style={{ width: `${progress}%` }} />
-            </div>
-          )}
+          {/* 2-Phase Progress Bar */}
+          <VideoUploadProgress
+            stage={stage}
+            progress={progress}
+            originalSize={originalSize}
+            compressedSize={compressedSize}
+          />
 
           <Button
             onClick={handleUpload}
