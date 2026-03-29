@@ -258,6 +258,13 @@ const Index = () => {
             </LazySection>
           </div>
 
+          {/* iRecycle Health — PPG Showcase */}
+          <div id="health-showcase">
+            <LazySection minH={400}>
+              <HealthShowcase />
+            </LazySection>
+          </div>
+
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (
             <LazySection key={block.id} minH={150}>
