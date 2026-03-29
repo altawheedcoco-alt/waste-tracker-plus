@@ -1140,6 +1140,9 @@ export const sidebarGroups: SidebarGroupConfig[] = [
  * ترتيب فئوي: المؤسسة → العمليات → المستندات → التقارير → المالية → التواصل → السوق → AI → أدمن → إعدادات
  */
 const CATEGORY_ORDER: string[] = [
+  // ═══ 0. الصحة المهنية (أولوية قصوى) ═══
+  'occupational-health',
+
   // ═══ 1. المؤسسة والهوية ═══
   'org-page',
   'identity-attestation',
@@ -1261,6 +1264,13 @@ const ADMIN_GROUP_IDS = new Set([
  */
 export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
   {
+    id: 'sec-health',
+    labelAr: 'الصحة الذكية',
+    labelEn: 'Smart Health',
+    icon: Heart,
+    groupIds: ['occupational-health'],
+  },
+  {
     id: 'sec-org-identity',
     labelAr: 'المؤسسة والهوية',
     labelEn: 'Organization & Identity',
@@ -1331,7 +1341,7 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'الموارد البشرية',
     labelEn: 'Human Resources',
     icon: Users,
-    groupIds: ['hr-core', 'hr-payroll-performance', 'occupational-health'],
+    groupIds: ['hr-core', 'hr-payroll-performance'],
   },
   {
     id: 'sec-communication',

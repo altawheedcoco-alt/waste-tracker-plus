@@ -40,6 +40,7 @@ const BetaBanner = lazy(() => import('@/components/BetaBanner'));
 const AccessibilityPanel = lazy(() => import('@/components/accessibility/AccessibilityPanel').then(m => ({ default: m.AccessibilityPanel })));
 const FloatingSidePanel = lazy(() => import('@/components/layout/FloatingSidePanel'));
 const TouchOptimizations = lazy(() => import('@/components/mobile/TouchOptimizations'));
+const FloatingHealthButton = lazy(() => import('@/components/health/FloatingHealthButton'));
 
 const DashboardLoader = () => (
   <div className="flex items-center justify-center py-20">
@@ -182,6 +183,7 @@ const Dashboard = () => {
                   {!isDriver && <AIChatbot />}
                   {!isDriver && <EnhancedChatWidget />}
                   {!isDriver && <AccessibilityPanel />}
+                  <FloatingHealthButton />
                 </Suspense>
               </ErrorBoundary>
             )}
