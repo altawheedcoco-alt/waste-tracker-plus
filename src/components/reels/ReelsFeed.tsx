@@ -7,6 +7,7 @@ import ReelComments from './ReelComments';
 import ReelUploadDialog from './ReelUploadDialog';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
+import { useContainerScrollRestore } from '@/hooks/useScrollRestoration';
 
 type FeedTab = 'trending' | 'latest' | 'saved';
 
@@ -21,7 +22,8 @@ const ReelsFeed = memo(() => {
   const navigate = useNavigate();
   const viewedReels = useRef(new Set<string>());
 
-  // Filter reels based on tab
+  // Restore scroll position when returning to reels feed
+  useContainerScrollRestore(containerRef, `reels-${activeTab}`);
   const filteredReels = (() => {
     switch (activeTab) {
       case 'trending':

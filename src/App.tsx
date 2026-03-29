@@ -41,12 +41,10 @@ import { publicRoutes } from "@/routes/PublicRoutes";
 // Eagerly preload dashboard routes module on first script eval
 const dashboardRoutesPromise = import('@/routes/DashboardRoutes');
 
-// Scroll to top on every route change
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+// Smart scroll restoration — saves position on leave, restores on back
+import { useScrollRestoration } from '@/hooks/useScrollRestoration';
+const ScrollRestore = () => {
+  useScrollRestoration();
   return null;
 };
 
@@ -107,7 +105,7 @@ const Providers = memo(() => (
             <BrowserRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
               <AuthProvider>
                 <ErrorBoundary fallbackTitle="حدث خطأ في تحميل الصفحة">
-                  <ScrollToTop />
+                  <ScrollRestore />
                   <Suspense fallback={null}><SoundIntegrator /></Suspense>
                   <Suspense fallback={<PageLoader />}>
                     <AppRoutes />
