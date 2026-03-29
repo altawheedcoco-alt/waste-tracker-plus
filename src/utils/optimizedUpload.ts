@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { compressImage, CompressionOptions, formatFileSize } from './imageCompression';
 import { smartChunkedUpload } from './chunkedUpload';
 import { needsCompression, quickCompressVideo } from './quickVideoCompress';
+import { ffmpegCompressVideo, isFFmpegSupported } from './ffmpegCompress';
 
 export interface UploadOptions {
   /** اسم الـ bucket */
