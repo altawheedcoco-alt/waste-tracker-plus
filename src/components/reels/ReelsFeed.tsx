@@ -22,7 +22,8 @@ const ReelsFeed = memo(() => {
   const navigate = useNavigate();
   const viewedReels = useRef(new Set<string>());
 
-  // Filter reels based on tab
+  // Restore scroll position when returning to reels feed
+  useContainerScrollRestore(containerRef, `reels-${activeTab}`);
   const filteredReels = (() => {
     switch (activeTab) {
       case 'trending':
