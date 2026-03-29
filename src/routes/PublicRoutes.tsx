@@ -66,6 +66,7 @@ const SharedDocumentView = lazyRetry(() => import("@/pages/SharedDocumentView"))
 const RecyclingHistory = lazyRetry(() => import("@/pages/RecyclingHistory"));
 const SharedResourcePage = lazyRetry(() => import("@/pages/SharedResourcePage"));
 const SharedShipmentEdit = lazyRetry(() => import("@/pages/SharedShipmentEdit"));
+const PublicHealth = lazyRetry(() => import("@/pages/PublicHealth"));
 const AccountPendingPage = lazyRetry(() => import("@/pages/AccountPendingPage"));
 const VerifySeal = lazyRetry(() => import("@/pages/VerifySeal"));
 const Digitalization = lazyRetry(() => import("@/pages/Digitalization"));
