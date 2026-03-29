@@ -1,76 +1,62 @@
-# خطة تنفيذ الموسم الثالث — رندر + تكبير الخطوط + نشر مع دمج الموسيقي 
-
-## الوضع الحالي
-
-- الموسم الثالث مكتوب بالكامل (5 حلقات: Ep11-Ep15) في مجلد `remotion/src/videos/season3/`
-- **غير منشور** على المنصة — صفحة VideoSeries.tsx تعرض الموسم 1 و 2 فقط
-- أحجام الخطوط الحالية في S3Common: العنوان 56px، الإنجليزي 24px، الوصف 18px، النصوص الداخلية 15-16px
-
-## الخطة
-
-### 1. تكبير الخطوط في S3Common.tsx
-
-تحديث أحجام الخطوط في المكونات المشتركة للموسم الثالث:
 
 
-| المكون                   | الحالي        | الجديد |
-| ------------------------ | ------------- | ------ |
-| S3Header عنوان عربي      | 56px          | 64px   |
-| S3Header إنجليزي         | 24px          | 30px   |
-| S3Header وصف             | 18px          | 22px   |
-| S3Feature عنوان عربي     | 22px          | 28px   |
-| S3Feature إنجليزي        | 12px          | 16px   |
-| S3Feature وصف            | 15px          | 19px   |
-| S3Stat قيمة              | 30px          | 38px   |
-| S3Stat عنوان             | 15px          | 19px   |
-| GlassCard محتوى          | حسب الاستخدام | +4px   |
-| النصوص الداخلية بالحلقات | 16px          | 20px   |
+# خطة: ترقية iRecycle Health — وصول شامل + زر عائم + تأكيد السجل الصحي
 
+## ملخص
+جعل iRecycle Health الأداة الأولى في القائمة الجانبية لجميع الحسابات، مع إضافة زر عائم (Floating Action Button) للوصول السريع، وتأكيد أن نظام التتبع الصحي والمقارنات يعمل بشكل كامل.
 
-وكذلك تكبير الخطوط داخل كل حلقة (Ep11-Ep15) بنفس النسبة.
+---
 
-### 2. اختيار الوضع: الليلي (Dark)
+## 1. نقل iRecycle Health لأول قسم في القائمة الجانبية
 
-الوضع الليلي هو الأنسب لأسلوب "Clean Futuristic" — التدرجات اللونية والتوهجات تبرز بشكل أفضل على الخلفية الداكنة.
+**الوضع الحالي:** موجود ضمن قسم "الموارد البشرية" → "الصحة المهنية" (ترتيب متأخر)
 
-### 3. رندر 5 فيديوهات (Dark فقط)
+**التعديل:**
+- إنشاء قسم جديد مستقل `sec-health` يكون **أول قسم** في مصفوفة `SIDEBAR_SECTIONS` (قبل المؤسسة والهوية)
+- نقل مجموعة `occupational-health` إليه مع جعل iRecycle Health العنصر الأول
+- ضمان `visibleFor: []` (مرئي لجميع أنواع الحسابات)
 
-رندر كل حلقة باستخدام Remotion CLI:
+**الملف:** `src/config/sidebarConfig.ts`
 
-- `ep11-dark` → `/videos/ep11-dark.mp4`
-- `ep12-dark` → `/videos/ep12-dark.mp4`
-- `ep13-dark` → `/videos/ep13-dark.mp4`
-- `ep14-dark` → `/videos/ep14-dark.mp4`
-- `ep15-dark` → `/videos/ep15-dark.mp4`
+---
 
-ثم نسخها إلى `public/videos/`
+## 2. زر عائم (FAB) لـ iRecycle Health
 
-### 4. إنشاء أغلفة بالذكاء الاصطناعي
+**التعديل:**
+- إنشاء مكون `FloatingHealthButton.tsx` — زر دائري عائم بأيقونة القلب/البصمة مع نبض أنيميشن
+- يظهر في جميع صفحات الداشبورد (أسفل يسار الشاشة)
+- عند الضغط ينقل مباشرة لـ `/dashboard/health`
+- يظهر شارة صغيرة "فحص اليوم" إذا لم يُجرِ المستخدم فحصاً اليوم
 
-توليد 5 أغلفة بالذكاء الاصطناعي (بدون نصوص عربية — إنجليزي فقط):
+**الملفات:**
+- إنشاء: `src/components/health/FloatingHealthButton.tsx`
+- تعديل: `src/pages/Dashboard.tsx` — إضافته ضمن widgets المؤجلة
 
-- Ep11: Smart Notifications
-- Ep12: Financial Management
-- Ep13: Workforce Management
-- Ep14: Call Center
-- Ep15: Compliance & Regulations
+---
 
-### 5. نشر على المنصة
+## 3. تأكيد وتحسين السجل الصحي والمقارنات
 
-تحديث `src/pages/dashboard/VideoSeries.tsx`:
+**الموجود فعلاً:**
+- جدول `health_measurements` في قاعدة البيانات مع RLS
+- `useHealthHistory` hook يحفظ ويسترجع القياسات
+- `HealthHistoryTab` يعرض الرسوم البيانية (stress/energy) ومتوسطات آخر 10 قياسات
+- مؤشر الاتجاه (improving/declining/stable) يقارن آخر 5 قياسات بالـ 5 السابقة
 
-- إضافة الموسم الثالث في مصفوفة `seasons`
-- إضافة 5 حلقات جديدة في مصفوفة `videos` (dark فقط بدون light)
-- ربط الأغلفة والفيديوهات
+**التحسينات:**
+- إضافة مقارنة "اليوم vs الأمس" و"هذا الأسبوع vs الأسبوع الماضي" بنسب مئوية
+- إضافة تنبيه ذكي عند تدهور المؤشرات لـ 3 أيام متتالية
+- عرض عداد "أيام الفحص المتتالية" (Streak) لتحفيز الاستمرار
 
-### الملفات المتأثرة
+**الملف:** تعديل `src/components/health/HealthHistoryTab.tsx`
 
-1. `remotion/src/videos/season3/S3Common.tsx` — تكبير الخطوط
-2. `remotion/src/videos/season3/Ep11Notifications.tsx` — تكبير خطوط داخلية
-3. `remotion/src/videos/season3/Ep12Finance.tsx` — تكبير خطوط داخلية
-4. `remotion/src/videos/season3/Ep13Workforce.tsx` — تكبير خطوط داخلية
-5. `remotion/src/videos/season3/Ep14CallCenter.tsx` — تكبير خطوط داخلية
-6. `remotion/src/videos/season3/Ep15Compliance.tsx` — تكبير خطوط داخلية
-7. `src/pages/dashboard/VideoSeries.tsx` — إضافة الموسم الثالث
-8. `public/thumbnails/ep11-15-cover.jpg` — أغلفة جديدة
-9. `public/videos/ep11-15-dark.mp4` — فيديوهات مرندرة
+---
+
+## التفاصيل التقنية
+
+| الملف | التعديل |
+|---|---|
+| `src/config/sidebarConfig.ts` | نقل `occupational-health` لأول قسم مستقل |
+| `src/components/health/FloatingHealthButton.tsx` | مكون جديد — FAB عائم |
+| `src/pages/Dashboard.tsx` | إضافة FloatingHealthButton |
+| `src/components/health/HealthHistoryTab.tsx` | مقارنات يومية/أسبوعية + streak |
+
