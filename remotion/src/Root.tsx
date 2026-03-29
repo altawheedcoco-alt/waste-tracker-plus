@@ -27,6 +27,12 @@ import { Ep18Dark, Ep18Light } from "./videos/season4/Ep18Documentation";
 import { Ep19Dark, Ep19Light } from "./videos/season4/Ep19Weighbridge";
 import { Ep20Dark, Ep20Light } from "./videos/season4/Ep20Pricing";
 import { Ep21Dark, Ep21Light } from "./videos/season4/Ep21SafeDisposal";
+import { Ep22Dark, Ep22Light } from "./videos/season5/Ep22DocumentAI";
+import { Ep23Dark, Ep23Light } from "./videos/season5/Ep23WasteAI";
+import { Ep24Dark, Ep24Light } from "./videos/season5/Ep24HealthAI";
+import { Ep25Dark, Ep25Light } from "./videos/season5/Ep25ChatAgent";
+import { Ep26Dark, Ep26Light } from "./videos/season5/Ep26QualityAI";
+import { Ep27Dark, Ep27Light } from "./videos/season5/Ep27StrategicAI";
 
 export const RemotionRoot = () => (
   <>
@@ -86,5 +92,18 @@ export const RemotionRoot = () => (
     <Composition id="ep20-light" component={Ep20Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
     <Composition id="ep21-dark" component={Ep21Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
     <Composition id="ep21-light" component={Ep21Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 5 (AI Deep Dive - Neural Digital) */}
+    <Composition id="ep22-dark" component={Ep22Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep22-light" component={Ep22Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep23-dark" component={Ep23Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep23-light" component={Ep23Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep24-dark" component={Ep24Dark} durationInFrames={2010} fps={30} width={1920} height={1080} />
+    <Composition id="ep24-light" component={Ep24Light} durationInFrames={2010} fps={30} width={1920} height={1080} />
+    <Composition id="ep25-dark" component={Ep25Dark} durationInFrames={2010} fps={30} width={1920} height={1080} />
+    <Composition id="ep25-light" component={Ep25Light} durationInFrames={2010} fps={30} width={1920} height={1080} />
+    <Composition id="ep26-dark" component={Ep26Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep26-light" component={Ep26Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep27-dark" component={Ep27Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep27-light" component={Ep27Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
   </>
 );
