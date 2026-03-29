@@ -68,6 +68,7 @@ const DriverEcosystemShowcase = lazyRetry(() => import("@/components/landing/Dri
 const MarketplacePreview = lazyRetry(() => import("@/components/landing/MarketplacePreview"));
 const WalletFinanceShowcase = lazyRetry(() => import("@/components/landing/WalletFinanceShowcase"));
 const RatingTrustSection = lazyRetry(() => import("@/components/landing/RatingTrustSection"));
+const HealthShowcase = lazyRetry(() => import("@/components/landing/HealthShowcase"));
 const RegulatorShowcase = lazyRetry(() => import("@/components/landing/RegulatorShowcase"));
 
 /** Renders children when the container scrolls into view — with proper placeholder height */
@@ -254,6 +255,13 @@ const Index = () => {
           <div id="regulator-showcase">
             <LazySection minH={400}>
               <RegulatorShowcase />
+            </LazySection>
+          </div>
+
+          {/* iRecycle Health — PPG Showcase */}
+          <div id="health-showcase">
+            <LazySection minH={400}>
+              <HealthShowcase />
             </LazySection>
           </div>
 
