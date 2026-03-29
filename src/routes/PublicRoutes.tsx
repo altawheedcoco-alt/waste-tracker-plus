@@ -69,6 +69,7 @@ const SharedShipmentEdit = lazyRetry(() => import("@/pages/SharedShipmentEdit"))
 const AccountPendingPage = lazyRetry(() => import("@/pages/AccountPendingPage"));
 const VerifySeal = lazyRetry(() => import("@/pages/VerifySeal"));
 const Digitalization = lazyRetry(() => import("@/pages/Digitalization"));
+const EgyptGreenTransformation = lazyRetry(() => import("@/pages/EgyptGreenTransformation"));
 const VideoSeries = lazyRetry(() => import("@/pages/dashboard/VideoSeries"));
 
 const GeneratorGuide = lazyRetry(() => import("@/pages/guide/GeneratorGuide"));
