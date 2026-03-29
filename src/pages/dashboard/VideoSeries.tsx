@@ -36,6 +36,7 @@ const seasons: SeasonInfo[] = [
   { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600' },
   { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600' },
   { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600' },
+  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600' },
 ];
 
 const videos: VideoItem[] = [
@@ -145,6 +146,49 @@ const videos: VideoItem[] = [
     duration: '1:40', thumbnail: '/thumbnails/ep15-cover.jpg',
     videoUrlDark: '/videos/ep15-dark.mp4',
     status: 'available', episode: 15, season: 3, tags: ['امتثال', 'ISO', 'حوكمة'],
+  },
+  // === Season 4: Shipments Deep Dive ===
+  {
+    id: '16', title: 'دورة حياة الشحنة', titleEn: 'Shipment Lifecycle',
+    description: 'رحلة الشحنة الكاملة من لحظة إنشائها حتى التسليم النهائي — المراحل، التتبع، التوثيق والتأكيد.',
+    duration: '1:45', thumbnail: '/thumbnails/ep16-cover.jpg',
+    videoUrlDark: '/videos/ep16-dark.mp4',
+    status: 'available', episode: 16, season: 4, tags: ['شحنات', 'دورة حياة', 'تتبع'],
+  },
+  {
+    id: '17', title: 'أنواع المخلفات', titleEn: 'Waste Types & Classification',
+    description: 'تصنيف شامل لأنواع المخلفات — صناعية، عضوية، خطرة، إلكترونية — مع معايير الفرز والمعالجة.',
+    duration: '1:45', thumbnail: '/thumbnails/ep17-cover.jpg',
+    videoUrlDark: '/videos/ep17-dark.mp4',
+    status: 'available', episode: 17, season: 4, tags: ['مخلفات', 'تصنيف', 'فرز'],
+  },
+  {
+    id: '18', title: 'التوثيق الرقمي', titleEn: 'Digital Documentation',
+    description: 'منظومة التوثيق الذكي — بوليصات الشحن، شهادات التخلص الآمن، صور الميزان والتوقيع الإلكتروني.',
+    duration: '1:45', thumbnail: '/thumbnails/ep18-cover.jpg',
+    videoUrlDark: '/videos/ep18-dark.mp4',
+    status: 'available', episode: 18, season: 4, tags: ['توثيق', 'شهادات', 'بوليصة'],
+  },
+  {
+    id: '19', title: 'الميزان الرقمي', titleEn: 'Digital Weighbridge',
+    description: 'نظام الوزن الذكي المتكامل — ربط الميزان الإلكتروني، التحقق التلقائي، صور التوثيق والتقارير.',
+    duration: '1:45', thumbnail: '/thumbnails/ep19-cover.jpg',
+    videoUrlDark: '/videos/ep19-dark.mp4',
+    status: 'available', episode: 19, season: 4, tags: ['ميزان', 'وزن', 'تحقق'],
+  },
+  {
+    id: '20', title: 'التسعير الديناميكي', titleEn: 'Dynamic Pricing',
+    description: 'محرك التسعير الذكي — أسعار حسب النوع والوزن والمسافة، عروض خاصة، فوترة تلقائية ومقارنة أسعار السوق.',
+    duration: '1:45', thumbnail: '/thumbnails/ep20-cover.jpg',
+    videoUrlDark: '/videos/ep20-dark.mp4',
+    status: 'available', episode: 20, season: 4, tags: ['تسعير', 'فوترة', 'أسعار'],
+  },
+  {
+    id: '21', title: 'التخلص الآمن', titleEn: 'Safe Disposal & Compliance',
+    description: 'ضمان التخلص الآمن من المخلفات — شهادات بيئية، تتبع نهاية الدورة، تقارير الامتثال والأثر البيئي.',
+    duration: '1:45', thumbnail: '/thumbnails/ep21-cover.jpg',
+    videoUrlDark: '/videos/ep21-dark.mp4',
+    status: 'available', episode: 21, season: 4, tags: ['تخلص آمن', 'بيئة', 'امتثال'],
   },
 ];
 
