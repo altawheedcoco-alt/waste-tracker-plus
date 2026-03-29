@@ -20470,6 +20470,84 @@ export type Database = {
           },
         ]
       }
+      health_measurements: {
+        Row: {
+          breathing_rate: number | null
+          confidence: number | null
+          created_at: string
+          energy: number | null
+          heart_rate: number | null
+          hrv: number | null
+          id: string
+          measured_at: string
+          measurement_type: string
+          metadata: Json | null
+          organization_id: string | null
+          productivity: number | null
+          spo2: number | null
+          stress: number | null
+          user_id: string
+          voice_energy: number | null
+          voice_fatigue: number | null
+          voice_stress: number | null
+        }
+        Insert: {
+          breathing_rate?: number | null
+          confidence?: number | null
+          created_at?: string
+          energy?: number | null
+          heart_rate?: number | null
+          hrv?: number | null
+          id?: string
+          measured_at?: string
+          measurement_type?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          productivity?: number | null
+          spo2?: number | null
+          stress?: number | null
+          user_id: string
+          voice_energy?: number | null
+          voice_fatigue?: number | null
+          voice_stress?: number | null
+        }
+        Update: {
+          breathing_rate?: number | null
+          confidence?: number | null
+          created_at?: string
+          energy?: number | null
+          heart_rate?: number | null
+          hrv?: number | null
+          id?: string
+          measured_at?: string
+          measurement_type?: string
+          metadata?: Json | null
+          organization_id?: string | null
+          productivity?: number | null
+          spo2?: number | null
+          stress?: number | null
+          user_id?: string
+          voice_energy?: number | null
+          voice_fatigue?: number | null
+          voice_stress?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "health_measurements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "health_measurements_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homepage_custom_blocks: {
         Row: {
           background_color: string | null
