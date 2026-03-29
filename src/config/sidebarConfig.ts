@@ -1341,7 +1341,7 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'الموارد البشرية',
     labelEn: 'Human Resources',
     icon: Users,
-    groupIds: ['hr-core', 'hr-payroll-performance', 'occupational-health'],
+    groupIds: ['hr-core', 'hr-payroll-performance'],
   },
   {
     id: 'sec-communication',
