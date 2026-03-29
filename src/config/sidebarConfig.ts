@@ -1140,6 +1140,9 @@ export const sidebarGroups: SidebarGroupConfig[] = [
  * ترتيب فئوي: المؤسسة → العمليات → المستندات → التقارير → المالية → التواصل → السوق → AI → أدمن → إعدادات
  */
 const CATEGORY_ORDER: string[] = [
+  // ═══ 0. الصحة المهنية (أولوية قصوى) ═══
+  'occupational-health',
+
   // ═══ 1. المؤسسة والهوية ═══
   'org-page',
   'identity-attestation',
