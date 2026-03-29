@@ -6,6 +6,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { compressImage, CompressionOptions, formatFileSize } from './imageCompression';
 import { smartChunkedUpload } from './chunkedUpload';
 import { needsCompression, quickCompressVideo } from './quickVideoCompress';
+import { ffmpegCompressVideo, isFFmpegSupported } from './ffmpegCompress';
 
 export interface UploadOptions {
   /** اسم الـ bucket */
@@ -68,13 +69,24 @@ export const uploadFile = async (
     }
   }
 
-  // ضغط الفيديو تلقائياً (تقليل أبعاد + bitrate)
+  // ضغط الفيديو تلقائياً — يفضل ffmpeg.wasm ثم يرجع لـ MediaRecorder
   if (compress && needsCompression(file)) {
     try {
-      const result = await quickCompressVideo(file, { onProgress: options.onProgress });
-      fileToUpload = result.file;
-      compressed = result.compressionRatio > 0;
-      compressionRatio = result.compressionRatio;
+      if (isFFmpegSupported()) {
+        const result = await ffmpegCompressVideo(file, {
+          maxWidth: 1080,
+          crf: 26,
+          onProgress: options.onProgress,
+        });
+        fileToUpload = result.file;
+        compressed = result.compressionRatio > 0;
+        compressionRatio = result.compressionRatio;
+      } else {
+        const result = await quickCompressVideo(file, { onProgress: options.onProgress });
+        fileToUpload = result.file;
+        compressed = result.compressionRatio > 0;
+        compressionRatio = result.compressionRatio;
+      }
     } catch (err) {
       console.warn('⚠️ فشل ضغط الفيديو، سيتم رفع الأصلي:', err);
     }
