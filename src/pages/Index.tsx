@@ -209,6 +209,13 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
+          {/* iRecycle Health — PPG Showcase (moved up) */}
+          <div id="health-showcase">
+            <LazySection minH={400}>
+              <HealthShowcase />
+            </LazySection>
+          </div>
+
           {/* SaaS Tech Section - technical identity */}
           <div id="saas-tech">
             <LazySection minH={500}>
@@ -258,12 +265,6 @@ const Index = () => {
             </LazySection>
           </div>
 
-          {/* iRecycle Health — PPG Showcase */}
-          <div id="health-showcase">
-            <LazySection minH={400}>
-              <HealthShowcase />
-            </LazySection>
-          </div>
 
           {/* Custom blocks: top position */}
           {blocksAtPosition('top').map(block => (
