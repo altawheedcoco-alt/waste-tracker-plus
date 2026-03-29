@@ -5,7 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Fingerprint, ScanFace, Mic, Bot, Eye
 } from 'lucide-react';
-import { usePPGMeasurement } from '@/hooks/usePPGMeasurement';
+
 import PPGTab from '@/components/health/PPGTab';
 import FaceScanTab from '@/components/health/FaceScanTab';
 import VoiceStressTab from '@/components/health/VoiceStressTab';
