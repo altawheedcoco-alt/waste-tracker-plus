@@ -313,6 +313,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: FileText, labelAr: 'الإقرارات الدورية', labelEn: 'Periodic', path: '/dashboard?tab=declarations', key: 'transporter-periodic-declarations', bindingType: 'admin' as const },
       { icon: ClipboardList, labelAr: 'الخطة السنوية', labelEn: 'Annual Plan', path: '/dashboard?tab=annual_plan', key: 'transporter-annual-plan', bindingType: 'admin' as const },
       { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'transporter-safety', bindingType: 'hybrid' as const },
+      { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health', bindingType: 'internal' as const },
     ],
   },
 
@@ -744,6 +745,20 @@ export const sidebarGroups: SidebarGroupConfig[] = [
       { icon: Award, labelAr: 'تقييم الأداء', labelEn: 'Performance', path: '/dashboard/hr/performance', key: 'hr-performance', bindingType: 'internal' as const, requiredPermissions: ['manage_members'] },
       { icon: Activity, labelAr: 'الورديات', labelEn: 'Shifts', path: '/dashboard/hr/shifts', key: 'hr-shifts', bindingType: 'internal' as const, requiredPermissions: ['manage_members'] },
       { icon: UserPlus, labelAr: 'نهاية الخدمة', labelEn: 'End of Service', path: '/dashboard/hr/end-of-service', key: 'hr-eos', bindingType: 'internal' as const, requiredPermissions: ['manage_members', 'manage_settings'] },
+    ],
+  },
+
+  // ═══════════════ الصحة المهنية ═══════════════
+  {
+    id: 'occupational-health',
+    icon: Heart,
+    labelAr: 'الصحة المهنية',
+    labelEn: 'Occupational Health',
+    visibleFor: [],
+    items: [
+      { icon: Heart, labelAr: 'iRecycle Health', labelEn: 'iRecycle Health', path: '/dashboard/health', key: 'irecycle-health-main', bindingType: 'internal' as const },
+      { icon: HardHat, labelAr: 'السلامة المهنية', labelEn: 'Safety & OHS', path: '/dashboard/safety', key: 'ohs-safety', bindingType: 'hybrid' as const },
+      { icon: Activity, labelAr: 'البرنامج الطبي', labelEn: 'Medical Program', path: '/dashboard/medical-program', key: 'medical-program', bindingType: 'internal' as const },
     ],
   },
 
@@ -1316,7 +1331,7 @@ export const SIDEBAR_SECTIONS: SidebarSectionConfig[] = [
     labelAr: 'الموارد البشرية',
     labelEn: 'Human Resources',
     icon: Users,
-    groupIds: ['hr-core', 'hr-payroll-performance'],
+    groupIds: ['hr-core', 'hr-payroll-performance', 'occupational-health'],
   },
   {
     id: 'sec-communication',
