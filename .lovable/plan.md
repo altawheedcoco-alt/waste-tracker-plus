@@ -1,53 +1,26 @@
 
 
-# خطة: ترقية iRecycle Health — وصول شامل + زر عائم + تأكيد السجل الصحي
+# خطة: إتاحة iRecycle Health كصفحة عامة مفتوحة للجميع
 
-## ملخص
-جعل iRecycle Health الأداة الأولى في القائمة الجانبية لجميع الحسابات، مع إضافة زر عائم (Floating Action Button) للوصول السريع، وتأكيد أن نظام التتبع الصحي والمقارنات يعمل بشكل كامل.
+## المشكلة
+حالياً صفحة iRecycle Health موجودة فقط على مسار `/dashboard/health` — وهذا المسار محمي ويتطلب تسجيل دخول. الزر في الصفحة الرئيسية يوجه الزائر لهذا المسار فيُطلب منه تسجيل الدخول أولاً.
 
----
+## الحل
 
-## 1. نقل iRecycle Health لأول قسم في القائمة الجانبية
+### 1. إنشاء مسار عام `/health` (بدون dashboard)
+- إنشاء صفحة عامة `src/pages/PublicHealth.tsx` تعرض نفس أدوات iRecycle Health الـ 9 بالكامل (PPG، الوجه، الصوت، التنفس، إلخ) بدون الحاجة لتسجيل دخول
+- الصفحة تستخدم نفس التبويبات والمكونات الموجودة لكن بدون `DashboardLayout`
+- حفظ النتائج يكون محلياً (localStorage) للزائر العادي، وفي قاعدة البيانات للمسجّل
 
-**الوضع الحالي:** موجود ضمن قسم "الموارد البشرية" → "الصحة المهنية" (ترتيب متأخر)
+### 2. تسجيل المسار في PublicRoutes
+- إضافة `<Route path="/health" element={<PublicHealth />} />` في `src/routes/PublicRoutes.tsx`
 
-**التعديل:**
-- إنشاء قسم جديد مستقل `sec-health` يكون **أول قسم** في مصفوفة `SIDEBAR_SECTIONS` (قبل المؤسسة والهوية)
-- نقل مجموعة `occupational-health` إليه مع جعل iRecycle Health العنصر الأول
-- ضمان `visibleFor: []` (مرئي لجميع أنواع الحسابات)
+### 3. تحديث روابط الصفحة الرئيسية
+- تغيير زر "جرّب الآن مجاناً" في `HealthShowcase.tsx` من `/dashboard/health` إلى `/health`
+- تحديث رابط الهيدر أيضاً ليوجه لـ `/health` بدلاً من anchor
 
-**الملف:** `src/config/sidebarConfig.ts`
-
----
-
-## 2. زر عائم (FAB) لـ iRecycle Health
-
-**التعديل:**
-- إنشاء مكون `FloatingHealthButton.tsx` — زر دائري عائم بأيقونة القلب/البصمة مع نبض أنيميشن
-- يظهر في جميع صفحات الداشبورد (أسفل يسار الشاشة)
-- عند الضغط ينقل مباشرة لـ `/dashboard/health`
-- يظهر شارة صغيرة "فحص اليوم" إذا لم يُجرِ المستخدم فحصاً اليوم
-
-**الملفات:**
-- إنشاء: `src/components/health/FloatingHealthButton.tsx`
-- تعديل: `src/pages/Dashboard.tsx` — إضافته ضمن widgets المؤجلة
-
----
-
-## 3. تأكيد وتحسين السجل الصحي والمقارنات
-
-**الموجود فعلاً:**
-- جدول `health_measurements` في قاعدة البيانات مع RLS
-- `useHealthHistory` hook يحفظ ويسترجع القياسات
-- `HealthHistoryTab` يعرض الرسوم البيانية (stress/energy) ومتوسطات آخر 10 قياسات
-- مؤشر الاتجاه (improving/declining/stable) يقارن آخر 5 قياسات بالـ 5 السابقة
-
-**التحسينات:**
-- إضافة مقارنة "اليوم vs الأمس" و"هذا الأسبوع vs الأسبوع الماضي" بنسب مئوية
-- إضافة تنبيه ذكي عند تدهور المؤشرات لـ 3 أيام متتالية
-- عرض عداد "أيام الفحص المتتالية" (Streak) لتحفيز الاستمرار
-
-**الملف:** تعديل `src/components/health/HealthHistoryTab.tsx`
+### 4. إبقاء `/dashboard/health` للمسجلين
+- المسار الداخلي يبقى كما هو مع حفظ البيانات في قاعدة البيانات والسجل الصحي الكامل
 
 ---
 
@@ -55,8 +28,8 @@
 
 | الملف | التعديل |
 |---|---|
-| `src/config/sidebarConfig.ts` | نقل `occupational-health` لأول قسم مستقل |
-| `src/components/health/FloatingHealthButton.tsx` | مكون جديد — FAB عائم |
-| `src/pages/Dashboard.tsx` | إضافة FloatingHealthButton |
-| `src/components/health/HealthHistoryTab.tsx` | مقارنات يومية/أسبوعية + streak |
+| `src/pages/PublicHealth.tsx` | صفحة جديدة — تعرض أدوات Health بدون DashboardLayout |
+| `src/routes/PublicRoutes.tsx` | إضافة مسار `/health` |
+| `src/components/landing/HealthShowcase.tsx` | تغيير الرابط لـ `/health` |
+| `src/components/Header.tsx` | تحديث رابط iRecycle Health لـ `/health` |
 
