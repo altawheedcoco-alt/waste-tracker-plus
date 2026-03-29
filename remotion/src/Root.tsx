@@ -21,6 +21,12 @@ import { Ep12Dark, Ep12Light } from "./videos/season3/Ep12Finance";
 import { Ep13Dark, Ep13Light } from "./videos/season3/Ep13Workforce";
 import { Ep14Dark, Ep14Light } from "./videos/season3/Ep14CallCenter";
 import { Ep15Dark, Ep15Light } from "./videos/season3/Ep15Compliance";
+import { Ep16Dark, Ep16Light } from "./videos/season4/Ep16ShipmentLifecycle";
+import { Ep17Dark, Ep17Light } from "./videos/season4/Ep17WasteTypes";
+import { Ep18Dark, Ep18Light } from "./videos/season4/Ep18Documentation";
+import { Ep19Dark, Ep19Light } from "./videos/season4/Ep19Weighbridge";
+import { Ep20Dark, Ep20Light } from "./videos/season4/Ep20Pricing";
+import { Ep21Dark, Ep21Light } from "./videos/season4/Ep21SafeDisposal";
 
 export const RemotionRoot = () => (
   <>
