@@ -93,25 +93,47 @@ serve(async (req) => {
       global: { headers: { Authorization: authHeader } },
     });
 
+    // Allow public access for health-related actions (chat, etc.)
+    // by checking if token is the anon key itself (no user session)
     const token = authHeader.replace("Bearer ", "");
+    let isPublicAccess = false;
+
     const { data: claimsData, error: authError } = await supabase.auth.getClaims(token);
     if (authError || !claimsData?.claims) {
-      return new Response(JSON.stringify({ error: "Invalid authentication" }), {
-        status: 401,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      // Check if request body has a public-allowed action before rejecting
+      try {
+        const bodyClone = req.clone();
+        const bodyCheck = await bodyClone.json();
+        const PUBLIC_ALLOWED_ACTIONS = ["chat"];
+        if (PUBLIC_ALLOWED_ACTIONS.includes(bodyCheck?.action)) {
+          isPublicAccess = true;
+          console.log("[ai-gateway] Public access granted for action:", bodyCheck.action);
+        } else {
+          return new Response(JSON.stringify({ error: "Invalid authentication" }), {
+            status: 401,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } catch {
+        return new Response(JSON.stringify({ error: "Invalid authentication" }), {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
     }
 
-    userId = claimsData.claims.sub as string;
+    if (!isPublicAccess && claimsData?.claims) {
+      userId = claimsData.claims.sub as string;
 
-    // Get user's organization
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("organization_id")
-      .eq("user_id", userId)
-      .single();
+      // Get user's organization
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("organization_id")
+        .eq("user_id", userId)
+        .single();
 
-    organizationId = profile?.organization_id || null;
+      organizationId = profile?.organization_id || null;
+    }
 
     // === Parse Request ===
     const body = await req.json();
