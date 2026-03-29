@@ -41,12 +41,10 @@ import { publicRoutes } from "@/routes/PublicRoutes";
 // Eagerly preload dashboard routes module on first script eval
 const dashboardRoutesPromise = import('@/routes/DashboardRoutes');
 
-// Scroll to top on every route change
-const ScrollToTop = () => {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+// Smart scroll restoration — saves position on leave, restores on back
+import { useScrollRestoration } from '@/hooks/useScrollRestoration';
+const ScrollRestore = () => {
+  useScrollRestoration();
   return null;
 };
 
