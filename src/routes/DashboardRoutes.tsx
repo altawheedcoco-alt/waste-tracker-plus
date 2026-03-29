@@ -260,6 +260,7 @@ const IndependentDriverOnboarding = lazy(() => import("@/pages/driver/Independen
 const LeadGeneration = lazy(() => import("@/pages/dashboard/LeadGeneration"));
 const CompanyDirectory = lazy(() => import("@/pages/dashboard/CompanyDirectory"));
 const MedicalProgram = lazy(() => import("@/pages/dashboard/MedicalProgram"));
+const IRecycleHealth = lazy(() => import("@/pages/dashboard/IRecycleHealth"));
 
 /**
  * All dashboard routes wrapped inside a single DashboardRouteGuard layout route.
