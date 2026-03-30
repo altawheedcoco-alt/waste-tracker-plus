@@ -110,10 +110,10 @@ export function useNearbyDrivers(center: ProximityCenter | null, radiusKm = 50) 
       // 2) Arriving soon — in_transit shipments with delivery near center
       const { data: inTransit } = await supabase
         .from('shipments')
-        .select('id, driver_id, delivery_lat, delivery_lng, in_transit_at')
+        .select('id, driver_id, delivery_latitude, delivery_longitude, in_transit_at')
         .eq('status', 'in_transit')
         .not('driver_id', 'is', null)
-        .not('delivery_lat', 'is', null);
+        .not('delivery_latitude', 'is', null);
 
       if (inTransit?.length) {
         const arrivingDriverIds = inTransit
