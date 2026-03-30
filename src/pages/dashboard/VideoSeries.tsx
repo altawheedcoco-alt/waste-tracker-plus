@@ -52,6 +52,7 @@ const seasonBanners: Record<number, string> = {
   4: season4Banner,
   5: season5Banner,
   6: season6Banner,
+  7: season7Banner,
 };
 
 const seasons: SeasonInfo[] = [
