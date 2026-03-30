@@ -1108,7 +1108,7 @@ const DashboardV2Header = memo(({
                         </p>
                         {stat.trend && <TrendIcon trend={stat.trend} />}
                       </div>
-                      <p className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate">{stat.label}</p>
+                      <p className="text-[8px] sm:text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{stat.label}</p>
                     </div>
                     <div className="mt-1 h-[2px] w-full bg-border/20 rounded-full overflow-hidden">
                       <motion.div className="h-full bg-primary/40 rounded-full"
