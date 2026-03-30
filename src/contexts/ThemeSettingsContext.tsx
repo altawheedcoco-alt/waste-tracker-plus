@@ -13,12 +13,14 @@ export type FontFamily =
   | 'space-grotesk' | 'outfit' | 'plus-jakarta' | 'manrope' | 'sora'
   | 'lexend' | 'red-hat' | 'be-vietnam' | 'cabinet-grotesk' | 'general-sans';
 export type DisplayMode = 'auto' | 'desktop' | 'tablet' | 'mobile';
+export type VisualMode = 'light' | 'dim' | 'dark';
 
 interface ThemeSettings {
   themeColor: ThemeColor;
   fontFamily: FontFamily;
   fontSize: number;
   isDarkMode: boolean;
+  visualMode: VisualMode;
   displayMode: DisplayMode;
 }
 
