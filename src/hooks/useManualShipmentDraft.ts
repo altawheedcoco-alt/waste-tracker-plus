@@ -628,8 +628,8 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
             .from('shipment-documents')
             .upload(filename, blob, { contentType: 'application/pdf', upsert: true });
           if (uploadError) return;
-          const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-          const pdfUrl = urlData?.publicUrl;
+          const { data: urlData } = await supabase.storage.from('shipment-documents').createSignedUrl(filename, 24 * 3600);
+          const pdfUrl = urlData?.signedUrl;
           const pdfFilename = `بيان-شحنة-${form.shipment_number || result.draftId}.pdf`;
           for (const { phone } of recipients) {
             const rawPhone = phone.replace(/[\s+\-()]/g, '').replace(/^0+/, '');

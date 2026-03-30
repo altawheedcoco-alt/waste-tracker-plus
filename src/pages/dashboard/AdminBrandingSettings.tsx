@@ -93,9 +93,9 @@ export default function AdminBrandingSettings() {
         .upload(path, file, { contentType: file.type, upsert: true });
       if (upErr) throw upErr;
 
-      const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(path);
+      const { data: urlData } = await supabase.storage.from('shipment-documents').createSignedUrl(path, 365 * 24 * 3600);
       const field = type === 'logo' ? 'logo_url' : 'notification_logo_url';
-      await saveMutation.mutateAsync({ [field]: urlData.publicUrl });
+      await saveMutation.mutateAsync({ [field]: urlData?.signedUrl || '' });
     } catch (err: any) {
       toast.error(`فشل رفع الصورة: ${err.message}`);
     } finally {
