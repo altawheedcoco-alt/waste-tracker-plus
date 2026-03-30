@@ -330,16 +330,18 @@ const GeneratorDashboard = () => {
         <V2TabsNav tabs={[
           { value: 'overview', label: t('dashboard.tabs.overview'), icon: Package, bindingType: GENERATOR_TAB_BINDINGS['overview']?.type },
           { value: 'shipments', label: t('dashboard.tabs.shipments'), icon: Package, bindingType: GENERATOR_TAB_BINDINGS['shipments']?.type },
+          { value: 'finance', label: language === 'ar' ? 'المالية' : 'Finance', icon: Wallet, bindingType: GENERATOR_TAB_BINDINGS['finance']?.type },
           { value: 'operations', label: t('dashboard.tabs.operations'), icon: Truck, bindingType: GENERATOR_TAB_BINDINGS['operations']?.type },
+          { value: 'ai-tools', label: language === 'ar' ? 'الذكاء الاصطناعي' : 'AI Tools', icon: Brain, bindingType: GENERATOR_TAB_BINDINGS['ai-tools']?.type },
           { value: 'work-orders', label: t('dashboard.tabs.workOrders'), icon: ClipboardList, bindingType: GENERATOR_TAB_BINDINGS['work-orders']?.type },
-          { value: 'partners', label: t('dashboard.tabs.partners'), icon: Eye, bindingType: GENERATOR_TAB_BINDINGS['partners']?.type },
+          { value: 'partners', label: t('dashboard.tabs.partners'), icon: Building2, bindingType: GENERATOR_TAB_BINDINGS['partners']?.type },
+          { value: 'reports', label: language === 'ar' ? 'التقارير' : 'Reports', icon: BarChart3, bindingType: GENERATOR_TAB_BINDINGS['reports']?.type },
           { value: 'compliance', label: t('dashboard.tabs.legalCompliance'), icon: FileCheck, bindingType: GENERATOR_TAB_BINDINGS['compliance']?.type },
           { value: 'geofence', label: t('dashboard.tabs.shipmentTracking'), icon: MapPin, bindingType: GENERATOR_TAB_BINDINGS['geofence']?.type },
         ] as TabItem[]} />
 
-        {/* ── نظرة عامة ── */}
+        {/* ── نظرة عامة (مخففة) ── */}
         <TabsContent value="overview" className="space-y-4 sm:space-y-6 mt-4 sm:mt-6">
-          {/* Environmental KPIs & License Alerts */}
           <div className={`grid gap-3 ${isMobile ? 'grid-cols-1' : 'grid-cols-2'}`}>
             <Suspense fallback={<TabFallback />}>
               <ErrorBoundary fallbackTitle="خطأ في مؤشرات البيئة">
@@ -372,38 +374,11 @@ const GeneratorDashboard = () => {
             </Suspense>
           </ErrorBoundary>
 
-          <QuickActionsGrid
-            actions={quickActions}
-            title={t('dashboard.quickActions')}
-            subtitle={t('dashboard.quickActionsSubtitle')}
-          />
-
           <ErrorBoundary fallbackTitle="خطأ في الملخص المالي">
             <Suspense fallback={<TabFallback />}>
               <FinancialSummaryWidget />
             </Suspense>
           </ErrorBoundary>
-
-          {/* Generator Intelligence Suite */}
-          <Suspense fallback={<TabFallback />}>
-            <GeneratorSmartKPIs />
-          </Suspense>
-
-          <Suspense fallback={<TabFallback />}>
-            <WasteGenerationIntelligence />
-          </Suspense>
-
-          <Suspense fallback={<TabFallback />}>
-            <FinancialFlowAnalyzer />
-          </Suspense>
-
-          <Suspense fallback={<TabFallback />}>
-            <InstantPickupPortal />
-          </Suspense>
-
-          <Suspense fallback={<TabFallback />}>
-            <EnvironmentalScorecard />
-          </Suspense>
         </TabsContent>
 
         {/* ── الشحنات ── */}
@@ -438,7 +413,6 @@ const GeneratorDashboard = () => {
                     <Package className="w-5 h-5" />
                     {t('dashboard.latestShipments')}
                   </CardTitle>
-                  <CardDescription>{t('dashboard.last10Shipments')}</CardDescription>
                 </div>
               </div>
             </CardHeader>
@@ -481,6 +455,13 @@ const GeneratorDashboard = () => {
           </Card>
         </TabsContent>
 
+        {/* ── المالية ── */}
+        <TabsContent value="finance" className="space-y-4 mt-4 sm:mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorFinanceTab />
+          </Suspense>
+        </TabsContent>
+
         {/* ── العمليات ── */}
         <TabsContent value="operations" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
@@ -498,6 +479,22 @@ const GeneratorDashboard = () => {
                 <DriverCodeLookup />
               </ErrorBoundary>
             </div>
+            <ErrorBoundary fallbackTitle="خطأ في جدولة الجمع">
+              <SmartCollectionScheduler />
+            </ErrorBoundary>
+          </Suspense>
+        </TabsContent>
+
+        {/* ── الذكاء الاصطناعي ── */}
+        <TabsContent value="ai-tools" className="space-y-4 mt-4 sm:mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorSmartKPIs />
+            <WasteClassificationAI />
+            <WasteGenerationIntelligence />
+            <WasteGenerationForecast />
+            <FinancialFlowAnalyzer />
+            <InstantPickupPortal />
+            <EnvironmentalScorecard />
           </Suspense>
         </TabsContent>
 
@@ -512,11 +509,21 @@ const GeneratorDashboard = () => {
 
         {/* ── الجهات المرتبطة ── */}
         <TabsContent value="partners" className="space-y-4 mt-4 sm:mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorPartnersHub />
+          </Suspense>
           <ErrorBoundary fallbackTitle="خطأ في تقييمات الشركاء">
             <Suspense fallback={<TabFallback />}>
               <PartnerRatingsWidget />
             </Suspense>
           </ErrorBoundary>
+        </TabsContent>
+
+        {/* ── التقارير ── */}
+        <TabsContent value="reports" className="space-y-4 mt-4 sm:mt-6">
+          <Suspense fallback={<TabFallback />}>
+            <GeneratorReportsTab />
+          </Suspense>
         </TabsContent>
 
         {/* ── الامتثال القانوني ── */}
