@@ -224,7 +224,7 @@ const Footer = () => {
           </div>
           <div className="flex flex-col sm:flex-row items-center justify-between gap-1.5 text-white/35 text-[11px]">
             <div className="flex items-center gap-2">
-              <span>© {new Date().getFullYear()} iRecycle. {t('footer.allRightsReserved')}</span>
+              <span>© {new Date().getFullYear()} iRecycle — Waste Management Solution Platform. {t('footer.allRightsReserved')}</span>
               <span className="px-1.5 py-0.5 rounded-full bg-primary/20 text-primary text-[9px] font-black tracking-wide">v5.1</span>
             </div>
             <span className="text-white/25 text-[10px]">

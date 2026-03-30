@@ -282,7 +282,7 @@ export const arCore = {
     ourServices: 'خدماتنا',
     contactUs: 'تواصل معنا',
     address: 'القاهرة، جمهورية مصر العربية',
-    allRightsReserved: 'iRecycle Waste Management System. جميع الحقوق محفوظة.',
+    allRightsReserved: 'iRecycle — Waste Management Solution Platform. جميع الحقوق محفوظة.',
     shipmentMgmt: 'إدارة الشحنات',
     transportTracking: 'تتبع النقل',
     recyclingService: 'إعادة التدوير',

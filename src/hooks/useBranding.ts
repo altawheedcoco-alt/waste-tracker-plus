@@ -16,8 +16,8 @@ export interface BrandingData {
 }
 
 const DEFAULT: BrandingData = {
-  system_name: 'iRecycle - نظام إدارة المخلفات',
-  system_name_en: 'iRecycle - Waste Management System',
+  system_name: 'آي ريسايكل — منصة حلول إدارة المخلفات',
+  system_name_en: 'iRecycle — Waste Management Solution Platform',
   logo_url: '',
   notification_logo_url: '',
   tagline: 'نحو مستقبل أنظف',

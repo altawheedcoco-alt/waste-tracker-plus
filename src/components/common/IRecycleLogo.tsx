@@ -112,7 +112,7 @@ const IRecycleLogo = memo(({
           </span>
           {showSubtitle && (
             <span style={{ fontSize: subtitleSize, color: colors.subtext, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.2, marginTop: 2, opacity: 0.7 }}>
-              Waste Management System
+              Waste Management Solution Platform
             </span>
           )}
         </div>
@@ -133,7 +133,7 @@ const IRecycleLogo = memo(({
         </span>
         {showSubtitle && (
           <span style={{ fontSize: subtitleSize, color: colors.subtext, fontWeight: 500, letterSpacing: '0.08em', textTransform: 'uppercase', lineHeight: 1.2, marginTop: 1, opacity: 0.7 }}>
-            Waste Management System
+            Waste Management Solution Platform
           </span>
         )}
       </div>

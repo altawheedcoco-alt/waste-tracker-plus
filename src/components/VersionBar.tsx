@@ -34,7 +34,7 @@ const VersionBar = memo(() => {
         </span>
         
         <span className="hidden sm:inline text-[10px] font-medium text-amber-300/50 tracking-wide">
-          {language === 'ar' ? '— النضج المتكامل' : '— Full Maturity'}
+          {language === 'ar' ? '— النضج المتكامل ♻️' : '— Full Maturity ♻️'}
         </span>
         
         <Sparkles className="w-3 h-3 text-amber-400/70 animate-pulse" />

@@ -33,9 +33,9 @@ const SharedResourceLayout = ({ children, title, resourceType }: SharedResourceL
 
       <footer className="border-t py-6 text-center text-sm text-muted-foreground">
         <p>
-          تمت المشاركة عبر منصة{' '}
+          تمت المشاركة عبر{' '}
           <Link to="/" className="text-primary hover:underline">
-            iRecycle
+            iRecycle — Waste Management Solution Platform
           </Link>
         </p>
       </footer>

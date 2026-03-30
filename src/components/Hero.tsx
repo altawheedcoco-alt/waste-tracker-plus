@@ -113,6 +113,15 @@ const Hero = memo(() => {
           </motion.p>
 
           <motion.p
+            className="text-[9px] sm:text-xs text-white/60 font-semibold tracking-[0.15em] uppercase mt-1"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 0.35 }}
+          >
+            {language === 'ar' ? 'آي ريسايكل — منصة حلول إدارة المخلفات' : 'iRecycle — Waste Management Solution Platform'}
+          </motion.p>
+
+          <motion.p
             className="text-[12px] sm:text-lg md:text-xl text-white/90 max-w-2xl mx-auto mb-5 sm:mb-7 px-4 sm:px-4 leading-relaxed font-medium mt-2 sm:mt-2 drop-shadow-[0_1px_4px_rgba(0,0,0,0.4)]"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
