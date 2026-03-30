@@ -63,6 +63,7 @@ const ThemeActionsContext = createContext<ThemeActionsContextType | undefined>(u
 const ThemeSettingsContext = createContext<ThemeSettingsContextType | undefined>(undefined);
 
 const STORAGE_KEY = 'irecycle-theme-settings';
+const LANDING_STORAGE_KEY = 'irecycle-landing-theme';
 
 const colorPalettes: Record<ThemeColor, { primary: string; accent: string; ring: string }> = {
   green: { primary: '142 71% 45%', accent: '160 84% 39%', ring: '142 71% 45%' },
