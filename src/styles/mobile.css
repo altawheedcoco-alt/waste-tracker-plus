@@ -103,18 +103,21 @@ img, video, iframe, svg, canvas {
 
 /* ——— Small phones (≤ 360px) ——— */
 @media (max-width: 360px) {
-  :root { font-size: 14px; }
+  :root { font-size: 13.5px; }
   
-  .container { padding-left: 0.625rem; padding-right: 0.625rem; }
+  .container { padding-left: 0.5rem; padding-right: 0.5rem; }
   
-  h1 { font-size: 1.35rem !important; }
-  h2 { font-size: 1.125rem !important; }
+  h1 { font-size: 1.125rem !important; }
+  h2 { font-size: 1rem !important; }
   
   [role="dialog"] > div,
   [data-radix-dialog-content] {
-    margin: 0.5rem;
-    max-width: calc(100vw - 1rem);
+    margin: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
   }
+
+  /* Force 2-col grid on small phones */
+  .grid-cols-3:not(.force-3-cols) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 
 /* ——— Standard phones (≤ 640px) ——— */
@@ -194,14 +197,15 @@ img, video, iframe, svg, canvas {
     left: 0.5rem;
     right: 0.5rem;
     width: auto;
-    max-height: 60vh;
+    max-height: 55vh;
   }
 
-  main { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  /* Ensure enough space for bottom nav */
+  main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important; }
 
-  .recharts-responsive-container { min-height: 200px; }
+  .recharts-responsive-container { min-height: 180px; }
 
-  [data-radix-accordion-content] { padding: 0.75rem; }
+  [data-radix-accordion-content] { padding: 0.5rem; }
 
   .print-preview-container { transform: scale(0.5); transform-origin: top center; }
 
@@ -352,9 +356,9 @@ img, video, iframe, svg, canvas {
     overscroll-behavior-y: contain;
   }
 
-  /* Extra bottom padding for gesture nav */
+  /* Extra bottom padding for gesture nav + bottom nav */
   main {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* PWA header safe area */
@@ -376,6 +380,26 @@ img, video, iframe, svg, canvas {
   /* Bottom nav in PWA needs extra padding */
   .fixed.bottom-0 {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* PWA: prevent text clipping in cards */
+  [class*="Card"] p,
+  [class*="Card"] span,
+  [class*="Card"] h1,
+  [class*="Card"] h2,
+  [class*="Card"] h3 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* PWA: ensure buttons remain tappable */
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+
+  /* PWA: Fix header overlap on notched phones */
+  header {
+    min-height: calc(3.5rem + env(safe-area-inset-top, 0px));
   }
 }
 

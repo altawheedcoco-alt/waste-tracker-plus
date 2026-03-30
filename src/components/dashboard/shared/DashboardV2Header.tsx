@@ -950,10 +950,10 @@ const DashboardV2Header = memo(({
               animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 8, repeat: Infinity }} />
           </div>
 
-          <div className="relative z-10 p-2.5 sm:p-3.5">
+          <div className="relative z-10 p-2 sm:p-3.5">
             {/* ── ROW 1: TOP BAR ── */}
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <div className="flex items-center gap-1 flex-wrap min-w-0">
                 {/* LIVE */}
                 <motion.div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20"
                   animate={{ borderColor: ['hsl(var(--primary) / 0.2)', 'hsl(var(--primary) / 0.5)', 'hsl(var(--primary) / 0.2)'] }}
@@ -965,12 +965,12 @@ const DashboardV2Header = memo(({
                   <span className="text-[9px] font-mono text-primary font-black tracking-wider">LIVE</span>
                 </motion.div>
 
-                {/* Clock */}
-                <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/30" dir="ltr">
+                {/* Clock — visible on mobile too */}
+                <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md bg-muted/40 border border-border/30" dir="ltr">
                   <Timer className="w-3 h-3 text-primary/70" />
-                  <span className="text-[9px] font-mono font-bold text-foreground tabular-nums">{timeStr}</span>
-                  <span className="text-border/50">|</span>
-                  <span className="text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
+                  <span className="text-[8px] sm:text-[9px] font-mono font-bold text-foreground tabular-nums">{timeStr}</span>
+                  <span className="hidden sm:inline text-border/50">|</span>
+                  <span className="hidden sm:inline text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
                 </div>
 
                 {/* System status icons */}
@@ -1025,19 +1025,19 @@ const DashboardV2Header = memo(({
               </div>
 
               {/* Name + org */}
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <h1 className="font-black text-sm sm:text-lg text-foreground leading-tight">
+              <div className="flex items-center gap-2 shrink-0 max-w-[55%] sm:max-w-none">
+                <div className="text-right min-w-0">
+                  <h1 className="font-black text-xs sm:text-lg text-foreground leading-tight truncate">
                     {greeting}، <span className="text-primary">{displayName}</span>
                   </h1>
                   {orgName && (
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
-                      <Shield className="w-2.5 h-2.5 text-primary/60" />
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
+                      <Shield className="w-2.5 h-2.5 text-primary/60 shrink-0" />
                       <span className="truncate">{orgName} — {orgLabel}</span>
                     </p>
                   )}
                 </div>
-                <motion.div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 relative", gradient)}
+                <motion.div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 relative", gradient)}
                   whileHover={{ scale: 1.1, rotate: 5 }}>
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   <PulseRing color="border-primary/30" />
@@ -1080,7 +1080,7 @@ const DashboardV2Header = memo(({
               </div>
 
               {/* Stats grid */}
-              <div className="flex-1 grid grid-cols-3 gap-1 sm:gap-1.5">
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5">
                 {radarStats!.map((stat, i) => (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
                     onClick={() => stat.route && navigate(stat.route)}
@@ -1108,7 +1108,7 @@ const DashboardV2Header = memo(({
                         </p>
                         {stat.trend && <TrendIcon trend={stat.trend} />}
                       </div>
-                      <p className="text-[7px] sm:text-[8px] text-muted-foreground mt-0.5 truncate">{stat.label}</p>
+                      <p className="text-[8px] sm:text-[8px] text-muted-foreground mt-0.5 leading-tight line-clamp-1">{stat.label}</p>
                     </div>
                     <div className="mt-1 h-[2px] w-full bg-border/20 rounded-full overflow-hidden">
                       <motion.div className="h-full bg-primary/40 rounded-full"
@@ -1133,7 +1133,7 @@ const DashboardV2Header = memo(({
             </div>
 
             {/* ── ROW 4: BOTTOM TICKER ── */}
-            <motion.div className="mt-2 flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-muted/30 border border-border/20"
+            <motion.div className="mt-2 flex items-center justify-between gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 rounded-lg bg-muted/30 border border-border/20 overflow-hidden"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <div className="flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard')}>
