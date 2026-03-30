@@ -18,7 +18,7 @@ const VersionBar = memo(() => {
         <Sparkles className="w-3 h-3 text-amber-400/70 animate-pulse" />
         
         <span className="text-[10px] sm:text-[11px] font-semibold text-amber-200/70 tracking-wide">
-          {language === 'ar' ? 'منصة iRecycle — الإصدار' : 'iRecycle Platform — Version'}
+          {language === 'ar' ? 'آي ريسايكل — منصة حلول إدارة المخلفات — الإصدار' : 'iRecycle — Waste Management Solution Platform — Version'}
         </span>
         
         {/* Golden glowing version number */}
