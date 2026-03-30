@@ -571,6 +571,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 </div>
               </div>
 
+           {/* Visual Comfort Toggle */}
+           <div className="px-3 py-2 border-b border-sidebar-border">
+             <VisualComfortToggle />
+           </div>
+
            {/* Account Switcher / Organization info */}
           <div className="border-b border-sidebar-border">
             <AccountSwitcher collapsed={false} />
