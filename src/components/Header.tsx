@@ -34,7 +34,29 @@ const Header = memo(() => {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth();
-  const { settings, toggleDarkMode } = useThemeSettings();
+  const { settings: dashSettings } = useThemeSettings();
+  
+  // Landing page has its own separate dark mode state
+  const [landingDark, setLandingDark] = useState(() => {
+    try {
+      return localStorage.getItem('irecycle-landing-theme') === 'dark';
+    } catch { return false; }
+  });
+  
+  const toggleLandingDark = useCallback(() => {
+    setLandingDark(prev => {
+      const next = !prev;
+      localStorage.setItem('irecycle-landing-theme', next ? 'dark' : 'light');
+      // Apply to root only if we're on landing (not dashboard)
+      if (next) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove('dim');
+      }
+      return next;
+    });
+  }, []);
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
