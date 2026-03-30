@@ -231,7 +231,7 @@ img, video, iframe, svg, canvas {
 
   /* Floating actions: position above bottom nav */
   .floating-widgets-container {
-    bottom: calc(4.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    bottom: calc(5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* Stat cards grid: ensure 2-col doesn't cramp */
