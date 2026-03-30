@@ -129,7 +129,7 @@ interface RecentShipment {
 const GeneratorDashboard = () => {
   const { profile, organization } = useAuth();
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const { isMobile } = useDisplayMode();
   const realWeather = useRealWeather();
   const { data: operationalAlerts = [] } = useOperationalAlerts();
