@@ -197,14 +197,15 @@ img, video, iframe, svg, canvas {
     left: 0.5rem;
     right: 0.5rem;
     width: auto;
-    max-height: 60vh;
+    max-height: 55vh;
   }
 
-  main { padding-bottom: calc(5rem + env(safe-area-inset-bottom, 0px)); }
+  /* Ensure enough space for bottom nav */
+  main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important; }
 
-  .recharts-responsive-container { min-height: 200px; }
+  .recharts-responsive-container { min-height: 180px; }
 
-  [data-radix-accordion-content] { padding: 0.75rem; }
+  [data-radix-accordion-content] { padding: 0.5rem; }
 
   .print-preview-container { transform: scale(0.5); transform-origin: top center; }
 
