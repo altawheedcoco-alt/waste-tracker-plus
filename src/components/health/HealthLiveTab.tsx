@@ -148,11 +148,7 @@ const HealthLiveTab = () => {
           ].map(q => (
             <button
               key={q}
-              onClick={() => {
-                // Simulate sending text directly
-                const event = new CustomEvent('voice-quick-prompt', { detail: q });
-                window.dispatchEvent(event);
-              }}
+              onClick={() => sendTextMessage(q)}
               className="block w-full text-right text-[11px] p-2 rounded-lg bg-primary/5 hover:bg-primary/10 transition-colors text-foreground"
               dir="rtl"
             >
