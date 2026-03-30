@@ -319,7 +319,14 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
   }, []);
 
   const toggleDarkMode = useCallback(() => {
-    setSettings((prev) => ({ ...prev, isDarkMode: !prev.isDarkMode }));
+    setSettings((prev) => {
+      const newDark = !prev.isDarkMode;
+      return { ...prev, isDarkMode: newDark, visualMode: newDark ? 'dark' : 'light' };
+    });
+  }, []);
+
+  const setVisualMode = useCallback((mode: VisualMode) => {
+    setSettings((prev) => ({ ...prev, visualMode: mode, isDarkMode: mode === 'dark' }));
   }, []);
 
   const resetToDefaults = useCallback(() => {
@@ -337,9 +344,10 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
     setFontFamily,
     setFontSize,
     setDisplayMode,
+    setVisualMode,
     toggleDarkMode,
     resetToDefaults,
-  }), [setThemeColor, setFontFamily, setFontSize, setDisplayMode, toggleDarkMode, resetToDefaults]);
+  }), [setThemeColor, setFontFamily, setFontSize, setDisplayMode, setVisualMode, toggleDarkMode, resetToDefaults]);
 
   const combinedValue = useMemo<ThemeSettingsContextType>(() => ({
     ...valuesContextValue,
