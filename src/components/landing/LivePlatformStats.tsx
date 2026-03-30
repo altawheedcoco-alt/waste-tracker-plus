@@ -32,13 +32,13 @@ const LivePlatformStats = memo(() => {
   const { data: stats } = useQuery({
     queryKey: ['landing-live-platform-stats'],
     queryFn: async () => {
-      const [orgs, shipments, users, drivers, invoices, wasteItems] = await Promise.all([
+      const [orgs, shipments, users, drivers, invoices, posts] = await Promise.all([
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('shipments').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('independent_drivers').select('id', { count: 'exact', head: true }),
+        supabase.from('driver_profiles').select('id', { count: 'exact', head: true }),
         supabase.from('invoices').select('id', { count: 'exact', head: true }),
-        supabase.from('waste_items').select('id', { count: 'exact', head: true }),
+        supabase.from('platform_posts').select('id', { count: 'exact', head: true }),
       ]);
       return {
         organizations: orgs.count ?? 0,
@@ -46,7 +46,7 @@ const LivePlatformStats = memo(() => {
         users: users.count ?? 0,
         drivers: drivers.count ?? 0,
         invoices: invoices.count ?? 0,
-        wasteItems: wasteItems.count ?? 0,
+        wasteItems: posts.count ?? 0,
       };
     },
     staleTime: 1000 * 60 * 5,
