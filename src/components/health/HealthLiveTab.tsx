@@ -28,6 +28,7 @@ const HealthLiveTab = () => {
     cancel,
     clearHistory,
     stopSpeaking,
+    sendTextMessage,
   } = useVoiceChat();
 
   const config = STATE_CONFIG[state];
