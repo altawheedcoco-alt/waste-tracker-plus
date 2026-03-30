@@ -602,7 +602,7 @@ const StatCard = ({ icon: Icon, value, label, color }: { icon: any; value: strin
 /* ─── Main Page ─── */
 const VideoSeries = () => {
   const [selectedVideoIndex, setSelectedVideoIndex] = useState<number | null>(null);
-  const [collapsedSeasons, setCollapsedSeasons] = useState<number[]>([]);
+  const [collapsedSeasons, setCollapsedSeasons] = useState<number[]>([2,3,4,5,6,7,8,9,10,11,12]);
   const [searchQuery, setSearchQuery] = useState('');
   const [watchedEpisodes, setWatchedEpisodes] = useState<Set<string>>(getWatchedEpisodes);
   const { resolvedTheme } = useTheme();
