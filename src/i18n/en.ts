@@ -350,7 +350,7 @@ export const en = {
     ourServices: 'Our Services',
     contactUs: 'Contact Us',
     address: 'Cairo, Arab Republic of Egypt',
-    allRightsReserved: 'iRecycle Waste Management System. All rights reserved.',
+    allRightsReserved: 'iRecycle — Waste Management Solution Platform. All rights reserved.',
     shipmentMgmt: 'Shipment Management',
     transportTracking: 'Transport Tracking',
     recyclingService: 'Recycling',
