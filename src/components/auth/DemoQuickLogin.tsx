@@ -102,9 +102,11 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     accounts: [
       { email: 'company-driver@irecycle.test', label: 'سائق تابع', desc: 'موظف دائم بحساب كامل — صلاحيات تشغيلية 🏢', icon: Truck, color: 'from-blue-500 to-indigo-700' },
       { email: 'independent-driver@irecycle.test', label: 'سائق مستقل', desc: 'نموذج Uber — سوق شحنات + محفظة + تحليلات 🟢', icon: Zap, color: 'from-emerald-500 to-green-700' },
+      { email: 'hired-driver@irecycle.test', label: 'سائق مؤجر', desc: 'سائق حر مؤجر تجريبي 🔄', icon: User, color: 'from-violet-500 to-purple-700' },
       { email: 'demo-driver@irecycle.test', label: 'سائق التوحيد', desc: 'سائق تابع لجهة التوحيد 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'driver@demo.com', label: 'سائق النقل السريع', desc: 'سائق تابع لجهة النقل السريع 🏢', icon: Car, color: 'from-rose-500 to-red-600' },
       { email: 'abdullah-driver@irecycle.test', label: 'عبدالله السائق', desc: 'سائق تابع لجهة عبدالله 🏢', icon: Car, color: 'from-pink-500 to-rose-700' },
+      { email: 'driver940@transport.local', label: 'محمد (سائق)', desc: 'سائق عبدالله الناقل 🚗', icon: Car, color: 'from-amber-500 to-orange-700' },
     ],
   },
   {
@@ -135,6 +137,7 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: UserCog,
     accounts: [
       { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin سيادي', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+      { email: 'altawheedforwasteandwoodtrade@gmail.com', label: 'التوحيد للنقل', desc: 'الحساب الرسمي للتوحيد', icon: Building2, color: 'from-emerald-600 to-green-800' },
       { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
