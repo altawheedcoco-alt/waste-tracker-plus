@@ -2,7 +2,8 @@ import { memo, useEffect, useRef, useState, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Target, Zap, Activity, Bell, MessageSquare, FileSearch,
-  Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf
+  Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf,
+  Radio, Navigation
 } from 'lucide-react';
 
 interface SectionItem {
@@ -20,6 +21,8 @@ const FIXED_SECTIONS: SectionItem[] = [
   { id: 'section-actions', label: 'الإجراءات', icon: Zap },
   { id: 'section-pulse', label: 'النبض', icon: Activity },
   { id: 'section-alerts', label: 'التنبيهات', icon: Bell },
+  { id: 'section-dispatch', label: 'طلب سائق', icon: Radio },
+  { id: 'section-live-tracking', label: 'التتبع الحي', icon: Navigation },
   { id: 'section-comms', label: 'التواصل', icon: MessageSquare },
   { id: 'section-docs', label: 'التوثيق', icon: FileSearch },
 ];
