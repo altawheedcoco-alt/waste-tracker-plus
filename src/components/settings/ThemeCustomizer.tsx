@@ -48,6 +48,12 @@ const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Moni
   { value: 'mobile', label: 'هاتف', icon: Smartphone },
 ];
 
+const visualModeOptions: { value: VisualMode; label: string; icon: typeof Sun; desc: string }[] = [
+  { value: 'light', label: 'نهاري', icon: Sun, desc: 'خطوط Cairo — مريح للنهار' },
+  { value: 'dim', label: 'مسائي', icon: Sunset, desc: 'خطوط Tajawal — دافئ للمساء' },
+  { value: 'dark', label: 'ليلي', icon: Moon, desc: 'خطوط Readex Pro — مريح للعين' },
+];
+
 const ThemeCustomizer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -56,6 +62,7 @@ const ThemeCustomizer = () => {
     setFontFamily,
     setFontSize,
     setDisplayMode,
+    setVisualMode,
     toggleDarkMode,
     resetToDefaults,
     effectiveDisplayMode,
