@@ -62,6 +62,7 @@ const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyt
 const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
+const DemandHeatmapDriver = lazy(() => import('@/components/driver/DemandHeatmapDriver'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
 const MutualRatingDialog = lazy(() => import('@/components/driver/MutualRatingDialog'));
@@ -135,6 +136,7 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'home', label: 'الرئيسية', icon: Power },
+  { value: 'nearby', label: 'فرص قريبة', icon: Navigation },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
@@ -395,6 +397,19 @@ const DriverDashboard = () => {
                   totalTrips={driverInfo.total_trips}
                 />
               )}
+            </Suspense>
+          </TabsContent>
+
+          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: فرص قريبة — Demand Heatmap (مستقل فقط) */}
+          {/* ═══════════════════════════════════════════════ */}
+          <TabsContent value="nearby" className="mt-4">
+            <Suspense fallback={<TabFallback />}>
+              <DemandHeatmapDriver
+                driverLat={30.0444}
+                driverLng={31.2357}
+                serviceAreaKm={30}
+              />
             </Suspense>
           </TabsContent>
 
