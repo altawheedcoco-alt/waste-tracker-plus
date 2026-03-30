@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
-// Season banner images
+// Platform logo & Season banner images
+import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
 import season1Banner from '@/assets/banners/season1-banner.jpg';
 import season2Banner from '@/assets/banners/season2-banner.jpg';
 import season3Banner from '@/assets/banners/season3-banner.jpg';
