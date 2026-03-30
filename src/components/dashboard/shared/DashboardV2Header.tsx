@@ -950,10 +950,10 @@ const DashboardV2Header = memo(({
               animate={{ scale: [1.1, 1, 1.1] }} transition={{ duration: 8, repeat: Infinity }} />
           </div>
 
-          <div className="relative z-10 p-2.5 sm:p-3.5">
+          <div className="relative z-10 p-2 sm:p-3.5">
             {/* ── ROW 1: TOP BAR ── */}
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-1 flex-wrap">
+            <div className="flex items-start justify-between mb-2 gap-2">
+              <div className="flex items-center gap-1 flex-wrap min-w-0">
                 {/* LIVE */}
                 <motion.div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-primary/10 border border-primary/20"
                   animate={{ borderColor: ['hsl(var(--primary) / 0.2)', 'hsl(var(--primary) / 0.5)', 'hsl(var(--primary) / 0.2)'] }}
