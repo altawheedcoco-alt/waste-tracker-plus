@@ -118,8 +118,8 @@ export function useNearbyDrivers(center: ProximityCenter | null, radiusKm = 50) 
       if (inTransit?.length) {
         const arrivingDriverIds = inTransit
           .filter(s => {
-            if (!s.delivery_lat || !s.delivery_lng) return false;
-            const dist = calculateHaversineDistance(center.lat, center.lng, Number(s.delivery_lat), Number(s.delivery_lng));
+            if (!s.delivery_latitude || !s.delivery_longitude) return false;
+            const dist = calculateHaversineDistance(center.lat, center.lng, Number(s.delivery_latitude), Number(s.delivery_longitude));
             return dist <= radiusKm;
           })
           .map(s => s.driver_id!)
