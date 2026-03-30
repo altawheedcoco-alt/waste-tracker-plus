@@ -19,19 +19,45 @@ const getBannerUrl = (seasonNum: number): (() => Promise<string>) | undefined =>
   return key ? bannerModules[key] : undefined;
 };
 
+interface VideoItem {
+  id: string;
+  title: string;
+  titleEn: string;
+  description: string;
+  duration: string;
+  thumbnail: string;
+  videoUrl?: string;
+  videoUrlDark?: string;
+  videoUrlLight?: string;
+  status: 'available' | 'coming_soon';
+  episode: number;
+  season: number;
+  tags: string[];
+}
+
+interface SeasonInfo {
+  number: number;
+  title: string;
+  titleEn: string;
+  style: string;
+  color: string;
+  gradient: string;
+  icon: string;
+}
+
 const seasons: SeasonInfo[] = [
-  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱', bannerImage: seasonBanners[1] },
-  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡', bannerImage: seasonBanners[2] },
-  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗', bannerImage: seasonBanners[3] },
-  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛', bannerImage: seasonBanners[4] },
-  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠', bannerImage: seasonBanners[5] },
-  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
-  { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
-  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
-  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️', bannerImage: seasonBanners[9] },
-  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️', bannerImage: seasonBanners[10] },
-  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌', bannerImage: seasonBanners[11] },
-  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀', bannerImage: seasonBanners[12] },
+  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱' },
+  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡' },
+  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗' },
+  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛' },
+  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠' },
+  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️' },
+  { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡' },
+  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰' },
+  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️' },
+  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️' },
+  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌' },
+  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀' },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
