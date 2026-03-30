@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
-  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users, ArrowLeft, LogIn
+  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users, ArrowLeft, LogIn, Radio
 } from 'lucide-react';
 import PPGTab from '@/components/health/PPGTab';
 import FaceScanTab from '@/components/health/FaceScanTab';
 import VoiceStressTab from '@/components/health/VoiceStressTab';
 import HealthCoachTab from '@/components/health/HealthCoachTab';
+import HealthLiveTab from '@/components/health/HealthLiveTab';
 import EyePostureTab from '@/components/health/EyePostureTab';
 import BreathingTab from '@/components/health/BreathingTab';
 import HearingSkinTab from '@/components/health/HearingSkinTab';
