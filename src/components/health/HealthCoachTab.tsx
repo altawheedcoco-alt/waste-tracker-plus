@@ -7,7 +7,7 @@ import {
   Bot, Send, Loader2, Sparkles, Heart, Stethoscope
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { supabase } from '@/integrations/supabase/client';
+
 import ReactMarkdown from 'react-markdown';
 
 interface Message {
@@ -47,18 +47,53 @@ const HealthCoachTab = () => {
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('ai-unified-gateway', {
-        body: {
+      const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-unified-gateway`;
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: JSON.stringify({
           action: 'chat',
           messages: [
             { role: 'system', content: SYSTEM_PROMPT },
             ...allMessages.map(m => ({ role: m.role, content: m.content })),
           ],
-        },
+        }),
       });
 
-      if (error) throw error;
-      const reply = data?.result || data?.choices?.[0]?.message?.content || 'عذراً، حدث خطأ. حاول مرة أخرى.';
+      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+      // Parse SSE stream
+      const reader = resp.body?.getReader();
+      if (!reader) throw new Error('No body');
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullText = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        let idx: number;
+        while ((idx = buffer.indexOf('\n')) !== -1) {
+          let line = buffer.slice(0, idx);
+          buffer = buffer.slice(idx + 1);
+          if (line.endsWith('\r')) line = line.slice(0, -1);
+          if (!line.startsWith('data: ')) continue;
+          const jsonStr = line.slice(6).trim();
+          if (jsonStr === '[DONE]') break;
+          try {
+            const parsed = JSON.parse(jsonStr);
+            const content = parsed.choices?.[0]?.delta?.content;
+            if (content) fullText += content;
+          } catch { /* partial */ }
+        }
+      }
+
+      const reply = fullText || 'عذراً، حدث خطأ. حاول مرة أخرى.';
       setMessages(prev => [...prev, { role: 'assistant', content: reply }]);
     } catch {
       setMessages(prev => [...prev, { role: 'assistant', content: 'عذراً، لم أتمكن من الرد. حاول مرة أخرى.' }]);
