@@ -19,6 +19,10 @@ import season5Banner from '@/assets/banners/season5-banner.jpg';
 import season6Banner from '@/assets/banners/season6-banner.jpg';
 import season7Banner from '@/assets/banners/season7-banner.jpg';
 import season8Banner from '@/assets/banners/season8-banner.jpg';
+import season9Banner from '@/assets/banners/season9-banner.jpg';
+import season10Banner from '@/assets/banners/season10-banner.jpg';
+import season11Banner from '@/assets/banners/season11-banner.jpg';
+import season12Banner from '@/assets/banners/season12-banner.jpg';
 interface VideoItem {
   id: string;
   title: string;
@@ -47,14 +51,9 @@ interface SeasonInfo {
 }
 
 const seasonBanners: Record<number, string> = {
-  1: season1Banner,
-  2: season2Banner,
-  3: season3Banner,
-  4: season4Banner,
-  5: season5Banner,
-  6: season6Banner,
-  7: season7Banner,
-  8: season8Banner,
+  1: season1Banner, 2: season2Banner, 3: season3Banner, 4: season4Banner,
+  5: season5Banner, 6: season6Banner, 7: season7Banner, 8: season8Banner,
+  9: season9Banner, 10: season10Banner, 11: season11Banner, 12: season12Banner,
 };
 
 const seasons: SeasonInfo[] = [
@@ -66,6 +65,10 @@ const seasons: SeasonInfo[] = [
   { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
   { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
   { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
+  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️', bannerImage: seasonBanners[9] },
+  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️', bannerImage: seasonBanners[10] },
+  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌', bannerImage: seasonBanners[11] },
+  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀', bannerImage: seasonBanners[12] },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
@@ -124,6 +127,34 @@ const videos: VideoItem[] = [
   { id: '43', title: 'حسابات الشركاء', titleEn: 'Partner Accounts & Settlements', description: 'إدارة مالية شاملة لحسابات الشركاء — كشوف حساب، تسويات آلية، عقود.', duration: '1:50', thumbnail: '/thumbnails/ep43-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep43-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep43-light.mp4`, status: 'available', episode: 43, season: 8, tags: ['شركاء', 'تسويات', 'حسابات'] },
   { id: '44', title: 'المحفظة الرقمية', titleEn: 'Digital Wallet & Payments', description: 'محفظة إلكترونية متكاملة للسائقين والعملاء — رصيد فوري، تحويلات، سحب للبنك.', duration: '1:50', thumbnail: '/thumbnails/ep44-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep44-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep44-light.mp4`, status: 'available', episode: 44, season: 8, tags: ['محفظة', 'دفع', 'تحويل'] },
   { id: '45', title: 'التقارير المالية المتقدمة', titleEn: 'Advanced Financial Reports', description: 'تقارير مالية شاملة بصيغ متعددة — لوحة حية، تقارير دورية، مقارنات مالية.', duration: '1:50', thumbnail: '/thumbnails/ep45-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep45-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep45-light.mp4`, status: 'available', episode: 45, season: 8, tags: ['تقارير', 'مالية', 'تحليل'] },
+  // === Season 9 ===
+  { id: '46', title: 'التوظيف الذكي', titleEn: 'Smart Recruitment', description: 'نظام توظيف متكامل يربط المنشآت بالكفاءات المتخصصة في إدارة المخلفات.', duration: '1:50', thumbnail: '/thumbnails/ep46-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep46-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep46-light.mp4`, status: 'available', episode: 46, season: 9, tags: ['توظيف', 'مرشحين', 'عقود'] },
+  { id: '47', title: 'أكاديمية التدريب', titleEn: 'Training Academy', description: 'منصة تعليمية متكاملة لتأهيل العاملين — دورات، شهادات، تعلم متنقل.', duration: '1:50', thumbnail: '/thumbnails/ep47-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep47-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep47-light.mp4`, status: 'available', episode: 47, season: 9, tags: ['تدريب', 'شهادات', 'تعلم'] },
+  { id: '48', title: 'إدارة الورديات', titleEn: 'Shift Management', description: 'تنظيم ذكي للورديات مع حضور وانصراف وإدارة الإجازات.', duration: '1:50', thumbnail: '/thumbnails/ep48-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep48-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep48-light.mp4`, status: 'available', episode: 48, season: 9, tags: ['ورديات', 'حضور', 'إجازات'] },
+  { id: '49', title: 'السلامة المهنية', titleEn: 'Safety & HSE', description: 'منظومة شاملة لإدارة الصحة والسلامة والبيئة في مواقع العمل.', duration: '1:50', thumbnail: '/thumbnails/ep49-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep49-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep49-light.mp4`, status: 'available', episode: 49, season: 9, tags: ['سلامة', 'HSE', 'حوادث'] },
+  { id: '50', title: 'الرواتب والمزايا', titleEn: 'Payroll & Benefits', description: 'نظام رواتب آلي متكامل مع حساب المكافآت والخصومات والتأمينات.', duration: '1:50', thumbnail: '/thumbnails/ep50-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep50-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep50-light.mp4`, status: 'available', episode: 50, season: 9, tags: ['رواتب', 'تأمينات', 'مكافآت'] },
+  { id: '51', title: 'تحليلات الموارد البشرية', titleEn: 'HR Analytics', description: 'لوحات تحكم ذكية تكشف أنماط الأداء وتساعد في اتخاذ القرارات.', duration: '1:50', thumbnail: '/thumbnails/ep51-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep51-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep51-light.mp4`, status: 'available', episode: 51, season: 9, tags: ['تحليلات', 'أداء', 'HR'] },
+  // === Season 10 ===
+  { id: '52', title: 'العقود الرقمية', titleEn: 'Digital Contracts', description: 'إدارة شاملة لدورة حياة العقود — صياغة، توقيع إلكتروني، تجديد تلقائي.', duration: '1:50', thumbnail: '/thumbnails/ep52-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep52-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep52-light.mp4`, status: 'available', episode: 52, season: 10, tags: ['عقود', 'توقيع', 'قانون'] },
+  { id: '53', title: 'الامتثال التنظيمي', titleEn: 'Regulatory Compliance', description: 'ضمان الالتزام بالقوانين البيئية المحلية والدولية تلقائياً.', duration: '1:50', thumbnail: '/thumbnails/ep53-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep53-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep53-light.mp4`, status: 'available', episode: 53, season: 10, tags: ['امتثال', 'قوانين', 'تراخيص'] },
+  { id: '54', title: 'سجل التدقيق', titleEn: 'Audit Trail', description: 'سجل رقمي غير قابل للتلاعب لكل عملية ومعاملة في النظام.', duration: '1:50', thumbnail: '/thumbnails/ep54-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep54-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep54-light.mp4`, status: 'available', episode: 54, season: 10, tags: ['تدقيق', 'أدلة', 'سجلات'] },
+  { id: '55', title: 'حماية البيانات', titleEn: 'Data Privacy & GDPR', description: 'حماية شاملة للبيانات الشخصية وفقاً للمعايير الدولية.', duration: '1:50', thumbnail: '/thumbnails/ep55-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep55-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep55-light.mp4`, status: 'available', episode: 55, season: 10, tags: ['خصوصية', 'GDPR', 'تشفير'] },
+  { id: '56', title: 'التأمين والمسؤولية', titleEn: 'Insurance & Liability', description: 'إدارة شاملة لبوالص التأمين والمسؤولية القانونية.', duration: '1:50', thumbnail: '/thumbnails/ep56-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep56-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep56-light.mp4`, status: 'available', episode: 56, season: 10, tags: ['تأمين', 'مسؤولية', 'مطالبات'] },
+  { id: '57', title: 'حل النزاعات', titleEn: 'Dispute Resolution', description: 'نظام ذكي لإدارة النزاعات التجارية والتحكيم الإلكتروني.', duration: '1:50', thumbnail: '/thumbnails/ep57-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep57-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep57-light.mp4`, status: 'available', episode: 57, season: 10, tags: ['نزاعات', 'تحكيم', 'وساطة'] },
+  // === Season 11 ===
+  { id: '58', title: 'تكامل ERP', titleEn: 'ERP Integration', description: 'ربط سلس مع أنظمة SAP وOracle وMicrosoft Dynamics.', duration: '1:50', thumbnail: '/thumbnails/ep58-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep58-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep58-light.mp4`, status: 'available', episode: 58, season: 11, tags: ['ERP', 'SAP', 'تكامل'] },
+  { id: '59', title: 'البوابات الحكومية', titleEn: 'Government Portals', description: 'ربط مباشر مع الأنظمة الحكومية والبيئية الرقابية.', duration: '1:50', thumbnail: '/thumbnails/ep59-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep59-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep59-light.mp4`, status: 'available', episode: 59, season: 11, tags: ['حكومي', 'تصاريح', 'تقارير'] },
+  { id: '60', title: 'الخرائط ونظم GIS', titleEn: 'Maps & GIS', description: 'نظام معلومات جغرافية متكامل لإدارة المواقع والمسارات.', duration: '1:50', thumbnail: '/thumbnails/ep60-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep60-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep60-light.mp4`, status: 'available', episode: 60, season: 11, tags: ['خرائط', 'GIS', 'مواقع'] },
+  { id: '61', title: 'محرك Webhooks', titleEn: 'Webhook Engine', description: 'نظام أحداث قوي يربط iRecycle بأي نظام خارجي تلقائياً.', duration: '1:50', thumbnail: '/thumbnails/ep61-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep61-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep61-light.mp4`, status: 'available', episode: 61, season: 11, tags: ['Webhooks', 'أحداث', 'ربط'] },
+  { id: '62', title: 'سوق التطبيقات', titleEn: 'API Marketplace', description: 'سوق تطبيقات مفتوح يتيح للمطورين بناء حلول متكاملة.', duration: '1:50', thumbnail: '/thumbnails/ep62-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep62-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep62-light.mp4`, status: 'available', episode: 62, season: 11, tags: ['API', 'مطورين', 'تطبيقات'] },
+  { id: '63', title: 'البنية متعددة المستأجرين', titleEn: 'Multi-Tenant Architecture', description: 'بنية سحابية قابلة للتوسع تخدم آلاف المنشآت بعزل كامل.', duration: '1:50', thumbnail: '/thumbnails/ep63-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep63-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep63-light.mp4`, status: 'available', episode: 63, season: 11, tags: ['سحابة', 'بنية', 'توسع'] },
+  // === Season 12 ===
+  { id: '64', title: 'الروبوتات والأتمتة', titleEn: 'Robotics & Automation', description: 'روبوتات ذكية تعمل بشكل مستقل في فرز ومعالجة المخلفات.', duration: '1:50', thumbnail: '/thumbnails/ep64-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep64-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep64-light.mp4`, status: 'available', episode: 64, season: 12, tags: ['روبوتات', 'أتمتة', 'فرز'] },
+  { id: '65', title: 'البلوكشين وكربون كريدت', titleEn: 'Blockchain & Carbon Credits', description: 'تتبع شفاف وغير قابل للتلاعب لدورة حياة كل طن مخلفات.', duration: '1:50', thumbnail: '/thumbnails/ep65-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep65-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep65-light.mp4`, status: 'available', episode: 65, season: 12, tags: ['بلوكشين', 'كربون', 'شفافية'] },
+  { id: '66', title: 'الاقتصاد الدائري', titleEn: 'Circular Economy', description: 'تحويل المخلفات من مشكلة إلى مورد اقتصادي بقيمة تريليون دولار.', duration: '1:50', thumbnail: '/thumbnails/ep66-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep66-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep66-light.mp4`, status: 'available', episode: 66, season: 12, tags: ['اقتصاد دائري', 'صفر نفايات', 'تدوير'] },
+  { id: '67', title: 'المدن الذكية', titleEn: 'Smart Cities', description: 'iRecycle كعمود فقري لإدارة المخلفات في مدن المستقبل.', duration: '1:50', thumbnail: '/thumbnails/ep67-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep67-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep67-light.mp4`, status: 'available', episode: 67, season: 12, tags: ['مدن ذكية', 'مواطنين', 'بيئة'] },
+  { id: '68', title: 'الحوسبة الكمية', titleEn: 'Quantum Computing', description: 'استخدام قوة الحوسبة الكمية لحل أعقد مشاكل إدارة المخلفات.', duration: '1:50', thumbnail: '/thumbnails/ep68-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep68-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep68-light.mp4`, status: 'available', episode: 68, season: 12, tags: ['كمي', 'تحسين', 'مستقبل'] },
+  { id: '69', title: 'الختام الكبير', titleEn: 'The Grand Finale', description: '١٢ موسم • ٦٩ حلقة • رحلة شاملة في مستقبل إدارة المخلفات الذكية.', duration: '2:00', thumbnail: '/thumbnails/ep69-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep69-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep69-light.mp4`, status: 'available', episode: 69, season: 12, tags: ['ختام', 'رؤية 2030', 'مستقبل'] },
 ];
 
 const getVideoUrl = (video: VideoItem, isDark: boolean): string | undefined => {
