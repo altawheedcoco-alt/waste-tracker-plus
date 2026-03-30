@@ -59,7 +59,7 @@ const Header = memo(() => {
   }, []);
 
   // Apply landing theme on mount, restore dashboard theme on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     if (landingDark) {
       document.documentElement.classList.add('dark');
     } else {
