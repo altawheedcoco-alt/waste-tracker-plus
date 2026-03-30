@@ -55,6 +55,8 @@ const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/Transpor
 const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
 const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
+const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
+const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
