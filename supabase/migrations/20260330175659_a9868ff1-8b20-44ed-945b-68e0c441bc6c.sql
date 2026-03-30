@@ -1,0 +1,1 @@
+UPDATE storage.buckets SET allowed_mime_types = ARRAY['video/mp4', 'application/octet-stream'] WHERE id = 'series-videos';
