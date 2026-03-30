@@ -1133,7 +1133,7 @@ const DashboardV2Header = memo(({
             </div>
 
             {/* ── ROW 4: BOTTOM TICKER ── */}
-            <motion.div className="mt-2 flex items-center justify-between gap-2 px-2 py-1 rounded-lg bg-muted/30 border border-border/20"
+            <motion.div className="mt-2 flex items-center justify-between gap-1.5 sm:gap-2 px-1.5 sm:px-2 py-1 rounded-lg bg-muted/30 border border-border/20 overflow-hidden"
               initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}>
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide">
                 <div className="flex items-center gap-1 shrink-0 cursor-pointer hover:bg-primary/10 rounded px-1 py-0.5 transition-colors" onClick={() => navigate('/dashboard')}>
