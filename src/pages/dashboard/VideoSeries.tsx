@@ -41,15 +41,25 @@ interface SeasonInfo {
   color: string;
   gradient: string;
   icon: string;
+  bannerImage: string;
 }
 
+const seasonBanners: Record<number, string> = {
+  1: season1Banner,
+  2: season2Banner,
+  3: season3Banner,
+  4: season4Banner,
+  5: season5Banner,
+  6: season6Banner,
+};
+
 const seasons: SeasonInfo[] = [
-  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱' },
-  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡' },
-  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗' },
-  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛' },
-  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠' },
-  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️' },
+  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱', bannerImage: seasonBanners[1] },
+  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡', bannerImage: seasonBanners[2] },
+  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗', bannerImage: seasonBanners[3] },
+  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛', bannerImage: seasonBanners[4] },
+  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠', bannerImage: seasonBanners[5] },
+  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
