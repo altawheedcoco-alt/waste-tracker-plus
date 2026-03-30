@@ -20,6 +20,9 @@ interface EyeComfortSettings {
   warmth: number; // 0-50
   reducedMotion: boolean;
   autoSchedule: boolean;
+  dimStartHour: number; // 0-23
+  darkStartHour: number; // 0-23
+  lightStartHour: number; // 0-23
 }
 
 const defaultComfort: EyeComfortSettings = {
@@ -29,6 +32,9 @@ const defaultComfort: EyeComfortSettings = {
   warmth: 0,
   reducedMotion: false,
   autoSchedule: false,
+  dimStartHour: 17,
+  darkStartHour: 21,
+  lightStartHour: 6,
 };
 
 const VisualComfortToggle = () => {
@@ -63,18 +69,28 @@ const VisualComfortToggle = () => {
     localStorage.setItem(COMFORT_KEY, JSON.stringify(comfort));
   }, [comfort, applyFilters]);
 
-  // Auto schedule: dim at evening, dark at night
+  // Auto schedule with user-configurable times
   useEffect(() => {
     if (!comfort.autoSchedule) return;
-    const hour = new Date().getHours();
-    if (hour >= 21 || hour < 6) {
-      setVisualMode('dark');
-    } else if (hour >= 17) {
-      setVisualMode('dim');
-    } else {
-      setVisualMode('light');
-    }
-  }, [comfort.autoSchedule, setVisualMode]);
+    const check = () => {
+      const hour = new Date().getHours();
+      const { dimStartHour, darkStartHour, lightStartHour } = comfort;
+      if (darkStartHour > dimStartHour) {
+        // Normal: light -> dim -> dark
+        if (hour >= darkStartHour || hour < lightStartHour) setVisualMode('dark');
+        else if (hour >= dimStartHour) setVisualMode('dim');
+        else if (hour >= lightStartHour) setVisualMode('light');
+      } else {
+        // Edge case
+        if (hour >= darkStartHour && hour < lightStartHour) setVisualMode('dark');
+        else if (hour >= dimStartHour) setVisualMode('dim');
+        else setVisualMode('light');
+      }
+    };
+    check();
+    const interval = setInterval(check, 60000); // check every minute
+    return () => clearInterval(interval);
+  }, [comfort.autoSchedule, comfort.dimStartHour, comfort.darkStartHour, comfort.lightStartHour, setVisualMode]);
 
   const updateComfort = (key: keyof EyeComfortSettings, value: number | boolean) => {
     setComfort(prev => ({ ...prev, [key]: value }));
@@ -197,6 +213,47 @@ const VisualComfortToggle = () => {
                 className="scale-75"
               />
             </div>
+            {/* User-configurable schedule times */}
+            {comfort.autoSchedule && (
+              <div className="space-y-1.5 pt-1 pr-2 border-r-2 border-primary/20">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">☀️ نهاري من الساعة</label>
+                  <select
+                    value={comfort.lightStartHour}
+                    onChange={(e) => updateComfort('lightStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">🌅 مسائي من الساعة</label>
+                  <select
+                    value={comfort.dimStartHour}
+                    onChange={(e) => updateComfort('dimStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">🌙 ليلي من الساعة</label>
+                  <select
+                    value={comfort.darkStartHour}
+                    onChange={(e) => updateComfort('darkStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reset */}

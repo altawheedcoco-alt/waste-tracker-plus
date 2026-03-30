@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback } from "react";
+import { memo, useState, useRef, useCallback, useEffect } from "react";
 import { Menu, X, LogIn, UserPlus, Globe, ChevronDown, BookOpen, HelpCircle, GraduationCap, Factory, Recycle, Rocket, Map, MapPin, Route, Scale, Building2, ShieldCheck, Layers, Users, Sparkles, Landmark, MessageCircle, BarChart3, FileCheck, Brain, Shield, Wallet, ClipboardCheck, Headphones, Database, Eye, LayoutDashboard, LogOut, FileText, Sun, Moon, Newspaper, ArrowLeft, ExternalLink, Command, Megaphone, Briefcase, Gavel, Binary, Film, Heart } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,40 @@ const Header = memo(() => {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { user, signOut } = useAuth();
-  const { settings, toggleDarkMode } = useThemeSettings();
+  const { settings: dashSettings } = useThemeSettings();
+  
+  // Landing page has its own separate dark mode state
+  const [landingDark, setLandingDark] = useState(() => {
+    try {
+      return localStorage.getItem('irecycle-landing-theme') === 'dark';
+    } catch { return false; }
+  });
+  
+  const toggleLandingDark = useCallback(() => {
+    setLandingDark(prev => {
+      const next = !prev;
+      localStorage.setItem('irecycle-landing-theme', next ? 'dark' : 'light');
+      // Apply to root only if we're on landing (not dashboard)
+      if (next) {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.remove('dim');
+      }
+      return next;
+    });
+  }, []);
+
+  // Apply landing theme on mount, restore dashboard theme on unmount
+  useEffect(() => {
+    if (landingDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('dim');
+    }
+  }, [landingDark]);
+
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
@@ -232,12 +265,12 @@ const Header = memo(() => {
             {/* Right: Utilities */}
             <div className="flex items-center gap-2.5">
               <button
-                onClick={toggleDarkMode}
+                onClick={toggleLandingDark}
                 className="relative flex items-center justify-center w-6 h-6 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 text-foreground/70 dark:text-foreground/90 hover:border-primary/40 hover:shadow-[0_0_6px_hsl(var(--primary)/0.15)] transition-all duration-300 shadow-sm"
                 aria-label="Toggle theme"
               >
-                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${landingDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${landingDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
               </button>
               <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
               <button
@@ -476,11 +509,11 @@ const Header = memo(() => {
                     {language === 'ar' ? 'English' : 'عربي'}
                   </button>
                   <button
-                    onClick={toggleDarkMode}
+                    onClick={toggleLandingDark}
                     className="flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border/25 bg-muted/15 text-[11px] font-semibold text-muted-foreground/70 hover:text-foreground transition-all touch-manipulation"
                   >
-                    {settings.isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                    {settings.isDarkMode ? 'نهاري' : 'ليلي'}
+                    {landingDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                    {landingDark ? 'نهاري' : 'ليلي'}
                   </button>
                 </div>
                 <GuideButton />
