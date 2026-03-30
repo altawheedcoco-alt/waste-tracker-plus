@@ -78,6 +78,11 @@ const SmartCollectionScheduler = lazy(() => import('./generator/SmartCollectionS
 const InstantPickupPortal = lazy(() => import('./generator/InstantPickupPortal'));
 const EnvironmentalScorecard = lazy(() => import('./generator/EnvironmentalScorecard'));
 
+// New tabs
+const GeneratorFinanceTab = lazy(() => import('./generator/GeneratorFinanceTab'));
+const GeneratorPartnersHub = lazy(() => import('./generator/GeneratorPartnersHub'));
+const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab'));
+
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
     <Skeleton className="h-32 w-full" />
