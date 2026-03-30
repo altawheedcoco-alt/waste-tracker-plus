@@ -3,12 +3,13 @@ import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
-  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users, ArrowLeft, LogIn
+  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users, ArrowLeft, LogIn, Radio
 } from 'lucide-react';
 import PPGTab from '@/components/health/PPGTab';
 import FaceScanTab from '@/components/health/FaceScanTab';
 import VoiceStressTab from '@/components/health/VoiceStressTab';
 import HealthCoachTab from '@/components/health/HealthCoachTab';
+import HealthLiveTab from '@/components/health/HealthLiveTab';
 import EyePostureTab from '@/components/health/EyePostureTab';
 import BreathingTab from '@/components/health/BreathingTab';
 import HearingSkinTab from '@/components/health/HearingSkinTab';
@@ -66,6 +67,9 @@ const PublicHealth = () => {
               <TabsTrigger value="eye" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
                 <Eye className="w-3 h-3 shrink-0" />العين
               </TabsTrigger>
+              <TabsTrigger value="live" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
+                <Radio className="w-3 h-3 shrink-0" />Live 🎙️
+              </TabsTrigger>
               <TabsTrigger value="coach" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
                 <Bot className="w-3 h-3 shrink-0" />المدرب
               </TabsTrigger>
@@ -78,6 +82,7 @@ const PublicHealth = () => {
           <TabsContent value="breathing" className="mt-4"><BreathingTab /></TabsContent>
           <TabsContent value="hearing" className="mt-4"><HearingSkinTab /></TabsContent>
           <TabsContent value="eye" className="mt-4"><EyePostureTab /></TabsContent>
+          <TabsContent value="live" className="mt-4"><HealthLiveTab /></TabsContent>
           <TabsContent value="coach" className="mt-4"><HealthCoachTab /></TabsContent>
         </Tabs>
 
