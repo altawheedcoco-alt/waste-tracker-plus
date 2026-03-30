@@ -245,6 +245,24 @@ const TransporterDashboard = () => {
         </Suspense>
       </div>
 
+      {/* ★ طلب سائق مستقل (نموذج أوبر/ديدي) */}
+      <div id="section-dispatch">
+        <ErrorBoundary fallbackTitle="خطأ في لوحة طلب السائقين">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <DispatchToDriverPanel />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
+      {/* ★ تتبع الرحلات النشطة للسائقين */}
+      <div id="section-live-tracking">
+        <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <LiveDriverTracker />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
       {/* 6. التواصل */}
       <div id="section-comms">
         <Suspense fallback={null}><CommunicationHubWidget /></Suspense>
