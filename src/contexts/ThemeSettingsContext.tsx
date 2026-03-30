@@ -256,24 +256,45 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
     root.style.setProperty('--eco-green', palette.primary);
     root.style.setProperty('--eco-emerald', palette.accent);
 
-    if (settings.isDarkMode) {
+    // Visual mode: light / dim / dark
+    root.classList.remove('dark', 'dim');
+    if (settings.visualMode === 'dark' || settings.isDarkMode) {
       root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    } else if (settings.visualMode === 'dim') {
+      root.classList.add('dim');
     }
 
     root.style.fontSize = `${settings.fontSize}px`;
-    document.body.style.fontFamily = fontFamilyCSS[settings.fontFamily];
+    
+    // Apply mode-specific font as base, user override takes priority
+    const modeFont = visualModeFonts[settings.visualMode];
+    const userFont = fontFamilyCSS[settings.fontFamily];
+    document.body.style.fontFamily = userFont || modeFont.family;
 
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+    // Load both mode font and user font
+    const modeFontUrl = `https://fonts.googleapis.com/css2?family=${modeFont.import}&display=swap`;
+    const userFontUrl = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+    
     const fontLink = document.getElementById('dynamic-font') as HTMLLinkElement;
     if (fontLink) {
-      if (fontLink.href !== fontUrl) fontLink.href = fontUrl;
+      if (fontLink.href !== userFontUrl) fontLink.href = userFontUrl;
     } else {
       const link = document.createElement('link');
       link.id = 'dynamic-font';
       link.rel = 'stylesheet';
-      link.href = fontUrl;
+      link.href = userFontUrl;
+      document.head.appendChild(link);
+    }
+
+    // Load mode font separately
+    const modeFontLink = document.getElementById('mode-font') as HTMLLinkElement;
+    if (modeFontLink) {
+      if (modeFontLink.href !== modeFontUrl) modeFontLink.href = modeFontUrl;
+    } else {
+      const link = document.createElement('link');
+      link.id = 'mode-font';
+      link.rel = 'stylesheet';
+      link.href = modeFontUrl;
       document.head.appendChild(link);
     }
 
