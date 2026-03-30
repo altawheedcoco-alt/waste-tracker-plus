@@ -505,8 +505,11 @@ const VideoSeries = () => {
                             src={`${video.thumbnail}?v=6`}
                             alt={video.title}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                            loading="lazy"
+                            loading={idx < 4 ? 'eager' : 'lazy'}
                             decoding="async"
+                            fetchPriority={idx < 2 ? 'high' : 'low'}
+                            width={320}
+                            height={180}
                           />
                         )}
                         
