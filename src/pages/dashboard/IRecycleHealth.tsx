@@ -53,6 +53,9 @@ const IRecycleHealth = () => {
               <TabsTrigger value="eye" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
                 <Eye className="w-3 h-3 shrink-0" />العين
               </TabsTrigger>
+              <TabsTrigger value="live" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
+                <Radio className="w-3 h-3 shrink-0" />Live 🎙️
+              </TabsTrigger>
               <TabsTrigger value="coach" className="flex items-center gap-1 text-[9px] px-2 py-1.5 whitespace-nowrap">
                 <Bot className="w-3 h-3 shrink-0" />المدرب
               </TabsTrigger>
