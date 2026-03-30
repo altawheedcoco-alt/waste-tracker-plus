@@ -103,6 +103,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { TooltipProvider, Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import NotificationDropdown from './NotificationDropdown';
+import VisualComfortToggle from './VisualComfortToggle';
 import ThemeCustomizer from '@/components/settings/ThemeCustomizer';
 import FocusMusicPlayer from './FocusMusicPlayer';
 import SidebarNavItem from './SidebarNavItem';
@@ -570,6 +571,11 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
                 </div>
               </div>
 
+           {/* Visual Comfort Toggle */}
+           <div className="px-3 py-2 border-b border-sidebar-border">
+             <VisualComfortToggle />
+           </div>
+
            {/* Account Switcher / Organization info */}
           <div className="border-b border-sidebar-border">
             <AccountSwitcher collapsed={false} />
@@ -867,7 +873,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
               {!isMobile && <FocusMusicPlayer />}
 
-              {/* Theme Customizer - Hidden on mobile */}
+              {/* Theme Customizer - Hidden on mobile, kept for advanced settings */}
               {!isMobile && <ThemeCustomizer />}
 
               {/* My Shipments */}

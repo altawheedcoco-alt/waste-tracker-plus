@@ -13,12 +13,14 @@ export type FontFamily =
   | 'space-grotesk' | 'outfit' | 'plus-jakarta' | 'manrope' | 'sora'
   | 'lexend' | 'red-hat' | 'be-vietnam' | 'cabinet-grotesk' | 'general-sans';
 export type DisplayMode = 'auto' | 'desktop' | 'tablet' | 'mobile';
+export type VisualMode = 'light' | 'dim' | 'dark';
 
 interface ThemeSettings {
   themeColor: ThemeColor;
   fontFamily: FontFamily;
   fontSize: number;
   isDarkMode: boolean;
+  visualMode: VisualMode;
   displayMode: DisplayMode;
 }
 
@@ -33,6 +35,7 @@ interface ThemeActionsContextType {
   setFontFamily: (font: FontFamily) => void;
   setFontSize: (size: number) => void;
   setDisplayMode: (mode: DisplayMode) => void;
+  setVisualMode: (mode: VisualMode) => void;
   toggleDarkMode: () => void;
   resetToDefaults: () => void;
 }
@@ -44,7 +47,15 @@ const defaultSettings: ThemeSettings = {
   fontFamily: 'cairo',
   fontSize: 16,
   isDarkMode: false,
+  visualMode: 'light',
   displayMode: 'auto',
+};
+
+// Per-mode font defaults
+const visualModeFonts: Record<VisualMode, { family: string; import: string }> = {
+  light: { family: "'Cairo', sans-serif", import: 'Cairo:wght@300;400;500;600;700;800' },
+  dim: { family: "'Tajawal', sans-serif", import: 'Tajawal:wght@300;400;500;700;800' },
+  dark: { family: "'Readex Pro', sans-serif", import: 'Readex+Pro:wght@200;300;400;500;600;700' },
 };
 
 const ThemeValuesContext = createContext<ThemeValuesContextType | undefined>(undefined);
@@ -245,24 +256,45 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
     root.style.setProperty('--eco-green', palette.primary);
     root.style.setProperty('--eco-emerald', palette.accent);
 
-    if (settings.isDarkMode) {
+    // Visual mode: light / dim / dark
+    root.classList.remove('dark', 'dim');
+    if (settings.visualMode === 'dark' || settings.isDarkMode) {
       root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
+    } else if (settings.visualMode === 'dim') {
+      root.classList.add('dim');
     }
 
     root.style.fontSize = `${settings.fontSize}px`;
-    document.body.style.fontFamily = fontFamilyCSS[settings.fontFamily];
+    
+    // Apply mode-specific font as base, user override takes priority
+    const modeFont = visualModeFonts[settings.visualMode];
+    const userFont = fontFamilyCSS[settings.fontFamily];
+    document.body.style.fontFamily = userFont || modeFont.family;
 
-    const fontUrl = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+    // Load both mode font and user font
+    const modeFontUrl = `https://fonts.googleapis.com/css2?family=${modeFont.import}&display=swap`;
+    const userFontUrl = `https://fonts.googleapis.com/css2?family=${fontImports[settings.fontFamily]}&display=swap`;
+    
     const fontLink = document.getElementById('dynamic-font') as HTMLLinkElement;
     if (fontLink) {
-      if (fontLink.href !== fontUrl) fontLink.href = fontUrl;
+      if (fontLink.href !== userFontUrl) fontLink.href = userFontUrl;
     } else {
       const link = document.createElement('link');
       link.id = 'dynamic-font';
       link.rel = 'stylesheet';
-      link.href = fontUrl;
+      link.href = userFontUrl;
+      document.head.appendChild(link);
+    }
+
+    // Load mode font separately
+    const modeFontLink = document.getElementById('mode-font') as HTMLLinkElement;
+    if (modeFontLink) {
+      if (modeFontLink.href !== modeFontUrl) modeFontLink.href = modeFontUrl;
+    } else {
+      const link = document.createElement('link');
+      link.id = 'mode-font';
+      link.rel = 'stylesheet';
+      link.href = modeFontUrl;
       document.head.appendChild(link);
     }
 
@@ -287,7 +319,14 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
   }, []);
 
   const toggleDarkMode = useCallback(() => {
-    setSettings((prev) => ({ ...prev, isDarkMode: !prev.isDarkMode }));
+    setSettings((prev) => {
+      const newDark = !prev.isDarkMode;
+      return { ...prev, isDarkMode: newDark, visualMode: newDark ? 'dark' : 'light' };
+    });
+  }, []);
+
+  const setVisualMode = useCallback((mode: VisualMode) => {
+    setSettings((prev) => ({ ...prev, visualMode: mode, isDarkMode: mode === 'dark' }));
   }, []);
 
   const resetToDefaults = useCallback(() => {
@@ -305,9 +344,10 @@ export const ThemeSettingsProvider = ({ children }: { children: ReactNode }) => 
     setFontFamily,
     setFontSize,
     setDisplayMode,
+    setVisualMode,
     toggleDarkMode,
     resetToDefaults,
-  }), [setThemeColor, setFontFamily, setFontSize, setDisplayMode, toggleDarkMode, resetToDefaults]);
+  }), [setThemeColor, setFontFamily, setFontSize, setDisplayMode, setVisualMode, toggleDarkMode, resetToDefaults]);
 
   const combinedValue = useMemo<ThemeSettingsContextType>(() => ({
     ...valuesContextValue,

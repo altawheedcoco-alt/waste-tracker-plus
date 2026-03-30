@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Type, Moon, Sun, RotateCcw, Settings2, Check, Monitor, Tablet, Smartphone, MonitorSmartphone } from 'lucide-react';
+import { Palette, Type, Moon, Sun, Sunset, RotateCcw, Settings2, Check, Monitor, Tablet, Smartphone, MonitorSmartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import {
@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useThemeSettings, ThemeColor, FontFamily, DisplayMode } from '@/contexts/ThemeSettingsContext';
+import { useThemeSettings, ThemeColor, FontFamily, DisplayMode, VisualMode } from '@/contexts/ThemeSettingsContext';
 import { cn } from '@/lib/utils';
 
 const colorOptions: { value: ThemeColor; label: string; color: string }[] = [
@@ -48,6 +48,12 @@ const displayModeOptions: { value: DisplayMode; label: string; icon: typeof Moni
   { value: 'mobile', label: 'هاتف', icon: Smartphone },
 ];
 
+const visualModeOptions: { value: VisualMode; label: string; icon: typeof Sun; desc: string }[] = [
+  { value: 'light', label: 'نهاري', icon: Sun, desc: 'خطوط Cairo — مريح للنهار' },
+  { value: 'dim', label: 'مسائي', icon: Sunset, desc: 'خطوط Tajawal — دافئ للمساء' },
+  { value: 'dark', label: 'ليلي', icon: Moon, desc: 'خطوط Readex Pro — مريح للعين' },
+];
+
 const ThemeCustomizer = () => {
   const [isOpen, setIsOpen] = useState(false);
   const {
@@ -56,6 +62,7 @@ const ThemeCustomizer = () => {
     setFontFamily,
     setFontSize,
     setDisplayMode,
+    setVisualMode,
     toggleDarkMode,
     resetToDefaults,
     effectiveDisplayMode,
@@ -85,20 +92,40 @@ const ThemeCustomizer = () => {
         </SheetHeader>
 
         <div className="mt-6 space-y-8">
-          {/* Dark Mode Toggle */}
+          {/* Visual Mode (Light / Dim / Dark) */}
           <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium flex items-center gap-2">
-                {settings.isDarkMode ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-                الوضع الليلي
-              </label>
-              <Button
-                variant={settings.isDarkMode ? 'default' : 'outline'}
-                size="sm"
-                onClick={toggleDarkMode}
-              >
-                {settings.isDarkMode ? 'مفعّل' : 'معطّل'}
-              </Button>
+            <label className="text-sm font-medium flex items-center gap-2">
+              <Palette className="h-4 w-4" />
+              وضع الراحة البصرية
+            </label>
+            <div className="grid grid-cols-3 gap-2">
+              {visualModeOptions.map((opt) => {
+                const Icon = opt.icon;
+                const isActive = settings.visualMode === opt.value;
+                return (
+                  <motion.button
+                    key={opt.value}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => setVisualMode(opt.value)}
+                    className={cn(
+                      'relative flex flex-col items-center gap-1.5 p-3 rounded-lg border-2 transition-all',
+                      isActive
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-primary/50'
+                    )}
+                  >
+                    <Icon className="h-5 w-5" />
+                    <span className="text-xs font-medium">{opt.label}</span>
+                    <span className="text-[10px] text-muted-foreground text-center leading-tight">{opt.desc}</span>
+                    {isActive && (
+                      <motion.div layoutId="visual-check" className="absolute top-1 left-1">
+                        <Check className="h-3 w-3 text-primary" />
+                      </motion.div>
+                    )}
+                  </motion.button>
+                );
+              })}
             </div>
           </div>
 
