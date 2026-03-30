@@ -221,8 +221,8 @@ export default function BulkWeightEntries() {
         .from('shipment-documents')
         .upload(path, file, { contentType: file.type, upsert: false });
       if (error) { console.error('Image upload error:', error); return null; }
-      const { data } = supabase.storage.from('shipment-documents').getPublicUrl(path);
-      return data.publicUrl;
+      const { data } = await supabase.storage.from('shipment-documents').createSignedUrl(path, 365 * 24 * 3600);
+      return data?.signedUrl || null;
     } catch (err) { console.error('Upload failed:', err); return null; }
   };
 
