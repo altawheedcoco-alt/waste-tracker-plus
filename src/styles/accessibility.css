@@ -68,3 +68,12 @@
 }
 
 .skip-link:focus { top: 0; }
+
+/* Reduced Motion — Eye Comfort */
+.reduce-motion *,
+.reduce-motion *::before,
+.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+}
