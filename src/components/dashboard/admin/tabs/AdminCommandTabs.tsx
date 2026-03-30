@@ -39,6 +39,8 @@ const PartnersView = lazy(() => import('@/components/dashboard/PartnersView'));
 const DisposalIncomingPanel = lazy(() => import('@/components/dashboard/disposal/DisposalIncomingPanel'));
 const DisposalDailyOperations = lazy(() => import('@/components/dashboard/disposal/DisposalDailyOperations'));
 const DisposalRecentOperations = lazy(() => import('@/components/dashboard/disposal/DisposalRecentOperations'));
+const NearbyDriversRadar = lazy(() => import('@/components/maps/NearbyDriversRadar'));
+const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 
 interface AdminCommandTabsProps {
   statCards: StatCard[];
@@ -79,6 +81,15 @@ const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions, onR
           </Suspense>
         </ErrorBoundary>
         <AdminActiveTracking />
+        {/* رادار السائقين وخريطة الطلب */}
+        <ErrorBoundary fallbackTitle="خطأ في رادار القرب">
+          <Suspense fallback={<TabFallback />}>
+            <div className="grid gap-4 grid-cols-1 md:grid-cols-2">
+              <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+              <DemandHeatmapDriver driverLat={30.0444} driverLng={31.2357} />
+            </div>
+          </Suspense>
+        </ErrorBoundary>
         <AdminPendingApprovals />
         <PendingApprovalsWidget />
         <UnifiedDocumentSearch />

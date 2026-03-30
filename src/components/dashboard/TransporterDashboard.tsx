@@ -39,6 +39,7 @@ import TransporterSectionNav from './transporter/TransporterSectionNav';
 // ★ Lazy-load ALL heavy secondary components
 const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
+const NearbyDriversRadar = lazy(() => import('@/components/maps/NearbyDriversRadar'));
 const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
@@ -216,6 +217,13 @@ const TransporterDashboard = () => {
       {/* 2. مركز القيادة */}
       <div id="section-command">
         <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
+      </div>
+
+      {/* 2.5 رادار السائقين القريبين */}
+      <div id="section-radar">
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+          <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+        </Suspense>
       </div>
 
       {/* 3. الإجراءات السريعة */}
