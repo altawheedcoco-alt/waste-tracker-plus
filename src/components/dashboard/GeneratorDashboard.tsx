@@ -82,6 +82,7 @@ const EnvironmentalScorecard = lazy(() => import('./generator/EnvironmentalScore
 const GeneratorFinanceTab = lazy(() => import('./generator/GeneratorFinanceTab'));
 const GeneratorPartnersHub = lazy(() => import('./generator/GeneratorPartnersHub'));
 const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab'));
+const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
