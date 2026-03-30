@@ -39,6 +39,36 @@ import { Ep30Dark, Ep30Light } from "./videos/season6/Ep30Scheduling";
 import { Ep31Dark, Ep31Light } from "./videos/season6/Ep31Security";
 import { Ep32Dark, Ep32Light } from "./videos/season6/Ep32MobileOps";
 import { Ep33Dark, Ep33Light } from "./videos/season6/Ep33BusinessIntelligence";
+import { Ep40Dark, Ep40Light } from "./videos/season8/Ep40SmartInvoicing";
+import { Ep41Dark, Ep41Light } from "./videos/season8/Ep41CostAnalysis";
+import { Ep42Dark, Ep42Light } from "./videos/season8/Ep42TaxCompliance";
+import { Ep43Dark, Ep43Light } from "./videos/season8/Ep43PartnerAccounts";
+import { Ep44Dark, Ep44Light } from "./videos/season8/Ep44DigitalWallet";
+import { Ep45Dark, Ep45Light } from "./videos/season8/Ep45FinancialReports";
+import { Ep46Dark, Ep46Light } from "./videos/season9/Ep46Recruitment";
+import { Ep47Dark, Ep47Light } from "./videos/season9/Ep47Training";
+import { Ep48Dark, Ep48Light } from "./videos/season9/Ep48ShiftManagement";
+import { Ep49Dark, Ep49Light } from "./videos/season9/Ep49SafetyHSE";
+import { Ep50Dark, Ep50Light } from "./videos/season9/Ep50Payroll";
+import { Ep51Dark, Ep51Light } from "./videos/season9/Ep51HRAnalytics";
+import { Ep52Dark, Ep52Light } from "./videos/season10/Ep52Contracts";
+import { Ep53Dark, Ep53Light } from "./videos/season10/Ep53RegulatoryCompliance";
+import { Ep54Dark, Ep54Light } from "./videos/season10/Ep54AuditTrail";
+import { Ep55Dark, Ep55Light } from "./videos/season10/Ep55DataPrivacy";
+import { Ep56Dark, Ep56Light } from "./videos/season10/Ep56Insurance";
+import { Ep57Dark, Ep57Light } from "./videos/season10/Ep57DisputeResolution";
+import { Ep58Dark, Ep58Light } from "./videos/season11/Ep58ERPIntegration";
+import { Ep59Dark, Ep59Light } from "./videos/season11/Ep59GovPortals";
+import { Ep60Dark, Ep60Light } from "./videos/season11/Ep60MapsGIS";
+import { Ep61Dark, Ep61Light } from "./videos/season11/Ep61Webhooks";
+import { Ep62Dark, Ep62Light } from "./videos/season11/Ep62APIMarketplace";
+import { Ep63Dark, Ep63Light } from "./videos/season11/Ep63MultiTenant";
+import { Ep64Dark, Ep64Light } from "./videos/season12/Ep64Robotics";
+import { Ep65Dark, Ep65Light } from "./videos/season12/Ep65Blockchain";
+import { Ep66Dark, Ep66Light } from "./videos/season12/Ep66CircularEconomy";
+import { Ep67Dark, Ep67Light } from "./videos/season12/Ep67SmartCities";
+import { Ep68Dark, Ep68Light } from "./videos/season12/Ep68QuantumComputing";
+import { Ep69Dark, Ep69Light } from "./videos/season12/Ep69GrandFinale";
 
 export const RemotionRoot = () => (
   <>
