@@ -40,8 +40,8 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
   }, [tabs]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1 sm:p-1.5 shadow-sm">
-      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-0.5 sm:p-1.5 shadow-sm">
+      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 h-auto p-0 scrollbar-hide">
         {elements.map((el, i) => {
           if (el.type === 'separator') {
             return (
