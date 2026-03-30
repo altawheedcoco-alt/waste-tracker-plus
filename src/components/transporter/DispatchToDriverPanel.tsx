@@ -23,7 +23,7 @@ import {
   Radio, CheckCircle2, XCircle,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import NearbyDriversRadar from './NearbyDriversRadar';
+import NearbyDriversRadar from '@/components/maps/NearbyDriversRadar';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
