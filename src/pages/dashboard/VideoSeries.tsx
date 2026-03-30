@@ -65,6 +65,7 @@ const seasons: SeasonInfo[] = [
   { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠', bannerImage: seasonBanners[5] },
   { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
   { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
+  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
