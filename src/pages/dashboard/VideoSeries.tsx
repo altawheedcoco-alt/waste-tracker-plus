@@ -9,7 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
-// Season banner images
+// Platform logo & Season banner images
+import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
 import season1Banner from '@/assets/banners/season1-banner.jpg';
 import season2Banner from '@/assets/banners/season2-banner.jpg';
 import season3Banner from '@/assets/banners/season3-banner.jpg';
@@ -735,7 +736,7 @@ const VideoSeries = () => {
                     className="overflow-hidden"
                   >
                     {/* Season Banner */}
-                    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg">
+                    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative">
                       <img
                         src={season.bannerImage}
                         alt={`${season.titleEn} - Season ${season.number}`}
@@ -746,6 +747,7 @@ const VideoSeries = () => {
                         height={640}
                         style={{ aspectRatio: '3/1' }}
                       />
+                      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" />
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
@@ -819,6 +821,9 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
         </div>
       )}
 
+      {/* iRecycle Logo Watermark */}
+      <img src={logoImg} alt="" className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full opacity-75 shadow pointer-events-none z-10" />
+
       {/* Episode number */}
       <div className="absolute top-2 left-2">
         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white/90 backdrop-blur-sm">
@@ -827,7 +832,7 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
       </div>
 
       {/* Duration */}
-      <div className="absolute top-2 right-2">
+      <div className="absolute bottom-2 right-2">
         <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/90 backdrop-blur-sm">
           {video.duration}
         </span>
