@@ -135,6 +135,7 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'home', label: 'الرئيسية', icon: Power },
+  { value: 'nearby', label: 'فرص قريبة', icon: Navigation },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },

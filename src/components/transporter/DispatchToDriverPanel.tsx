@@ -201,6 +201,9 @@ const DispatchToDriverPanel = () => {
 
   return (
     <div className="space-y-4" dir="rtl">
+      {/* Nearby Drivers Radar Map */}
+      <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
