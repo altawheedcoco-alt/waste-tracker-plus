@@ -213,8 +213,8 @@ const AIQualityAuditor = () => {
     newChecks.push({
       id: 'commercial-register',
       label: 'السجل التجاري والبطاقة الضريبية',
-      status: org?.commercial_register && org?.tax_card_number ? 'pass' : !org?.commercial_register && !org?.tax_card_number ? 'fail' : 'warn',
-      detail: !org?.commercial_register ? 'لم يتم إدخال رقم السجل التجاري' : !org?.tax_card_number ? 'لم يتم إدخال رقم البطاقة الضريبية' : 'السجل التجاري والبطاقة الضريبية مكتملان',
+      status: org?.commercial_register && org?.tax_card ? 'pass' : !org?.commercial_register && !org?.tax_card ? 'fail' : 'warn',
+      detail: !org?.commercial_register ? 'لم يتم إدخال رقم السجل التجاري' : !org?.tax_card ? 'لم يتم إدخال رقم البطاقة الضريبية' : 'السجل التجاري والبطاقة الضريبية مكتملان',
       category: 'visual',
       severity: 'high',
     });
