@@ -103,18 +103,21 @@ img, video, iframe, svg, canvas {
 
 /* ——— Small phones (≤ 360px) ——— */
 @media (max-width: 360px) {
-  :root { font-size: 14px; }
+  :root { font-size: 13.5px; }
   
-  .container { padding-left: 0.625rem; padding-right: 0.625rem; }
+  .container { padding-left: 0.5rem; padding-right: 0.5rem; }
   
-  h1 { font-size: 1.35rem !important; }
-  h2 { font-size: 1.125rem !important; }
+  h1 { font-size: 1.125rem !important; }
+  h2 { font-size: 1rem !important; }
   
   [role="dialog"] > div,
   [data-radix-dialog-content] {
-    margin: 0.5rem;
-    max-width: calc(100vw - 1rem);
+    margin: 0.25rem;
+    max-width: calc(100vw - 0.5rem);
   }
+
+  /* Force 2-col grid on small phones */
+  .grid-cols-3:not(.force-3-cols) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 }
 
 /* ——— Standard phones (≤ 640px) ——— */
