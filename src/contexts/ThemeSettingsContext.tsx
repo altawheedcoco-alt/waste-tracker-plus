@@ -35,6 +35,7 @@ interface ThemeActionsContextType {
   setFontFamily: (font: FontFamily) => void;
   setFontSize: (size: number) => void;
   setDisplayMode: (mode: DisplayMode) => void;
+  setVisualMode: (mode: VisualMode) => void;
   toggleDarkMode: () => void;
   resetToDefaults: () => void;
 }
