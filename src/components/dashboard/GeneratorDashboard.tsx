@@ -489,6 +489,7 @@ const GeneratorDashboard = () => {
         {/* ── الذكاء الاصطناعي ── */}
         <TabsContent value="ai-tools" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
+            <AIQualityAuditor />
             <GeneratorSmartKPIs />
             <WasteClassificationAI />
             <WasteGenerationIntelligence />
