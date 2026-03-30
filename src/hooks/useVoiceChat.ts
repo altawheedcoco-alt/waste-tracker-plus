@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+
 
 export type VoiceChatState = 'idle' | 'listening' | 'thinking' | 'speaking';
 
