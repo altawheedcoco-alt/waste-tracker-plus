@@ -358,7 +358,7 @@ img, video, iframe, svg, canvas {
 
   /* Extra bottom padding for gesture nav + bottom nav */
   main {
-    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
+    padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* PWA header safe area */
