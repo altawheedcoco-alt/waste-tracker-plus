@@ -102,6 +102,69 @@
     --spacing: 0.25rem;
   }
 
+  /* Dim Mode — warm evening tones, easier on eyes at twilight */
+  .dim {
+    --background: 230 15% 18%;
+    --foreground: 40 20% 90%;
+    --card: 230 14% 22%;
+    --card-foreground: 40 20% 90%;
+    --popover: 230 14% 24%;
+    --popover-foreground: 40 20% 90%;
+    --primary: 160 55% 45%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 230 12% 26%;
+    --secondary-foreground: 40 15% 85%;
+    --muted: 230 12% 24%;
+    --muted-foreground: 40 8% 60%;
+    --accent: 38 30% 22%;
+    --accent-foreground: 38 60% 70%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 230 10% 28%;
+    --input: 230 10% 28%;
+    --ring: 160 55% 42%;
+
+    --sidebar-background: 230 15% 16%;
+    --sidebar-foreground: 40 15% 85%;
+    --sidebar-primary: 160 55% 45%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 38 20% 20%;
+    --sidebar-accent-foreground: 38 50% 70%;
+    --sidebar-border: 230 10% 25%;
+    --sidebar-ring: 160 55% 42%;
+    --sidebar: 230 15% 16%;
+
+    --eco-green: 160 55% 45%;
+    --eco-green-dark: 160 60% 32%;
+    --eco-green-light: 160 50% 55%;
+    --eco-emerald: 168 55% 40%;
+    --eco-teal: 178 48% 40%;
+    --eco-cream: 230 10% 20%;
+    --eco-sand: 230 8% 24%;
+    --eco-ocean: 205 60% 48%;
+    --eco-gold: 42 75% 55%;
+
+    --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.2);
+    --shadow-md: 0 4px 8px hsl(0 0% 0% / 0.25);
+    --shadow-lg: 0 8px 20px hsl(0 0% 0% / 0.25);
+
+    --chart-1: 160 55% 55%;
+    --chart-2: 178 50% 58%;
+    --chart-3: 205 65% 55%;
+    --chart-4: 42 80% 58%;
+    --chart-5: 0 0% 55%;
+
+    --wa-header: 200 16% 14%;
+    --wa-header-dark: 200 16% 20%;
+    --wa-outgoing: 168 25% 20%;
+    --wa-outgoing-foreground: 0 0% 90%;
+    --wa-incoming: 200 14% 20%;
+    --wa-incoming-foreground: 0 0% 90%;
+    --wa-chat-bg: 200 16% 10%;
+    --wa-chat-pattern: 200 12% 14%;
+    --wa-time: 0 0% 55%;
+  }
+
   .dark {
     --landing-background: 225 16% 8%;
     --landing-foreground: 210 15% 95%;
