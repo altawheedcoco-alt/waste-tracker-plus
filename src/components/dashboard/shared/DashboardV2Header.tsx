@@ -1025,19 +1025,19 @@ const DashboardV2Header = memo(({
               </div>
 
               {/* Name + org */}
-              <div className="flex items-center gap-2">
-                <div className="text-right">
-                  <h1 className="font-black text-sm sm:text-lg text-foreground leading-tight">
+              <div className="flex items-center gap-2 shrink-0 max-w-[55%] sm:max-w-none">
+                <div className="text-right min-w-0">
+                  <h1 className="font-black text-xs sm:text-lg text-foreground leading-tight truncate">
                     {greeting}، <span className="text-primary">{displayName}</span>
                   </h1>
                   {orgName && (
-                    <p className="text-[9px] sm:text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
-                      <Shield className="w-2.5 h-2.5 text-primary/60" />
+                    <p className="text-[8px] sm:text-[10px] text-muted-foreground flex items-center gap-1 justify-end">
+                      <Shield className="w-2.5 h-2.5 text-primary/60 shrink-0" />
                       <span className="truncate">{orgName} — {orgLabel}</span>
                     </p>
                   )}
                 </div>
-                <motion.div className={cn("w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 relative", gradient)}
+                <motion.div className={cn("w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br flex items-center justify-center shadow-lg shadow-primary/20 shrink-0 relative", gradient)}
                   whileHover={{ scale: 1.1, rotate: 5 }}>
                   <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   <PulseRing color="border-primary/30" />
