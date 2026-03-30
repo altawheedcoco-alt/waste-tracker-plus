@@ -33,6 +33,12 @@ import { Ep24Dark, Ep24Light } from "./videos/season5/Ep24HealthAI";
 import { Ep25Dark, Ep25Light } from "./videos/season5/Ep25ChatAgent";
 import { Ep26Dark, Ep26Light } from "./videos/season5/Ep26QualityAI";
 import { Ep27Dark, Ep27Light } from "./videos/season5/Ep27StrategicAI";
+import { Ep28Dark, Ep28Light } from "./videos/season6/Ep28WorkflowAutomation";
+import { Ep29Dark, Ep29Light } from "./videos/season6/Ep29RouteOptimization";
+import { Ep30Dark, Ep30Light } from "./videos/season6/Ep30Scheduling";
+import { Ep31Dark, Ep31Light } from "./videos/season6/Ep31Security";
+import { Ep32Dark, Ep32Light } from "./videos/season6/Ep32MobileOps";
+import { Ep33Dark, Ep33Light } from "./videos/season6/Ep33BusinessIntelligence";
 
 export const RemotionRoot = () => (
   <>
@@ -105,5 +111,18 @@ export const RemotionRoot = () => (
     <Composition id="ep26-light" component={Ep26Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="ep27-dark" component={Ep27Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="ep27-light" component={Ep27Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 6 (Operations & Automation - Cyber Industrial) */}
+    <Composition id="ep28-dark" component={Ep28Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep28-light" component={Ep28Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep29-dark" component={Ep29Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep29-light" component={Ep29Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep30-dark" component={Ep30Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep30-light" component={Ep30Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep31-dark" component={Ep31Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep31-light" component={Ep31Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep32-dark" component={Ep32Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep32-light" component={Ep32Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep33-dark" component={Ep33Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep33-light" component={Ep33Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
   </>
 );
