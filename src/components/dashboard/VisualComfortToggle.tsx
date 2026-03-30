@@ -20,6 +20,9 @@ interface EyeComfortSettings {
   warmth: number; // 0-50
   reducedMotion: boolean;
   autoSchedule: boolean;
+  dimStartHour: number; // 0-23
+  darkStartHour: number; // 0-23
+  lightStartHour: number; // 0-23
 }
 
 const defaultComfort: EyeComfortSettings = {
@@ -29,6 +32,9 @@ const defaultComfort: EyeComfortSettings = {
   warmth: 0,
   reducedMotion: false,
   autoSchedule: false,
+  dimStartHour: 17,
+  darkStartHour: 21,
+  lightStartHour: 6,
 };
 
 const VisualComfortToggle = () => {
