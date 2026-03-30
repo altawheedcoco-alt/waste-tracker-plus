@@ -225,8 +225,8 @@ export function useNearbyShipments(center: ProximityCenter | null, radiusKm = 30
             unit: s.unit,
             pickupAddress: s.pickup_address,
             deliveryAddress: s.delivery_address,
-            pickupLat: Number(s.pickup_lat),
-            pickupLng: Number(s.pickup_lng),
+            pickupLat: Number(s.pickup_latitude),
+            pickupLng: Number(s.pickup_longitude),
             distanceKm: Math.round(dist * 10) / 10,
             pricePerUnit: s.price_per_unit,
           });
