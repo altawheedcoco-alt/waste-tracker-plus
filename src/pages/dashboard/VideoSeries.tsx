@@ -243,7 +243,11 @@ const VideoPlayer = ({
               onEnded={handleEnded}
               onLoadedData={handleLoadedData}
               onCanPlay={() => setIsLoading(false)}
-              preload="auto"
+              onWaiting={() => setIsLoading(true)}
+              onPlaying={() => setIsLoading(false)}
+              preload="metadata"
+              playsInline
+              poster={video.thumbnail ? `${video.thumbnail}?v=6` : undefined}
             />
           ) : (
             <div className="text-center text-white/60 flex flex-col items-center gap-3">
