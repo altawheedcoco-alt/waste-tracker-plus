@@ -46,7 +46,7 @@ const AIQualityAuditor = () => {
       if (!organization?.id) return null;
       const [shipmentsRes, invoicesRes, orgRes, driversRes] = await Promise.all([
         supabase.from('shipments').select('id, status, waste_type, quantity, unit, pickup_date, delivered_at, created_at, generator_notes, hazard_level, packaging_method').eq('generator_id', organization.id).limit(100),
-        supabase.from('invoices').select('id, status, amount, due_date, paid_at').eq('organization_id', organization.id).limit(50),
+        supabase.from('invoices').select('id, status, total_amount, due_date, paid_amount').eq('organization_id', organization.id).limit(50),
         supabase.from('organizations').select('*').eq('id', organization.id).single(),
         supabase.from('drivers').select('id, license_number, vehicle_plate, license_expiry').limit(20),
       ]);
