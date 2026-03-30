@@ -734,6 +734,20 @@ const VideoSeries = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
+                    {/* Season Banner */}
+                    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg">
+                      <img
+                        src={season.bannerImage}
+                        alt={`${season.titleEn} - Season ${season.number}`}
+                        className="w-full h-auto object-cover"
+                        loading="lazy"
+                        decoding="async"
+                        width={1920}
+                        height={640}
+                        style={{ aspectRatio: '3/1' }}
+                      />
+                    </div>
+
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
                       {seasonVideos.map((video, idx) => (
                         <VideoCard key={video.id} video={video} idx={idx} openVideo={openVideo} isWatched={watchedEpisodes.has(video.id)} />
