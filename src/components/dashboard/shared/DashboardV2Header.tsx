@@ -965,12 +965,12 @@ const DashboardV2Header = memo(({
                   <span className="text-[9px] font-mono text-primary font-black tracking-wider">LIVE</span>
                 </motion.div>
 
-                {/* Clock */}
-                <div className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-md bg-muted/40 border border-border/30" dir="ltr">
+                {/* Clock — visible on mobile too */}
+                <div className="flex items-center gap-1 px-1.5 sm:px-2 py-0.5 rounded-md bg-muted/40 border border-border/30" dir="ltr">
                   <Timer className="w-3 h-3 text-primary/70" />
-                  <span className="text-[9px] font-mono font-bold text-foreground tabular-nums">{timeStr}</span>
-                  <span className="text-border/50">|</span>
-                  <span className="text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
+                  <span className="text-[8px] sm:text-[9px] font-mono font-bold text-foreground tabular-nums">{timeStr}</span>
+                  <span className="hidden sm:inline text-border/50">|</span>
+                  <span className="hidden sm:inline text-[8px] font-mono text-muted-foreground tabular-nums">{dateStr}</span>
                 </div>
 
                 {/* System status icons */}
