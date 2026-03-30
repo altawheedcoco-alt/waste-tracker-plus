@@ -873,7 +873,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
               {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
               {!isMobile && <FocusMusicPlayer />}
 
-              {/* Theme Customizer - Hidden on mobile */}
+              {/* Theme Customizer - Hidden on mobile, kept for advanced settings */}
               {!isMobile && <ThemeCustomizer />}
 
               {/* My Shipments */}
