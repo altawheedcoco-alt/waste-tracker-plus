@@ -57,6 +57,17 @@ const Header = memo(() => {
       return next;
     });
   }, []);
+
+  // Apply landing theme on mount, restore dashboard theme on unmount
+  React.useEffect(() => {
+    if (landingDark) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.classList.remove('dim');
+    }
+  }, [landingDark]);
+
   const dropdownTimeout = useRef<ReturnType<typeof setTimeout>>();
 
   const handleLogin = () => navigate('/auth?mode=login');
