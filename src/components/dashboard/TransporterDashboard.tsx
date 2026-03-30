@@ -55,6 +55,8 @@ const TransporterOperationsTabs = lazy(() => import('./transporter/tabs/Transpor
 const TransporterIntelligenceTabs = lazy(() => import('./transporter/tabs/TransporterIntelligenceTabs'));
 const TransporterComplianceTabs = lazy(() => import('./transporter/tabs/TransporterComplianceTabs'));
 const PostsHub = lazy(() => import('./transporter/PostsHub'));
+const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
+const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
 
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
@@ -241,6 +243,24 @@ const TransporterDashboard = () => {
             incomingRequestsComponent={<TransporterIncomingRequests />}
           />
         </Suspense>
+      </div>
+
+      {/* ★ طلب سائق مستقل (نموذج أوبر/ديدي) */}
+      <div id="section-dispatch">
+        <ErrorBoundary fallbackTitle="خطأ في لوحة طلب السائقين">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <DispatchToDriverPanel />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
+
+      {/* ★ تتبع الرحلات النشطة للسائقين */}
+      <div id="section-live-tracking">
+        <ErrorBoundary fallbackTitle="خطأ في تتبع السائقين">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <LiveDriverTracker />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* 6. التواصل */}

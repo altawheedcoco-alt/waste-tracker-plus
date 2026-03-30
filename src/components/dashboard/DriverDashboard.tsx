@@ -63,7 +63,8 @@ const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarke
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
-
+const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
+const MutualRatingDialog = lazy(() => import('@/components/driver/MutualRatingDialog'));
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
     <Skeleton className="h-32 w-full rounded-xl" />
@@ -440,38 +441,32 @@ const DriverDashboard = () => {
                   ) : (
                     activeShipments.map((shipment) => (
                       <div key={shipment.id} className="flex flex-col gap-2">
-                        <ShipmentCard
-                          shipment={shipment}
-                          onStatusChange={fetchDriverData}
-                          variant="full"
-                        />
-                        {/* Map preview - hidden on small mobile, shown on larger screens */}
-                        <div className="hidden sm:block">
-                          <Card className="overflow-hidden">
-                            <div className="h-[120px] relative">
-                              <iframe
-                                src={`https://maps.google.com/maps?q=${encodeURIComponent(
-                                  shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address
-                                )}&z=14&output=embed`}
-                                width="100%"
-                                height="100%"
-                                style={{ border: 'none' }}
-                                loading="lazy"
-                                title={`خريطة ${shipment.shipment_number}`}
-                              />
-                            </div>
-                          </Card>
-                        </div>
-                        {/* Mobile: compact navigate button */}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="sm:hidden w-full gap-2 text-xs"
-                          onClick={() => handleNavigateToShipment(shipment)}
-                        >
-                          <Navigation className="w-3.5 h-3.5 text-primary" />
-                          ابدأ التنقل
-                        </Button>
+                        {/* DiDi-style Trip Lifecycle for independent/hired drivers */}
+                        {(driverInfo?.driver_type === 'independent' || driverInfo?.driver_type === 'hired') ? (
+                          <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+                            <TripLifecyclePanel
+                              shipment={shipment as any}
+                              onStatusChange={fetchDriverData}
+                            />
+                          </Suspense>
+                        ) : (
+                          <>
+                            <ShipmentCard
+                              shipment={shipment}
+                              onStatusChange={fetchDriverData}
+                              variant="full"
+                            />
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full gap-2 text-xs"
+                              onClick={() => handleNavigateToShipment(shipment)}
+                            >
+                              <Navigation className="w-3.5 h-3.5 text-primary" />
+                              ابدأ التنقل
+                            </Button>
+                          </>
+                        )}
                       </div>
                     ))
                   )}
