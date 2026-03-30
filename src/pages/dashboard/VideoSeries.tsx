@@ -9,20 +9,16 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
-// Platform logo & Season banner images
+// Platform logo
 import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
-import season1Banner from '@/assets/banners/season1-banner.jpg';
-import season2Banner from '@/assets/banners/season2-banner.jpg';
-import season3Banner from '@/assets/banners/season3-banner.jpg';
-import season4Banner from '@/assets/banners/season4-banner.jpg';
-import season5Banner from '@/assets/banners/season5-banner.jpg';
-import season6Banner from '@/assets/banners/season6-banner.jpg';
-import season7Banner from '@/assets/banners/season7-banner.jpg';
-import season8Banner from '@/assets/banners/season8-banner.jpg';
-import season9Banner from '@/assets/banners/season9-banner.jpg';
-import season10Banner from '@/assets/banners/season10-banner.jpg';
-import season11Banner from '@/assets/banners/season11-banner.jpg';
-import season12Banner from '@/assets/banners/season12-banner.jpg';
+
+// Banners loaded lazily via dynamic imports to avoid bundling 2MB+ upfront
+const bannerModules = import.meta.glob('@/assets/banners/season*-banner.webp', { eager: false, import: 'default' }) as Record<string, () => Promise<string>>;
+const getBannerUrl = (seasonNum: number): (() => Promise<string>) | undefined => {
+  const key = Object.keys(bannerModules).find(k => k.includes(`season${seasonNum}-banner.webp`));
+  return key ? bannerModules[key] : undefined;
+};
+
 interface VideoItem {
   id: string;
   title: string;
@@ -47,28 +43,21 @@ interface SeasonInfo {
   color: string;
   gradient: string;
   icon: string;
-  bannerImage: string;
 }
 
-const seasonBanners: Record<number, string> = {
-  1: season1Banner, 2: season2Banner, 3: season3Banner, 4: season4Banner,
-  5: season5Banner, 6: season6Banner, 7: season7Banner, 8: season8Banner,
-  9: season9Banner, 10: season10Banner, 11: season11Banner, 12: season12Banner,
-};
-
 const seasons: SeasonInfo[] = [
-  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱', bannerImage: seasonBanners[1] },
-  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡', bannerImage: seasonBanners[2] },
-  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗', bannerImage: seasonBanners[3] },
-  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛', bannerImage: seasonBanners[4] },
-  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠', bannerImage: seasonBanners[5] },
-  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
-  { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
-  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
-  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️', bannerImage: seasonBanners[9] },
-  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️', bannerImage: seasonBanners[10] },
-  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌', bannerImage: seasonBanners[11] },
-  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀', bannerImage: seasonBanners[12] },
+  { number: 1, title: 'أساسيات المنصة', titleEn: 'Platform Essentials', style: 'Cinematic Minimal', color: 'from-emerald-500 to-teal-600', gradient: 'from-emerald-500/20 via-teal-500/10 to-transparent', icon: '🌱' },
+  { number: 2, title: 'الميزات المتقدمة', titleEn: 'Advanced Features', style: 'Tech Product', color: 'from-cyan-500 to-blue-600', gradient: 'from-cyan-500/20 via-blue-500/10 to-transparent', icon: '⚡' },
+  { number: 3, title: 'الأنظمة المتكاملة', titleEn: 'Integrated Systems', style: 'Clean Futuristic', color: 'from-indigo-500 to-purple-600', gradient: 'from-indigo-500/20 via-purple-500/10 to-transparent', icon: '🔗' },
+  { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛' },
+  { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠' },
+  { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️' },
+  { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡' },
+  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰' },
+  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️' },
+  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️' },
+  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌' },
+  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀' },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
@@ -785,20 +774,8 @@ const VideoSeries = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    {/* Season Banner */}
-                    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative">
-                      <img
-                        src={season.bannerImage}
-                        alt={`${season.titleEn} - Season ${season.number}`}
-                        className="w-full h-auto object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        width={1920}
-                        height={640}
-                        style={{ aspectRatio: '3/1' }}
-                      />
-                      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" />
-                    </div>
+                    {/* Season Banner - Lazy loaded */}
+                    <LazyBanner seasonNum={season.number} alt={`${season.titleEn} - Season ${season.number}`} />
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
                       {seasonVideos.map((video, idx) => (
