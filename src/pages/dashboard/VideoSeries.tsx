@@ -51,14 +51,9 @@ interface SeasonInfo {
 }
 
 const seasonBanners: Record<number, string> = {
-  1: season1Banner,
-  2: season2Banner,
-  3: season3Banner,
-  4: season4Banner,
-  5: season5Banner,
-  6: season6Banner,
-  7: season7Banner,
-  8: season8Banner,
+  1: season1Banner, 2: season2Banner, 3: season3Banner, 4: season4Banner,
+  5: season5Banner, 6: season6Banner, 7: season7Banner, 8: season8Banner,
+  9: season9Banner, 10: season10Banner, 11: season11Banner, 12: season12Banner,
 };
 
 const seasons: SeasonInfo[] = [
