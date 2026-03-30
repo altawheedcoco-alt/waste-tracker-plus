@@ -222,8 +222,8 @@ img, video, iframe, svg, canvas {
 
   /* v3.0: Better card spacing on mobile */
   .grid { gap: 0.5rem; }
-  .grid.gap-4 { gap: 0.625rem; }
-  .grid.gap-6 { gap: 0.75rem; }
+  .grid.gap-4 { gap: 0.5rem; }
+  .grid.gap-6 { gap: 0.625rem; }
 
   /* v3.1: Dashboard internal pages — prevent button/element overlap */
   .scrollbar-hide::-webkit-scrollbar { display: none; }
@@ -236,15 +236,24 @@ img, video, iframe, svg, canvas {
 
   /* Stat cards grid: ensure 2-col doesn't cramp */
   .grid-cols-2 > * { min-width: 0; }
-
-  /* Action buttons in headers: prevent wrapping, enable scroll */
-  [class*="DashboardV2Header"] .flex-wrap { flex-wrap: nowrap; }
+  
+  /* Force 3-col grids to 2-col on phones */
+  .grid-cols-3:not(.force-3-cols) { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 
   /* Card headers with buttons: stack vertically on small screens */
   .card-header-actions {
     flex-direction: column;
     align-items: stretch;
     gap: 0.5rem;
+  }
+  
+  /* Prevent text overflow in stat values */
+  .tabular-nums { font-size: clamp(0.875rem, 4vw, 1.25rem); }
+  
+  /* Fix badges on small screens */
+  .badge, [data-badge] { 
+    font-size: 0.625rem; 
+    padding: 0.0625rem 0.25rem;
   }
   /* v3.1: Landing page — force opaque backgrounds on mobile */
   .landing-page section {
