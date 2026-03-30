@@ -3,12 +3,13 @@ import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
-  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users
+  Fingerprint, ScanFace, Mic, Bot, Eye, BarChart3, Wind, Ear, Users, Radio
 } from 'lucide-react';
 import PPGTab from '@/components/health/PPGTab';
 import FaceScanTab from '@/components/health/FaceScanTab';
 import VoiceStressTab from '@/components/health/VoiceStressTab';
 import HealthCoachTab from '@/components/health/HealthCoachTab';
+import HealthLiveTab from '@/components/health/HealthLiveTab';
 import EyePostureTab from '@/components/health/EyePostureTab';
 import HealthHistoryTab from '@/components/health/HealthHistoryTab';
 import BreathingTab from '@/components/health/BreathingTab';
