@@ -22,7 +22,7 @@ const STAT_ITEMS: StatItem[] = [
   { icon: Users, valueKey: 'users', labelAr: 'مستخدم نشط', labelEn: 'Active Users', gradient: 'from-violet-500 to-purple-600' },
   { icon: UserCheck, valueKey: 'drivers', labelAr: 'سائق مستقل', labelEn: 'Drivers', gradient: 'from-amber-500 to-orange-600' },
   { icon: FileText, valueKey: 'invoices', labelAr: 'فاتورة رقمية', labelEn: 'Invoices', gradient: 'from-rose-500 to-pink-600' },
-  { icon: Package, valueKey: 'wasteItems', labelAr: 'مادة مخلفات', labelEn: 'Waste Items', gradient: 'from-teal-500 to-green-600' },
+  { icon: Package, valueKey: 'wasteItems', labelAr: 'منشور محتوى', labelEn: 'Posts', gradient: 'from-teal-500 to-green-600' },
 ];
 
 const LivePlatformStats = memo(() => {
