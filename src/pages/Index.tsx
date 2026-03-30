@@ -304,6 +304,20 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* Live Platform Stats */}
+          <div id="live-stats">
+            <LazySection minH={300}>
+              <LivePlatformStats />
+            </LazySection>
+          </div>
+
+          {/* Platform Changelog */}
+          <div id="changelog">
+            <LazySection minH={400}>
+              <PlatformChangelog />
+            </LazySection>
+          </div>
+
           {/* Platform Posts Section */}
           <LazySection minH={400}>
             <PlatformPostsSection />
