@@ -240,7 +240,7 @@ const UnifiedFloatingMenu = memo(() => {
       {/* Menu Items */}
       <AnimatePresence>
         {isOpen && (
-          <div className="absolute bottom-16 right-0 z-50 flex flex-col-reverse items-end gap-2 mb-2">
+          <div className={cn("absolute bottom-14 right-0 z-50 flex flex-col-reverse items-end gap-1.5 mb-2", isMobile && "max-h-[50vh] overflow-y-auto scrollbar-hide")}>
             {visibleItems.map((item, index) => (
               <motion.div
                 key={`${item.navPath || item.id}-${item.label}`}
