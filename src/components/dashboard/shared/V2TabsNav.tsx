@@ -60,7 +60,7 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
               key={tab.value}
               value={tab.value}
               className={cn(
-                "gap-1 sm:gap-1.5 text-[11px] sm:text-sm whitespace-nowrap rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 relative min-h-[36px] touch-manipulation",
+                "gap-1 text-[10px] sm:text-sm whitespace-nowrap rounded-lg sm:rounded-xl px-1.5 sm:px-3 py-1.5 sm:py-2.5 relative min-h-[32px] sm:min-h-[36px] touch-manipulation",
                 "data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80",
                 "data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20",
                 "hover:bg-muted/50 transition-all duration-300"
