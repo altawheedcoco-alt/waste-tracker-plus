@@ -9,51 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
-// Platform logo & Season banner images
+// Platform logo
 import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
-import season1Banner from '@/assets/banners/season1-banner.jpg';
-import season2Banner from '@/assets/banners/season2-banner.jpg';
-import season3Banner from '@/assets/banners/season3-banner.jpg';
-import season4Banner from '@/assets/banners/season4-banner.jpg';
-import season5Banner from '@/assets/banners/season5-banner.jpg';
-import season6Banner from '@/assets/banners/season6-banner.jpg';
-import season7Banner from '@/assets/banners/season7-banner.jpg';
-import season8Banner from '@/assets/banners/season8-banner.jpg';
-import season9Banner from '@/assets/banners/season9-banner.jpg';
-import season10Banner from '@/assets/banners/season10-banner.jpg';
-import season11Banner from '@/assets/banners/season11-banner.jpg';
-import season12Banner from '@/assets/banners/season12-banner.jpg';
-interface VideoItem {
-  id: string;
-  title: string;
-  titleEn: string;
-  description: string;
-  duration: string;
-  thumbnail: string;
-  videoUrl?: string;
-  videoUrlDark?: string;
-  videoUrlLight?: string;
-  status: 'available' | 'coming_soon';
-  episode: number;
-  season: number;
-  tags: string[];
-}
 
-interface SeasonInfo {
-  number: number;
-  title: string;
-  titleEn: string;
-  style: string;
-  color: string;
-  gradient: string;
-  icon: string;
-  bannerImage: string;
-}
-
-const seasonBanners: Record<number, string> = {
-  1: season1Banner, 2: season2Banner, 3: season3Banner, 4: season4Banner,
-  5: season5Banner, 6: season6Banner, 7: season7Banner, 8: season8Banner,
-  9: season9Banner, 10: season10Banner, 11: season11Banner, 12: season12Banner,
+// Banners loaded lazily via dynamic imports to avoid bundling 2MB+ upfront
+const bannerModules = import.meta.glob('@/assets/banners/season*-banner.webp', { eager: false, import: 'default' }) as Record<string, () => Promise<string>>;
+const getBannerUrl = (seasonNum: number): (() => Promise<string>) | undefined => {
+  const key = Object.keys(bannerModules).find(k => k.includes(`season${seasonNum}-banner.webp`));
+  return key ? bannerModules[key] : undefined;
 };
 
 const seasons: SeasonInfo[] = [
