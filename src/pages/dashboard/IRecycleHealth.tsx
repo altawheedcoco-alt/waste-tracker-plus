@@ -74,6 +74,7 @@ const IRecycleHealth = () => {
           <TabsContent value="breathing" className="mt-4"><BreathingTab /></TabsContent>
           <TabsContent value="hearing" className="mt-4"><HearingSkinTab /></TabsContent>
           <TabsContent value="eye" className="mt-4"><EyePostureTab /></TabsContent>
+          <TabsContent value="live" className="mt-4"><HealthLiveTab /></TabsContent>
           <TabsContent value="coach" className="mt-4"><HealthCoachTab /></TabsContent>
           <TabsContent value="history" className="mt-4"><HealthHistoryTab /></TabsContent>
           <TabsContent value="team" className="mt-4"><TeamHealthTab /></TabsContent>
