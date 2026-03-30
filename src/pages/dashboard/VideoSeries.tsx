@@ -774,20 +774,8 @@ const VideoSeries = () => {
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    {/* Season Banner */}
-                    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative">
-                      <img
-                        src={season.bannerImage}
-                        alt={`${season.titleEn} - Season ${season.number}`}
-                        className="w-full h-auto object-cover"
-                        loading="lazy"
-                        decoding="async"
-                        width={1920}
-                        height={640}
-                        style={{ aspectRatio: '3/1' }}
-                      />
-                      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" />
-                    </div>
+                    {/* Season Banner - Lazy loaded */}
+                    <LazyBanner seasonNum={season.number} alt={`${season.titleEn} - Season ${season.number}`} />
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
                       {seasonVideos.map((video, idx) => (
