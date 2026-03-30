@@ -201,7 +201,7 @@ img, video, iframe, svg, canvas {
   }
 
   /* Ensure enough space for bottom nav */
-  main { padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important; }
+  main { padding-bottom: calc(6rem + env(safe-area-inset-bottom, 0px)) !important; }
 
   .recharts-responsive-container { min-height: 180px; }
 
