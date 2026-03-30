@@ -213,6 +213,47 @@ const VisualComfortToggle = () => {
                 className="scale-75"
               />
             </div>
+            {/* User-configurable schedule times */}
+            {comfort.autoSchedule && (
+              <div className="space-y-1.5 pt-1 pr-2 border-r-2 border-primary/20">
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">☀️ نهاري من الساعة</label>
+                  <select
+                    value={comfort.lightStartHour}
+                    onChange={(e) => updateComfort('lightStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">🌅 مسائي من الساعة</label>
+                  <select
+                    value={comfort.dimStartHour}
+                    onChange={(e) => updateComfort('dimStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+                <div className="flex items-center justify-between">
+                  <label className="text-[10px] text-muted-foreground">🌙 ليلي من الساعة</label>
+                  <select
+                    value={comfort.darkStartHour}
+                    onChange={(e) => updateComfort('darkStartHour', Number(e.target.value))}
+                    className="text-[10px] bg-muted/50 border border-border/50 rounded px-1.5 py-0.5"
+                  >
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <option key={i} value={i}>{i.toString().padStart(2, '0')}:00</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Reset */}
