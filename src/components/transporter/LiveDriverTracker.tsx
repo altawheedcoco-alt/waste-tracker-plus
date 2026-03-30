@@ -5,13 +5,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  MapPin, Phone, Navigation, Truck, Clock, Star,
-  Loader2, CheckCircle2, Circle, ArrowDown,
-  MessageCircle,
+  MapPin, Phone, Navigation, Truck, Clock,
+  Loader2, CheckCircle2,
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useEffect, useState } from 'react';
@@ -20,7 +19,6 @@ import { cn } from '@/lib/utils';
 const TRIP_STAGES = [
   { key: 'approved', label: 'تم القبول', icon: CheckCircle2, color: 'text-emerald-500' },
   { key: 'collecting', label: 'متجه للاستلام', icon: Navigation, color: 'text-blue-500' },
-  { key: 'at_pickup', label: 'في موقع التحميل', icon: MapPin, color: 'text-amber-500' },
   { key: 'in_transit', label: 'في الطريق', icon: Truck, color: 'text-primary' },
   { key: 'delivered', label: 'تم التسليم', icon: CheckCircle2, color: 'text-emerald-600' },
 ];
@@ -29,7 +27,6 @@ const LiveDriverTracker = () => {
   const { organization } = useAuth();
   const orgId = organization?.id;
 
-  // Fetch active shipments with assigned drivers
   const { data: activeTrips = [], isLoading } = useQuery({
     queryKey: ['transporter-active-trips', orgId],
     enabled: !!orgId,
@@ -48,39 +45,28 @@ const LiveDriverTracker = () => {
         .order('created_at', { ascending: false })
         .limit(10);
       if (error) throw error;
-
-      // Fetch driver info for each
       if (!data?.length) return [];
-      const driverIds = [...new Set(data.map(s => s.driver_id).filter(Boolean))];
+
+      const driverIds = [...new Set(data.map(s => s.driver_id).filter(Boolean))] as string[];
+      
       const { data: drivers } = await supabase
         .from('drivers')
-        .select('id, license_number, vehicle_plate, vehicle_type, rating, total_trips, is_available')
-        .in('id', driverIds as string[]);
+        .select('id, license_number, vehicle_plate, vehicle_type, rating, total_trips, is_available, profile_id')
+        .in('id', driverIds);
 
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, full_name, phone, avatar_url')
-        .in('id', (drivers || []).map(d => d.id));
+      const profileIds = (drivers || []).map(d => d.profile_id).filter(Boolean) as string[];
+      const { data: profiles } = profileIds.length > 0
+        ? await supabase.from('profiles').select('id, full_name, phone, avatar_url').in('id', profileIds)
+        : { data: [] };
 
       const driverMap = new Map((drivers || []).map(d => [d.id, d]));
       const profileMap = new Map((profiles || []).map(p => [p.id, p]));
 
-      // Get latest locations
-      const { data: locations } = await supabase
-        .from('driver_locations')
-        .select('driver_id, latitude, longitude, speed, recorded_at')
-        .in('driver_id', driverIds as string[])
-        .order('recorded_at', { ascending: false })
-        .limit(driverIds.length);
-
-      const locationMap = new Map((locations || []).map(l => [l.driver_id, l]));
-
-      return data.map(shipment => ({
-        ...shipment,
-        driver: driverMap.get(shipment.driver_id!) || null,
-        driverProfile: profileMap.get(shipment.driver_id!) || null,
-        lastLocation: locationMap.get(shipment.driver_id!) || null,
-      }));
+      return data.map(shipment => {
+        const driver = driverMap.get(shipment.driver_id!) || null;
+        const driverProfile = driver?.profile_id ? profileMap.get(driver.profile_id) || null : null;
+        return { ...shipment, driver, driverProfile };
+      });
     },
   });
 
@@ -137,12 +123,8 @@ const TripCard = ({ trip }: { trip: any }) => {
   }, [trip.approved_at]);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
       <Card className="border-primary/20 overflow-hidden">
-        {/* Status progress bar */}
         <div className="h-1 bg-muted">
           <motion.div
             className="h-full bg-primary"
@@ -153,17 +135,11 @@ const TripCard = ({ trip }: { trip: any }) => {
         </div>
 
         <CardContent className="p-4 space-y-3">
-          {/* Header: Driver info + shipment */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <Badge variant="outline" className="text-xs gap-1">
                 <Clock className="w-3 h-3" /> {elapsed}
               </Badge>
-              {trip.lastLocation?.speed > 0 && (
-                <Badge variant="secondary" className="text-[10px]">
-                  {Math.round((trip.lastLocation.speed || 0) * 3.6)} كم/س
-                </Badge>
-              )}
             </div>
             <div className="text-right">
               <span className="text-sm font-bold">{trip.shipment_number}</span>
@@ -201,7 +177,6 @@ const TripCard = ({ trip }: { trip: any }) => {
               const isCompleted = i <= currentStageIndex;
               const isCurrent = i === currentStageIndex;
               const StageIcon = stage.icon;
-
               return (
                 <div key={stage.key} className="flex flex-col items-center gap-1 flex-1">
                   <div className={cn(
@@ -220,7 +195,7 @@ const TripCard = ({ trip }: { trip: any }) => {
                   <span className={cn(
                     'text-[8px] text-center leading-tight',
                     isCurrent ? 'text-primary font-bold' :
-                    isCompleted ? 'text-emerald-600 dark:text-emerald-400' :
+                    isCompleted ? 'text-foreground' :
                     'text-muted-foreground/50'
                   )}>
                     {stage.label}
@@ -237,7 +212,7 @@ const TripCard = ({ trip }: { trip: any }) => {
               <span className="text-muted-foreground truncate">{trip.pickup_address}</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 rounded-full bg-red-500" />
+              <div className="w-2 h-2 rounded-full bg-destructive" />
               <span className="text-muted-foreground truncate">{trip.delivery_address}</span>
             </div>
           </div>
