@@ -17,12 +17,24 @@ export const GENERATOR_TAB_BINDINGS: Record<string, BindingMeta> = {
     requiresPartner: true,
     contextHint: 'شحنات المخلفات المرسلة للناقلين والمدورين',
   },
+  finance: {
+    type: 'hybrid',
+    involvedParties: ['self', 'admin'],
+    adminVisible: true,
+    contextHint: 'الفواتير والمدفوعات والمحفظة والتكاليف',
+  },
   operations: {
     type: 'partner',
     involvedParties: ['self', 'recycler'],
     adminVisible: true,
     requiresPartner: true,
     contextHint: 'عمليات النقل مع الشركاء',
+  },
+  'ai-tools': {
+    type: 'hybrid',
+    involvedParties: ['self'],
+    adminVisible: true,
+    contextHint: 'أدوات الذكاء الاصطناعي وتصنيف النفايات والتوقعات',
   },
   'work-orders': {
     type: 'partner',
@@ -37,6 +49,12 @@ export const GENERATOR_TAB_BINDINGS: Record<string, BindingMeta> = {
     adminVisible: true,
     requiresPartner: true,
     contextHint: 'إدارة العلاقات مع الناقلين والمدورين',
+  },
+  reports: {
+    type: 'hybrid',
+    involvedParties: ['self', 'admin'],
+    adminVisible: true,
+    contextHint: 'التقارير الشهرية والربع سنوية والبيئية',
   },
   compliance: {
     type: 'admin',
