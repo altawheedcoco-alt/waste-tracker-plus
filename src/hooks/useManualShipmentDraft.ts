@@ -532,8 +532,8 @@ export function useManualShipmentDraft(draftId?: string, shareCode?: string) {
           return;
         }
 
-        const { data: urlData } = supabase.storage.from('shipment-documents').getPublicUrl(filename);
-        const pdfUrl = urlData?.publicUrl;
+        const { data: urlData } = await supabase.storage.from('shipment-documents').createSignedUrl(filename, 24 * 3600);
+        const pdfUrl = urlData?.signedUrl;
         const pdfFilename = `بيان-شحنة-${form.shipment_number || result.draftId}.pdf`;
 
         for (const { phone } of recipients) {
