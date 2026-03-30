@@ -39,6 +39,8 @@ const PartnersView = lazy(() => import('@/components/dashboard/PartnersView'));
 const DisposalIncomingPanel = lazy(() => import('@/components/dashboard/disposal/DisposalIncomingPanel'));
 const DisposalDailyOperations = lazy(() => import('@/components/dashboard/disposal/DisposalDailyOperations'));
 const DisposalRecentOperations = lazy(() => import('@/components/dashboard/disposal/DisposalRecentOperations'));
+const NearbyDriversRadar = lazy(() => import('@/components/maps/NearbyDriversRadar'));
+const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 
 interface AdminCommandTabsProps {
   statCards: StatCard[];

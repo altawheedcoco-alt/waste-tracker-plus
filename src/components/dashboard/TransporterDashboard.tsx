@@ -39,6 +39,7 @@ import TransporterSectionNav from './transporter/TransporterSectionNav';
 // ★ Lazy-load ALL heavy secondary components
 const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 const TransporterCommandCenter = lazy(() => import('./transporter/TransporterCommandCenter'));
+const NearbyDriversRadar = lazy(() => import('@/components/maps/NearbyDriversRadar'));
 const SmartDailyBrief = lazy(() => import('./shared/SmartDailyBrief'));
 import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 const TransporterDailyPulse = lazy(() => import('./transporter/TransporterDailyPulse'));
