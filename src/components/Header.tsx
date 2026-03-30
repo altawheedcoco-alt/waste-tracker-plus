@@ -498,11 +498,11 @@ const Header = memo(() => {
                     {language === 'ar' ? 'English' : 'عربي'}
                   </button>
                   <button
-                    onClick={toggleDarkMode}
+                    onClick={toggleLandingDark}
                     className="flex items-center justify-center gap-1.5 h-10 rounded-lg border border-border/25 bg-muted/15 text-[11px] font-semibold text-muted-foreground/70 hover:text-foreground transition-all touch-manipulation"
                   >
-                    {settings.isDarkMode ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
-                    {settings.isDarkMode ? 'نهاري' : 'ليلي'}
+                    {landingDark ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+                    {landingDark ? 'نهاري' : 'ليلي'}
                   </button>
                 </div>
                 <GuideButton />
