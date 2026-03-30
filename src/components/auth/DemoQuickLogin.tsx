@@ -137,6 +137,7 @@ const accountGroups: { id: string; label: string; icon: any; hint?: string; acco
     icon: UserCog,
     accounts: [
       { email: 'altawheedco.co@gmail.com', label: 'مدير النظام', desc: 'Admin سيادي', icon: Shield, color: 'from-yellow-500 to-amber-700' },
+      { email: 'altawheedforwasteandwoodtrade@gmail.com', label: 'التوحيد للنقل', desc: 'الحساب الرسمي للتوحيد', icon: Building2, color: 'from-emerald-600 to-green-800' },
       { email: 'demo-employee@irecycle.test', label: 'موظف - التوحيد', desc: 'موظف → مساحة العمل', icon: UserCog, color: 'from-slate-500 to-slate-700' },
     ],
   },
