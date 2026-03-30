@@ -19,6 +19,10 @@ import season5Banner from '@/assets/banners/season5-banner.jpg';
 import season6Banner from '@/assets/banners/season6-banner.jpg';
 import season7Banner from '@/assets/banners/season7-banner.jpg';
 import season8Banner from '@/assets/banners/season8-banner.jpg';
+import season9Banner from '@/assets/banners/season9-banner.jpg';
+import season10Banner from '@/assets/banners/season10-banner.jpg';
+import season11Banner from '@/assets/banners/season11-banner.jpg';
+import season12Banner from '@/assets/banners/season12-banner.jpg';
 interface VideoItem {
   id: string;
   title: string;
