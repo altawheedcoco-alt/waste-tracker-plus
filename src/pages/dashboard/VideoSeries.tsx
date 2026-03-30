@@ -65,6 +65,10 @@ const seasons: SeasonInfo[] = [
   { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
   { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
   { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
+  { number: 9, title: 'الموارد البشرية', titleEn: 'HR & Workforce', style: 'Military Tactical', color: 'from-lime-600 to-green-700', gradient: 'from-lime-600/20 via-green-700/10 to-transparent', icon: '🎖️', bannerImage: seasonBanners[9] },
+  { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️', bannerImage: seasonBanners[10] },
+  { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌', bannerImage: seasonBanners[11] },
+  { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀', bannerImage: seasonBanners[12] },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
