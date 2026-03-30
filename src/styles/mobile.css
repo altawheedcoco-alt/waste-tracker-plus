@@ -356,9 +356,9 @@ img, video, iframe, svg, canvas {
     overscroll-behavior-y: contain;
   }
 
-  /* Extra bottom padding for gesture nav */
+  /* Extra bottom padding for gesture nav + bottom nav */
   main {
-    padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(5.5rem + env(safe-area-inset-bottom, 0px)) !important;
   }
 
   /* PWA header safe area */
@@ -380,6 +380,26 @@ img, video, iframe, svg, canvas {
   /* Bottom nav in PWA needs extra padding */
   .fixed.bottom-0 {
     padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* PWA: prevent text clipping in cards */
+  [class*="Card"] p,
+  [class*="Card"] span,
+  [class*="Card"] h1,
+  [class*="Card"] h2,
+  [class*="Card"] h3 {
+    overflow-wrap: break-word;
+    word-break: break-word;
+  }
+
+  /* PWA: ensure buttons remain tappable */
+  button, [role="button"], a[href] {
+    min-height: 36px;
+  }
+
+  /* PWA: Fix header overlap on notched phones */
+  header {
+    min-height: calc(3.5rem + env(safe-area-inset-top, 0px));
   }
 }
 
