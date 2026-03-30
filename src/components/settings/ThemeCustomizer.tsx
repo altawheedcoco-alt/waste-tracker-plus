@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Palette, Type, Moon, Sun, RotateCcw, Settings2, Check, Monitor, Tablet, Smartphone, MonitorSmartphone } from 'lucide-react';
+import { Palette, Type, Moon, Sun, Sunset, RotateCcw, Settings2, Check, Monitor, Tablet, Smartphone, MonitorSmartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import {
