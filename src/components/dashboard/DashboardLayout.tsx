@@ -515,9 +515,9 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
   // Get responsive values
   const SIDEBAR_WIDTH = isMobile ? 260 : isTablet ? 270 : 280;
   const sidebarWidth = isSidebarOpen ? SIDEBAR_WIDTH : 0;
-  const headerHeight = isMobile ? 'h-[52px]' : 'h-14';
-  const mainPadding = fullWidth ? 'px-3 py-3' : getResponsiveClass({
-    mobile: 'px-3 pt-3 pb-0',
+  const headerHeight = isMobile ? 'h-[48px]' : 'h-14';
+  const mainPadding = fullWidth ? 'px-2 sm:px-3 py-2 sm:py-3' : getResponsiveClass({
+    mobile: 'px-2 pt-2 pb-0',
     tablet: 'p-4',
     desktop: 'p-6',
   });
@@ -856,13 +856,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Right side - Responsive spacing */}
-            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2'}`}>
+            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-0.5' : isTablet ? 'gap-1.5' : 'gap-2'}`}>
               {/* View Mode Toolbar - Desktop only */}
               {!isMobile && !isTablet && <ViewModeToolbar />}
-              <LiveClock />
+              {/* Live Clock - hidden on very small mobile */}
+              {!isMobile && <LiveClock />}
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
-
 
               {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
               {!isMobile && <FocusMusicPlayer />}
@@ -1144,7 +1144,7 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
           </AnimatePresence>
 
           {/* Page content - Responsive padding with proper overflow handling and bottom spacing for bottom nav */}
-          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[5.5rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
+          <main className={`flex-1 ${mainPadding} overflow-x-hidden overflow-y-auto ${isMobile ? 'pb-[6rem]' : 'pb-6'} scroll-smooth min-h-0`} style={{ WebkitOverflowScrolling: 'touch' }}>
             <DashboardBreadcrumb />
             <div className={`w-full ${fullWidth ? 'max-w-full' : 'max-w-[1600px] mx-auto'}`}>
               <OnboardingGuard>

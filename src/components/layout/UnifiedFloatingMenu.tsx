@@ -211,8 +211,8 @@ const UnifiedFloatingMenu = memo(() => {
   // Close when route changes
   useEffect(() => { setIsOpen(false); }, [location.pathname]);
 
-  const buttonSize = isMobile ? 'w-12 h-12' : 'w-14 h-14';
-  const itemButtonSize = isMobile ? 'w-10 h-10' : 'w-12 h-12';
+  const buttonSize = isMobile ? 'w-11 h-11' : 'w-14 h-14';
+  const itemButtonSize = isMobile ? 'w-9 h-9' : 'w-12 h-12';
 
   return (
     <div
@@ -220,7 +220,7 @@ const UnifiedFloatingMenu = memo(() => {
       className={cn(
         'fixed z-50',
         isMobile
-          ? 'bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-3'
+          ? 'bottom-[calc(5rem+env(safe-area-inset-bottom))] right-2.5'
           : 'bottom-6 right-6'
       )}
     >
@@ -240,7 +240,7 @@ const UnifiedFloatingMenu = memo(() => {
       {/* Menu Items */}
       <AnimatePresence>
         {isOpen && (
-          <div className="absolute bottom-16 right-0 z-50 flex flex-col-reverse items-end gap-2 mb-2">
+          <div className={cn("absolute bottom-14 right-0 z-50 flex flex-col-reverse items-end gap-1.5 mb-2", isMobile && "max-h-[50vh] overflow-y-auto scrollbar-hide")}>
             {visibleItems.map((item, index) => (
               <motion.div
                 key={`${item.navPath || item.id}-${item.label}`}

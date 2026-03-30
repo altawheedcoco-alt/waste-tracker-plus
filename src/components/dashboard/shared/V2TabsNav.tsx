@@ -40,8 +40,8 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
   }, [tabs]);
 
   return (
-    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-1 sm:p-1.5 shadow-sm">
-      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 sm:gap-1 h-auto p-0 scrollbar-hide">
+    <div className="relative overflow-hidden rounded-xl sm:rounded-2xl border border-border/30 bg-gradient-to-r from-card via-card to-muted/20 p-0.5 sm:p-1.5 shadow-sm">
+      <TabsList className="w-full justify-start overflow-x-auto flex-nowrap bg-transparent gap-0.5 h-auto p-0 scrollbar-hide">
         {elements.map((el, i) => {
           if (el.type === 'separator') {
             return (
@@ -60,7 +60,7 @@ const V2TabsNav = memo(({ tabs }: V2TabsNavProps) => {
               key={tab.value}
               value={tab.value}
               className={cn(
-                "gap-1 sm:gap-1.5 text-[11px] sm:text-sm whitespace-nowrap rounded-lg sm:rounded-xl px-2 sm:px-3 py-2 sm:py-2.5 relative min-h-[36px] touch-manipulation",
+                "gap-1 text-[10px] sm:text-sm whitespace-nowrap rounded-lg sm:rounded-xl px-1.5 sm:px-3 py-1.5 sm:py-2.5 relative min-h-[32px] sm:min-h-[36px] touch-manipulation",
                 "data-[state=active]:bg-gradient-to-r data-[state=active]:from-primary data-[state=active]:to-primary/80",
                 "data-[state=active]:text-primary-foreground data-[state=active]:shadow-md data-[state=active]:shadow-primary/20",
                 "hover:bg-muted/50 transition-all duration-300"
