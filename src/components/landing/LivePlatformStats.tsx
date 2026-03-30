@@ -36,7 +36,7 @@ const LivePlatformStats = memo(() => {
         supabase.from('organizations').select('id', { count: 'exact', head: true }),
         supabase.from('shipments').select('id', { count: 'exact', head: true }),
         supabase.from('profiles').select('id', { count: 'exact', head: true }),
-        supabase.from('driver_profiles').select('id', { count: 'exact', head: true }),
+        supabase.from('drivers').select('id', { count: 'exact', head: true }),
         supabase.from('invoices').select('id', { count: 'exact', head: true }),
         supabase.from('platform_posts').select('id', { count: 'exact', head: true }),
       ]);
