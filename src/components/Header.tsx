@@ -254,12 +254,12 @@ const Header = memo(() => {
             {/* Right: Utilities */}
             <div className="flex items-center gap-2.5">
               <button
-                onClick={toggleDarkMode}
+                onClick={toggleLandingDark}
                 className="relative flex items-center justify-center w-6 h-6 rounded-md bg-accent dark:bg-accent/70 border border-border/40 dark:border-border/50 text-foreground/70 dark:text-foreground/90 hover:border-primary/40 hover:shadow-[0_0_6px_hsl(var(--primary)/0.15)] transition-all duration-300 shadow-sm"
                 aria-label="Toggle theme"
               >
-                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
-                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${settings.isDarkMode ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
+                <Sun className={`w-3 h-3 absolute transition-all duration-400 ${landingDark ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'}`} />
+                <Moon className={`w-3 h-3 absolute transition-all duration-400 ${landingDark ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} />
               </button>
               <span className="w-px h-4 bg-border/40 dark:bg-border/30" />
               <button
