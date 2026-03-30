@@ -13,10 +13,11 @@ import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
-  User, ListTodo, ShieldCheck, Trophy, Bell, Loader2,
+  User, ListTodo, ShieldCheck, Trophy, Bell,
   Building2, Clock, Package, Zap, CalendarDays, LayoutDashboard, Settings, LogOut,
   Gauge, Cog, Calendar, FileText, BarChart3,
 } from 'lucide-react';
+import TabFallback from '@/components/dashboard/shared/TabFallback';
 
 const MyProfileTab = lazy(() => import('@/components/workspace/MyProfileTab'));
 const MyTasksTab = lazy(() => import('@/components/workspace/MyTasksTab'));
@@ -28,12 +29,6 @@ const MySettingsTab = lazy(() => import('@/components/workspace/MySettingsTab'))
 const MyCalendarTab = lazy(() => import('@/components/workspace/MyCalendarTab'));
 const MyDocumentsTab = lazy(() => import('@/components/workspace/MyDocumentsTab'));
 const MyStatsTab = lazy(() => import('@/components/workspace/MyStatsTab'));
-
-const TabFallback = () => (
-  <div className="flex items-center justify-center py-16">
-    <Loader2 className="w-6 h-6 text-primary animate-spin" />
-  </div>
-);
 
 const TABS: TabItem[] = [
   { value: 'dashboard', label: 'لوحة التحكم', icon: Gauge },
