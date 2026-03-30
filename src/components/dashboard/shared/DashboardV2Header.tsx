@@ -1080,7 +1080,7 @@ const DashboardV2Header = memo(({
               </div>
 
               {/* Stats grid */}
-              <div className="flex-1 grid grid-cols-3 gap-1 sm:gap-1.5">
+              <div className="flex-1 grid grid-cols-2 sm:grid-cols-3 gap-1 sm:gap-1.5">
                 {radarStats!.map((stat, i) => (
                   <motion.div key={stat.label} initial={{ opacity: 0, x: 15 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.15 + i * 0.04 }}
                     onClick={() => stat.route && navigate(stat.route)}
