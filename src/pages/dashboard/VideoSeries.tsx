@@ -567,6 +567,25 @@ const VideoPlayer = ({
   );
 };
 
+/* ─── Lazy Banner ─── */
+const LazyBanner = ({ seasonNum, alt }: { seasonNum: number; alt: string }) => {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    const loader = getBannerUrl(seasonNum);
+    if (loader) loader().then(setSrc);
+  }, [seasonNum]);
+  return (
+    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative" style={{ aspectRatio: '3/1' }}>
+      {src ? (
+        <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" decoding="async" />
+      ) : (
+        <div className="w-full h-full bg-muted animate-pulse" />
+      )}
+      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" />
+    </div>
+  );
+};
+
 /* ─── Stats Card ─── */
 const StatCard = ({ icon: Icon, value, label, color }: { icon: any; value: string | number; label: string; color: string }) => (
   <div className="flex items-center gap-3 p-3 rounded-xl bg-card border border-border/40">
