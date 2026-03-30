@@ -17,7 +17,8 @@ import season3Banner from '@/assets/banners/season3-banner.jpg';
 import season4Banner from '@/assets/banners/season4-banner.jpg';
 import season5Banner from '@/assets/banners/season5-banner.jpg';
 import season6Banner from '@/assets/banners/season6-banner.jpg';
-
+import season7Banner from '@/assets/banners/season7-banner.jpg';
+import season8Banner from '@/assets/banners/season8-banner.jpg';
 interface VideoItem {
   id: string;
   title: string;
@@ -52,6 +53,8 @@ const seasonBanners: Record<number, string> = {
   4: season4Banner,
   5: season5Banner,
   6: season6Banner,
+  7: season7Banner,
+  8: season8Banner,
 };
 
 const seasons: SeasonInfo[] = [
@@ -61,6 +64,8 @@ const seasons: SeasonInfo[] = [
   { number: 4, title: 'عالم الشحنات', titleEn: 'Shipments Deep Dive', style: 'Warm Cinematic', color: 'from-amber-500 to-orange-600', gradient: 'from-amber-500/20 via-orange-500/10 to-transparent', icon: '🚛', bannerImage: seasonBanners[4] },
   { number: 5, title: 'ذكاء المخلفات', titleEn: 'Waste Intelligence AI', style: 'Neural Digital', color: 'from-violet-500 to-fuchsia-600', gradient: 'from-violet-500/20 via-fuchsia-500/10 to-transparent', icon: '🧠', bannerImage: seasonBanners[5] },
   { number: 6, title: 'العمليات والأتمتة', titleEn: 'Operations & Automation', style: 'Cyber Industrial', color: 'from-orange-500 to-red-600', gradient: 'from-orange-500/20 via-red-500/10 to-transparent', icon: '⚙️', bannerImage: seasonBanners[6] },
+  { number: 7, title: 'إنترنت الأشياء والمستشعرات', titleEn: 'IoT & Smart Sensors', style: 'Neon Matrix', color: 'from-green-400 to-cyan-500', gradient: 'from-green-400/20 via-cyan-500/10 to-transparent', icon: '📡', bannerImage: seasonBanners[7] },
+  { number: 8, title: 'الإدارة المالية', titleEn: 'Financial Management', style: 'Gold Luxe', color: 'from-yellow-500 to-amber-600', gradient: 'from-yellow-500/20 via-amber-500/10 to-transparent', icon: '💰', bannerImage: seasonBanners[8] },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
@@ -105,6 +110,20 @@ const videos: VideoItem[] = [
   { id: '31', title: 'الأمان والصلاحيات', titleEn: 'Security & Access Control', description: 'حماية شاملة — مصادقة متعددة، أدوار وصلاحيات دقيقة، تشفير البيانات وسجل تدقيق كامل.', duration: '1:50', thumbnail: '/thumbnails/ep31-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep31-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep31-light.mp4`, status: 'available', episode: 31, season: 6, tags: ['أمان', 'صلاحيات', 'تشفير'] },
   { id: '32', title: 'العمليات الميدانية', titleEn: 'Mobile Field Operations', description: 'تطبيق PWA متكامل — توثيق بالكاميرا، تحديد الموقع، عمل بدون إنترنت ومزامنة تلقائية.', duration: '1:50', thumbnail: '/thumbnails/ep32-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep32-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep32-light.mp4`, status: 'available', episode: 32, season: 6, tags: ['ميداني', 'PWA', 'موبايل'] },
   { id: '33', title: 'تحليلات الأعمال', titleEn: 'Business Intelligence', description: 'لوحات تحكم حية، تحليل تنبؤي بالذكاء الاصطناعي، مقارنات أداء وتصدير تقارير متعددة الصيغ.', duration: '1:50', thumbnail: '/thumbnails/ep33-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep33-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep33-light.mp4`, status: 'available', episode: 33, season: 6, tags: ['تحليلات', 'BI', 'تقارير'] },
+  // === Season 7 ===
+  { id: '34', title: 'الحاويات الذكية', titleEn: 'Smart Bins & IoT Sensors', description: 'حاويات متصلة بالإنترنت تراقب المستوى والحرارة والوزن لحظياً عبر مستشعرات LoRaWAN وطاقة شمسية.', duration: '1:50', thumbnail: '/thumbnails/ep34-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep34-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep34-light.mp4`, status: 'available', episode: 34, season: 7, tags: ['IoT', 'مستشعرات', 'حاويات'] },
+  { id: '35', title: 'تتبع الأسطول الذكي', titleEn: 'Fleet Telematics & GPS', description: 'نظام متكامل لتتبع المركبات بدقة GPS عالية — تشخيص OBD-II، إدارة الوقود، تنبيهات القيادة.', duration: '1:50', thumbnail: '/thumbnails/ep35-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep35-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep35-light.mp4`, status: 'available', episode: 35, season: 7, tags: ['GPS', 'أسطول', 'تتبع'] },
+  { id: '36', title: 'المستشعرات البيئية', titleEn: 'Environmental Monitoring', description: 'مراقبة جودة الهواء والمياه والتربة حول مواقع إدارة المخلفات بمستشعرات ذكية ٢٤/٧.', duration: '1:50', thumbnail: '/thumbnails/ep36-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep36-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep36-light.mp4`, status: 'available', episode: 36, season: 7, tags: ['بيئة', 'مراقبة', 'هواء'] },
+  { id: '37', title: 'التحليلات التنبؤية', titleEn: 'Predictive IoT Analytics', description: 'خوارزميات تعلم الآلة تتنبأ بالصيانة والامتلاء — نماذج متقدمة بدقة ٩٥٪ لمدة ٧ أيام قادمة.', duration: '1:50', thumbnail: '/thumbnails/ep37-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep37-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep37-light.mp4`, status: 'available', episode: 37, season: 7, tags: ['تنبؤ', 'ML', 'صيانة'] },
+  { id: '38', title: 'الحوسبة الطرفية', titleEn: 'Edge Computing & Local AI', description: 'معالجة البيانات محلياً على الأجهزة لقرارات فورية بدون تأخير الشبكة — عمل بلا إنترنت.', duration: '1:50', thumbnail: '/thumbnails/ep38-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep38-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep38-light.mp4`, status: 'available', episode: 38, season: 7, tags: ['Edge', 'حوسبة', 'محلي'] },
+  { id: '39', title: 'التوائم الرقمية', titleEn: 'Digital Twins & Simulation', description: 'نسخة رقمية حية من كل أصل مادي — محاكاة سيناريوهات، صيانة افتراضية، تحسين مستمر.', duration: '1:50', thumbnail: '/thumbnails/ep39-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep39-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep39-light.mp4`, status: 'available', episode: 39, season: 7, tags: ['توأم رقمي', 'محاكاة', '3D'] },
+  // === Season 8 ===
+  { id: '40', title: 'الفوترة الذكية', titleEn: 'Smart Invoicing & Billing', description: 'نظام فوترة آلي متكامل مع بوابات الدفع الإلكتروني — ضريبة، خصومات، شروط دفع.', duration: '1:50', thumbnail: '/thumbnails/ep40-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep40-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep40-light.mp4`, status: 'available', episode: 40, season: 8, tags: ['فوترة', 'دفع', 'مالية'] },
+  { id: '41', title: 'تحليل التكاليف', titleEn: 'Cost Analysis & Budgeting', description: 'أدوات متقدمة لتحليل التكاليف التشغيلية وتخطيط الميزانيات مع تنبؤ AI.', duration: '1:50', thumbnail: '/thumbnails/ep41-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep41-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep41-light.mp4`, status: 'available', episode: 41, season: 8, tags: ['تكاليف', 'ميزانية', 'تحليل'] },
+  { id: '42', title: 'الضرائب والامتثال المالي', titleEn: 'Tax & Financial Compliance', description: 'نظام ضريبي متكامل يدعم الفاتورة الإلكترونية ومعايير المحاسبة الدولية IFRS.', duration: '1:50', thumbnail: '/thumbnails/ep42-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep42-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep42-light.mp4`, status: 'available', episode: 42, season: 8, tags: ['ضرائب', 'فاتورة إلكترونية', 'IFRS'] },
+  { id: '43', title: 'حسابات الشركاء', titleEn: 'Partner Accounts & Settlements', description: 'إدارة مالية شاملة لحسابات الشركاء — كشوف حساب، تسويات آلية، عقود.', duration: '1:50', thumbnail: '/thumbnails/ep43-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep43-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep43-light.mp4`, status: 'available', episode: 43, season: 8, tags: ['شركاء', 'تسويات', 'حسابات'] },
+  { id: '44', title: 'المحفظة الرقمية', titleEn: 'Digital Wallet & Payments', description: 'محفظة إلكترونية متكاملة للسائقين والعملاء — رصيد فوري، تحويلات، سحب للبنك.', duration: '1:50', thumbnail: '/thumbnails/ep44-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep44-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep44-light.mp4`, status: 'available', episode: 44, season: 8, tags: ['محفظة', 'دفع', 'تحويل'] },
+  { id: '45', title: 'التقارير المالية المتقدمة', titleEn: 'Advanced Financial Reports', description: 'تقارير مالية شاملة بصيغ متعددة — لوحة حية، تقارير دورية، مقارنات مالية.', duration: '1:50', thumbnail: '/thumbnails/ep45-cover.jpg', videoUrlDark: `${STORAGE_BASE}/ep45-dark.mp4`, videoUrlLight: `${STORAGE_BASE}/ep45-light.mp4`, status: 'available', episode: 45, season: 8, tags: ['تقارير', 'مالية', 'تحليل'] },
 ];
 
 const getVideoUrl = (video: VideoItem, isDark: boolean): string | undefined => {

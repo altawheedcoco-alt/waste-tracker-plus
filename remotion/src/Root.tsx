@@ -124,5 +124,18 @@ export const RemotionRoot = () => (
     <Composition id="ep32-light" component={Ep32Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="ep33-dark" component={Ep33Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="ep33-light" component={Ep33Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    {/* Series Episodes - Season 7 (IoT & Smart Sensors - Neon Matrix) */}
+    <Composition id="ep34-dark" component={Ep34Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep34-light" component={Ep34Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep35-dark" component={Ep35Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep35-light" component={Ep35Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep36-dark" component={Ep36Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep36-light" component={Ep36Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep37-dark" component={Ep37Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep37-light" component={Ep37Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep38-dark" component={Ep38Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep38-light" component={Ep38Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep39-dark" component={Ep39Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep39-light" component={Ep39Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
   </>
 );
