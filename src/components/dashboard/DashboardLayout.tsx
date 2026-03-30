@@ -856,13 +856,13 @@ const DashboardLayout = memo(({ children }: DashboardLayoutProps) => {
             </div>
 
             {/* Right side - Responsive spacing */}
-            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-1' : isTablet ? 'gap-2' : 'gap-2'}`}>
+            <div className={`flex items-center shrink-0 ${isMobile ? 'gap-0.5' : isTablet ? 'gap-1.5' : 'gap-2'}`}>
               {/* View Mode Toolbar - Desktop only */}
               {!isMobile && !isTablet && <ViewModeToolbar />}
-              <LiveClock />
+              {/* Live Clock - hidden on very small mobile */}
+              {!isMobile && <LiveClock />}
               {/* Global Refresh Button - Hidden on mobile */}
               {!isMobile && <GlobalRefreshButton />}
-
 
               {/* Focus Music Player - Hidden on mobile, shown in sidebar */}
               {!isMobile && <FocusMusicPlayer />}
