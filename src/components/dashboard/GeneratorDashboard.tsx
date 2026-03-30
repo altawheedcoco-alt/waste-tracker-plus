@@ -37,59 +37,18 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import DashboardPrintReports from './shared/DashboardPrintReports';
 import DashboardWidgetCustomizer from './DashboardWidgetCustomizer';
 import { useDashboardWidgets } from '@/hooks/useDashboardWidgets';
-import { Skeleton } from '@/components/ui/skeleton';
+import TabFallback from './shared/TabFallback';
 
 // Lazy load heavy tab content
-const CommunicationHubWidget = lazy(() => import('./widgets/CommunicationHubWidget'));
-
-const GeneratorTrackingWidget = lazy(() => import('./generator/GeneratorTrackingWidget'));
-const DisposalRadarWidget = lazy(() => import('./generator/DisposalRadarWidget'));
-const ESGReportWidget = lazy(() => import('./generator/ESGReportWidget'));
-const LegalArchiveWidget = lazy(() => import('./generator/LegalArchiveWidget'));
-const LegalComplianceWidget = lazy(() => import('./generator/LegalComplianceWidget'));
-const DashboardBrief = lazy(() => import('./generator/DashboardBrief'));
-const WeeklyShipmentChart = lazy(() => import('./generator/WeeklyShipmentChart'));
-const FinancialSummaryWidget = lazy(() => import('./generator/FinancialSummaryWidget'));
-const ComplianceGauge = lazy(() => import('./generator/ComplianceGauge'));
-const DriverCodeLookup = lazy(() => import('@/components/drivers/DriverCodeLookup'));
-const SmartWeightUpload = lazy(() => import('@/components/ai/SmartWeightUpload'));
-const PartnerRatingsWidget = lazy(() => import('@/components/partners/PartnerRatingsWidget'));
-const BulkCertificateButton = lazy(() => import('@/components/bulk/BulkCertificateButton'));
-const WorkOrderInbox = lazy(() => import('@/components/work-orders/WorkOrderInbox'));
-const CreateWorkOrderDialog = lazy(() => import('@/components/work-orders/CreateWorkOrderDialog'));
-const ComplianceCertificateWidget = lazy(() => import('@/components/compliance/ComplianceCertificateWidget'));
-const ConsultantKPIsWidget = lazy(() => import('@/components/compliance/ConsultantKPIsWidget'));
-const ComplianceAlertsWidget = lazy(() => import('@/components/compliance/ComplianceAlertsWidget'));
-const RiskMatrixWidget = lazy(() => import('@/components/compliance/RiskMatrixWidget'));
-const CorrectiveActionsWidget = lazy(() => import('@/components/compliance/CorrectiveActionsWidget'));
-const AuditPortalWidget = lazy(() => import('@/components/compliance/AuditPortalWidget'));
-const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
-const OrgPerformanceRadar = lazy(() => import('./shared/OrgPerformanceRadar'));
-const EnvironmentalKPIWidget = lazy(() => import('./shared/EnvironmentalKPIWidget'));
-const LicenseExpiryWidget = lazy(() => import('./shared/LicenseExpiryWidget'));
-
-// Generator Intelligence Suite
-const GeneratorSmartKPIs = lazy(() => import('./generator/GeneratorSmartKPIs'));
-const WasteGenerationIntelligence = lazy(() => import('./generator/WasteGenerationIntelligence'));
-const FinancialFlowAnalyzer = lazy(() => import('./generator/FinancialFlowAnalyzer'));
-const WasteGenerationForecast = lazy(() => import('./generator/WasteGenerationForecast'));
-const WasteClassificationAI = lazy(() => import('./generator/WasteClassificationAI'));
-const SmartCollectionScheduler = lazy(() => import('./generator/SmartCollectionScheduler'));
-const InstantPickupPortal = lazy(() => import('./generator/InstantPickupPortal'));
-const EnvironmentalScorecard = lazy(() => import('./generator/EnvironmentalScorecard'));
-
-// New tabs
 const GeneratorFinanceTab = lazy(() => import('./generator/GeneratorFinanceTab'));
-const GeneratorPartnersHub = lazy(() => import('./generator/GeneratorPartnersHub'));
-const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab'));
+const GeneratorOperationsTab = lazy(() => import('./generator/GeneratorOperationsTab'));
+const GeneratorShipmentsTab = lazy(() => import('./generator/GeneratorShipmentsTab'));
+const GeneratorAnalyticsTab = lazy(() => import('./generator/GeneratorAnalyticsTab'));
+const GeneratorTeamTab = lazy(() => import('./generator/GeneratorTeamTab'));
+const GeneratorMapTab = lazy(() => import('./generator/GeneratorMapTab'));
+const GeneratorComplianceTab = lazy(() => import('./generator/GeneratorComplianceTab'));
+const AIAnalyticsDashboard = lazy(() => import('./AIAnalyticsDashboard'));
 const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
-
-const TabFallback = () => (
-  <div className="space-y-4 mt-6">
-    <Skeleton className="h-32 w-full" />
-    <Skeleton className="h-48 w-full" />
-  </div>
-);
 
 interface RecentShipment {
   id: string;
