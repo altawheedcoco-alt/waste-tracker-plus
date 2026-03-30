@@ -11,7 +11,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
-import { useThemeSettings, ThemeColor, FontFamily, DisplayMode } from '@/contexts/ThemeSettingsContext';
+import { useThemeSettings, ThemeColor, FontFamily, DisplayMode, VisualMode } from '@/contexts/ThemeSettingsContext';
 import { cn } from '@/lib/utils';
 
 const colorOptions: { value: ThemeColor; label: string; color: string }[] = [
