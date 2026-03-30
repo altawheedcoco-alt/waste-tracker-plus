@@ -82,6 +82,7 @@ const EnvironmentalScorecard = lazy(() => import('./generator/EnvironmentalScore
 const GeneratorFinanceTab = lazy(() => import('./generator/GeneratorFinanceTab'));
 const GeneratorPartnersHub = lazy(() => import('./generator/GeneratorPartnersHub'));
 const GeneratorReportsTab = lazy(() => import('./generator/GeneratorReportsTab'));
+const AIQualityAuditor = lazy(() => import('./generator/AIQualityAuditor'));
 
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
@@ -488,6 +489,7 @@ const GeneratorDashboard = () => {
         {/* ── الذكاء الاصطناعي ── */}
         <TabsContent value="ai-tools" className="space-y-4 mt-4 sm:mt-6">
           <Suspense fallback={<TabFallback />}>
+            <AIQualityAuditor />
             <GeneratorSmartKPIs />
             <WasteClassificationAI />
             <WasteGenerationIntelligence />
