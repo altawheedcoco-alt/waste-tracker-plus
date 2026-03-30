@@ -63,7 +63,8 @@ const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarke
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
-
+const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
+const MutualRatingDialog = lazy(() => import('@/components/driver/MutualRatingDialog'));
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
     <Skeleton className="h-32 w-full rounded-xl" />
