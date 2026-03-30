@@ -62,6 +62,7 @@ const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyt
 const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
+const DemandHeatmapDriver = lazy(() => import('@/components/driver/DemandHeatmapDriver'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
 const MutualRatingDialog = lazy(() => import('@/components/driver/MutualRatingDialog'));
