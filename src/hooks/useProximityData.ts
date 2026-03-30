@@ -205,17 +205,17 @@ export function useNearbyShipments(center: ProximityCenter | null, radiusKm = 30
 
       const { data, error } = await supabase
         .from('shipments')
-        .select('id, shipment_number, waste_type, quantity, unit, pickup_address, delivery_address, pickup_lat, pickup_lng, price_per_unit')
+        .select('id, shipment_number, waste_type, quantity, unit, pickup_address, delivery_address, pickup_latitude, pickup_longitude, price_per_unit')
         .is('driver_id', null)
         .in('status', ['approved', 'new'])
-        .not('pickup_lat', 'is', null);
+        .not('pickup_latitude', 'is', null);
 
       if (error || !data) return [];
 
       const nearby: NearbyShipment[] = [];
-      data.forEach(s => {
-        if (!s.pickup_lat || !s.pickup_lng) return;
-        const dist = calculateHaversineDistance(center.lat, center.lng, Number(s.pickup_lat), Number(s.pickup_lng));
+      data.forEach((s: any) => {
+        if (!s.pickup_latitude || !s.pickup_longitude) return;
+        const dist = calculateHaversineDistance(center.lat, center.lng, Number(s.pickup_latitude), Number(s.pickup_longitude));
         if (dist <= radiusKm) {
           nearby.push({
             id: s.id,
