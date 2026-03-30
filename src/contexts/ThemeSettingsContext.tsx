@@ -47,7 +47,15 @@ const defaultSettings: ThemeSettings = {
   fontFamily: 'cairo',
   fontSize: 16,
   isDarkMode: false,
+  visualMode: 'light',
   displayMode: 'auto',
+};
+
+// Per-mode font defaults
+const visualModeFonts: Record<VisualMode, { family: string; import: string }> = {
+  light: { family: "'Cairo', sans-serif", import: 'Cairo:wght@300;400;500;600;700;800' },
+  dim: { family: "'Tajawal', sans-serif", import: 'Tajawal:wght@300;400;500;700;800' },
+  dark: { family: "'Readex Pro', sans-serif", import: 'Readex+Pro:wght@200;300;400;500;600;700' },
 };
 
 const ThemeValuesContext = createContext<ThemeValuesContextType | undefined>(undefined);
