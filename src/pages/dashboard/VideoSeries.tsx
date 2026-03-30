@@ -820,6 +820,9 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
         </div>
       )}
 
+      {/* iRecycle Logo Watermark */}
+      <img src={logoImg} alt="" className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full opacity-75 shadow pointer-events-none z-10" />
+
       {/* Episode number */}
       <div className="absolute top-2 left-2">
         <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white/90 backdrop-blur-sm">
@@ -828,7 +831,7 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
       </div>
 
       {/* Duration */}
-      <div className="absolute top-2 right-2">
+      <div className="absolute bottom-2 right-2">
         <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/90 backdrop-blur-sm">
           {video.duration}
         </span>
