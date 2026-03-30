@@ -9,6 +9,14 @@ import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Progress } from '@/components/ui/progress';
 
+// Season banner images
+import season1Banner from '@/assets/banners/season1-banner.jpg';
+import season2Banner from '@/assets/banners/season2-banner.jpg';
+import season3Banner from '@/assets/banners/season3-banner.jpg';
+import season4Banner from '@/assets/banners/season4-banner.jpg';
+import season5Banner from '@/assets/banners/season5-banner.jpg';
+import season6Banner from '@/assets/banners/season6-banner.jpg';
+
 interface VideoItem {
   id: string;
   title: string;
