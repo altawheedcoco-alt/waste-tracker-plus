@@ -148,7 +148,7 @@ export const arCore = {
   // Landing / Hero
   landing: {
     systemName: 'iRecycle',
-    systemNameAr: 'Waste Management System - نظام إدارة المخلفات',
+    systemNameAr: 'آي ريسايكل — منصة حلول إدارة المخلفات',
     tagline: 'حلول ذكية لبيئة نظيفة',
     heroTitle1: 'نظام متكامل',
     heroTitle2: 'لإدارة المخلفات والنفايات',
@@ -282,7 +282,7 @@ export const arCore = {
     ourServices: 'خدماتنا',
     contactUs: 'تواصل معنا',
     address: 'القاهرة، جمهورية مصر العربية',
-    allRightsReserved: 'iRecycle Waste Management System. جميع الحقوق محفوظة.',
+    allRightsReserved: 'iRecycle — Waste Management Solution Platform. جميع الحقوق محفوظة.',
     shipmentMgmt: 'إدارة الشحنات',
     transportTracking: 'تتبع النقل',
     recyclingService: 'إعادة التدوير',

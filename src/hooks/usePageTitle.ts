@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 
-const BASE_TITLE = 'آي ريسايكل - iRecycle';
+const BASE_TITLE = 'iRecycle — Waste Management Solution Platform';
 
 /**
  * Sets the document title on mount and restores on unmount.

@@ -145,7 +145,7 @@ const Auth = () => {
               <PlatformLogo size="xl" />
               <div className="flex items-center gap-2">
                 <span className="text-[10px] font-semibold tracking-[0.25em] uppercase text-muted-foreground/50">
-                  Waste Management System
+                  Waste Management Solution Platform
                 </span>
                 <Badge variant="outline" className="text-[9px] px-1.5 py-0 gap-1 border-primary/30 text-primary font-bold">
                   <Sparkles className="w-2.5 h-2.5" />
