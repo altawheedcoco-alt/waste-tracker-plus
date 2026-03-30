@@ -88,10 +88,10 @@ const MobileBottomNav = memo(() => {
 
   return (
     <nav 
-      className="fixed bottom-0 left-0 right-0 z-50 bg-card/90 backdrop-blur-2xl border-t border-border/30 pb-[env(safe-area-inset-bottom)]"
-      style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)', boxShadow: '0 -1px 20px hsl(var(--foreground) / 0.04)' }}
+      className="fixed bottom-0 left-0 right-0 z-50 bg-card/95 backdrop-blur-2xl border-t border-border/40 pb-[env(safe-area-inset-bottom)]"
+      style={{ WebkitBackdropFilter: 'blur(28px) saturate(1.8)', boxShadow: '0 -1px 20px hsl(var(--foreground) / 0.06)' }}
     >
-      <div className="flex items-center justify-around h-[58px] px-1">
+      <div className="flex items-center justify-around h-[54px] px-0.5">
         {tabs.map((tab) => {
           const active = isActive(tab.path);
           const Icon = tab.icon;
