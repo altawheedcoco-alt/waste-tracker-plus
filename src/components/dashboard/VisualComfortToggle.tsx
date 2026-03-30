@@ -69,18 +69,28 @@ const VisualComfortToggle = () => {
     localStorage.setItem(COMFORT_KEY, JSON.stringify(comfort));
   }, [comfort, applyFilters]);
 
-  // Auto schedule: dim at evening, dark at night
+  // Auto schedule with user-configurable times
   useEffect(() => {
     if (!comfort.autoSchedule) return;
-    const hour = new Date().getHours();
-    if (hour >= 21 || hour < 6) {
-      setVisualMode('dark');
-    } else if (hour >= 17) {
-      setVisualMode('dim');
-    } else {
-      setVisualMode('light');
-    }
-  }, [comfort.autoSchedule, setVisualMode]);
+    const check = () => {
+      const hour = new Date().getHours();
+      const { dimStartHour, darkStartHour, lightStartHour } = comfort;
+      if (darkStartHour > dimStartHour) {
+        // Normal: light -> dim -> dark
+        if (hour >= darkStartHour || hour < lightStartHour) setVisualMode('dark');
+        else if (hour >= dimStartHour) setVisualMode('dim');
+        else if (hour >= lightStartHour) setVisualMode('light');
+      } else {
+        // Edge case
+        if (hour >= darkStartHour && hour < lightStartHour) setVisualMode('dark');
+        else if (hour >= dimStartHour) setVisualMode('dim');
+        else setVisualMode('light');
+      }
+    };
+    check();
+    const interval = setInterval(check, 60000); // check every minute
+    return () => clearInterval(interval);
+  }, [comfort.autoSchedule, comfort.dimStartHour, comfort.darkStartHour, comfort.lightStartHour, setVisualMode]);
 
   const updateComfort = (key: keyof EyeComfortSettings, value: number | boolean) => {
     setComfort(prev => ({ ...prev, [key]: value }));
