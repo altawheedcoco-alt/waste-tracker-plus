@@ -218,6 +218,13 @@ const TransporterDashboard = () => {
         <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       </div>
 
+      {/* 2.5 رادار السائقين القريبين */}
+      <div id="section-radar">
+        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+          <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+        </Suspense>
+      </div>
+
       {/* 3. الإجراءات السريعة */}
       <div id="section-actions">
         <QuickActionsGrid actions={quickActions} title={t('dashboard.quickActions')} subtitle={t('dashboard.quickActionsTransporter')} />
