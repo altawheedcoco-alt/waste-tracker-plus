@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export type VoiceChatState = 'idle' | 'listening' | 'thinking' | 'speaking';
@@ -26,11 +26,19 @@ export function useVoiceChat() {
   const [messages, setMessages] = useState<VoiceChatMessage[]>([]);
   const [currentTranscript, setCurrentTranscript] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [isSupported, setIsSupported] = useState(!!SpeechRecognitionAPI);
+  const [isSupported] = useState(!!SpeechRecognitionAPI);
 
   const recognitionRef = useRef<any>(null);
   const synthRef = useRef(typeof window !== 'undefined' ? window.speechSynthesis : null);
   const abortRef = useRef<AbortController | null>(null);
+  const messagesRef = useRef<VoiceChatMessage[]>([]);
+  const finalTranscriptRef = useRef('');
+  const isProcessingRef = useRef(false);
+
+  // Keep messagesRef in sync
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
 
   const stopSpeaking = useCallback(() => {
     synthRef.current?.cancel();
@@ -39,10 +47,8 @@ export function useVoiceChat() {
   const speak = useCallback((text: string): Promise<void> => {
     return new Promise((resolve) => {
       if (!synthRef.current) { resolve(); return; }
-      
       synthRef.current.cancel();
-      
-      // Clean markdown/formatting for natural speech
+
       const clean = text
         .replace(/[*_#`~>\-|]/g, '')
         .replace(/\n+/g, '، ')
@@ -50,14 +56,11 @@ export function useVoiceChat() {
 
       const utterance = new SpeechSynthesisUtterance(clean);
       utterance.lang = 'ar-SA';
-      utterance.rate = 0.95;
+      utterance.rate = 1.0;
       utterance.pitch = 1;
 
-      // Try to find Arabic voice
       const voices = synthRef.current.getVoices();
-      const arabicVoice = voices.find((v: SpeechSynthesisVoice) =>
-        v.lang.startsWith('ar')
-      );
+      const arabicVoice = voices.find((v: SpeechSynthesisVoice) => v.lang.startsWith('ar'));
       if (arabicVoice) utterance.voice = arabicVoice;
 
       utterance.onend = () => resolve();
@@ -67,47 +70,71 @@ export function useVoiceChat() {
     });
   }, []);
 
-  const sendToAI = useCallback(async (text: string, history: VoiceChatMessage[]) => {
-    setState('thinking');
+  const sendToAI = useCallback(async (text: string, history: VoiceChatMessage[]): Promise<string | null> => {
     abortRef.current = new AbortController();
 
     try {
-      const allMessages = [...history, { role: 'user' as const, content: text }];
-      
       const { data, error: fnError } = await supabase.functions.invoke('ai-unified-gateway', {
         body: {
           action: 'chat',
           messages: [
             { role: 'system', content: VOICE_SYSTEM_PROMPT },
-            ...allMessages.map(m => ({ role: m.role, content: m.content })),
+            ...history.map(m => ({ role: m.role, content: m.content })),
+            { role: 'user', content: text },
           ],
         },
       });
 
       if (fnError) throw fnError;
-      const reply = data?.result || data?.choices?.[0]?.message?.content || 'عذراً، لم أفهم. حاول مرة أخرى.';
-      
-      return reply;
+      return data?.result || data?.choices?.[0]?.message?.content || 'عذراً، لم أستطع الرد. حاول مرة أخرى.';
     } catch (err: any) {
       if (err?.name === 'AbortError') return null;
       throw err;
     }
   }, []);
 
+  const processAndRespond = useCallback(async (text: string) => {
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    const history = messagesRef.current;
+    const userMsg: VoiceChatMessage = { role: 'user', content: text };
+    setMessages(prev => [...prev, userMsg]);
+
+    setState('thinking');
+
+    try {
+      const reply = await sendToAI(text, history);
+      if (!reply) { setState('idle'); isProcessingRef.current = false; return; }
+
+      const assistantMsg: VoiceChatMessage = { role: 'assistant', content: reply };
+      setMessages(prev => [...prev, assistantMsg]);
+
+      setState('speaking');
+      await speak(reply);
+      setState('idle');
+    } catch {
+      setError('عذراً، حدث خطأ. حاول مرة أخرى.');
+      setState('idle');
+    } finally {
+      isProcessingRef.current = false;
+    }
+  }, [sendToAI, speak]);
+
   const startListening = useCallback(() => {
     if (!SpeechRecognitionAPI) {
       setError('متصفحك لا يدعم التعرف على الصوت. استخدم Chrome أو Edge.');
-      setIsSupported(false);
       return;
     }
 
     setError(null);
     stopSpeaking();
+    finalTranscriptRef.current = '';
 
     const recognition = new SpeechRecognitionAPI();
     recognition.lang = 'ar-SA';
     recognition.interimResults = true;
-    recognition.continuous = false;
+    recognition.continuous = true; // Keep listening until user stops
     recognition.maxAlternatives = 1;
 
     recognitionRef.current = recognition;
@@ -118,27 +145,27 @@ export function useVoiceChat() {
     };
 
     recognition.onresult = (event: any) => {
-      let transcript = '';
+      let interim = '';
+      let final = '';
       for (let i = 0; i < event.results.length; i++) {
-        transcript += event.results[i][0].transcript;
+        const result = event.results[i];
+        if (result.isFinal) {
+          final += result[0].transcript;
+        } else {
+          interim += result[0].transcript;
+        }
       }
-      setCurrentTranscript(transcript);
+      finalTranscriptRef.current = final;
+      setCurrentTranscript(final + interim);
     };
 
-    recognition.onend = async () => {
-      const transcript = currentTranscriptRef.current;
-      if (!transcript.trim()) {
+    recognition.onend = () => {
+      const transcript = (finalTranscriptRef.current || currentTranscriptRef.current).trim();
+      if (!transcript) {
         setState('idle');
         return;
       }
-
-      const userMsg: VoiceChatMessage = { role: 'user', content: transcript };
-      
-      setMessages(prev => {
-        const updated = [...prev, userMsg];
-        processAI(transcript, prev);
-        return updated;
-      });
+      processAndRespond(transcript);
     };
 
     recognition.onerror = (event: any) => {
@@ -155,28 +182,17 @@ export function useVoiceChat() {
     };
 
     recognition.start();
-  }, [stopSpeaking]);
+  }, [stopSpeaking, processAndRespond]);
 
-  // Use ref for currentTranscript to access in callbacks
+  // Ref for currentTranscript to access in onend callback
   const currentTranscriptRef = useRef('');
   currentTranscriptRef.current = currentTranscript;
 
-  const processAI = useCallback(async (text: string, history: VoiceChatMessage[]) => {
-    try {
-      const reply = await sendToAI(text, history);
-      if (!reply) { setState('idle'); return; }
-
-      const assistantMsg: VoiceChatMessage = { role: 'assistant', content: reply };
-      setMessages(prev => [...prev, assistantMsg]);
-
-      setState('speaking');
-      await speak(reply);
-      setState('idle');
-    } catch {
-      setError('عذراً، حدث خطأ. حاول مرة أخرى.');
-      setState('idle');
-    }
-  }, [sendToAI, speak]);
+  // Handle quick prompts (text sent directly without voice)
+  const sendTextMessage = useCallback((text: string) => {
+    if (state !== 'idle' || isProcessingRef.current) return;
+    processAndRespond(text);
+  }, [state, processAndRespond]);
 
   const stopListening = useCallback(() => {
     recognitionRef.current?.stop();
@@ -186,6 +202,7 @@ export function useVoiceChat() {
     recognitionRef.current?.abort();
     abortRef.current?.abort();
     stopSpeaking();
+    isProcessingRef.current = false;
     setState('idle');
   }, [stopSpeaking]);
 
@@ -207,5 +224,6 @@ export function useVoiceChat() {
     clearHistory,
     speak,
     stopSpeaking,
+    sendTextMessage,
   };
 }
