@@ -866,6 +866,19 @@ const VideoSeries = () => {
 };
 
 /* ─── Video Card Component ─── */
+const SEASON_GRADIENTS: Record<number, string> = {
+  1: 'from-emerald-600 to-teal-700', 2: 'from-cyan-600 to-blue-700', 3: 'from-indigo-600 to-purple-700',
+  4: 'from-amber-600 to-orange-700', 5: 'from-violet-600 to-fuchsia-700', 6: 'from-orange-600 to-red-700',
+  7: 'from-green-500 to-cyan-600', 8: 'from-yellow-600 to-amber-700', 9: 'from-lime-600 to-green-700',
+  10: 'from-blue-700 to-indigo-800', 11: 'from-purple-600 to-violet-700', 12: 'from-cyan-500 to-rose-600',
+  13: 'from-amber-500 to-yellow-600', 14: 'from-green-600 to-emerald-700', 15: 'from-blue-500 to-indigo-600',
+  16: 'from-green-500 to-yellow-600', 17: 'from-teal-500 to-green-600',
+};
+const SEASON_ICONS: Record<number, string> = {
+  1: '🌱', 2: '⚡', 3: '🔗', 4: '🚛', 5: '🧠', 6: '⚙️', 7: '📡', 8: '💰',
+  9: '🎖️', 10: '⚖️', 11: '🌌', 12: '🚀', 13: '📖', 14: '🌍', 15: '⚡', 16: '🏆', 17: '🌎',
+};
+
 const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx: number; openVideo: (v: VideoItem) => void; isWatched: boolean }) => (
   <motion.div
     initial={{ opacity: 0, y: 20 }}
@@ -878,24 +891,19 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
     }`}
     onClick={() => video.status === 'available' && openVideo(video)}
   >
-    {/* Thumbnail */}
-    <div className="relative aspect-video bg-muted overflow-hidden">
-      {video.thumbnail && (
-        <img
-          src={`${video.thumbnail}?v=6`}
-          alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-          loading={idx < 4 ? 'eager' : 'lazy'}
-          decoding="async"
-          width={320}
-          height={180}
-        />
-      )}
+    {/* Thumbnail — generated gradient, no image download */}
+    <div className="relative aspect-video overflow-hidden">
+      <div className={`absolute inset-0 bg-gradient-to-br ${SEASON_GRADIENTS[video.season] || 'from-primary to-primary/60'}`} />
+      {/* Season icon + episode number overlay */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <span className="text-4xl opacity-20 select-none">{SEASON_ICONS[video.season] || '🎬'}</span>
+      </div>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
       
       {video.status === 'available' ? (
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
-          <div className="w-11 h-11 rounded-full bg-primary/90 flex items-center justify-center opacity-0 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all shadow-lg">
-            <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+          <div className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center opacity-70 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all shadow-lg">
+            <Play className="w-5 h-5 text-gray-900 ml-0.5" />
           </div>
         </div>
       ) : (
@@ -906,18 +914,18 @@ const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx
       )}
 
       {/* iRecycle Logo Watermark */}
-      <img src={logoImg} alt="" className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full opacity-75 shadow pointer-events-none z-10" />
+      <img src={logoImg} alt="" className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full opacity-75 shadow pointer-events-none z-10" loading="lazy" />
 
       {/* Episode number */}
       <div className="absolute top-2 left-2">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white/90 backdrop-blur-sm">
+        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white/90">
           EP{video.episode}
         </span>
       </div>
 
       {/* Duration */}
       <div className="absolute bottom-2 right-2">
-        <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/90 backdrop-blur-sm">
+        <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/90">
           {video.duration}
         </span>
       </div>
