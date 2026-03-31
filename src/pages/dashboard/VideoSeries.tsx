@@ -605,18 +605,18 @@ const LazyBanner = ({ seasonNum, alt }: { seasonNum: number; alt: string }) => {
   const season = seasons.find(s => s.number === seasonNum);
   if (!season) return null;
   return (
-    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative" style={{ aspectRatio: '3/1' }}>
+    <div className="mb-4 sm:mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative aspect-[2.5/1] sm:aspect-[3/1] lg:aspect-[4/1]">
       <div className={`absolute inset-0 bg-gradient-to-br ${season.color}`} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-      <div className="absolute inset-0 flex items-center justify-between px-6 sm:px-10">
+      <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-8 lg:px-12">
         <div className="text-white text-right">
-          <p className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">الموسم {season.number}</p>
-          <h3 className="text-lg sm:text-2xl lg:text-3xl font-bold mt-1">{season.title}</h3>
-          <p className="text-xs sm:text-sm opacity-80 mt-0.5">{season.titleEn}</p>
+          <p className="text-[9px] sm:text-xs uppercase tracking-widest opacity-70">الموسم {season.number}</p>
+          <h3 className="text-base sm:text-2xl lg:text-3xl font-bold mt-0.5 sm:mt-1">{season.title}</h3>
+          <p className="text-[10px] sm:text-sm opacity-80 mt-0.5">{season.titleEn}</p>
         </div>
-        <span className="text-5xl sm:text-7xl opacity-25 select-none">{season.icon}</span>
+        <span className="text-4xl sm:text-6xl lg:text-7xl opacity-25 select-none">{season.icon}</span>
       </div>
-      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" loading="lazy" />
+      <img src={logoImg} alt="" className="absolute top-2 right-2 w-7 h-7 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" loading="lazy" />
     </div>
   );
 };
