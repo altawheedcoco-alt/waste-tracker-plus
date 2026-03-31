@@ -324,5 +324,10 @@ export const RemotionRoot = () => (
     <Composition id="ep92-light" component={Ep92Light} durationInFrames={900} fps={30} width={1920} height={1080} />
     <Composition id="ep93-dark" component={Ep93Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
     <Composition id="ep93-light" component={Ep93Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    {/* World Environment Day */}
+    <Composition id="wed-2022" component={WED2022} durationInFrames={1800} fps={30} width={1080} height={1080} />
+    <Composition id="wed-2023" component={WED2023} durationInFrames={1800} fps={30} width={1080} height={1080} />
+    <Composition id="wed-2024" component={WED2024} durationInFrames={1800} fps={30} width={1080} height={1080} />
+    <Composition id="wed-2025" component={WED2025} durationInFrames={1800} fps={30} width={1080} height={1080} />
   </>
 );
