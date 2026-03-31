@@ -2,50 +2,158 @@
  * خريطة رادار السائقين القريبين — للناقل
  * نطاق 50 كم مع تحديث لحظي
  */
-import { memo, useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Circle, Marker, Popup, useMap } from 'react-leaflet';
-import L from 'leaflet';
+import { memo, useState, useEffect, Component, type ReactNode } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
-import { Truck, MapPin, Navigation, Loader2 } from 'lucide-react';
-import { OSM_TILE_URL, OSM_ATTRIBUTION } from '@/lib/leafletConfig';
+import { Truck, MapPin, Navigation, Loader2, AlertTriangle } from 'lucide-react';
 import { useNearbyDrivers, type NearbyDriver } from '@/hooks/useProximityData';
-import '@/styles/leaflet.css';
-import 'leaflet/dist/leaflet.css';
 
 const RADIUS_KM = 50;
 
-// Custom icons
-const createDriverIcon = (status: 'available' | 'arriving_soon') => {
-  const color = status === 'available' ? '#22c55e' : '#f97316';
-  const emoji = status === 'available' ? '🟢' : '🟠';
-  return L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div style="background:${color};color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);">🚛</div>`,
-    iconSize: [32, 32],
-    iconAnchor: [16, 16],
-  });
-};
-
-const centerIcon = L.divIcon({
-  className: 'custom-div-icon',
-  html: `<div style="background:hsl(var(--primary));color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);">📦</div>`,
-  iconSize: [36, 36],
-  iconAnchor: [18, 18],
-});
-
-function FitBounds({ center, drivers }: { center: [number, number]; drivers: NearbyDriver[] }) {
-  const map = useMap();
-  useEffect(() => {
-    if (drivers.length === 0) {
-      map.setView(center, 10);
-    } else {
-      const bounds = L.latLngBounds([center, ...drivers.map(d => [d.lat, d.lng] as [number, number])]);
-      map.fitBounds(bounds, { padding: [30, 30] });
+/** Internal error boundary to prevent map crashes from propagating */
+class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error: Error) {
+    console.warn('NearbyDriversRadar map error caught:', error.message);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="flex items-center justify-center h-[220px] bg-muted/10 rounded-lg">
+          <div className="text-center text-xs text-muted-foreground space-y-1">
+            <AlertTriangle className="w-5 h-5 mx-auto text-amber-500" />
+            <p>تعذر تحميل الخريطة</p>
+          </div>
+        </div>
+      );
     }
-  }, [center, drivers.length]);
-  return null;
+    return this.props.children;
+  }
 }
+
+/** Lazy-loaded map internals */
+const LazyMapContent = memo(({ pickupLat, pickupLng, drivers }: { pickupLat: number; pickupLng: number; drivers: NearbyDriver[] }) => {
+  const [mapReady, setMapReady] = useState(false);
+  const [MapComponents, setMapComponents] = useState<any>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      import('react-leaflet'),
+      import('leaflet'),
+      import('@/styles/leaflet.css'),
+      import('leaflet/dist/leaflet.css'),
+    ]).then(([rl, L]) => {
+      if (cancelled) return;
+      setMapComponents({ rl, L: L.default || L });
+      setMapReady(true);
+    }).catch(err => {
+      console.warn('Failed to load map libraries:', err);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!mapReady || !MapComponents) {
+    return (
+      <div className="flex items-center justify-center h-[220px] bg-muted/20">
+        <Loader2 className="w-6 h-6 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const { MapContainer, TileLayer, Circle, Marker, Popup } = MapComponents.rl;
+  const L = MapComponents.L;
+
+  const createDriverIcon = (status: 'available' | 'arriving_soon') => {
+    const color = status === 'available' ? '#22c55e' : '#f97316';
+    return L.divIcon({
+      className: 'custom-div-icon',
+      html: `<div style="background:${color};color:white;border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:14px;border:2px solid white;box-shadow:0 2px 6px rgba(0,0,0,.3);">🚛</div>`,
+      iconSize: [32, 32],
+      iconAnchor: [16, 16],
+    });
+  };
+
+  const centerIcon = L.divIcon({
+    className: 'custom-div-icon',
+    html: `<div style="background:#6366f1;color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);">📦</div>`,
+    iconSize: [36, 36],
+    iconAnchor: [18, 18],
+  });
+
+  // Compute bounds
+  const allPoints: [number, number][] = [[pickupLat, pickupLng], ...drivers.map(d => [d.lat, d.lng] as [number, number])];
+  const bounds = L.latLngBounds(allPoints);
+
+  return (
+    <div className="h-[220px]">
+      <MapContainer
+        center={[pickupLat, pickupLng]}
+        zoom={10}
+        bounds={drivers.length > 0 ? bounds : undefined}
+        boundsOptions={{ padding: [30, 30] }}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
+        attributionControl={false}
+      >
+        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+
+        {/* Radius circle */}
+        <Circle
+          center={[pickupLat, pickupLng]}
+          radius={RADIUS_KM * 1000}
+          pathOptions={{
+            color: '#6366f1',
+            fillColor: '#6366f1',
+            fillOpacity: 0.06,
+            weight: 1.5,
+            dashArray: '6 4',
+          }}
+        />
+
+        {/* Pickup center */}
+        <Marker position={[pickupLat, pickupLng]} icon={centerIcon}>
+          <Popup>
+            <div className="text-center text-xs font-bold" dir="rtl">📦 موقع الاستلام</div>
+          </Popup>
+        </Marker>
+
+        {/* Driver markers */}
+        {drivers.map(driver => (
+          <Marker
+            key={driver.id}
+            position={[driver.lat, driver.lng]}
+            icon={createDriverIcon(driver.status)}
+          >
+            <Popup>
+              <div className="text-xs space-y-1 min-w-[140px]" dir="rtl">
+                <div className="font-bold">{driver.name}</div>
+                {driver.vehiclePlate && (
+                  <div className="text-muted-foreground">🚛 {driver.vehiclePlate}</div>
+                )}
+                <div>⭐ {driver.rating.toFixed(1)} • {driver.totalTrips} رحلة</div>
+                <div>📏 {driver.distanceKm} كم</div>
+                {driver.status === 'arriving_soon' && driver.etaMinutes && (
+                  <div className="text-orange-600">⏱ يصل خلال ~{driver.etaMinutes} دقيقة</div>
+                )}
+                <div className={driver.status === 'available' ? 'text-emerald-600 font-medium' : 'text-orange-600 font-medium'}>
+                  {driver.status === 'available' ? '🟢 متاح الآن' : '🟠 يقترب من الانتهاء'}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
+  );
+});
+LazyMapContent.displayName = 'LazyMapContent';
 
 interface Props {
   pickupLat: number;
@@ -87,64 +195,9 @@ const NearbyDriversRadar = memo(({ pickupLat, pickupLng }: Props) => {
             <Loader2 className="w-6 h-6 animate-spin text-primary" />
           </div>
         ) : (
-          <div className="h-[220px]">
-            <MapContainer
-              center={[pickupLat, pickupLng]}
-              zoom={10}
-              style={{ height: '100%', width: '100%' }}
-              zoomControl={false}
-              attributionControl={false}
-            >
-              <TileLayer url={OSM_TILE_URL} attribution={OSM_ATTRIBUTION} />
-              <FitBounds center={[pickupLat, pickupLng]} drivers={drivers} />
-
-              {/* Radius circle */}
-              <Circle
-                center={[pickupLat, pickupLng]}
-                radius={RADIUS_KM * 1000}
-                pathOptions={{
-                  color: 'hsl(var(--primary))',
-                  fillColor: 'hsl(var(--primary))',
-                  fillOpacity: 0.06,
-                  weight: 1.5,
-                  dashArray: '6 4',
-                }}
-              />
-
-              {/* Pickup center */}
-              <Marker position={[pickupLat, pickupLng]} icon={centerIcon}>
-                <Popup>
-                  <div className="text-center text-xs font-bold" dir="rtl">📦 موقع الاستلام</div>
-                </Popup>
-              </Marker>
-
-              {/* Driver markers */}
-              {drivers.map(driver => (
-                <Marker
-                  key={driver.id}
-                  position={[driver.lat, driver.lng]}
-                  icon={createDriverIcon(driver.status)}
-                >
-                  <Popup>
-                    <div className="text-xs space-y-1 min-w-[140px]" dir="rtl">
-                      <div className="font-bold">{driver.name}</div>
-                      {driver.vehiclePlate && (
-                        <div className="text-muted-foreground">🚛 {driver.vehiclePlate}</div>
-                      )}
-                      <div>⭐ {driver.rating.toFixed(1)} • {driver.totalTrips} رحلة</div>
-                      <div>📏 {driver.distanceKm} كم</div>
-                      {driver.status === 'arriving_soon' && driver.etaMinutes && (
-                        <div className="text-orange-600">⏱ يصل خلال ~{driver.etaMinutes} دقيقة</div>
-                      )}
-                      <div className={driver.status === 'available' ? 'text-emerald-600 font-medium' : 'text-orange-600 font-medium'}>
-                        {driver.status === 'available' ? '🟢 متاح الآن' : '🟠 يقترب من الانتهاء'}
-                      </div>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
-            </MapContainer>
-          </div>
+          <MapErrorBoundary>
+            <LazyMapContent pickupLat={pickupLat} pickupLng={pickupLng} drivers={drivers} />
+          </MapErrorBoundary>
         )}
       </CardContent>
     </Card>
