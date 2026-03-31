@@ -299,13 +299,7 @@ const GeneratorDashboard = () => {
           refreshFromGPS: realWeather.refreshFromGPS,
           isLocating: realWeather.isLocating,
         }}
-        heatmapData={[
-          { region: 'القاهرة', value: recentShipments.filter(s => s.status === 'in_transit').length, max: 10 },
-          { region: 'الجيزة', value: Math.round(recentShipments.length * 0.3), max: 10 },
-          { region: 'الإسكندرية', value: Math.round(recentShipments.length * 0.2), max: 8 },
-          { region: 'الدلتا', value: Math.round(recentShipments.length * 0.15), max: 6 },
-          { region: 'الصعيد', value: Math.round(recentShipments.length * 0.1), max: 5 },
-        ]}
+        heatmapData={buildRealHeatmap(recentShipments)}
       >
         <DashboardWidgetCustomizer orgType="generator" />
         <DashboardPrintReports />
