@@ -198,27 +198,27 @@ const TransporterReceipts = () => {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4 sm:space-y-6">
         <BackButton />
 
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold flex items-center gap-2">
-              <FileCheck className="h-6 w-6 text-primary" />
-              شهادات استلام الشحنات
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold flex items-center gap-2">
+              <FileCheck className="h-5 w-5 sm:h-6 sm:w-6 text-primary shrink-0" />
+              <span className="truncate">شهادات استلام الشحنات</span>
             </h1>
-            <p className="text-muted-foreground">
+            <p className="text-xs sm:text-sm text-muted-foreground">
               إدارة شهادات استلام الشحنات مصنفة حسب الجهة المولدة
             </p>
           </div>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => setConfigOpen(!configOpen)} className="gap-1">
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <Button variant="outline" size="sm" onClick={() => setConfigOpen(!configOpen)} className="gap-1">
               <Settings2 className="h-4 w-4" />
-              إعدادات
+              <span className="hidden sm:inline">إعدادات</span>
               <ChevronDown className={`h-3 w-3 transition-transform ${configOpen ? 'rotate-180' : ''}`} />
             </Button>
-            <Button onClick={() => navigate('/dashboard/create-receipt')}>
-              <Plus className="h-4 w-4 ml-2" />
+            <Button size="sm" onClick={() => navigate('/dashboard/create-receipt')} className="flex-1 sm:flex-none">
+              <Plus className="h-4 w-4 ml-1" />
               إنشاء شهادة جديدة
             </Button>
           </div>
