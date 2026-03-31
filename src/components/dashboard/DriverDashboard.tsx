@@ -278,7 +278,7 @@ const DriverDashboard = () => {
     { id: 'routes', label: 'تحسين المسارات', icon: Route },
   ];
 
-  const isMobileView = window.innerWidth < 768;
+  // Removed unused variable — responsive handled via Tailwind classes
 
   return (
     <div className="space-y-3 pb-20">
