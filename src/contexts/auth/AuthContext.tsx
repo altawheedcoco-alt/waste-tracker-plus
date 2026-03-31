@@ -379,21 +379,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 fetchUserData(session.user.id);
               }
             }, 0);
-            if (event === 'SIGNED_IN') {
-              // إشعار تسجيل الدخول مرة واحدة فقط لكل جلسة
-              const loginNotifiedKey = '__login_notified';
-              if (!sessionStorage.getItem(loginNotifiedKey)) {
-                sessionStorage.setItem(loginNotifiedKey, '1');
-                import('@/utils/notifyAction').then(({ notifyAction }) => {
-                  notifyAction({
-                    title: '🔓 تسجيل دخول جديد',
-                    message: `تم تسجيل الدخول بنجاح - ${new Date().toLocaleString('ar-EG')}`,
-                    type: 'auth_login',
-                    targetUserId: session.user.id,
-                  });
-                });
-              }
-            }
+            // لا يتم إرسال أي إشعار عند تسجيل الدخول
           }
         } else {
           setProfile(null);
@@ -494,8 +480,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     stopFocusMusicOnLogout();
-    // مسح علامة إشعار الدخول عند الخروج
-    sessionStorage.removeItem('__login_notified');
+    // لا يتم إرسال أي إشعار عند تسجيل الخروج
 
     try {
       await supabase.auth.signOut({ scope: 'local' });
