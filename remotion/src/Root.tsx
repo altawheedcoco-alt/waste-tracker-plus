@@ -99,6 +99,11 @@ import { Ep86Dark, Ep86Light } from "./videos/season15/NotificationHub";
 import { Ep87Dark, Ep87Light } from "./videos/season15/PlatformSecurity";
 // Season 16
 import { Ep88Dark, Ep88Light } from "./videos/season16/FactorySuccess";
+// World Environment Day
+import { WED2022 } from "./videos/wed/WED2022";
+import { WED2023 } from "./videos/wed/WED2023";
+import { WED2024 } from "./videos/wed/WED2024";
+import { WED2025 } from "./videos/wed/WED2025";
 import { Ep89Dark, Ep89Light } from "./videos/season16/TransporterJourney";
 import { Ep90Dark, Ep90Light } from "./videos/season16/RecyclerImpact";
 import { Ep91Dark, Ep91Light } from "./videos/season16/CarbonReduction";
