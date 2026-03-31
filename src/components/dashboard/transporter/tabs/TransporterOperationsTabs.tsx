@@ -77,24 +77,18 @@ const TransporterOperationsTabs = ({
   shipmentStatusFilter,
 }: OperationsTabsProps) => (
   <>
-    {/* ══════ 1. نظرة عامة (مخففة) ══════ */}
+    {/* ══════ 1. نظرة عامة (مُحسّنة — بدون تكرار مع CommandCenter) ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
-      {/* Smart KPIs */}
-      <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
-        <ErrorBoundary fallbackTitle="خطأ في مؤشرات الأداء الذكية">
-          <TransporterSmartKPIs />
-        </ErrorBoundary>
-      </Suspense>
+      {/* الإحصائيات الأساسية */}
+      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
+      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
-      {/* Smart ETA */}
+      {/* Smart ETA — معلومات فريدة غير متوفرة في CommandCenter */}
       <Suspense fallback={<Skeleton className="h-40 rounded-xl" />}>
         <ErrorBoundary fallbackTitle="خطأ في وقت الوصول الذكي">
           <SmartETAWidget />
         </ErrorBoundary>
       </Suspense>
-
-      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
-      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
       <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة العمليات">
