@@ -171,12 +171,11 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 5. الأداء والتحليلات (+ copilot + رادار) ══════ */}
+    {/* ══════ 5. الأداء والتحليلات (مدمج بدون تكرار) ══════ */}
     <TabsContent value="performance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
           <EnhancedDriverPerformance />
-          <DriverPerformancePanel />
           <SmartDriverNotifications />
           <MaintenanceScheduler />
         </ErrorBoundary>

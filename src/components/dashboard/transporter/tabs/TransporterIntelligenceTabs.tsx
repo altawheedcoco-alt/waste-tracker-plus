@@ -107,6 +107,16 @@ const TransporterIntelligenceTabs = () => (
 
     {/* ══════ 10. الشركاء والسوق ══════ */}
     <TabsContent value="partners" className="space-y-4 mt-6">
+      {/* ★ إجراء سريع */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-foreground">شبكة الشركاء والسوق</h3>
+        <button
+          onClick={() => window.location.href = '/dashboard/partners'}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+        >
+          + دعوة شريك جديد
+        </button>
+      </div>
       <Suspense fallback={<TabFallback />}>
         <Suspense fallback={<Skeleton className="h-[200px] rounded-xl" />}>
           <ErrorBoundary fallbackTitle="خطأ في ملخص الشركاء"><TransporterPartnerSummary /></ErrorBoundary>
