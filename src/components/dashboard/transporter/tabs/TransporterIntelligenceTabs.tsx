@@ -3,6 +3,7 @@
  * ai | finance | sustainability | partners
  */
 import { lazy, Suspense } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { TabsContent } from '@/components/ui/tabs';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { Skeleton } from '@/components/ui/skeleton';
