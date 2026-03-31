@@ -19,8 +19,11 @@ import { ar } from 'date-fns/locale';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import html2canvas from 'html2canvas';
-import jsPDF from 'jspdf';
+// Lazy-loaded for PDF export — reduces initial bundle
+const loadPdfTools = () => Promise.all([
+  import('html2canvas'),
+  import('jspdf'),
+]).then(([h, j]) => ({ html2canvas: h.default, jsPDF: j.default }));
 
 // ─── Animated counter ───
 const useAnimatedNumber = (target: number, duration = 1200) => {
