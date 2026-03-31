@@ -62,6 +62,7 @@ const seasons: SeasonInfo[] = [
   { number: 14, title: 'تاريخ التدوير عالمياً', titleEn: 'Global Recycling History', style: 'Vintage Earth', color: 'from-green-600 to-emerald-700', gradient: 'from-green-600/20 via-emerald-700/10 to-transparent', icon: '🌍' },
   { number: 15, title: 'الميزات الداخلية المتقدمة', titleEn: 'Advanced Internal Features', style: 'Electric Blueprint', color: 'from-blue-500 to-indigo-600', gradient: 'from-blue-500/20 via-indigo-600/10 to-transparent', icon: '⚡' },
   { number: 16, title: 'قصص نجاح وتأثير بيئي', titleEn: 'Success Stories & Impact', style: 'Green Gold', color: 'from-green-500 to-yellow-500', gradient: 'from-green-500/20 via-yellow-500/10 to-transparent', icon: '🏆' },
+  { number: 17, title: 'اليوم العالمي للبيئة', titleEn: 'World Environment Day', style: 'Earth Celebration', color: 'from-teal-500 to-green-600', gradient: 'from-teal-500/20 via-green-600/10 to-transparent', icon: '🌎' },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
