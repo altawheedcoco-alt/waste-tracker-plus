@@ -39,6 +39,16 @@ const TransporterIntelligenceTabs = () => (
   <>
     {/* ══════ 6. الذكاء الاصطناعي ══════ */}
     <TabsContent value="ai" className="space-y-4 mt-6">
+      {/* ★ توجيه المستخدم الجديد */}
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 flex items-start gap-3">
+        <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+          <span className="text-lg">🤖</span>
+        </div>
+        <div className="text-right">
+          <p className="text-xs font-bold text-foreground">مركز الذكاء الاصطناعي</p>
+          <p className="text-[11px] text-muted-foreground mt-0.5">استخدم أدوات الذكاء الاصطناعي لتحليل المستندات، التنبؤ بالطلب، جدولة الشحنات ذكياً، وتخطيط السعة المستقبلية.</p>
+        </div>
+      </div>
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في تحليل المستندات">
           <AIDocumentAnalyzer />
@@ -97,6 +107,16 @@ const TransporterIntelligenceTabs = () => (
 
     {/* ══════ 10. الشركاء والسوق ══════ */}
     <TabsContent value="partners" className="space-y-4 mt-6">
+      {/* ★ إجراء سريع */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-foreground">شبكة الشركاء والسوق</h3>
+        <button
+          onClick={() => window.location.href = '/dashboard/partners'}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+        >
+          + دعوة شريك جديد
+        </button>
+      </div>
       <Suspense fallback={<TabFallback />}>
         <Suspense fallback={<Skeleton className="h-[200px] rounded-xl" />}>
           <ErrorBoundary fallbackTitle="خطأ في ملخص الشركاء"><TransporterPartnerSummary /></ErrorBoundary>

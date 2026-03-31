@@ -77,24 +77,18 @@ const TransporterOperationsTabs = ({
   shipmentStatusFilter,
 }: OperationsTabsProps) => (
   <>
-    {/* ══════ 1. نظرة عامة (مخففة) ══════ */}
+    {/* ══════ 1. نظرة عامة (مُحسّنة — بدون تكرار مع CommandCenter) ══════ */}
     <TabsContent value="overview" className="space-y-4 sm:space-y-5 mt-4 sm:mt-6">
-      {/* Smart KPIs */}
-      <Suspense fallback={<Skeleton className="h-48 rounded-xl" />}>
-        <ErrorBoundary fallbackTitle="خطأ في مؤشرات الأداء الذكية">
-          <TransporterSmartKPIs />
-        </ErrorBoundary>
-      </Suspense>
+      {/* الإحصائيات الأساسية */}
+      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
+      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
-      {/* Smart ETA */}
+      {/* Smart ETA — معلومات فريدة غير متوفرة في CommandCenter */}
       <Suspense fallback={<Skeleton className="h-40 rounded-xl" />}>
         <ErrorBoundary fallbackTitle="خطأ في وقت الوصول الذكي">
           <SmartETAWidget />
         </ErrorBoundary>
       </Suspense>
-
-      <TransporterStatsGrid stats={stats} isLoading={statsLoading} onStatClick={onStatClick} />
-      <TransporterKPICards financials={financials} kpis={kpis} financialsLoading={financialsLoading} kpisLoading={kpisLoading} />
 
       <Suspense fallback={<Skeleton className="h-[400px] rounded-xl" />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة العمليات">
@@ -136,6 +130,16 @@ const TransporterOperationsTabs = ({
 
     {/* ══════ 3. الأسطول والصيانة (+ IoT + استخدام الأسطول) ══════ */}
     <TabsContent value="fleet" className="space-y-4 mt-6">
+      {/* ★ إجراء سريع: إضافة مركبة */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-foreground">إدارة الأسطول والصيانة</h3>
+        <button
+          onClick={() => window.location.href = '/dashboard/transporter-drivers'}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+        >
+          + إضافة مركبة / سائق
+        </button>
+      </div>
       <Suspense fallback={<TabFallback />}>
         <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
           <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول"><FleetStatusMini /></ErrorBoundary>
@@ -167,12 +171,11 @@ const TransporterOperationsTabs = ({
       </Suspense>
     </TabsContent>
 
-    {/* ══════ 5. الأداء والتحليلات (+ copilot + رادار) ══════ */}
+    {/* ══════ 5. الأداء والتحليلات (مدمج بدون تكرار) ══════ */}
     <TabsContent value="performance" className="space-y-4 mt-6">
       <Suspense fallback={<TabFallback />}>
         <ErrorBoundary fallbackTitle="خطأ في لوحة الأداء">
           <EnhancedDriverPerformance />
-          <DriverPerformancePanel />
           <SmartDriverNotifications />
           <MaintenanceScheduler />
         </ErrorBoundary>
