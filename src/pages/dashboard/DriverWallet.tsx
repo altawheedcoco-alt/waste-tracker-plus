@@ -178,10 +178,6 @@ const DriverWallet = () => {
                         <p className="text-[10px] text-amber-500">قيد التحصيل</p>
                       )}
                     </div>
-                    </div>
-                    <span className={`font-bold text-sm ${tx.type === 'credit' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {tx.type === 'credit' ? '+' : '-'}{tx.amount} ج.م
-                    </span>
                   </motion.div>
                 ))}
               </div>
