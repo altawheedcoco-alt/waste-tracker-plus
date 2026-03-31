@@ -73,7 +73,7 @@ const LoadConsolidator = () => {
             area: area || 'منطقة غير محددة',
             wasteType: wasteType || 'عام',
             shipments: items,
-            estimatedSaving: Math.round(15 + Math.random() * 25),
+            estimatedSaving: Math.min(40, Math.round(items.length * 10)),
           });
         }
       });
