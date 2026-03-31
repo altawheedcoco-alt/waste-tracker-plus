@@ -219,10 +219,10 @@ const TransporterDashboard = () => {
         <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       </div>
 
-      {/* 2.5 رادار السائقين القريبين */}
+      {/* 2.5 رادار السائقين القريبين — يستخدم موقع المنظمة الديناميكي */}
       <div id="section-radar">
         <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-          <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+          <DynamicNearbyRadar />
         </Suspense>
       </div>
 
