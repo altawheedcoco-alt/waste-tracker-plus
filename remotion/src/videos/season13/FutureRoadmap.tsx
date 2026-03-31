@@ -15,7 +15,7 @@ const VideoContent = ({ dark }: { dark: boolean }) => {
       <Sequence from={0} durationInFrames={120}>
         <S13Title ar="خارطة المستقبل" en="Future Roadmap 2025-2030" dark={dark} icon="🗺️" />
       </Sequence>
-      <Sequence from={120} durationInFrames={1910}>
+      <Sequence from={120} durationInFrames={810}>
         <S13ContentSlide items={items} dark={dark} />
       </Sequence>
     </AbsoluteFill>
