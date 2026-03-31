@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useMemo, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
