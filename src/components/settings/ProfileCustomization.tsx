@@ -91,7 +91,7 @@ const ProfileCustomization = ({ compact = false }: ProfileCustomizationProps) =>
           full_name: displayName,
           avatar_preset: selectedAvatar,
           profile_color_theme: selectedColor,
-        } as any)
+        })
         .eq('user_id', user.id);
 
       if (error) throw error;
