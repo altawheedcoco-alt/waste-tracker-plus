@@ -1,12 +1,20 @@
 /**
  * خريطة رادار السائقين القريبين — للناقل
- * مُعطّل مؤقتاً بسبب عدم توافق react-leaflet مع React 18
+ * تستخدم Leaflet الأصلي (بدون react-leaflet) لتوافق React 18
  */
-import { memo } from 'react';
+import { memo, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Truck, MapPin, Navigation, Radio } from 'lucide-react';
+import { Truck, MapPin, Navigation } from 'lucide-react';
 import { useNearbyDrivers } from '@/hooks/useProximityData';
+import { OSM_TILE_URL, OSM_ATTRIBUTION } from '@/lib/leafletConfig';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
 
 const RADIUS_KM = 50;
 
@@ -18,9 +26,88 @@ interface Props {
 const NearbyDriversRadar = memo(({ pickupLat, pickupLng }: Props) => {
   const center = { lat: pickupLat, lng: pickupLng };
   const { data: drivers = [], isLoading } = useNearbyDrivers(center, RADIUS_KM);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
+  const circleRef = useRef<L.Circle | null>(null);
 
   const availableCount = drivers.filter(d => d.status === 'available').length;
   const arrivingCount = drivers.filter(d => d.status === 'arriving_soon').length;
+
+  // Initialize map once
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([pickupLat, pickupLng], 10);
+
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
+
+    // Radius circle
+    circleRef.current = L.circle([pickupLat, pickupLng], {
+      radius: RADIUS_KM * 1000,
+      color: '#3b82f6',
+      fillColor: '#3b82f6',
+      fillOpacity: 0.08,
+      weight: 1,
+      dashArray: '6 4',
+    }).addTo(map);
+
+    // Center marker
+    L.circleMarker([pickupLat, pickupLng], {
+      radius: 8,
+      color: '#3b82f6',
+      fillColor: '#3b82f6',
+      fillOpacity: 1,
+      weight: 2,
+    }).addTo(map).bindPopup('📍 موقع الاستلام');
+
+    markersRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [pickupLat, pickupLng]);
+
+  // Update driver markers when data changes
+  useEffect(() => {
+    if (!markersRef.current || !mapInstanceRef.current) return;
+    markersRef.current.clearLayers();
+
+    drivers.forEach(driver => {
+      const isAvailable = driver.status === 'available';
+      const color = isAvailable ? '#10b981' : '#f59e0b';
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="
+          width:28px;height:28px;border-radius:50%;
+          background:${color};border:3px solid white;
+          box-shadow:0 2px 6px rgba(0,0,0,0.3);
+          display:flex;align-items:center;justify-content:center;
+          font-size:13px;color:white;
+        ">🚛</div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+      });
+
+      L.marker([driver.lat, driver.lng], { icon })
+        .addTo(markersRef.current!)
+        .bindPopup(`
+          <div style="text-align:right;direction:rtl;min-width:140px">
+            <b>${driver.name}</b><br/>
+            <span style="color:${color}">● ${isAvailable ? 'متاح' : 'يقترب'}</span><br/>
+            📏 ${driver.distanceKm} كم<br/>
+            ⭐ ${driver.rating || 0} — ${driver.totalTrips || 0} رحلة
+            ${driver.vehiclePlate ? `<br/>🚗 ${driver.vehiclePlate}` : ''}
+            ${driver.etaMinutes ? `<br/>⏱ وصول خلال ~${driver.etaMinutes} دقيقة` : ''}
+          </div>
+        `);
+    });
+  }, [drivers]);
 
   return (
     <Card className="overflow-hidden border-primary/20">
@@ -44,32 +131,25 @@ const NearbyDriversRadar = memo(({ pickupLat, pickupLng }: Props) => {
         </span>
       </div>
 
-      <CardContent className="p-0">
-        <div className="flex flex-col items-center justify-center h-[220px] bg-muted/10 gap-3">
-          <div className="relative">
-            <Radio className="w-10 h-10 text-primary/40 animate-pulse" />
-            <div className="absolute inset-0 rounded-full border-2 border-primary/20 animate-ping" />
+      <CardContent className="p-0 relative">
+        <div ref={mapRef} style={{ height: '250px', width: '100%' }} />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-[500]">
+            <p className="text-xs text-muted-foreground animate-pulse">جاري البحث عن سائقين...</p>
           </div>
-          {isLoading ? (
-            <p className="text-xs text-muted-foreground">جاري البحث عن سائقين...</p>
-          ) : (
-            <div className="text-center space-y-1">
-              <p className="text-sm font-semibold text-foreground">
-                {drivers.length} سائق في النطاق
-              </p>
-              <p className="text-[11px] text-muted-foreground">
-                🟢 {availableCount} متاح • 🟠 {arrivingCount} يقترب
-              </p>
-            </div>
-          )}
-          {drivers.slice(0, 4).map(driver => (
-            <div key={driver.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-              <span className={driver.status === 'available' ? 'text-emerald-500' : 'text-orange-500'}>●</span>
-              <span>{driver.name}</span>
-              <span className="text-[10px]">({driver.distanceKm} كم)</span>
-            </div>
-          ))}
-        </div>
+        )}
+        {!isLoading && drivers.length === 0 && (
+          <div className="absolute bottom-2 left-2 right-2 bg-background/80 rounded-lg p-2 text-center z-[500]">
+            <p className="text-xs text-muted-foreground">لا يوجد سائقين في النطاق حالياً</p>
+          </div>
+        )}
+        {!isLoading && drivers.length > 0 && (
+          <div className="absolute bottom-2 left-2 right-2 bg-background/80 backdrop-blur-sm rounded-lg p-1.5 text-center z-[500]">
+            <p className="text-[11px] text-foreground font-medium">
+              🟢 {availableCount} متاح • 🟠 {arrivingCount} يقترب — إجمالي {drivers.length} سائق
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
