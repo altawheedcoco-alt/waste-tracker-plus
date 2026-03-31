@@ -332,13 +332,15 @@ const ERPAccounting = () => {
                 { title: 'ميزان المراجعة', desc: 'مراجعة أرصدة جميع الحسابات', icon: Calculator },
                 { title: 'التدفقات النقدية', desc: 'حركة الأموال الواردة والصادرة', icon: FileText },
               ].map(report => (
-                <Card key={report.title} className="cursor-pointer hover:shadow-md transition-shadow">
-                  <CardContent className="p-6 text-right">
+                <Card key={report.title} className="cursor-pointer hover:shadow-md transition-shadow group"
+                  onClick={() => toast.info(`تقرير "${report.title}" قيد التطوير — سيتوفر قريباً`)}>
+                  <CardContent className="p-4 sm:p-6 text-right">
                     <div className="flex items-start gap-3">
-                      <report.icon className="h-8 w-8 text-primary shrink-0 mt-1" />
+                      <report.icon className="h-8 w-8 text-primary shrink-0 mt-1 group-hover:scale-110 transition-transform" />
                       <div>
                         <h3 className="font-semibold">{report.title}</h3>
                         <p className="text-sm text-muted-foreground">{report.desc}</p>
+                        <Badge variant="outline" className="mt-2 text-[10px]">قريباً</Badge>
                       </div>
                     </div>
                   </CardContent>

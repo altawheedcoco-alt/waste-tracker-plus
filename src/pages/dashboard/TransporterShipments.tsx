@@ -361,11 +361,11 @@ const TransporterShipments = () => {
                 </Select>
               </div>
               
-              {/* Partner Filter - hidden on small mobile */}
-              <div className="hidden sm:flex items-center gap-2 flex-1 min-w-[180px]">
+              {/* Partner Filter - visible on all screens */}
+              <div className="flex items-center gap-2 flex-1 min-w-[140px]">
                 <LinkIcon className="h-4 w-4 text-primary shrink-0" />
                 <Select value={partnerFilter} onValueChange={setPartnerFilter}>
-                  <SelectTrigger className="w-full sm:w-[200px]">
+                  <SelectTrigger className="w-full sm:w-[200px] text-xs sm:text-sm">
                     <SelectValue placeholder={t('shipments.allEntities')} />
                   </SelectTrigger>
                   <SelectContent>
@@ -383,7 +383,7 @@ const TransporterShipments = () => {
                           ) : (
                             <Recycle className="h-4 w-4 text-emerald-600" />
                           )}
-                          <span>{partner.name}</span>
+                          <span className="truncate">{partner.name}</span>
                           <Badge variant="secondary" className="text-[10px] mr-1">
                             {partner.shipmentsCount}
                           </Badge>

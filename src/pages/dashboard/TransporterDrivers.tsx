@@ -611,17 +611,34 @@ const TransporterDrivers = () => {
         </Card>
       </div>
 
-      {/* Search */}
+      {/* Search + Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="بحث بالاسم أو رقم الرخصة أو رقم اللوحة..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث بالاسم أو رقم الرخصة أو رقم اللوحة..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-10"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {(['all', 'available', 'busy'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setAvailabilityFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    availabilityFilter === f
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {f === 'all' ? `الكل (${stats.total})` : f === 'available' ? `متاح (${stats.available})` : `في مهمة (${stats.busy})`}
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
