@@ -54,9 +54,10 @@ const SmartRouteOptimizer = () => {
       toast.info('يجب وجود شحنتين على الأقل لتحسين المسار');
       return;
     }
+    // Use a deterministic spread based on index for coordinates when no real geocoding
     const destinations = pendingShipments.map((s, i) => ({
-      lat: 30.0 + Math.random() * 0.5,
-      lng: 31.2 + Math.random() * 0.5,
+      lat: 30.05 + (i * 0.03) * (i % 2 === 0 ? 1 : -1),
+      lng: 31.25 + (i * 0.04) * (i % 2 === 0 ? -1 : 1),
       name: s.delivery_address || `شحنة ${s.shipment_number}`,
       type: 'delivery' as const,
       shipmentId: s.id,

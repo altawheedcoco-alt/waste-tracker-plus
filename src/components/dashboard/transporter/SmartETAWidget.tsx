@@ -65,12 +65,15 @@ const SmartETAWidget = () => {
           else if (estimatedMinutes < 30) etaStatus = 'delayed';
         } else if (started) {
           const elapsed = Math.round((now.getTime() - started.getTime()) / 60000);
-          estimatedMinutes = Math.max(0, 120 - elapsed); // Estimate 2 hours default
+          estimatedMinutes = Math.max(0, 120 - elapsed);
           if (elapsed > 180) etaStatus = 'critical';
           else if (elapsed > 120) etaStatus = 'delayed';
         } else {
           estimatedMinutes = 60;
         }
+
+        // Estimate distance from remaining time (avg ~40 km/h in urban Egypt)
+        const estimatedDistance = estimatedMinutes > 0 ? Math.round((estimatedMinutes / 60) * 40) : 0;
 
         return {
           id: s.id,
@@ -79,7 +82,7 @@ const SmartETAWidget = () => {
           driver: s.driver_id ? (driversMap[s.driver_id] || 'غير معين') : 'غير معين',
           estimatedMinutes,
           status: etaStatus,
-          distance: Math.round(10 + Math.random() * 50),
+          distance: estimatedDistance,
         };
       });
 
