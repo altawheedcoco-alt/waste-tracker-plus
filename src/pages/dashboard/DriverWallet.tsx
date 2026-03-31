@@ -126,7 +126,7 @@ const DriverWallet = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">رحلات مدفوعة</p>
-                <p className="font-bold">{driverProfile?.total_trips || 0}</p>
+                <p className="font-bold">{walletData?.completedTrips || driverProfile?.total_trips || 0}</p>
               </div>
             </CardContent>
           </Card>
