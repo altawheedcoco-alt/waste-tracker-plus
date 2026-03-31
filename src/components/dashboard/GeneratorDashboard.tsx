@@ -116,6 +116,42 @@ interface RecentShipment {
 }
 
 const GeneratorDashboard = () => {
+  // Build real heatmap from shipment pickup/delivery locations
+  const buildRealHeatmap = useCallback((shipments: RecentShipment[]) => {
+    const regionMap: Record<string, number> = {};
+    const locations = shipments.flatMap(s => [
+      s.pickup_address, s.delivery_address,
+      s.generator?.city, s.recycler?.city, s.transporter?.city,
+    ].filter(Boolean));
+
+    const regionKeywords: Record<string, string[]> = {
+      'القاهرة': ['القاهرة', 'cairo', 'مدينة نصر', 'المعادي', 'حلوان', 'شبرا', 'عين شمس'],
+      'الجيزة': ['الجيزة', 'giza', '6 أكتوبر', 'الشيخ زايد', 'الهرم', 'فيصل'],
+      'الإسكندرية': ['الإسكندرية', 'alexandria', 'اسكندرية', 'برج العرب'],
+      'الدلتا': ['المنصورة', 'طنطا', 'الغربية', 'الدقهلية', 'كفر الشيخ', 'دمياط', 'المنوفية', 'القليوبية', 'الشرقية'],
+      'الصعيد': ['المنيا', 'أسيوط', 'سوهاج', 'قنا', 'الأقصر', 'أسوان', 'بني سويف'],
+      'السويس والقناة': ['السويس', 'الإسماعيلية', 'بورسعيد', 'suez'],
+      'البحر الأحمر': ['الغردقة', 'hurghada', 'البحر الأحمر', 'مرسى علم'],
+    };
+
+    for (const loc of locations) {
+      const locLower = (loc as string).toLowerCase();
+      let matched = false;
+      for (const [region, keywords] of Object.entries(regionKeywords)) {
+        if (keywords.some(kw => locLower.includes(kw.toLowerCase()))) {
+          regionMap[region] = (regionMap[region] || 0) + 1;
+          matched = true;
+          break;
+        }
+      }
+      if (!matched) regionMap['أخرى'] = (regionMap['أخرى'] || 0) + 1;
+    }
+
+    const entries = Object.entries(regionMap).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    if (entries.length === 0) return [{ region: 'لا توجد بيانات', value: 0, max: 1 }];
+    const maxVal = Math.max(...entries.map(e => e[1]), 1);
+    return entries.map(([region, value]) => ({ region, value, max: Math.ceil(maxVal * 1.2) }));
+  }, []);
   const { profile, organization } = useAuth();
   const navigate = useNavigate();
   const { t, language } = useLanguage();
