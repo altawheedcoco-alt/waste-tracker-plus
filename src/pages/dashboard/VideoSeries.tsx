@@ -13,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import logoImg from '@/assets/irecycle-logo-premium-3d.webp';
 
 // Banners loaded lazily via dynamic imports to avoid bundling 2MB+ upfront
-const bannerModules = import.meta.glob('@/assets/banners/season*-banner.webp', { eager: false, import: 'default' }) as Record<string, () => Promise<string>>;
+const bannerModules = import.meta.glob('@/assets/banners/season*-banner.webp', { eager: false, query: '?url', import: 'default' }) as Record<string, () => Promise<string>>;
 const getBannerUrl = (seasonNum: number): (() => Promise<string>) | undefined => {
   const key = Object.keys(bannerModules).find(k => k.includes(`season${seasonNum}-banner.webp`));
   return key ? bannerModules[key] : undefined;
