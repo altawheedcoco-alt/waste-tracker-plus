@@ -1,47 +1,16 @@
 /**
  * خريطة الطلب الساخن — للسائق المستقل
- * تظهر مناطق تركز الشحنات غير المُسندة + عروض المهام
+ * مُعطّل مؤقتاً بسبب عدم توافق react-leaflet مع React 18
  */
-import { memo, useState, useEffect, Component, type ReactNode } from 'react';
+import { memo, useState, useEffect } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Flame, MapPin, Package, Loader2, AlertTriangle } from 'lucide-react';
+import { Flame, MapPin, Package, Radio } from 'lucide-react';
 import { useNearbyShipments, type NearbyShipment } from '@/hooks/useProximityData';
 
-/** Internal error boundary */
-class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: boolean }> {
-  constructor(props: { children: ReactNode }) {
-    super(props);
-    this.state = { hasError: false };
-  }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
-  componentDidCatch(error: Error) {
-    console.warn('DemandHeatmapDriver map error caught:', error.message);
-  }
-  render() {
-    if (this.state.hasError) {
-      return (
-        <div className="flex items-center justify-center h-[250px] bg-muted/10 rounded-lg">
-          <div className="text-center text-xs text-muted-foreground space-y-1">
-            <AlertTriangle className="w-5 h-5 mx-auto text-amber-500" />
-            <p>تعذر تحميل الخريطة</p>
-          </div>
-        </div>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-/** Cluster nearby shipments into zones */
-function clusterShipments(shipments: NearbyShipment[], clusterRadiusKm = 5): Array<{
-  lat: number; lng: number; count: number; shipments: NearbyShipment[];
-}> {
+function clusterShipments(shipments: NearbyShipment[], clusterRadiusKm = 5) {
   const used = new Set<string>();
   const clusters: Array<{ lat: number; lng: number; count: number; shipments: NearbyShipment[] }> = [];
-
   shipments.forEach(s => {
     if (used.has(s.id)) return;
     const group = shipments.filter(o => {
@@ -57,137 +26,8 @@ function clusterShipments(shipments: NearbyShipment[], clusterRadiusKm = 5): Arr
     const avgLng = group.reduce((a, g) => a + g.pickupLng, 0) / group.length;
     clusters.push({ lat: avgLat, lng: avgLng, count: group.length, shipments: group });
   });
-
   return clusters;
 }
-
-function getHeatColor(count: number, max: number): string {
-  const ratio = Math.min(count / Math.max(max, 1), 1);
-  if (ratio < 0.33) return '#facc15';
-  if (ratio < 0.66) return '#f97316';
-  return '#ef4444';
-}
-
-/** Lazy-loaded map internals */
-const LazyMapContent = memo(({ lat, lng, serviceAreaKm, shipments }: {
-  lat: number; lng: number; serviceAreaKm: number; shipments: NearbyShipment[];
-}) => {
-  const [mapReady, setMapReady] = useState(false);
-  const [MapComponents, setMapComponents] = useState<any>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([
-      import('react-leaflet'),
-      import('leaflet'),
-      import('@/styles/leaflet.css'),
-      import('leaflet/dist/leaflet.css'),
-    ]).then(([rl, L]) => {
-      if (cancelled) return;
-      setMapComponents({ rl, L: L.default || L });
-      setMapReady(true);
-    }).catch(err => {
-      console.warn('Failed to load map libraries:', err);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  if (!mapReady || !MapComponents) {
-    return (
-      <div className="flex items-center justify-center h-[250px] bg-muted/20">
-        <Loader2 className="w-6 h-6 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const { MapContainer, TileLayer, Circle, CircleMarker, Marker, Popup } = MapComponents.rl;
-  const L = MapComponents.L;
-
-  const driverIcon = L.divIcon({
-    className: 'custom-div-icon',
-    html: `<div style="background:#3b82f6;color:white;border-radius:50%;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:16px;border:3px solid white;box-shadow:0 2px 8px rgba(0,0,0,.4);">📍</div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 18],
-  });
-
-  const clusters = clusterShipments(shipments);
-  const maxCount = Math.max(...clusters.map(c => c.count), 1);
-
-  const allPoints: [number, number][] = [[lat, lng], ...shipments.map(s => [s.pickupLat, s.pickupLng] as [number, number])];
-  const bounds = shipments.length > 0 ? L.latLngBounds(allPoints) : undefined;
-
-  return (
-    <div className="h-[250px]">
-      <MapContainer
-        center={[lat, lng]}
-        zoom={11}
-        bounds={bounds}
-        boundsOptions={{ padding: [30, 30] }}
-        style={{ height: '100%', width: '100%' }}
-        zoomControl={false}
-        attributionControl={false}
-      >
-        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-
-        {/* Service area circle */}
-        <Circle
-          center={[lat, lng]}
-          radius={serviceAreaKm * 1000}
-          pathOptions={{
-            color: '#3b82f6',
-            fillColor: '#3b82f6',
-            fillOpacity: 0.04,
-            weight: 1.5,
-            dashArray: '8 4',
-          }}
-        />
-
-        {/* Driver position */}
-        <Marker position={[lat, lng]} icon={driverIcon}>
-          <Popup>
-            <div className="text-center text-xs font-bold" dir="rtl">📍 موقعك الحالي</div>
-          </Popup>
-        </Marker>
-
-        {/* Demand clusters */}
-        {clusters.map((cluster, i) => {
-          const color = getHeatColor(cluster.count, maxCount);
-          const radius = Math.max(15, Math.min(40, cluster.count * 12));
-          return (
-            <CircleMarker
-              key={`cluster-${i}`}
-              center={[cluster.lat, cluster.lng]}
-              radius={radius}
-              pathOptions={{
-                color,
-                fillColor: color,
-                fillOpacity: 0.35,
-                weight: 2,
-              }}
-            >
-              <Popup>
-                <div className="text-xs space-y-1 min-w-[130px]" dir="rtl">
-                  <div className="font-bold text-center">🔥 {cluster.count} شحنة</div>
-                  {cluster.shipments.slice(0, 3).map(s => (
-                    <div key={s.id} className="border-t pt-1">
-                      <div className="font-medium">{s.shipmentNumber}</div>
-                      <div className="text-muted-foreground">{s.wasteType} • {s.quantity} {s.unit}</div>
-                      <div className="text-muted-foreground">📏 {s.distanceKm} كم</div>
-                    </div>
-                  ))}
-                  {cluster.shipments.length > 3 && (
-                    <div className="text-center text-muted-foreground">+{cluster.shipments.length - 3} أخرى</div>
-                  )}
-                </div>
-              </Popup>
-            </CircleMarker>
-          );
-        })}
-      </MapContainer>
-    </div>
-  );
-});
-LazyMapContent.displayName = 'LazyMapContent';
 
 interface Props {
   driverLat?: number;
@@ -246,15 +86,25 @@ const DemandHeatmapDriver = memo(({ driverLat, driverLng, serviceAreaKm = 30 }: 
       </CardHeader>
 
       <CardContent className="p-0">
-        {isLoading ? (
-          <div className="flex items-center justify-center h-[250px] bg-muted/20">
-            <Loader2 className="w-6 h-6 animate-spin text-primary" />
+        <div className="flex flex-col items-center justify-center h-[250px] bg-muted/10 gap-3">
+          <div className="relative">
+            <Radio className="w-10 h-10 text-orange-400/50 animate-pulse" />
           </div>
-        ) : (
-          <MapErrorBoundary>
-            <LazyMapContent lat={actualLat} lng={actualLng} serviceAreaKm={serviceAreaKm} shipments={shipments} />
-          </MapErrorBoundary>
-        )}
+          {isLoading ? (
+            <p className="text-xs text-muted-foreground">جاري تحليل مناطق الطلب...</p>
+          ) : (
+            <div className="text-center space-y-1">
+              <p className="text-sm font-semibold text-foreground">
+                {shipments.length} شحنة في {clusters.length} منطقة
+              </p>
+              {clusters.slice(0, 3).map((c, i) => (
+                <p key={i} className="text-[11px] text-muted-foreground">
+                  🔥 {c.count} شحنة — {c.shipments[0]?.wasteType || 'متنوع'}
+                </p>
+              ))}
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   );
