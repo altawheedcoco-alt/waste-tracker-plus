@@ -278,7 +278,7 @@ const DriverDashboard = () => {
     { id: 'routes', label: 'تحسين المسارات', icon: Route },
   ];
 
-  const isMobileView = window.innerWidth < 768;
+  // Removed unused variable — responsive handled via Tailwind classes
 
   return (
     <div className="space-y-3 pb-20">
@@ -405,11 +405,7 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="nearby" className="mt-4">
             <Suspense fallback={<TabFallback />}>
-              <DemandHeatmapDriver
-                driverLat={30.0444}
-                driverLng={31.2357}
-                serviceAreaKm={30}
-              />
+              <DemandHeatmapDriver serviceAreaKm={30} />
             </Suspense>
           </TabsContent>
 
@@ -660,6 +656,13 @@ const DriverDashboard = () => {
               </Card>
             </div>
 
+            <QuickActionsGrid
+              actions={quickActions}
+              title="الإجراءات السريعة"
+              subtitle="الوظائف المستخدمة بكثرة"
+            />
+          </TabsContent>
+
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: التحليلات (مؤجر + مستقل) */}
           {/* ═══════════════════════════════════════════════ */}
@@ -667,13 +670,6 @@ const DriverDashboard = () => {
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <DriverAnalyticsPanel driverId={driverInfo.id} driverType={driverInfo.driver_type} />}
             </Suspense>
-          </TabsContent>
-
-            <QuickActionsGrid
-              actions={quickActions}
-              title="الإجراءات السريعة"
-              subtitle="الوظائف المستخدمة بكثرة"
-            />
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
