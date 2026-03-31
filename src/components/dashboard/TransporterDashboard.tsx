@@ -59,6 +59,28 @@ const PostsHub = lazy(() => import('./transporter/PostsHub'));
 const DispatchToDriverPanel = lazy(() => import('@/components/transporter/DispatchToDriverPanel'));
 const LiveDriverTracker = lazy(() => import('@/components/transporter/LiveDriverTracker'));
 
+/**
+ * مكوّن يستخدم Geolocation API للحصول على إحداثيات المنظمة الفعلية
+ * بدلاً من الإحداثيات الثابتة (القاهرة)
+ */
+const DynamicNearbyRadar = () => {
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => setCoords({ lat: 30.0444, lng: 31.2357 }), // fallback to Cairo
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 300000 }
+      );
+    } else {
+      setCoords({ lat: 30.0444, lng: 31.2357 });
+    }
+  }, []);
+
+  if (!coords) return <Skeleton className="h-64 w-full rounded-xl" />;
+  return <NearbyDriversRadar pickupLat={coords.lat} pickupLng={coords.lng} />;
+};
+
 const tabKeys = [
   { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
   { value: 'operations', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
@@ -219,10 +241,10 @@ const TransporterDashboard = () => {
         <Suspense fallback={null}><TransporterCommandCenter /></Suspense>
       </div>
 
-      {/* 2.5 رادار السائقين القريبين */}
+      {/* 2.5 رادار السائقين القريبين — يستخدم موقع المنظمة الديناميكي */}
       <div id="section-radar">
         <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-          <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+          <DynamicNearbyRadar />
         </Suspense>
       </div>
 
