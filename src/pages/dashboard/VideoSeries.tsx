@@ -58,6 +58,10 @@ const seasons: SeasonInfo[] = [
   { number: 10, title: 'القانون والامتثال', titleEn: 'Legal & Compliance', style: 'Legal Blueprint', color: 'from-blue-700 to-indigo-800', gradient: 'from-blue-700/20 via-indigo-800/10 to-transparent', icon: '⚖️' },
   { number: 11, title: 'التكامل والربط', titleEn: 'Integration & Connectivity', style: 'Cosmic Network', color: 'from-purple-500 to-violet-600', gradient: 'from-purple-500/20 via-violet-600/10 to-transparent', icon: '🌌' },
   { number: 12, title: 'الرؤية المستقبلية', titleEn: 'Future Vision — Grand Finale', style: 'Holographic', color: 'from-cyan-500 to-rose-500', gradient: 'from-cyan-500/20 via-rose-500/10 to-transparent', icon: '🚀' },
+  { number: 13, title: 'رحلة المنصة وتاريخها', titleEn: 'Platform Journey & History', style: 'Warm Chronicle', color: 'from-amber-500 to-yellow-600', gradient: 'from-amber-500/20 via-yellow-600/10 to-transparent', icon: '📖' },
+  { number: 14, title: 'تاريخ التدوير عالمياً', titleEn: 'Global Recycling History', style: 'Vintage Earth', color: 'from-green-600 to-emerald-700', gradient: 'from-green-600/20 via-emerald-700/10 to-transparent', icon: '🌍' },
+  { number: 15, title: 'الميزات الداخلية المتقدمة', titleEn: 'Advanced Internal Features', style: 'Electric Blueprint', color: 'from-blue-500 to-indigo-600', gradient: 'from-blue-500/20 via-indigo-600/10 to-transparent', icon: '⚡' },
+  { number: 16, title: 'قصص نجاح وتأثير بيئي', titleEn: 'Success Stories & Impact', style: 'Green Gold', color: 'from-green-500 to-yellow-500', gradient: 'from-green-500/20 via-yellow-500/10 to-transparent', icon: '🏆' },
 ];
 
 const STORAGE_BASE = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/series-videos`;
