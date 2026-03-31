@@ -207,6 +207,7 @@ const TransporterCommandCenter = () => {
     if (!cardRef.current || isExporting) return;
     setIsExporting(true);
     try {
+      const { html2canvas, jsPDF } = await loadPdfTools();
       const canvas = await html2canvas(cardRef.current, { scale: 2, useCORS: true, backgroundColor: null });
       const imgData = canvas.toDataURL('image/png');
       const pdf = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
