@@ -123,20 +123,27 @@ const TransporterDrivers = () => {
 
       if (error) throw error;
 
-      const driversWithShipments = await Promise.all(
-        (data || []).map(async (driver) => {
-          const { count } = await supabase
-            .from('shipments')
-            .select('id', { count: 'exact', head: true })
-            .eq('driver_id', driver.id)
-            .in('status', ['new', 'approved', 'collecting', 'in_transit']);
+      // Single batch query for active shipment counts instead of N+1
+      const driverIds = (data || []).map(d => d.id);
+      let shipmentCounts: Record<string, number> = {};
+      if (driverIds.length > 0) {
+        const { data: activeShipments } = await supabase
+          .from('shipments')
+          .select('driver_id')
+          .in('driver_id', driverIds)
+          .in('status', ['new', 'approved', 'collecting', 'in_transit']);
+        
+        (activeShipments || []).forEach(s => {
+          if (s.driver_id) {
+            shipmentCounts[s.driver_id] = (shipmentCounts[s.driver_id] || 0) + 1;
+          }
+        });
+      }
 
-          return {
-            ...driver,
-            activeShipments: count || 0,
-          } as Driver;
-        })
-      );
+      const driversWithShipments = (data || []).map(driver => ({
+        ...driver,
+        activeShipments: shipmentCounts[driver.id] || 0,
+      })) as Driver[];
 
       setDrivers(driversWithShipments);
     } catch (error) {
