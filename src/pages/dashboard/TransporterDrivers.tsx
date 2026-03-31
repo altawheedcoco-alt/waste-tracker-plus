@@ -298,11 +298,17 @@ const TransporterDrivers = () => {
     }
   };
 
-  const filteredDrivers = drivers.filter(driver =>
-    driver.profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.vehicle_plate?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'busy'>('all');
+
+  const filteredDrivers = drivers.filter(driver => {
+    const matchesSearch = driver.profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.vehicle_plate?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAvailability = availabilityFilter === 'all' ||
+      (availabilityFilter === 'available' && driver.is_available) ||
+      (availabilityFilter === 'busy' && driver.activeShipments > 0);
+    return matchesSearch && matchesAvailability;
+  });
 
   const stats = {
     total: drivers.length,
