@@ -406,9 +406,10 @@ const DriverDashboard = () => {
           <TabsContent value="nearby" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               <DemandHeatmapDriver
-                driverLat={30.0444}
-                driverLng={31.2357}
+                driverLat={undefined as any}
+                driverLng={undefined as any}
                 serviceAreaKm={30}
+                useGPS
               />
             </Suspense>
           </TabsContent>
