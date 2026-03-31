@@ -168,7 +168,7 @@ const DriverCopilot = () => {
                   ))}
                 </select>
                 <Button size="sm" variant="outline" onClick={generateDemoTasks} className="gap-1">
-                  <Sparkles className="w-3 h-3" /> مهام تجريبية
+                  <Sparkles className="w-3 h-3" /> إنشاء مهام نموذجية
                 </Button>
               </div>
             </div>

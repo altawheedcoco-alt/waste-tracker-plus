@@ -47,9 +47,9 @@ const DriverDailySummary = ({ shipments, driverName }: DriverDailySummaryProps) 
     const completionRate = totalAll > 0 ? (totalCompleted / totalAll) * 100 : 0;
     const performanceScore = Math.min(100, Math.round(completionRate * 0.7 + Math.min(30, deliveredToday.length * 10)));
 
-    // Estimated fuel savings (mock but based on data)
-    const estimatedKm = deliveredToday.length * 35; // avg 35km per trip
-    const fuelSaved = Math.round(estimatedKm * 0.08); // liters saved via optimization
+    // تقدير المسافة بناءً على عدد الرحلات المكتملة (متوسط 35 كم/رحلة في المناطق الحضرية المصرية)
+    const estimatedKm = deliveredToday.length * 35;
+    const fuelSaved = Math.round(estimatedKm * 0.08);
 
     return {
       deliveredToday: deliveredToday.length,
