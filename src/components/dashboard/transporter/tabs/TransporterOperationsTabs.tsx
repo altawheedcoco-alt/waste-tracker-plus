@@ -130,6 +130,16 @@ const TransporterOperationsTabs = ({
 
     {/* ══════ 3. الأسطول والصيانة (+ IoT + استخدام الأسطول) ══════ */}
     <TabsContent value="fleet" className="space-y-4 mt-6">
+      {/* ★ إجراء سريع: إضافة مركبة */}
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-bold text-foreground">إدارة الأسطول والصيانة</h3>
+        <button
+          onClick={() => window.location.href = '/dashboard/transporter-drivers'}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
+        >
+          + إضافة مركبة / سائق
+        </button>
+      </div>
       <Suspense fallback={<TabFallback />}>
         <Suspense fallback={<Skeleton className="h-[180px] rounded-xl" />}>
           <ErrorBoundary fallbackTitle="خطأ في حالة الأسطول"><FleetStatusMini /></ErrorBoundary>
