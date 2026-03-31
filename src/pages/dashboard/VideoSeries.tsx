@@ -605,18 +605,18 @@ const LazyBanner = ({ seasonNum, alt }: { seasonNum: number; alt: string }) => {
   const season = seasons.find(s => s.number === seasonNum);
   if (!season) return null;
   return (
-    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative" style={{ aspectRatio: '3/1' }}>
+    <div className="mb-4 sm:mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative aspect-[2.5/1] sm:aspect-[3/1] lg:aspect-[4/1]">
       <div className={`absolute inset-0 bg-gradient-to-br ${season.color}`} />
       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
-      <div className="absolute inset-0 flex items-center justify-between px-6 sm:px-10">
+      <div className="absolute inset-0 flex items-center justify-between px-4 sm:px-8 lg:px-12">
         <div className="text-white text-right">
-          <p className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">الموسم {season.number}</p>
-          <h3 className="text-lg sm:text-2xl lg:text-3xl font-bold mt-1">{season.title}</h3>
-          <p className="text-xs sm:text-sm opacity-80 mt-0.5">{season.titleEn}</p>
+          <p className="text-[9px] sm:text-xs uppercase tracking-widest opacity-70">الموسم {season.number}</p>
+          <h3 className="text-base sm:text-2xl lg:text-3xl font-bold mt-0.5 sm:mt-1">{season.title}</h3>
+          <p className="text-[10px] sm:text-sm opacity-80 mt-0.5">{season.titleEn}</p>
         </div>
-        <span className="text-5xl sm:text-7xl opacity-25 select-none">{season.icon}</span>
+        <span className="text-4xl sm:text-6xl lg:text-7xl opacity-25 select-none">{season.icon}</span>
       </div>
-      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" loading="lazy" />
+      <img src={logoImg} alt="" className="absolute top-2 right-2 w-7 h-7 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" loading="lazy" />
     </div>
   );
 };
@@ -761,7 +761,7 @@ const VideoSeries = () => {
             <p className="text-sm text-muted-foreground">
               {filteredBySearch.length > 0 ? `${filteredBySearch.length} نتيجة` : 'لا توجد نتائج'}
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4">
               {filteredBySearch.map((video, idx) => (
                 <VideoCard key={video.id} video={video} idx={idx} openVideo={openVideo} isWatched={watchedEpisodes.has(video.id)} />
               ))}
@@ -785,37 +785,37 @@ const VideoSeries = () => {
             >
               <button
                 onClick={() => toggleSeason(season.number)}
-                className="w-full flex items-center justify-between gap-4 p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all mb-4 relative overflow-hidden"
+                className="w-full flex items-center justify-between gap-3 sm:gap-4 p-3 sm:p-4 rounded-xl bg-card border border-border/50 hover:border-primary/30 transition-all mb-3 sm:mb-4 relative overflow-hidden"
               >
                 {/* Season gradient background */}
                 <div className={`absolute inset-0 bg-gradient-to-l ${season.gradient} opacity-50`} />
                 
-                <div className="flex items-center gap-4 relative z-10">
-                  <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center shadow-lg flex-shrink-0`}>
-                    <span className="text-2xl">{season.icon}</span>
+                <div className="flex items-center gap-3 sm:gap-4 relative z-10 min-w-0">
+                  <div className={`w-11 h-11 sm:w-14 sm:h-14 rounded-xl bg-gradient-to-br ${season.color} flex items-center justify-center shadow-lg flex-shrink-0`}>
+                    <span className="text-xl sm:text-2xl">{season.icon}</span>
                   </div>
-                  <div className="text-right">
-                    <h2 className="font-bold text-base sm:text-lg">الموسم {season.number}: {season.title}</h2>
-                    <div className="flex items-center gap-2 mt-1 flex-wrap">
-                      <span className="text-xs text-muted-foreground">{season.titleEn}</span>
-                      <Badge variant="outline" className="text-[9px] h-5 px-1.5 border-primary/30 text-primary">
-                        <Sparkles className="w-2.5 h-2.5 ml-1" />
+                  <div className="text-right min-w-0">
+                    <h2 className="font-bold text-sm sm:text-base lg:text-lg truncate">الموسم {season.number}: {season.title}</h2>
+                    <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1 flex-wrap">
+                      <span className="text-[10px] sm:text-xs text-muted-foreground hidden sm:inline">{season.titleEn}</span>
+                      <Badge variant="outline" className="text-[8px] sm:text-[9px] h-4 sm:h-5 px-1 sm:px-1.5 border-primary/30 text-primary">
+                        <Sparkles className="w-2 h-2 sm:w-2.5 sm:h-2.5 ml-0.5 sm:ml-1" />
                         {season.style}
                       </Badge>
-                      <span className="text-xs text-muted-foreground">{seasonVideos.length} حلقات</span>
+                      <span className="text-[10px] sm:text-xs text-muted-foreground">{seasonVideos.length} حلقات</span>
                     </div>
                     {/* Season progress */}
-                    <div className="flex items-center gap-2 mt-2">
-                      <div className="w-24 h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className="flex items-center gap-2 mt-1.5 sm:mt-2">
+                      <div className="w-16 sm:w-24 h-1 sm:h-1.5 bg-muted rounded-full overflow-hidden">
                         <div className={`h-full bg-gradient-to-l ${season.color} rounded-full transition-all`} style={{ width: `${seasonProgress}%` }} />
                       </div>
-                      <span className="text-[10px] text-muted-foreground">{watchedInSeason}/{seasonVideos.length}</span>
-                      {seasonProgress === 100 && <CheckCircle2 className="w-3.5 h-3.5 text-primary" />}
+                      <span className="text-[9px] sm:text-[10px] text-muted-foreground">{watchedInSeason}/{seasonVideos.length}</span>
+                      {seasonProgress === 100 && <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />}
                     </div>
                   </div>
                 </div>
-                <div className="relative z-10">
-                  {isCollapsed ? <ChevronDown className="w-5 h-5 text-muted-foreground flex-shrink-0" /> : <ChevronUp className="w-5 h-5 text-muted-foreground flex-shrink-0" />}
+                <div className="relative z-10 flex-shrink-0">
+                  {isCollapsed ? <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" /> : <ChevronUp className="w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />}
                 </div>
               </button>
 
@@ -831,7 +831,7 @@ const VideoSeries = () => {
                     {/* Season Banner - Lazy loaded */}
                     <LazyBanner seasonNum={season.number} alt={`${season.titleEn} - Season ${season.number}`} />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-8">
                       {seasonVideos.map((video, idx) => (
                         <VideoCard key={video.id} video={video} idx={idx} openVideo={openVideo} isWatched={watchedEpisodes.has(video.id)} />
                       ))}
@@ -878,76 +878,75 @@ const SEASON_ICONS: Record<number, string> = {
 
 const VideoCard = ({ video, idx, openVideo, isWatched }: { video: VideoItem; idx: number; openVideo: (v: VideoItem) => void; isWatched: boolean }) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
+    initial={{ opacity: 0, y: 15 }}
     animate={{ opacity: 1, y: 0 }}
-    transition={{ delay: idx * 0.04 }}
+    transition={{ delay: idx * 0.03 }}
     className={`group rounded-xl border overflow-hidden transition-all ${
       video.status === 'available'
-        ? 'border-border/50 bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 cursor-pointer'
+        ? 'border-border/50 bg-card hover:border-primary/50 hover:shadow-lg hover:shadow-primary/5 cursor-pointer active:scale-[0.98]'
         : 'border-border/30 bg-muted/20 opacity-60'
     }`}
     onClick={() => video.status === 'available' && openVideo(video)}
   >
-    {/* Thumbnail — generated gradient, no image download */}
-    <div className="relative aspect-video overflow-hidden">
-      <div className={`absolute inset-0 bg-gradient-to-br ${SEASON_GRADIENTS[video.season] || 'from-primary to-primary/60'}`} />
-      {/* Season icon + episode number overlay */}
-      <div className="absolute inset-0 flex items-center justify-center">
-        <span className="text-4xl opacity-20 select-none">{SEASON_ICONS[video.season] || '🎬'}</span>
-      </div>
-      <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
-      
-      {video.status === 'available' ? (
-        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-          <div className="w-11 h-11 rounded-full bg-white/90 flex items-center justify-center opacity-70 group-hover:opacity-100 scale-75 group-hover:scale-100 transition-all shadow-lg">
-            <Play className="w-5 h-5 text-gray-900 ml-0.5" />
+    {/* Mobile: horizontal layout / Desktop: vertical layout */}
+    <div className="flex sm:flex-col">
+      {/* Thumbnail */}
+      <div className="relative w-28 sm:w-full aspect-square sm:aspect-video overflow-hidden flex-shrink-0">
+        <div className={`absolute inset-0 bg-gradient-to-br ${SEASON_GRADIENTS[video.season] || 'from-primary to-primary/60'}`} />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <span className="text-3xl sm:text-4xl opacity-20 select-none">{SEASON_ICONS[video.season] || '🎬'}</span>
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+        
+        {video.status === 'available' ? (
+          <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-white/90 flex items-center justify-center opacity-80 group-hover:opacity-100 scale-90 group-hover:scale-100 transition-all shadow-lg">
+              <Play className="w-4 h-4 sm:w-5 sm:h-5 text-gray-900 ml-0.5" />
+            </div>
           </div>
-        </div>
-      ) : (
-        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40">
-          <Clock className="w-6 h-6 text-white/70" />
-          <span className="text-[10px] text-white/70">قريباً</span>
-        </div>
-      )}
-
-      {/* iRecycle Logo Watermark */}
-      <img src={logoImg} alt="" className="absolute top-1.5 right-1.5 w-6 h-6 rounded-full opacity-75 shadow pointer-events-none z-10" loading="lazy" />
-
-      {/* Episode number */}
-      <div className="absolute top-2 left-2">
-        <span className="text-[10px] font-bold px-2 py-0.5 rounded-md bg-black/60 text-white/90">
-          EP{video.episode}
-        </span>
-      </div>
-
-      {/* Duration */}
-      <div className="absolute bottom-2 right-2">
-        <span className="text-[9px] px-1.5 py-0.5 rounded bg-black/60 text-white/90">
-          {video.duration}
-        </span>
-      </div>
-
-      {/* Watched indicator */}
-      {isWatched && (
-        <div className="absolute bottom-2 left-2">
-          <div className="w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-md">
-            <CheckCircle2 className="w-3.5 h-3.5 text-primary-foreground" />
+        ) : (
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-black/40">
+            <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white/70" />
+            <span className="text-[9px] sm:text-[10px] text-white/70">قريباً</span>
           </div>
-        </div>
-      )}
-    </div>
+        )}
 
-    {/* Info */}
-    <div className="p-3">
-      <h3 className="font-bold text-xs sm:text-sm line-clamp-1">{video.title}</h3>
-      <p className="text-[10px] text-muted-foreground/80 mt-0.5">{video.titleEn}</p>
-      <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2 mt-1">{video.description}</p>
-      <div className="flex gap-1 mt-2 flex-wrap">
-        {video.tags.slice(0, 3).map((tag) => (
-          <span key={tag} className="text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/10">
-            {tag}
+        {/* Episode number */}
+        <div className="absolute top-1.5 left-1.5 sm:top-2 sm:left-2">
+          <span className="text-[9px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 rounded-md bg-black/60 text-white/90">
+            EP{video.episode}
           </span>
-        ))}
+        </div>
+
+        {/* Duration */}
+        <div className="absolute bottom-1.5 right-1.5 sm:bottom-2 sm:right-2">
+          <span className="text-[8px] sm:text-[9px] px-1 sm:px-1.5 py-0.5 rounded bg-black/60 text-white/90">
+            {video.duration}
+          </span>
+        </div>
+
+        {/* Watched indicator */}
+        {isWatched && (
+          <div className="absolute bottom-1.5 left-1.5 sm:bottom-2 sm:left-2">
+            <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-primary flex items-center justify-center shadow-md">
+              <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary-foreground" />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Info */}
+      <div className="p-2.5 sm:p-3 flex-1 min-w-0 flex flex-col justify-center">
+        <h3 className="font-bold text-xs sm:text-sm line-clamp-1">{video.title}</h3>
+        <p className="text-[9px] sm:text-[10px] text-muted-foreground/80 mt-0.5 line-clamp-1">{video.titleEn}</p>
+        <p className="text-[10px] sm:text-xs text-muted-foreground line-clamp-2 mt-1 hidden sm:block">{video.description}</p>
+        <div className="flex gap-1 mt-1.5 sm:mt-2 flex-wrap">
+          {video.tags.slice(0, 2).map((tag) => (
+            <span key={tag} className="text-[8px] sm:text-[9px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/10">
+              {tag}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   </motion.div>
