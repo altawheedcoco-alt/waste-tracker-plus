@@ -605,21 +605,23 @@ const VideoPlayer = ({
   );
 };
 
-/* ─── Lazy Banner ─── */
+/* ─── Season Banner (generated, no image download) ─── */
 const LazyBanner = ({ seasonNum, alt }: { seasonNum: number; alt: string }) => {
-  const [src, setSrc] = useState<string | null>(null);
-  useEffect(() => {
-    const loader = getBannerUrl(seasonNum);
-    if (loader) loader().then(setSrc);
-  }, [seasonNum]);
+  const season = seasons.find(s => s.number === seasonNum);
+  if (!season) return null;
   return (
-    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative">
-      {src ? (
-        <img src={src} alt={alt} className="w-full h-auto rounded-xl" loading="lazy" decoding="async" />
-      ) : (
-        <div className="w-full bg-muted animate-pulse rounded-xl" style={{ aspectRatio: '3/1' }} />
-      )}
-      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" />
+    <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative" style={{ aspectRatio: '3/1' }}>
+      <div className={`absolute inset-0 bg-gradient-to-br ${season.color}`} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/10" />
+      <div className="absolute inset-0 flex items-center justify-between px-6 sm:px-10">
+        <div className="text-white text-right">
+          <p className="text-[10px] sm:text-xs uppercase tracking-widest opacity-70">الموسم {season.number}</p>
+          <h3 className="text-lg sm:text-2xl lg:text-3xl font-bold mt-1">{season.title}</h3>
+          <p className="text-xs sm:text-sm opacity-80 mt-0.5">{season.titleEn}</p>
+        </div>
+        <span className="text-5xl sm:text-7xl opacity-25 select-none">{season.icon}</span>
+      </div>
+      <img src={logoImg} alt="" className="absolute top-2 right-2 w-8 h-8 sm:w-10 sm:h-10 rounded-full opacity-80 shadow-md pointer-events-none" loading="lazy" />
     </div>
   );
 };
