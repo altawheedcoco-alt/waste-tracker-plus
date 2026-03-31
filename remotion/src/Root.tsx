@@ -39,6 +39,13 @@ import { Ep30Dark, Ep30Light } from "./videos/season6/Ep30Scheduling";
 import { Ep31Dark, Ep31Light } from "./videos/season6/Ep31Security";
 import { Ep32Dark, Ep32Light } from "./videos/season6/Ep32MobileOps";
 import { Ep33Dark, Ep33Light } from "./videos/season6/Ep33BusinessIntelligence";
+// Season 7
+import { Ep34Dark, Ep34Light } from "./videos/season7/Ep34SmartBins";
+import { Ep35Dark, Ep35Light } from "./videos/season7/Ep35FleetTelematics";
+import { Ep36Dark, Ep36Light } from "./videos/season7/Ep36EnvironmentalSensors";
+import { Ep37Dark, Ep37Light } from "./videos/season7/Ep37PredictiveAnalytics";
+import { Ep38Dark, Ep38Light } from "./videos/season7/Ep38EdgeComputing";
+import { Ep39Dark, Ep39Light } from "./videos/season7/Ep39DigitalTwins";
 import { Ep40Dark, Ep40Light } from "./videos/season8/Ep40SmartInvoicing";
 import { Ep41Dark, Ep41Light } from "./videos/season8/Ep41CostAnalysis";
 import { Ep42Dark, Ep42Light } from "./videos/season8/Ep42TaxCompliance";

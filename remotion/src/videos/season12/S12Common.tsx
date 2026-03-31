@@ -1,7 +1,7 @@
 // Season 12 — Future Vision & Grand Finale — "Holographic" Style
 import { AbsoluteFill, useCurrentFrame, interpolate, spring, useVideoConfig } from "remotion";
 import { loadFont as loadCairo } from "@remotion/google-fonts/Cairo";
-import { loadFont as loadBigShoulders } from "@remotion/google-fonts/BigShouldersDisplay";
+import { loadFont as loadBigShoulders } from "@remotion/google-fonts/BigShoulders";
 import { loadFont as loadIBM } from "@remotion/google-fonts/IBMPlexMono";
 import React from "react";
 
