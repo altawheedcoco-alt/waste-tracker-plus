@@ -235,21 +235,26 @@ const TransporterCommandCenter = () => {
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
-      const [
-        todayR, yesterdayR, activeR, driversR, weekR, ledgerR, pendingR, overdueR, monthR, partnersR,
-        invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR
-      ] = await Promise.all([
+      // Batch 1: Core shipment data (most critical — renders hero cards)
+      const [todayR, yesterdayR, activeR, driversR, pendingR, overdueR] = await Promise.all([
         supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', periodStart.toISOString()).lt('created_at', tomorrow.toISOString()),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
         supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
         supabase.from('drivers').select('id, is_available').eq('organization_id', organization!.id),
-        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', weekAgo.toISOString()),
-        supabase.from('accounting_ledger').select('amount, entry_type, entry_category, created_at').eq('organization_id', organization!.id),
         supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['new'] as any),
         supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled")'),
+      ]);
+
+      // Batch 2: Trend & financial data (sparklines, revenue)
+      const [weekR, monthR, ledgerR, partnersR] = await Promise.all([
+        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', weekAgo.toISOString()),
         supabase.from('shipments').select('id, status, quantity').eq('transporter_id', organization!.id).gte('created_at', monthAgo.toISOString()),
+        supabase.from('accounting_ledger').select('amount, entry_type, entry_category, created_at').eq('organization_id', organization!.id),
         supabase.from('external_partners').select('id').eq('organization_id', organization!.id),
-        // NEW: Full org data
+      ]);
+
+      // Batch 3: Organization resources (secondary stats)
+      const [invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR] = await Promise.all([
         supabase.from('invoices').select('id, status, total_amount').eq('organization_id', organization!.id),
         supabase.from('shipment_receipts').select('id, status, created_at').eq('transporter_id', organization!.id),
         supabase.from('organization_members').select('id, status').eq('organization_id', organization!.id),

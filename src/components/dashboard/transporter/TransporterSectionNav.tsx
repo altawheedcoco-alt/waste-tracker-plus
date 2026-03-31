@@ -150,18 +150,65 @@ const TransporterSectionNav = memo(({ activeTab, onTabChange }: TransporterSecti
     );
   };
 
+  // Scroll indicators
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = navRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft < el.scrollWidth - el.clientWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = navRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener('scroll', checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => { el.removeEventListener('scroll', checkScroll); ro.disconnect(); };
+  }, [checkScroll]);
+
+  const scroll = (dir: 'left' | 'right') => {
+    navRef.current?.scrollBy({ left: dir === 'left' ? -160 : 160, behavior: 'smooth' });
+  };
+
   return (
     <div className="sticky top-0 z-40 bg-background/95 backdrop-blur-md border-b border-border/30 shadow-sm">
-      <div
-        ref={navRef}
-        className="flex items-center gap-0.5 px-2 py-1.5 overflow-x-auto scrollbar-hide"
-      >
-        {FIXED_SECTIONS.map(s => renderButton(s))}
+      <div className="relative">
+        {/* Left scroll arrow */}
+        {canScrollLeft && (
+          <button
+            onClick={() => scroll('left')}
+            className="absolute left-0 top-0 bottom-0 z-10 w-7 flex items-center justify-center bg-gradient-to-r from-background via-background/90 to-transparent"
+            aria-label="تمرير لليسار"
+          >
+            <ChevronLeft className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
+        {/* Right scroll arrow */}
+        {canScrollRight && (
+          <button
+            onClick={() => scroll('right')}
+            className="absolute right-0 top-0 bottom-0 z-10 w-7 flex items-center justify-center bg-gradient-to-l from-background via-background/90 to-transparent"
+            aria-label="تمرير لليمين"
+          >
+            <ChevronRight className="w-4 h-4 text-muted-foreground" />
+          </button>
+        )}
+        <div
+          ref={navRef}
+          className="flex items-center gap-0.5 px-2 py-1.5 overflow-x-auto scrollbar-hide"
+        >
+          {FIXED_SECTIONS.map(s => renderButton(s))}
 
-        {/* Separator */}
-        <div className="w-px h-6 bg-border/50 mx-1.5 shrink-0" />
+          {/* Separator */}
+          <div className="w-px h-6 bg-border/50 mx-1.5 shrink-0" />
 
-        {TAB_SECTIONS.map(s => renderButton(s))}
+          {TAB_SECTIONS.map(s => renderButton(s))}
+        </div>
       </div>
     </div>
   );
