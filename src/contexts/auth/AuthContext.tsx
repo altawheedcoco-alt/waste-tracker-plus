@@ -494,22 +494,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     stopFocusMusicOnLogout();
-
-    // إشعار تسجيل الخروج قبل مسح الجلسة
-    const currentUserId = user?.id;
-    if (currentUserId) {
-      try {
-        const { notifyAction } = await import('@/utils/notifyAction');
-        await notifyAction({
-          title: '🔒 تسجيل خروج',
-          message: `تم تسجيل الخروج - ${new Date().toLocaleString('ar-EG')}`,
-          type: 'auth_logout',
-          targetUserId: currentUserId,
-        });
-      } catch (e) {
-        console.error('Logout notification failed:', e);
-      }
-    }
+    // مسح علامة إشعار الدخول عند الخروج
+    sessionStorage.removeItem('__login_notified');
 
     try {
       await supabase.auth.signOut({ scope: 'local' });
