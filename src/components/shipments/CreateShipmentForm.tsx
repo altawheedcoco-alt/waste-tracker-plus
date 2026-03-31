@@ -989,34 +989,40 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
         </div>
       </FormSection>
 
-      {/* ══════════ Submit ══════════ */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex justify-start gap-3 pt-2 pb-4"
-      >
-        <Button type="submit" variant="eco" size="lg" disabled={loading} className="min-w-[160px]">
-          {loading ? (
-            <>
-              <Loader2 className="ml-2 h-4 w-4 animate-spin" />
-              جاري الإنشاء...
-            </>
-          ) : (
-            <>
-              <FileText className="ml-2 h-4 w-4" />
-              إنشاء الشحنة
-            </>
-          )}
-        </Button>
-        <Button 
-          type="button" 
-          variant="outline" 
-          size="lg"
-          onClick={onClose || (() => navigate(-1))}
-        >
-          إلغاء
-        </Button>
-      </motion.div>
+      {/* ══════════ Submit — sticky on mobile ══════════ */}
+      <div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur-sm border-t pt-3 pb-4 -mx-4 px-4 sm:static sm:bg-transparent sm:backdrop-blur-none sm:border-0 sm:mx-0 sm:px-0">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex gap-3">
+            <Button type="submit" variant="eco" size="lg" disabled={loading || !formData.generator_id || !formData.quantity} className="min-w-[140px] sm:min-w-[160px]">
+              {loading ? (
+                <>
+                  <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+                  <span className="hidden sm:inline">جاري الإنشاء...</span>
+                  <span className="sm:hidden">إنشاء...</span>
+                </>
+              ) : (
+                <>
+                  <FileText className="ml-2 h-4 w-4" />
+                  إنشاء الشحنة
+                </>
+              )}
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="lg"
+              onClick={onClose || (() => navigate(-1))}
+              className="hidden sm:flex"
+            >
+              إلغاء
+            </Button>
+          </div>
+          {/* Progress badge on mobile */}
+          <Badge variant="outline" className="sm:hidden text-[10px] shrink-0">
+            {progressPercent}% مكتمل
+          </Badge>
+        </div>
+      </div>
 
       {/* إخلاء مسؤولية قانوني */}
       <div className="border-t border-border/30 pt-3 pb-1">
