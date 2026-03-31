@@ -111,7 +111,7 @@ const TransporterIntelligenceTabs = () => (
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-bold text-foreground">شبكة الشركاء والسوق</h3>
         <button
-          onClick={() => window.location.href = '/dashboard/partners'}
+          onClick={() => navigate('/dashboard/partners')}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-medium hover:bg-primary/90 transition-colors"
         >
           + دعوة شريك جديد

@@ -41,7 +41,7 @@ const RevenueSnapshotMini = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className="bg-emerald-500/8 rounded-lg p-2.5 text-right border border-emerald-500/10">
+            <div className="bg-emerald-500/10 rounded-lg p-2.5 text-right border border-emerald-500/15">
               <div className="flex items-center justify-end gap-1 mb-1">
                 <span className="text-[10px] text-muted-foreground">الإيرادات</span>
                 <TrendingUp className="w-3 h-3 text-emerald-500" />
@@ -51,7 +51,7 @@ const RevenueSnapshotMini = () => {
               </p>
               <p className="text-[9px] text-muted-foreground">{currency}</p>
             </div>
-            <div className="bg-amber-500/8 rounded-lg p-2.5 text-right border border-amber-500/10">
+            <div className="bg-amber-500/10 rounded-lg p-2.5 text-right border border-amber-500/15">
               <div className="flex items-center justify-end gap-1 mb-1">
                 <span className="text-[10px] text-muted-foreground">معلّقة</span>
                 <Wallet className="w-3 h-3 text-amber-500" />
