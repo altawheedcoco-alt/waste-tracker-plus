@@ -214,22 +214,45 @@ const CreateShipmentForm = ({ onSuccess, onClose, loadLastOnMount = false }: Cre
     });
   }, [formData, organization, movementSupervisors]);
 
+  // Dynamic progress tracking
+  const completedSteps = [
+    !!(formData.generator_id && (formData.recycler_id || formData.disposal_facility_id)), // أطراف
+    !!formData.quantity, // كمية
+    !!formData.waste_description, // مخلفات
+    !!(formData.driver_id || formData.manual_driver_name), // سائق
+    !!(formData.pickup_address || formData.delivery_address), // مواقع
+    !!(formData.pricing_mode), // تسعير
+  ];
+  const progressPercent = Math.round((completedSteps.filter(Boolean).length / completedSteps.length) * 100);
+
   return (
     <form onSubmit={(e) => handleSubmit(e, onSuccess, onClose, handleAfterCreate)} className="space-y-5">
       
-      {/* Progress indicator - visual only */}
-      <div className="flex items-center gap-1.5 justify-center opacity-60">
-        {['أطراف *', 'كمية *', 'مخلفات', 'سائق', 'مواقع', 'تسعير'].map((step, i) => (
-          <div key={step} className="flex items-center gap-1.5">
-            <span className={cn(
-              "w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center border",
-              i < 2 ? 'bg-primary/20 text-primary border-primary/30' : 'bg-primary/10 text-primary border-primary/20'
-            )}>
-              {i + 1}
-            </span>
-            {i < 5 && <div className="w-3 h-px bg-border" />}
-          </div>
-        ))}
+      {/* Dynamic progress indicator */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-1.5 justify-center">
+          {['أطراف *', 'كمية *', 'مخلفات', 'سائق', 'مواقع', 'تسعير'].map((step, i) => (
+            <div key={step} className="flex items-center gap-1.5">
+              <span className={cn(
+                "w-6 h-6 rounded-full text-[10px] font-bold flex items-center justify-center border transition-colors",
+                completedSteps[i] 
+                  ? 'bg-primary text-primary-foreground border-primary' 
+                  : i < 2 ? 'bg-primary/20 text-primary border-primary/30' : 'bg-muted text-muted-foreground border-border'
+              )}>
+                {completedSteps[i] ? '✓' : i + 1}
+              </span>
+              {i < 5 && <div className={cn("w-3 h-px transition-colors", completedSteps[i] ? 'bg-primary' : 'bg-border')} />}
+            </div>
+          ))}
+        </div>
+        <div className="h-1 bg-muted rounded-full overflow-hidden">
+          <motion.div 
+            className="h-full bg-primary rounded-full" 
+            initial={{ width: 0 }}
+            animate={{ width: `${progressPercent}%` }}
+            transition={{ duration: 0.3 }}
+          />
+        </div>
       </div>
 
       {/* Pinned Parties Controls - for transporters */}
