@@ -831,7 +831,7 @@ const VideoSeries = () => {
                     {/* Season Banner - Lazy loaded */}
                     <LazyBanner seasonNum={season.number} alt={`${season.titleEn} - Season ${season.number}`} />
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-4 mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 mb-8">
                       {seasonVideos.map((video, idx) => (
                         <VideoCard key={video.id} video={video} idx={idx} openVideo={openVideo} isWatched={watchedEpisodes.has(video.id)} />
                       ))}
