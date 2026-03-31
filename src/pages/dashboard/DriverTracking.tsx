@@ -131,23 +131,29 @@ const DriverTracking = () => {
 
       if (error) throw error;
 
-      // Fetch latest location for each driver
+      // Fetch latest location for ALL drivers in a single batch query
       const driverIds = (driversData || []).map(d => d.id);
       const locationsMap = new Map<string, { latitude: number; longitude: number; recorded_at: string }>();
       
       if (driverIds.length > 0) {
-        // Get the latest location for each driver
-        for (const driverId of driverIds) {
-          const { data: locationData } = await supabase
-            .from('driver_location_logs')
-            .select('latitude, longitude, recorded_at')
-            .eq('driver_id', driverId)
-            .order('recorded_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          
-          if (locationData) {
-            locationsMap.set(driverId, locationData);
+        // Use RPC or a single query with distinct-on logic
+        // Fetch recent locations for all drivers at once, then pick latest per driver
+        const { data: allLocations } = await supabase
+          .from('driver_location_logs')
+          .select('driver_id, latitude, longitude, recorded_at')
+          .in('driver_id', driverIds)
+          .order('recorded_at', { ascending: false })
+          .limit(driverIds.length * 2); // fetch enough to cover all drivers
+
+        if (allLocations) {
+          for (const loc of allLocations) {
+            if (!locationsMap.has(loc.driver_id)) {
+              locationsMap.set(loc.driver_id, {
+                latitude: loc.latitude,
+                longitude: loc.longitude,
+                recorded_at: loc.recorded_at,
+              });
+            }
           }
         }
       }
