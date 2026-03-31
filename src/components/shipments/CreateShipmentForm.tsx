@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Loader2, MapPin, RefreshCw, User, Truck, Recycle, Flame, Package, Calendar, Scale, Route, FileText, DollarSign, Sparkles, Navigation as NavigationIcon, Camera, Upload, Check, X, Eye } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import MovementSupervisorSelector, { type MovementSupervisorEntry } from '@/components/shipments/MovementSupervisorSelector';
 import { useAIAssistant } from '@/hooks/useAIAssistant';
 import { toast } from 'sonner';
