@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Target, Zap, Activity, Bell, MessageSquare, FileSearch,
   Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf,
-  Radio, Navigation
+  Radio, Navigation, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 interface SectionItem {
