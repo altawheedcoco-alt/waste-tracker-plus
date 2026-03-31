@@ -65,7 +65,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'

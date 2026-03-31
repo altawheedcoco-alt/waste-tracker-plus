@@ -137,6 +137,7 @@ const TransporterIntelligenceTabs = () => {
       </Suspense>
     </TabsContent>
   </>
-);
+  );
+};
 
 export default TransporterIntelligenceTabs;
