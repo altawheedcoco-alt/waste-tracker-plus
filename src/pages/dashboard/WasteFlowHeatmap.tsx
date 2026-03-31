@@ -198,8 +198,10 @@ const WasteFlowHeatmap = () => {
 
         <TabsContent value="map">
           <Card>
-            <CardContent className="p-0">
-              <div className="w-full h-[500px] md:h-[600px] rounded-lg flex items-center justify-center bg-muted/50 text-muted-foreground"><p>{t('wasteFlow.mapsDisabled')}</p></div>
+            <CardContent className="p-0 overflow-hidden rounded-lg">
+              <Suspense fallback={<Skeleton className="w-full h-[500px] md:h-[600px] rounded-lg" />}>
+                <WasteFlowLeafletMap flows={flows} alerts={alerts} height="500px" />
+              </Suspense>
             </CardContent>
           </Card>
           <div className="flex items-center gap-4 flex-wrap mt-3">
