@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NearbyDriversRadar from '@/components/maps/NearbyDriversRadar';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
