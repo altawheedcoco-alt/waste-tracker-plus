@@ -751,34 +751,36 @@ const PrintCenter = () => {
   }, [documents]);
 
   return (
-    <div className="space-y-6" dir="rtl">
-      <div className="flex items-center justify-between flex-wrap gap-3">
+    <div className="space-y-4 sm:space-y-6" dir="rtl">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <Button variant="ghost" size="icon" onClick={() => navigate('/dashboard')} className="shrink-0">
             <ArrowRight className="h-5 w-5" />
           </Button>
-          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-            <FileStack className="h-5 w-5 text-primary" />
+          <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+            <FileStack className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
           </div>
-          <div>
-            <h1 className="text-2xl font-bold">مركز الطباعة</h1>
-            <p className="text-muted-foreground text-sm">عرض وطباعة المستندات - مفردة أو مجمعة</p>
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-bold truncate">مركز الطباعة</h1>
+            <p className="text-muted-foreground text-xs sm:text-sm">عرض وطباعة المستندات - مفردة أو مجمعة</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {selectedIds.size > 0 && (
-            <Badge variant="secondary" className="gap-1">
+            <Badge variant="secondary" className="gap-1 shrink-0">
               <CheckCircle className="w-3 h-3" />
               {selectedIds.size} محدد
             </Badge>
           )}
-          <Button onClick={exportBulkPDF} variant="outline" disabled={isPrinting || !documents?.length} className="gap-2">
-            {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileDown className="h-4 w-4" />}
-            تصدير PDF
+          <Button onClick={exportBulkPDF} variant="outline" size="sm" disabled={isPrinting || !documents?.length} className="gap-1.5 flex-1 sm:flex-none">
+            {isPrinting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <FileDown className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">تصدير PDF</span>
+            <span className="sm:hidden">PDF</span>
           </Button>
-          <Button onClick={printBulk} disabled={isPrinting || !documents?.length} className="gap-2">
-            {isPrinting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
-            {selectedIds.size > 0 ? `طباعة المحدد (${selectedIds.size})` : 'طباعة الكل'}
+          <Button onClick={printBulk} size="sm" disabled={isPrinting || !documents?.length} className="gap-1.5 flex-1 sm:flex-none">
+            {isPrinting ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Printer className="h-3.5 w-3.5" />}
+            <span className="hidden sm:inline">{selectedIds.size > 0 ? `طباعة المحدد (${selectedIds.size})` : 'طباعة الكل'}</span>
+            <span className="sm:hidden">طباعة</span>
           </Button>
         </div>
       </div>
