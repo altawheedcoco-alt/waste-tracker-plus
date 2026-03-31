@@ -480,8 +480,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const signOut = useCallback(async () => {
     stopFocusMusicOnLogout();
-    // مسح علامة إشعار الدخول عند الخروج
-    sessionStorage.removeItem('__login_notified');
+    // لا يتم إرسال أي إشعار عند تسجيل الخروج
 
     try {
       await supabase.auth.signOut({ scope: 'local' });
