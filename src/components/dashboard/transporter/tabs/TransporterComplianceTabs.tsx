@@ -56,7 +56,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
     <>
       {/* ══════ 8. المخاطر والامتثال (regulatory_hub + ohs + risk + custody) ══════ */}
       <TabsContent value="compliance" className="space-y-4 mt-6">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin sm:flex-wrap sm:overflow-visible sm:pb-0">
           {COMPLIANCE_SECTIONS.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;
