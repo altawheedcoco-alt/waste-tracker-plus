@@ -115,7 +115,7 @@ const DriverWallet = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">هذا الشهر</p>
-                <p className="font-bold">0 ج.م</p>
+                <p className="font-bold">{(walletData?.monthEarnings || 0).toLocaleString('ar-EG')} ج.م</p>
               </div>
             </CardContent>
           </Card>
