@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,6 +14,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion, AnimatePresence } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const WasteFlowLeafletMap = lazy(() => import('@/components/maps/WasteFlowLeafletMap'));
 
 interface WasteFlow {
   id: string;
@@ -195,8 +198,10 @@ const WasteFlowHeatmap = () => {
 
         <TabsContent value="map">
           <Card>
-            <CardContent className="p-0">
-              <div className="w-full h-[500px] md:h-[600px] rounded-lg flex items-center justify-center bg-muted/50 text-muted-foreground"><p>{t('wasteFlow.mapsDisabled')}</p></div>
+            <CardContent className="p-0 overflow-hidden rounded-lg">
+              <Suspense fallback={<Skeleton className="w-full h-[500px] md:h-[600px] rounded-lg" />}>
+                <WasteFlowLeafletMap flows={flows} alerts={alerts} height="500px" />
+              </Suspense>
             </CardContent>
           </Card>
           <div className="flex items-center gap-4 flex-wrap mt-3">
