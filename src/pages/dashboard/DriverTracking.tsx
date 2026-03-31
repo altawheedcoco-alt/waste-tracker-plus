@@ -439,30 +439,34 @@ const DriverTracking = () => {
             >
               <Card>
                 <CardHeader className="text-right">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className="text-primary gap-1">
                         <Eye className="w-3 h-3" />
                         جاري المتابعة
                       </Badge>
                       <Button
                         variant="outline"
-                        className="gap-2"
+                        size="sm"
+                        className="gap-1.5"
                         onClick={() => setHistoryDriver(selectedDriver)}
                       >
-                        <History className="w-4 h-4" />
-                        سجل المواقع
+                        <History className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">سجل المواقع</span>
+                        <span className="sm:hidden">السجل</span>
                       </Button>
                       <Button
                         variant="default"
-                        className="gap-2"
+                        size="sm"
+                        className="gap-1.5"
                         onClick={() => setNotificationDriver(selectedDriver)}
                       >
-                        <Send className="w-4 h-4" />
-                        إرسال إشعار
+                        <Send className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">إرسال إشعار</span>
+                        <span className="sm:hidden">إشعار</span>
                       </Button>
                     </div>
-                    <CardTitle>تفاصيل السائق</CardTitle>
+                    <CardTitle className="text-sm sm:text-base">تفاصيل السائق</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
