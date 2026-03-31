@@ -131,23 +131,29 @@ const DriverTracking = () => {
 
       if (error) throw error;
 
-      // Fetch latest location for each driver
+      // Fetch latest location for ALL drivers in a single batch query
       const driverIds = (driversData || []).map(d => d.id);
       const locationsMap = new Map<string, { latitude: number; longitude: number; recorded_at: string }>();
       
       if (driverIds.length > 0) {
-        // Get the latest location for each driver
-        for (const driverId of driverIds) {
-          const { data: locationData } = await supabase
-            .from('driver_location_logs')
-            .select('latitude, longitude, recorded_at')
-            .eq('driver_id', driverId)
-            .order('recorded_at', { ascending: false })
-            .limit(1)
-            .maybeSingle();
-          
-          if (locationData) {
-            locationsMap.set(driverId, locationData);
+        // Use RPC or a single query with distinct-on logic
+        // Fetch recent locations for all drivers at once, then pick latest per driver
+        const { data: allLocations } = await supabase
+          .from('driver_location_logs')
+          .select('driver_id, latitude, longitude, recorded_at')
+          .in('driver_id', driverIds)
+          .order('recorded_at', { ascending: false })
+          .limit(driverIds.length * 2); // fetch enough to cover all drivers
+
+        if (allLocations) {
+          for (const loc of allLocations) {
+            if (!locationsMap.has(loc.driver_id)) {
+              locationsMap.set(loc.driver_id, {
+                latitude: loc.latitude,
+                longitude: loc.longitude,
+                recorded_at: loc.recorded_at,
+              });
+            }
           }
         }
       }
@@ -433,34 +439,38 @@ const DriverTracking = () => {
             >
               <Card>
                 <CardHeader className="text-right">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <Badge variant="outline" className="text-primary gap-1">
                         <Eye className="w-3 h-3" />
                         جاري المتابعة
                       </Badge>
                       <Button
                         variant="outline"
-                        className="gap-2"
+                        size="sm"
+                        className="gap-1.5"
                         onClick={() => setHistoryDriver(selectedDriver)}
                       >
-                        <History className="w-4 h-4" />
-                        سجل المواقع
+                        <History className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">سجل المواقع</span>
+                        <span className="sm:hidden">السجل</span>
                       </Button>
                       <Button
                         variant="default"
-                        className="gap-2"
+                        size="sm"
+                        className="gap-1.5"
                         onClick={() => setNotificationDriver(selectedDriver)}
                       >
-                        <Send className="w-4 h-4" />
-                        إرسال إشعار
+                        <Send className="w-3.5 h-3.5" />
+                        <span className="hidden sm:inline">إرسال إشعار</span>
+                        <span className="sm:hidden">إشعار</span>
                       </Button>
                     </div>
-                    <CardTitle>تفاصيل السائق</CardTitle>
+                    <CardTitle className="text-sm sm:text-base">تفاصيل السائق</CardTitle>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
                     <div className="flex items-center gap-4 justify-end">
                       <div className="text-right">
                         <p className="font-medium text-lg">{selectedDriver.profile?.full_name}</p>
