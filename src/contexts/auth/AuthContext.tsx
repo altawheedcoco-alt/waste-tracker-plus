@@ -380,15 +380,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               }
             }, 0);
             if (event === 'SIGNED_IN') {
-              // إشعار تسجيل الدخول
-              import('@/utils/notifyAction').then(({ notifyAction }) => {
-                notifyAction({
-                  title: '🔓 تسجيل دخول جديد',
-                  message: `تم تسجيل الدخول بنجاح - ${new Date().toLocaleString('ar-EG')}`,
-                  type: 'auth_login',
-                  targetUserId: session.user.id,
+              // إشعار تسجيل الدخول مرة واحدة فقط لكل جلسة
+              const loginNotifiedKey = '__login_notified';
+              if (!sessionStorage.getItem(loginNotifiedKey)) {
+                sessionStorage.setItem(loginNotifiedKey, '1');
+                import('@/utils/notifyAction').then(({ notifyAction }) => {
+                  notifyAction({
+                    title: '🔓 تسجيل دخول جديد',
+                    message: `تم تسجيل الدخول بنجاح - ${new Date().toLocaleString('ar-EG')}`,
+                    type: 'auth_login',
+                    targetUserId: session.user.id,
+                  });
                 });
-              });
+              }
             }
           }
         } else {
