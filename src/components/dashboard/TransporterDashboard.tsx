@@ -243,9 +243,11 @@ const TransporterDashboard = () => {
 
       {/* 2.5 رادار السائقين القريبين — يستخدم موقع المنظمة الديناميكي */}
       <div id="section-radar">
-        <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-          <DynamicNearbyRadar />
-        </Suspense>
+        <ErrorBoundary fallbackTitle="خطأ في رادار السائقين">
+          <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
+            <DynamicNearbyRadar />
+          </Suspense>
+        </ErrorBoundary>
       </div>
 
       {/* 3. الإجراءات السريعة */}
