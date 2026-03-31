@@ -280,48 +280,48 @@ const TransporterReceipts = () => {
         </Card>
 
         {/* Stats for selected generator */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-4">
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
-                <Package className="w-6 h-6 text-blue-600" />
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                <Package className="w-4 h-4 sm:w-6 sm:h-6 text-primary" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.total}</p>
-                <p className="text-sm text-muted-foreground">إجمالي الشهادات</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold">{stats.total}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground truncate">إجمالي الشهادات</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-yellow-600" />
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                <Clock className="w-4 h-4 sm:w-6 sm:h-6 text-amber-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.pending}</p>
-                <p className="text-sm text-muted-foreground">بانتظار التأكيد</p>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                <CheckCircle2 className="w-6 h-6 text-green-600" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.confirmed}</p>
-                <p className="text-sm text-muted-foreground">مؤكدة</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold">{stats.pending}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground truncate">بانتظار التأكيد</p>
               </div>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 flex items-center gap-4">
-              <div className="w-12 h-12 rounded-xl bg-red-100 dark:bg-red-900 flex items-center justify-center">
-                <AlertCircle className="w-6 h-6 text-red-600" />
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
               </div>
-              <div>
-                <p className="text-2xl font-bold">{stats.disputed}</p>
-                <p className="text-sm text-muted-foreground">متنازع عليها</p>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold">{stats.confirmed}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground truncate">مؤكدة</p>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="p-3 sm:p-4 flex items-center gap-3">
+              <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl bg-destructive/10 flex items-center justify-center shrink-0">
+                <AlertCircle className="w-4 h-4 sm:w-6 sm:h-6 text-destructive" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg sm:text-2xl font-bold">{stats.disputed}</p>
+                <p className="text-[10px] sm:text-sm text-muted-foreground truncate">متنازع عليها</p>
               </div>
             </CardContent>
           </Card>
