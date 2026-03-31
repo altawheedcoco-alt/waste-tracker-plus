@@ -36,7 +36,9 @@ const TabFallback = () => (
   </div>
 );
 
-const TransporterIntelligenceTabs = () => (
+const TransporterIntelligenceTabs = () => {
+  const navigate = useNavigate();
+  return (
   <>
     {/* ══════ 6. الذكاء الاصطناعي ══════ */}
     <TabsContent value="ai" className="space-y-4 mt-6">
