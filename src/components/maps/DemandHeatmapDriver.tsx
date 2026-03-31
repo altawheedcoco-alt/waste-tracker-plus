@@ -68,13 +68,30 @@ function FitView({ center, shipments }: { center: [number, number]; shipments: N
 }
 
 interface Props {
-  driverLat: number;
-  driverLng: number;
+  driverLat?: number;
+  driverLng?: number;
   serviceAreaKm?: number;
 }
 
 const DemandHeatmapDriver = memo(({ driverLat, driverLng, serviceAreaKm = 30 }: Props) => {
-  const center = { lat: driverLat, lng: driverLng };
+  // Auto-detect GPS if no coordinates provided
+  const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
+  useEffect(() => {
+    if (driverLat && driverLng) return;
+    if ('geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => setGpsCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+        () => setGpsCoords({ lat: 30.0444, lng: 31.2357 }), // fallback Cairo
+        { enableHighAccuracy: true, timeout: 8000 }
+      );
+    } else {
+      setGpsCoords({ lat: 30.0444, lng: 31.2357 });
+    }
+  }, [driverLat, driverLng]);
+
+  const actualLat = driverLat || gpsCoords?.lat || 30.0444;
+  const actualLng = driverLng || gpsCoords?.lng || 31.2357;
+  const center = { lat: actualLat, lng: actualLng };
   const { data: shipments = [], isLoading } = useNearbyShipments(center, serviceAreaKm);
 
   const clusters = clusterShipments(shipments);
