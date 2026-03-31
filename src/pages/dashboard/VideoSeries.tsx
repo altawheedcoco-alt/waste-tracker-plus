@@ -609,7 +609,7 @@ const LazyBanner = ({ seasonNum, alt }: { seasonNum: number; alt: string }) => {
   return (
     <div className="mb-5 rounded-xl overflow-hidden border border-border/30 shadow-lg relative" style={{ aspectRatio: '3/1' }}>
       {src ? (
-        <img src={src} alt={alt} className="w-full h-full object-contain bg-black/5 dark:bg-black/30" loading="lazy" decoding="async" />
+        <img src={src} alt={alt} className="w-full h-full object-cover" loading="lazy" decoding="async" />
       ) : (
         <div className="w-full h-full bg-muted animate-pulse" />
       )}
