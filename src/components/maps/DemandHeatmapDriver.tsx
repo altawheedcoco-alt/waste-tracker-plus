@@ -1,12 +1,20 @@
 /**
  * خريطة الطلب الساخن — للسائق المستقل
- * مُعطّل مؤقتاً بسبب عدم توافق react-leaflet مع React 18
+ * تستخدم Leaflet الأصلي (بدون react-leaflet) لتوافق React 18
  */
-import { memo, useState, useEffect } from 'react';
+import { memo, useState, useEffect, useRef } from 'react';
+import L from 'leaflet';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Flame, MapPin, Package, Radio } from 'lucide-react';
+import { Flame, MapPin, Package } from 'lucide-react';
 import { useNearbyShipments, type NearbyShipment } from '@/hooks/useProximityData';
+import { OSM_TILE_URL, OSM_ATTRIBUTION } from '@/lib/leafletConfig';
+
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+L.Icon.Default.mergeOptions({ iconRetinaUrl: markerIcon2x, iconUrl: markerIcon, shadowUrl: markerShadow });
 
 function clusterShipments(shipments: NearbyShipment[], clusterRadiusKm = 5) {
   const used = new Set<string>();
@@ -29,6 +37,12 @@ function clusterShipments(shipments: NearbyShipment[], clusterRadiusKm = 5) {
   return clusters;
 }
 
+function getHeatColor(count: number): string {
+  if (count >= 5) return '#ef4444';
+  if (count >= 3) return '#f97316';
+  return '#eab308';
+}
+
 interface Props {
   driverLat?: number;
   driverLng?: number;
@@ -37,6 +51,10 @@ interface Props {
 
 const DemandHeatmapDriver = memo(({ driverLat, driverLng, serviceAreaKm = 30 }: Props) => {
   const [gpsCoords, setGpsCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const mapRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<L.Map | null>(null);
+  const markersRef = useRef<L.LayerGroup | null>(null);
+
   useEffect(() => {
     if (driverLat && driverLng) return;
     if ('geolocation' in navigator) {
@@ -56,6 +74,102 @@ const DemandHeatmapDriver = memo(({ driverLat, driverLng, serviceAreaKm = 30 }: 
   const { data: shipments = [], isLoading } = useNearbyShipments(center, serviceAreaKm);
 
   const clusters = clusterShipments(shipments);
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapRef.current || mapInstanceRef.current) return;
+    if (!actualLat || !actualLng) return;
+
+    const map = L.map(mapRef.current, {
+      zoomControl: false,
+      attributionControl: false,
+    }).setView([actualLat, actualLng], 10);
+
+    L.tileLayer(OSM_TILE_URL, { attribution: OSM_ATTRIBUTION }).addTo(map);
+
+    // Service area circle
+    L.circle([actualLat, actualLng], {
+      radius: serviceAreaKm * 1000,
+      color: '#f97316',
+      fillColor: '#f97316',
+      fillOpacity: 0.06,
+      weight: 1,
+      dashArray: '6 4',
+    }).addTo(map);
+
+    // Driver position
+    L.circleMarker([actualLat, actualLng], {
+      radius: 8,
+      color: '#3b82f6',
+      fillColor: '#3b82f6',
+      fillOpacity: 1,
+      weight: 2,
+    }).addTo(map).bindPopup('📍 موقعك الحالي');
+
+    markersRef.current = L.layerGroup().addTo(map);
+    mapInstanceRef.current = map;
+
+    return () => {
+      map.remove();
+      mapInstanceRef.current = null;
+    };
+  }, [actualLat, actualLng, serviceAreaKm]);
+
+  // Update cluster markers
+  useEffect(() => {
+    if (!markersRef.current) return;
+    markersRef.current.clearLayers();
+
+    clusters.forEach(cluster => {
+      const color = getHeatColor(cluster.count);
+      const size = Math.min(20 + cluster.count * 6, 50);
+
+      const icon = L.divIcon({
+        className: '',
+        html: `<div style="
+          width:${size}px;height:${size}px;border-radius:50%;
+          background:${color};opacity:0.85;border:2px solid white;
+          box-shadow:0 2px 8px ${color}80;
+          display:flex;align-items:center;justify-content:center;
+          font-size:${Math.min(10 + cluster.count, 16)}px;font-weight:bold;color:white;
+        ">${cluster.count}</div>`,
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+      });
+
+      const wasteTypes = [...new Set(cluster.shipments.map(s => s.wasteType).filter(Boolean))].join('، ');
+
+      L.marker([cluster.lat, cluster.lng], { icon })
+        .addTo(markersRef.current!)
+        .bindPopup(`
+          <div style="text-align:right;direction:rtl;min-width:130px">
+            <b>🔥 ${cluster.count} شحنة</b><br/>
+            ${wasteTypes ? `📦 ${wasteTypes}<br/>` : ''}
+            ${cluster.shipments[0]?.pickupAddress ? `📍 ${cluster.shipments[0].pickupAddress.substring(0, 40)}` : ''}
+          </div>
+        `);
+    });
+
+    // Also add individual shipment markers if few
+    if (shipments.length <= 15) {
+      shipments.forEach(s => {
+        L.circleMarker([s.pickupLat, s.pickupLng], {
+          radius: 5,
+          color: '#f97316',
+          fillColor: '#f97316',
+          fillOpacity: 0.6,
+          weight: 1,
+        }).addTo(markersRef.current!)
+          .bindPopup(`
+            <div style="text-align:right;direction:rtl">
+              <b>${s.shipmentNumber}</b><br/>
+              📦 ${s.wasteType || 'غير محدد'} — ${s.quantity} ${s.unit || ''}<br/>
+              📏 ${s.distanceKm} كم
+            </div>
+          `);
+      });
+    }
+  }, [clusters, shipments]);
 
   return (
     <Card className="overflow-hidden border-primary/20">
@@ -85,26 +199,20 @@ const DemandHeatmapDriver = memo(({ driverLat, driverLng, serviceAreaKm = 30 }: 
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
-        <div className="flex flex-col items-center justify-center h-[250px] bg-muted/10 gap-3">
-          <div className="relative">
-            <Radio className="w-10 h-10 text-orange-400/50 animate-pulse" />
+      <CardContent className="p-0 relative">
+        <div ref={mapRef} style={{ height: '280px', width: '100%' }} />
+        {isLoading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-background/60 z-[500]">
+            <p className="text-xs text-muted-foreground animate-pulse">جاري تحليل مناطق الطلب...</p>
           </div>
-          {isLoading ? (
-            <p className="text-xs text-muted-foreground">جاري تحليل مناطق الطلب...</p>
-          ) : (
-            <div className="text-center space-y-1">
-              <p className="text-sm font-semibold text-foreground">
-                {shipments.length} شحنة في {clusters.length} منطقة
-              </p>
-              {clusters.slice(0, 3).map((c, i) => (
-                <p key={i} className="text-[11px] text-muted-foreground">
-                  🔥 {c.count} شحنة — {c.shipments[0]?.wasteType || 'متنوع'}
-                </p>
-              ))}
-            </div>
-          )}
-        </div>
+        )}
+        {!isLoading && shipments.length > 0 && (
+          <div className="absolute bottom-2 left-2 right-2 bg-background/80 backdrop-blur-sm rounded-lg p-1.5 text-center z-[500]">
+            <p className="text-[11px] text-foreground font-medium">
+              {shipments.length} شحنة في {clusters.length} منطقة
+            </p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
