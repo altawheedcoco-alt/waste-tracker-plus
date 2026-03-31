@@ -16,12 +16,21 @@ import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt";
 import { AutoPushSubscriber } from "./components/pwa/AutoPushSubscriber";
 import PushPermissionBanner from "./components/pwa/PushPermissionBanner";
 
+// Retry wrapper for lazy imports (handles stale cache / network glitches)
+const lazyRetry = (factory: () => Promise<any>, retries = 2): Promise<any> =>
+  factory().catch((err: any) => {
+    if (retries > 0) {
+      return new Promise(r => setTimeout(r, 500)).then(() => lazyRetry(factory, retries - 1));
+    }
+    throw err;
+  });
+
 // Offline components (lightweight, keep global)
-const OfflineBanner = lazy(() => import("./components/offline/OfflineBanner"));
-const ScrollToTopButton = lazy(() => import("./components/ui/ScrollToTopButton"));
-const CodeProtection = lazy(() => import("./components/security/CodeProtection"));
-const ProductionReadiness = lazy(() => import("./components/production/ProductionReadiness"));
-const SoundIntegrator = lazy(() => import("./components/SoundIntegrator"));
+const OfflineBanner = lazy(() => lazyRetry(() => import("./components/offline/OfflineBanner")));
+const ScrollToTopButton = lazy(() => lazyRetry(() => import("./components/ui/ScrollToTopButton")));
+const CodeProtection = lazy(() => lazyRetry(() => import("./components/security/CodeProtection")));
+const ProductionReadiness = lazy(() => lazyRetry(() => import("./components/production/ProductionReadiness")));
+const SoundIntegrator = lazy(() => lazyRetry(() => import("./components/SoundIntegrator")));
 
 // Minimal loading component
 const PageLoader = memo(() => (
