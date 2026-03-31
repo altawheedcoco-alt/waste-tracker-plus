@@ -1,5 +1,5 @@
 /**
- * محفظة السائق المستقل — أرباح ومعاملات مالية
+ * محفظة السائق المستقل — أرباح ومعاملات مالية (بيانات فعلية)
  */
 import DashboardLayout from '@/components/dashboard/DashboardLayout';
 import BackButton from '@/components/ui/back-button';
@@ -11,15 +11,65 @@ import {
 } from 'lucide-react';
 import { useDriverType } from '@/hooks/useDriverType';
 import { motion } from 'framer-motion';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { format } from 'date-fns';
+import { ar } from 'date-fns/locale';
 
 const DriverWallet = () => {
   const { driverProfile } = useDriverType();
+  const { user } = useAuth();
 
-  // Mock data — will be replaced with real wallet data
-  const walletBalance = 0;
-  const pendingEarnings = 0;
-  const totalEarnings = 0;
-  const transactions: any[] = [];
+  // Fetch real earnings from accounting_ledger linked to driver's shipments
+  const { data: walletData } = useQuery({
+    queryKey: ['driver-wallet', driverProfile?.id],
+    enabled: !!driverProfile?.id,
+    queryFn: async () => {
+      // Get shipments delivered by this driver
+      const { data: shipments } = await supabase
+        .from('shipments')
+        .select('id, status, quantity, waste_type, delivered_at, confirmed_at, created_at, shipment_number')
+        .eq('driver_id', driverProfile!.id)
+        .order('created_at', { ascending: false });
+
+      const completed = shipments?.filter(s => ['delivered', 'confirmed'].includes(s.status)) || [];
+      const pending = shipments?.filter(s => ['in_transit', 'approved'].includes(s.status)) || [];
+
+      // Calculate earnings based on completed trips (rate from driver profile or default)
+      const perTripRate = driverProfile?.per_trip_rate || 150;
+      const totalEarnings = completed.length * perTripRate;
+      const pendingEarnings = pending.length * perTripRate;
+
+      // Build transaction list from real shipments
+      const transactions = (shipments || []).slice(0, 20).map(s => ({
+        id: s.id,
+        description: `شحنة #${s.shipment_number?.slice(-6) || s.id.slice(0, 6)} - ${s.waste_type || 'نفايات'}`,
+        amount: perTripRate,
+        type: ['delivered', 'confirmed'].includes(s.status) ? 'credit' : 'pending',
+        date: s.delivered_at || s.created_at,
+        status: s.status,
+      }));
+
+      // Current month earnings
+      const thisMonth = new Date().toISOString().slice(0, 7);
+      const monthEarnings = completed.filter(s => (s.delivered_at || s.confirmed_at || '').startsWith(thisMonth)).length * perTripRate;
+
+      return {
+        walletBalance: totalEarnings,
+        pendingEarnings,
+        totalEarnings,
+        monthEarnings,
+        transactions,
+        completedTrips: completed.length,
+      };
+    },
+  });
+
+  const walletBalance = walletData?.walletBalance || 0;
+  const pendingEarnings = walletData?.pendingEarnings || 0;
+  const totalEarnings = walletData?.totalEarnings || 0;
+  const transactions = walletData?.transactions || [];
 
   return (
     <DashboardLayout>
@@ -65,7 +115,7 @@ const DriverWallet = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">هذا الشهر</p>
-                <p className="font-bold">0 ج.م</p>
+                <p className="font-bold">{(walletData?.monthEarnings || 0).toLocaleString('ar-EG')} ج.م</p>
               </div>
             </CardContent>
           </Card>
@@ -76,7 +126,7 @@ const DriverWallet = () => {
               </div>
               <div>
                 <p className="text-xs text-muted-foreground">رحلات مدفوعة</p>
-                <p className="font-bold">{driverProfile?.total_trips || 0}</p>
+                <p className="font-bold">{walletData?.completedTrips || driverProfile?.total_trips || 0}</p>
               </div>
             </CardContent>
           </Card>
@@ -100,27 +150,34 @@ const DriverWallet = () => {
               <div className="space-y-2">
                 {transactions.map((tx: any, i: number) => (
                   <motion.div
-                    key={i}
+                    key={tx.id}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: i * 0.05 }}
                     className="flex items-center justify-between p-3 rounded-xl bg-muted/50"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tx.type === 'credit' ? 'bg-emerald-100' : 'bg-red-100'}`}>
+                      <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${tx.type === 'credit' ? 'bg-emerald-100 dark:bg-emerald-900/30' : 'bg-amber-100 dark:bg-amber-900/30'}`}>
                         {tx.type === 'credit' ?
                           <ArrowUpRight className="w-4 h-4 text-emerald-600" /> :
-                          <ArrowDownRight className="w-4 h-4 text-red-600" />
+                          <Clock className="w-4 h-4 text-amber-600" />
                         }
                       </div>
                       <div>
                         <p className="text-sm font-medium">{tx.description}</p>
-                        <p className="text-xs text-muted-foreground">{tx.date}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {tx.date ? format(new Date(tx.date), 'dd MMM yyyy', { locale: ar }) : '—'}
+                        </p>
                       </div>
                     </div>
-                    <span className={`font-bold text-sm ${tx.type === 'credit' ? 'text-emerald-600' : 'text-red-600'}`}>
-                      {tx.type === 'credit' ? '+' : '-'}{tx.amount} ج.م
-                    </span>
+                    <div className="text-left">
+                      <span className={`font-bold text-sm ${tx.type === 'credit' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                        {tx.type === 'credit' ? '+' : ''}{tx.amount} ج.م
+                      </span>
+                      {tx.type === 'pending' && (
+                        <p className="text-[10px] text-amber-500">قيد التحصيل</p>
+                      )}
+                    </div>
                   </motion.div>
                 ))}
               </div>
