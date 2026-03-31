@@ -76,8 +76,8 @@ const ProfileCustomization = ({ compact = false }: ProfileCustomizationProps) =>
   useEffect(() => {
     if (profile) {
       setDisplayName(profile.full_name || '');
-      setSelectedColor((profile as any).profile_color_theme || 'teal-blue');
-      setSelectedAvatar((profile as any).avatar_preset || 'default');
+      setSelectedColor(profile.profile_color_theme || 'teal-blue');
+      setSelectedAvatar(profile.avatar_preset || 'default');
     }
   }, [profile]);
 
