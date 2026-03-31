@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Settings2, RotateCcw, UserCircle, Globe, Palette,
@@ -80,8 +81,7 @@ const Settings = () => {
   const orgType = organization?.organization_type || 'generator';
   const isTransporter = orgType === 'transporter';
 
-  // Read tab from URL params
-  const searchParams = new URLSearchParams(window.location.search);
+  const [searchParams] = useSearchParams();
   const initialCategory = searchParams.get('tab') || '';
 
   const [activeCategory, setActiveCategory] = useState<string>(initialCategory);
