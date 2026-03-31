@@ -15,7 +15,7 @@ const VideoContent = ({ dark }: { dark: boolean }) => {
       <Sequence from={0} durationInFrames={120}>
         <S15Title ar="أمان المنصة" en="Platform Security Deep Dive" dark={dark} icon="🛡️" />
       </Sequence>
-      <Sequence from={120} durationInFrames={1910}>
+      <Sequence from={120} durationInFrames={810}>
         <S15ContentSlide items={items} dark={dark} />
       </Sequence>
     </AbsoluteFill>

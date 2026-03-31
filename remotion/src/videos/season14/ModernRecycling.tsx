@@ -15,7 +15,7 @@ const VideoContent = ({ dark }: { dark: boolean }) => {
       <Sequence from={0} durationInFrames={120}>
         <S14Title ar="التدوير الحديث" en="Modern Recycling Movement" dark={dark} icon="♻️" />
       </Sequence>
-      <Sequence from={120} durationInFrames={1910}>
+      <Sequence from={120} durationInFrames={810}>
         <S14ContentSlide items={items} dark={dark} />
       </Sequence>
     </AbsoluteFill>
