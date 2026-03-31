@@ -56,9 +56,50 @@ registerRoute(
   })
 );
 
+// Supabase Storage videos (series-videos) → cache first after first download
+registerRoute(
+  ({ url }) => url.pathname.includes('/storage/') && (url.pathname.endsWith('.mp4') || url.pathname.endsWith('.webm')),
+  new CacheFirst({
+    cacheName: 'video-cache',
+    plugins: [
+      new ExpirationPlugin({ maxEntries: 100, maxAgeSeconds: 30 * 24 * 60 * 60 }), // 30 days
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+      {
+        // Use range requests for video seeking support
+        cachedResponseWillBeUsed: async ({ cachedResponse, request }) => {
+          if (cachedResponse && !request.headers.has('range')) return cachedResponse;
+          return cachedResponse || null;
+        },
+      } as any,
+    ],
+  })
+);
+
+// Supabase Storage images (thumbnails, banners) → cache first
+registerRoute(
+  ({ url }) => url.pathname.includes('/storage/') && (url.pathname.endsWith('.webp') || url.pathname.endsWith('.jpg') || url.pathname.endsWith('.png')),
+  new CacheFirst({
+    cacheName: 'storage-images-cache',
+    plugins: [
+      new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 30 * 24 * 60 * 60 }),
+      new CacheableResponsePlugin({ statuses: [0, 200] }),
+    ],
+  })
+);
+
 // Supabase API → always from network
 registerRoute(
-  /^https:\/\/.*\.supabase\.co\/.*/i,
+  /^https:\/\/.*\.supabase\.co\/rest\/.*/i,
+  new NetworkOnly()
+);
+
+registerRoute(
+  /^https:\/\/.*\.supabase\.co\/auth\/.*/i,
+  new NetworkOnly()
+);
+
+registerRoute(
+  /^https:\/\/.*\.supabase\.co\/realtime\/.*/i,
   new NetworkOnly()
 );
 
