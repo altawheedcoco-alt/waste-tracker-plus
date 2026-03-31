@@ -107,16 +107,16 @@ import { Ep93Dark, Ep93Light } from "./videos/season16/Vision2030";
 
 export const RemotionRoot = () => (
   <>
-    <Composition id="main" component={MainVideo} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="light" component={MainVideoLight} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="main" component={MainVideo} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="light" component={MainVideoLight} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="v2-dark" component={Video2Dark} durationInFrames={1350} fps={30} width={1920} height={1080} />
     <Composition id="v2-light" component={Video2Light} durationInFrames={1350} fps={30} width={1920} height={1080} />
     <Composition id="v3-dark" component={Video3Dark} durationInFrames={1350} fps={30} width={1920} height={1080} />
     <Composition id="v3-light" component={Video3Light} durationInFrames={1350} fps={30} width={1920} height={1080} />
     <Composition id="v4-dark" component={Video4Dark} durationInFrames={1710} fps={30} width={1920} height={1080} />
     <Composition id="v4-light" component={Video4Light} durationInFrames={1710} fps={30} width={1920} height={1080} />
-    <Composition id="v5-dark" component={Video5Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="v5-light" component={Video5Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="v5-dark" component={Video5Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="v5-light" component={Video5Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="tawheed-reel" component={TawheedReel} durationInFrames={600} fps={30} width={1080} height={1920} />
     <Composition id="platform-showcase" component={PlatformShowcase} durationInFrames={1350} fps={30} width={1920} height={1080} />
     {/* Series Episodes - Season 1 */}
@@ -164,160 +164,160 @@ export const RemotionRoot = () => (
     <Composition id="ep21-dark" component={Ep21Dark} durationInFrames={2930} fps={30} width={1920} height={1080} />
     <Composition id="ep21-light" component={Ep21Light} durationInFrames={2930} fps={30} width={1920} height={1080} />
     {/* Series Episodes - Season 5 (AI Deep Dive - Neural Digital) */}
-    <Composition id="ep22-dark" component={Ep22Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep22-light" component={Ep22Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep23-dark" component={Ep23Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep23-light" component={Ep23Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep22-dark" component={Ep22Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep22-light" component={Ep22Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep23-dark" component={Ep23Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep23-light" component={Ep23Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     <Composition id="ep24-dark" component={Ep24Dark} durationInFrames={2010} fps={30} width={1920} height={1080} />
     <Composition id="ep24-light" component={Ep24Light} durationInFrames={2010} fps={30} width={1920} height={1080} />
     <Composition id="ep25-dark" component={Ep25Dark} durationInFrames={2010} fps={30} width={1920} height={1080} />
     <Composition id="ep25-light" component={Ep25Light} durationInFrames={2010} fps={30} width={1920} height={1080} />
-    <Composition id="ep26-dark" component={Ep26Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep26-light" component={Ep26Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep27-dark" component={Ep27Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep27-light" component={Ep27Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep26-dark" component={Ep26Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep26-light" component={Ep26Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep27-dark" component={Ep27Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep27-light" component={Ep27Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Series Episodes - Season 6 (Operations & Automation - Cyber Industrial) */}
-    <Composition id="ep28-dark" component={Ep28Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep28-light" component={Ep28Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep29-dark" component={Ep29Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep29-light" component={Ep29Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep30-dark" component={Ep30Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep30-light" component={Ep30Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep31-dark" component={Ep31Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep31-light" component={Ep31Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep32-dark" component={Ep32Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep32-light" component={Ep32Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep33-dark" component={Ep33Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep33-light" component={Ep33Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep28-dark" component={Ep28Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep28-light" component={Ep28Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep29-dark" component={Ep29Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep29-light" component={Ep29Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep30-dark" component={Ep30Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep30-light" component={Ep30Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep31-dark" component={Ep31Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep31-light" component={Ep31Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep32-dark" component={Ep32Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep32-light" component={Ep32Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep33-dark" component={Ep33Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep33-light" component={Ep33Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Series Episodes - Season 7 (IoT & Smart Sensors - Neon Matrix) */}
-    <Composition id="ep34-dark" component={Ep34Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep34-light" component={Ep34Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep35-dark" component={Ep35Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep35-light" component={Ep35Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep36-dark" component={Ep36Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep36-light" component={Ep36Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep37-dark" component={Ep37Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep37-light" component={Ep37Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep38-dark" component={Ep38Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep38-light" component={Ep38Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep39-dark" component={Ep39Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep39-light" component={Ep39Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep34-dark" component={Ep34Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep34-light" component={Ep34Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep35-dark" component={Ep35Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep35-light" component={Ep35Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep36-dark" component={Ep36Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep36-light" component={Ep36Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep37-dark" component={Ep37Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep37-light" component={Ep37Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep38-dark" component={Ep38Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep38-light" component={Ep38Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep39-dark" component={Ep39Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep39-light" component={Ep39Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 8 */}
-    <Composition id="ep40-dark" component={Ep40Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep40-light" component={Ep40Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep41-dark" component={Ep41Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep41-light" component={Ep41Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep42-dark" component={Ep42Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep42-light" component={Ep42Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep43-dark" component={Ep43Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep43-light" component={Ep43Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep44-dark" component={Ep44Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep44-light" component={Ep44Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep45-dark" component={Ep45Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep45-light" component={Ep45Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep40-dark" component={Ep40Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep40-light" component={Ep40Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep41-dark" component={Ep41Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep41-light" component={Ep41Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep42-dark" component={Ep42Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep42-light" component={Ep42Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep43-dark" component={Ep43Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep43-light" component={Ep43Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep44-dark" component={Ep44Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep44-light" component={Ep44Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep45-dark" component={Ep45Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep45-light" component={Ep45Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 9 */}
-    <Composition id="ep46-dark" component={Ep46Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep46-light" component={Ep46Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep47-dark" component={Ep47Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep47-light" component={Ep47Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep48-dark" component={Ep48Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep48-light" component={Ep48Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep49-dark" component={Ep49Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep49-light" component={Ep49Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep50-dark" component={Ep50Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep50-light" component={Ep50Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep51-dark" component={Ep51Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep51-light" component={Ep51Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep46-dark" component={Ep46Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep46-light" component={Ep46Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep47-dark" component={Ep47Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep47-light" component={Ep47Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep48-dark" component={Ep48Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep48-light" component={Ep48Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep49-dark" component={Ep49Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep49-light" component={Ep49Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep50-dark" component={Ep50Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep50-light" component={Ep50Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep51-dark" component={Ep51Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep51-light" component={Ep51Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 10 */}
-    <Composition id="ep52-dark" component={Ep52Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep52-light" component={Ep52Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep53-dark" component={Ep53Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep53-light" component={Ep53Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep54-dark" component={Ep54Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep54-light" component={Ep54Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep55-dark" component={Ep55Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep55-light" component={Ep55Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep56-dark" component={Ep56Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep56-light" component={Ep56Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep57-dark" component={Ep57Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep57-light" component={Ep57Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep52-dark" component={Ep52Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep52-light" component={Ep52Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep53-dark" component={Ep53Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep53-light" component={Ep53Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep54-dark" component={Ep54Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep54-light" component={Ep54Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep55-dark" component={Ep55Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep55-light" component={Ep55Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep56-dark" component={Ep56Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep56-light" component={Ep56Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep57-dark" component={Ep57Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep57-light" component={Ep57Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 11 */}
-    <Composition id="ep58-dark" component={Ep58Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep58-light" component={Ep58Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep59-dark" component={Ep59Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep59-light" component={Ep59Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep60-dark" component={Ep60Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep60-light" component={Ep60Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep61-dark" component={Ep61Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep61-light" component={Ep61Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep62-dark" component={Ep62Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep62-light" component={Ep62Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep63-dark" component={Ep63Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep63-light" component={Ep63Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep58-dark" component={Ep58Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep58-light" component={Ep58Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep59-dark" component={Ep59Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep59-light" component={Ep59Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep60-dark" component={Ep60Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep60-light" component={Ep60Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep61-dark" component={Ep61Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep61-light" component={Ep61Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep62-dark" component={Ep62Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep62-light" component={Ep62Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep63-dark" component={Ep63Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep63-light" component={Ep63Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 12 */}
-    <Composition id="ep64-dark" component={Ep64Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep64-light" component={Ep64Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep65-dark" component={Ep65Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep65-light" component={Ep65Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep66-dark" component={Ep66Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep66-light" component={Ep66Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep67-dark" component={Ep67Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep67-light" component={Ep67Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep68-dark" component={Ep68Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep68-light" component={Ep68Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep69-dark" component={Ep69Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep69-light" component={Ep69Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep64-dark" component={Ep64Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep64-light" component={Ep64Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep65-dark" component={Ep65Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep65-light" component={Ep65Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep66-dark" component={Ep66Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep66-light" component={Ep66Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep67-dark" component={Ep67Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep67-light" component={Ep67Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep68-dark" component={Ep68Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep68-light" component={Ep68Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep69-dark" component={Ep69Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep69-light" component={Ep69Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 13: Platform Journey */}
-    <Composition id="ep70-dark" component={Ep70Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep70-light" component={Ep70Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep71-dark" component={Ep71Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep71-light" component={Ep71Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep72-dark" component={Ep72Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep72-light" component={Ep72Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep73-dark" component={Ep73Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep73-light" component={Ep73Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep74-dark" component={Ep74Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep74-light" component={Ep74Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep75-dark" component={Ep75Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep75-light" component={Ep75Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep70-dark" component={Ep70Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep70-light" component={Ep70Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep71-dark" component={Ep71Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep71-light" component={Ep71Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep72-dark" component={Ep72Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep72-light" component={Ep72Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep73-dark" component={Ep73Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep73-light" component={Ep73Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep74-dark" component={Ep74Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep74-light" component={Ep74Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep75-dark" component={Ep75Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep75-light" component={Ep75Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 14: Global Recycling History */}
-    <Composition id="ep76-dark" component={Ep76Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep76-light" component={Ep76Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep77-dark" component={Ep77Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep77-light" component={Ep77Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep78-dark" component={Ep78Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep78-light" component={Ep78Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep79-dark" component={Ep79Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep79-light" component={Ep79Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep80-dark" component={Ep80Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep80-light" component={Ep80Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep81-dark" component={Ep81Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep81-light" component={Ep81Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep76-dark" component={Ep76Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep76-light" component={Ep76Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep77-dark" component={Ep77Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep77-light" component={Ep77Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep78-dark" component={Ep78Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep78-light" component={Ep78Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep79-dark" component={Ep79Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep79-light" component={Ep79Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep80-dark" component={Ep80Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep80-light" component={Ep80Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep81-dark" component={Ep81Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep81-light" component={Ep81Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 15: Advanced Internal Features */}
-    <Composition id="ep82-dark" component={Ep82Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep82-light" component={Ep82Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep83-dark" component={Ep83Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep83-light" component={Ep83Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep84-dark" component={Ep84Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep84-light" component={Ep84Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep85-dark" component={Ep85Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep85-light" component={Ep85Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep86-dark" component={Ep86Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep86-light" component={Ep86Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep87-dark" component={Ep87Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep87-light" component={Ep87Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep82-dark" component={Ep82Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep82-light" component={Ep82Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep83-dark" component={Ep83Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep83-light" component={Ep83Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep84-dark" component={Ep84Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep84-light" component={Ep84Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep85-dark" component={Ep85Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep85-light" component={Ep85Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep86-dark" component={Ep86Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep86-light" component={Ep86Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep87-dark" component={Ep87Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep87-light" component={Ep87Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
     {/* Season 16: Success Stories & Impact */}
-    <Composition id="ep88-dark" component={Ep88Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep88-light" component={Ep88Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep89-dark" component={Ep89Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep89-light" component={Ep89Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep90-dark" component={Ep90Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep90-light" component={Ep90Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep91-dark" component={Ep91Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep91-light" component={Ep91Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep92-dark" component={Ep92Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep92-light" component={Ep92Light} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep93-dark" component={Ep93Dark} durationInFrames={900} fps={30} width={1920} height={1080} />
-    <Composition id="ep93-light" component={Ep93Light} durationInFrames={900} fps={30} width={1920} height={1080} />
+    <Composition id="ep88-dark" component={Ep88Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep88-light" component={Ep88Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep89-dark" component={Ep89Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep89-light" component={Ep89Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep90-dark" component={Ep90Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep90-light" component={Ep90Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep91-dark" component={Ep91Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep91-light" component={Ep91Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep92-dark" component={Ep92Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep92-light" component={Ep92Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep93-dark" component={Ep93Dark} durationInFrames={2030} fps={30} width={1920} height={1080} />
+    <Composition id="ep93-light" component={Ep93Light} durationInFrames={2030} fps={30} width={1920} height={1080} />
   </>
 );
