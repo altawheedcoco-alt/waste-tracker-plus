@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import NearbyDriversRadar from '@/components/maps/NearbyDriversRadar';
+import { ErrorBoundary } from '@/components/common/ErrorBoundary';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
@@ -202,7 +203,9 @@ const DispatchToDriverPanel = () => {
   return (
     <div className="space-y-4" dir="rtl">
       {/* Nearby Drivers Radar Map */}
-      <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+      <ErrorBoundary fallbackTitle="خطأ في رادار السائقين">
+        <NearbyDriversRadar pickupLat={30.0444} pickupLng={31.2357} />
+      </ErrorBoundary>
 
       {/* Header */}
       <div className="flex items-center justify-between">
