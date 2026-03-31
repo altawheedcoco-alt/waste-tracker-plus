@@ -56,7 +56,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
     <>
       {/* ══════ 8. المخاطر والامتثال (regulatory_hub + ohs + risk + custody) ══════ */}
       <TabsContent value="compliance" className="space-y-4 mt-6">
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin sm:flex-wrap sm:overflow-visible sm:pb-0">
           {COMPLIANCE_SECTIONS.map((section) => {
             const Icon = section.icon;
             const isActive = activeSection === section.id;
@@ -65,7 +65,7 @@ const TransporterComplianceTabs = ({ organizationId }: ComplianceTabsProps) => {
                 key={section.id}
                 onClick={() => setActiveSection(section.id)}
                 className={cn(
-                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                  'flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap shrink-0',
                   isActive
                     ? 'bg-primary text-primary-foreground shadow-sm'
                     : 'bg-muted/50 text-muted-foreground hover:bg-muted'
