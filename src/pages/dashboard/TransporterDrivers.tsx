@@ -123,20 +123,27 @@ const TransporterDrivers = () => {
 
       if (error) throw error;
 
-      const driversWithShipments = await Promise.all(
-        (data || []).map(async (driver) => {
-          const { count } = await supabase
-            .from('shipments')
-            .select('id', { count: 'exact', head: true })
-            .eq('driver_id', driver.id)
-            .in('status', ['new', 'approved', 'collecting', 'in_transit']);
+      // Single batch query for active shipment counts instead of N+1
+      const driverIds = (data || []).map(d => d.id);
+      let shipmentCounts: Record<string, number> = {};
+      if (driverIds.length > 0) {
+        const { data: activeShipments } = await supabase
+          .from('shipments')
+          .select('driver_id')
+          .in('driver_id', driverIds)
+          .in('status', ['new', 'approved', 'collecting', 'in_transit']);
+        
+        (activeShipments || []).forEach(s => {
+          if (s.driver_id) {
+            shipmentCounts[s.driver_id] = (shipmentCounts[s.driver_id] || 0) + 1;
+          }
+        });
+      }
 
-          return {
-            ...driver,
-            activeShipments: count || 0,
-          } as Driver;
-        })
-      );
+      const driversWithShipments = (data || []).map(driver => ({
+        ...driver,
+        activeShipments: shipmentCounts[driver.id] || 0,
+      })) as Driver[];
 
       setDrivers(driversWithShipments);
     } catch (error) {
@@ -291,11 +298,17 @@ const TransporterDrivers = () => {
     }
   };
 
-  const filteredDrivers = drivers.filter(driver =>
-    driver.profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    driver.vehicle_plate?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [availabilityFilter, setAvailabilityFilter] = useState<'all' | 'available' | 'busy'>('all');
+
+  const filteredDrivers = drivers.filter(driver => {
+    const matchesSearch = driver.profile?.full_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.license_number.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      driver.vehicle_plate?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesAvailability = availabilityFilter === 'all' ||
+      (availabilityFilter === 'available' && driver.is_available) ||
+      (availabilityFilter === 'busy' && driver.activeShipments > 0);
+    return matchesSearch && matchesAvailability;
+  });
 
   const stats = {
     total: drivers.length,
@@ -598,17 +611,34 @@ const TransporterDrivers = () => {
         </Card>
       </div>
 
-      {/* Search */}
+      {/* Search + Filter */}
       <Card>
         <CardContent className="p-4">
-          <div className="relative">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="بحث بالاسم أو رقم الرخصة أو رقم اللوحة..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pr-10"
-            />
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="بحث بالاسم أو رقم الرخصة أو رقم اللوحة..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pr-10"
+              />
+            </div>
+            <div className="flex gap-1.5">
+              {(['all', 'available', 'busy'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setAvailabilityFilter(f)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+                    availabilityFilter === f
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'bg-muted/50 text-muted-foreground hover:bg-muted'
+                  }`}
+                >
+                  {f === 'all' ? `الكل (${stats.total})` : f === 'available' ? `متاح (${stats.available})` : `في مهمة (${stats.busy})`}
+                </button>
+              ))}
+            </div>
           </div>
         </CardContent>
       </Card>
