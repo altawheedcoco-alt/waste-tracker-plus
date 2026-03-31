@@ -46666,6 +46666,10 @@ export type Database = {
         Args: { _user_id: string; _waste_type: string }
         Returns: boolean
       }
+      has_worker_relationship: {
+        Args: { p_user_id: string; p_worker_id: string }
+        Returns: boolean
+      }
       increment_org_profile_views: {
         Args: { _share_code: string }
         Returns: undefined
