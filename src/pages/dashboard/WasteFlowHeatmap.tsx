@@ -14,6 +14,9 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { motion, AnimatePresence } from 'framer-motion';
 import BackButton from '@/components/ui/back-button';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const WasteFlowLeafletMap = lazy(() => import('@/components/maps/WasteFlowLeafletMap'));
 
 interface WasteFlow {
   id: string;
