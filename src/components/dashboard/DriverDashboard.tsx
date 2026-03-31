@@ -661,6 +661,13 @@ const DriverDashboard = () => {
               </Card>
             </div>
 
+            <QuickActionsGrid
+              actions={quickActions}
+              title="الإجراءات السريعة"
+              subtitle="الوظائف المستخدمة بكثرة"
+            />
+          </TabsContent>
+
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: التحليلات (مؤجر + مستقل) */}
           {/* ═══════════════════════════════════════════════ */}
@@ -668,13 +675,6 @@ const DriverDashboard = () => {
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <DriverAnalyticsPanel driverId={driverInfo.id} driverType={driverInfo.driver_type} />}
             </Suspense>
-          </TabsContent>
-
-            <QuickActionsGrid
-              actions={quickActions}
-              title="الإجراءات السريعة"
-              subtitle="الوظائف المستخدمة بكثرة"
-            />
           </TabsContent>
 
           {/* ═══════════════════════════════════════════════ */}
