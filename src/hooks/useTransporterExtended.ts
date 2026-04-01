@@ -28,11 +28,12 @@ export interface DriverSummary {
 }
 
 async function fetchFinancials(organizationId: string): Promise<TransporterFinancials> {
-  const { data: ledger } = await supabase
+  const { data: ledger, error: ledgerError } = await supabase
     .from('accounting_ledger')
     .select('amount, entry_type, entry_category')
     .eq('organization_id', organizationId);
 
+  if (ledgerError) throw ledgerError;
   const entries = ledger || [];
 
   const totalRevenue = entries
@@ -60,11 +61,12 @@ async function fetchFinancials(organizationId: string): Promise<TransporterFinan
 }
 
 async function fetchKPIs(organizationId: string): Promise<TransporterKPIs> {
-  const { data: shipments } = await supabase
+  const { data: shipments, error: shipError } = await supabase
     .from('shipments')
     .select('status, created_at, delivered_at, expected_delivery_date')
     .eq('transporter_id', organizationId);
 
+  if (shipError) throw shipError;
   const all = shipments || [];
   const total = all.length;
   if (total === 0) return { onTimeRate: 0, completionRate: 0, avgDeliveryDays: 0, overdueShipments: 0 };
@@ -110,11 +112,12 @@ async function fetchKPIs(organizationId: string): Promise<TransporterKPIs> {
 }
 
 async function fetchDriversSummary(organizationId: string): Promise<DriverSummary[]> {
-  const { data: drivers } = await supabase
+  const { data: drivers, error: driversError } = await supabase
     .from('drivers')
     .select('id, is_available, vehicle_plate, profile:profiles(full_name, phone)')
     .eq('organization_id', organizationId);
 
+  if (driversError) throw driversError;
   if (!drivers?.length) return [];
 
   const driverIds = drivers.map(d => d.id);
