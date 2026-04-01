@@ -197,7 +197,7 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
   const totalBilling = completedOps.reduce((acc: number, o: any) => acc + (o.cost || 0), 0);
 
   // Statement data
-  const statementNumber = `STMT-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const statementNumber = useMemo(() => `STMT-${format(new Date(), 'yyyyMMdd')}-${Date.now().toString(36).toUpperCase().slice(-4)}`, []);
   const periodFrom = completedOps.length > 0 ? completedOps[completedOps.length - 1]?.created_at : new Date().toISOString();
   const periodTo = new Date().toISOString();
 
