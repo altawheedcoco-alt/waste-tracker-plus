@@ -168,6 +168,11 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     }
   };
 
+  // If magic link mode, show the magic link form
+  if (loginMethod === 'magic') {
+    return <MagicLinkForm onBack={() => setLoginMethod('email')} />;
+  }
+
   return (
     <motion.form
       key="login"
@@ -201,26 +206,38 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => setLoginMethod('email')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
             loginMethod === 'email'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Mail className="w-4 h-4" />
-          البريد الإلكتروني
+          <Mail className="w-3.5 h-3.5" />
+          البريد
         </button>
         <button
           type="button"
           onClick={() => setLoginMethod('phone')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
             loginMethod === 'phone'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Phone className="w-4 h-4" />
-          رقم الهاتف
+          <Phone className="w-3.5 h-3.5" />
+          الهاتف
+        </button>
+        <button
+          type="button"
+          onClick={() => setLoginMethod('magic')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+            loginMethod === 'magic'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Wand2 className="w-3.5 h-3.5" />
+          رابط سحري
         </button>
       </div>
 
