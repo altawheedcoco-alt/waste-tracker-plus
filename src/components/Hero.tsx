@@ -232,13 +232,23 @@ const Hero = memo(() => {
             </div>
           </motion.div>
 
-          {/* Egyptian heritage footer */}
+          {/* Scroll indicator for mobile */}
           <motion.div
-            className="mt-4 sm:mt-6 flex flex-col items-center gap-1 sm:gap-1"
+            className="mt-4 sm:mt-6 flex flex-col items-center gap-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
+            transition={{ delay: 1.2 }}
           >
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+            >
+              <span className="text-[9px] text-white/40 mb-1">{language === 'ar' ? 'اكتشف المزيد' : 'Discover more'}</span>
+              <ChevronDown className="w-5 h-5 text-white/40" />
+            </motion.div>
+          </motion.div>
             <p
               className="text-[11px] sm:text-sm font-bold tracking-wide text-gradient-eco"
               style={{ WebkitTextFillColor: 'transparent' }}
