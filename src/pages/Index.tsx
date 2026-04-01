@@ -332,28 +332,12 @@ const Index = () => {
             </LazySection>
           ))}
 
-          {/* v5.2 — Savings Calculator */}
-          <div id="savings-calculator">
-            <LazySection minH={400}>
-              <SavingsCalculator />
-            </LazySection>
-          </div>
-
           {/* v5.2 — Before & After */}
           <div id="before-after">
             <LazySection minH={400}>
               <BeforeAfterSection />
             </LazySection>
           </div>
-
-          {/* Live Platform Stats */}
-          <div id="live-stats">
-            <LazySection minH={300}>
-              <LivePlatformStats />
-            </LazySection>
-          </div>
-
-          {/* Platform Changelog */}
           <div id="changelog">
             <LazySection minH={400}>
               <PlatformChangelog />
