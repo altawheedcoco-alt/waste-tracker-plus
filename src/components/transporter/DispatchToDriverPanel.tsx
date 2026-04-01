@@ -104,12 +104,14 @@ const DispatchToDriverPanel = () => {
   // Smart dispatch mutation - sends to nearest available drivers
   const dispatchMutation = useMutation({
     mutationFn: async ({ shipmentId, price, mode }: { shipmentId: string; price: number; mode: string }) => {
-      // Get available independent drivers
+      // Get available independent drivers (verified, not bound to any org)
       const { data: drivers, error: driversError } = await supabase
         .from('drivers')
         .select('id, license_number, vehicle_plate, rating')
         .eq('driver_type', 'independent')
         .eq('is_available', true)
+        .eq('is_verified', true)
+        .is('organization_id', null)
         .limit(mode === 'smart' ? 5 : 20);
 
       if (driversError) throw driversError;
@@ -150,6 +152,18 @@ const DispatchToDriverPanel = () => {
   // Accept a driver's bid
   const acceptBidMutation = useMutation({
     mutationFn: async ({ bidId, shipmentId, driverId }: { bidId: string; shipmentId: string; driverId: string }) => {
+      // Verify driver is independent (prevent assigning company drivers from other orgs)
+      const { data: driverCheck } = await supabase
+        .from('drivers')
+        .select('id, driver_type, organization_id')
+        .eq('id', driverId)
+        .single();
+      
+      if (!driverCheck) throw new Error('السائق غير موجود');
+      if (driverCheck.driver_type !== 'independent') {
+        throw new Error('لا يمكن قبول عرض من سائق تابع لجهة أخرى');
+      }
+
       // Accept the bid
       const { error: bidError } = await supabase
         .from('driver_shipment_bids')
@@ -157,11 +171,12 @@ const DispatchToDriverPanel = () => {
         .eq('id', bidId);
       if (bidError) throw bidError;
 
-      // Assign driver to shipment
+      // Assign driver to shipment — only if it belongs to this transporter
       const { error: shipError } = await supabase
         .from('shipments')
         .update({ driver_id: driverId, status: 'approved' })
-        .eq('id', shipmentId);
+        .eq('id', shipmentId)
+        .eq('transporter_id', orgId!);
       if (shipError) throw shipError;
 
       // Reject other bids on same shipment
