@@ -204,7 +204,7 @@ const GroupChatView = ({ room, onBack }: GroupChatViewProps) => {
                     {p.profile?.full_name?.split(' ')[0] || 'عضو'}
                   </span>
                   {p.role === 'admin' && (
-                    <Crown className="w-3 h-3 text-amber-500" />
+                    <Crown className="w-3 h-3 text-primary" />
                   )}
                 </div>
               ))}
