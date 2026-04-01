@@ -1441,6 +1441,7 @@ const EncryptedChatInner = () => {
                       }}
                       sending={sending}
                       disabled={!selectedConvoId}
+                      onTyping={sendTyping}
                     />
                   </div>
                 </>
