@@ -1486,46 +1486,14 @@ const EncryptedChatInner = () => {
                   {/* Chat Search Bar */}
                   <AnimatePresence>
                     {showChatSearch && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        className="overflow-hidden border-b border-border bg-card"
-                      >
-                        <div className="flex items-center gap-2 px-3 py-2">
-                          <div className="flex-1 relative">
-                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                            <Input
-                              value={chatSearchQuery}
-                              onChange={(e) => {
-                                setChatSearchQuery(e.target.value);
-                                // Find & highlight first match
-                                if (e.target.value.length >= 2) {
-                                  const match = messages.find(m => m.content.toLowerCase().includes(e.target.value.toLowerCase()));
-                                  if (match) {
-                                    setHighlightedMsgId(match.id);
-                                    document.getElementById(`msg-${match.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                  }
-                                } else {
-                                  setHighlightedMsgId(null);
-                                }
-                              }}
-                              placeholder="بحث في الرسائل..."
-                              className="pr-9 h-9 text-sm"
-                              autoFocus
-                              dir="rtl"
-                            />
-                          </div>
-                          {chatSearchQuery.length >= 2 && (
-                            <span className="text-xs text-muted-foreground whitespace-nowrap">
-                              {messages.filter(m => m.content.toLowerCase().includes(chatSearchQuery.toLowerCase())).length} نتيجة
-                            </span>
-                          )}
-                          <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => { setShowChatSearch(false); setChatSearchQuery(''); setHighlightedMsgId(null); }}>
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </motion.div>
+                      <ChatSearchBar
+                        messages={messages}
+                        onScrollToMessage={(msgId) => {
+                          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }}
+                        onHighlightMessage={setHighlightedMsgId}
+                        onClose={() => { setShowChatSearch(false); setChatSearchQuery(''); setHighlightedMsgId(null); }}
+                      />
                     )}
                   </AnimatePresence>
 
