@@ -119,8 +119,9 @@ interface Shipment {
 const companyTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'field', label: 'الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'أدائي', icon: BarChart3 },
   { value: 'account', label: 'حسابي', icon: User },
 ];
 
