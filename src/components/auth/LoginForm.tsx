@@ -45,7 +45,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
+  const [loginMethod, setLoginMethod] = useState<'email' | 'phone' | 'magic'>('email');
   const [loginData, setLoginData] = useState({
     email: localStorage.getItem('rememberEmail') || '',
     phone: localStorage.getItem('rememberPhone') || '',
@@ -168,8 +168,9 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     }
   };
 
-  // If magic link mode, show the magic link form
-  if (loginMethod === 'magic') {
+  const showMagicLink = loginMethod === 'magic';
+
+  if (showMagicLink) {
     return <MagicLinkForm onBack={() => setLoginMethod('email')} />;
   }
 
@@ -230,11 +231,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => setLoginMethod('magic')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
-            loginMethod === 'magic'
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 text-muted-foreground hover:text-foreground"
         >
           <Wand2 className="w-3.5 h-3.5" />
           رابط سحري
