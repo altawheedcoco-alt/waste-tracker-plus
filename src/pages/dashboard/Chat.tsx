@@ -401,7 +401,7 @@ const EncryptedChatInner = () => {
             const filtered = prev.filter(m => m.id !== decrypted.id && !m.id.startsWith('temp_'));
             return [...filtered, decrypted];
           });
-          if (decrypted.sender_id !== user?.id) { try { soundEngine.play('message_received'); } catch {} }
+          if (decrypted.sender_id !== user?.id && shouldNotify()) { try { soundEngine.play('message_received'); } catch {} }
         }
         markAsRead(selectedConvoId);
       })
