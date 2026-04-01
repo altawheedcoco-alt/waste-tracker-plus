@@ -6,7 +6,8 @@ import {
   MoreVertical, Lock, Download, VolumeX, Ban,
   Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Info, BarChart3, Radio, Timer, Image as ImageIcon, Pin, Star
+  Info, BarChart3, Radio, Timer, Image as ImageIcon, Pin, Star,
+  Clock, Moon
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
@@ -51,6 +52,10 @@ import StarredMessagesPanel from '@/components/chat/StarredMessagesPanel';
 import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import ReplyPreviewBar from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
+import ChatNotificationDialog from '@/components/chat/ChatNotificationDialog';
+import ScheduleMessageDialog from '@/components/chat/ScheduleMessageDialog';
+import { useChatInfiniteScroll } from '@/hooks/useChatInfiniteScroll';
+import { useChatNotificationSettings } from '@/hooks/useChatNotificationSettings';
 
 // Extracted components
 import ConversationItem from '@/components/chat/ConversationItem';
@@ -153,6 +158,8 @@ const EncryptedChatInner = () => {
   const [showPinnedBar, setShowPinnedBar] = useState(true);
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const [showStarredPanel, setShowStarredPanel] = useState(false);
+  const [showNotifDialog, setShowNotifDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -175,6 +182,14 @@ const EncryptedChatInner = () => {
 
   // Pinned messages
   const { pinnedMessages, fetchPinned, togglePin: togglePinMessage } = usePinnedMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Infinite scroll
+  const { hasMore, loadingMore, loadOlderMessages, resetPagination } = useChatInfiniteScroll({
+    fetchMessages, conversationId: selectedConvoId,
+  });
+
+  // Per-conversation notification settings
+  const { settings: notifSettings, shouldNotify } = useChatNotificationSettings(selectedConvoId);
 
   // Gallery images
   const galleryImages = useMemo(() => {
@@ -359,6 +374,7 @@ const EncryptedChatInner = () => {
     setMessagesLoading(true);
     setReplyTo(null);
     setShowPartnerInfo(false);
+    resetPagination();
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
         const unread = msgs.find(m => m.sender_id !== user?.id && m.status !== 'read');
@@ -369,7 +385,7 @@ const EncryptedChatInner = () => {
       }
     }).catch(() => { if (!cancelled) setMessagesLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedConvoId, fetchMessages, markAsRead]);
+  }, [selectedConvoId, fetchMessages, markAsRead, resetPagination]);
 
   // Realtime messages
   useEffect(() => {
@@ -385,7 +401,7 @@ const EncryptedChatInner = () => {
             const filtered = prev.filter(m => m.id !== decrypted.id && !m.id.startsWith('temp_'));
             return [...filtered, decrypted];
           });
-          if (decrypted.sender_id !== user?.id) { try { soundEngine.play('message_received'); } catch {} }
+          if (decrypted.sender_id !== user?.id && shouldNotify()) { try { soundEngine.play('message_received'); } catch {} }
         }
         markAsRead(selectedConvoId);
       })
@@ -738,7 +754,13 @@ const EncryptedChatInner = () => {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleExport}><Download className="w-4 h-4 ml-2" /> تصدير المحادثة</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toggleMute(selectedConvoId!)}><VolumeX className="w-4 h-4 ml-2" /> كتم المحادثة</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowNotifDialog(true)}>
+                            <Bell className="w-4 h-4 ml-2" /> إعدادات الإشعارات
+                            {notifSettings.level !== 'all' && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{notifSettings.level === 'none' ? 'مكتوم' : 'إشارات'}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowScheduleDialog(true)}>
+                            <Clock className="w-4 h-4 ml-2" /> جدولة رسالة
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowDisappearDialog(true)}>
                             <Timer className="w-4 h-4 ml-2" /> الرسائل المؤقتة
                             {disappearActive && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">مفعّل</Badge>}
@@ -782,7 +804,24 @@ const EncryptedChatInner = () => {
                       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
                       setShowScrollBottom(!nearBottom);
                       isNearBottomRef.current = nearBottom;
+                      // Infinite scroll: load older when near top
+                      if (el.scrollTop < 80 && !loadingMore && hasMore && messages.length > 0) {
+                        const prevHeight = el.scrollHeight;
+                        loadOlderMessages(messages, setMessages).then(() => {
+                          // Preserve scroll position
+                          requestAnimationFrame(() => {
+                            el.scrollTop = el.scrollHeight - prevHeight;
+                          });
+                        });
+                      }
                     }}>
+                    {/* Loading older messages indicator */}
+                    {loadingMore && (
+                      <div className="flex items-center justify-center py-3">
+                        <Loader2 className="animate-spin text-primary w-5 h-5" />
+                        <span className="text-xs text-muted-foreground mr-2">تحميل رسائل أقدم...</span>
+                      </div>
+                    )}
                     {messagesLoading ? (
                       <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>
                     ) : messages.length === 0 ? (
@@ -950,6 +989,17 @@ const EncryptedChatInner = () => {
       <ForwardDialog isOpen={!!forwardMsg} onClose={() => setForwardMsg(null)} messageContent={forwardMsg?.content || ''}
         conversations={conversations.filter(c => c.id !== selectedConvoId)} onForward={handleForwardToConversations} currentUserId={user?.id} />
       <ImageGalleryViewer images={galleryImages} initialIndex={galleryIndex} isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} />
+      <ChatNotificationDialog open={showNotifDialog} onOpenChange={setShowNotifDialog} conversationId={selectedConvoId} partnerName={selectedConvo?.partner?.full_name} />
+      <ScheduleMessageDialog open={showScheduleDialog} onClose={() => setShowScheduleDialog(false)}
+        onSchedule={(scheduledAt, content) => {
+          const delay = new Date(scheduledAt).getTime() - Date.now();
+          if (delay > 0 && selectedConvoId) {
+            setTimeout(async () => {
+              try { await sendMessage(selectedConvoId, content); } catch {}
+            }, Math.min(delay, 2147483647));
+          }
+        }}
+      />
       <StarredMessagesPanel isOpen={showStarredPanel} onClose={() => setShowStarredPanel(false)} starredMessages={starredMessages}
         onScrollToMessage={(msgId) => {
           document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
