@@ -61,6 +61,7 @@ import ChatSearchBar from '@/components/chat/ChatSearchBar';
 import LinkPreview, { extractUrls } from '@/components/chat/LinkPreview';
 import ImageGalleryViewer from '@/components/chat/ImageGalleryViewer';
 import PinnedMessagesBar from '@/components/chat/PinnedMessagesBar';
+import StarredMessagesPanel from '@/components/chat/StarredMessagesPanel';
 import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 
 // ─── Types ──────────────────────────────────────────────
