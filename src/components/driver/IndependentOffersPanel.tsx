@@ -1,12 +1,13 @@
 /**
  * لوحة العروض الواردة المتقدمة للسائق المستقل
- * تتضمن: عداد تنازلي، تفاصيل متقدمة، إشعار صوتي
+ * تتضمن: عداد تنازلي، تفاصيل متقدمة، إشعار صوتي، سبب الرفض
  */
 import { useDriverMissionOffers } from '@/hooks/useDriverMissionOffers';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, Package, CheckCircle, XCircle, Loader2, Zap, Volume2 } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Clock, MapPin, Package, CheckCircle, XCircle, Loader2, Zap, Volume2, ChevronDown, Send } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -61,9 +62,19 @@ const playNotificationSound = () => {
   } catch { /* silent */ }
 };
 
+const REJECTION_REASONS = [
+  'المسافة بعيدة',
+  'السعر غير مناسب',
+  'الوقت غير مناسب',
+  'نوع الشحنة غير مفضل',
+  'لدي مهمة أخرى',
+];
+
 const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
   const { offers, isLoading, acceptOffer, rejectOffer, pendingCount } = useDriverMissionOffers(driverId);
   const [prevCount, setPrevCount] = useState(0);
+  const [rejectingOfferId, setRejectingOfferId] = useState<string | null>(null);
+  const [customReason, setCustomReason] = useState('');
 
   // Play sound when new offers arrive
   useEffect(() => {
@@ -72,6 +83,12 @@ const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
     }
     setPrevCount(pendingCount);
   }, [pendingCount, prevCount]);
+
+  const handleReject = useCallback((offerId: string, reason?: string) => {
+    rejectOffer.mutate({ offerId, reason });
+    setRejectingOfferId(null);
+    setCustomReason('');
+  }, [rejectOffer]);
 
   if (isLoading) {
     return (
@@ -115,6 +132,7 @@ const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
         {offers.map((offer: any) => {
           const expiresAt = new Date(offer.expires_at);
           const isExpired = expiresAt.getTime() < Date.now();
+          const isRejecting = rejectingOfferId === offer.id;
 
           return (
             <motion.div
@@ -154,7 +172,7 @@ const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
                         </div>
                       </div>
                       <div className="flex items-start gap-1.5 text-xs">
-                        <MapPin className="w-3 h-3 text-red-500 shrink-0 mt-0.5" />
+                        <MapPin className="w-3 h-3 text-destructive shrink-0 mt-0.5" />
                         <div>
                           <span className="text-[10px] text-muted-foreground">التسليم:</span>
                           <p className="truncate">{offer.shipment.delivery_address || 'غير محدد'}</p>
@@ -183,7 +201,7 @@ const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
                   )}
 
                   {/* Actions */}
-                  {!isExpired && (
+                  {!isExpired && !isRejecting && (
                     <div className="flex gap-2">
                       <Button
                         size="sm"
@@ -202,13 +220,59 @@ const IndependentOffersPanel = ({ driverId }: IndependentOffersPanelProps) => {
                         size="sm"
                         variant="outline"
                         className="flex-1 gap-1.5"
-                        onClick={() => rejectOffer.mutate({ offerId: offer.id })}
-                        disabled={rejectOffer.isPending}
+                        onClick={() => setRejectingOfferId(offer.id)}
                       >
                         <XCircle className="w-3.5 h-3.5" />
                         رفض
                       </Button>
                     </div>
+                  )}
+
+                  {/* Rejection reason panel */}
+                  {isRejecting && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="space-y-2 pt-2 border-t border-border/30"
+                    >
+                      <p className="text-xs font-medium text-muted-foreground">سبب الرفض (اختياري):</p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {REJECTION_REASONS.map((reason) => (
+                          <button
+                            key={reason}
+                            onClick={() => handleReject(offer.id, reason)}
+                            className="text-[10px] px-2.5 py-1.5 rounded-full border border-border/50 bg-card hover:bg-destructive/10 hover:border-destructive/30 hover:text-destructive transition-colors"
+                          >
+                            {reason}
+                          </button>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
+                        <Input
+                          value={customReason}
+                          onChange={(e) => setCustomReason(e.target.value)}
+                          placeholder="سبب آخر..."
+                          className="text-xs h-8"
+                        />
+                        <Button
+                          size="sm"
+                          variant="destructive"
+                          className="h-8 gap-1 px-3"
+                          onClick={() => handleReject(offer.id, customReason || undefined)}
+                          disabled={rejectOffer.isPending}
+                        >
+                          {rejectOffer.isPending ? <Loader2 className="w-3 h-3 animate-spin" /> : <Send className="w-3 h-3" />}
+                        </Button>
+                      </div>
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="w-full text-xs h-7"
+                        onClick={() => { setRejectingOfferId(null); setCustomReason(''); }}
+                      >
+                        إلغاء
+                      </Button>
+                    </motion.div>
                   )}
                 </CardContent>
               </Card>
