@@ -228,9 +228,11 @@ const MessageBubble = memo(({
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
-      case 'read': return <CheckCheck className="w-3.5 h-3.5 text-blue-400" />;
-      case 'delivered': return <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" />;
-      default: return <Check className="w-3.5 h-3.5 text-muted-foreground" />;
+      case 'read': return <CheckCheck className="w-3.5 h-3.5 text-blue-500" />;
+      case 'delivered': return <CheckCheck className="w-3.5 h-3.5 text-muted-foreground/70" />;
+      case 'sent': return <Check className="w-3.5 h-3.5 text-muted-foreground/70" />;
+      case 'sending': return <Loader2 className="w-3 h-3 text-muted-foreground/50 animate-spin" />;
+      default: return <Check className="w-3.5 h-3.5 text-muted-foreground/50" />;
     }
   };
 
@@ -514,11 +516,27 @@ const DateSeparator = ({ date }: { date: Date }) => {
   return (
     <div className="flex items-center gap-3 my-3 px-4">
       <div className="flex-1 h-px bg-border" />
-      <span className="text-[10px] text-muted-foreground bg-muted px-3 py-0.5 rounded-full">{label}</span>
+      <span className="text-[10px] text-muted-foreground bg-muted px-3 py-0.5 rounded-full shadow-sm">{label}</span>
       <div className="flex-1 h-px bg-border" />
     </div>
   );
 };
+
+// ─── Unread Messages Separator ──────────────────────────
+const UnreadSeparator = memo(() => (
+  <div className="flex items-center gap-3 my-3 px-4">
+    <div className="flex-1 h-px bg-primary/30" />
+    <motion.span
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="text-[10px] font-semibold text-primary-foreground bg-primary px-4 py-1 rounded-full shadow-sm"
+    >
+      رسائل غير مقروءة
+    </motion.span>
+    <div className="flex-1 h-px bg-primary/30" />
+  </div>
+));
+UnreadSeparator.displayName = 'UnreadSeparator';
 
 // ─── Notes Panel ────────────────────────────────────────
 const NotesPanel = memo(({ 
@@ -798,6 +816,7 @@ const EncryptedChatInner = () => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [showPinnedBar, setShowPinnedBar] = useState(true);
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -1081,6 +1100,8 @@ const EncryptedChatInner = () => {
     setShowPartnerInfo(false);
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
+        const unread = msgs.find(m => m.sender_id !== user?.id && m.status !== 'read');
+        setFirstUnreadId(unread?.id || null);
         setMessages(msgs);
         setMessagesLoading(false);
         markAsRead(selectedConvoId);
@@ -1136,9 +1157,12 @@ const EncryptedChatInner = () => {
     return () => { supabase.removeChannel(channel); };
   }, [selectedConvoId, decryptSingleRow, markAsRead]);
 
-  // Auto scroll
+  // Auto scroll - only if near bottom
+  const isNearBottomRef = useRef(true);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isNearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const handleSelectConvo = (convo: PrivateConversation) => {
@@ -1633,8 +1657,9 @@ const EncryptedChatInner = () => {
                     style={getWallpaperStyle()}
                     onScroll={(e) => {
                       const el = e.currentTarget;
-                      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-                      setShowScrollBottom(!isNearBottom);
+                      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+                      setShowScrollBottom(!nearBottom);
+                      isNearBottomRef.current = nearBottom;
                     }}
                   >
                     {messagesLoading ? (
@@ -1668,27 +1693,31 @@ const EncryptedChatInner = () => {
                               const nextMsg = group.messages[mi + 1];
                               const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
                               const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
+                              const showUnreadSep = firstUnreadId === msg.id;
                               return (
-                                <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
-                                <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
-                                  <MessageBubble
-                                    message={msg}
-                                    isMine={isMine}
-                                    reactions={reactionsMap[msg.id] || []}
-                                    onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                                    onReply={() => handleReply(msg)}
-                                    onForward={() => handleForward(msg)}
-                                    onDelete={() => handleDeleteMessage(msg.id)}
-                                    onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
-                                    onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
-                                    allMessages={messages}
-                                    isStarred={starredMessageIds.has(msg.id)}
-                                    onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
-                                    isMobile={isMobile}
-                                    isFirstInGroup={isFirstInGroup}
-                                    isLastInGroup={isLastInGroup}
-                                  />
-                                </SwipeableMessage>
+                                <div key={msg.id}>
+                                  {showUnreadSep && <UnreadSeparator />}
+                                  <div id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
+                                  <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                    <MessageBubble
+                                      message={msg}
+                                      isMine={isMine}
+                                      reactions={reactionsMap[msg.id] || []}
+                                      onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                                      onReply={() => handleReply(msg)}
+                                      onForward={() => handleForward(msg)}
+                                      onDelete={() => handleDeleteMessage(msg.id)}
+                                      onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
+                                      onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
+                                      allMessages={messages}
+                                      isStarred={starredMessageIds.has(msg.id)}
+                                      onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
+                                      isMobile={isMobile}
+                                      isFirstInGroup={isFirstInGroup}
+                                      isLastInGroup={isLastInGroup}
+                                    />
+                                  </SwipeableMessage>
+                                  </div>
                                 </div>
                               );
                             })}
