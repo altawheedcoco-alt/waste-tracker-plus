@@ -15,6 +15,7 @@ interface GoOnlineButtonProps {
   onToggle: (newState: boolean) => void;
   rating?: number;
   totalTrips?: number;
+  acceptanceRate?: number;
 }
 
 const GoOnlineButton = ({ driverId, isAvailable, onToggle, rating = 0, totalTrips = 0 }: GoOnlineButtonProps) => {
