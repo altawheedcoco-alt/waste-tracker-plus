@@ -1,14 +1,42 @@
 import { memo, useEffect, useState } from "react";
-import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck, Sparkles, TrendingUp, Shield } from "lucide-react";
+import { ArrowLeft, Globe, Leaf, Truck, Factory, Recycle, Building2, UserCog, Car, ShieldCheck, Sparkles, TrendingUp, Shield, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg-egypt-tech.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { motion, useScroll, useTransform } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
 
 const Hero = memo(() => {
   const navigate = useNavigate();
   const { t, language } = useLanguage();
+
+  // Real stats from DB
+  const { data: liveStats } = useQuery({
+    queryKey: ['hero-live-stats'],
+    queryFn: async () => {
+      const [orgs, shipments, users] = await Promise.all([
+        supabase.from('organizations').select('id', { count: 'exact', head: true }),
+        supabase.from('shipments').select('id', { count: 'exact', head: true }),
+        supabase.from('profiles').select('id', { count: 'exact', head: true }),
+      ]);
+      return {
+        organizations: orgs.count ?? 0,
+        shipments: shipments.count ?? 0,
+        users: users.count ?? 0,
+      };
+    },
+    staleTime: 1000 * 60 * 10,
+  });
+
+  // Animated counters based on real data
+  const targets = {
+    orgs: liveStats?.organizations ?? 500,
+    shipments: liveStats?.shipments ?? 12,
+    users: liveStats?.users ?? 98,
+  };
+
   const [count1, setCount1] = useState(0);
   const [count2, setCount2] = useState(0);
   const [count3, setCount3] = useState(0);
@@ -22,13 +50,13 @@ const Hero = memo(() => {
       step++;
       const progress = step / steps;
       const ease = 1 - Math.pow(1 - progress, 3);
-      setCount1(Math.round(ease * 500));
-      setCount2(Math.round(ease * 12));
-      setCount3(Math.round(ease * 98));
+      setCount1(Math.round(ease * targets.orgs));
+      setCount2(Math.round(ease * targets.shipments));
+      setCount3(Math.round(ease * targets.users));
       if (step >= steps) clearInterval(timer);
     }, interval);
     return () => clearInterval(timer);
-  }, []);
+  }, [targets.orgs, targets.shipments, targets.users]);
 
   const quickAccessItems = [
     { icon: Factory, label: t('landing.wasteGenerator'), desc: t('landing.wasteGeneratorDesc'), mode: 'register', type: 'generator', color: 'from-amber-500 to-orange-600' },
@@ -42,7 +70,7 @@ const Hero = memo(() => {
   const statsItems = [
     { value: `${count1}+`, label: t('heroExtra.registeredEntities'), icon: Building2 },
     { value: `${count2}+`, label: t('heroExtra.operationalModules'), icon: TrendingUp },
-    { value: `${count3}%`, label: t('heroExtra.complianceRate'), icon: Shield },
+    { value: `${count3}+`, label: t('heroExtra.complianceRate'), icon: Shield },
   ];
 
   // Parallax effect
@@ -204,22 +232,22 @@ const Hero = memo(() => {
             </div>
           </motion.div>
 
-          {/* Egyptian heritage footer */}
+          {/* Scroll indicator for mobile */}
           <motion.div
-            className="mt-4 sm:mt-6 flex flex-col items-center gap-1 sm:gap-1"
+            className="mt-4 sm:mt-6 flex flex-col items-center gap-1"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 1.0 }}
+            transition={{ delay: 1.2 }}
           >
-            <p
-              className="text-[11px] sm:text-sm font-bold tracking-wide text-gradient-eco"
-              style={{ WebkitTextFillColor: 'transparent' }}
+            <motion.div
+              animate={{ y: [0, 8, 0] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: 'easeInOut' }}
+              className="flex flex-col items-center cursor-pointer"
+              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
             >
-              {t('landing.joinUs')}
-            </p>
-            <p className="text-xs sm:text-lg text-amber-400 font-bold tracking-[0.25em] sm:tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}>
-              𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
-            </p>
+              <span className="text-[9px] text-white/40 mb-1">{language === 'ar' ? 'اكتشف المزيد' : 'Discover more'}</span>
+              <ChevronDown className="w-5 h-5 text-white/40" />
+            </motion.div>
           </motion.div>
         </div>
       </div>
