@@ -73,6 +73,13 @@ const RegulatorShowcase = lazyRetry(() => import("@/components/landing/Regulator
 const PlatformChangelog = lazyRetry(() => import("@/components/landing/PlatformChangelog"));
 const LivePlatformStats = lazyRetry(() => import("@/components/landing/LivePlatformStats"));
 
+// v5.2 — New landing sections
+const HowItWorksSection = lazyRetry(() => import("@/components/landing/HowItWorksSection"));
+const SavingsCalculator = lazyRetry(() => import("@/components/landing/SavingsCalculator"));
+const BeforeAfterSection = lazyRetry(() => import("@/components/landing/BeforeAfterSection"));
+const FAQSection = lazyRetry(() => import("@/components/landing/FAQSection"));
+const BlogPreviewSection = lazyRetry(() => import("@/components/landing/BlogPreviewSection"));
+
 /** Renders children when the container scrolls into view — with proper placeholder height */
 const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -211,7 +218,14 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* iRecycle Health — PPG Showcase (moved up) */}
+          {/* v5.2 — How It Works */}
+          <div id="how-it-works">
+            <LazySection minH={350}>
+              <HowItWorksSection />
+            </LazySection>
+          </div>
+
+          {/* iRecycle Health — PPG Showcase */}
           <div id="health-showcase">
             <LazySection minH={400}>
               <HealthShowcase />
@@ -304,6 +318,20 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* v5.2 — Savings Calculator */}
+          <div id="savings-calculator">
+            <LazySection minH={400}>
+              <SavingsCalculator />
+            </LazySection>
+          </div>
+
+          {/* v5.2 — Before & After */}
+          <div id="before-after">
+            <LazySection minH={400}>
+              <BeforeAfterSection />
+            </LazySection>
+          </div>
+
           {/* Live Platform Stats */}
           <div id="live-stats">
             <LazySection minH={300}>
@@ -318,10 +346,24 @@ const Index = () => {
             </LazySection>
           </div>
 
+          {/* v5.2 — Blog Preview */}
+          <div id="blog-preview">
+            <LazySection minH={300}>
+              <BlogPreviewSection />
+            </LazySection>
+          </div>
+
           {/* Platform Posts Section */}
           <LazySection minH={400}>
             <PlatformPostsSection />
           </LazySection>
+
+          {/* v5.2 — FAQ Section */}
+          <div id="faq">
+            <LazySection minH={400}>
+              <FAQSection />
+            </LazySection>
+          </div>
 
           {/* C2B Contact Form */}
           <LazySection minH={400}>

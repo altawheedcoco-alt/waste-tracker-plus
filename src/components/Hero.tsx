@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg-egypt-tech.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const Hero = memo(() => {
   const navigate = useNavigate();
@@ -45,10 +45,15 @@ const Hero = memo(() => {
     { value: `${count3}%`, label: t('heroExtra.complianceRate'), icon: Shield },
   ];
 
+  // Parallax effect
+  const { scrollY } = useScroll();
+  const bgY = useTransform(scrollY, [0, 600], [0, 150]);
+  const overlayOpacity = useTransform(scrollY, [0, 400], [0.3, 0.7]);
+
   return (
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-[7.5rem] pb-6 sm:pt-[10rem] sm:pb-0">
-      {/* Background image */}
-      <div className="absolute inset-0">
+      {/* Background image with parallax */}
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
         <img
           src={heroBg}
           alt={t('landing.recyclingFacilities')}
@@ -66,7 +71,7 @@ const Hero = memo(() => {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 82% 8%, hsla(50, 100%, 90%, 0.18), transparent 30%)' }} />
         {/* Subtle color accent overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-eco-ocean/3" />
-      </div>
+      </motion.div>
 
       <div className="container relative z-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
