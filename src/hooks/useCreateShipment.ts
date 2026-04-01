@@ -407,10 +407,12 @@ export const useCreateShipment = () => {
       }
 
       if (!isDriver && orgId) {
+        // Only show company drivers belonging to this organization
         const { data: driverData } = await supabase
           .from('drivers')
           .select('id, vehicle_type, vehicle_plate, profile:profiles(full_name)')
           .eq('organization_id', orgId)
+          .eq('driver_type', 'company')
           .eq('is_available', true);
 
         if (driverData) setDrivers(driverData as unknown as Driver[]);
