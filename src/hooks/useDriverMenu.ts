@@ -38,18 +38,15 @@ export function getDriverMenuItems(
 
   switch (driverType) {
     case 'company':
-      // سائق تابع — موظف دائم بصلاحيات كاملة
+      // سائق تابع — موظف ينفذ مهام الجهة الناقلة (7 عناصر أساسية)
       return [
-        common[0], // dashboard
+        common[0], // لوحة التحكم
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
-        { icon: PlusCircle, label: lang === 'ar' ? 'إنشاء شحنة' : 'Create Shipment', path: '/dashboard/create-shipment', key: 'driver-create-shipment' },
-        { icon: Map, label: lang === 'ar' ? 'خريطة المسارات' : 'Routes Map', path: '/dashboard/shipment-routes', key: 'driver-routes' },
         { icon: Route, label: lang === 'ar' ? 'تتبع مساري' : 'My Route', path: '/dashboard/driver-my-route', key: 'driver-my-route' },
-        common[1], // location
         { icon: CreditCard, label: lang === 'ar' ? 'أرباحي' : 'My Earnings', path: '/dashboard/driver-wallet', key: 'driver-earnings' },
         { icon: User, label: lang === 'ar' ? 'ملفي' : 'Profile', path: '/dashboard/driver-profile', key: 'driver-profile' },
-        { icon: FileText, label: lang === 'ar' ? 'بياناتي' : 'My Data', path: '/dashboard/driver-data', key: 'driver-data' },
-        ...common.slice(2),
+        { icon: Bell, label: lang === 'ar' ? 'الإشعارات' : 'Notifications', path: '/dashboard/notifications', key: 'driver-notifications', badge: badges?.notifications },
+        { icon: Settings, label: lang === 'ar' ? 'الإعدادات' : 'Settings', path: '/dashboard/settings', key: 'driver-settings' },
       ];
 
     case 'hired':
