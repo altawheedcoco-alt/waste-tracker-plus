@@ -374,6 +374,7 @@ const EncryptedChatInner = () => {
     setMessagesLoading(true);
     setReplyTo(null);
     setShowPartnerInfo(false);
+    resetPagination();
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
         const unread = msgs.find(m => m.sender_id !== user?.id && m.status !== 'read');
@@ -384,7 +385,7 @@ const EncryptedChatInner = () => {
       }
     }).catch(() => { if (!cancelled) setMessagesLoading(false); });
     return () => { cancelled = true; };
-  }, [selectedConvoId, fetchMessages, markAsRead]);
+  }, [selectedConvoId, fetchMessages, markAsRead, resetPagination]);
 
   // Realtime messages
   useEffect(() => {
