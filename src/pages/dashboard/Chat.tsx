@@ -1221,10 +1221,10 @@ const EncryptedChatInner = () => {
     }
   };
 
-  const filteredConversations = conversations.filter(c =>
+  const filteredConversations = useMemo(() => conversations.filter(c =>
     !searchQuery || c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.partner?.organization_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [conversations, searchQuery]);
 
   const filteredOrgGroups = useMemo(() => {
     if (!searchQuery) return orgGroups;
@@ -1237,24 +1237,27 @@ const EncryptedChatInner = () => {
     })).filter(g => g.conversations.length > 0);
   }, [orgGroups, searchQuery]);
 
+  // Group messages by date (memoized)
+  const groupedMessages = useMemo(() => {
+    const groups: { date: Date; messages: DecryptedMessage[] }[] = [];
+    messages.forEach(msg => {
+      const msgDate = new Date(msg.created_at);
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && isSameDay(lastGroup.date, msgDate)) {
+        lastGroup.messages.push(msg);
+      } else {
+        groups.push({ date: msgDate, messages: [msg] });
+      }
+    });
+    return groups;
+  }, [messages]);
+
+  const totalUnread = useMemo(() => conversations.reduce((s, c) => s + (c.unread_count || 0), 0), [conversations]);
+
   if (!user) return null;
 
   const showChat = !isMobile || !showSidebar;
   const showSidebarPanel = !isMobile || showSidebar;
-
-  // Group messages by date
-  const groupedMessages: { date: Date; messages: DecryptedMessage[] }[] = [];
-  messages.forEach(msg => {
-    const msgDate = new Date(msg.created_at);
-    const lastGroup = groupedMessages[groupedMessages.length - 1];
-    if (lastGroup && isSameDay(lastGroup.date, msgDate)) {
-      lastGroup.messages.push(msg);
-    } else {
-      groupedMessages.push({ date: msgDate, messages: [msg] });
-    }
-  });
-
-  const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
 
     return (
       <>
@@ -1305,6 +1308,14 @@ const EncryptedChatInner = () => {
                     placeholder="البحث بالاسم أو الجهة..."
                     className="pr-9 h-9 text-sm bg-muted/50 border-none"
                   />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-muted-foreground/20 flex items-center justify-center hover:bg-muted-foreground/30"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  )}
                 </div>
 
                 {/* View Toggle */}
@@ -1800,12 +1811,10 @@ const EncryptedChatInner = () => {
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
                       onSendMessage={async (text) => {
-                        // Handle edit mode
                         if (editingMessage) {
                           await handleEditMessage(editingMessage.id, text.trim());
                           return;
                         }
-                        // Optimistic: add message instantly before await
                         const optimistic = {
                           id: `temp_${Date.now()}`,
                           conversation_id: selectedConvoId!,
@@ -1822,6 +1831,7 @@ const EncryptedChatInner = () => {
                         setSending(true);
                         try {
                           await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
+                          soundEngine.play('message_sent');
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
