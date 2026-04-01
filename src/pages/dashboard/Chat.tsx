@@ -87,6 +87,8 @@ const ConversationItem = memo(({
   currentUserId?: string;
   compact?: boolean;
 }) => {
+  const partnerStatus = useUserOnlineStatus(conversation.partner?.user_id);
+
   const formatTime = (t?: string | null) => {
     if (!t) return '';
     const d = new Date(t);
@@ -114,7 +116,9 @@ const ConversationItem = memo(({
             {conversation.partner?.full_name?.charAt(0) || '?'}
           </AvatarFallback>
         </Avatar>
-        <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
+        {partnerStatus.isOnline && (
+          <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
@@ -132,15 +136,21 @@ const ConversationItem = memo(({
                   ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   : <Check className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             )}
-            {!isMyLastMessage && <Lock className="w-3 h-3 text-emerald-500 shrink-0" />}
+            {!isMyLastMessage && <Lock className="w-3 h-3 text-primary shrink-0" />}
             <p className="text-xs text-muted-foreground truncate">
               {conversation.lastDecryptedPreview || (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
             </p>
           </div>
           {(conversation.unread_count || 0) > 0 && (
-            <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground">
-              {conversation.unread_count}
-            </Badge>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', damping: 15 }}
+            >
+              <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground">
+                {conversation.unread_count}
+              </Badge>
+            </motion.div>
           )}
         </div>
       </div>
