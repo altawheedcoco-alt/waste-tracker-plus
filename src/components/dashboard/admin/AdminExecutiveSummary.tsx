@@ -40,12 +40,7 @@ const AdminExecutiveSummary = () => {
         supabase
           .from('organizations')
           .select('id', { count: 'exact', head: true })
-          .eq('status', 'pending'),
-        // شحنات نشطة الآن
-        supabase
-          .from('shipments')
-          .select('id', { count: 'exact', head: true })
-          .in('status', ['approved', 'in_transit', 'collecting'] as any),
+          .eq('status', 'pending' as any),
       ]);
 
       return {
