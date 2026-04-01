@@ -54,6 +54,7 @@ import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
 import { Timer } from 'lucide-react';
+import FileUploadProgress from '@/components/chat/FileUploadProgress';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -694,6 +695,8 @@ const EncryptedChatInner = () => {
   const [messagesLoading, setMessagesLoading] = useState(false);
   
   const [sending, setSending] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFile, setUploadingFile] = useState<{ name: string; type: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
@@ -1507,6 +1510,14 @@ const EncryptedChatInner = () => {
                     <ReplyPreviewBar replyToMessage={replyTo} onCancel={() => setReplyTo(null)} />
                   )}
 
+                  {/* Upload Progress */}
+                  <FileUploadProgress
+                    fileName={uploadingFile?.name || ''}
+                    progress={uploadProgress}
+                    isVisible={!!uploadingFile}
+                    fileType={uploadingFile?.type}
+                  />
+
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
@@ -1552,11 +1563,22 @@ const EncryptedChatInner = () => {
                         };
                         setMessages(prev => [...prev, optimistic]);
                         setSending(true);
+                        setUploadingFile({ name: file.name, type: file.type });
+                        setUploadProgress(0);
+                        const progressInterval = setInterval(() => {
+                          setUploadProgress(prev => Math.min(prev + 15, 90));
+                        }, 200);
                         try {
                           await sendFileMessage(selectedConvoId!, file);
+                          clearInterval(progressInterval);
+                          setUploadProgress(100);
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
+                          setTimeout(() => { setUploadingFile(null); setUploadProgress(0); }, 500);
                         } catch {
+                          clearInterval(progressInterval);
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
+                          setUploadingFile(null);
+                          setUploadProgress(0);
                           toast.error('فشل إرسال الملف');
                         } finally {
                           setSending(false);
