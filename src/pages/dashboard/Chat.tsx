@@ -56,6 +56,7 @@ import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDi
 import { Timer } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
 import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
+import ChatSearchBar from '@/components/chat/ChatSearchBar';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
