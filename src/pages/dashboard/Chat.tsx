@@ -188,7 +188,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, onDelete, allMessages, isStarred, onStar, isMobile 
+  message, isMine, reactions, onReact, onReply, onForward, onDelete, allMessages, isStarred, onStar, isMobile, isFirstInGroup, isLastInGroup 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -201,6 +201,8 @@ const MessageBubble = memo(({
   isStarred?: boolean;
   onStar?: () => void;
   isMobile?: boolean;
+  isFirstInGroup?: boolean;
+  isLastInGroup?: boolean;
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
@@ -263,13 +265,32 @@ const MessageBubble = memo(({
     );
   }
 
+  // Bubble corner radius based on grouping
+  const bubbleRadius = isMine
+    ? cn(
+        isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-bl-sm' : '',
+        isFirstInGroup && !isLastInGroup ? 'rounded-2xl rounded-bl-sm rounded-bl-md' : '',
+        !isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tl-md rounded-bl-sm' : '',
+        !isFirstInGroup && !isLastInGroup ? 'rounded-xl' : '',
+      )
+    : cn(
+        isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-br-sm' : '',
+        isFirstInGroup && !isLastInGroup ? 'rounded-2xl rounded-br-sm rounded-br-md' : '',
+        !isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tr-md rounded-br-sm' : '',
+        !isFirstInGroup && !isLastInGroup ? 'rounded-xl' : '',
+      );
+
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 8, scale: 0.97 }}
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-        className={cn("flex group relative select-none", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}
+        transition={{ type: 'spring', damping: 28, stiffness: 400 }}
+        className={cn(
+          "flex group relative select-none",
+          isMine ? "justify-start" : "justify-end",
+          isLastInGroup ? (compactMode ? "mb-0.5" : "mb-1") : "mb-px"
+        )}
         onClick={handleTap}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
@@ -291,7 +312,7 @@ const MessageBubble = memo(({
           </div>
 
           <div className={cn(getBubbleClasses(isMine), "relative")}>
-            {!isMine && message.sender && (
+            {!isMine && message.sender && isFirstInGroup && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
@@ -386,7 +407,7 @@ const MessageBubble = memo(({
               </>
             )}
             
-            {showTimestamp && (
+            {(showTimestamp && isLastInGroup) && (
               <div className={cn(
                 "flex items-center gap-1 mt-0.5",
                 isMine ? "justify-start" : "justify-end"
@@ -403,7 +424,16 @@ const MessageBubble = memo(({
                     isMine ? "text-primary-foreground/60" : "text-muted-foreground"
                   )}>تم التعديل</span>
                 )}
-                {getStatusIcon()}
+                {isMine && (
+                  <motion.span
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', damping: 15 }}
+                    key={message.status}
+                  >
+                    {getStatusIcon()}
+                  </motion.span>
+                )}
               </div>
             )}
 
@@ -1555,9 +1585,13 @@ const EncryptedChatInner = () => {
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
                             <DateSeparator date={group.date} />
-                            {group.messages.map(msg => {
+                            {group.messages.map((msg, mi) => {
                               const isMine = msg.sender_id === user?.id;
                               const isHighlighted = highlightedMsgId === msg.id;
+                              const prevMsg = group.messages[mi - 1];
+                              const nextMsg = group.messages[mi + 1];
+                              const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
+                              const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
                               return (
                                 <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
                                 <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
@@ -1573,6 +1607,8 @@ const EncryptedChatInner = () => {
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
                                     isMobile={isMobile}
+                                    isFirstInGroup={isFirstInGroup}
+                                    isLastInGroup={isLastInGroup}
                                   />
                                 </SwipeableMessage>
                                 </div>
@@ -1587,6 +1623,7 @@ const EncryptedChatInner = () => {
                     <ScrollToBottomButton
                       isVisible={showScrollBottom && messages.length > 0}
                       onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                      unreadCount={selectedConvo?.unread_count || 0}
                     />
                   </div>
 
