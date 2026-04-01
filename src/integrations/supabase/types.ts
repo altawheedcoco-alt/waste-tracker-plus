@@ -39257,6 +39257,36 @@ export type Database = {
         }
         Relationships: []
       }
+      starred_messages: {
+        Row: {
+          conversation_id: string
+          id: string
+          message_content: string | null
+          message_id: string
+          message_type: string | null
+          starred_at: string
+          user_id: string
+        }
+        Insert: {
+          conversation_id: string
+          id?: string
+          message_content?: string | null
+          message_id: string
+          message_type?: string | null
+          starred_at?: string
+          user_id: string
+        }
+        Update: {
+          conversation_id?: string
+          id?: string
+          message_content?: string | null
+          message_id?: string
+          message_type?: string | null
+          starred_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       stationery_plans: {
         Row: {
           created_at: string

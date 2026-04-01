@@ -48,6 +48,8 @@ import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresenc
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
 import MessageContextMenu from '@/components/chat/MessageContextMenu';
+import ForwardDialog from '@/components/chat/ForwardDialog';
+import { useStarredMessages } from '@/hooks/useStarredMessages';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -167,7 +169,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, allMessages 
+  message, isMine, reactions, onReact, onReply, onForward, allMessages, isStarred, onStar 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -176,6 +178,8 @@ const MessageBubble = memo(({
   onReply: () => void;
   onForward: () => void;
   allMessages: DecryptedMessage[];
+  isStarred?: boolean;
+  onStar?: () => void;
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
@@ -384,6 +388,7 @@ const MessageBubble = memo(({
         onReply={onReply}
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onStar={onStar}
         isMine={isMine}
       />
     </>
@@ -673,6 +678,7 @@ const EncryptedChatInner = () => {
   const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
+  const [forwardMsg, setForwardMsg] = useState<DecryptedMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
@@ -684,9 +690,10 @@ const EncryptedChatInner = () => {
   useOnlinePresence();
   const partnerOnline = useUserOnlineStatus(selectedConvo?.partner?.user_id);
 
-  // Reactions
+  // Reactions & Starred
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
+  const { starredMessageIds, toggleStar } = useStarredMessages();
 
   // ─── Fetch Linked Partner Orgs + Members ─────────────
   const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
@@ -985,9 +992,15 @@ const EncryptedChatInner = () => {
   };
 
   const handleForward = (msg: DecryptedMessage) => {
-    navigator.clipboard.writeText(msg.content);
-    toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
+    setForwardMsg(msg);
   };
+
+  const handleForwardToConversations = useCallback(async (conversationIds: string[]) => {
+    if (!forwardMsg) return;
+    for (const convoId of conversationIds) {
+      await sendMessage(convoId, `↩️ رسالة محوّلة:\n${forwardMsg.content}`);
+    }
+  }, [forwardMsg, sendMessage]);
 
   const handleExport = async () => {
     if (!selectedConvoId) return;
@@ -1034,6 +1047,7 @@ const EncryptedChatInner = () => {
   const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
 
     return (
+      <>
       <div className={cn(
         "flex overflow-hidden bg-background",
         isMobile ? "h-full" : "h-full"
@@ -1418,6 +1432,8 @@ const EncryptedChatInner = () => {
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
                                     allMessages={messages}
+                                    isStarred={starredMessageIds.has(msg.id)}
+                                    onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
                                   />
                                 </SwipeableMessage>
                               );
@@ -1549,6 +1565,17 @@ const EncryptedChatInner = () => {
           </div>
         )}
       </div>
+
+      {/* Forward Dialog */}
+      <ForwardDialog
+        isOpen={!!forwardMsg}
+        onClose={() => setForwardMsg(null)}
+        messageContent={forwardMsg?.content || ''}
+        conversations={conversations.filter(c => c.id !== selectedConvoId)}
+        onForward={handleForwardToConversations}
+        currentUserId={user?.id}
+      />
+    </>
     );
   };
 
