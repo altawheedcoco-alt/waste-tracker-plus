@@ -1555,11 +1555,22 @@ const EncryptedChatInner = () => {
                         };
                         setMessages(prev => [...prev, optimistic]);
                         setSending(true);
+                        setUploadingFile({ name: file.name, type: file.type });
+                        setUploadProgress(0);
+                        const progressInterval = setInterval(() => {
+                          setUploadProgress(prev => Math.min(prev + 15, 90));
+                        }, 200);
                         try {
                           await sendFileMessage(selectedConvoId!, file);
+                          clearInterval(progressInterval);
+                          setUploadProgress(100);
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
+                          setTimeout(() => { setUploadingFile(null); setUploadProgress(0); }, 500);
                         } catch {
+                          clearInterval(progressInterval);
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
+                          setUploadingFile(null);
+                          setUploadProgress(0);
                           toast.error('فشل إرسال الملف');
                         } finally {
                           setSending(false);
