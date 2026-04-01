@@ -142,7 +142,17 @@ const ConversationItem = memo(({
             )}
             {!isMyLastMessage && <Lock className="w-3 h-3 text-primary shrink-0" />}
             <p className="text-xs text-muted-foreground truncate">
-              {conversation.lastDecryptedPreview || (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
+              {conversation.lastDecryptedPreview 
+                ? (conversation.lastDecryptedPreview.startsWith('voice-') 
+                    ? '🎤 رسالة صوتية'
+                    : conversation.lastDecryptedPreview.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+                      ? '📷 صورة'
+                      : conversation.lastDecryptedPreview.match(/\.(pdf|doc|docx|xls|xlsx)$/i)
+                        ? '📎 مستند'
+                        : conversation.lastDecryptedPreview.match(/\.(mp4|mov|webm)$/i)
+                          ? '🎬 فيديو'
+                          : conversation.lastDecryptedPreview)
+                : (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
             </p>
           </div>
           {(conversation.unread_count || 0) > 0 && (
