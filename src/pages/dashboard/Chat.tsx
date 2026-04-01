@@ -54,6 +54,7 @@ import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
 import { Timer } from 'lucide-react';
+import FileUploadProgress from '@/components/chat/FileUploadProgress';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
