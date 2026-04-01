@@ -104,6 +104,19 @@
 
   /* Dim Mode — warm evening tones, easier on eyes at twilight */
   .dim {
+    /* Landing page tokens for dim mode */
+    --landing-background: 230 14% 16%;
+    --landing-foreground: 40 18% 88%;
+    --landing-primary: 160 55% 45%;
+    --landing-primary-foreground: 0 0% 100%;
+    --landing-muted: 230 12% 22%;
+    --landing-muted-foreground: 40 8% 58%;
+    --landing-accent: 175 50% 40%;
+    --landing-accent-foreground: 0 0% 100%;
+    --landing-border: 230 10% 26%;
+    --landing-card: 230 14% 20%;
+    --landing-card-foreground: 40 18% 88%;
+
     --background: 230 15% 18%;
     --foreground: 40 20% 90%;
     --card: 230 14% 22%;
@@ -144,9 +157,24 @@
     --eco-ocean: 205 60% 48%;
     --eco-gold: 42 75% 55%;
 
+    /* Dim gradients — warmer, muted */
+    --gradient-eco: linear-gradient(135deg, hsl(160, 55%, 45%) 0%, hsl(178, 48%, 40%) 50%, hsl(205, 60%, 48%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(230, 15%, 18%) 0%, hsl(230, 14%, 22%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(230, 14%, 22%) 0%, hsl(230, 12%, 24%) 100%);
+    --gradient-premium: linear-gradient(135deg, hsl(160, 55%, 45%) 0%, hsl(205, 60%, 48%) 100%);
+    --gradient-warm: linear-gradient(135deg, hsl(42, 75%, 55%) 0%, hsl(25, 70%, 50%) 100%);
+
     --shadow-sm: 0 1px 3px hsl(0 0% 0% / 0.2);
     --shadow-md: 0 4px 8px hsl(0 0% 0% / 0.25);
     --shadow-lg: 0 8px 20px hsl(0 0% 0% / 0.25);
+    --shadow-glow: 0 0 32px hsl(160, 55%, 45%, 0.18);
+    --shadow-hero: 0 4px 24px hsl(0 0% 0% / 0.25), 0 8px 48px hsl(160, 55%, 45%, 0.05);
+    --shadow-premium: 0 4px 20px hsl(160, 55%, 45%, 0.08), 0 1px 4px hsl(205, 60%, 48%, 0.06);
+    --shadow-2xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-xs: 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow: 0 1px 3px hsl(0 0% 0% / 0.28), 0 1px 2px hsl(0 0% 0% / 0.2);
+    --shadow-xl: 0 16px 32px hsl(0 0% 0% / 0.3), 0 4px 8px hsl(0 0% 0% / 0.2);
+    --shadow-2xl: 0 24px 48px hsl(0 0% 0% / 0.4);
 
     --chart-1: 160 55% 55%;
     --chart-2: 178 50% 58%;
