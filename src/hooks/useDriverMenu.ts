@@ -70,13 +70,15 @@ export function getDriverMenuItems(
       ];
 
     default:
-      // Fallback to company menu
+      // Fallback to company menu (7 items)
       return [
         common[0],
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments' },
-        common[1],
+        { icon: Route, label: lang === 'ar' ? 'تتبع مساري' : 'My Route', path: '/dashboard/driver-my-route', key: 'driver-my-route' },
+        { icon: CreditCard, label: lang === 'ar' ? 'أرباحي' : 'My Earnings', path: '/dashboard/driver-wallet', key: 'driver-earnings' },
         { icon: User, label: lang === 'ar' ? 'ملفي' : 'Profile', path: '/dashboard/driver-profile', key: 'driver-profile' },
-        ...common.slice(2),
+        { icon: Bell, label: lang === 'ar' ? 'الإشعارات' : 'Notifications', path: '/dashboard/notifications', key: 'driver-notifications', badge: badges?.notifications },
+        { icon: Settings, label: lang === 'ar' ? 'الإعدادات' : 'Settings', path: '/dashboard/settings', key: 'driver-settings' },
       ];
   }
 }
