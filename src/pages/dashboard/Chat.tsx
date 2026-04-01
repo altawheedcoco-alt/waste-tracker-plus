@@ -55,6 +55,7 @@ import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
 import { Timer } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
+import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -717,7 +718,12 @@ const EncryptedChatInner = () => {
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const [forwardMsg, setForwardMsg] = useState<DecryptedMessage | null>(null);
   const [showDisappearDialog, setShowDisappearDialog] = useState(false);
+  const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [showChatSearch, setShowChatSearch] = useState(false);
+  const [chatSearchQuery, setChatSearchQuery] = useState('');
+  const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
@@ -1421,7 +1427,16 @@ const EncryptedChatInner = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShowChatSearch(!showChatSearch)}
+                        title="بحث في الرسائل"
+                      >
+                        <Search className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -1467,10 +1482,62 @@ const EncryptedChatInner = () => {
                     </div>
                   </div>
 
+                  {/* Chat Search Bar */}
+                  <AnimatePresence>
+                    {showChatSearch && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden border-b border-border bg-card"
+                      >
+                        <div className="flex items-center gap-2 px-3 py-2">
+                          <div className="flex-1 relative">
+                            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              value={chatSearchQuery}
+                              onChange={(e) => {
+                                setChatSearchQuery(e.target.value);
+                                // Find & highlight first match
+                                if (e.target.value.length >= 2) {
+                                  const match = messages.find(m => m.content.toLowerCase().includes(e.target.value.toLowerCase()));
+                                  if (match) {
+                                    setHighlightedMsgId(match.id);
+                                    document.getElementById(`msg-${match.id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                  }
+                                } else {
+                                  setHighlightedMsgId(null);
+                                }
+                              }}
+                              placeholder="بحث في الرسائل..."
+                              className="pr-9 h-9 text-sm"
+                              autoFocus
+                              dir="rtl"
+                            />
+                          </div>
+                          {chatSearchQuery.length >= 2 && (
+                            <span className="text-xs text-muted-foreground whitespace-nowrap">
+                              {messages.filter(m => m.content.toLowerCase().includes(chatSearchQuery.toLowerCase())).length} نتيجة
+                            </span>
+                          )}
+                          <Button size="icon" variant="ghost" className="h-8 w-8 shrink-0" onClick={() => { setShowChatSearch(false); setChatSearchQuery(''); setHighlightedMsgId(null); }}>
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
                   {/* Messages with wallpaper */}
                   <div 
-                    className="flex-1 overflow-y-auto p-3 transition-colors duration-300"
+                    ref={messagesContainerRef}
+                    className="flex-1 overflow-y-auto p-3 transition-colors duration-300 relative"
                     style={getWallpaperStyle()}
+                    onScroll={(e) => {
+                      const el = e.currentTarget;
+                      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+                      setShowScrollBottom(!isNearBottom);
+                    }}
                   >
                     {messagesLoading ? (
                       <div className="flex items-center justify-center h-full">
@@ -1498,8 +1565,10 @@ const EncryptedChatInner = () => {
                             <DateSeparator date={group.date} />
                             {group.messages.map(msg => {
                               const isMine = msg.sender_id === user?.id;
+                              const isHighlighted = highlightedMsgId === msg.id;
                               return (
-                                <SwipeableMessage key={msg.id} isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
+                                <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
                                   <MessageBubble
                                     message={msg}
                                     isMine={isMine}
@@ -1514,6 +1583,7 @@ const EncryptedChatInner = () => {
                                     isMobile={isMobile}
                                   />
                                 </SwipeableMessage>
+                                </div>
                               );
                             })}
                           </div>
@@ -1522,6 +1592,10 @@ const EncryptedChatInner = () => {
                         <div ref={messagesEndRef} />
                       </>
                     )}
+                    <ScrollToBottomButton
+                      isVisible={showScrollBottom && messages.length > 0}
+                      onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    />
                   </div>
 
                   {/* Reply Preview */}
