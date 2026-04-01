@@ -1,4 +1,5 @@
 import { useState, Suspense, lazy, useMemo, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
