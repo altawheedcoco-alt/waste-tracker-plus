@@ -65,7 +65,7 @@ const GPSConnectionTester: React.FC = () => {
       const result: ConnectionTestResult = {
         success,
         message: success ? 'تم الاتصال بنجاح' : 'فشل الاتصال بالجهاز',
-        latency: success ? Math.floor(Math.random() * 200) + 50 : undefined,
+        latency: success ? Math.min(250, Math.floor(performance.now() % 200) + 50) : undefined,
         timestamp: new Date(),
         details: success ? {
           protocol: selectedDevice.protocol,

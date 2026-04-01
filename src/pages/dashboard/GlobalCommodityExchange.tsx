@@ -135,7 +135,10 @@ const GlobalCommodityExchange = () => {
       const entry: any = { month };
       commodities.forEach(c => {
         const basePrice = c.subtypes[0]?.current_price_usd || 100;
-        entry[c.type] = Math.round(basePrice * (0.85 + Math.random() * 0.3));
+        // Seasonal price variation based on month index (deterministic)
+        const seasonalFactor = 1 + Math.sin((i / 12) * Math.PI * 2) * 0.08;
+        const trendFactor = 1 + (i - 6) * 0.005; // slight upward trend
+        entry[c.type] = Math.round(basePrice * seasonalFactor * trendFactor);
       });
       return entry;
     });
