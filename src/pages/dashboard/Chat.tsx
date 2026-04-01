@@ -1549,6 +1549,17 @@ const EncryptedChatInner = () => {
                         <Info className="w-4 h-4" />
                       </Button>
                       <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
+                      {galleryImages.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => { setGalleryIndex(galleryImages.length - 1); setGalleryOpen(true); }}
+                          title="معرض الصور"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         variant={showNotes ? "default" : "ghost"}
                         size="icon"
