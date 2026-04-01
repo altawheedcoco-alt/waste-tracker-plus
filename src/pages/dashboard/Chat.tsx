@@ -36,6 +36,7 @@ import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { soundEngine } from '@/lib/soundEngine';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, CheckCheck } from 'lucide-react';
 import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/MessageReactions';
