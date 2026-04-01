@@ -48,8 +48,12 @@ import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresenc
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
 import MessageContextMenu from '@/components/chat/MessageContextMenu';
+import ChatBottomSheet from '@/components/chat/ChatBottomSheet';
 import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
+import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
+import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
+import { Timer } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
