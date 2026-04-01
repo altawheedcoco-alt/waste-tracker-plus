@@ -1152,9 +1152,12 @@ const EncryptedChatInner = () => {
     return () => { supabase.removeChannel(channel); };
   }, [selectedConvoId, decryptSingleRow, markAsRead]);
 
-  // Auto scroll
+  // Auto scroll - only if near bottom
+  const isNearBottomRef = useRef(true);
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (isNearBottomRef.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
   }, [messages]);
 
   const handleSelectConvo = (convo: PrivateConversation) => {
