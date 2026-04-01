@@ -128,7 +128,7 @@ const PulseRing = ({ color, delay = 0 }: { color: string; delay?: number }) => (
 
 /* ── Mini sparkline ── */
 const MiniSpark = ({ color = 'hsl(var(--primary))' }: { color?: string }) => {
-  const pts = useMemo(() => Array.from({ length: 8 }, () => 4 + Math.random() * 12), []);
+  const pts = useMemo(() => [8, 12, 6, 14, 10, 16, 9, 13], []);
   const path = pts.map((y, i) => `${i === 0 ? 'M' : 'L'}${i * 6},${20 - y}`).join(' ');
   return (
     <svg width="42" height="20" className="opacity-40">
