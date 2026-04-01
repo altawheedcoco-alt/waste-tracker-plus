@@ -1308,6 +1308,14 @@ const EncryptedChatInner = () => {
                     placeholder="البحث بالاسم أو الجهة..."
                     className="pr-9 h-9 text-sm bg-muted/50 border-none"
                   />
+                  {searchQuery && (
+                    <button
+                      onClick={() => setSearchQuery('')}
+                      className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-muted-foreground/20 flex items-center justify-center hover:bg-muted-foreground/30"
+                    >
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  )}
                 </div>
 
                 {/* View Toggle */}
