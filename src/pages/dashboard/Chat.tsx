@@ -1615,6 +1615,14 @@ const EncryptedChatInner = () => {
         )}
       </div>
 
+      {/* Disappearing Messages Dialog */}
+      <DisappearingMessagesDialog
+        open={showDisappearDialog}
+        onOpenChange={setShowDisappearDialog}
+        currentDuration={disappearDuration}
+        onSetDuration={setDisappearDuration}
+      />
+
       {/* Forward Dialog */}
       <ForwardDialog
         isOpen={!!forwardMsg}
