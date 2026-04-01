@@ -318,6 +318,20 @@ const Index = () => {
             </LazySection>
           ))}
 
+          {/* v5.2 — Savings Calculator */}
+          <div id="savings-calculator">
+            <LazySection minH={400}>
+              <SavingsCalculator />
+            </LazySection>
+          </div>
+
+          {/* v5.2 — Before & After */}
+          <div id="before-after">
+            <LazySection minH={400}>
+              <BeforeAfterSection />
+            </LazySection>
+          </div>
+
           {/* Live Platform Stats */}
           <div id="live-stats">
             <LazySection minH={300}>
@@ -332,10 +346,24 @@ const Index = () => {
             </LazySection>
           </div>
 
+          {/* v5.2 — Blog Preview */}
+          <div id="blog-preview">
+            <LazySection minH={300}>
+              <BlogPreviewSection />
+            </LazySection>
+          </div>
+
           {/* Platform Posts Section */}
           <LazySection minH={400}>
             <PlatformPostsSection />
           </LazySection>
+
+          {/* v5.2 — FAQ Section */}
+          <div id="faq">
+            <LazySection minH={400}>
+              <FAQSection />
+            </LazySection>
+          </div>
 
           {/* C2B Contact Form */}
           <LazySection minH={400}>
