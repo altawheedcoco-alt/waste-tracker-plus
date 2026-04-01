@@ -233,11 +233,9 @@ const EncryptedChatWidget = () => {
     setSending(true);
     try {
       await sendMessage(selectedConvoId, text.trim());
-      // Replace optimistic with real messages
-      const updated = await fetchMessages(selectedConvoId, 30);
-      setMessages(updated);
+      // Mark as sent — realtime will sync the real message
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'sent' } : m));
     } catch {
-      // Mark as failed
       setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
       toast.error('فشل الإرسال');
     }
@@ -270,8 +268,7 @@ const EncryptedChatWidget = () => {
     setSending(true);
     try {
       await sendFileMessage(selectedConvoId, file);
-      const updated = await fetchMessages(selectedConvoId, 30);
-      setMessages(updated);
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'sent' } : m));
     } catch {
       setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
       toast.error('فشل إرسال الملف');

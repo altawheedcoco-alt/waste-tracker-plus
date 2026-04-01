@@ -1347,25 +1347,52 @@ const EncryptedChatInner = () => {
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
                       onSendMessage={async (text) => {
+                        // Optimistic: add message instantly before await
+                        const optimistic = {
+                          id: `temp_${Date.now()}`,
+                          conversation_id: selectedConvoId!,
+                          sender_id: user!.id,
+                          content: text.trim(),
+                          message_type: 'text' as const,
+                          status: 'sending',
+                          is_edited: false,
+                          is_deleted: false,
+                          created_at: new Date().toISOString(),
+                        };
+                        setMessages(prev => [...prev, optimistic]);
+                        setReplyTo(null);
                         setSending(true);
                         try {
                           await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
-                          setReplyTo(null);
-                          const updated = await fetchMessages(selectedConvoId!);
-                          setMessages(updated);
+                          // Mark as sent (realtime will bring the real message)
+                          setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
+                          setMessages(prev => prev.filter(m => m.id !== optimistic.id));
                           toast.error('فشل إرسال الرسالة');
                         } finally {
                           setSending(false);
                         }
                       }}
                       onSendFile={async (file) => {
+                        const optimistic = {
+                          id: `temp_file_${Date.now()}`,
+                          conversation_id: selectedConvoId!,
+                          sender_id: user!.id,
+                          content: file.name,
+                          message_type: file.type.startsWith('image/') ? 'image' : 'file',
+                          file_name: file.name,
+                          status: 'sending',
+                          is_edited: false,
+                          is_deleted: false,
+                          created_at: new Date().toISOString(),
+                        };
+                        setMessages(prev => [...prev, optimistic]);
                         setSending(true);
                         try {
                           await sendFileMessage(selectedConvoId!, file);
-                          const updated = await fetchMessages(selectedConvoId!);
-                          setMessages(updated);
+                          setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
+                          setMessages(prev => prev.filter(m => m.id !== optimistic.id));
                           toast.error('فشل إرسال الملف');
                         } finally {
                           setSending(false);
