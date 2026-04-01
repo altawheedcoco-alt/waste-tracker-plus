@@ -1585,9 +1585,13 @@ const EncryptedChatInner = () => {
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
                             <DateSeparator date={group.date} />
-                            {group.messages.map(msg => {
+                            {group.messages.map((msg, mi) => {
                               const isMine = msg.sender_id === user?.id;
                               const isHighlighted = highlightedMsgId === msg.id;
+                              const prevMsg = group.messages[mi - 1];
+                              const nextMsg = group.messages[mi + 1];
+                              const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
+                              const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
                               return (
                                 <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
                                 <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
@@ -1603,6 +1607,8 @@ const EncryptedChatInner = () => {
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
                                     isMobile={isMobile}
+                                    isFirstInGroup={isFirstInGroup}
+                                    isLastInGroup={isLastInGroup}
                                   />
                                 </SwipeableMessage>
                                 </div>
