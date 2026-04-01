@@ -1221,10 +1221,10 @@ const EncryptedChatInner = () => {
     }
   };
 
-  const filteredConversations = conversations.filter(c =>
+  const filteredConversations = useMemo(() => conversations.filter(c =>
     !searchQuery || c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     c.partner?.organization_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  ), [conversations, searchQuery]);
 
   const filteredOrgGroups = useMemo(() => {
     if (!searchQuery) return orgGroups;
@@ -1242,19 +1242,22 @@ const EncryptedChatInner = () => {
   const showChat = !isMobile || !showSidebar;
   const showSidebarPanel = !isMobile || showSidebar;
 
-  // Group messages by date
-  const groupedMessages: { date: Date; messages: DecryptedMessage[] }[] = [];
-  messages.forEach(msg => {
-    const msgDate = new Date(msg.created_at);
-    const lastGroup = groupedMessages[groupedMessages.length - 1];
-    if (lastGroup && isSameDay(lastGroup.date, msgDate)) {
-      lastGroup.messages.push(msg);
-    } else {
-      groupedMessages.push({ date: msgDate, messages: [msg] });
-    }
-  });
+  // Group messages by date (memoized)
+  const groupedMessages = useMemo(() => {
+    const groups: { date: Date; messages: DecryptedMessage[] }[] = [];
+    messages.forEach(msg => {
+      const msgDate = new Date(msg.created_at);
+      const lastGroup = groups[groups.length - 1];
+      if (lastGroup && isSameDay(lastGroup.date, msgDate)) {
+        lastGroup.messages.push(msg);
+      } else {
+        groups.push({ date: msgDate, messages: [msg] });
+      }
+    });
+    return groups;
+  }, [messages]);
 
-  const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
+  const totalUnread = useMemo(() => conversations.reduce((s, c) => s + (c.unread_count || 0), 0), [conversations]);
 
     return (
       <>
