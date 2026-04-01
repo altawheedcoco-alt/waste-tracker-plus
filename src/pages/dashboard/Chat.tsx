@@ -476,6 +476,7 @@ const MessageBubble = memo(({
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
         onDelete={isMine ? onDelete : undefined}
+        onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
         isMine={isMine}
       />
@@ -489,6 +490,7 @@ const MessageBubble = memo(({
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
         onDelete={isMine ? onDelete : undefined}
+        onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
         onReact={(emoji) => onReact(emoji)}
       />
