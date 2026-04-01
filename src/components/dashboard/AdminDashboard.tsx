@@ -32,6 +32,9 @@ import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import AICapabilitiesInfoDialog from '@/components/admin/AICapabilitiesInfoDialog';
 import DashboardAlertsHub from './shared/DashboardAlertsHub';
 import AutomationSettingsDialog from '@/components/automation/AutomationSettingsDialog';
+import AdminExecutiveSummary from './admin/AdminExecutiveSummary';
+import AdminStatsGridEnhanced from './admin/AdminStatsGridEnhanced';
+import AdminMobileQuickBar from './admin/AdminMobileQuickBar';
 
 
 import {
@@ -233,7 +236,11 @@ const AdminDashboard = () => {
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <AdminStatsGrid stats={statCards} />
+        <AdminExecutiveSummary />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <AdminStatsGridEnhanced stats={statCards} />
       </motion.div>
 
       <motion.div variants={itemVariants}>
@@ -292,6 +299,8 @@ const AdminDashboard = () => {
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
       </Suspense>
+
+      <AdminMobileQuickBar />
     </motion.div>
   );
 };
