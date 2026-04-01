@@ -53,6 +53,7 @@ const SovereignGovernanceDashboard = () => {
       <SovereignOverviewCard />
 
       {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="overflow-x-auto scrollbar-hide">
           <TabsList className="w-max min-w-full justify-start gap-0.5 bg-muted/50 p-1">
             {tabs.map(tab => (
@@ -90,6 +91,9 @@ const SovereignGovernanceDashboard = () => {
         </TabsContent>
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignReportsPanel /></Suspense>
+        </TabsContent>
+        <TabsContent value="audit" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SovereignAuditTimeline /></Suspense>
         </TabsContent>
       </Tabs>
     </div>
