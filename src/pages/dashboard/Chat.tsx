@@ -48,8 +48,12 @@ import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresenc
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
 import MessageContextMenu from '@/components/chat/MessageContextMenu';
+import ChatBottomSheet from '@/components/chat/ChatBottomSheet';
 import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
+import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
+import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
+import { Timer } from 'lucide-react';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -169,7 +173,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, allMessages, isStarred, onStar 
+  message, isMine, reactions, onReact, onReply, onForward, onDelete, allMessages, isStarred, onStar, isMobile 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -177,13 +181,16 @@ const MessageBubble = memo(({
   onReact: (emoji: string) => void;
   onReply: () => void;
   onForward: () => void;
+  onDelete?: () => void;
   allMessages: DecryptedMessage[];
   isStarred?: boolean;
   onStar?: () => void;
+  isMobile?: boolean;
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const lastTapRef = useRef<number>(0);
 
@@ -199,8 +206,11 @@ const MessageBubble = memo(({
   // Long-press
   const longPressTimer = useRef<ReturnType<typeof setTimeout>>();
   const handleTouchStart = useCallback(() => {
-    longPressTimer.current = setTimeout(() => setShowContextMenu(true), 500);
-  }, []);
+    longPressTimer.current = setTimeout(() => {
+      if (isMobile) setShowBottomSheet(true);
+      else setShowContextMenu(true);
+    }, 500);
+  }, [isMobile]);
   const handleTouchEnd = useCallback(() => clearTimeout(longPressTimer.current), []);
 
   // Double-tap
@@ -388,8 +398,22 @@ const MessageBubble = memo(({
         onReply={onReply}
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onDelete={isMine ? onDelete : undefined}
         onStar={onStar}
         isMine={isMine}
+      />
+
+      <ChatBottomSheet
+        open={showBottomSheet}
+        onClose={() => setShowBottomSheet(false)}
+        isOwn={isMine}
+        messageContent={message.content}
+        onReply={onReply}
+        onForward={onForward}
+        onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onDelete={isMine ? onDelete : undefined}
+        onStar={onStar}
+        onReact={(emoji) => onReact(emoji)}
       />
     </>
   );
@@ -679,6 +703,7 @@ const EncryptedChatInner = () => {
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const [forwardMsg, setForwardMsg] = useState<DecryptedMessage | null>(null);
+  const [showDisappearDialog, setShowDisappearDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
@@ -694,6 +719,23 @@ const EncryptedChatInner = () => {
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
   const { starredMessageIds, toggleStar } = useStarredMessages();
+
+  // Disappearing messages
+  const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Delete message handler
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    try {
+      await supabase
+        .from('encrypted_messages')
+        .update({ is_deleted: true })
+        .eq('id', messageId);
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_deleted: true } : m));
+      toast.success('تم حذف الرسالة');
+    } catch {
+      toast.error('فشل حذف الرسالة');
+    }
+  }, []);
 
   // ─── Fetch Linked Partner Orgs + Members ─────────────
   const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
@@ -1347,6 +1389,13 @@ const EncryptedChatInner = () => {
                           <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
+                          {disappearActive && (
+                            <>
+                              <span className="mx-0.5 text-muted-foreground">·</span>
+                              <Timer className="w-2.5 h-2.5 text-primary" />
+                              <span className="text-primary text-[9px]">مؤقتة</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -1381,6 +1430,11 @@ const EncryptedChatInner = () => {
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => toggleMute(selectedConvoId!)}>
                             <VolumeX className="w-4 h-4 ml-2" /> كتم المحادثة
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowDisappearDialog(true)}>
+                            <Timer className="w-4 h-4 ml-2" />
+                            الرسائل المؤقتة
+                            {disappearActive && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">مفعّل</Badge>}
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => toggleBlock(selectedConvoId!)} className="text-destructive">
@@ -1431,9 +1485,11 @@ const EncryptedChatInner = () => {
                                     onReact={(emoji) => toggleReaction(msg.id, emoji)}
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
+                                    onDelete={() => handleDeleteMessage(msg.id)}
                                     allMessages={messages}
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
+                                    isMobile={isMobile}
                                   />
                                 </SwipeableMessage>
                               );
@@ -1565,6 +1621,14 @@ const EncryptedChatInner = () => {
           </div>
         )}
       </div>
+
+      {/* Disappearing Messages Dialog */}
+      <DisappearingMessagesDialog
+        open={showDisappearDialog}
+        onOpenChange={setShowDisappearDialog}
+        currentDuration={disappearDuration}
+        onSetDuration={setDisappearDuration}
+      />
 
       {/* Forward Dialog */}
       <ForwardDialog
