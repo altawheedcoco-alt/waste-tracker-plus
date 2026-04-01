@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback, memo } from 'react';
 import { motion } from 'framer-motion';
 import { Play, Pause } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,19 +13,28 @@ interface VoiceMessagePlayerProps {
 }
 
 const PLAYBACK_SPEEDS = [1, 1.5, 2];
+const BARS_COUNT = 40;
 
-const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvatar, senderName }: VoiceMessagePlayerProps) => {
+const VoiceMessagePlayer = memo(({ url, isOwn, duration: initialDuration, senderAvatar, senderName }: VoiceMessagePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(initialDuration || 0);
   const [currentTime, setCurrentTime] = useState(0);
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
   const [speedIndex, setSpeedIndex] = useState(0);
+  const [listened, setListened] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animationRef = useRef<number>();
+  const waveformRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const heights = Array.from({ length: 32 }, () => Math.random() * 20 + 3);
+    // Generate smoother waveform with peaks
+    const heights: number[] = [];
+    for (let i = 0; i < BARS_COUNT; i++) {
+      const base = Math.sin(i * 0.3) * 8 + 12;
+      const noise = Math.random() * 10;
+      heights.push(Math.max(3, base + noise));
+    }
     setWaveformHeights(heights);
   }, [url]);
 
@@ -37,6 +46,7 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
       setIsPlaying(false);
       setProgress(0);
       setCurrentTime(0);
+      setListened(true);
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     });
     return () => {
@@ -77,11 +87,12 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
     }
   };
 
-  const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!audioRef.current) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const percent = (x / rect.width) * 100;
+  const handleSeek = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
+    if (!audioRef.current || !waveformRef.current) return;
+    const rect = waveformRef.current.getBoundingClientRect();
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const x = clientX - rect.left;
+    const percent = Math.max(0, Math.min(100, (x / rect.width) * 100));
     const newTime = (percent / 100) * audioRef.current.duration;
     audioRef.current.currentTime = newTime;
     setProgress(percent);
@@ -110,27 +121,34 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
             {senderName?.[0] || '؟'}
           </AvatarFallback>
         </Avatar>
-        <button
+        <motion.button
+          whileTap={{ scale: 0.85 }}
           className={cn(
-            "absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center shadow-sm",
+            "absolute -bottom-0.5 -right-0.5 w-6 h-6 rounded-full flex items-center justify-center shadow-sm",
             isOwn ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
           )}
           onClick={togglePlay}
         >
           {isPlaying ? (
-            <Pause className="w-2.5 h-2.5 fill-current" />
+            <Pause className="w-3 h-3 fill-current" />
           ) : (
-            <Play className="w-2.5 h-2.5 fill-current ml-[1px]" />
+            <Play className="w-3 h-3 fill-current ml-[1px]" />
           )}
-        </button>
+        </motion.button>
+        {/* Listened indicator */}
+        {listened && (
+          <div className="absolute -top-0.5 -left-0.5 w-2.5 h-2.5 rounded-full bg-primary border-2 border-background" />
+        )}
       </div>
 
       {/* Waveform & Time */}
       <div className="flex-1 space-y-0.5">
-        {/* Waveform */}
+        {/* Waveform - touch-friendly */}
         <div 
-          className="flex items-center gap-[1.5px] h-7 cursor-pointer"
+          ref={waveformRef}
+          className="flex items-center gap-[1px] h-8 cursor-pointer touch-none"
           onClick={handleSeek}
+          onTouchStart={handleSeek}
         >
           {waveformHeights.map((height, i) => {
             const barProgress = progress / 100 * waveformHeights.length;
@@ -139,14 +157,22 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
               <motion.div
                 key={i}
                 className={cn(
-                  "w-[2.5px] rounded-full transition-colors duration-100",
+                  "w-[2px] rounded-full transition-colors duration-75",
                   isActive 
                     ? "bg-primary"
-                    : (isOwn ? "bg-primary-foreground/25" : "bg-muted-foreground/25")
+                    : (isOwn ? "bg-primary-foreground/20" : "bg-muted-foreground/20")
                 )}
                 style={{ height: `${height}px` }}
-                animate={isPlaying && isActive ? { scaleY: [1, 1.2, 1] } : { scaleY: 1 }}
-                transition={{ duration: 0.3, repeat: isPlaying && isActive ? Infinity : 0 }}
+                animate={
+                  isPlaying && isActive 
+                    ? { scaleY: [1, 1.15 + Math.random() * 0.2, 1], opacity: [0.8, 1, 0.8] } 
+                    : { scaleY: 1, opacity: 1 }
+                }
+                transition={{ 
+                  duration: 0.25 + Math.random() * 0.15, 
+                  repeat: isPlaying && isActive ? Infinity : 0,
+                  ease: 'easeInOut',
+                }}
               />
             );
           })}
@@ -154,24 +180,26 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
 
         {/* Time + Speed */}
         <div className="flex justify-between items-center">
-          <span className="text-[10px] font-mono text-muted-foreground">
+          <span className="text-[10px] font-mono text-muted-foreground tabular-nums">
             {formatTime(isPlaying ? currentTime : duration || 0)}
           </span>
-          <button
+          <motion.button
+            whileTap={{ scale: 0.9 }}
             onClick={cycleSpeed}
             className={cn(
-              "text-[9px] font-bold rounded px-1 py-0.5 transition-colors",
+              "text-[9px] font-bold rounded-md px-1.5 py-0.5 transition-colors",
               PLAYBACK_SPEEDS[speedIndex] !== 1
                 ? "bg-primary/20 text-primary"
                 : "text-muted-foreground hover:bg-muted"
             )}
           >
-            {PLAYBACK_SPEEDS[speedIndex]}x
-          </button>
+            {PLAYBACK_SPEEDS[speedIndex]}×
+          </motion.button>
         </div>
       </div>
     </div>
   );
-};
+});
 
+VoiceMessagePlayer.displayName = 'VoiceMessagePlayer';
 export default VoiceMessagePlayer;

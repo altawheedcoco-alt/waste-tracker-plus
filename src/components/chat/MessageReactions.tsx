@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { SmilePlus } from 'lucide-react';
 import { soundEngine } from '@/lib/soundEngine';
 import { Button } from '@/components/ui/button';
@@ -19,30 +20,35 @@ interface MessageReactionsProps {
 }
 
 const MessageReactionsDisplay = ({ reactions, onReact, isOwn }: MessageReactionsProps) => {
-  const [showPicker, setShowPicker] = useState(false);
-
-  if (reactions.length === 0 && !showPicker) return null;
+  if (reactions.length === 0) return null;
 
   return (
     <div className={cn(
       "flex items-center gap-0.5 flex-wrap mt-0.5",
       isOwn ? "justify-start" : "justify-end"
     )}>
-      {reactions.map((r) => (
-        <button
-          key={r.emoji}
-          onClick={() => { soundEngine.play('reaction'); onReact(r.emoji); }}
-          className={cn(
-            "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors",
-            r.reacted
-              ? "bg-primary/10 border-primary/30 text-primary"
-              : "bg-muted/50 border-border hover:bg-muted"
-          )}
-        >
-          <span>{r.emoji}</span>
-          {r.count > 1 && <span className="text-[10px]">{r.count}</span>}
-        </button>
-      ))}
+      <AnimatePresence>
+        {reactions.map((r) => (
+          <motion.button
+            key={r.emoji}
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0, opacity: 0 }}
+            whileTap={{ scale: 0.85 }}
+            transition={{ type: 'spring', damping: 15, stiffness: 300 }}
+            onClick={() => { soundEngine.play('reaction'); onReact(r.emoji); }}
+            className={cn(
+              "inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-xs border transition-colors",
+              r.reacted
+                ? "bg-primary/10 border-primary/30 text-primary"
+                : "bg-muted/50 border-border hover:bg-muted"
+            )}
+          >
+            <span>{r.emoji}</span>
+            {r.count > 1 && <span className="text-[10px] tabular-nums">{r.count}</span>}
+          </motion.button>
+        ))}
+      </AnimatePresence>
     </div>
   );
 };
@@ -67,13 +73,15 @@ export const ReactionPicker = ({ onReact, isOwn }: { onReact: (emoji: string) =>
       <PopoverContent className="w-auto p-1.5" side="top" align={isOwn ? "start" : "end"}>
         <div className="flex items-center gap-0.5">
           {QUICK_REACTIONS.map((emoji) => (
-            <button
+            <motion.button
               key={emoji}
+              whileHover={{ scale: 1.3 }}
+              whileTap={{ scale: 0.9 }}
               onClick={() => { soundEngine.play('reaction'); onReact(emoji); }}
-              className="w-8 h-8 flex items-center justify-center hover:bg-muted rounded-md transition-colors text-lg hover:scale-125"
+              className="w-8 h-8 flex items-center justify-center hover:bg-muted rounded-md transition-colors text-lg"
             >
               {emoji}
-            </button>
+            </motion.button>
           ))}
         </div>
       </PopoverContent>
