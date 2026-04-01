@@ -43,6 +43,10 @@ import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
 import { ChatAppearanceProvider, useChatAppearance } from '@/contexts/ChatAppearanceContext';
 import MentionRendererNote from '@/components/notes/MentionRenderer';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresence';
+import TypingIndicator from '@/components/chat/TypingIndicator';
+import SwipeableMessage from '@/components/chat/SwipeableMessage';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
