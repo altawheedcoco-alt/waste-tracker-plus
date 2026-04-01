@@ -1583,6 +1583,10 @@ const EncryptedChatInner = () => {
                         <div ref={messagesEndRef} />
                       </>
                     )}
+                    <ScrollToBottomButton
+                      isVisible={showScrollBottom && messages.length > 0}
+                      onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                    />
                   </div>
 
                   {/* Reply Preview */}
