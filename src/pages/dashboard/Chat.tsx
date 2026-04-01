@@ -388,6 +388,7 @@ const MessageBubble = memo(({
         onReply={onReply}
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onStar={onStar}
         isMine={isMine}
       />
     </>
