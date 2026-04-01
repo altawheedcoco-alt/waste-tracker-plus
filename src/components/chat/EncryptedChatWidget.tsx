@@ -268,8 +268,7 @@ const EncryptedChatWidget = () => {
     setSending(true);
     try {
       await sendFileMessage(selectedConvoId, file);
-      const updated = await fetchMessages(selectedConvoId, 30);
-      setMessages(updated);
+      setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'sent' } : m));
     } catch {
       setMessages(prev => prev.map(m => m.id === optimisticMsg.id ? { ...m, status: 'failed' } : m));
       toast.error('فشل إرسال الملف');
