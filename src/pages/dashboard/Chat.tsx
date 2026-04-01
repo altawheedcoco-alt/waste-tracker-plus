@@ -206,8 +206,11 @@ const MessageBubble = memo(({
   // Long-press
   const longPressTimer = useRef<ReturnType<typeof setTimeout>>();
   const handleTouchStart = useCallback(() => {
-    longPressTimer.current = setTimeout(() => setShowContextMenu(true), 500);
-  }, []);
+    longPressTimer.current = setTimeout(() => {
+      if (isMobile) setShowBottomSheet(true);
+      else setShowContextMenu(true);
+    }, 500);
+  }, [isMobile]);
   const handleTouchEnd = useCallback(() => clearTimeout(longPressTimer.current), []);
 
   // Double-tap
