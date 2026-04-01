@@ -169,7 +169,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, allMessages 
+  message, isMine, reactions, onReact, onReply, onForward, allMessages, isStarred, onStar 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -178,6 +178,8 @@ const MessageBubble = memo(({
   onReply: () => void;
   onForward: () => void;
   allMessages: DecryptedMessage[];
+  isStarred?: boolean;
+  onStar?: () => void;
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
