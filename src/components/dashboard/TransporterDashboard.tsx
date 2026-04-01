@@ -97,7 +97,7 @@ const tabKeys = [
 const TransporterDashboard = () => {
   const { organization } = useAuth();
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('operations');
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<TransporterShipment | null>(null);
