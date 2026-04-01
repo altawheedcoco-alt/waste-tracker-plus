@@ -1562,7 +1562,6 @@ const EncryptedChatInner = () => {
                         <button
                           className="text-sm font-semibold hover:underline cursor-pointer"
                           onClick={() => {
-                            // Navigate to member profile
                             if (selectedConvo.partner?.user_id) {
                               navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`);
                             }
@@ -1571,31 +1570,59 @@ const EncryptedChatInner = () => {
                           {selectedConvo.partner?.full_name}
                         </button>
                         <div className="flex items-center gap-1 text-[10px]">
-                          {isPartnerTyping ? (
-                            <span className="text-primary font-medium animate-pulse">يكتب الآن...</span>
-                          ) : partnerOnline.isOnline ? (
-                            <span className="text-green-500 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
-                              متصل الآن
-                            </span>
-                          ) : partnerOnline.lastSeen ? (
-                            <span className="text-muted-foreground">
-                              آخر ظهور {(() => {
-                                const d = new Date(partnerOnline.lastSeen);
-                                if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
-                                if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
-                                return format(d, 'd/M hh:mm a', { locale: ar });
-                              })()}
-                            </span>
-                          ) : (
-                            <button
-                              className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
-                              onClick={() => navigate('/dashboard/organization-profile')}
-                            >
-                              <Building2 className="w-2.5 h-2.5" />
-                              {selectedConvo.partner?.organization_name || 'غير محدد'}
-                            </button>
-                          )}
+                          <AnimatePresence mode="wait">
+                            {isPartnerTyping ? (
+                              <motion.span
+                                key="typing"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                className="text-primary font-medium"
+                              >
+                                يكتب الآن...
+                              </motion.span>
+                            ) : partnerOnline.isOnline ? (
+                              <motion.span
+                                key="online"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                className="text-green-500 flex items-center gap-1"
+                              >
+                                <motion.span
+                                  animate={{ scale: [1, 1.4, 1] }}
+                                  transition={{ repeat: Infinity, duration: 2 }}
+                                  className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"
+                                />
+                                متصل الآن
+                              </motion.span>
+                            ) : partnerOnline.lastSeen ? (
+                              <motion.span
+                                key="lastseen"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-muted-foreground"
+                              >
+                                آخر ظهور {(() => {
+                                  const d = new Date(partnerOnline.lastSeen);
+                                  if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
+                                  if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
+                                  return format(d, 'd/M hh:mm a', { locale: ar });
+                                })()}
+                              </motion.span>
+                            ) : (
+                              <motion.button
+                                key="org"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                                onClick={() => navigate('/dashboard/organization-profile')}
+                              >
+                                <Building2 className="w-2.5 h-2.5" />
+                                {selectedConvo.partner?.organization_name || 'غير محدد'}
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
                           <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-primary" />
                           <span className="text-primary">E2E</span>
