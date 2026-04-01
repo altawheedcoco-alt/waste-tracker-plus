@@ -771,11 +771,33 @@ NotesPanel.displayName = 'NotesPanel';
 // ─── Empty State ────────────────────────────────────────
 const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle: string }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-    <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4">
-      <Icon className="w-10 h-10 text-primary/30" />
-    </div>
-    <p className="font-semibold text-foreground">{title}</p>
-    <p className="text-xs mt-1 max-w-xs text-center">{subtitle}</p>
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+      className="relative mb-6"
+    >
+      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+        <Icon className="w-12 h-12 text-primary/30" />
+      </div>
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+        className="absolute inset-0 rounded-full border-2 border-primary/10"
+      />
+    </motion.div>
+    <motion.p
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.15 }}
+      className="font-bold text-foreground text-base"
+    >{title}</motion.p>
+    <motion.p
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.25 }}
+      className="text-xs mt-2 max-w-xs text-center leading-relaxed"
+    >{subtitle}</motion.p>
   </div>
 );
 
