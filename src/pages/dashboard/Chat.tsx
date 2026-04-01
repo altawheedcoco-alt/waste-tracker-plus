@@ -1574,6 +1574,7 @@ const EncryptedChatInner = () => {
         onForward={handleForwardToConversations}
         currentUserId={user?.id}
       />
+    </>
     );
   };
 
