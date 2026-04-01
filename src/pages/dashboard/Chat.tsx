@@ -798,7 +798,24 @@ const EncryptedChatInner = () => {
                       const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
                       setShowScrollBottom(!nearBottom);
                       isNearBottomRef.current = nearBottom;
+                      // Infinite scroll: load older when near top
+                      if (el.scrollTop < 80 && !loadingMore && hasMore && messages.length > 0) {
+                        const prevHeight = el.scrollHeight;
+                        loadOlderMessages(messages, setMessages).then(() => {
+                          // Preserve scroll position
+                          requestAnimationFrame(() => {
+                            el.scrollTop = el.scrollHeight - prevHeight;
+                          });
+                        });
+                      }
                     }}>
+                    {/* Loading older messages indicator */}
+                    {loadingMore && (
+                      <div className="flex items-center justify-center py-3">
+                        <Loader2 className="animate-spin text-primary w-5 h-5" />
+                        <span className="text-xs text-muted-foreground mr-2">تحميل رسائل أقدم...</span>
+                      </div>
+                    )}
                     {messagesLoading ? (
                       <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>
                     ) : messages.length === 0 ? (
