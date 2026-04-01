@@ -1693,6 +1693,11 @@ const EncryptedChatInner = () => {
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
                       onSendMessage={async (text) => {
+                        // Handle edit mode
+                        if (editingMessage) {
+                          await handleEditMessage(editingMessage.id, text.trim());
+                          return;
+                        }
                         // Optimistic: add message instantly before await
                         const optimistic = {
                           id: `temp_${Date.now()}`,
@@ -1710,7 +1715,6 @@ const EncryptedChatInner = () => {
                         setSending(true);
                         try {
                           await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
-                          // Mark as sent (realtime will bring the real message)
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
