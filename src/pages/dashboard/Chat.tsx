@@ -43,6 +43,10 @@ import ReplyPreviewBar, { QuotedReply } from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
 import { ChatAppearanceProvider, useChatAppearance } from '@/contexts/ChatAppearanceContext';
 import MentionRendererNote from '@/components/notes/MentionRenderer';
+import { useTypingIndicator } from '@/hooks/useTypingIndicator';
+import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresence';
+import TypingIndicator from '@/components/chat/TypingIndicator';
+import SwipeableMessage from '@/components/chat/SwipeableMessage';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -622,6 +626,13 @@ const EncryptedChatInner = () => {
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
+  // Typing indicator
+  const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedConvoId || undefined);
+  
+  // Online presence
+  useOnlinePresence();
+  const partnerOnline = useUserOnlineStatus(selectedConvo?.partner?.user_id);
+
   // Reactions
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
@@ -1251,18 +1262,27 @@ const EncryptedChatInner = () => {
                         >
                           {selectedConvo.partner?.full_name}
                         </button>
-                        <button
-                          className="text-[10px] text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
-                          onClick={() => {
-                            navigate('/dashboard/organization-profile');
-                          }}
-                        >
-                          <Building2 className="w-2.5 h-2.5" />
-                          {selectedConvo.partner?.organization_name || 'غير محدد'}
-                          <span className="mx-1">·</span>
+                        <div className="flex items-center gap-1 text-[10px]">
+                          {isPartnerTyping ? (
+                            <span className="text-emerald-500 font-medium animate-pulse">يكتب الآن...</span>
+                          ) : partnerOnline.isOnline ? (
+                            <span className="text-emerald-500 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                              متصل الآن
+                            </span>
+                          ) : (
+                            <button
+                              className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                              onClick={() => navigate('/dashboard/organization-profile')}
+                            >
+                              <Building2 className="w-2.5 h-2.5" />
+                              {selectedConvo.partner?.organization_name || 'غير محدد'}
+                            </button>
+                          )}
+                          <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
-                        </button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
@@ -1335,20 +1355,25 @@ const EncryptedChatInner = () => {
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
                             <DateSeparator date={group.date} />
-                            {group.messages.map(msg => (
-                              <MessageBubble
-                                key={msg.id}
-                                message={msg}
-                                isMine={msg.sender_id === user?.id}
-                                reactions={reactionsMap[msg.id] || []}
-                                onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                                onReply={() => handleReply(msg)}
-                                onForward={() => handleForward(msg)}
-                                allMessages={messages}
-                              />
-                            ))}
+                            {group.messages.map(msg => {
+                              const isMine = msg.sender_id === user?.id;
+                              return (
+                                <SwipeableMessage key={msg.id} isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                  <MessageBubble
+                                    message={msg}
+                                    isMine={isMine}
+                                    reactions={reactionsMap[msg.id] || []}
+                                    onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                                    onReply={() => handleReply(msg)}
+                                    onForward={() => handleForward(msg)}
+                                    allMessages={messages}
+                                  />
+                                </SwipeableMessage>
+                              );
+                            })}
                           </div>
                         ))}
+                        <TypingIndicator isTyping={isPartnerTyping} name={partnerTypingName || undefined} />
                         <div ref={messagesEndRef} />
                       </>
                     )}
@@ -1416,6 +1441,7 @@ const EncryptedChatInner = () => {
                       }}
                       sending={sending}
                       disabled={!selectedConvoId}
+                      onTyping={sendTyping}
                     />
                   </div>
                 </>
