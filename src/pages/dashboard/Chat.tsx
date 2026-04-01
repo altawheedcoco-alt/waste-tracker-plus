@@ -524,20 +524,25 @@ const MessageBubble = memo(({
 MessageBubble.displayName = 'MessageBubble';
 
 // ─── Date Separator ─────────────────────────────────────
-const DateSeparator = ({ date }: { date: Date }) => {
+const DateSeparator = memo(({ date }: { date: Date }) => {
   let label: string;
   if (isToday(date)) label = 'اليوم';
   else if (isYesterday(date)) label = 'أمس';
   else label = format(date, 'EEEE d MMMM yyyy', { locale: ar });
 
   return (
-    <div className="flex items-center gap-3 my-3 px-4">
-      <div className="flex-1 h-px bg-border" />
-      <span className="text-[10px] text-muted-foreground bg-muted px-3 py-0.5 rounded-full shadow-sm">{label}</span>
-      <div className="flex-1 h-px bg-border" />
-    </div>
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="flex items-center gap-3 my-3 px-4"
+    >
+      <div className="flex-1 h-px bg-border/60" />
+      <span className="text-[10px] text-muted-foreground bg-muted/80 backdrop-blur-sm px-3 py-0.5 rounded-full shadow-sm border border-border/30">{label}</span>
+      <div className="flex-1 h-px bg-border/60" />
+    </motion.div>
   );
-};
+});
+DateSeparator.displayName = 'DateSeparator';
 
 // ─── Unread Messages Separator ──────────────────────────
 const UnreadSeparator = memo(() => (
@@ -771,11 +776,33 @@ NotesPanel.displayName = 'NotesPanel';
 // ─── Empty State ────────────────────────────────────────
 const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string; subtitle: string }) => (
   <div className="flex-1 flex flex-col items-center justify-center text-muted-foreground">
-    <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center mb-4">
-      <Icon className="w-10 h-10 text-primary/30" />
-    </div>
-    <p className="font-semibold text-foreground">{title}</p>
-    <p className="text-xs mt-1 max-w-xs text-center">{subtitle}</p>
+    <motion.div
+      initial={{ scale: 0.8, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ type: 'spring', damping: 20, stiffness: 200 }}
+      className="relative mb-6"
+    >
+      <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary/10 to-primary/5 flex items-center justify-center">
+        <Icon className="w-12 h-12 text-primary/30" />
+      </div>
+      <motion.div
+        animate={{ scale: [1, 1.15, 1], opacity: [0.3, 0.6, 0.3] }}
+        transition={{ repeat: Infinity, duration: 3, ease: 'easeInOut' }}
+        className="absolute inset-0 rounded-full border-2 border-primary/10"
+      />
+    </motion.div>
+    <motion.p
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.15 }}
+      className="font-bold text-foreground text-base"
+    >{title}</motion.p>
+    <motion.p
+      initial={{ y: 10, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ delay: 0.25 }}
+      className="text-xs mt-2 max-w-xs text-center leading-relaxed"
+    >{subtitle}</motion.p>
   </div>
 );
 
@@ -1540,7 +1567,6 @@ const EncryptedChatInner = () => {
                         <button
                           className="text-sm font-semibold hover:underline cursor-pointer"
                           onClick={() => {
-                            // Navigate to member profile
                             if (selectedConvo.partner?.user_id) {
                               navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`);
                             }
@@ -1549,31 +1575,59 @@ const EncryptedChatInner = () => {
                           {selectedConvo.partner?.full_name}
                         </button>
                         <div className="flex items-center gap-1 text-[10px]">
-                          {isPartnerTyping ? (
-                            <span className="text-primary font-medium animate-pulse">يكتب الآن...</span>
-                          ) : partnerOnline.isOnline ? (
-                            <span className="text-green-500 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
-                              متصل الآن
-                            </span>
-                          ) : partnerOnline.lastSeen ? (
-                            <span className="text-muted-foreground">
-                              آخر ظهور {(() => {
-                                const d = new Date(partnerOnline.lastSeen);
-                                if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
-                                if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
-                                return format(d, 'd/M hh:mm a', { locale: ar });
-                              })()}
-                            </span>
-                          ) : (
-                            <button
-                              className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
-                              onClick={() => navigate('/dashboard/organization-profile')}
-                            >
-                              <Building2 className="w-2.5 h-2.5" />
-                              {selectedConvo.partner?.organization_name || 'غير محدد'}
-                            </button>
-                          )}
+                          <AnimatePresence mode="wait">
+                            {isPartnerTyping ? (
+                              <motion.span
+                                key="typing"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                className="text-primary font-medium"
+                              >
+                                يكتب الآن...
+                              </motion.span>
+                            ) : partnerOnline.isOnline ? (
+                              <motion.span
+                                key="online"
+                                initial={{ opacity: 0, y: 4 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -4 }}
+                                className="text-green-500 flex items-center gap-1"
+                              >
+                                <motion.span
+                                  animate={{ scale: [1, 1.4, 1] }}
+                                  transition={{ repeat: Infinity, duration: 2 }}
+                                  className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"
+                                />
+                                متصل الآن
+                              </motion.span>
+                            ) : partnerOnline.lastSeen ? (
+                              <motion.span
+                                key="lastseen"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-muted-foreground"
+                              >
+                                آخر ظهور {(() => {
+                                  const d = new Date(partnerOnline.lastSeen);
+                                  if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
+                                  if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
+                                  return format(d, 'd/M hh:mm a', { locale: ar });
+                                })()}
+                              </motion.span>
+                            ) : (
+                              <motion.button
+                                key="org"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                                onClick={() => navigate('/dashboard/organization-profile')}
+                              >
+                                <Building2 className="w-2.5 h-2.5" />
+                                {selectedConvo.partner?.organization_name || 'غير محدد'}
+                              </motion.button>
+                            )}
+                          </AnimatePresence>
                           <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-primary" />
                           <span className="text-primary">E2E</span>
@@ -1709,20 +1763,30 @@ const EncryptedChatInner = () => {
                       </div>
                     ) : messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <Shield className="w-16 h-16 mb-3 text-primary/20" />
-                        <p className="text-sm font-medium">محادثة مشفرة</p>
-                        <p className="text-xs mt-1">الرسائل محمية بتشفير طرف لطرف</p>
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', damping: 20 }}
+                        >
+                          <Shield className="w-16 h-16 mb-3 text-primary/20" />
+                        </motion.div>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="text-sm font-semibold text-foreground">محادثة مشفرة</motion.p>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs mt-1.5 text-center max-w-[250px]">ابدأ بإرسال أول رسالة — محمية بتشفير طرف لطرف</motion.p>
                       </div>
                     ) : (
                       <>
-                        <div className="flex justify-center mb-4">
-                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2 text-center max-w-md backdrop-blur-sm">
-                            <Lock className="w-4 h-4 text-amber-600 inline-block ml-1" />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-center mb-4"
+                        >
+                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-xl px-4 py-2 text-center max-w-md backdrop-blur-sm">
+                            <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 inline-block ml-1" />
                             <span className="text-[11px] text-amber-700 dark:text-amber-400">
-                              الرسائل محمية بتشفير طرف لطرف. لا يمكن لأي طرف ثالث قراءتها.
+                              الرسائل محمية بتشفير طرف لطرف
                             </span>
                           </div>
-                        </div>
+                        </motion.div>
 
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
