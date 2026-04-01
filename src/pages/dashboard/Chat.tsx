@@ -228,9 +228,11 @@ const MessageBubble = memo(({
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
-      case 'read': return <CheckCheck className="w-3.5 h-3.5 text-blue-400" />;
-      case 'delivered': return <CheckCheck className="w-3.5 h-3.5 text-muted-foreground" />;
-      default: return <Check className="w-3.5 h-3.5 text-muted-foreground" />;
+      case 'read': return <CheckCheck className="w-3.5 h-3.5 text-blue-500" />;
+      case 'delivered': return <CheckCheck className="w-3.5 h-3.5 text-muted-foreground/70" />;
+      case 'sent': return <Check className="w-3.5 h-3.5 text-muted-foreground/70" />;
+      case 'sending': return <Loader2 className="w-3 h-3 text-muted-foreground/50 animate-spin" />;
+      default: return <Check className="w-3.5 h-3.5 text-muted-foreground/50" />;
     }
   };
 
