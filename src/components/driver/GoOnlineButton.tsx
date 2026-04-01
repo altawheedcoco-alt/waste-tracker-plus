@@ -18,7 +18,7 @@ interface GoOnlineButtonProps {
   acceptanceRate?: number;
 }
 
-const GoOnlineButton = ({ driverId, isAvailable, onToggle, rating = 0, totalTrips = 0 }: GoOnlineButtonProps) => {
+const GoOnlineButton = ({ driverId, isAvailable, onToggle, rating = 0, totalTrips = 0, acceptanceRate = 0 }: GoOnlineButtonProps) => {
   const [toggling, setToggling] = useState(false);
   const [onlineSince, setOnlineSince] = useState<Date | null>(null);
   const [elapsed, setElapsed] = useState('00:00');
