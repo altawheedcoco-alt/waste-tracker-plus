@@ -47,6 +47,8 @@ import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresence';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
+import MessageContextMenu from '@/components/chat/MessageContextMenu';
+import SwipeableMessage from '@/components/chat/SwipeableMessage';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
