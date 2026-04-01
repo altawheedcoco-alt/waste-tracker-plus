@@ -190,6 +190,7 @@ const MessageBubble = memo(({
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
   const [showContextMenu, setShowContextMenu] = useState(false);
+  const [showBottomSheet, setShowBottomSheet] = useState(false);
   const [showHeartAnim, setShowHeartAnim] = useState(false);
   const lastTapRef = useRef<number>(0);
 
