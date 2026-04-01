@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,24 +16,61 @@ import {
 } from 'lucide-react';
 import { useDemandForecaster } from '@/hooks/useDemandForecaster';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area } from 'recharts';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
+import { subDays, format } from 'date-fns';
 
 const DemandForecastPanel = () => {
   const { isForecasting, result, error, forecastDemand, clearResults } = useDemandForecaster();
   const [forecastPeriod, setForecastPeriod] = useState<'daily' | 'weekly' | 'monthly'>('weekly');
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
+  const { user } = useAuth();
 
-  // بيانات تاريخية تجريبية
-  const mockHistoricalData = [
-    { date: '2024-01-01', shipmentCount: 45, totalWeight: 1200, totalRevenue: 15000 },
-    { date: '2024-01-02', shipmentCount: 52, totalWeight: 1400, totalRevenue: 18000 },
-    { date: '2024-01-03', shipmentCount: 38, totalWeight: 1000, totalRevenue: 12000 },
-    { date: '2024-01-04', shipmentCount: 61, totalWeight: 1600, totalRevenue: 21000 },
-    { date: '2024-01-05', shipmentCount: 55, totalWeight: 1450, totalRevenue: 19000 },
-    { date: '2024-01-06', shipmentCount: 48, totalWeight: 1250, totalRevenue: 16000 },
-    { date: '2024-01-07', shipmentCount: 42, totalWeight: 1100, totalRevenue: 14000 },
-  ];
+  // جلب البيانات التاريخية الفعلية من قاعدة البيانات
+  useEffect(() => {
+    const fetchHistorical = async () => {
+      if (!user) return;
+      const fromDate = subDays(new Date(), 30).toISOString();
+      const { data } = await supabase
+        .from('shipments')
+        .select('created_at, estimated_weight, total_price')
+        .gte('created_at', fromDate)
+        .order('created_at', { ascending: true });
+
+      if (data && data.length > 0) {
+        // تجميع حسب اليوم
+        const grouped = new Map<string, { count: number; weight: number; revenue: number }>();
+        data.forEach(s => {
+          const day = format(new Date(s.created_at), 'yyyy-MM-dd');
+          const prev = grouped.get(day) || { count: 0, weight: 0, revenue: 0 };
+          grouped.set(day, {
+            count: prev.count + 1,
+            weight: prev.weight + (s.estimated_weight || 0),
+            revenue: prev.revenue + (s.total_price || 0),
+          });
+        });
+        setHistoricalData(Array.from(grouped.entries()).map(([date, v]) => ({
+          date,
+          shipmentCount: v.count,
+          totalWeight: v.weight,
+          totalRevenue: v.revenue,
+        })));
+      } else {
+        // بيانات أولية تقديرية بناءً على حجم المنصة
+        const last7 = Array.from({ length: 7 }, (_, i) => ({
+          date: format(subDays(new Date(), 7 - i), 'yyyy-MM-dd'),
+          shipmentCount: 0,
+          totalWeight: 0,
+          totalRevenue: 0,
+        }));
+        setHistoricalData(last7);
+      }
+    };
+    fetchHistorical();
+  }, [user]);
 
   const handleForecast = () => {
-    forecastDemand(mockHistoricalData, forecastPeriod);
+    forecastDemand(historicalData.length > 0 ? historicalData : [{ date: format(new Date(), 'yyyy-MM-dd'), shipmentCount: 0, totalWeight: 0, totalRevenue: 0 }], forecastPeriod);
   };
 
   const getTrendIcon = (trend: string) => {

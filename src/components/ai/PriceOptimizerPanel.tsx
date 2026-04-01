@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,22 +15,54 @@ import {
   Minus
 } from 'lucide-react';
 import { usePriceOptimizer } from '@/hooks/usePriceOptimizer';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const PriceOptimizerPanel = () => {
   const { isOptimizing, result, error, optimizePrices, clearResults } = usePriceOptimizer();
   const [optimizationGoal, setOptimizationGoal] = useState<'balanced' | 'profit_maximize' | 'market_share' | 'customer_retention'>('balanced');
+  const [pricingData, setPricingData] = useState<any[]>([]);
+  const { user } = useAuth();
 
-  // بيانات تسعير تجريبية
-  const mockPricingData = [
-    { wasteType: 'نفايات صناعية', currentPrice: 150, averageCost: 80, demand: 'high' as const, volume: 500 },
-    { wasteType: 'نفايات طبية', currentPrice: 300, averageCost: 180, demand: 'medium' as const, volume: 200 },
-    { wasteType: 'نفايات إلكترونية', currentPrice: 250, averageCost: 120, demand: 'high' as const, volume: 350 },
-    { wasteType: 'نفايات عضوية', currentPrice: 80, averageCost: 50, demand: 'low' as const, volume: 800 },
-    { wasteType: 'نفايات بناء', currentPrice: 100, averageCost: 60, demand: 'medium' as const, volume: 600 },
-  ];
+  // جلب بيانات التسعير الفعلية من الشحنات
+  useEffect(() => {
+    const fetchPricing = async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from('shipments')
+        .select('waste_type, total_price, estimated_weight')
+        .not('waste_type', 'is', null)
+        .not('total_price', 'is', null)
+        .order('created_at', { ascending: false })
+        .limit(500);
+
+      if (data && data.length > 0) {
+        const byType = new Map<string, { totalPrice: number; totalWeight: number; count: number }>();
+        data.forEach(s => {
+          const t = s.waste_type || 'غير مصنف';
+          const prev = byType.get(t) || { totalPrice: 0, totalWeight: 0, count: 0 };
+          byType.set(t, {
+            totalPrice: prev.totalPrice + (s.total_price || 0),
+            totalWeight: prev.totalWeight + (s.estimated_weight || 0),
+            count: prev.count + 1,
+          });
+        });
+        setPricingData(Array.from(byType.entries()).map(([wasteType, v]) => ({
+          wasteType,
+          currentPrice: v.totalWeight > 0 ? Math.round(v.totalPrice / v.totalWeight) : 0,
+          averageCost: v.totalWeight > 0 ? Math.round((v.totalPrice / v.totalWeight) * 0.6) : 0,
+          demand: v.count > 10 ? 'high' as const : v.count > 3 ? 'medium' as const : 'low' as const,
+          volume: Math.round(v.totalWeight),
+        })));
+      }
+    };
+    fetchPricing();
+  }, [user]);
 
   const handleOptimize = () => {
-    optimizePrices(mockPricingData, optimizationGoal);
+    if (pricingData.length > 0) {
+      optimizePrices(pricingData, optimizationGoal);
+    }
   };
 
   const getChangeIcon = (change: number) => {

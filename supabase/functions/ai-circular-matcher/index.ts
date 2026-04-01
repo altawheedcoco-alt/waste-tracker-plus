@@ -117,21 +117,28 @@ ${candidates.slice(0, 10).map((c, i) => `${i + 1}. ${c.name} - ${c.city} - سع�
     // Fallback: algorithmic matching
     const matches = candidates.slice(0, 5).map((c, i) => {
       const sameGov = c.city === location_governorate;
-      const distanceKm = sameGov ? 15 + Math.random() * 30 : 50 + Math.random() * 200;
+      // Deterministic distance based on same governorate + candidate index
+      const distanceKm = sameGov ? 15 + i * 8 : 60 + i * 40;
+      const materialMatch = c.material === waste_type;
+      const capacityScore = Math.min(c.capacity / Math.max(quantity_tons, 1) * 20, 20);
       const score = Math.round(
         (sameGov ? 30 : 10) +
-        (c.material === waste_type ? 40 : 15) +
-        Math.min(c.capacity / quantity_tons * 20, 20) +
-        Math.random() * 10
+        (materialMatch ? 40 : 15) +
+        capacityScore +
+        Math.max(0, 10 - i * 2)
       );
+
+      // Deterministic price based on capacity and material match
+      const basePrice = materialMatch ? 5000 : 8000;
+      const estimatedPrice = c.price || Math.round(basePrice + (c.capacity > 50 ? 2000 : 5000));
 
       return {
         organization_name: c.name,
         material_type: c.material,
         match_score: Math.min(score, 98),
         distance_km: Math.round(distanceKm),
-        price_per_ton: c.price || Math.round(3000 + Math.random() * 15000),
-        carbon_savings_kg: Math.round(quantity_tons * (0.5 + Math.random()) * 1000),
+        price_per_ton: estimatedPrice,
+        carbon_savings_kg: Math.round(quantity_tons * 0.75 * 1000),
         capacity_tons: c.capacity,
         reasoning: sameGov
           ? `جهة في نفس المحافظة (${c.city}) مما يقلل تكلفة النقل والانبعاثات`
