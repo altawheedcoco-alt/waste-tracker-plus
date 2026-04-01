@@ -24,7 +24,7 @@ const AdminExecutiveSummary = () => {
   const { data: metrics } = useQuery({
     queryKey: ['admin-executive-summary'],
     queryFn: async () => {
-      const [delayed, pendingApprovals, pendingOrgs, activeShipments] = await Promise.all([
+      const [delayed, pendingApprovals, pendingOrgs] = await Promise.all([
         // شحنات متأخرة (أكثر من 48 ساعة في حالة new)
         supabase
           .from('shipments')
@@ -40,8 +40,14 @@ const AdminExecutiveSummary = () => {
         supabase
           .from('organizations')
           .select('id', { count: 'exact', head: true })
-          .eq('status', 'pending' as any),
+          .eq('status' as any, 'pending'),
       ]);
+
+      // استعلام منفصل لتجنب مشكلة الأنواع
+      const activeShipments = await supabase
+        .from('shipments')
+        .select('id', { count: 'exact', head: true })
+        .in('status', ['approved', 'in_transit', 'collecting']);
 
       return {
         delayedShipments: delayed.count ?? 0,
