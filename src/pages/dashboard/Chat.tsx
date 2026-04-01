@@ -181,9 +181,11 @@ const MessageBubble = memo(({
   onReact: (emoji: string) => void;
   onReply: () => void;
   onForward: () => void;
+  onDelete?: () => void;
   allMessages: DecryptedMessage[];
   isStarred?: boolean;
   onStar?: () => void;
+  isMobile?: boolean;
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
