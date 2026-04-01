@@ -1609,6 +1609,21 @@ const EncryptedChatInner = () => {
                     )}
                   </AnimatePresence>
 
+                  {/* Pinned Messages Bar */}
+                  <AnimatePresence>
+                    {showPinnedBar && pinnedMessages.length > 0 && (
+                      <PinnedMessagesBar
+                        pinnedMessages={pinnedMessages}
+                        onScrollToMessage={(msgId) => {
+                          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          setHighlightedMsgId(msgId);
+                          setTimeout(() => setHighlightedMsgId(null), 2000);
+                        }}
+                        onClose={() => setShowPinnedBar(false)}
+                      />
+                    )}
+                  </AnimatePresence>
+
                   {/* Messages with wallpaper */}
                   <div 
                     ref={messagesContainerRef}
