@@ -231,10 +231,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => setLoginMethod('magic')}
-          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 text-muted-foreground hover:text-foreground`}
-              ? 'bg-background text-foreground shadow-sm'
-              : 'text-muted-foreground hover:text-foreground'
-          }`}
+          className="flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 text-muted-foreground hover:text-foreground"
         >
           <Wand2 className="w-3.5 h-3.5" />
           رابط سحري
