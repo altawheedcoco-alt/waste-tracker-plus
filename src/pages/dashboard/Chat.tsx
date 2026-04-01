@@ -57,6 +57,8 @@ import { Timer } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
 import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 import ChatSearchBar from '@/components/chat/ChatSearchBar';
+import LinkPreview, { extractUrls } from '@/components/chat/LinkPreview';
+import ImageGalleryViewer from '@/components/chat/ImageGalleryViewer';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -310,25 +312,40 @@ const MessageBubble = memo(({
             )}
             
             {message.file_url && (
-              <div className="mb-1">
+              <div className="mb-1.5 -mx-1 -mt-1">
                 {message.message_type === 'voice' || (message.message_type === 'file' && message.file_name && /\.(webm|mp3|wav|ogg|m4a)$/i.test(message.file_name)) ? (
-                  <VoiceMessagePlayer url={message.file_url} isOwn={isMine} />
+                  <div className="mx-1 mt-1">
+                    <VoiceMessagePlayer url={message.file_url} isOwn={isMine} />
+                  </div>
                 ) : (() => {
                   const mType = detectMediaType(message.file_url, undefined);
                   if (mType === 'image' || message.message_type === 'image') {
-                    return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" className="max-w-[280px] max-h-60" />;
+                    return (
+                      <div className="rounded-lg overflow-hidden">
+                        <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" className="max-w-[300px] max-h-64 w-full object-cover" />
+                      </div>
+                    );
                   }
                   if (mType === 'video' || message.message_type === 'video') {
-                    return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" aspectRatio="video" className="max-w-[280px]" />;
+                    return (
+                      <div className="rounded-lg overflow-hidden">
+                        <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" aspectRatio="video" className="max-w-[300px] w-full" />
+                      </div>
+                    );
                   }
                   if (mType === 'pdf') {
-                    return <MediaThumbnail url={message.file_url!} title={message.file_name || 'PDF'} size="md" />;
+                    return <div className="mx-1 mt-1"><MediaThumbnail url={message.file_url!} title={message.file_name || 'PDF'} size="md" /></div>;
                   }
                   return (
                     <a href={message.file_url} target="_blank" rel="noopener noreferrer"
-                      className="flex items-center gap-2 p-2 rounded-lg bg-background/20 hover:bg-background/30 transition-colors">
-                      <FileText className="w-5 h-5" />
-                      <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
+                      className="mx-1 mt-1 flex items-center gap-2 p-2.5 rounded-lg bg-background/20 hover:bg-background/30 transition-colors border border-border/30">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                        <FileText className="w-4 h-4 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs font-medium truncate block">{message.file_name || 'ملف'}</span>
+                        <span className="text-[10px] text-muted-foreground">اضغط للتحميل</span>
+                      </div>
                       <Download className="w-4 h-4 shrink-0 opacity-60" />
                     </a>
                   );
@@ -360,7 +377,13 @@ const MessageBubble = memo(({
                 </button>
               </div>
             ) : (
-              <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+              <>
+                <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+                {/* Link Previews */}
+                {message.message_type === 'text' && extractUrls(message.content).slice(0, 2).map((url, i) => (
+                  <LinkPreview key={i} url={url} />
+                ))}
+              </>
             )}
             
             {showTimestamp && (
