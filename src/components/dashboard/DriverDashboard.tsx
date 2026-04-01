@@ -83,6 +83,8 @@ interface DriverInfo {
   driver_type: DriverType;
   rating: number;
   total_trips: number;
+  acceptance_rate: number;
+  is_verified: boolean;
   organization: {
     name: string;
     phone: string;
