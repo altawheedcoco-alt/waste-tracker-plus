@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History } from 'lucide-react';
+import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSovereignGovernance } from '@/hooks/useSovereignGovernance';
 import SovereignOverviewCard from './SovereignOverviewCard';
