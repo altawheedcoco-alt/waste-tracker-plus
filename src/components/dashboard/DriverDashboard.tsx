@@ -83,6 +83,8 @@ interface DriverInfo {
   driver_type: DriverType;
   rating: number;
   total_trips: number;
+  acceptance_rate: number;
+  is_verified: boolean;
   organization: {
     name: string;
     phone: string;
@@ -216,7 +218,7 @@ const DriverDashboard = () => {
     try {
       const { data: driver } = await supabase
         .from('drivers')
-        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, organization:organizations(name, phone)`)
+        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, acceptance_rate, is_verified, organization:organizations(name, phone)`)
         .eq('profile_id', profile?.id)
         .maybeSingle();
 
@@ -717,8 +719,8 @@ const DriverDashboard = () => {
                   driverType={driverInfo.driver_type || 'company'}
                   rating={driverInfo.rating || 0}
                   totalTrips={driverInfo.total_trips || 0}
-                  acceptanceRate={0.85}
-                  isVerified={false}
+                  acceptanceRate={driverInfo.acceptance_rate ?? 0}
+                  isVerified={driverInfo.is_verified ?? false}
                   driverId={driverInfo.id}
                 />
               )}
