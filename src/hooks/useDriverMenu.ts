@@ -59,18 +59,17 @@ export function getDriverMenuItems(
       return [];
 
     case 'independent':
-      // سائق مستقل — نموذج Uber/InDriver
+      // سائق مستقل — نموذج Uber/InDriver (8 عناصر أساسية فقط)
       return [
-        common[0],
+        common[0], // لوحة التحكم
         { icon: Zap, label: lang === 'ar' ? 'العروض الواردة' : 'Incoming Offers', path: '/dashboard/driver-offers', key: 'driver-offers', badge: badges?.offers },
         { icon: ShoppingCart, label: lang === 'ar' ? 'سوق الشحنات' : 'Shipment Market', path: '/dashboard/shipment-market', key: 'driver-market' },
         { icon: Package, label: lang === 'ar' ? 'شحناتي' : 'My Shipments', path: '/dashboard/transporter-shipments', key: 'driver-shipments', badge: badges?.shipments },
         { icon: CreditCard, label: lang === 'ar' ? 'المحفظة' : 'Wallet', path: '/dashboard/driver-wallet', key: 'driver-wallet' },
-        { icon: BarChart3, label: lang === 'ar' ? 'التحليلات' : 'Analytics', path: '/dashboard/driver-analytics', key: 'driver-analytics' },
         { icon: Route, label: lang === 'ar' ? 'تتبع مساري' : 'My Route', path: '/dashboard/driver-my-route', key: 'driver-my-route' },
-        common[1],
         { icon: Star, label: lang === 'ar' ? 'ملفي المهني' : 'Public Profile', path: '/dashboard/driver-profile', key: 'driver-public-profile' },
-        ...common.slice(2),
+        { icon: Bell, label: lang === 'ar' ? 'الإشعارات' : 'Notifications', path: '/dashboard/notifications', key: 'driver-notifications', badge: badges?.notifications },
+        { icon: Settings, label: lang === 'ar' ? 'الإعدادات' : 'Settings', path: '/dashboard/settings', key: 'driver-settings' },
       ];
 
     default:
