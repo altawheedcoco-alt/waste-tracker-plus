@@ -989,9 +989,15 @@ const EncryptedChatInner = () => {
   };
 
   const handleForward = (msg: DecryptedMessage) => {
-    navigator.clipboard.writeText(msg.content);
-    toast.success('تم نسخ الرسالة — اختر محادثة وألصقها');
+    setForwardMsg(msg);
   };
+
+  const handleForwardToConversations = useCallback(async (conversationIds: string[]) => {
+    if (!forwardMsg) return;
+    for (const convoId of conversationIds) {
+      await sendMessage(convoId, `↩️ رسالة محوّلة:\n${forwardMsg.content}`);
+    }
+  }, [forwardMsg, sendMessage]);
 
   const handleExport = async () => {
     if (!selectedConvoId) return;
