@@ -45,10 +45,15 @@ const Hero = memo(() => {
     { value: `${count3}%`, label: t('heroExtra.complianceRate'), icon: Shield },
   ];
 
+  // Parallax effect
+  const { scrollY } = useScroll();
+  const bgY = useTransform(scrollY, [0, 600], [0, 150]);
+  const overlayOpacity = useTransform(scrollY, [0, 400], [0.3, 0.7]);
+
   return (
     <section className="relative min-h-[100dvh] flex items-center justify-center overflow-hidden pt-[7.5rem] pb-6 sm:pt-[10rem] sm:pb-0">
-      {/* Background image */}
-      <div className="absolute inset-0">
+      {/* Background image with parallax */}
+      <motion.div className="absolute inset-0" style={{ y: bgY }}>
         <img
           src={heroBg}
           alt={t('landing.recyclingFacilities')}
