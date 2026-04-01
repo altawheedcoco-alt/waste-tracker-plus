@@ -1623,6 +1623,7 @@ const EncryptedChatInner = () => {
                     <ScrollToBottomButton
                       isVisible={showScrollBottom && messages.length > 0}
                       onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                      unreadCount={selectedConvo?.unread_count || 0}
                     />
                   </div>
 
