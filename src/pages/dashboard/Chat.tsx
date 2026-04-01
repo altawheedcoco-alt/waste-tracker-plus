@@ -407,7 +407,7 @@ const MessageBubble = memo(({
               </>
             )}
             
-            {showTimestamp && (
+            {(showTimestamp && isLastInGroup) && (
               <div className={cn(
                 "flex items-center gap-1 mt-0.5",
                 isMine ? "justify-start" : "justify-end"
@@ -424,7 +424,16 @@ const MessageBubble = memo(({
                     isMine ? "text-primary-foreground/60" : "text-muted-foreground"
                   )}>تم التعديل</span>
                 )}
-                {getStatusIcon()}
+                {isMine && (
+                  <motion.span
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', damping: 15 }}
+                    key={message.status}
+                  >
+                    {getStatusIcon()}
+                  </motion.span>
+                )}
               </div>
             )}
 
