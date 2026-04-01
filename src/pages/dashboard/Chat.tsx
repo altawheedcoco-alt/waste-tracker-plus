@@ -754,7 +754,13 @@ const EncryptedChatInner = () => {
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleExport}><Download className="w-4 h-4 ml-2" /> تصدير المحادثة</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => toggleMute(selectedConvoId!)}><VolumeX className="w-4 h-4 ml-2" /> كتم المحادثة</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowNotifDialog(true)}>
+                            <Bell className="w-4 h-4 ml-2" /> إعدادات الإشعارات
+                            {notifSettings.level !== 'all' && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{notifSettings.level === 'none' ? 'مكتوم' : 'إشارات'}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowScheduleDialog(true)}>
+                            <Clock className="w-4 h-4 ml-2" /> جدولة رسالة
+                          </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setShowDisappearDialog(true)}>
                             <Timer className="w-4 h-4 ml-2" /> الرسائل المؤقتة
                             {disappearActive && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">مفعّل</Badge>}
