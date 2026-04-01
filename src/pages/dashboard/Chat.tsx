@@ -1389,6 +1389,13 @@ const EncryptedChatInner = () => {
                           <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
+                          {disappearActive && (
+                            <>
+                              <span className="mx-0.5 text-muted-foreground">·</span>
+                              <Timer className="w-2.5 h-2.5 text-primary" />
+                              <span className="text-primary text-[9px]">مؤقتة</span>
+                            </>
+                          )}
                         </div>
                       </div>
                     </div>
