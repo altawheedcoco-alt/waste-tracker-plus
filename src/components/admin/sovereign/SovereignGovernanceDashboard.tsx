@@ -49,8 +49,10 @@ const SovereignGovernanceDashboard = () => {
         </div>
       </div>
 
+      {/* Overview Card */}
+      <SovereignOverviewCard />
+
       {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="overflow-x-auto scrollbar-hide">
           <TabsList className="w-max min-w-full justify-start gap-0.5 bg-muted/50 p-1">
             {tabs.map(tab => (
