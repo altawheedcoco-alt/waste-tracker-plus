@@ -792,6 +792,9 @@ const EncryptedChatInner = () => {
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const [editingMessage, setEditingMessage] = useState<DecryptedMessage | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showPinnedBar, setShowPinnedBar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
