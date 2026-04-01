@@ -824,6 +824,21 @@ const EncryptedChatInner = () => {
     }
   }, []);
 
+  // Edit message handler
+  const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
+    try {
+      await supabase
+        .from('encrypted_messages')
+        .update({ content: newContent, is_edited: true })
+        .eq('id', messageId);
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, content: newContent, is_edited: true } : m));
+      setEditingMessage(null);
+      toast.success('تم تعديل الرسالة');
+    } catch {
+      toast.error('فشل تعديل الرسالة');
+    }
+  }, []);
+
   // ─── Fetch Linked Partner Orgs + Members ─────────────
   const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
     queryKey: ['chat-linked-partners', organization?.id],
