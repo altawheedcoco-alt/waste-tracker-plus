@@ -139,15 +139,14 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'home', label: 'الرئيسية', icon: Power },
-  { value: 'nearby', label: 'فرص قريبة', icon: Navigation },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'field', label: 'الميدان', icon: Wrench },
   { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
-  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'profile', label: 'ملفي', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
 
