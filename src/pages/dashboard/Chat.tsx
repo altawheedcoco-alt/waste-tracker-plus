@@ -48,6 +48,8 @@ import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresenc
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
 import MessageContextMenu from '@/components/chat/MessageContextMenu';
+import ForwardDialog from '@/components/chat/ForwardDialog';
+import { useStarredMessages } from '@/hooks/useStarredMessages';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
