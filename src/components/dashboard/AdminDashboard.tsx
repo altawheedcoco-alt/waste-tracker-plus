@@ -211,6 +211,7 @@ const AdminDashboard = () => {
             {isRTL ? 'مركز القيادة والسيطرة' : 'Command & Control Center'}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">{t('dashboard.welcomeAdmin')}</p>
+          <SystemHealthIndicator />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/50">
