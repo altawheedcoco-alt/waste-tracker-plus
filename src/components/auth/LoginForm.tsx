@@ -168,8 +168,9 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     }
   };
 
-  // If magic link mode, show the magic link form
-  if (loginMethod === 'magic') {
+  const showMagicLink = loginMethod === 'magic';
+
+  if (showMagicLink) {
     return <MagicLinkForm onBack={() => setLoginMethod('email')} />;
   }
 
