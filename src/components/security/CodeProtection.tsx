@@ -41,8 +41,13 @@ const CodeProtection = memo(() => {
       }
     });
 
-    // 3. منع السحب والإفلات
-    addHandler('dragstart', (e) => e.preventDefault());
+    // 3. منع السحب والإفلات (مع استثناء تفاعلات الخرائط)
+    addHandler('dragstart', (e) => {
+      const target = e.target as HTMLElement | null;
+      // Leaflet يعتمد على السحب للحركة داخل الخريطة
+      if (target?.closest('.leaflet-container')) return;
+      e.preventDefault();
+    });
 
     // 4. منع تحديد النصوص (CSS)
     const style = document.createElement('style');
