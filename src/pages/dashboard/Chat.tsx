@@ -695,6 +695,8 @@ const EncryptedChatInner = () => {
   const [messagesLoading, setMessagesLoading] = useState(false);
   
   const [sending, setSending] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadingFile, setUploadingFile] = useState<{ name: string; type: string } | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
