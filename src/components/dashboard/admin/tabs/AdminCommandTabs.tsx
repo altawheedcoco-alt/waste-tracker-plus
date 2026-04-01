@@ -69,9 +69,6 @@ const AdminCommandTabs = ({ statCards, stats, recentShipments, quickActions, onR
         <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
           <AdminDailyOperationsSummary />
         </ErrorBoundary>
-        <ErrorBoundary fallbackTitle="خطأ في ملخص العمليات">
-          <DailyOperationsSummary />
-        </ErrorBoundary>
         <ErrorBoundary fallbackTitle="خطأ في الرسوم البيانية">
           <Suspense fallback={<TabFallback />}>
             <div className="grid gap-4 grid-cols-1 md:grid-cols-2">

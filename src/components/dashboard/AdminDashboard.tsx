@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { toast as sonnerToast } from 'sonner';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
@@ -13,6 +14,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 
 import StoryCircles from '@/components/stories/StoryCircles';
+import { useAdminTabBadges } from '@/hooks/useAdminTabBadges';
 import SmartRequestDialog from './SmartRequestDialog';
 import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
 import {
@@ -35,7 +37,7 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import AdminExecutiveSummary from './admin/AdminExecutiveSummary';
 import AdminStatsGridEnhanced from './admin/AdminStatsGridEnhanced';
 import AdminMobileQuickBar from './admin/AdminMobileQuickBar';
-
+import SystemHealthIndicator from './admin/SystemHealthIndicator';
 
 import {
   FileText, Truck, Building2, Users, Plus, Bot, Zap,
@@ -116,6 +118,7 @@ const AdminDashboard = () => {
   const navigate = useNavigate();
   const { t, isRTL } = useLanguage();
   const { enabled: aiEnabled, toggle: toggleAI } = usePlatformSetting('ai_assistant_enabled');
+  const { data: tabBadges } = useAdminTabBadges();
   const { data: dashboardData, isLoading: loading, refetch: refetchDashboard } = useQuery({
     queryKey: ['admin-dashboard-stats'],
     queryFn: async () => {
@@ -211,6 +214,7 @@ const AdminDashboard = () => {
             {isRTL ? 'مركز القيادة والسيطرة' : 'Command & Control Center'}
           </h1>
           <p className="text-muted-foreground text-sm mt-1">{t('dashboard.welcomeAdmin')}</p>
+          <SystemHealthIndicator />
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-2 border rounded-lg px-3 py-1.5 bg-muted/50">
@@ -271,6 +275,11 @@ const AdminDashboard = () => {
               >
                 <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="font-semibold">{isRTL ? tab.labelAr : tab.labelEn}</span>
+                {tabBadges?.[tab.value] ? (
+                  <Badge variant="destructive" className="text-[9px] h-4 min-w-[16px] px-1 rounded-full">
+                    {tabBadges[tab.value]}
+                  </Badge>
+                ) : null}
               </TabsTrigger>
             ))}
           </TabsList>
