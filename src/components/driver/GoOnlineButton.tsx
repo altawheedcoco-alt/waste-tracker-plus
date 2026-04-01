@@ -152,7 +152,7 @@ const GoOnlineButton = ({ driverId, isAvailable, onToggle, rating = 0, totalTrip
         </div>
         <div className="text-center p-3 rounded-xl bg-card border border-border/50">
           <Zap className="w-4 h-4 mx-auto mb-1 text-emerald-500" />
-          <p className="text-lg font-bold">85%</p>
+          <p className="text-lg font-bold">{acceptanceRate > 0 ? `${Math.round(acceptanceRate)}%` : '—'}</p>
           <p className="text-[10px] text-muted-foreground">معدل القبول</p>
         </div>
       </div>
