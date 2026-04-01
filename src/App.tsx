@@ -15,6 +15,7 @@ import InstallPWA from "./components/pwa/InstallPWA";
 import PWAUpdatePrompt from "./components/pwa/PWAUpdatePrompt";
 import { AutoPushSubscriber } from "./components/pwa/AutoPushSubscriber";
 import PushPermissionBanner from "./components/pwa/PushPermissionBanner";
+import MobileEnhancements from "./components/mobile/MobileEnhancements";
 
 // Retry wrapper for lazy imports (handles stale cache / network glitches)
 const lazyRetry = (factory: () => Promise<any>, retries = 2): Promise<any> =>
@@ -133,6 +134,7 @@ const Providers = memo(() => (
                 {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
                 <AutoPushSubscriber />
                 <PushPermissionBanner />
+                <MobileEnhancements />
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
