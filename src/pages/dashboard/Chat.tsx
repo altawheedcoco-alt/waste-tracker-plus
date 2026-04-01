@@ -1573,6 +1573,7 @@ const EncryptedChatInner = () => {
                                     isMobile={isMobile}
                                   />
                                 </SwipeableMessage>
+                                </div>
                               );
                             })}
                           </div>
