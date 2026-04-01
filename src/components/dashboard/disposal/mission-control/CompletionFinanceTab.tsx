@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -143,9 +143,9 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
   // Billing
   const billingMutation = useMutation({
     mutationFn: async (op: any) => {
-      const pricePerTon = 450;
+      const pricePerTon = op.cost_per_ton || 450;
       const cost = (op.quantity || 0) * pricePerTon;
-      const invoiceNum = Math.floor(Math.random() * 9000) + 1000;
+      const invoiceNum = `INV-${format(new Date(), 'yyyyMMdd')}-${Date.now().toString(36).toUpperCase().slice(-4)}`;
       const { error } = await supabase.from('disposal_operations').update({
         cost, currency: 'EGP', updated_at: new Date().toISOString(),
       }).eq('id', op.id);
@@ -197,7 +197,7 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
   const totalBilling = completedOps.reduce((acc: number, o: any) => acc + (o.cost || 0), 0);
 
   // Statement data
-  const statementNumber = `STMT-${format(new Date(), 'yyyyMMdd')}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+  const statementNumber = useMemo(() => `STMT-${format(new Date(), 'yyyyMMdd')}-${Date.now().toString(36).toUpperCase().slice(-4)}`, []);
   const periodFrom = completedOps.length > 0 ? completedOps[completedOps.length - 1]?.created_at : new Date().toISOString();
   const periodTo = new Date().toISOString();
 
