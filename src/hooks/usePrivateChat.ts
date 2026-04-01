@@ -682,12 +682,63 @@ export function usePrivateChat() {
     await sendMessage(conversationId, plaintext, messageType, result.publicUrl, file.name);
   }, [user, sendMessage]);
 
+  /** Decrypt a single raw DB row into a DecryptedMessage (for realtime append) */
+  const decryptSingleRow = useCallback(async (
+    row: any,
+    conversationId: string,
+  ): Promise<DecryptedMessage | null> => {
+    if (!user) return null;
+
+    let partnerId = convoPartnersCache.current.get(conversationId);
+    if (!partnerId) {
+      const { data: convo } = await supabase
+        .from('private_conversations')
+        .select('participant_1, participant_2')
+        .eq('id', conversationId)
+        .single();
+      if (!convo) return null;
+      partnerId = convo.participant_1 === user.id ? convo.participant_2 : convo.participant_1;
+      convoPartnersCache.current.set(conversationId, partnerId);
+    }
+
+    let content = '[رسالة مشفرة]';
+    try {
+      content = await decryptForCurrentUser(row, partnerId);
+    } catch {
+      content = row.content_preview || row.file_name || '[تعذر فك التشفير]';
+    }
+
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('user_id, full_name, avatar_url')
+      .eq('user_id', row.sender_id)
+      .limit(1);
+    const profile = profiles?.[0];
+
+    return {
+      id: row.id,
+      conversation_id: row.conversation_id,
+      sender_id: row.sender_id,
+      content,
+      message_type: row.message_type || 'text',
+      file_url: row.file_url || undefined,
+      file_name: row.file_name || undefined,
+      status: row.status || 'sent',
+      reply_to_id: row.reply_to_id || undefined,
+      is_edited: row.is_edited || false,
+      is_deleted: row.is_deleted || false,
+      created_at: row.created_at,
+      sender: profile ? { full_name: profile.full_name, avatar_url: profile.avatar_url } : undefined,
+    };
+  }, [user, decryptForCurrentUser]);
+
   return {
     conversations,
     conversationsLoading,
     refetchConversations,
     getOrCreateConversation,
     fetchMessages,
+    decryptSingleRow,
     sendMessage,
     sendFileMessage,
     markAsRead,
