@@ -1810,13 +1810,11 @@ const EncryptedChatInner = () => {
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
-                      onSendMessage={async (text) => {
-                        // Handle edit mode
+                      onSendMessage={useCallback(async (text: string) => {
                         if (editingMessage) {
                           await handleEditMessage(editingMessage.id, text.trim());
                           return;
                         }
-                        // Optimistic: add message instantly before await
                         const optimistic = {
                           id: `temp_${Date.now()}`,
                           conversation_id: selectedConvoId!,
@@ -1833,6 +1831,7 @@ const EncryptedChatInner = () => {
                         setSending(true);
                         try {
                           await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
+                          soundEngine.play('message_sent');
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
@@ -1840,7 +1839,7 @@ const EncryptedChatInner = () => {
                         } finally {
                           setSending(false);
                         }
-                      }}
+                      }, [editingMessage, handleEditMessage, selectedConvoId, user, sendMessage, replyTo])}
                       onSendFile={async (file) => {
                         const optimistic = {
                           id: `temp_file_${Date.now()}`,
