@@ -1098,6 +1098,8 @@ const EncryptedChatInner = () => {
     setShowPartnerInfo(false);
     fetchMessages(selectedConvoId).then(msgs => {
       if (!cancelled) {
+        const unread = msgs.find(m => m.sender_id !== user?.id && m.status !== 'read');
+        setFirstUnreadId(unread?.id || null);
         setMessages(msgs);
         setMessagesLoading(false);
         markAsRead(selectedConvoId);
