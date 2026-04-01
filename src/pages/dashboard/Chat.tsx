@@ -2,88 +2,56 @@ import { useState, useEffect, useRef, useCallback, memo, useMemo, lazy, Suspense
 import { motion, AnimatePresence } from 'framer-motion';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-  MessageCircle, Search, Loader2, ArrowRight, Shield,
-  MoreVertical, Lock, Download, VolumeX, Ban,
-  Building2, StickyNote, Bell, BellOff,
-  ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Info, BarChart3, Radio, Timer, Image as ImageIcon, Pin, Star,
-  Clock, Moon
+  MessageCircle, Loader2, Shield, StickyNote, Hash, BarChart3, X
 } from 'lucide-react';
-import ClickableImage from '@/components/ui/ClickableImage';
-import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import EnhancedChatInput from '@/components/chat/EnhancedChatInput';
-import {
-  DropdownMenu, DropdownMenuContent, DropdownMenuItem,
-  DropdownMenuSeparator, DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { soundEngine } from '@/lib/soundEngine';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { usePrivateChat, type PrivateConversation, type DecryptedMessage } from '@/hooks/usePrivateChat';
 import { useChatReactions } from '@/hooks/useChatReactions';
 import { useChatWallpaper } from '@/hooks/useChatWallpaper';
 import { useAuth } from '@/contexts/AuthContext';
 import { useDisplayMode } from '@/hooks/useDisplayMode';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import { cn } from '@/lib/utils';
-import { format, isToday, isYesterday, isSameDay } from 'date-fns';
-import { ar } from 'date-fns/locale';
-import { toast } from 'sonner';
-import { supabase } from '@/integrations/supabase/client';
-import { soundEngine } from '@/lib/soundEngine';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChatAppearanceProvider } from '@/contexts/ChatAppearanceContext';
 import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresence';
-import TypingIndicator from '@/components/chat/TypingIndicator';
-import SwipeableMessage from '@/components/chat/SwipeableMessage';
-import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
+import { usePinnedMessages } from '@/hooks/usePinnedMessages';
+import { useChatInfiniteScroll } from '@/hooks/useChatInfiniteScroll';
+import { useChatNotificationSettings } from '@/hooks/useChatNotificationSettings';
+import DashboardLayout from '@/components/dashboard/DashboardLayout';
+
+// Extracted components
+import ChatSidebarPanel, { type PartnerMember, type LinkedPartnerOrg } from '@/components/chat/ChatSidebarPanel';
+import ChatHeaderBar from '@/components/chat/ChatHeaderBar';
+import ChatMessagesArea from '@/components/chat/ChatMessagesArea';
+import ChatNotesPanel from '@/components/chat/ChatNotesPanel';
+import OrgGroupHeader, { type OrgGroup } from '@/components/chat/OrgGroupHeader';
+
+// Feature components
+import EnhancedChatInput from '@/components/chat/EnhancedChatInput';
+import ForwardDialog from '@/components/chat/ForwardDialog';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
-import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 import ChatSearchBar from '@/components/chat/ChatSearchBar';
 import ImageGalleryViewer from '@/components/chat/ImageGalleryViewer';
 import PinnedMessagesBar from '@/components/chat/PinnedMessagesBar';
 import StarredMessagesPanel from '@/components/chat/StarredMessagesPanel';
-import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import ReplyPreviewBar from '@/components/chat/ReplyPreview';
-import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
 import ChatNotificationDialog from '@/components/chat/ChatNotificationDialog';
 import ScheduleMessageDialog from '@/components/chat/ScheduleMessageDialog';
-import { useChatInfiniteScroll } from '@/hooks/useChatInfiniteScroll';
-import { useChatNotificationSettings } from '@/hooks/useChatNotificationSettings';
-
-// Extracted components
-import ConversationItem from '@/components/chat/ConversationItem';
-import OrgGroupHeader, { type OrgGroup } from '@/components/chat/OrgGroupHeader';
-import MessageBubble from '@/components/chat/ChatMessageBubble';
-import ChatNotesPanel from '@/components/chat/ChatNotesPanel';
-import { DateSeparator, UnreadSeparator } from '@/components/chat/ChatDateSeparators';
+import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
 
 // ─── Types ──────────────────────────────────────────────
 interface ReplyTo {
   id: string;
   content: string;
   senderName: string;
-}
-
-interface PartnerMember {
-  user_id: string;
-  full_name: string;
-  avatar_url: string | null;
-  role?: string;
-}
-
-interface LinkedPartnerOrg {
-  id: string;
-  name: string;
-  organization_type: string;
-  logo_url: string | null;
-  members: PartnerMember[];
 }
 
 // ─── Empty State ────────────────────────────────────────
@@ -104,18 +72,10 @@ const EmptyState = ({ icon: Icon, title, subtitle }: { icon: any; title: string;
         className="absolute inset-0 rounded-full border-2 border-primary/10"
       />
     </motion.div>
-    <motion.p
-      initial={{ y: 10, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.15 }}
-      className="font-bold text-foreground text-base"
-    >{title}</motion.p>
-    <motion.p
-      initial={{ y: 10, opacity: 0 }}
-      animate={{ y: 0, opacity: 1 }}
-      transition={{ delay: 0.25 }}
-      className="text-xs mt-2 max-w-xs text-center leading-relaxed"
-    >{subtitle}</motion.p>
+    <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}
+      className="font-bold text-foreground text-base">{title}</motion.p>
+    <motion.p initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.25 }}
+      className="text-xs mt-2 max-w-xs text-center leading-relaxed">{subtitle}</motion.p>
   </div>
 );
 
@@ -132,25 +92,22 @@ const EncryptedChatInner = () => {
     toggleBlock, toggleMute,
   } = usePrivateChat();
 
+  // State
   const [selectedConvoId, setSelectedConvoId] = useState<string | null>(null);
   const [messages, setMessages] = useState<DecryptedMessage[]>([]);
   const [messagesLoading, setMessagesLoading] = useState(false);
   const [sending, setSending] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingFile, setUploadingFile] = useState<{ name: string; type: string } | null>(null);
-  const [searchQuery, setSearchQuery] = useState('');
   const [showSidebar, setShowSidebar] = useState(true);
   const [showNotes, setShowNotes] = useState(false);
-  const [sidebarTab, setSidebarTab] = useState<'all' | 'orgs' | 'partners'>('orgs');
   const [expandedOrgs, setExpandedOrgs] = useState<Set<string>>(new Set());
-  const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
   const [forwardMsg, setForwardMsg] = useState<DecryptedMessage | null>(null);
   const [showDisappearDialog, setShowDisappearDialog] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
   const [showChatSearch, setShowChatSearch] = useState(false);
-  const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const [editingMessage, setEditingMessage] = useState<DecryptedMessage | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -164,43 +121,31 @@ const EncryptedChatInner = () => {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
-  
-  // Typing indicator
+
+  // Hooks
   const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedConvoId || undefined);
-  
-  // Online presence
   useOnlinePresence();
   const partnerOnline = useUserOnlineStatus(selectedConvo?.partner?.user_id);
-
-  // Reactions & Starred
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
   const { starredMessages, starredMessageIds, toggleStar } = useStarredMessages();
-
-  // Disappearing messages
   const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
-
-  // Pinned messages
   const { pinnedMessages, fetchPinned, togglePin: togglePinMessage } = usePinnedMessages(selectedConvo?.partner?.organization_id || undefined);
-
-  // Infinite scroll
-  const { hasMore, loadingMore, loadOlderMessages, resetPagination } = useChatInfiniteScroll({
-    fetchMessages, conversationId: selectedConvoId,
-  });
-
-  // Per-conversation notification settings
+  const { hasMore, loadingMore, loadOlderMessages, resetPagination } = useChatInfiniteScroll({ fetchMessages, conversationId: selectedConvoId });
   const { settings: notifSettings, shouldNotify } = useChatNotificationSettings(selectedConvoId);
+  const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
 
-  // Gallery images
   const galleryImages = useMemo(() => {
     return messages
       .filter(m => m.file_url && (m.message_type === 'image' || /\.(jpg|jpeg|png|gif|webp)$/i.test(m.file_url)))
       .map(m => ({ url: m.file_url!, name: m.file_name || 'صورة' }));
   }, [messages]);
 
+  const totalUnread = useMemo(() => conversations.reduce((s, c) => s + (c.unread_count || 0), 0), [conversations]);
+
   useEffect(() => { if (selectedConvo) fetchPinned(); }, [selectedConvo?.id, fetchPinned]);
 
-  // Delete message
+  // Actions
   const handleDeleteMessage = useCallback(async (messageId: string) => {
     try {
       await supabase.from('encrypted_messages').update({ is_deleted: true }).eq('id', messageId);
@@ -209,7 +154,6 @@ const EncryptedChatInner = () => {
     } catch { toast.error('فشل حذف الرسالة'); }
   }, []);
 
-  // Edit message
   const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
     try {
       await supabase.from('encrypted_messages').update({ content: newContent, is_edited: true }).eq('id', messageId);
@@ -238,15 +182,11 @@ const EncryptedChatInner = () => {
       if (partnerIds.size === 0) return [];
       const partnerIdsArr = Array.from(partnerIds);
       const { data: orgs } = await supabase
-        .from('organizations')
-        .select('id, name, organization_type, logo_url')
-        .in('id', partnerIdsArr)
-        .eq('is_active', true)
-        .order('name');
+        .from('organizations').select('id, name, organization_type, logo_url')
+        .in('id', partnerIdsArr).eq('is_active', true).order('name');
       if (!orgs?.length) return [];
       const { data: profiles } = await supabase
-        .from('profiles')
-        .select('user_id, full_name, avatar_url, organization_id')
+        .from('profiles').select('user_id, full_name, avatar_url, organization_id')
         .in('organization_id', partnerIdsArr);
       const membersByOrg = new Map<string, PartnerMember[]>();
       (profiles || []).forEach(p => {
@@ -281,17 +221,6 @@ const EncryptedChatInner = () => {
     } catch { toast.error('فشل بدء المحادثة'); }
   };
 
-  const togglePartnerOrgExpand = (orgId: string) => {
-    setExpandedPartnerOrgs(prev => {
-      const next = new Set(prev);
-      if (next.has(orgId)) next.delete(orgId); else next.add(orgId);
-      return next;
-    });
-  };
-
-  // Wallpaper
-  const { getWallpaperStyle } = useChatWallpaper(selectedConvoId || undefined);
-
   // Group conversations by organization
   const orgGroups = useMemo((): OrgGroup[] => {
     const grouped = new Map<string, OrgGroup>();
@@ -300,9 +229,7 @@ const EncryptedChatInner = () => {
       const orgName = conv.partner?.organization_name;
       if (!orgName) { noOrg.push(conv); return; }
       const key = orgName;
-      if (!grouped.has(key)) {
-        grouped.set(key, { orgId: key, orgName, conversations: [], totalUnread: 0 });
-      }
+      if (!grouped.has(key)) grouped.set(key, { orgId: key, orgName, conversations: [], totalUnread: 0 });
       const group = grouped.get(key)!;
       group.conversations.push(conv);
       group.totalUnread += conv.unread_count || 0;
@@ -312,10 +239,7 @@ const EncryptedChatInner = () => {
       return a.orgName.localeCompare(b.orgName, 'ar');
     });
     if (noOrg.length > 0) {
-      result.push({
-        orgId: '__none__', orgName: 'بدون جهة', conversations: noOrg,
-        totalUnread: noOrg.reduce((s, c) => s + (c.unread_count || 0), 0),
-      });
+      result.push({ orgId: '__none__', orgName: 'بدون جهة', conversations: noOrg, totalUnread: noOrg.reduce((s, c) => s + (c.unread_count || 0), 0) });
     }
     return result;
   }, [conversations]);
@@ -323,9 +247,7 @@ const EncryptedChatInner = () => {
   // Auto-expand orgs with unread
   useEffect(() => {
     const withUnread = orgGroups.filter(g => g.totalUnread > 0).map(g => g.orgId);
-    if (withUnread.length > 0) {
-      setExpandedOrgs(prev => new Set([...prev, ...withUnread]));
-    }
+    if (withUnread.length > 0) setExpandedOrgs(prev => new Set([...prev, ...withUnread]));
   }, [orgGroups]);
 
   // Auto-open conversation from URL params
@@ -349,7 +271,7 @@ const EncryptedChatInner = () => {
         if (members && members.length > 0) {
           const targetUserId = members[0].user_id;
           const existingConvo = conversations.find(c => c.partner?.user_id === targetUserId);
-          if (existingConvo) { setSelectedConvoId(existingConvo.id); }
+          if (existingConvo) setSelectedConvoId(existingConvo.id);
           else { const convoId = await getOrCreateConversation(targetUserId); if (convoId) setSelectedConvoId(convoId); }
           setShowSidebar(false);
         } else { toast.error('لم يتم العثور على أعضاء في هذه الجهة'); }
@@ -394,7 +316,6 @@ const EncryptedChatInner = () => {
       .channel(`chat-${selectedConvoId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'encrypted_messages', filter: `conversation_id=eq.${selectedConvoId}` }, async (payload) => {
         const row = payload.new as any;
-        setMessages(prev => { if (prev.some(m => m.id === row.id)) return prev; return prev; });
         const decrypted = await decryptSingleRow(row, selectedConvoId);
         if (decrypted) {
           setMessages(prev => {
@@ -434,8 +355,6 @@ const EncryptedChatInner = () => {
     });
   };
 
-  const handleForward = (msg: DecryptedMessage) => setForwardMsg(msg);
-
   const handleForwardToConversations = useCallback(async (conversationIds: string[]) => {
     if (!forwardMsg) return;
     for (const convoId of conversationIds) {
@@ -448,37 +367,24 @@ const EncryptedChatInner = () => {
     try { await exportChatHistory(selectedConvoId); } catch { toast.error('فشل تصدير المحادثة'); }
   };
 
-  const filteredConversations = useMemo(() => conversations.filter(c =>
-    !searchQuery || c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    c.partner?.organization_name?.toLowerCase().includes(searchQuery.toLowerCase())
-  ), [conversations, searchQuery]);
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const el = e.currentTarget;
+    const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+    setShowScrollBottom(!nearBottom);
+    isNearBottomRef.current = nearBottom;
+    if (el.scrollTop < 80 && !loadingMore && hasMore && messages.length > 0) {
+      const prevHeight = el.scrollHeight;
+      loadOlderMessages(messages, setMessages).then(() => {
+        requestAnimationFrame(() => { el.scrollTop = el.scrollHeight - prevHeight; });
+      });
+    }
+  }, [loadingMore, hasMore, messages, loadOlderMessages]);
 
-  const filteredOrgGroups = useMemo(() => {
-    if (!searchQuery) return orgGroups;
-    return orgGroups.map(g => ({
-      ...g,
-      conversations: g.conversations.filter(c =>
-        c.partner?.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        c.partner?.organization_name?.toLowerCase().includes(searchQuery.toLowerCase())
-      ),
-    })).filter(g => g.conversations.length > 0);
-  }, [orgGroups, searchQuery]);
-
-  const groupedMessages = useMemo(() => {
-    const groups: { date: Date; messages: DecryptedMessage[] }[] = [];
-    messages.forEach(msg => {
-      const msgDate = new Date(msg.created_at);
-      const lastGroup = groups[groups.length - 1];
-      if (lastGroup && isSameDay(lastGroup.date, msgDate)) {
-        lastGroup.messages.push(msg);
-      } else {
-        groups.push({ date: msgDate, messages: [msg] });
-      }
-    });
-    return groups;
-  }, [messages]);
-
-  const totalUnread = useMemo(() => conversations.reduce((s, c) => s + (c.unread_count || 0), 0), [conversations]);
+  const scrollToMessage = useCallback((msgId: string) => {
+    document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setHighlightedMsgId(msgId);
+    setTimeout(() => setHighlightedMsgId(null), 2000);
+  }, []);
 
   if (!user) return null;
 
@@ -487,405 +393,108 @@ const EncryptedChatInner = () => {
 
   return (
     <>
-      <div className={cn("flex overflow-hidden bg-background", isMobile ? "h-full" : "h-full")}>
-        {/* ===== SIDEBAR ===== */}
+      <div className={cn("flex overflow-hidden bg-background", "h-full")}>
+        {/* SIDEBAR */}
         <AnimatePresence mode="wait">
           {showSidebarPanel && (
-            <motion.div
-              initial={isMobile ? { x: 100, opacity: 0 } : false}
-              animate={{ x: 0, opacity: 1 }}
-              exit={isMobile ? { x: 100, opacity: 0 } : undefined}
-              transition={{ type: 'spring', damping: 25 }}
-              className={cn("h-full flex flex-col bg-card border-l border-border", isMobile ? "w-full" : "w-[300px] min-w-[300px]")}
-            >
-              {/* Sidebar Header */}
-              <div className="p-3 border-b border-border bg-gradient-to-l from-primary/5 to-transparent">
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-primary" />
-                    </div>
-                    <div>
-                      <h2 className="font-bold text-sm">مركز التواصل</h2>
-                      <p className="text-[10px] text-primary flex items-center gap-1">
-                        <Lock className="w-2.5 h-2.5" /> تشفير طرف لطرف
-                        {totalUnread > 0 && (
-                          <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-destructive text-destructive-foreground ms-1">
-                            {totalUnread}
-                          </Badge>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Search */}
-                <div className="relative mb-2">
-                  <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                  <Input
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="البحث بالاسم أو الجهة..."
-                    className="pr-9 h-9 text-sm bg-muted/50 border-none"
-                  />
-                  {searchQuery && (
-                    <button onClick={() => setSearchQuery('')} className="absolute left-2.5 top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-muted-foreground/20 flex items-center justify-center hover:bg-muted-foreground/30">
-                      <X className="w-2.5 h-2.5" />
-                    </button>
-                  )}
-                </div>
-
-                {/* View Toggle */}
-                <div className="flex rounded-lg bg-muted/50 p-0.5">
-                  {[
-                    { key: 'orgs' as const, icon: Building2, label: 'حسب الجهة' },
-                    { key: 'all' as const, icon: Users, label: 'الكل' },
-                    { key: 'partners' as const, icon: Plus, label: 'الجهات' },
-                  ].map(tab => (
-                    <button key={tab.key} onClick={() => setSidebarTab(tab.key)}
-                      className={cn("flex-1 flex items-center justify-center gap-1.5 text-xs py-1.5 rounded-md transition-colors",
-                        sidebarTab === tab.key ? "bg-background shadow-sm font-semibold" : "text-muted-foreground"
-                      )}>
-                      <tab.icon className="w-3.5 h-3.5" />
-                      {tab.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Conversations List */}
-              <ScrollArea className="flex-1">
-                {conversationsLoading ? (
-                  <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-                ) : sidebarTab === 'orgs' ? (
-                  filteredOrgGroups.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <Building2 className="w-10 h-10 mb-2 opacity-30" />
-                      <p className="text-sm">لا توجد محادثات</p>
-                    </div>
-                  ) : (
-                    filteredOrgGroups.map(group => (
-                      <div key={group.orgId}>
-                        <OrgGroupHeader group={group} isExpanded={expandedOrgs.has(group.orgId)} onToggle={() => toggleOrgExpand(group.orgId)} />
-                        <AnimatePresence>
-                          {expandedOrgs.has(group.orgId) && (
-                            <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                              {group.conversations.map(convo => (
-                                <ConversationItem key={convo.id} conversation={convo} isActive={selectedConvoId === convo.id} onClick={() => handleSelectConvo(convo)} currentUserId={user?.id} compact />
-                              ))}
-                            </motion.div>
-                          )}
-                        </AnimatePresence>
-                      </div>
-                    ))
-                  )
-                ) : sidebarTab === 'partners' ? (
-                  partnersLoading ? (
-                    <div className="flex items-center justify-center py-12"><Loader2 className="animate-spin text-primary" size={24} /></div>
-                  ) : linkedPartners.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <Building2 className="w-10 h-10 mb-2 opacity-30" />
-                      <p className="text-sm">لا توجد جهات مرتبطة</p>
-                      <p className="text-xs mt-1">اربط جهات عبر كود الشراكة لبدء المحادثة</p>
-                    </div>
-                  ) : (
-                    linkedPartners
-                      .filter(lp => !searchQuery || lp.name.toLowerCase().includes(searchQuery.toLowerCase()) || lp.members.some(m => m.full_name.toLowerCase().includes(searchQuery.toLowerCase())))
-                      .map(partner => {
-                        const orgTypeLabel = partner.organization_type === 'generator' ? 'مولّد'
-                          : partner.organization_type === 'transporter' ? 'ناقل'
-                          : partner.organization_type === 'recycler' ? 'مدوّر'
-                          : partner.organization_type === 'disposal' ? 'تخلص'
-                          : partner.organization_type;
-                        const isExpanded = expandedPartnerOrgs.has(partner.id);
-                        return (
-                          <div key={partner.id}>
-                            <button onClick={() => togglePartnerOrgExpand(partner.id)} className="w-full flex items-center gap-2 px-3 py-2 bg-muted/50 hover:bg-muted/80 transition-colors text-start">
-                              {isExpanded ? <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" /> : <ChevronRight className="w-3.5 h-3.5 text-muted-foreground" />}
-                              <Avatar className="w-7 h-7">
-                                {partner.logo_url && <AvatarImage src={partner.logo_url} />}
-                                <AvatarFallback className="bg-primary/10 text-primary text-[10px]"><Building2 className="w-3.5 h-3.5" /></AvatarFallback>
-                              </Avatar>
-                              <div className="flex-1 min-w-0">
-                                <span className="text-xs font-semibold truncate block">{partner.name}</span>
-                                <span className="text-[10px] text-muted-foreground">{orgTypeLabel}</span>
-                              </div>
-                              <Badge variant="outline" className="text-[9px] h-4 px-1.5">{partner.members.length} عضو</Badge>
-                            </button>
-                            <AnimatePresence>
-                              {isExpanded && (
-                                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="overflow-hidden">
-                                  {partner.members.length === 0 ? (
-                                    <div className="px-4 py-3 text-center text-xs text-muted-foreground">لا يوجد أعضاء مسجلين</div>
-                                  ) : (
-                                    partner.members.map(member => {
-                                      const hasConvo = conversations.some(c => c.partner?.user_id === member.user_id);
-                                      return (
-                                        <button key={member.user_id} onClick={() => handleStartConvoWithMember(member)}
-                                          className={cn("w-full flex items-center gap-3 px-4 py-2.5 transition-colors border-b border-border/20", "hover:bg-muted/50 active:bg-muted/80")}>
-                                          <Avatar className="w-9 h-9">
-                                            {member.avatar_url && <AvatarImage src={member.avatar_url} />}
-                                            <AvatarFallback className="bg-primary/10 text-primary text-xs">{member.full_name?.charAt(0) || '?'}</AvatarFallback>
-                                          </Avatar>
-                                          <div className="flex-1 min-w-0 text-right">
-                                            <p className="text-sm font-medium truncate">{member.full_name}</p>
-                                            <p className="text-[10px] text-muted-foreground">{hasConvo ? '💬 محادثة قائمة' : '➕ بدء محادثة جديدة'}</p>
-                                          </div>
-                                          {!hasConvo && <MessageCircle className="w-4 h-4 text-primary/50 shrink-0" />}
-                                        </button>
-                                      );
-                                    })
-                                  )}
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        );
-                      })
-                  )
-                ) : (
-                  filteredConversations.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                      <MessageCircle className="w-10 h-10 mb-2 opacity-30" />
-                      <p className="text-sm">لا توجد محادثات</p>
-                    </div>
-                  ) : (
-                    filteredConversations.map(convo => (
-                      <ConversationItem key={convo.id} conversation={convo} isActive={selectedConvoId === convo.id} onClick={() => handleSelectConvo(convo)} currentUserId={user?.id} />
-                    ))
-                  )
-                )}
-              </ScrollArea>
-            </motion.div>
+            <ChatSidebarPanel
+              conversations={conversations}
+              conversationsLoading={conversationsLoading}
+              linkedPartners={linkedPartners}
+              partnersLoading={partnersLoading}
+              selectedConvoId={selectedConvoId}
+              currentUserId={user?.id}
+              isMobile={isMobile}
+              orgGroups={orgGroups}
+              expandedOrgs={expandedOrgs}
+              onToggleOrgExpand={toggleOrgExpand}
+              onSelectConvo={handleSelectConvo}
+              onStartConvoWithMember={handleStartConvoWithMember}
+              totalUnread={totalUnread}
+            />
           )}
         </AnimatePresence>
 
-        {/* ===== CHAT AREA ===== */}
+        {/* CHAT AREA */}
         {showChat && (
           <div className="flex-1 flex min-w-0">
             <div className="flex-1 flex flex-col min-w-0">
               {selectedConvo ? (
                 <>
-                  {/* Chat Header */}
-                  <div className="h-14 px-3 flex items-center justify-between border-b border-border bg-card shrink-0">
-                    <div className="flex items-center gap-3">
-                      {isMobile && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowSidebar(true)}>
-                          <ArrowRight className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <ClickableImage src={selectedConvo.partner?.avatar_url || ''} protected>
-                        <Avatar className="w-9 h-9 cursor-pointer">
-                          <AvatarImage src={selectedConvo.partner?.avatar_url || ''} />
-                          <AvatarFallback className="bg-primary/10 text-primary text-xs font-bold">{selectedConvo.partner?.full_name?.charAt(0) || '?'}</AvatarFallback>
-                        </Avatar>
-                      </ClickableImage>
-                      <div className="text-right">
-                        <button className="text-sm font-semibold hover:underline cursor-pointer"
-                          onClick={() => { if (selectedConvo.partner?.user_id) navigate(`/dashboard/profile?userId=${selectedConvo.partner.user_id}`); }}>
-                          {selectedConvo.partner?.full_name}
-                        </button>
-                        <div className="flex items-center gap-1 text-[10px]">
-                          <AnimatePresence mode="wait">
-                            {isPartnerTyping ? (
-                              <motion.span key="typing" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="text-primary font-medium">يكتب الآن...</motion.span>
-                            ) : partnerOnline.isOnline ? (
-                              <motion.span key="online" initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }} className="text-green-500 flex items-center gap-1">
-                                <motion.span animate={{ scale: [1, 1.4, 1] }} transition={{ repeat: Infinity, duration: 2 }} className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
-                                متصل الآن
-                              </motion.span>
-                            ) : partnerOnline.lastSeen ? (
-                              <motion.span key="lastseen" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-muted-foreground">
-                                آخر ظهور {(() => {
-                                  const d = new Date(partnerOnline.lastSeen);
-                                  if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
-                                  if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
-                                  return format(d, 'd/M hh:mm a', { locale: ar });
-                                })()}
-                              </motion.span>
-                            ) : (
-                              <motion.button key="org" initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer" onClick={() => navigate('/dashboard/organization-profile')}>
-                                <Building2 className="w-2.5 h-2.5" />
-                                {selectedConvo.partner?.organization_name || 'غير محدد'}
-                              </motion.button>
-                            )}
-                          </AnimatePresence>
-                          <span className="mx-1 text-muted-foreground">·</span>
-                          <Lock className="w-2.5 h-2.5 text-primary" />
-                          <span className="text-primary">E2E</span>
-                          {disappearActive && (
-                            <>
-                              <span className="mx-0.5 text-muted-foreground">·</span>
-                              <Timer className="w-2.5 h-2.5 text-primary" />
-                              <span className="text-primary text-[9px]">مؤقتة</span>
-                            </>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-0.5">
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowChatSearch(!showChatSearch)} title="بحث في الرسائل">
-                        <Search className="w-4 h-4" />
-                      </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setShowPartnerInfo(!showPartnerInfo)} title="معلومات الشريك">
-                        <Info className="w-4 h-4" />
-                      </Button>
-                      <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
-                      {galleryImages.length > 0 && (
-                        <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setGalleryIndex(galleryImages.length - 1); setGalleryOpen(true); }} title="معرض الصور">
-                          <ImageIcon className="w-4 h-4" />
-                        </Button>
-                      )}
-                      <Button variant={showNotes ? "default" : "ghost"} size="icon" className="h-8 w-8" onClick={() => setShowNotes(!showNotes)}>
-                        <StickyNote className="w-4 h-4" />
-                      </Button>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="w-4 h-4" /></Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="start">
-                          <DropdownMenuItem onClick={() => setShowStarredPanel(true)}>
-                            <Star className="w-4 h-4 ml-2" /> الرسائل المميزة
-                            {starredMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-amber-500/20 text-amber-600 mr-auto">{starredMessages.length}</Badge>}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowPinnedBar(!showPinnedBar)}>
-                            <Pin className="w-4 h-4 ml-2" /> الرسائل المثبتة
-                            {pinnedMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{pinnedMessages.length}</Badge>}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={handleExport}><Download className="w-4 h-4 ml-2" /> تصدير المحادثة</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowNotifDialog(true)}>
-                            <Bell className="w-4 h-4 ml-2" /> إعدادات الإشعارات
-                            {notifSettings.level !== 'all' && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{notifSettings.level === 'none' ? 'مكتوم' : 'إشارات'}</Badge>}
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowScheduleDialog(true)}>
-                            <Clock className="w-4 h-4 ml-2" /> جدولة رسالة
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => setShowDisappearDialog(true)}>
-                            <Timer className="w-4 h-4 ml-2" /> الرسائل المؤقتة
-                            {disappearActive && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">مفعّل</Badge>}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => toggleBlock(selectedConvoId!)} className="text-destructive"><Ban className="w-4 h-4 ml-2" /> حظر</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </div>
+                  <ChatHeaderBar
+                    selectedConvo={selectedConvo}
+                    selectedConvoId={selectedConvoId}
+                    isMobile={isMobile}
+                    isPartnerTyping={isPartnerTyping}
+                    partnerOnline={partnerOnline}
+                    disappearActive={disappearActive}
+                    showNotes={showNotes}
+                    notifSettings={notifSettings}
+                    pinnedMessagesCount={pinnedMessages.length}
+                    starredMessagesCount={starredMessages.length}
+                    galleryImagesCount={galleryImages.length}
+                    onShowSidebar={() => setShowSidebar(true)}
+                    onToggleChatSearch={() => setShowChatSearch(!showChatSearch)}
+                    onTogglePartnerInfo={() => setShowPartnerInfo(!showPartnerInfo)}
+                    onToggleNotes={() => setShowNotes(!showNotes)}
+                    onOpenGallery={() => { setGalleryIndex(galleryImages.length - 1); setGalleryOpen(true); }}
+                    onOpenStarredPanel={() => setShowStarredPanel(true)}
+                    onTogglePinnedBar={() => setShowPinnedBar(!showPinnedBar)}
+                    onExport={handleExport}
+                    onOpenNotifDialog={() => setShowNotifDialog(true)}
+                    onOpenScheduleDialog={() => setShowScheduleDialog(true)}
+                    onOpenDisappearDialog={() => setShowDisappearDialog(true)}
+                    onBlock={() => toggleBlock(selectedConvoId!)}
+                  />
 
-                  {/* Chat Search Bar */}
+                  {/* Search & Pinned Bars */}
                   <AnimatePresence>
                     {showChatSearch && (
                       <ChatSearchBar messages={messages}
-                        onScrollToMessage={(msgId) => { document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }); }}
+                        onScrollToMessage={(msgId) => scrollToMessage(msgId)}
                         onHighlightMessage={setHighlightedMsgId}
-                        onClose={() => { setShowChatSearch(false); setChatSearchQuery(''); setHighlightedMsgId(null); }}
+                        onClose={() => { setShowChatSearch(false); setHighlightedMsgId(null); }}
                       />
                     )}
                   </AnimatePresence>
-
-                  {/* Pinned Messages Bar */}
                   <AnimatePresence>
                     {showPinnedBar && pinnedMessages.length > 0 && (
                       <PinnedMessagesBar pinnedMessages={pinnedMessages}
-                        onScrollToMessage={(msgId) => {
-                          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                          setHighlightedMsgId(msgId);
-                          setTimeout(() => setHighlightedMsgId(null), 2000);
-                        }}
+                        onScrollToMessage={scrollToMessage}
                         onClose={() => setShowPinnedBar(false)}
                       />
                     )}
                   </AnimatePresence>
 
                   {/* Messages */}
-                  <div ref={messagesContainerRef} className="flex-1 overflow-y-auto p-3 transition-colors duration-300 relative" style={getWallpaperStyle()}
-                    onScroll={(e) => {
-                      const el = e.currentTarget;
-                      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-                      setShowScrollBottom(!nearBottom);
-                      isNearBottomRef.current = nearBottom;
-                      // Infinite scroll: load older when near top
-                      if (el.scrollTop < 80 && !loadingMore && hasMore && messages.length > 0) {
-                        const prevHeight = el.scrollHeight;
-                        loadOlderMessages(messages, setMessages).then(() => {
-                          // Preserve scroll position
-                          requestAnimationFrame(() => {
-                            el.scrollTop = el.scrollHeight - prevHeight;
-                          });
-                        });
-                      }
-                    }}>
-                    {/* Loading older messages indicator */}
-                    {loadingMore && (
-                      <div className="flex items-center justify-center py-3">
-                        <Loader2 className="animate-spin text-primary w-5 h-5" />
-                        <span className="text-xs text-muted-foreground mr-2">تحميل رسائل أقدم...</span>
-                      </div>
-                    )}
-                    {messagesLoading ? (
-                      <div className="flex items-center justify-center h-full"><Loader2 className="animate-spin text-primary" size={28} /></div>
-                    ) : messages.length === 0 ? (
-                      <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', damping: 20 }}>
-                          <Shield className="w-16 h-16 mb-3 text-primary/20" />
-                        </motion.div>
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="text-sm font-semibold text-foreground">محادثة مشفرة</motion.p>
-                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs mt-1.5 text-center max-w-[250px]">ابدأ بإرسال أول رسالة — محمية بتشفير طرف لطرف</motion.p>
-                      </div>
-                    ) : (
-                      <>
-                        <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="flex justify-center mb-4">
-                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-xl px-4 py-2 text-center max-w-md backdrop-blur-sm">
-                            <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 inline-block ml-1" />
-                            <span className="text-[11px] text-amber-700 dark:text-amber-400">الرسائل محمية بتشفير طرف لطرف</span>
-                          </div>
-                        </motion.div>
-
-                        {groupedMessages.map((group, gi) => (
-                          <div key={gi}>
-                            <DateSeparator date={group.date} />
-                            {group.messages.map((msg, mi) => {
-                              const isMine = msg.sender_id === user?.id;
-                              const isHighlighted = highlightedMsgId === msg.id;
-                              const prevMsg = group.messages[mi - 1];
-                              const nextMsg = group.messages[mi + 1];
-                              const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
-                              const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
-                              const showUnreadSep = firstUnreadId === msg.id;
-                              return (
-                                <div key={msg.id}>
-                                  {showUnreadSep && <UnreadSeparator />}
-                                  <div id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
-                                    <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
-                                      <MessageBubble
-                                        message={msg} isMine={isMine}
-                                        reactions={reactionsMap[msg.id] || []}
-                                        onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                                        onReply={() => handleReply(msg)}
-                                        onForward={() => handleForward(msg)}
-                                        onDelete={() => handleDeleteMessage(msg.id)}
-                                        onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
-                                        onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
-                                        allMessages={messages}
-                                        isStarred={starredMessageIds.has(msg.id)}
-                                        onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
-                                        isMobile={isMobile}
-                                        isFirstInGroup={isFirstInGroup}
-                                        isLastInGroup={isLastInGroup}
-                                      />
-                                    </SwipeableMessage>
-                                  </div>
-                                </div>
-                              );
-                            })}
-                          </div>
-                        ))}
-                        <TypingIndicator isTyping={isPartnerTyping} name={partnerTypingName || undefined} />
-                        <div ref={messagesEndRef} />
-                      </>
-                    )}
-                    <ScrollToBottomButton isVisible={showScrollBottom && messages.length > 0} onClick={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })} unreadCount={selectedConvo?.unread_count || 0} />
-                  </div>
+                  <ChatMessagesArea
+                    messages={messages}
+                    messagesLoading={messagesLoading}
+                    loadingMore={loadingMore}
+                    hasMore={hasMore}
+                    currentUserId={user.id}
+                    wallpaperStyle={getWallpaperStyle()}
+                    reactionsMap={reactionsMap}
+                    starredMessageIds={starredMessageIds}
+                    highlightedMsgId={highlightedMsgId}
+                    firstUnreadId={firstUnreadId}
+                    isPartnerTyping={isPartnerTyping}
+                    partnerTypingName={partnerTypingName}
+                    unreadCount={selectedConvo?.unread_count || 0}
+                    isMobile={isMobile}
+                    showScrollBottom={showScrollBottom}
+                    containerRef={messagesContainerRef}
+                    messagesEndRef={messagesEndRef}
+                    onScroll={handleScroll}
+                    onReact={(msgId, emoji) => toggleReaction(msgId, emoji)}
+                    onReply={handleReply}
+                    onForward={(msg) => setForwardMsg(msg)}
+                    onDelete={handleDeleteMessage}
+                    onEdit={(msg) => setEditingMessage(msg)}
+                    onPin={(msgId, isPinned) => togglePinMessage(msgId, isPinned)}
+                    onStar={(msg) => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
+                    onScrollToBottom={() => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })}
+                  />
 
                   {/* Edit Preview */}
                   {editingMessage && (
@@ -905,7 +514,7 @@ const EncryptedChatInner = () => {
                   {/* Upload Progress */}
                   <FileUploadProgress fileName={uploadingFile?.name || ''} progress={uploadProgress} isVisible={!!uploadingFile} fileType={uploadingFile?.type} />
 
-                  {/* Input Area */}
+                  {/* Input */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
                       onSendMessage={async (text) => {
@@ -960,7 +569,7 @@ const EncryptedChatInner = () => {
               )}
             </div>
 
-            {/* Partner Info Panel */}
+            {/* Side Panels */}
             {showPartnerInfo && selectedConvo && !isMobile && (
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 320, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="h-full overflow-hidden border-s border-border">
                 <ChatPartnerInfo
@@ -973,8 +582,6 @@ const EncryptedChatInner = () => {
                 />
               </motion.div>
             )}
-
-            {/* Notes Panel */}
             {showNotes && selectedConvoId && !isMobile && !showPartnerInfo && (
               <motion.div initial={{ width: 0, opacity: 0 }} animate={{ width: 280, opacity: 1 }} exit={{ width: 0, opacity: 0 }} transition={{ duration: 0.2 }} className="h-full overflow-hidden">
                 <ChatNotesPanel conversationId={selectedConvoId} organizationId={organization?.id} targetOrganizationId={selectedConvo?.partner?.organization_id || null} />
@@ -994,18 +601,12 @@ const EncryptedChatInner = () => {
         onSchedule={(scheduledAt, content) => {
           const delay = new Date(scheduledAt).getTime() - Date.now();
           if (delay > 0 && selectedConvoId) {
-            setTimeout(async () => {
-              try { await sendMessage(selectedConvoId, content); } catch {}
-            }, Math.min(delay, 2147483647));
+            setTimeout(async () => { try { await sendMessage(selectedConvoId, content); } catch {} }, Math.min(delay, 2147483647));
           }
         }}
       />
       <StarredMessagesPanel isOpen={showStarredPanel} onClose={() => setShowStarredPanel(false)} starredMessages={starredMessages}
-        onScrollToMessage={(msgId) => {
-          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          setHighlightedMsgId(msgId);
-          setTimeout(() => setHighlightedMsgId(null), 2000);
-        }}
+        onScrollToMessage={scrollToMessage}
         onUnstar={(msgId) => { const msg = messages.find(m => m.id === msgId); if (msg) toggleStar(msgId, msg.conversation_id, msg.content, msg.message_type); }}
       />
     </>
