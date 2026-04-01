@@ -1262,18 +1262,27 @@ const EncryptedChatInner = () => {
                         >
                           {selectedConvo.partner?.full_name}
                         </button>
-                        <button
-                          className="text-[10px] text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
-                          onClick={() => {
-                            navigate('/dashboard/organization-profile');
-                          }}
-                        >
-                          <Building2 className="w-2.5 h-2.5" />
-                          {selectedConvo.partner?.organization_name || 'غير محدد'}
-                          <span className="mx-1">·</span>
+                        <div className="flex items-center gap-1 text-[10px]">
+                          {isPartnerTyping ? (
+                            <span className="text-emerald-500 font-medium animate-pulse">يكتب الآن...</span>
+                          ) : partnerOnline.isOnline ? (
+                            <span className="text-emerald-500 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                              متصل الآن
+                            </span>
+                          ) : (
+                            <button
+                              className="text-muted-foreground flex items-center gap-1 hover:underline cursor-pointer"
+                              onClick={() => navigate('/dashboard/organization-profile')}
+                            >
+                              <Building2 className="w-2.5 h-2.5" />
+                              {selectedConvo.partner?.organization_name || 'غير محدد'}
+                            </button>
+                          )}
+                          <span className="mx-1 text-muted-foreground">·</span>
                           <Lock className="w-2.5 h-2.5 text-emerald-500" />
                           <span className="text-emerald-600">E2E</span>
-                        </button>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-center gap-1">
