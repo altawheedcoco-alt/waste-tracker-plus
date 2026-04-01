@@ -990,14 +990,13 @@ const EncryptedChatInner = () => {
         conversations={conversations.filter(c => c.id !== selectedConvoId)} onForward={handleForwardToConversations} currentUserId={user?.id} />
       <ImageGalleryViewer images={galleryImages} initialIndex={galleryIndex} isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} />
       <ChatNotificationDialog open={showNotifDialog} onOpenChange={setShowNotifDialog} conversationId={selectedConvoId} partnerName={selectedConvo?.partner?.full_name} />
-      <ScheduleMessageDialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog} partnerName={selectedConvo?.partner?.full_name}
-        onSchedule={async (msg, sendAt) => {
-          // Store scheduled message locally and send at time
-          const delay = sendAt.getTime() - Date.now();
+      <ScheduleMessageDialog open={showScheduleDialog} onClose={() => setShowScheduleDialog(false)}
+        onSchedule={(scheduledAt, content) => {
+          const delay = new Date(scheduledAt).getTime() - Date.now();
           if (delay > 0 && selectedConvoId) {
             setTimeout(async () => {
-              try { await sendMessage(selectedConvoId, msg); } catch {}
-            }, Math.min(delay, 2147483647)); // Max setTimeout value
+              try { await sendMessage(selectedConvoId, content); } catch {}
+            }, Math.min(delay, 2147483647));
           }
         }}
       />
