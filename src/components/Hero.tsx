@@ -249,16 +249,6 @@ const Hero = memo(() => {
               <ChevronDown className="w-5 h-5 text-white/40" />
             </motion.div>
           </motion.div>
-            <p
-              className="text-[11px] sm:text-sm font-bold tracking-wide text-gradient-eco"
-              style={{ WebkitTextFillColor: 'transparent' }}
-            >
-              {t('landing.joinUs')}
-            </p>
-            <p className="text-xs sm:text-lg text-amber-400 font-bold tracking-[0.25em] sm:tracking-[0.35em]" style={{ fontFamily: 'serif', textShadow: '0 0 12px rgba(251,191,36,0.4)' }}>
-              𓂀 𓏏𓅓𓂋𓆑 𓇋𓏏𓂋 𓊪𓏏𓂋 𓅱𓂧𓏏 𓆓𓏏𓏤
-            </p>
-          </motion.div>
         </div>
       </div>
 
