@@ -73,6 +73,13 @@ const RegulatorShowcase = lazyRetry(() => import("@/components/landing/Regulator
 const PlatformChangelog = lazyRetry(() => import("@/components/landing/PlatformChangelog"));
 const LivePlatformStats = lazyRetry(() => import("@/components/landing/LivePlatformStats"));
 
+// v5.2 — New landing sections
+const HowItWorksSection = lazyRetry(() => import("@/components/landing/HowItWorksSection"));
+const SavingsCalculator = lazyRetry(() => import("@/components/landing/SavingsCalculator"));
+const BeforeAfterSection = lazyRetry(() => import("@/components/landing/BeforeAfterSection"));
+const FAQSection = lazyRetry(() => import("@/components/landing/FAQSection"));
+const BlogPreviewSection = lazyRetry(() => import("@/components/landing/BlogPreviewSection"));
+
 /** Renders children when the container scrolls into view — with proper placeholder height */
 const LazySection = memo(({ children, minH = 200 }: { children: React.ReactNode; minH?: number }) => {
   const ref = useRef<HTMLDivElement>(null);
