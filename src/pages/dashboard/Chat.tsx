@@ -1384,11 +1384,20 @@ const EncryptedChatInner = () => {
                         </button>
                         <div className="flex items-center gap-1 text-[10px]">
                           {isPartnerTyping ? (
-                            <span className="text-emerald-500 font-medium animate-pulse">يكتب الآن...</span>
+                            <span className="text-primary font-medium animate-pulse">يكتب الآن...</span>
                           ) : partnerOnline.isOnline ? (
-                            <span className="text-emerald-500 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                            <span className="text-green-500 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
                               متصل الآن
+                            </span>
+                          ) : partnerOnline.lastSeen ? (
+                            <span className="text-muted-foreground">
+                              آخر ظهور {(() => {
+                                const d = new Date(partnerOnline.lastSeen);
+                                if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
+                                if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
+                                return format(d, 'd/M hh:mm a', { locale: ar });
+                              })()}
                             </span>
                           ) : (
                             <button
@@ -1400,8 +1409,8 @@ const EncryptedChatInner = () => {
                             </button>
                           )}
                           <span className="mx-1 text-muted-foreground">·</span>
-                          <Lock className="w-2.5 h-2.5 text-emerald-500" />
-                          <span className="text-emerald-600">E2E</span>
+                          <Lock className="w-2.5 h-2.5 text-primary" />
+                          <span className="text-primary">E2E</span>
                           {disappearActive && (
                             <>
                               <span className="mx-0.5 text-muted-foreground">·</span>
