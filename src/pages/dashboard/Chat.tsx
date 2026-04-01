@@ -1657,8 +1657,27 @@ const EncryptedChatInner = () => {
                     />
                   </div>
 
+                  {/* Edit Preview */}
+                  {editingMessage && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-border bg-card px-3 py-2 flex items-center gap-2"
+                    >
+                      <div className="w-1 h-8 rounded-full bg-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-semibold text-primary">تعديل الرسالة</p>
+                        <p className="text-xs text-muted-foreground truncate">{editingMessage.content.slice(0, 60)}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setEditingMessage(null)}>
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </motion.div>
+                  )}
+
                   {/* Reply Preview */}
-                  {replyTo && (
+                  {replyTo && !editingMessage && (
                     <ReplyPreviewBar replyToMessage={replyTo} onCancel={() => setReplyTo(null)} />
                   )}
 
