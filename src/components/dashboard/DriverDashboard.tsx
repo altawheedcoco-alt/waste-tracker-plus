@@ -62,6 +62,7 @@ const DriverAnalyticsPanel = lazy(() => import('@/components/driver/DriverAnalyt
 const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarketplace'));
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
+const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
@@ -138,15 +139,14 @@ const hiredTabs = [
 
 const independentTabs = [
   { value: 'home', label: 'الرئيسية', icon: Power },
-  { value: 'nearby', label: 'فرص قريبة', icon: Navigation },
   { value: 'offers', label: 'العروض', icon: Zap },
   { value: 'marketplace', label: 'السوق', icon: ShoppingCart },
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'field', label: 'الميدان', icon: Wrench },
   { value: 'wallet', label: 'المحفظة', icon: CreditCard },
   { value: 'analytics', label: 'التحليلات', icon: BarChart3 },
-  { value: 'profile', label: 'ملفي المهني', icon: Star },
+  { value: 'profile', label: 'ملفي', icon: Star },
   { value: 'account', label: 'حسابي', icon: User },
 ];
 
@@ -386,18 +386,23 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: الرئيسية — Go Online (مستقل فقط) */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="home" className="mt-4">
+          <TabsContent value="home" className="mt-4 space-y-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && (
-                <GoOnlineButton
-                  driverId={driverInfo.id}
-                  isAvailable={driverInfo.is_available}
-                  onToggle={(newState) => {
-                    setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
-                  }}
-                  rating={driverInfo.rating}
-                  totalTrips={driverInfo.total_trips}
-                />
+                <>
+                  <GoOnlineButton
+                    driverId={driverInfo.id}
+                    isAvailable={driverInfo.is_available}
+                    onToggle={(newState) => {
+                      setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
+                    }}
+                    rating={driverInfo.rating}
+                    totalTrips={driverInfo.total_trips}
+                    acceptanceRate={driverInfo.acceptance_rate}
+                  />
+                  <EarningsMiniCard driverId={driverInfo.id} />
+                  <DemandHeatmapDriver serviceAreaKm={30} />
+                </>
               )}
             </Suspense>
           </TabsContent>
@@ -405,11 +410,7 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: فرص قريبة — Demand Heatmap (مستقل فقط) */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="nearby" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <DemandHeatmapDriver serviceAreaKm={30} />
-            </Suspense>
-          </TabsContent>
+          {/* nearby tab merged into home */}
 
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 1: المهام - Daily Tasks & Assignment */}
