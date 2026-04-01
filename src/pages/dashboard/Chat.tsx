@@ -1047,6 +1047,7 @@ const EncryptedChatInner = () => {
   const totalUnread = conversations.reduce((s, c) => s + (c.unread_count || 0), 0);
 
     return (
+      <>
       <div className={cn(
         "flex overflow-hidden bg-background",
         isMobile ? "h-full" : "h-full"
