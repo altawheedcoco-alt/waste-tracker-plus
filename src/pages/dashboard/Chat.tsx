@@ -989,6 +989,18 @@ const EncryptedChatInner = () => {
       <ForwardDialog isOpen={!!forwardMsg} onClose={() => setForwardMsg(null)} messageContent={forwardMsg?.content || ''}
         conversations={conversations.filter(c => c.id !== selectedConvoId)} onForward={handleForwardToConversations} currentUserId={user?.id} />
       <ImageGalleryViewer images={galleryImages} initialIndex={galleryIndex} isOpen={galleryOpen} onClose={() => setGalleryOpen(false)} />
+      <ChatNotificationDialog open={showNotifDialog} onOpenChange={setShowNotifDialog} conversationId={selectedConvoId} partnerName={selectedConvo?.partner?.full_name} />
+      <ScheduleMessageDialog open={showScheduleDialog} onOpenChange={setShowScheduleDialog} partnerName={selectedConvo?.partner?.full_name}
+        onSchedule={async (msg, sendAt) => {
+          // Store scheduled message locally and send at time
+          const delay = sendAt.getTime() - Date.now();
+          if (delay > 0 && selectedConvoId) {
+            setTimeout(async () => {
+              try { await sendMessage(selectedConvoId, msg); } catch {}
+            }, Math.min(delay, 2147483647)); // Max setTimeout value
+          }
+        }}
+      />
       <StarredMessagesPanel isOpen={showStarredPanel} onClose={() => setShowStarredPanel(false)} starredMessages={starredMessages}
         onScrollToMessage={(msgId) => {
           document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
