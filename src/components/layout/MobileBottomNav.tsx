@@ -35,7 +35,7 @@ const MobileBottomNav = memo(() => {
       return [
         { id: 'dashboard', icon: LayoutDashboard, label: 'الرئيسية', path: '/dashboard' },
         { id: 'shipments', icon: Package, label: 'الشحنات', path: '/dashboard/transporter-shipments' },
-        { id: 'location', icon: MapPin, label: 'موقعي', path: '/dashboard/my-location' },
+        { id: 'route', icon: Truck, label: 'مساري', path: '/dashboard/driver-my-route' },
         { id: 'notifications', icon: Bell, label: 'الإشعارات', path: '/dashboard/notifications', badge: combinedBadge },
         { id: 'profile', icon: User, label: 'حسابي', path: '/dashboard/driver-profile' },
       ];
