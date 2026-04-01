@@ -1951,6 +1951,22 @@ const EncryptedChatInner = () => {
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
       />
+
+      {/* Starred Messages Panel */}
+      <StarredMessagesPanel
+        isOpen={showStarredPanel}
+        onClose={() => setShowStarredPanel(false)}
+        starredMessages={starredMessages}
+        onScrollToMessage={(msgId) => {
+          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedMsgId(msgId);
+          setTimeout(() => setHighlightedMsgId(null), 2000);
+        }}
+        onUnstar={(msgId) => {
+          const msg = messages.find(m => m.id === msgId);
+          if (msg) toggleStar(msgId, msg.conversation_id, msg.content, msg.message_type);
+        }}
+      />
     </>
     );
   };
