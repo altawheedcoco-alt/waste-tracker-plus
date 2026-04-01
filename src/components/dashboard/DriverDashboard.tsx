@@ -422,7 +422,20 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 1: المهام - Daily Tasks & Assignment */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="tasks" className="mt-4">
+          <TabsContent value="tasks" className="mt-4 space-y-3">
+            {/* Company driver quick stats */}
+            {driverInfo?.driver_type === 'company' && (
+              <Suspense fallback={<Skeleton className="h-20 w-full rounded-xl" />}>
+                <CompanyDriverStats
+                  rating={driverInfo.rating}
+                  totalTrips={driverInfo.total_trips}
+                  acceptanceRate={driverInfo.acceptance_rate}
+                  isAvailable={driverInfo.is_available}
+                  organizationName={driverInfo.organization?.name}
+                />
+                <EarningsMiniCard driverId={driverInfo.id} />
+              </Suspense>
+            )}
             <DriverDailyTasks
               shipments={shipments}
               onNavigate={handleNavigateToShipment}
