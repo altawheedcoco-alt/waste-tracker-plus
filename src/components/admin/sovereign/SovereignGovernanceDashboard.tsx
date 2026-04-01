@@ -32,6 +32,7 @@ const SovereignGovernanceDashboard = () => {
     { value: 'sla', label: 'SLA', icon: Target },
     { value: 'ai-command', label: 'القرار الذكي', icon: Brain, badge: decisions.filter(d => d.status === 'pending').length || undefined },
     { value: 'reports', label: 'التقارير', icon: FileText },
+    { value: 'audit', label: 'سجل الرقابة', icon: History },
   ];
 
   return (
