@@ -675,6 +675,7 @@ const EncryptedChatInner = () => {
   const [expandedPartnerOrgs, setExpandedPartnerOrgs] = useState<Set<string>>(new Set());
   const [replyTo, setReplyTo] = useState<ReplyTo | null>(null);
   const [showPartnerInfo, setShowPartnerInfo] = useState(false);
+  const [forwardMsg, setForwardMsg] = useState<DecryptedMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
