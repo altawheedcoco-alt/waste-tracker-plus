@@ -265,13 +265,32 @@ const MessageBubble = memo(({
     );
   }
 
+  // Bubble corner radius based on grouping
+  const bubbleRadius = isMine
+    ? cn(
+        isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-bl-sm' : '',
+        isFirstInGroup && !isLastInGroup ? 'rounded-2xl rounded-bl-sm rounded-bl-md' : '',
+        !isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tl-md rounded-bl-sm' : '',
+        !isFirstInGroup && !isLastInGroup ? 'rounded-xl' : '',
+      )
+    : cn(
+        isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-br-sm' : '',
+        isFirstInGroup && !isLastInGroup ? 'rounded-2xl rounded-br-sm rounded-br-md' : '',
+        !isFirstInGroup && isLastInGroup ? 'rounded-2xl rounded-tr-md rounded-br-sm' : '',
+        !isFirstInGroup && !isLastInGroup ? 'rounded-xl' : '',
+      );
+
   return (
     <>
       <motion.div
-        initial={{ opacity: 0, y: 8, scale: 0.97 }}
+        initial={{ opacity: 0, y: 6, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
-        className={cn("flex group relative select-none", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}
+        transition={{ type: 'spring', damping: 28, stiffness: 400 }}
+        className={cn(
+          "flex group relative select-none",
+          isMine ? "justify-start" : "justify-end",
+          isLastInGroup ? (compactMode ? "mb-0.5" : "mb-1") : "mb-px"
+        )}
         onClick={handleTap}
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
