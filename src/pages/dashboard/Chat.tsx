@@ -173,7 +173,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, allMessages, isStarred, onStar 
+  message, isMine, reactions, onReact, onReply, onForward, onDelete, allMessages, isStarred, onStar, isMobile 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
