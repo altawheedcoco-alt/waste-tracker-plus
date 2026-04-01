@@ -397,6 +397,7 @@ const DriverDashboard = () => {
                   }}
                   rating={driverInfo.rating}
                   totalTrips={driverInfo.total_trips}
+                  acceptanceRate={driverInfo.acceptance_rate}
                 />
               )}
             </Suspense>
