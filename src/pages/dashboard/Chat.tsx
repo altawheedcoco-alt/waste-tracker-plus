@@ -1478,9 +1478,11 @@ const EncryptedChatInner = () => {
                                     onReact={(emoji) => toggleReaction(msg.id, emoji)}
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
+                                    onDelete={() => handleDeleteMessage(msg.id)}
                                     allMessages={messages}
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
+                                    isMobile={isMobile}
                                   />
                                 </SwipeableMessage>
                               );
