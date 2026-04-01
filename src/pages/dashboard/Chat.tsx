@@ -158,6 +158,8 @@ const EncryptedChatInner = () => {
   const [showPinnedBar, setShowPinnedBar] = useState(true);
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const [showStarredPanel, setShowStarredPanel] = useState(false);
+  const [showNotifDialog, setShowNotifDialog] = useState(false);
+  const [showScheduleDialog, setShowScheduleDialog] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
