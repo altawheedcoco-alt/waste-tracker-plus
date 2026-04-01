@@ -687,9 +687,10 @@ const EncryptedChatInner = () => {
   useOnlinePresence();
   const partnerOnline = useUserOnlineStatus(selectedConvo?.partner?.user_id);
 
-  // Reactions
+  // Reactions & Starred
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
+  const { starredMessageIds, toggleStar } = useStarredMessages();
 
   // ─── Fetch Linked Partner Orgs + Members ─────────────
   const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
