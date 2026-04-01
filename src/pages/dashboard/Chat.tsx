@@ -720,6 +720,23 @@ const EncryptedChatInner = () => {
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
   const { starredMessageIds, toggleStar } = useStarredMessages();
 
+  // Disappearing messages
+  const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Delete message handler
+  const handleDeleteMessage = useCallback(async (messageId: string) => {
+    try {
+      await supabase
+        .from('encrypted_messages')
+        .update({ is_deleted: true })
+        .eq('id', messageId);
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, is_deleted: true } : m));
+      toast.success('تم حذف الرسالة');
+    } catch {
+      toast.error('فشل حذف الرسالة');
+    }
+  }, []);
+
   // ─── Fetch Linked Partner Orgs + Members ─────────────
   const { data: linkedPartners = [], isLoading: partnersLoading } = useQuery({
     queryKey: ['chat-linked-partners', organization?.id],
