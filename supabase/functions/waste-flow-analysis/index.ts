@@ -103,14 +103,24 @@ serve(async (req) => {
       regionTotals.set(f.destination_region, (regionTotals.get(f.destination_region) || 0) + f.quantity_tons);
     });
 
+    // Egyptian governorate approximate centers for deterministic geo placement
+    const govCoords: Record<string, [number, number]> = {
+      'القاهرة': [30.0444, 31.2357], 'الجيزة': [30.0131, 31.2089], 'الإسكندرية': [31.2001, 29.9187],
+      'الشرقية': [30.5833, 31.5], 'الدقهلية': [31.0409, 31.3785], 'الغربية': [30.8754, 31.0297],
+      'المنوفية': [30.5972, 30.9876], 'القليوبية': [30.3292, 31.2422], 'البحيرة': [31.0340, 30.4686],
+      'الفيوم': [29.3084, 30.8428], 'بني سويف': [29.0661, 31.0994], 'المنيا': [28.1099, 30.7503],
+    };
+    const defaultCoord: [number, number] = [30.0444, 31.2357];
+
     const generatedAlerts: any[] = [];
     regionTotals.forEach((tons, region) => {
       if (tons > 100) {
+        const [lat, lng] = govCoords[region] || defaultCoord;
         generatedAlerts.push({
           id: `gen_${region}`,
           region_name: region,
-          region_lat: 30.0 + Math.random() * 1,
-          region_lng: 31.0 + Math.random() * 1,
+          region_lat: lat,
+          region_lng: lng,
           alert_type: 'accumulation',
           waste_type: null,
           severity: tons > 500 ? 'critical' : tons > 200 ? 'high' : 'medium',

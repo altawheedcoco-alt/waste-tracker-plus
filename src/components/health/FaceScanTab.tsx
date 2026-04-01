@@ -164,8 +164,14 @@ const FaceScanTab = () => {
         rmssd = Math.sqrt(sumSq / (intervals.length - 1));
       }
 
-      // Breathing rate from low-frequency modulation of green channel
-      const breathingRate = Math.round(12 + Math.random() * 8); // 12-20 breaths/min
+      // Breathing rate estimated from low-frequency peaks in green channel
+      const greenVals = samples.map(s => s.g);
+      let breathPeaks = 0;
+      for (let i = 1; i < greenVals.length - 1; i++) {
+        if (greenVals[i] > greenVals[i - 1] && greenVals[i] > greenVals[i + 1]) breathPeaks++;
+      }
+      const scanDurationSec = samples.length / 30; // ~30 fps
+      const breathingRate = scanDurationSec > 0 ? Math.round(Math.max(12, Math.min(20, (breathPeaks / scanDurationSec) * 60))) : 16;
       
       // SpO2 estimation from R/G ratio (simplified)
       const avgR = samples.reduce((a, s) => a + s.r, 0) / samples.length;
