@@ -386,19 +386,23 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: الرئيسية — Go Online (مستقل فقط) */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="home" className="mt-4">
+          <TabsContent value="home" className="mt-4 space-y-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && (
-                <GoOnlineButton
-                  driverId={driverInfo.id}
-                  isAvailable={driverInfo.is_available}
-                  onToggle={(newState) => {
-                    setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
-                  }}
-                  rating={driverInfo.rating}
-                  totalTrips={driverInfo.total_trips}
-                  acceptanceRate={driverInfo.acceptance_rate}
-                />
+                <>
+                  <GoOnlineButton
+                    driverId={driverInfo.id}
+                    isAvailable={driverInfo.is_available}
+                    onToggle={(newState) => {
+                      setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
+                    }}
+                    rating={driverInfo.rating}
+                    totalTrips={driverInfo.total_trips}
+                    acceptanceRate={driverInfo.acceptance_rate}
+                  />
+                  <EarningsMiniCard driverId={driverInfo.id} />
+                  <DemandHeatmapDriver serviceAreaKm={30} />
+                </>
               )}
             </Suspense>
           </TabsContent>
