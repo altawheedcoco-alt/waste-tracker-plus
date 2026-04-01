@@ -1652,8 +1652,9 @@ const EncryptedChatInner = () => {
                     style={getWallpaperStyle()}
                     onScroll={(e) => {
                       const el = e.currentTarget;
-                      const isNearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
-                      setShowScrollBottom(!isNearBottom);
+                      const nearBottom = el.scrollHeight - el.scrollTop - el.clientHeight < 150;
+                      setShowScrollBottom(!nearBottom);
+                      isNearBottomRef.current = nearBottom;
                     }}
                   >
                     {messagesLoading ? (
