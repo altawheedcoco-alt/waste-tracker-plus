@@ -601,7 +601,7 @@ const EncryptedChatInner = () => {
   const queryClient = useQueryClient();
   const {
     conversations, conversationsLoading, getOrCreateConversation,
-    fetchMessages, sendMessage, sendFileMessage, markAsRead, exportChatHistory,
+    fetchMessages, decryptSingleRow, sendMessage, sendFileMessage, markAsRead, exportChatHistory,
     toggleBlock, toggleMute,
   } = usePrivateChat();
 
