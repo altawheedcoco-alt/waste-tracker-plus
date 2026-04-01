@@ -858,7 +858,7 @@ const EncryptedChatInner = () => {
     return () => { cancelled = true; };
   }, [selectedConvoId, fetchMessages, markAsRead]);
 
-  // Realtime: reload messages and statuses
+  // Realtime: append new messages instantly, update statuses
   useEffect(() => {
     if (!selectedConvoId) return;
 
@@ -869,8 +869,21 @@ const EncryptedChatInner = () => {
         schema: 'public',
         table: 'encrypted_messages',
         filter: `conversation_id=eq.${selectedConvoId}`,
-      }, () => {
-        fetchMessages(selectedConvoId).then(setMessages);
+      }, async (payload) => {
+        const row = payload.new as any;
+        // Skip if already in state (optimistic or duplicate)
+        setMessages(prev => {
+          if (prev.some(m => m.id === row.id)) return prev;
+          return prev; // trigger decrypt below
+        });
+        const decrypted = await decryptSingleRow(row, selectedConvoId);
+        if (decrypted) {
+          setMessages(prev => {
+            // Remove any optimistic temp message & avoid duplicates
+            const filtered = prev.filter(m => m.id !== decrypted.id && !m.id.startsWith('temp_'));
+            return [...filtered, decrypted];
+          });
+        }
         markAsRead(selectedConvoId);
       })
       .on('postgres_changes', {
@@ -878,13 +891,16 @@ const EncryptedChatInner = () => {
         schema: 'public',
         table: 'encrypted_messages',
         filter: `conversation_id=eq.${selectedConvoId}`,
-      }, () => {
-        fetchMessages(selectedConvoId).then(setMessages);
+      }, (payload) => {
+        const updated = payload.new as any;
+        setMessages(prev => prev.map(m => 
+          m.id === updated.id ? { ...m, status: updated.status || m.status, is_edited: updated.is_edited || m.is_edited, is_deleted: updated.is_deleted || m.is_deleted } : m
+        ));
       })
       .subscribe();
 
     return () => { supabase.removeChannel(channel); };
-  }, [selectedConvoId, fetchMessages, markAsRead]);
+  }, [selectedConvoId, decryptSingleRow, markAsRead]);
 
   // Auto scroll
   useEffect(() => {
