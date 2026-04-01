@@ -1355,20 +1355,25 @@ const EncryptedChatInner = () => {
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
                             <DateSeparator date={group.date} />
-                            {group.messages.map(msg => (
-                              <MessageBubble
-                                key={msg.id}
-                                message={msg}
-                                isMine={msg.sender_id === user?.id}
-                                reactions={reactionsMap[msg.id] || []}
-                                onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                                onReply={() => handleReply(msg)}
-                                onForward={() => handleForward(msg)}
-                                allMessages={messages}
-                              />
-                            ))}
+                            {group.messages.map(msg => {
+                              const isMine = msg.sender_id === user?.id;
+                              return (
+                                <SwipeableMessage key={msg.id} isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                  <MessageBubble
+                                    message={msg}
+                                    isMine={isMine}
+                                    reactions={reactionsMap[msg.id] || []}
+                                    onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                                    onReply={() => handleReply(msg)}
+                                    onForward={() => handleForward(msg)}
+                                    allMessages={messages}
+                                  />
+                                </SwipeableMessage>
+                              );
+                            })}
                           </div>
                         ))}
+                        <TypingIndicator isTyping={isPartnerTyping} name={partnerTypingName || undefined} />
                         <div ref={messagesEndRef} />
                       </>
                     )}
