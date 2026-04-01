@@ -218,7 +218,7 @@ const DriverDashboard = () => {
     try {
       const { data: driver } = await supabase
         .from('drivers')
-        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, organization:organizations(name, phone)`)
+        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, acceptance_rate, is_verified, organization:organizations(name, phone)`)
         .eq('profile_id', profile?.id)
         .maybeSingle();
 

@@ -879,7 +879,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     icon: MapPin,
     labelAr: 'التتبع والخرائط',
     labelEn: 'Tracking & Maps',
-    visibleFor: [],
+    visibleFor: ['transporter', 'generator', 'recycler', 'disposal'],
     items: [
       { icon: MapPin, labelAr: 'مركز التتبع', labelEn: 'Tracking Center', path: '/dashboard/tracking-center', key: 'unified-tracking-center', bindingType: 'hybrid' as const, requiredPermissions: ['view_shipments'] },
       { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'unified-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'], visibleFor: ['transporter'] },
