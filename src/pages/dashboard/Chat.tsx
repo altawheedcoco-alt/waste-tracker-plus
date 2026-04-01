@@ -53,12 +53,14 @@ import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
-import { Timer } from 'lucide-react';
+import { Timer, Image as ImageIcon, Pin } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
 import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 import ChatSearchBar from '@/components/chat/ChatSearchBar';
 import LinkPreview, { extractUrls } from '@/components/chat/LinkPreview';
 import ImageGalleryViewer from '@/components/chat/ImageGalleryViewer';
+import PinnedMessagesBar from '@/components/chat/PinnedMessagesBar';
+import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -198,7 +200,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, onDelete, onEdit, allMessages, isStarred, onStar, isMobile, isFirstInGroup, isLastInGroup 
+  message, isMine, reactions, onReact, onReply, onForward, onDelete, onEdit, onPin, allMessages, isStarred, onStar, isMobile, isFirstInGroup, isLastInGroup 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -208,6 +210,7 @@ const MessageBubble = memo(({
   onForward: () => void;
   onDelete?: () => void;
   onEdit?: () => void;
+  onPin?: () => void;
   allMessages: DecryptedMessage[];
   isStarred?: boolean;
   onStar?: () => void;
@@ -478,6 +481,7 @@ const MessageBubble = memo(({
         onDelete={isMine ? onDelete : undefined}
         onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
+        onPin={onPin}
         isMine={isMine}
       />
 
@@ -492,6 +496,7 @@ const MessageBubble = memo(({
         onDelete={isMine ? onDelete : undefined}
         onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
+        onPin={onPin}
         onReact={(emoji) => onReact(emoji)}
       />
     </>
@@ -790,6 +795,9 @@ const EncryptedChatInner = () => {
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
   const [editingMessage, setEditingMessage] = useState<DecryptedMessage | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [showPinnedBar, setShowPinnedBar] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -809,6 +817,19 @@ const EncryptedChatInner = () => {
 
   // Disappearing messages
   const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Pinned messages
+  const { pinnedMessages, fetchPinned, togglePin: togglePinMessage } = usePinnedMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Collect all image URLs from messages for gallery
+  const galleryImages = useMemo(() => {
+    return messages
+      .filter(m => m.file_url && (m.message_type === 'image' || /\.(jpg|jpeg|png|gif|webp)$/i.test(m.file_url)))
+      .map(m => ({ url: m.file_url!, name: m.file_name || 'صورة' }));
+  }, [messages]);
+
+  // Fetch pinned when conversation changes
+  useEffect(() => { if (selectedConvo) fetchPinned(); }, [selectedConvo?.id, fetchPinned]);
 
   // Delete message handler
   const handleDeleteMessage = useCallback(async (messageId: string) => {
@@ -1530,6 +1551,17 @@ const EncryptedChatInner = () => {
                         <Info className="w-4 h-4" />
                       </Button>
                       <ChatWallpaperPicker conversationId={selectedConvoId || undefined} />
+                      {galleryImages.length > 0 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => { setGalleryIndex(galleryImages.length - 1); setGalleryOpen(true); }}
+                          title="معرض الصور"
+                        >
+                          <ImageIcon className="w-4 h-4" />
+                        </Button>
+                      )}
                       <Button
                         variant={showNotes ? "default" : "ghost"}
                         size="icon"
@@ -1575,6 +1607,21 @@ const EncryptedChatInner = () => {
                         }}
                         onHighlightMessage={setHighlightedMsgId}
                         onClose={() => { setShowChatSearch(false); setChatSearchQuery(''); setHighlightedMsgId(null); }}
+                      />
+                    )}
+                  </AnimatePresence>
+
+                  {/* Pinned Messages Bar */}
+                  <AnimatePresence>
+                    {showPinnedBar && pinnedMessages.length > 0 && (
+                      <PinnedMessagesBar
+                        pinnedMessages={pinnedMessages}
+                        onScrollToMessage={(msgId) => {
+                          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                          setHighlightedMsgId(msgId);
+                          setTimeout(() => setHighlightedMsgId(null), 2000);
+                        }}
+                        onClose={() => setShowPinnedBar(false)}
                       />
                     )}
                   </AnimatePresence>
@@ -1633,6 +1680,7 @@ const EncryptedChatInner = () => {
                                     onForward={() => handleForward(msg)}
                                     onDelete={() => handleDeleteMessage(msg.id)}
                                     onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
+                                    onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
                                     allMessages={messages}
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
@@ -1835,6 +1883,14 @@ const EncryptedChatInner = () => {
         conversations={conversations.filter(c => c.id !== selectedConvoId)}
         onForward={handleForwardToConversations}
         currentUserId={user?.id}
+      />
+
+      {/* Image Gallery Viewer */}
+      <ImageGalleryViewer
+        images={galleryImages}
+        initialIndex={galleryIndex}
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
       />
     </>
     );
