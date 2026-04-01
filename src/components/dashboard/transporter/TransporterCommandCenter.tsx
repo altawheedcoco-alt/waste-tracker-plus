@@ -22,6 +22,9 @@ import MiniSparkline from './command-center/MiniSparkline';
 import StatMicro from './command-center/StatMicro';
 import useAnimatedNumber from './command-center/useAnimatedNumber';
 import { calcHealthScore, StatusDot } from './command-center/healthUtils';
+import HeroMetricsGrid from './command-center/HeroMetricsGrid';
+import OrgResourcesGrid from './command-center/OrgResourcesGrid';
+import GaugesAndSummary from './command-center/GaugesAndSummary';
 
 // Lazy-loaded for PDF export — reduces initial bundle
 const loadPdfTools = () => Promise.all([
