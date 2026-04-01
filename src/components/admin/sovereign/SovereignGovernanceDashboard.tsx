@@ -2,9 +2,10 @@ import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText } from 'lucide-react';
+import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSovereignGovernance } from '@/hooks/useSovereignGovernance';
+import SovereignOverviewCard from './SovereignOverviewCard';
 
 const SovereignRolesPanel = lazy(() => import('./SovereignRolesPanel'));
 const SovereignDelegationPanel = lazy(() => import('./SovereignDelegationPanel'));
@@ -14,6 +15,7 @@ const SovereignKPIsPanel = lazy(() => import('./SovereignKPIsPanel'));
 const CrisisManagementPanel = lazy(() => import('./CrisisManagementPanel'));
 const SLAMonitoringPanel = lazy(() => import('./SLAMonitoringPanel'));
 const SovereignReportsPanel = lazy(() => import('./SovereignReportsPanel'));
+const SovereignAuditTimeline = lazy(() => import('./SovereignAuditTimeline'));
 
 const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
@@ -30,6 +32,7 @@ const SovereignGovernanceDashboard = () => {
     { value: 'sla', label: 'SLA', icon: Target },
     { value: 'ai-command', label: 'القرار الذكي', icon: Brain, badge: decisions.filter(d => d.status === 'pending').length || undefined },
     { value: 'reports', label: 'التقارير', icon: FileText },
+    { value: 'audit', label: 'سجل الرقابة', icon: History },
   ];
 
   return (
@@ -45,6 +48,9 @@ const SovereignGovernanceDashboard = () => {
           <p className="text-xs text-muted-foreground">مؤشرات الأداء · الإنذار المبكر · الأزمات · الأدوار · التفويضات · SLA · القرار الذكي · التقارير</p>
         </div>
       </div>
+
+      {/* Overview Card */}
+      <SovereignOverviewCard />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -85,6 +91,9 @@ const SovereignGovernanceDashboard = () => {
         </TabsContent>
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignReportsPanel /></Suspense>
+        </TabsContent>
+        <TabsContent value="audit" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SovereignAuditTimeline /></Suspense>
         </TabsContent>
       </Tabs>
     </div>
