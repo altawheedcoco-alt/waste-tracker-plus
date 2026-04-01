@@ -1424,6 +1424,11 @@ const EncryptedChatInner = () => {
                           <DropdownMenuItem onClick={() => toggleMute(selectedConvoId!)}>
                             <VolumeX className="w-4 h-4 ml-2" /> كتم المحادثة
                           </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowDisappearDialog(true)}>
+                            <Timer className="w-4 h-4 ml-2" />
+                            الرسائل المؤقتة
+                            {disappearActive && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">مفعّل</Badge>}
+                          </DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => toggleBlock(selectedConvoId!)} className="text-destructive">
                             <Ban className="w-4 h-4 ml-2" /> حظر
