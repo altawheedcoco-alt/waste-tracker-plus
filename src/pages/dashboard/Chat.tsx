@@ -36,6 +36,7 @@ import { format, isToday, isYesterday, isSameDay } from 'date-fns';
 import { ar } from 'date-fns/locale';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { soundEngine } from '@/lib/soundEngine';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Check, CheckCheck } from 'lucide-react';
 import MessageReactionsDisplay, { ReactionPicker } from '@/components/chat/MessageReactions';
@@ -109,10 +110,11 @@ const ConversationItem = memo(({
     <motion.div
       layout
       onClick={onClick}
+      whileTap={{ scale: 0.98 }}
       className={cn(
-        "flex items-center gap-3 cursor-pointer transition-colors border-b border-border/30",
-        compact ? "px-2 py-2" : "px-3 py-2.5",
-        isActive ? "bg-primary/10" : "hover:bg-muted/50"
+        "flex items-center gap-3 cursor-pointer transition-all border-b border-border/20",
+        compact ? "px-2 py-2" : "px-3 py-3",
+        isActive ? "bg-primary/8 border-l-2 border-l-primary" : "hover:bg-muted/40 active:bg-muted/60"
       )}
     >
       <div className="relative">
@@ -123,13 +125,25 @@ const ConversationItem = memo(({
           </AvatarFallback>
         </Avatar>
         {partnerStatus.isOnline && (
-          <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+          <motion.div 
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" 
+          />
         )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-semibold truncate">{conversation.partner?.full_name || 'مستخدم'}</h4>
-          <span className="text-[10px] text-muted-foreground shrink-0 mr-1">
+          <h4 className={cn(
+            "text-sm truncate",
+            (conversation.unread_count || 0) > 0 ? "font-bold" : "font-semibold"
+          )}>
+            {conversation.partner?.full_name || 'مستخدم'}
+          </h4>
+          <span className={cn(
+            "text-[10px] shrink-0 mr-1",
+            (conversation.unread_count || 0) > 0 ? "text-primary font-semibold" : "text-muted-foreground"
+          )}>
             {formatTime(conversation.last_message_at)}
           </span>
         </div>
@@ -137,13 +151,15 @@ const ConversationItem = memo(({
           <div className="flex items-center gap-1 min-w-0">
             {isMyLastMessage && (
               conversation.last_message_status === 'read'
-                ? <CheckCheck className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+                ? <CheckCheck className="w-3.5 h-3.5 text-blue-500 shrink-0" />
                 : conversation.last_message_status === 'delivered'
-                  ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-                  : <Check className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+                  ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground/70 shrink-0" />
+                  : <Check className="w-3.5 h-3.5 text-muted-foreground/50 shrink-0" />
             )}
-            {!isMyLastMessage && <Lock className="w-3 h-3 text-primary shrink-0" />}
-            <p className="text-xs text-muted-foreground truncate">
+            <p className={cn(
+              "text-xs truncate",
+              (conversation.unread_count || 0) > 0 ? "text-foreground font-medium" : "text-muted-foreground"
+            )}>
               {conversation.lastDecryptedPreview 
                 ? (conversation.lastDecryptedPreview.startsWith('voice-') 
                     ? '🎤 رسالة صوتية'
@@ -161,9 +177,9 @@ const ConversationItem = memo(({
             <motion.div
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
-              transition={{ type: 'spring', damping: 15 }}
+              transition={{ type: 'spring', damping: 12, stiffness: 300 }}
             >
-              <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground">
+              <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground shadow-sm">
                 {conversation.unread_count}
               </Badge>
             </motion.div>
@@ -1134,10 +1150,13 @@ const EncryptedChatInner = () => {
         const decrypted = await decryptSingleRow(row, selectedConvoId);
         if (decrypted) {
           setMessages(prev => {
-            // Remove any optimistic temp message & avoid duplicates
             const filtered = prev.filter(m => m.id !== decrypted.id && !m.id.startsWith('temp_'));
             return [...filtered, decrypted];
           });
+          // Play incoming message sound if not from me
+          if (decrypted.sender_id !== user?.id) {
+            try { soundEngine.play('message_received'); } catch {}
+          }
         }
         markAsRead(selectedConvoId);
       })
