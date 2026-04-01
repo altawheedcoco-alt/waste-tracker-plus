@@ -52,6 +52,10 @@ import StarredMessagesPanel from '@/components/chat/StarredMessagesPanel';
 import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 import ReplyPreviewBar from '@/components/chat/ReplyPreview';
 import ChatWallpaperPicker from '@/components/chat/ChatWallpaperPicker';
+import ChatNotificationDialog from '@/components/chat/ChatNotificationDialog';
+import ScheduleMessageDialog from '@/components/chat/ScheduleMessageDialog';
+import { useChatInfiniteScroll } from '@/hooks/useChatInfiniteScroll';
+import { useChatNotificationSettings } from '@/hooks/useChatNotificationSettings';
 
 // Extracted components
 import ConversationItem from '@/components/chat/ConversationItem';
