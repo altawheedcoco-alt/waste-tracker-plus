@@ -30,9 +30,9 @@ const PriceOptimizerPanel = () => {
       if (!user) return;
       const { data } = await supabase
         .from('shipments')
-        .select('waste_type, total_price, estimated_weight')
+        .select('waste_type, client_total, actual_weight')
         .not('waste_type', 'is', null)
-        .not('total_price', 'is', null)
+        .not('client_total', 'is', null)
         .order('created_at', { ascending: false })
         .limit(500);
 
@@ -42,8 +42,8 @@ const PriceOptimizerPanel = () => {
           const t = s.waste_type || 'غير مصنف';
           const prev = byType.get(t) || { totalPrice: 0, totalWeight: 0, count: 0 };
           byType.set(t, {
-            totalPrice: prev.totalPrice + (s.total_price || 0),
-            totalWeight: prev.totalWeight + (s.estimated_weight || 0),
+            totalPrice: prev.totalPrice + (s.client_total || 0),
+            totalWeight: prev.totalWeight + (s.actual_weight || 0),
             count: prev.count + 1,
           });
         });

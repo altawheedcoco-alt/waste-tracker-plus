@@ -33,20 +33,19 @@ const DemandForecastPanel = () => {
       const fromDate = subDays(new Date(), 30).toISOString();
       const { data } = await supabase
         .from('shipments')
-        .select('created_at, estimated_weight, total_price')
+        .select('created_at, actual_weight, client_total')
         .gte('created_at', fromDate)
         .order('created_at', { ascending: true });
 
       if (data && data.length > 0) {
-        // تجميع حسب اليوم
         const grouped = new Map<string, { count: number; weight: number; revenue: number }>();
         data.forEach(s => {
-          const day = format(new Date(s.created_at), 'yyyy-MM-dd');
+          const day = format(new Date(s.created_at!), 'yyyy-MM-dd');
           const prev = grouped.get(day) || { count: 0, weight: 0, revenue: 0 };
           grouped.set(day, {
             count: prev.count + 1,
-            weight: prev.weight + (s.estimated_weight || 0),
-            revenue: prev.revenue + (s.total_price || 0),
+            weight: prev.weight + (s.actual_weight || 0),
+            revenue: prev.revenue + (s.client_total || 0),
           });
         });
         setHistoricalData(Array.from(grouped.entries()).map(([date, v]) => ({
