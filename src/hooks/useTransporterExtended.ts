@@ -28,11 +28,12 @@ export interface DriverSummary {
 }
 
 async function fetchFinancials(organizationId: string): Promise<TransporterFinancials> {
-  const { data: ledger } = await supabase
+  const { data: ledger, error: ledgerError } = await supabase
     .from('accounting_ledger')
     .select('amount, entry_type, entry_category')
     .eq('organization_id', organizationId);
 
+  if (ledgerError) throw ledgerError;
   const entries = ledger || [];
 
   const totalRevenue = entries
