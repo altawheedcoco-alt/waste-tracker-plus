@@ -9749,6 +9749,13 @@ export type Database = {
             foreignKeyName: "deposits_deposit_link_id_fkey"
             columns: ["deposit_link_id"]
             isOneToOne: false
+            referencedRelation: "deposit_links_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "deposits_deposit_link_id_fkey"
+            columns: ["deposit_link_id"]
+            isOneToOne: false
             referencedRelation: "organization_deposit_links"
             referencedColumns: ["id"]
           },
@@ -46012,6 +46019,75 @@ export type Database = {
       }
     }
     Views: {
+      deposit_links_public: {
+        Row: {
+          allow_amount_edit: boolean | null
+          allow_date_edit: boolean | null
+          allow_partner_edit: boolean | null
+          created_at: string | null
+          description: string | null
+          expires_at: string | null
+          id: string | null
+          is_active: boolean | null
+          organization_id: string | null
+          preset_amount: number | null
+          preset_category: string | null
+          preset_waste_type: string | null
+          require_receipt: boolean | null
+          title: string | null
+          token: string | null
+        }
+        Insert: {
+          allow_amount_edit?: boolean | null
+          allow_date_edit?: boolean | null
+          allow_partner_edit?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          organization_id?: string | null
+          preset_amount?: number | null
+          preset_category?: string | null
+          preset_waste_type?: string | null
+          require_receipt?: boolean | null
+          title?: string | null
+          token?: string | null
+        }
+        Update: {
+          allow_amount_edit?: boolean | null
+          allow_date_edit?: boolean | null
+          allow_partner_edit?: boolean | null
+          created_at?: string | null
+          description?: string | null
+          expires_at?: string | null
+          id?: string | null
+          is_active?: boolean | null
+          organization_id?: string | null
+          preset_amount?: number | null
+          preset_category?: string | null
+          preset_waste_type?: string | null
+          require_receipt?: boolean | null
+          title?: string | null
+          token?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_deposit_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "mv_organization_summary"
+            referencedColumns: ["organization_id"]
+          },
+          {
+            foreignKeyName: "organization_deposit_links_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mv_admin_dashboard: {
         Row: {
           active_contracts: number | null
