@@ -3,192 +3,37 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  TrendingUp, TrendingDown, Truck, CheckCircle2, Users, Route, Gauge, Zap, Activity,
-  Package, Timer, Fuel, DollarSign, AlertTriangle, Shield, Clock, MapPin, Wallet,
-  BarChart3, ArrowUpRight, ArrowDownRight, Target, Sparkles, FileCheck, Eye,
-  Signal, Radio, Milestone, ShieldCheck, CircleDot, ChevronDown, ChevronUp,
-  Boxes, Navigation, Compass, Workflow, HeartPulse, Receipt, FileText,
-  Building2, Scale, Leaf, CreditCard, UserCheck, Wrench, Star, Globe,
-  BookOpen, BadgeCheck, Handshake, TrendingUp as TUp
+  TrendingUp, TrendingDown, Truck, CheckCircle2, Users, Route, Gauge, Activity,
+  Package, Clock, Fuel, DollarSign, AlertTriangle, Shield, MapPin, Wallet,
+  BarChart3, Target, FileCheck, FileText, Building2, Leaf, CreditCard,
+  UserCheck, Handshake, HeartPulse, Receipt, Compass
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// Extracted sub-components
+import ArcGauge from './command-center/ArcGauge';
+import MiniSparkline from './command-center/MiniSparkline';
+import StatMicro from './command-center/StatMicro';
+import useAnimatedNumber from './command-center/useAnimatedNumber';
+import { calcHealthScore, StatusDot } from './command-center/healthUtils';
+
 // Lazy-loaded for PDF export — reduces initial bundle
 const loadPdfTools = () => Promise.all([
   import('html2canvas'),
   import('jspdf'),
 ]).then(([h, j]) => ({ html2canvas: h.default, jsPDF: j.default }));
 
-// ─── Animated counter ───
-const useAnimatedNumber = (target: number, duration = 1200) => {
-  const [current, setCurrent] = useState(0);
-  useEffect(() => {
-    if (target === 0) { setCurrent(0); return; }
-    const start = performance.now();
-    const animate = (now: number) => {
-      const elapsed = now - start;
-      const progress = Math.min(elapsed / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setCurrent(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(animate);
-    };
-    requestAnimationFrame(animate);
-  }, [target, duration]);
-  return current;
-};
-
-// ─── Animated arc gauge ───
-const ArcGauge = ({ value, max = 100, size = 100, label, color, icon: Icon }: {
-  value: number; max?: number; size?: number; label: string; color: string; icon: any;
-}) => {
-  const pct = Math.min(value / max, 1) * 100;
-  const radius = (size - 12) / 2;
-  const circumference = radius * Math.PI;
-  const offset = circumference - (pct / 100) * circumference;
-  const statusColor = pct >= 80 ? 'text-emerald-500' : pct >= 50 ? 'text-amber-500' : 'text-destructive';
-
-  return (
-    <div className="flex flex-col items-center gap-1">
-      <svg width={size} height={size / 2 + 10} className="overflow-visible">
-        <path d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
-          fill="none" stroke="hsl(var(--muted))" strokeWidth="8" strokeLinecap="round" />
-        <motion.path d={`M ${6} ${size / 2} A ${radius} ${radius} 0 0 1 ${size - 6} ${size / 2}`}
-          fill="none" stroke={color} strokeWidth="8" strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 1.8, ease: 'easeOut', delay: 0.4 }} />
-        <text x={size / 2} y={size / 2 - 8} textAnchor="middle" className="fill-foreground text-xl font-black">{Math.round(pct)}%</text>
-      </svg>
-      <div className="flex items-center gap-1 -mt-1">
-        <Icon className={`w-3 h-3 ${statusColor}`} />
-        <span className="text-[10px] text-muted-foreground font-medium">{label}</span>
-      </div>
-    </div>
-  );
-};
-
-// ─── Mini sparkline ───
-const MiniSparkline = ({ data, color, height = 28, width = 90 }: { data: number[]; color: string; height?: number; width?: number }) => {
-  if (!data.length) return null;
-  const max = Math.max(...data, 1);
-  const min = Math.min(...data, 0);
-  const range = max - min || 1;
-  const points = data.map((v, i) => `${(i / (data.length - 1)) * width},${height - ((v - min) / range) * (height - 4) - 2}`).join(' ');
-  const areaPoints = `0,${height} ${points} ${width},${height}`;
-  return (
-    <svg width={width} height={height} className="shrink-0">
-      <defs>
-        <linearGradient id={`spark-${color.replace(/[^a-z0-9]/gi, '')}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor={color} stopOpacity="0.3" />
-          <stop offset="100%" stopColor={color} stopOpacity="0" />
-        </linearGradient>
-      </defs>
-      <polygon points={areaPoints} fill={`url(#spark-${color.replace(/[^a-z0-9]/gi, '')})`} />
-      <polyline points={points} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-      {data.length > 0 && (
-        <circle cx={width} cy={height - ((data[data.length - 1] - min) / range) * (height - 4) - 2} r="3" fill={color} />
-      )}
-    </svg>
-  );
-};
-
-// ─── Status Dot ───
-const StatusDot = ({ status }: { status: 'healthy' | 'warning' | 'critical' }) => {
-  const colors = { healthy: 'bg-emerald-500', warning: 'bg-amber-500', critical: 'bg-destructive' };
-  return (
-    <span className="relative flex h-2.5 w-2.5">
-      <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${colors[status]} opacity-40`} />
-      <span className={`relative inline-flex rounded-full h-2.5 w-2.5 ${colors[status]}`} />
-    </span>
-  );
-};
-
-// ─── Health Calculator ───
-const calcHealthScore = (stats: any): { score: number; status: 'healthy' | 'warning' | 'critical'; factors: string[] } => {
-  if (!stats) return { score: 0, status: 'critical', factors: [] };
-  let score = 100;
-  const factors: string[] = [];
-
-  if (stats.overdueCount > 0) { score -= stats.overdueCount * 8; factors.push(`${stats.overdueCount} شحنة متأخرة`); }
-  if (stats.pendingShipments > 10) { score -= 10; factors.push('تراكم في طلبات الموافقة'); }
-  if (stats.totalDrivers > 0 && stats.availableDrivers === 0) { score -= 20; factors.push('لا يوجد سائقين متاحين'); }
-  if (stats.completionRate < 50 && stats.todayTrips > 0) { score -= 15; factors.push('معدل إنجاز منخفض'); }
-  if (stats.todayTrips === 0) { score -= 5; factors.push('لا توجد رحلات اليوم بعد'); }
-  if (stats.unpaidInvoices > 3) { score -= 10; factors.push(`${stats.unpaidInvoices} فاتورة غير مسددة`); }
-  if (stats.expiringDocs > 0) { score -= stats.expiringDocs * 5; factors.push(`${stats.expiringDocs} مستند يحتاج تجديد`); }
-
-  score = Math.max(0, Math.min(100, score));
-  const status = score >= 75 ? 'healthy' : score >= 45 ? 'warning' : 'critical';
-  return { score, status, factors };
-};
-
-// ─── Stat Micro Card with drill-down ───
-const StatMicro = ({ icon: Icon, label, value, color, alert, onClick, sub, details }: {
-  icon: any; label: string; value: string | number; color: string; alert?: boolean; onClick?: () => void; sub?: string;
-  details?: { items: { label: string; value: string | number }[]; actionLabel?: string };
-}) => {
-  const content = (
-    <motion.div
-      whileHover={{ scale: 1.03, y: -1 }} whileTap={{ scale: 0.97 }}
-      onClick={details ? undefined : onClick}
-      className={`flex items-center gap-2 rounded-xl py-2 px-2.5 border relative overflow-hidden transition-all ${onClick || details ? 'cursor-pointer hover:shadow-md' : ''} ${
-        alert ? 'bg-destructive/8 border-destructive/15' : 'bg-muted/20 border-border/30'
-      }`}
-    >
-      {alert && <motion.div className="absolute inset-0 bg-destructive/5" animate={{ opacity: [0, 0.4, 0] }} transition={{ duration: 2, repeat: Infinity }} />}
-      <Icon className={`w-4 h-4 ${color} shrink-0`} />
-      <div className="flex-1 min-w-0 text-right">
-        <p className={`text-sm font-bold ${color} tabular-nums`}>{value}</p>
-        <p className="text-[9px] text-muted-foreground truncate">{label}</p>
-        {sub && <p className="text-[8px] text-muted-foreground/60 truncate">{sub}</p>}
-      </div>
-    </motion.div>
-  );
-
-  if (!details) return content;
-
-  return (
-    <Popover>
-      <PopoverTrigger asChild>{content}</PopoverTrigger>
-      <PopoverContent className="w-56 p-0 rounded-xl overflow-hidden" align="center" dir="rtl"
-        onOpenAutoFocus={(e) => e.preventDefault()}>
-        <div className="p-2.5 border-b border-border/30 bg-muted/20 flex items-center justify-between">
-          <span className="text-xs font-bold text-foreground flex items-center gap-1.5">
-            <Icon className={`w-3.5 h-3.5 ${color}`} />
-            {label}
-          </span>
-          <Badge variant="outline" className="text-[9px] h-4">{value}</Badge>
-        </div>
-        <div className="p-2 space-y-1">
-          {details.items.map((item, i) => (
-            <div key={i} className="flex items-center justify-between py-1 px-1.5 text-[11px] rounded hover:bg-muted/30">
-              <span className="text-muted-foreground">{item.label}</span>
-              <span className="font-bold text-foreground">{item.value}</span>
-            </div>
-          ))}
-        </div>
-        {onClick && (
-          <button
-            onClick={onClick}
-            className="w-full text-center py-2 text-[10px] font-bold text-primary hover:bg-primary/5 border-t border-border/30 transition-colors"
-          >
-            {details.actionLabel || 'عرض التفاصيل الكاملة'} →
-          </button>
-        )}
-      </PopoverContent>
-    </Popover>
-  );
-};
-
 type TimePeriod = 'today' | 'week' | 'month';
 const PERIOD_LABELS: Record<TimePeriod, string> = { today: 'اليوم', week: 'الأسبوع', month: 'الشهر' };
+
+// Max rows to fetch from ledger to prevent pulling entire history
+const LEDGER_LIMIT = 500;
 
 const TransporterCommandCenter = () => {
   const { organization } = useAuth();
@@ -223,47 +68,54 @@ const TransporterCommandCenter = () => {
   }, [isExporting, now]);
 
   const { data: stats, isLoading } = useQuery({
-    queryKey: ['transporter-command-center-v5', organization?.id, period],
+    queryKey: ['transporter-command-center-v6', organization?.id, period],
     queryFn: async () => {
+      const orgId = organization!.id;
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
       const tomorrow = new Date(today); tomorrow.setDate(tomorrow.getDate() + 1);
-      // Period-based start date
       const periodStart = new Date(today);
       if (period === 'week') periodStart.setDate(periodStart.getDate() - 7);
       else if (period === 'month') periodStart.setDate(periodStart.getDate() - 30);
       const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
       const monthAgo = new Date(today); monthAgo.setDate(monthAgo.getDate() - 30);
 
-      // Batch 1: Core shipment data (most critical — renders hero cards)
+      // ── Batch 1: Core shipment + drivers (hero cards) ──
       const [todayR, yesterdayR, activeR, driversR, pendingR, overdueR] = await Promise.all([
-        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', periodStart.toISOString()).lt('created_at', tomorrow.toISOString()),
-        supabase.from('shipments').select('id').eq('transporter_id', organization!.id).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
-        supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', organization!.id).in('status', ['in_transit', 'approved', 'collecting'] as any),
-        supabase.from('drivers').select('id, is_available').eq('organization_id', organization!.id),
-        supabase.from('shipments').select('id').eq('transporter_id', organization!.id).in('status', ['new'] as any),
-        supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', organization!.id).not('status', 'in', '("delivered","confirmed","cancelled")'),
+        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', orgId).gte('created_at', periodStart.toISOString()).lt('created_at', tomorrow.toISOString()),
+        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', orgId).gte('created_at', yesterday.toISOString()).lt('created_at', today.toISOString()),
+        supabase.from('shipments').select('id, status, driver_id').eq('transporter_id', orgId).in('status', ['in_transit', 'approved', 'collecting'] as any),
+        supabase.from('drivers').select('id, is_available').eq('organization_id', orgId),
+        supabase.from('shipments').select('id', { count: 'exact', head: true }).eq('transporter_id', orgId).in('status', ['new'] as any),
+        supabase.from('shipments').select('id, expected_delivery_date, status').eq('transporter_id', orgId).not('status', 'in', '("delivered","confirmed","cancelled")'),
       ]);
 
-      // Batch 2: Trend & financial data (sparklines, revenue)
+      // ── Batch 2: Trends + financials (sparklines, revenue) ──
       const [weekR, monthR, ledgerR, partnersR] = await Promise.all([
-        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', organization!.id).gte('created_at', weekAgo.toISOString()),
-        supabase.from('shipments').select('id, status, quantity').eq('transporter_id', organization!.id).gte('created_at', monthAgo.toISOString()),
-        supabase.from('accounting_ledger').select('amount, entry_type, entry_category, created_at').eq('organization_id', organization!.id),
-        supabase.from('external_partners').select('id').eq('organization_id', organization!.id),
+        supabase.from('shipments').select('status, quantity, created_at').eq('transporter_id', orgId).gte('created_at', weekAgo.toISOString()),
+        supabase.from('shipments').select('id, status, quantity').eq('transporter_id', orgId).gte('created_at', monthAgo.toISOString()),
+        supabase.from('accounting_ledger').select('amount, entry_type, entry_category, created_at').eq('organization_id', orgId).order('created_at', { ascending: false }).limit(LEDGER_LIMIT),
+        supabase.from('external_partners').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
       ]);
 
-      // Batch 3: Organization resources (secondary stats)
-      const [invoicesR, receiptsR, employeesR, vehiclesR, docsR, contractsR, depositsR] = await Promise.all([
-        supabase.from('invoices').select('id, status, total_amount').eq('organization_id', organization!.id),
-        supabase.from('shipment_receipts').select('id, status, created_at').eq('transporter_id', organization!.id),
-        supabase.from('organization_members').select('id, status').eq('organization_id', organization!.id),
-        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', organization!.id),
-        supabase.from('entity_documents').select('id, document_category, created_at').eq('organization_id', organization!.id),
-        supabase.from('contracts').select('id, status').eq('organization_id', organization!.id),
-        supabase.from('deposits').select('id, amount').eq('organization_id', organization!.id),
+      // ── Batch 3: Org resources (counts only where possible) ──
+      const [invoicesR, receiptsR, membersR, vehiclesR, docsR, contractsR, depositsR, expiringR, expiredR] = await Promise.all([
+        supabase.from('invoices').select('id, status, total_amount').eq('organization_id', orgId),
+        supabase.from('shipment_receipts').select('id, created_at').eq('transporter_id', orgId).order('created_at', { ascending: false }).limit(100),
+        supabase.from('organization_members').select('id, status').eq('organization_id', orgId),
+        supabase.from('fleet_vehicles').select('id, status').eq('organization_id', orgId),
+        supabase.from('entity_documents').select('id', { count: 'exact', head: true }).eq('organization_id', orgId),
+        supabase.from('contracts').select('id, status').eq('organization_id', orgId),
+        supabase.from('deposits').select('id, amount').eq('organization_id', orgId),
+        // Expiring contracts (next 30 days)
+        supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('organization_id', orgId)
+          .lte('end_date', new Date(Date.now() + 30 * 86400000).toISOString()).gte('end_date', new Date().toISOString()),
+        // Expired contracts still marked active
+        supabase.from('contracts').select('id', { count: 'exact', head: true }).eq('organization_id', orgId)
+          .lt('end_date', new Date().toISOString()).in('status', ['active', 'signed'] as any),
       ]);
 
+      // ── Process data ──
       const todayData = todayR.data || [];
       const todayQuantity = todayData.reduce((acc, s) => acc + (Number(s.quantity) || 0), 0);
       const delivered = todayData.filter(s => ['delivered', 'confirmed'].includes(s.status)).length;
@@ -298,54 +150,22 @@ const TransporterCommandCenter = () => {
 
       const monthData = monthR.data || [];
       const monthDelivered = monthData.filter(s => ['delivered', 'confirmed'].includes(s.status)).length;
-      const monthTotal = monthData.length;
-      const monthQuantity = monthData.reduce((a, s) => a + (Number(s.quantity) || 0), 0);
       const activeDriverIds = new Set((activeR.data || []).map(s => s.driver_id).filter(Boolean));
 
-      // NEW calculated stats
       const allInvoices = invoicesR.data || [];
       const unpaidInvoices = allInvoices.filter(i => i.status === 'unpaid' || i.status === 'pending' || i.status === 'draft').length;
-      const invoicesTotal = allInvoices.reduce((sum, i) => sum + (Number(i.total_amount) || 0), 0);
 
       const allReceipts = receiptsR.data || [];
       const todayReceipts = allReceipts.filter(r => new Date(r.created_at) >= today).length;
 
-      const members = employeesR.data || [];
-      const activeMembers = members.filter(m => m.status === 'active').length;
-
+      const members = membersR.data || [];
       const vehicles = vehiclesR.data || [];
-      const activeVehicles = vehicles.filter(v => v.status === 'active').length;
-
-      const docs = docsR.data || [];
-      // Check for contracts expiring within 30 days (entity_documents has no expiry_date)
-      const thirtyDaysFromNow = new Date();
-      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-      const { count: expiringContractsCount } = await supabase
-        .from('contracts')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', organization!.id)
-        .lte('end_date', thirtyDaysFromNow.toISOString())
-        .gte('end_date', new Date().toISOString());
-      const expiringDocs = expiringContractsCount || 0;
-      
-      const { count: expiredContractsCount } = await supabase
-        .from('contracts')
-        .select('id', { count: 'exact', head: true })
-        .eq('organization_id', organization!.id)
-        .lt('end_date', new Date().toISOString())
-        .in('status', ['active', 'signed'] as any);
-      const expiredDocs = expiredContractsCount || 0;
-
       const contracts = contractsR.data || [];
-      const activeContracts = contracts.filter(c => c.status === 'active' || c.status === 'signed').length;
-
       const deposits = depositsR.data || [];
-      const totalDeposits = deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
-      const pendingDeposits = 0;
 
       return {
         todayTrips: todayData.length,
-        yesterdayTrips: yesterdayR.data?.length || 0,
+        yesterdayTrips: yesterdayR.count || 0,
         activeShipments: activeR.data?.length || 0,
         todayDelivered: delivered,
         totalDrivers: allDrivers.length,
@@ -355,7 +175,7 @@ const TransporterCommandCenter = () => {
         completionRate: todayData.length > 0 ? Math.round((delivered / todayData.length) * 100) : 0,
         totalRevenue,
         pendingPayments,
-        pendingShipments: pendingR.data?.length || 0,
+        pendingShipments: pendingR.count || 0,
         overdueCount,
         weeklySparkline: dailyCounts,
         weeklyQuantitySparkline: dailyQuantities,
@@ -365,39 +185,37 @@ const TransporterCommandCenter = () => {
         awaitingPickup: (activeR.data || []).filter(s => s.status === 'approved').length,
         collecting: (activeR.data || []).filter(s => s.status === 'collecting').length,
         monthDelivered,
-        monthTotal,
-        monthQuantity,
-        partnersCount: partnersR.data?.length || 0,
+        monthTotal: monthData.length,
+        monthQuantity: monthData.reduce((a, s) => a + (Number(s.quantity) || 0), 0),
+        partnersCount: partnersR.count || 0,
         driverUtilization: allDrivers.length > 0 ? Math.round((activeDriverIds.size / allDrivers.length) * 100) : 0,
-        // NEW
         totalInvoices: allInvoices.length,
         unpaidInvoices,
-        invoicesTotal,
+        invoicesTotal: allInvoices.reduce((sum, i) => sum + (Number(i.total_amount) || 0), 0),
         totalReceipts: allReceipts.length,
         todayReceipts,
         totalMembers: members.length,
-        activeMembers,
+        activeMembers: members.filter(m => m.status === 'active').length,
         totalVehicles: vehicles.length,
-        activeVehicles,
-        totalDocs: docs.length,
-        expiringDocs,
-        expiredDocs,
+        activeVehicles: vehicles.filter(v => v.status === 'active').length,
+        totalDocs: docsR.count || 0,
+        expiringDocs: expiringR.count || 0,
+        expiredDocs: expiredR.count || 0,
         totalContracts: contracts.length,
-        activeContracts,
-        totalDeposits,
-        pendingDeposits,
+        activeContracts: contracts.filter(c => c.status === 'active' || c.status === 'signed').length,
+        totalDeposits: deposits.reduce((sum, d) => sum + (Number(d.amount) || 0), 0),
+        pendingDeposits: 0,
       };
     },
     enabled: !!organization?.id,
-    staleTime: 2 * 60 * 1000,       // 2 minutes
-    gcTime: 10 * 60 * 1000,         // 10 minutes
-    refetchInterval: 60000,          // every 60s instead of 30s
+    staleTime: 2 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+    refetchInterval: 60000,
     refetchOnWindowFocus: false,
   });
 
   const health = useMemo(() => calcHealthScore(stats), [stats]);
 
-  // Animated numbers
   const a = {
     trips: useAnimatedNumber(stats?.todayTrips || 0),
     inTransit: useAnimatedNumber(stats?.inTransit || 0),
@@ -509,6 +327,7 @@ const TransporterCommandCenter = () => {
                     <CreditCard className="w-3 h-3" /> {stats?.unpaidInvoices} فاتورة معلقة
                   </Badge>
                 )}
+
                 {/* Period Toggle */}
                 <div className="flex items-center gap-0.5 bg-muted/30 rounded-lg p-0.5 border border-border/30">
                   {(['today', 'week', 'month'] as TimePeriod[]).map(p => (
@@ -617,17 +436,17 @@ const TransporterCommandCenter = () => {
               ))}
             </div>
 
-            {/* ═══════════ FULL ORG DASHBOARD GRID — Always Visible ═══════════ */}
+            {/* ═══════════ FULL ORG DASHBOARD GRID ═══════════ */}
             <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mt-3">
               
               {/* Row 1: Operations */}
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-emerald-500"
-                  sub={stats?.revenueSparkline ? undefined : undefined} onClick={() => navigate('/dashboard/erp/accounting')} />
+                <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-primary"
+                  onClick={() => navigate('/dashboard/erp/accounting')} />
                 <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5}
                   onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
                 <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
-                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-emerald-500'} alert={(stats?.overdueCount || 0) > 0}
+                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-primary'} alert={(stats?.overdueCount || 0) > 0}
                   onClick={() => navigate('/dashboard/transporter-shipments?status=overdue')} />
                 <StatMicro icon={Activity} label="شحنات نشطة" value={a.active} color="text-primary"
                   onClick={() => navigate('/dashboard/tracking-center')} />
@@ -635,22 +454,22 @@ const TransporterCommandCenter = () => {
 
               {/* Row 2: Organization Resources */}
               <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
-                <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-blue-500"
+                <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-primary"
                   sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
                   onClick={() => navigate('/dashboard/erp/accounting')} />
-                <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-teal-500"
+                <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-accent-foreground"
                   sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
                   onClick={() => navigate('/dashboard/transporter-receipts')} />
-                <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-violet-500"
+                <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-secondary-foreground"
                   sub={`${stats?.activeMembers || 0} نشط`}
                   onClick={() => navigate('/dashboard/org-structure')} />
-                <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-orange-500"
+                <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-primary"
                   sub={`${stats?.activeVehicles || 0} فعّال`}
                   onClick={() => navigate('/dashboard/transporter-drivers')} />
-                <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-indigo-500"
+                <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-primary"
                   sub={`${stats?.activeContracts || 0} سارٍ`}
                   onClick={() => navigate('/dashboard/contracts')} />
-                <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-cyan-500"
+                <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-muted-foreground"
                   sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
                   alert={(stats?.expiringDocs || 0) > 0}
                   onClick={() => navigate('/dashboard/document-center')} />
@@ -660,10 +479,10 @@ const TransporterCommandCenter = () => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                 <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500"
                   onClick={() => navigate('/dashboard/erp/accounting')} />
-                <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-emerald-500"
+                <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-primary"
                   sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
                   onClick={() => navigate('/dashboard/quick-deposit-links')} />
-                <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-indigo-500"
+                <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-primary"
                   onClick={() => navigate('/dashboard/partners')} />
                 <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
                   sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`}
@@ -689,7 +508,7 @@ const TransporterCommandCenter = () => {
                     {[
                       { v: a.monthTotal, l: 'شحنة' },
                       { v: (stats?.monthQuantity || 0).toLocaleString('ar-SA'), l: 'طن' },
-                      { v: stats?.monthDelivered || 0, l: 'تم التسليم', c: 'text-emerald-500' },
+                      { v: stats?.monthDelivered || 0, l: 'تم التسليم', c: 'text-primary' },
                       { v: a.partners, l: 'شريك' },
                     ].map((item, i) => (
                       <div key={i} className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
