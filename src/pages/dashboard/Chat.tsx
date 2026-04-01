@@ -514,11 +514,27 @@ const DateSeparator = ({ date }: { date: Date }) => {
   return (
     <div className="flex items-center gap-3 my-3 px-4">
       <div className="flex-1 h-px bg-border" />
-      <span className="text-[10px] text-muted-foreground bg-muted px-3 py-0.5 rounded-full">{label}</span>
+      <span className="text-[10px] text-muted-foreground bg-muted px-3 py-0.5 rounded-full shadow-sm">{label}</span>
       <div className="flex-1 h-px bg-border" />
     </div>
   );
 };
+
+// ─── Unread Messages Separator ──────────────────────────
+const UnreadSeparator = memo(() => (
+  <div className="flex items-center gap-3 my-3 px-4">
+    <div className="flex-1 h-px bg-primary/30" />
+    <motion.span
+      initial={{ opacity: 0, scale: 0.9 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="text-[10px] font-semibold text-primary-foreground bg-primary px-4 py-1 rounded-full shadow-sm"
+    >
+      رسائل غير مقروءة
+    </motion.span>
+    <div className="flex-1 h-px bg-primary/30" />
+  </div>
+));
+UnreadSeparator.displayName = 'UnreadSeparator';
 
 // ─── Notes Panel ────────────────────────────────────────
 const NotesPanel = memo(({ 
