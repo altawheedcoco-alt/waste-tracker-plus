@@ -481,6 +481,7 @@ const MessageBubble = memo(({
         onDelete={isMine ? onDelete : undefined}
         onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
+        onPin={onPin}
         isMine={isMine}
       />
 
