@@ -198,7 +198,7 @@ OrgGroupHeader.displayName = 'OrgGroupHeader';
 
 // ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
-  message, isMine, reactions, onReact, onReply, onForward, onDelete, allMessages, isStarred, onStar, isMobile, isFirstInGroup, isLastInGroup 
+  message, isMine, reactions, onReact, onReply, onForward, onDelete, onEdit, allMessages, isStarred, onStar, isMobile, isFirstInGroup, isLastInGroup 
 }: { 
   message: DecryptedMessage; 
   isMine: boolean;
@@ -207,6 +207,7 @@ const MessageBubble = memo(({
   onReply: () => void;
   onForward: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   allMessages: DecryptedMessage[];
   isStarred?: boolean;
   onStar?: () => void;
@@ -475,6 +476,7 @@ const MessageBubble = memo(({
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
         onDelete={isMine ? onDelete : undefined}
+        onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
         isMine={isMine}
       />
@@ -488,6 +490,7 @@ const MessageBubble = memo(({
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
         onDelete={isMine ? onDelete : undefined}
+        onEdit={isMine && message.message_type === 'text' ? onEdit : undefined}
         onStar={onStar}
         onReact={(emoji) => onReact(emoji)}
       />
@@ -786,6 +789,7 @@ const EncryptedChatInner = () => {
   const [showChatSearch, setShowChatSearch] = useState(false);
   const [chatSearchQuery, setChatSearchQuery] = useState('');
   const [highlightedMsgId, setHighlightedMsgId] = useState<string | null>(null);
+  const [editingMessage, setEditingMessage] = useState<DecryptedMessage | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -817,6 +821,21 @@ const EncryptedChatInner = () => {
       toast.success('تم حذف الرسالة');
     } catch {
       toast.error('فشل حذف الرسالة');
+    }
+  }, []);
+
+  // Edit message handler
+  const handleEditMessage = useCallback(async (messageId: string, newContent: string) => {
+    try {
+      await supabase
+        .from('encrypted_messages')
+        .update({ content: newContent, is_edited: true })
+        .eq('id', messageId);
+      setMessages(prev => prev.map(m => m.id === messageId ? { ...m, content: newContent, is_edited: true } : m));
+      setEditingMessage(null);
+      toast.success('تم تعديل الرسالة');
+    } catch {
+      toast.error('فشل تعديل الرسالة');
     }
   }, []);
 
@@ -1613,6 +1632,7 @@ const EncryptedChatInner = () => {
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
                                     onDelete={() => handleDeleteMessage(msg.id)}
+                                    onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
                                     allMessages={messages}
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
@@ -1637,8 +1657,27 @@ const EncryptedChatInner = () => {
                     />
                   </div>
 
+                  {/* Edit Preview */}
+                  {editingMessage && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="border-t border-border bg-card px-3 py-2 flex items-center gap-2"
+                    >
+                      <div className="w-1 h-8 rounded-full bg-primary shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[10px] font-semibold text-primary">تعديل الرسالة</p>
+                        <p className="text-xs text-muted-foreground truncate">{editingMessage.content.slice(0, 60)}</p>
+                      </div>
+                      <Button variant="ghost" size="icon" className="h-7 w-7 shrink-0" onClick={() => setEditingMessage(null)}>
+                        <X className="w-3.5 h-3.5" />
+                      </Button>
+                    </motion.div>
+                  )}
+
                   {/* Reply Preview */}
-                  {replyTo && (
+                  {replyTo && !editingMessage && (
                     <ReplyPreviewBar replyToMessage={replyTo} onCancel={() => setReplyTo(null)} />
                   )}
 
@@ -1654,6 +1693,11 @@ const EncryptedChatInner = () => {
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
                       onSendMessage={async (text) => {
+                        // Handle edit mode
+                        if (editingMessage) {
+                          await handleEditMessage(editingMessage.id, text.trim());
+                          return;
+                        }
                         // Optimistic: add message instantly before await
                         const optimistic = {
                           id: `temp_${Date.now()}`,
@@ -1671,7 +1715,6 @@ const EncryptedChatInner = () => {
                         setSending(true);
                         try {
                           await sendMessage(selectedConvoId!, text, 'text', undefined, undefined, replyTo?.id);
-                          // Mark as sent (realtime will bring the real message)
                           setMessages(prev => prev.map(m => m.id === optimistic.id ? { ...m, status: 'sent' } : m));
                         } catch {
                           setMessages(prev => prev.filter(m => m.id !== optimistic.id));
