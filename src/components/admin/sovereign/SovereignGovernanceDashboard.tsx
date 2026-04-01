@@ -2,7 +2,7 @@ import { useState, lazy, Suspense } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History } from 'lucide-react';
+import { Crown, KeyRound, Zap, Brain, Shield, BarChart3, Siren, Target, FileText, History, ShieldCheck } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useSovereignGovernance } from '@/hooks/useSovereignGovernance';
 import SovereignOverviewCard from './SovereignOverviewCard';
@@ -16,6 +16,9 @@ const CrisisManagementPanel = lazy(() => import('./CrisisManagementPanel'));
 const SLAMonitoringPanel = lazy(() => import('./SLAMonitoringPanel'));
 const SovereignReportsPanel = lazy(() => import('./SovereignReportsPanel'));
 const SovereignAuditTimeline = lazy(() => import('./SovereignAuditTimeline'));
+const SecurityAuditPanel = lazy(() => import('./SecurityAuditPanel'));
+
+import PlatformPulseChart from './PlatformPulseChart';
 
 const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
@@ -32,6 +35,7 @@ const SovereignGovernanceDashboard = () => {
     { value: 'sla', label: 'SLA', icon: Target },
     { value: 'ai-command', label: 'القرار الذكي', icon: Brain, badge: decisions.filter(d => d.status === 'pending').length || undefined },
     { value: 'reports', label: 'التقارير', icon: FileText },
+    { value: 'security', label: 'الفحص الأمني', icon: ShieldCheck },
     { value: 'audit', label: 'سجل الرقابة', icon: History },
   ];
 
@@ -51,6 +55,7 @@ const SovereignGovernanceDashboard = () => {
 
       {/* Overview Card */}
       <SovereignOverviewCard />
+      <PlatformPulseChart />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -91,6 +96,9 @@ const SovereignGovernanceDashboard = () => {
         </TabsContent>
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignReportsPanel /></Suspense>
+        </TabsContent>
+        <TabsContent value="security" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SecurityAuditPanel /></Suspense>
         </TabsContent>
         <TabsContent value="audit" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignAuditTimeline /></Suspense>
