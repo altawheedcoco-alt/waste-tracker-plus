@@ -218,35 +218,42 @@ const Index = () => {
             </ErrorBoundary>
           )}
 
-          {/* v5.2 — How It Works */}
+          {/* v5.2 — How It Works (highest conversion impact) */}
           <div id="how-it-works">
             <LazySection minH={350}>
               <HowItWorksSection />
             </LazySection>
           </div>
 
-          {/* iRecycle Health — PPG Showcase */}
-          <div id="health-showcase">
-            <LazySection minH={400}>
-              <HealthShowcase />
+          {/* Live Platform Stats (social proof — early) */}
+          <div id="live-stats">
+            <LazySection minH={300}>
+              <LivePlatformStats />
             </LazySection>
           </div>
 
-          {/* SaaS Tech Section - technical identity */}
+          {/* SaaS Tech Section */}
           <div id="saas-tech">
             <LazySection minH={500}>
               <SaaSTechSection />
             </LazySection>
           </div>
 
-          {/* Platform Showcase - immediately after tech section */}
+          {/* Platform Showcase */}
           <div id="platform-showcase">
             <LazySection minH={600}>
               <PlatformShowcase />
             </LazySection>
           </div>
 
-          {/* v5.1 — Driver Ecosystem Showcase */}
+          {/* v5.2 — Savings Calculator (conversion driver) */}
+          <div id="savings-calculator">
+            <LazySection minH={400}>
+              <SavingsCalculator />
+            </LazySection>
+          </div>
+
+          {/* v5.1 — Driver Ecosystem */}
           <div id="driver-ecosystem">
             <LazySection minH={500}>
               <DriverEcosystemShowcase />
@@ -271,6 +278,13 @@ const Index = () => {
           <div id="rating-trust">
             <LazySection minH={400}>
               <RatingTrustSection />
+            </LazySection>
+          </div>
+
+          {/* iRecycle Health */}
+          <div id="health-showcase">
+            <LazySection minH={400}>
+              <HealthShowcase />
             </LazySection>
           </div>
 
