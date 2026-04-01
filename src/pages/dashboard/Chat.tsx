@@ -1121,15 +1121,15 @@ const EncryptedChatInner = () => {
               )}
             >
               {/* Sidebar Header */}
-              <div className="p-3 border-b border-border bg-gradient-to-l from-emerald-500/5 to-transparent">
+              <div className="p-3 border-b border-border bg-gradient-to-l from-primary/5 to-transparent">
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-emerald-600" />
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <h2 className="font-bold text-sm">مركز التواصل</h2>
-                      <p className="text-[10px] text-emerald-600 flex items-center gap-1">
+                      <p className="text-[10px] text-primary flex items-center gap-1">
                         <Lock className="w-2.5 h-2.5" /> تشفير طرف لطرف
                         {totalUnread > 0 && (
                           <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-destructive text-destructive-foreground ms-1">
