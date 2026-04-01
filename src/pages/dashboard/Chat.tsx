@@ -1882,6 +1882,14 @@ const EncryptedChatInner = () => {
         onForward={handleForwardToConversations}
         currentUserId={user?.id}
       />
+
+      {/* Image Gallery Viewer */}
+      <ImageGalleryViewer
+        images={galleryImages}
+        initialIndex={galleryIndex}
+        isOpen={galleryOpen}
+        onClose={() => setGalleryOpen(false)}
+      />
     </>
     );
   };
