@@ -1632,6 +1632,7 @@ const EncryptedChatInner = () => {
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
                                     onDelete={() => handleDeleteMessage(msg.id)}
+                                    onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
                                     allMessages={messages}
                                     isStarred={starredMessageIds.has(msg.id)}
                                     onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
