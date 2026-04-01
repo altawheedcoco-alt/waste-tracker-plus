@@ -245,6 +245,72 @@ const MobileEnhancements = memo(() => {
           from { opacity: 0; }
           to { opacity: 1; }
         }
+
+        /* === Extra-small screen optimizations (360px) === */
+        @media (max-width: 380px) {
+          /* Tighter padding on very small screens */
+          .p-4, .p-6 { padding: 0.625rem !important; }
+          .px-4, .px-6 { padding-inline: 0.625rem !important; }
+          .gap-4 { gap: 0.5rem !important; }
+          .gap-3 { gap: 0.375rem !important; }
+          
+          /* Smaller text for cramped screens */
+          .text-2xl { font-size: 1.125rem !important; }
+          .text-xl { font-size: 1rem !important; }
+          .text-lg { font-size: 0.9375rem !important; }
+          
+          /* Grid columns collapse to single */
+          .grid-cols-2 { grid-template-columns: 1fr !important; }
+          .grid-cols-3 { grid-template-columns: repeat(2, 1fr) !important; }
+          
+          /* Tab lists scroll horizontally */
+          [role="tablist"] {
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            flex-wrap: nowrap !important;
+          }
+          [role="tablist"]::-webkit-scrollbar { display: none; }
+          [role="tab"] {
+            white-space: nowrap;
+            flex-shrink: 0;
+            font-size: 0.75rem !important;
+            padding: 0.375rem 0.625rem !important;
+          }
+          
+          /* Dialog/modal full width on tiny screens */
+          [role="dialog"] > div {
+            max-width: calc(100vw - 1rem) !important;
+            margin: 0.5rem !important;
+          }
+          
+          /* Tables become card-like */
+          table { font-size: 0.75rem !important; }
+          th, td { padding: 0.375rem 0.5rem !important; }
+        }
+
+        /* === Safe area bottom padding for pages with bottom nav === */
+        @media (max-width: 768px) {
+          .pb-safe-bottom {
+            padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px)) !important;
+          }
+          
+          /* Ensure main content doesn't hide behind bottom nav */
+          main, [role="main"], .dashboard-content {
+            padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px));
+          }
+
+          /* Sticky headers account for notch */
+          .sticky-top-safe {
+            top: env(safe-area-inset-top, 0px);
+          }
+
+          /* Touch-friendly minimum hit targets */
+          button:not(.icon-only), a[role="button"] {
+            min-height: 44px;
+            min-width: 44px;
+          }
+        }
       }
 
       /* === Dark mode mobile enhancements === */
