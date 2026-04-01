@@ -1427,7 +1427,16 @@ const EncryptedChatInner = () => {
                         </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-0.5">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => setShowChatSearch(!showChatSearch)}
+                        title="بحث في الرسائل"
+                      >
+                        <Search className="w-4 h-4" />
+                      </Button>
                       <Button
                         variant="ghost"
                         size="icon"
