@@ -61,11 +61,12 @@ async function fetchFinancials(organizationId: string): Promise<TransporterFinan
 }
 
 async function fetchKPIs(organizationId: string): Promise<TransporterKPIs> {
-  const { data: shipments } = await supabase
+  const { data: shipments, error: shipError } = await supabase
     .from('shipments')
     .select('status, created_at, delivered_at, expected_delivery_date')
     .eq('transporter_id', organizationId);
 
+  if (shipError) throw shipError;
   const all = shipments || [];
   const total = all.length;
   if (total === 0) return { onTimeRate: 0, completionRate: 0, avgDeliveryDays: 0, overdueShipments: 0 };
