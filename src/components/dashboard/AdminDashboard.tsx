@@ -236,7 +236,11 @@ const AdminDashboard = () => {
       </motion.div>
 
       <motion.div variants={itemVariants}>
-        <AdminStatsGrid stats={statCards} />
+        <AdminExecutiveSummary />
+      </motion.div>
+
+      <motion.div variants={itemVariants}>
+        <AdminStatsGridEnhanced stats={statCards} />
       </motion.div>
 
       <motion.div variants={itemVariants}>
