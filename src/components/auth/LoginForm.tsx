@@ -33,7 +33,7 @@ const phoneLoginSchema = z.object({
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
 });
 
-type LoginMethod = 'email' | 'phone';
+type LoginMethod = 'email' | 'phone' | 'magic';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
