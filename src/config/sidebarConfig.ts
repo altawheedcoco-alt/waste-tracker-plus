@@ -278,6 +278,7 @@ export const sidebarGroups: SidebarGroupConfig[] = [
     visibleFor: ['transporter'],
     items: [
       { icon: Users, labelAr: 'السائقون', labelEn: 'Drivers', path: '/dashboard/transporter-drivers', key: 'transporter-drivers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers', 'view_drivers'] },
+      { icon: MapPin, labelAr: 'تتبع السائقين', labelEn: 'Driver Tracking', path: '/dashboard/driver-tracking', key: 'transporter-driver-tracking', bindingType: 'internal' as const, requiredPermissions: ['view_drivers', 'manage_drivers'] },
       { icon: Shield, labelAr: 'تصاريح السائقين', labelEn: 'Permits', path: '/dashboard/driver-permits', key: 'driver-permits', bindingType: 'admin' as const, requiredPermissions: ['manage_drivers'] },
       { icon: CalendarClock, labelAr: 'جدولة الرحلات', labelEn: 'Trip Schedule', path: '/dashboard/driver-trip-schedule', key: 'driver-trip-schedule', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
       { icon: HardHat, labelAr: 'عمال التحميل', labelEn: 'Loading Workers', path: '/dashboard/loading-workers', key: 'loading-workers', bindingType: 'internal' as const, requiredPermissions: ['manage_drivers'] },
