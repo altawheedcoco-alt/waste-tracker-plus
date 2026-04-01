@@ -45,7 +45,7 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
   const { toast } = useToast();
   const { t } = useLanguage();
 
-  const [loginMethod, setLoginMethod] = useState<LoginMethod>('email');
+  const [loginMethod, setLoginMethod] = useState<'email' | 'phone' | 'magic'>('email');
   const [loginData, setLoginData] = useState({
     email: localStorage.getItem('rememberEmail') || '',
     phone: localStorage.getItem('rememberPhone') || '',
