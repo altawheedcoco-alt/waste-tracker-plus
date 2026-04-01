@@ -87,6 +87,8 @@ const ConversationItem = memo(({
   currentUserId?: string;
   compact?: boolean;
 }) => {
+  const partnerStatus = useUserOnlineStatus(conversation.partner?.user_id);
+
   const formatTime = (t?: string | null) => {
     if (!t) return '';
     const d = new Date(t);
@@ -114,7 +116,9 @@ const ConversationItem = memo(({
             {conversation.partner?.full_name?.charAt(0) || '?'}
           </AvatarFallback>
         </Avatar>
-        <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-emerald-500 border-2 border-background" />
+        {partnerStatus.isOnline && (
+          <div className="absolute bottom-0 left-0 w-3 h-3 rounded-full bg-green-500 border-2 border-background" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
@@ -132,15 +136,21 @@ const ConversationItem = memo(({
                   ? <CheckCheck className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   : <Check className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
             )}
-            {!isMyLastMessage && <Lock className="w-3 h-3 text-emerald-500 shrink-0" />}
+            {!isMyLastMessage && <Lock className="w-3 h-3 text-primary shrink-0" />}
             <p className="text-xs text-muted-foreground truncate">
               {conversation.lastDecryptedPreview || (!compact && (conversation.partner?.organization_name || 'رسالة مشفرة')) || 'رسالة مشفرة'}
             </p>
           </div>
           {(conversation.unread_count || 0) > 0 && (
-            <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground">
-              {conversation.unread_count}
-            </Badge>
+            <motion.div
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: 'spring', damping: 15 }}
+            >
+              <Badge className="h-5 min-w-5 rounded-full text-[10px] px-1.5 bg-primary text-primary-foreground">
+                {conversation.unread_count}
+              </Badge>
+            </motion.div>
           )}
         </div>
       </div>
@@ -1111,15 +1121,15 @@ const EncryptedChatInner = () => {
               )}
             >
               {/* Sidebar Header */}
-              <div className="p-3 border-b border-border bg-gradient-to-l from-emerald-500/5 to-transparent">
+              <div className="p-3 border-b border-border bg-gradient-to-l from-primary/5 to-transparent">
                 <div className="flex items-center justify-between mb-2.5">
                   <div className="flex items-center gap-2">
-                    <div className="w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <Shield className="w-5 h-5 text-emerald-600" />
+                    <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center">
+                      <Shield className="w-5 h-5 text-primary" />
                     </div>
                     <div>
                       <h2 className="font-bold text-sm">مركز التواصل</h2>
-                      <p className="text-[10px] text-emerald-600 flex items-center gap-1">
+                      <p className="text-[10px] text-primary flex items-center gap-1">
                         <Lock className="w-2.5 h-2.5" /> تشفير طرف لطرف
                         {totalUnread > 0 && (
                           <Badge className="h-4 min-w-4 rounded-full text-[9px] px-1 bg-destructive text-destructive-foreground ms-1">
@@ -1374,11 +1384,20 @@ const EncryptedChatInner = () => {
                         </button>
                         <div className="flex items-center gap-1 text-[10px]">
                           {isPartnerTyping ? (
-                            <span className="text-emerald-500 font-medium animate-pulse">يكتب الآن...</span>
+                            <span className="text-primary font-medium animate-pulse">يكتب الآن...</span>
                           ) : partnerOnline.isOnline ? (
-                            <span className="text-emerald-500 flex items-center gap-1">
-                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+                            <span className="text-green-500 flex items-center gap-1">
+                              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block animate-pulse" />
                               متصل الآن
+                            </span>
+                          ) : partnerOnline.lastSeen ? (
+                            <span className="text-muted-foreground">
+                              آخر ظهور {(() => {
+                                const d = new Date(partnerOnline.lastSeen);
+                                if (isToday(d)) return format(d, 'hh:mm a', { locale: ar });
+                                if (isYesterday(d)) return 'أمس ' + format(d, 'hh:mm a', { locale: ar });
+                                return format(d, 'd/M hh:mm a', { locale: ar });
+                              })()}
                             </span>
                           ) : (
                             <button
@@ -1390,8 +1409,8 @@ const EncryptedChatInner = () => {
                             </button>
                           )}
                           <span className="mx-1 text-muted-foreground">·</span>
-                          <Lock className="w-2.5 h-2.5 text-emerald-500" />
-                          <span className="text-emerald-600">E2E</span>
+                          <Lock className="w-2.5 h-2.5 text-primary" />
+                          <span className="text-primary">E2E</span>
                           {disappearActive && (
                             <>
                               <span className="mx-0.5 text-muted-foreground">·</span>
@@ -1459,7 +1478,7 @@ const EncryptedChatInner = () => {
                       </div>
                     ) : messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <Shield className="w-16 h-16 mb-3 text-emerald-500/20" />
+                        <Shield className="w-16 h-16 mb-3 text-primary/20" />
                         <p className="text-sm font-medium">محادثة مشفرة</p>
                         <p className="text-xs mt-1">الرسائل محمية بتشفير طرف لطرف</p>
                       </div>
