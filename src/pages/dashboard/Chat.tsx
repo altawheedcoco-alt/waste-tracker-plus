@@ -815,6 +815,19 @@ const EncryptedChatInner = () => {
   // Disappearing messages
   const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
 
+  // Pinned messages
+  const { pinnedMessages, fetchPinned, togglePin: togglePinMessage } = usePinnedMessages(selectedConvo?.partner?.organization_id || undefined);
+
+  // Collect all image URLs from messages for gallery
+  const galleryImages = useMemo(() => {
+    return messages
+      .filter(m => m.file_url && (m.message_type === 'image' || /\.(jpg|jpeg|png|gif|webp)$/i.test(m.file_url)))
+      .map(m => ({ url: m.file_url!, name: m.file_name || 'صورة' }));
+  }, [messages]);
+
+  // Fetch pinned when conversation changes
+  useEffect(() => { if (selectedConvo) fetchPinned(); }, [selectedConvo?.id, fetchPinned]);
+
   // Delete message handler
   const handleDeleteMessage = useCallback(async (messageId: string) => {
     try {
