@@ -12,17 +12,20 @@ interface VoiceMessagePlayerProps {
   senderName?: string | null;
 }
 
+const PLAYBACK_SPEEDS = [1, 1.5, 2];
+
 const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvatar, senderName }: VoiceMessagePlayerProps) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [progress, setProgress] = useState(0);
   const [duration, setDuration] = useState(initialDuration || 0);
   const [currentTime, setCurrentTime] = useState(0);
   const [waveformHeights, setWaveformHeights] = useState<number[]>([]);
+  const [speedIndex, setSpeedIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const animationRef = useRef<number>();
 
   useEffect(() => {
-    const heights = Array.from({ length: 28 }, () => Math.random() * 18 + 3);
+    const heights = Array.from({ length: 32 }, () => Math.random() * 20 + 3);
     setWaveformHeights(heights);
   }, [url]);
 
@@ -59,10 +62,19 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
       audioRef.current.pause();
       if (animationRef.current) cancelAnimationFrame(animationRef.current);
     } else {
+      audioRef.current.playbackRate = PLAYBACK_SPEEDS[speedIndex];
       audioRef.current.play();
       animationRef.current = requestAnimationFrame(updateProgress);
     }
     setIsPlaying(!isPlaying);
+  };
+
+  const cycleSpeed = () => {
+    const next = (speedIndex + 1) % PLAYBACK_SPEEDS.length;
+    setSpeedIndex(next);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = PLAYBACK_SPEEDS[next];
+    }
   };
 
   const handleSeek = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -93,7 +105,7 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
           <AvatarImage src={senderAvatar || undefined} />
           <AvatarFallback className={cn(
             "text-[11px]",
-            isOwn ? "bg-[hsl(var(--wa-teal-green))]/30 text-[hsl(var(--wa-teal-green))]" : "bg-muted"
+            isOwn ? "bg-primary/30 text-primary" : "bg-muted"
           )}>
             {senderName?.[0] || '؟'}
           </AvatarFallback>
@@ -101,7 +113,7 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
         <button
           className={cn(
             "absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full flex items-center justify-center shadow-sm",
-            isOwn ? "bg-[hsl(var(--wa-teal-green))] text-white" : "bg-[hsl(var(--wa-light-green))] text-white"
+            isOwn ? "bg-primary text-primary-foreground" : "bg-accent text-accent-foreground"
           )}
           onClick={togglePlay}
         >
@@ -124,28 +136,38 @@ const VoiceMessagePlayer = ({ url, isOwn, duration: initialDuration, senderAvata
             const barProgress = progress / 100 * waveformHeights.length;
             const isActive = i < barProgress;
             return (
-              <div
+              <motion.div
                 key={i}
                 className={cn(
                   "w-[2.5px] rounded-full transition-colors duration-100",
                   isActive 
-                    ? (isOwn ? "bg-[hsl(var(--wa-teal-green))]" : "bg-[hsl(var(--wa-light-green))]")
-                    : (isOwn ? "bg-[hsl(var(--wa-outgoing-foreground))]/25" : "bg-muted-foreground/25")
+                    ? "bg-primary"
+                    : (isOwn ? "bg-primary-foreground/25" : "bg-muted-foreground/25")
                 )}
                 style={{ height: `${height}px` }}
+                animate={isPlaying && isActive ? { scaleY: [1, 1.2, 1] } : { scaleY: 1 }}
+                transition={{ duration: 0.3, repeat: isPlaying && isActive ? Infinity : 0 }}
               />
             );
           })}
         </div>
 
-        {/* Time */}
+        {/* Time + Speed */}
         <div className="flex justify-between items-center">
-          <span className={cn(
-            "text-[10px] font-mono",
-            "text-[hsl(var(--wa-time))]"
-          )}>
+          <span className="text-[10px] font-mono text-muted-foreground">
             {formatTime(isPlaying ? currentTime : duration || 0)}
           </span>
+          <button
+            onClick={cycleSpeed}
+            className={cn(
+              "text-[9px] font-bold rounded px-1 py-0.5 transition-colors",
+              PLAYBACK_SPEEDS[speedIndex] !== 1
+                ? "bg-primary/20 text-primary"
+                : "text-muted-foreground hover:bg-muted"
+            )}
+          >
+            {PLAYBACK_SPEEDS[speedIndex]}x
+          </button>
         </div>
       </div>
     </div>
