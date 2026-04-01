@@ -55,6 +55,7 @@ const SovereignGovernanceDashboard = () => {
 
       {/* Overview Card */}
       <SovereignOverviewCard />
+      <PlatformPulseChart />
 
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
