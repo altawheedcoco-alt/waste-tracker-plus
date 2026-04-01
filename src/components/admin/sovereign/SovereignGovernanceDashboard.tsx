@@ -16,6 +16,9 @@ const CrisisManagementPanel = lazy(() => import('./CrisisManagementPanel'));
 const SLAMonitoringPanel = lazy(() => import('./SLAMonitoringPanel'));
 const SovereignReportsPanel = lazy(() => import('./SovereignReportsPanel'));
 const SovereignAuditTimeline = lazy(() => import('./SovereignAuditTimeline'));
+const SecurityAuditPanel = lazy(() => import('./SecurityAuditPanel'));
+
+import PlatformPulseChart from './PlatformPulseChart';
 
 const TabFallback = () => <Skeleton className="h-48 w-full rounded-xl" />;
 
