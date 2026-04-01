@@ -54,13 +54,14 @@ import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
-import { Timer, Image as ImageIcon, Pin } from 'lucide-react';
+import { Timer, Image as ImageIcon, Pin, Star } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
 import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 import ChatSearchBar from '@/components/chat/ChatSearchBar';
 import LinkPreview, { extractUrls } from '@/components/chat/LinkPreview';
 import ImageGalleryViewer from '@/components/chat/ImageGalleryViewer';
 import PinnedMessagesBar from '@/components/chat/PinnedMessagesBar';
+import StarredMessagesPanel from '@/components/chat/StarredMessagesPanel';
 import { usePinnedMessages } from '@/hooks/usePinnedMessages';
 
 // ─── Types ──────────────────────────────────────────────
@@ -833,6 +834,7 @@ const EncryptedChatInner = () => {
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [showPinnedBar, setShowPinnedBar] = useState(true);
   const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
+  const [showStarredPanel, setShowStarredPanel] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -848,7 +850,7 @@ const EncryptedChatInner = () => {
   // Reactions & Starred
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
-  const { starredMessageIds, toggleStar } = useStarredMessages();
+  const { starredMessages, starredMessageIds, toggleStar } = useStarredMessages();
 
   // Disappearing messages
   const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
@@ -1620,6 +1622,15 @@ const EncryptedChatInner = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => setShowStarredPanel(true)}>
+                            <Star className="w-4 h-4 ml-2" /> الرسائل المميزة
+                            {starredMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-amber-500/20 text-amber-600 mr-auto">{starredMessages.length}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowPinnedBar(!showPinnedBar)}>
+                            <Pin className="w-4 h-4 ml-2" /> الرسائل المثبتة
+                            {pinnedMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{pinnedMessages.length}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleExport}>
                             <Download className="w-4 h-4 ml-2" /> تصدير المحادثة
                           </DropdownMenuItem>
@@ -1939,6 +1950,22 @@ const EncryptedChatInner = () => {
         initialIndex={galleryIndex}
         isOpen={galleryOpen}
         onClose={() => setGalleryOpen(false)}
+      />
+
+      {/* Starred Messages Panel */}
+      <StarredMessagesPanel
+        isOpen={showStarredPanel}
+        onClose={() => setShowStarredPanel(false)}
+        starredMessages={starredMessages}
+        onScrollToMessage={(msgId) => {
+          document.getElementById(`msg-${msgId}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setHighlightedMsgId(msgId);
+          setTimeout(() => setHighlightedMsgId(null), 2000);
+        }}
+        onUnstar={(msgId) => {
+          const msg = messages.find(m => m.id === msgId);
+          if (msg) toggleStar(msgId, msg.conversation_id, msg.content, msg.message_type);
+        }}
       />
     </>
     );
