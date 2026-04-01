@@ -312,7 +312,7 @@ const MessageBubble = memo(({
           </div>
 
           <div className={cn(getBubbleClasses(isMine), "relative")}>
-            {!isMine && message.sender && (
+            {!isMine && message.sender && isFirstInGroup && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();
