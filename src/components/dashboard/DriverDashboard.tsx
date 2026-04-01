@@ -63,6 +63,7 @@ const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarke
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
 const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard'));
+const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverStats'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
