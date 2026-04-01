@@ -134,6 +134,7 @@ const Providers = memo(() => (
                 {shouldEnablePWA() ? <PWAUpdatePrompt /> : null}
                 <AutoPushSubscriber />
                 <PushPermissionBanner />
+                <MobileEnhancements />
               </AuthProvider>
             </BrowserRouter>
           </TooltipProvider>
