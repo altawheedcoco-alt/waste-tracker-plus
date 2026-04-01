@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn, Phone, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn, Phone, Loader2, Wand2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -18,6 +18,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import DemoQuickLogin from './DemoQuickLogin';
+import MagicLinkForm from './MagicLinkForm';
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
@@ -32,7 +33,7 @@ const phoneLoginSchema = z.object({
   password: z.string().min(6, 'كلمة المرور يجب أن تكون 6 أحرف على الأقل'),
 });
 
-type LoginMethod = 'email' | 'phone';
+type LoginMethod = 'email' | 'phone' | 'magic';
 
 interface LoginFormProps {
   onSwitchToRegister: () => void;
@@ -167,6 +168,11 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
     }
   };
 
+  // If magic link mode, show the magic link form
+  if (loginMethod === 'magic') {
+    return <MagicLinkForm onBack={() => setLoginMethod('email')} />;
+  }
+
   return (
     <motion.form
       key="login"
@@ -200,26 +206,38 @@ const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
         <button
           type="button"
           onClick={() => setLoginMethod('email')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
             loginMethod === 'email'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Mail className="w-4 h-4" />
-          البريد الإلكتروني
+          <Mail className="w-3.5 h-3.5" />
+          البريد
         </button>
         <button
           type="button"
           onClick={() => setLoginMethod('phone')}
-          className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
             loginMethod === 'phone'
               ? 'bg-background text-foreground shadow-sm'
               : 'text-muted-foreground hover:text-foreground'
           }`}
         >
-          <Phone className="w-4 h-4" />
-          رقم الهاتف
+          <Phone className="w-3.5 h-3.5" />
+          الهاتف
+        </button>
+        <button
+          type="button"
+          onClick={() => setLoginMethod('magic')}
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 ${
+            loginMethod === 'magic'
+              ? 'bg-background text-foreground shadow-sm'
+              : 'text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <Wand2 className="w-3.5 h-3.5" />
+          رابط سحري
         </button>
       </div>
 
