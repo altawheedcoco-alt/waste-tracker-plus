@@ -97,6 +97,9 @@ const SovereignGovernanceDashboard = () => {
         <TabsContent value="reports" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignReportsPanel /></Suspense>
         </TabsContent>
+        <TabsContent value="security" className="mt-4">
+          <Suspense fallback={<TabFallback />}><SecurityAuditPanel /></Suspense>
+        </TabsContent>
         <TabsContent value="audit" className="mt-4">
           <Suspense fallback={<TabFallback />}><SovereignAuditTimeline /></Suspense>
         </TabsContent>
