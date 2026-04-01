@@ -1510,6 +1510,14 @@ const EncryptedChatInner = () => {
                     <ReplyPreviewBar replyToMessage={replyTo} onCancel={() => setReplyTo(null)} />
                   )}
 
+                  {/* Upload Progress */}
+                  <FileUploadProgress
+                    fileName={uploadingFile?.name || ''}
+                    progress={uploadProgress}
+                    isVisible={!!uploadingFile}
+                    fileType={uploadingFile?.type}
+                  />
+
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
