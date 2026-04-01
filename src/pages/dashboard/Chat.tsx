@@ -1758,20 +1758,30 @@ const EncryptedChatInner = () => {
                       </div>
                     ) : messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <Shield className="w-16 h-16 mb-3 text-primary/20" />
-                        <p className="text-sm font-medium">محادثة مشفرة</p>
-                        <p className="text-xs mt-1">الرسائل محمية بتشفير طرف لطرف</p>
+                        <motion.div
+                          initial={{ scale: 0.8, opacity: 0 }}
+                          animate={{ scale: 1, opacity: 1 }}
+                          transition={{ type: 'spring', damping: 20 }}
+                        >
+                          <Shield className="w-16 h-16 mb-3 text-primary/20" />
+                        </motion.div>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.1 }} className="text-sm font-semibold text-foreground">محادثة مشفرة</motion.p>
+                        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.2 }} className="text-xs mt-1.5 text-center max-w-[250px]">ابدأ بإرسال أول رسالة — محمية بتشفير طرف لطرف</motion.p>
                       </div>
                     ) : (
                       <>
-                        <div className="flex justify-center mb-4">
-                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg px-4 py-2 text-center max-w-md backdrop-blur-sm">
-                            <Lock className="w-4 h-4 text-amber-600 inline-block ml-1" />
+                        <motion.div
+                          initial={{ opacity: 0, y: -10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          className="flex justify-center mb-4"
+                        >
+                          <div className="bg-amber-50/90 dark:bg-amber-900/20 border border-amber-200/50 dark:border-amber-800/50 rounded-xl px-4 py-2 text-center max-w-md backdrop-blur-sm">
+                            <Lock className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400 inline-block ml-1" />
                             <span className="text-[11px] text-amber-700 dark:text-amber-400">
-                              الرسائل محمية بتشفير طرف لطرف. لا يمكن لأي طرف ثالث قراءتها.
+                              الرسائل محمية بتشفير طرف لطرف
                             </span>
                           </div>
-                        </div>
+                        </motion.div>
 
                         {groupedMessages.map((group, gi) => (
                           <div key={gi}>
