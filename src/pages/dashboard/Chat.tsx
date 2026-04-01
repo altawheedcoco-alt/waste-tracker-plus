@@ -183,6 +183,14 @@ const EncryptedChatInner = () => {
   // Pinned messages
   const { pinnedMessages, fetchPinned, togglePin: togglePinMessage } = usePinnedMessages(selectedConvo?.partner?.organization_id || undefined);
 
+  // Infinite scroll
+  const { hasMore, loadingMore, loadOlderMessages, resetPagination } = useChatInfiniteScroll({
+    fetchMessages, conversationId: selectedConvoId,
+  });
+
+  // Per-conversation notification settings
+  const { settings: notifSettings, shouldNotify } = useChatNotificationSettings(selectedConvoId);
+
   // Gallery images
   const galleryImages = useMemo(() => {
     return messages
