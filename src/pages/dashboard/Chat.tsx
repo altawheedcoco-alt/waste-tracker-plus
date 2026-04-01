@@ -814,6 +814,7 @@ const EncryptedChatInner = () => {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [showPinnedBar, setShowPinnedBar] = useState(true);
+  const [firstUnreadId, setFirstUnreadId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
