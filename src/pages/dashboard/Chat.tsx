@@ -362,7 +362,13 @@ const MessageBubble = memo(({
                 </button>
               </div>
             ) : (
-              <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+              <>
+                <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+                {/* Link Previews */}
+                {message.message_type === 'text' && extractUrls(message.content).slice(0, 2).map((url, i) => (
+                  <LinkPreview key={i} url={url} />
+                ))}
+              </>
             )}
             
             {showTimestamp && (
