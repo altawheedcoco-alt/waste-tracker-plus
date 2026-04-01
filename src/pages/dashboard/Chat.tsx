@@ -1564,6 +1564,16 @@ const EncryptedChatInner = () => {
           </div>
         )}
       </div>
+
+      {/* Forward Dialog */}
+      <ForwardDialog
+        isOpen={!!forwardMsg}
+        onClose={() => setForwardMsg(null)}
+        messageContent={forwardMsg?.content || ''}
+        conversations={conversations.filter(c => c.id !== selectedConvoId)}
+        onForward={handleForwardToConversations}
+        currentUserId={user?.id}
+      />
     );
   };
 
