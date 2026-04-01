@@ -63,6 +63,7 @@ const ShipmentMarketplace = lazy(() => import('@/components/driver/ShipmentMarke
 const DriverFinancialWallet = lazy(() => import('@/components/driver/DriverFinancialWallet'));
 const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
 const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard'));
+const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverStats'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
 const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
@@ -119,8 +120,9 @@ interface Shipment {
 const companyTabs = [
   { value: 'tasks', label: 'المهام', icon: ListTodo },
   { value: 'shipments', label: 'الشحنات', icon: Package },
-  { value: 'field', label: 'أدوات الميدان', icon: Wrench },
+  { value: 'field', label: 'الميدان', icon: Wrench },
   { value: 'finance', label: 'المالية', icon: Wallet },
+  { value: 'analytics', label: 'أدائي', icon: BarChart3 },
   { value: 'account', label: 'حسابي', icon: User },
 ];
 
@@ -307,9 +309,14 @@ const DriverDashboard = () => {
               </span>
               {driverInfo && <DriverTypeBadge type={driverInfo.driver_type || 'company'} size="sm" />}
             </div>
-            {driverInfo?.vehicle_plate && (
-              <p className="text-[10px] text-muted-foreground">{driverInfo.vehicle_plate}</p>
-            )}
+            <div className="flex items-center gap-1.5">
+              {driverInfo?.organization?.name && (
+                <p className="text-[10px] text-muted-foreground">{driverInfo.organization.name}</p>
+              )}
+              {driverInfo?.vehicle_plate && (
+                <p className="text-[10px] text-muted-foreground">• {driverInfo.vehicle_plate}</p>
+              )}
+            </div>
           </div>
         </div>
 
@@ -415,7 +422,20 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 1: المهام - Daily Tasks & Assignment */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="tasks" className="mt-4">
+          <TabsContent value="tasks" className="mt-4 space-y-3">
+            {/* Company driver quick stats */}
+            {driverInfo?.driver_type === 'company' && (
+              <Suspense fallback={<Skeleton className="h-20 w-full rounded-xl" />}>
+                <CompanyDriverStats
+                  rating={driverInfo.rating}
+                  totalTrips={driverInfo.total_trips}
+                  acceptanceRate={driverInfo.acceptance_rate}
+                  isAvailable={driverInfo.is_available}
+                  organizationName={driverInfo.organization?.name}
+                />
+                <EarningsMiniCard driverId={driverInfo.id} />
+              </Suspense>
+            )}
             <DriverDailyTasks
               shipments={shipments}
               onNavigate={handleNavigateToShipment}
