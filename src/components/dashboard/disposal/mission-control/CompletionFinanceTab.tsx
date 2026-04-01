@@ -143,9 +143,9 @@ const CompletionFinanceTab = ({ facilityId, organizationId, searchQuery }: Compl
   // Billing
   const billingMutation = useMutation({
     mutationFn: async (op: any) => {
-      const pricePerTon = 450;
+      const pricePerTon = op.cost_per_ton || 450;
       const cost = (op.quantity || 0) * pricePerTon;
-      const invoiceNum = Math.floor(Math.random() * 9000) + 1000;
+      const invoiceNum = `INV-${format(new Date(), 'yyyyMMdd')}-${Date.now().toString(36).toUpperCase().slice(-4)}`;
       const { error } = await supabase.from('disposal_operations').update({
         cost, currency: 'EGP', updated_at: new Date().toISOString(),
       }).eq('id', op.id);
