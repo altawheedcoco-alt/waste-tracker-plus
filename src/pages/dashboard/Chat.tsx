@@ -850,7 +850,7 @@ const EncryptedChatInner = () => {
   // Reactions & Starred
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
-  const { starredMessageIds, toggleStar } = useStarredMessages();
+  const { starredMessages, starredMessageIds, toggleStar } = useStarredMessages();
 
   // Disappearing messages
   const { duration: disappearDuration, setDisappearDuration, isActive: disappearActive } = useDisappearingMessages(selectedConvo?.partner?.organization_id || undefined);
