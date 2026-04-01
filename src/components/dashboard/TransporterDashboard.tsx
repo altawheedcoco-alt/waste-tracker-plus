@@ -1,4 +1,5 @@
 import { useState, Suspense, lazy, useMemo, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { useRealWeather } from '@/hooks/useRealWeather';
 import QuickActionsGrid from './QuickActionsGrid';
@@ -30,7 +31,7 @@ import ShipmentStatusDialog from '@/components/shipments/StatusChangeDialog';
 import AddDepositDialog from '@/components/deposits/AddDepositDialog';
 import { TransporterShipment } from '@/hooks/useTransporterDashboard';
 import { Skeleton } from '@/components/ui/skeleton';
-import { LayoutDashboard, Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf, Truck, Route, CheckCircle2, Users, Package, Clock, Building2 } from 'lucide-react';
+import { LayoutDashboard, Brain, BarChart3, CalendarDays, Handshake, MapPin, Shield, DollarSign, Wrench, Leaf, Truck, Route, CheckCircle2, Users, Package, Clock, Building2, Plus } from 'lucide-react';
 import { TRANSPORTER_TAB_BINDINGS } from '@/config/transporter/transporterBindings';
 import DashboardV2Header from './shared/DashboardV2Header';
 import V2TabsNav from './shared/V2TabsNav';
@@ -82,10 +83,10 @@ const DynamicNearbyRadar = () => {
 };
 
 const tabKeys = [
-  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
   { value: 'operations', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
-  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
   { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
+  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
+  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
   { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
   { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
   { value: 'finance', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
@@ -97,7 +98,7 @@ const tabKeys = [
 const TransporterDashboard = () => {
   const { organization } = useAuth();
   const { t } = useLanguage();
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState('operations');
   const [showDepositDialog, setShowDepositDialog] = useState(false);
   const [showSmartWeightUpload, setShowSmartWeightUpload] = useState(false);
   const [selectedShipment, setSelectedShipment] = useState<TransporterShipment | null>(null);
@@ -377,6 +378,17 @@ const TransporterDashboard = () => {
       <Suspense fallback={null}>
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       </Suspense>
+
+      {/* FAB — إنشاء شحنة سريع */}
+      <motion.button
+        onClick={() => navigate('/dashboard/transporter-shipments?action=new')}
+        className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-8 right-4 sm:right-8 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/25 flex items-center justify-center touch-manipulation hover:shadow-2xl transition-shadow"
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        title="إنشاء شحنة جديدة"
+      >
+        <Plus className="w-6 h-6" />
+      </motion.button>
     </div>
   );
 };

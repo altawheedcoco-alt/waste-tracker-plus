@@ -22,6 +22,9 @@ import MiniSparkline from './command-center/MiniSparkline';
 import StatMicro from './command-center/StatMicro';
 import useAnimatedNumber from './command-center/useAnimatedNumber';
 import { calcHealthScore, StatusDot } from './command-center/healthUtils';
+import HeroMetricsGrid from './command-center/HeroMetricsGrid';
+import OrgResourcesGrid from './command-center/OrgResourcesGrid';
+import GaugesAndSummary from './command-center/GaugesAndSummary';
 
 // Lazy-loaded for PDF export — reduces initial bundle
 const loadPdfTools = () => Promise.all([
@@ -378,176 +381,13 @@ const TransporterCommandCenter = () => {
             </div>
 
             {/* ═══════════ PRIMARY METRICS (4 Hero Cards) ═══════════ */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3">
-              {[
-                {
-                  label: `رحلات ${PERIOD_LABELS[period]}`, value: a.trips, raw: stats?.todayTrips || 0,
-                  icon: Truck, gradient: 'from-blue-500 to-cyan-400', color: '#3B82F6',
-                  sub: `${stats?.yesterdayTrips || 0} أمس`, sparkData: stats?.weeklySparkline,
-                  onClick: () => navigate('/dashboard/transporter-shipments'),
-                },
-                {
-                  label: 'على الطريق', value: a.inTransit, raw: stats?.inTransit || 0,
-                  icon: Route, gradient: 'from-amber-500 to-orange-400', color: '#F59E0B',
-                  sub: `${stats?.collecting || 0} قيد الجمع`, sparkData: null,
-                  onClick: () => navigate('/dashboard/tracking-center'),
-                },
-                {
-                  label: 'تم التسليم', value: a.delivered, raw: stats?.todayDelivered || 0,
-                  icon: CheckCircle2, gradient: 'from-emerald-500 to-teal-400', color: '#10B981',
-                  sub: `إنجاز ${stats?.completionRate || 0}%`, sparkData: null,
-                  onClick: () => navigate('/dashboard/transporter-shipments'),
-                },
-                {
-                  label: 'السائقون', value: a.drivers, raw: stats?.totalDrivers || 0,
-                  icon: Users, gradient: 'from-violet-500 to-purple-400', color: '#8B5CF6',
-                  sub: `${stats?.availableDrivers || 0} متاح · ${stats?.activeDrivers || 0} نشط`,
-                  sparkData: null, onClick: () => navigate('/dashboard/transporter-drivers'),
-                },
-              ].map((m, index) => (
-                <motion.div key={m.label}
-                  initial={{ opacity: 0, y: 24, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  transition={{ delay: 0.1 + index * 0.07, duration: 0.5, type: 'spring', stiffness: 200 }}
-                  whileHover={{ y: -3, scale: 1.015 }} whileTap={{ scale: 0.98 }}
-                  onClick={m.onClick}
-                  className="relative group rounded-xl sm:rounded-2xl border border-border/30 bg-card/80 backdrop-blur-md p-3 sm:p-4 cursor-pointer transition-all duration-300 hover:shadow-xl hover:border-border/60 overflow-hidden"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${m.gradient} opacity-0 group-hover:opacity-[0.04] transition-opacity duration-500`} />
-                  <div className="flex items-start justify-between mb-2 relative z-10">
-                    {m.sparkData && <MiniSparkline data={m.sparkData} color={m.color} height={24} width={60} />}
-                    {!m.sparkData && <div className="w-[60px]" />}
-                    <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${m.gradient} flex items-center justify-center shadow-lg`}>
-                      <m.icon className="w-5 h-5 text-white" />
-                    </div>
-                  </div>
-                  <div className="text-right relative z-10">
-                    <p className="text-2xl sm:text-3xl font-black text-foreground tracking-tight tabular-nums leading-none">{m.value}</p>
-                    <p className="text-[10px] sm:text-xs text-muted-foreground mt-1 font-semibold">{m.label}</p>
-                    <p className="text-[9px] text-muted-foreground/60 mt-0.5">{m.sub}</p>
-                  </div>
-                  {m.raw > 0 && (
-                    <motion.div className="absolute top-2 left-2 w-1.5 h-1.5 rounded-full"
-                      style={{ backgroundColor: m.color }}
-                      animate={{ scale: [1, 1.5, 1], opacity: [0.6, 1, 0.6] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: index * 0.25 }} />
-                  )}
-                </motion.div>
-              ))}
-            </div>
+            <HeroMetricsGrid stats={stats} animatedValues={a} periodLabel={PERIOD_LABELS[period]} />
 
             {/* ═══════════ FULL ORG DASHBOARD GRID ═══════════ */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="mt-3">
-              
-              {/* Row 1: Operations */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-2">
-                <StatMicro icon={DollarSign} label="إجمالي الإيرادات" value={`${a.revenue}K`} color="text-primary"
-                  onClick={() => navigate('/dashboard/erp/accounting')} />
-                <StatMicro icon={Clock} label="بانتظار الموافقة" value={a.pending} color="text-amber-500" alert={(stats?.pendingShipments || 0) > 5}
-                  onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
-                <StatMicro icon={AlertTriangle} label="متأخرة" value={a.overdue}
-                  color={(stats?.overdueCount || 0) > 0 ? 'text-destructive' : 'text-primary'} alert={(stats?.overdueCount || 0) > 0}
-                  onClick={() => navigate('/dashboard/transporter-shipments?status=overdue')} />
-                <StatMicro icon={Activity} label="شحنات نشطة" value={a.active} color="text-primary"
-                  onClick={() => navigate('/dashboard/tracking-center')} />
-              </div>
-
-              {/* Row 2: Organization Resources */}
-              <div className="grid grid-cols-3 sm:grid-cols-6 gap-2 mb-2">
-                <StatMicro icon={Receipt} label="الفواتير" value={a.invoices} color="text-primary"
-                  sub={stats?.unpaidInvoices ? `${stats.unpaidInvoices} معلقة` : 'مسددة'}
-                  onClick={() => navigate('/dashboard/erp/accounting')} />
-                <StatMicro icon={FileCheck} label="الشهادات/الإيصالات" value={a.receipts} color="text-accent-foreground"
-                  sub={stats?.todayReceipts ? `${stats.todayReceipts} اليوم` : undefined}
-                  onClick={() => navigate('/dashboard/transporter-receipts')} />
-                <StatMicro icon={UserCheck} label="فريق العمل" value={a.members} color="text-secondary-foreground"
-                  sub={`${stats?.activeMembers || 0} نشط`}
-                  onClick={() => navigate('/dashboard/org-structure')} />
-                <StatMicro icon={Truck} label="المركبات" value={a.vehicles} color="text-primary"
-                  sub={`${stats?.activeVehicles || 0} فعّال`}
-                  onClick={() => navigate('/dashboard/transporter-drivers')} />
-                <StatMicro icon={Handshake} label="العقود" value={a.contracts} color="text-primary"
-                  sub={`${stats?.activeContracts || 0} سارٍ`}
-                  onClick={() => navigate('/dashboard/contracts')} />
-                <StatMicro icon={FileText} label="المستندات" value={a.docs} color="text-muted-foreground"
-                  sub={stats?.expiringDocs ? `${stats.expiringDocs} تنتهي قريباً` : 'سليمة'}
-                  alert={(stats?.expiringDocs || 0) > 0}
-                  onClick={() => navigate('/dashboard/document-center')} />
-              </div>
-
-              {/* Row 3: Financial & Compliance Bar */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                <StatMicro icon={Wallet} label="المدفوعات المعلقة" value={`${Math.round((stats?.pendingPayments || 0) / 1000)}K`} color="text-amber-500"
-                  onClick={() => navigate('/dashboard/erp/accounting')} />
-                <StatMicro icon={CreditCard} label="الإيداعات" value={`${Math.round((stats?.totalDeposits || 0) / 1000)}K`} color="text-primary"
-                  sub={stats?.pendingDeposits ? `${stats.pendingDeposits} قيد المراجعة` : undefined}
-                  onClick={() => navigate('/dashboard/quick-deposit-links')} />
-                <StatMicro icon={Handshake} label="الشركاء" value={a.partners} color="text-primary"
-                  onClick={() => navigate('/dashboard/partners')} />
-                <StatMicro icon={MapPin} label="بانتظار الاستلام" value={stats?.awaitingPickup || 0} color="text-primary"
-                  sub={`${stats?.todayQuantity?.toLocaleString('ar-SA') || 0} طن اليوم`}
-                  onClick={() => navigate('/dashboard/transporter-shipments?status=new')} />
-              </div>
-            </motion.div>
+            <OrgResourcesGrid stats={stats} animatedValues={a} />
 
             {/* ═══════════ GAUGES + MONTHLY SUMMARY ═══════════ */}
-            <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }} className="mt-3">
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {/* Gauges */}
-                <div className="flex items-center justify-around p-3 rounded-xl bg-muted/20 border border-border/30">
-                  <ArcGauge value={stats?.completionRate || 0} label="الإنجاز" color="hsl(var(--primary))" icon={Target} size={80} />
-                  <ArcGauge value={stats?.driverUtilization || 0} label="استخدام الأسطول" color="#F59E0B" icon={Truck} size={80} />
-                </div>
-
-                {/* Monthly Summary */}
-                <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
-                  <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
-                    ملخص الشهر <Compass className="w-3.5 h-3.5 text-primary" />
-                  </p>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { v: a.monthTotal, l: 'شحنة' },
-                      { v: (stats?.monthQuantity || 0).toLocaleString('ar-SA'), l: 'طن' },
-                      { v: stats?.monthDelivered || 0, l: 'تم التسليم', c: 'text-primary' },
-                      { v: a.partners, l: 'شريك' },
-                    ].map((item, i) => (
-                      <div key={i} className="text-center p-2 rounded-lg bg-card/60 border border-border/20">
-                        <p className={`text-lg font-black tabular-nums ${item.c || 'text-foreground'}`}>{item.v}</p>
-                        <p className="text-[9px] text-muted-foreground">{item.l}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Weekly Quantity Bars */}
-                <div className="p-3 rounded-xl bg-muted/20 border border-border/30 text-right space-y-2">
-                  <p className="text-[11px] font-bold text-foreground flex items-center gap-1.5 justify-end">
-                    اتجاه الكميات (أسبوعي) <BarChart3 className="w-3.5 h-3.5 text-primary" />
-                  </p>
-                  <div className="flex items-end gap-1 h-16 justify-center">
-                    {(stats?.weeklyQuantitySparkline || []).map((qty, i) => {
-                      const max = Math.max(...(stats?.weeklyQuantitySparkline || [1]), 1);
-                      const pct = Math.max((qty / max) * 100, 4);
-                      const isToday = i === (stats?.weeklyQuantitySparkline?.length || 0) - 1;
-                      return (
-                        <Tooltip key={i}>
-                          <TooltipTrigger asChild>
-                            <motion.div className={`w-6 sm:w-8 rounded-t-md ${isToday ? 'bg-primary' : 'bg-primary/30'}`}
-                              initial={{ height: 0 }} animate={{ height: `${pct}%` }}
-                              transition={{ delay: 0.7 + i * 0.05, duration: 0.5, ease: 'easeOut' }} />
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="text-xs">{qty.toLocaleString('ar-SA')} طن</TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                  <div className="flex justify-between text-[8px] text-muted-foreground/50 px-1">
-                    <span>قبل ٧ أيام</span>
-                    <span>اليوم</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            <GaugesAndSummary stats={stats} animatedValues={a} />
 
             {/* ═══════════ LIVE PULSE FOOTER ═══════════ */}
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
