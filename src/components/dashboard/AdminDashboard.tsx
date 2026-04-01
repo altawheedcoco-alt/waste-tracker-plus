@@ -274,6 +274,11 @@ const AdminDashboard = () => {
               >
                 <tab.icon className="w-4 h-4 sm:w-5 sm:h-5" />
                 <span className="font-semibold">{isRTL ? tab.labelAr : tab.labelEn}</span>
+                {tabBadges?.[tab.value] ? (
+                  <Badge variant="destructive" className="text-[9px] h-4 min-w-[16px] px-1 rounded-full">
+                    {tabBadges[tab.value]}
+                  </Badge>
+                ) : null}
               </TabsTrigger>
             ))}
           </TabsList>
