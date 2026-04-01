@@ -53,7 +53,10 @@ export { default as OperationRoomList } from './OperationRoomList';
 // Utility Components
 export { default as ImageLightbox } from './ImageLightbox';
 export { default as ChatSearch } from './ChatSearch';
+export { default as ChatSearchBar } from './ChatSearchBar';
+export { default as ScrollToBottomButton } from './ScrollToBottomButton';
 export { default as ReplyPreview } from './ReplyPreview';
+export { default as ChatMentionRenderer } from './ChatMentionRenderer';
 
 // Types
 export type { ChatPartner } from './ChatSidebar';
