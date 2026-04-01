@@ -1478,7 +1478,7 @@ const EncryptedChatInner = () => {
                       </div>
                     ) : messages.length === 0 ? (
                       <div className="flex flex-col items-center justify-center h-full text-muted-foreground">
-                        <Shield className="w-16 h-16 mb-3 text-emerald-500/20" />
+                        <Shield className="w-16 h-16 mb-3 text-primary/20" />
                         <p className="text-sm font-medium">محادثة مشفرة</p>
                         <p className="text-xs mt-1">الرسائل محمية بتشفير طرف لطرف</p>
                       </div>
