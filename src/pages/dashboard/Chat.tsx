@@ -626,6 +626,13 @@ const EncryptedChatInner = () => {
 
   const selectedConvo = conversations.find(c => c.id === selectedConvoId);
   
+  // Typing indicator
+  const { isPartnerTyping, partnerTypingName, sendTyping, stopTyping } = useTypingIndicator(selectedConvoId || undefined);
+  
+  // Online presence
+  useOnlinePresence();
+  const partnerOnline = useUserOnlineStatus(selectedConvo?.partner?.user_id);
+
   // Reactions
   const messageIds = useMemo(() => messages.map(m => m.id), [messages]);
   const { reactionsMap, toggleReaction } = useChatReactions(messageIds);
