@@ -1555,8 +1555,10 @@ const EncryptedChatInner = () => {
                             <DateSeparator date={group.date} />
                             {group.messages.map(msg => {
                               const isMine = msg.sender_id === user?.id;
+                              const isHighlighted = highlightedMsgId === msg.id;
                               return (
-                                <SwipeableMessage key={msg.id} isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
+                                <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
                                   <MessageBubble
                                     message={msg}
                                     isMine={isMine}
