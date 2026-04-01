@@ -112,11 +112,12 @@ async function fetchKPIs(organizationId: string): Promise<TransporterKPIs> {
 }
 
 async function fetchDriversSummary(organizationId: string): Promise<DriverSummary[]> {
-  const { data: drivers } = await supabase
+  const { data: drivers, error: driversError } = await supabase
     .from('drivers')
     .select('id, is_available, vehicle_plate, profile:profiles(full_name, phone)')
     .eq('organization_id', organizationId);
 
+  if (driversError) throw driversError;
   if (!drivers?.length) return [];
 
   const driverIds = drivers.map(d => d.id);
