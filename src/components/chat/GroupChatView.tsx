@@ -169,7 +169,7 @@ const GroupChatView = ({ room, onBack }: GroupChatViewProps) => {
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48" dir="rtl">
+            <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => setShowMembers(!showMembers)}>
                 <Users className="w-4 h-4 ml-2" />الأعضاء ({onlineCount})
               </DropdownMenuItem>
