@@ -71,7 +71,7 @@ const Hero = memo(() => {
         <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 82% 8%, hsla(50, 100%, 90%, 0.18), transparent 30%)' }} />
         {/* Subtle color accent overlay */}
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-eco-ocean/3" />
-      </div>
+      </motion.div>
 
       <div className="container relative z-10 px-4">
         <div className="max-w-4xl mx-auto text-center">
