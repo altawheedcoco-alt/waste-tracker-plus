@@ -45,7 +45,7 @@ const AdminExecutiveSummary = () => {
         supabase
           .from('shipments')
           .select('id', { count: 'exact', head: true })
-          .in('status', ['approved', 'in_transit', 'collection_started']),
+          .in('status', ['approved', 'in_transit', 'collecting'] as any),
       ]);
 
       return {
