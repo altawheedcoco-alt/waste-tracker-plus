@@ -308,9 +308,14 @@ const DriverDashboard = () => {
               </span>
               {driverInfo && <DriverTypeBadge type={driverInfo.driver_type || 'company'} size="sm" />}
             </div>
-            {driverInfo?.vehicle_plate && (
-              <p className="text-[10px] text-muted-foreground">{driverInfo.vehicle_plate}</p>
-            )}
+            <div className="flex items-center gap-1.5">
+              {driverInfo?.organization?.name && (
+                <p className="text-[10px] text-muted-foreground">{driverInfo.organization.name}</p>
+              )}
+              {driverInfo?.vehicle_plate && (
+                <p className="text-[10px] text-muted-foreground">• {driverInfo.vehicle_plate}</p>
+              )}
+            </div>
           </div>
         </div>
 
