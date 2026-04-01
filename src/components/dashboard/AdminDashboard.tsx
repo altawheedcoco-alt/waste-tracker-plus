@@ -299,6 +299,8 @@ const AdminDashboard = () => {
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
         <CreateWorkOrderDialog open={showWorkOrder} onOpenChange={setShowWorkOrder} />
       </Suspense>
+
+      <AdminMobileQuickBar />
     </motion.div>
   );
 };
