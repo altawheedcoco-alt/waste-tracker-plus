@@ -57,6 +57,8 @@ export { default as ChatSearchBar } from './ChatSearchBar';
 export { default as ScrollToBottomButton } from './ScrollToBottomButton';
 export { default as ReplyPreview } from './ReplyPreview';
 export { default as ChatMentionRenderer } from './ChatMentionRenderer';
+export { default as LinkPreview } from './LinkPreview';
+export { default as ImageGalleryViewer } from './ImageGalleryViewer';
 
 // Types
 export type { ChatPartner } from './ChatSidebar';
