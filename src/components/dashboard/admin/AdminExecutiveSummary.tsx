@@ -37,10 +37,10 @@ const AdminExecutiveSummary = () => {
           .select('id', { count: 'exact', head: true })
           .eq('is_verified', false),
         // جهات بانتظار الموافقة
-        supabase
+        (supabase
           .from('organizations')
-          .select('id', { count: 'exact', head: true })
-          .eq('status' as any, 'pending'),
+          .select('id', { count: 'exact', head: true }) as any)
+          .eq('status', 'pending'),
       ]);
 
       // استعلام منفصل لتجنب مشكلة الأنواع
