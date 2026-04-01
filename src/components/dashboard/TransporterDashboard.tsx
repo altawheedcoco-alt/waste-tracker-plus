@@ -82,10 +82,10 @@ const DynamicNearbyRadar = () => {
 };
 
 const tabKeys = [
-  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
   { value: 'operations', labelKey: 'dashboard.tabs.calendar', icon: CalendarDays },
-  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
   { value: 'tracking', labelKey: 'dashboard.tabs.tracking', icon: MapPin },
+  { value: 'overview', labelKey: 'dashboard.tabs.overview', icon: LayoutDashboard },
+  { value: 'fleet', labelKey: 'dashboard.tabs.fleet', icon: Wrench },
   { value: 'performance', labelKey: 'dashboard.tabs.performance', icon: BarChart3 },
   { value: 'ai', labelKey: 'dashboard.tabs.ai', icon: Brain },
   { value: 'finance', labelKey: 'dashboard.tabs.pricing', icon: DollarSign },
