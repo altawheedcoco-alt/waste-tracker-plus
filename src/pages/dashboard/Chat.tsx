@@ -1691,27 +1691,31 @@ const EncryptedChatInner = () => {
                               const nextMsg = group.messages[mi + 1];
                               const isFirstInGroup = !prevMsg || prevMsg.sender_id !== msg.sender_id;
                               const isLastInGroup = !nextMsg || nextMsg.sender_id !== msg.sender_id;
+                              const showUnreadSep = firstUnreadId === msg.id;
                               return (
-                                <div key={msg.id} id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
-                                <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
-                                  <MessageBubble
-                                    message={msg}
-                                    isMine={isMine}
-                                    reactions={reactionsMap[msg.id] || []}
-                                    onReact={(emoji) => toggleReaction(msg.id, emoji)}
-                                    onReply={() => handleReply(msg)}
-                                    onForward={() => handleForward(msg)}
-                                    onDelete={() => handleDeleteMessage(msg.id)}
-                                    onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
-                                    onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
-                                    allMessages={messages}
-                                    isStarred={starredMessageIds.has(msg.id)}
-                                    onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
-                                    isMobile={isMobile}
-                                    isFirstInGroup={isFirstInGroup}
-                                    isLastInGroup={isLastInGroup}
-                                  />
-                                </SwipeableMessage>
+                                <div key={msg.id}>
+                                  {showUnreadSep && <UnreadSeparator />}
+                                  <div id={`msg-${msg.id}`} className={cn(isHighlighted && "ring-2 ring-primary/50 rounded-xl transition-all duration-500")}>
+                                  <SwipeableMessage isMine={isMine} onSwipeReply={() => handleReply(msg)}>
+                                    <MessageBubble
+                                      message={msg}
+                                      isMine={isMine}
+                                      reactions={reactionsMap[msg.id] || []}
+                                      onReact={(emoji) => toggleReaction(msg.id, emoji)}
+                                      onReply={() => handleReply(msg)}
+                                      onForward={() => handleForward(msg)}
+                                      onDelete={() => handleDeleteMessage(msg.id)}
+                                      onEdit={isMine && msg.message_type === 'text' ? () => setEditingMessage(msg) : undefined}
+                                      onPin={() => togglePinMessage(msg.id, (msg as any).is_pinned || false)}
+                                      allMessages={messages}
+                                      isStarred={starredMessageIds.has(msg.id)}
+                                      onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
+                                      isMobile={isMobile}
+                                      isFirstInGroup={isFirstInGroup}
+                                      isLastInGroup={isLastInGroup}
+                                    />
+                                  </SwipeableMessage>
+                                  </div>
                                 </div>
                               );
                             })}
