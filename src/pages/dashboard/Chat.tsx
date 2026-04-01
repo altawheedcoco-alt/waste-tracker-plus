@@ -1622,6 +1622,15 @@ const EncryptedChatInner = () => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => setShowStarredPanel(true)}>
+                            <Star className="w-4 h-4 ml-2" /> الرسائل المميزة
+                            {starredMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-amber-500/20 text-amber-600 mr-auto">{starredMessages.length}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setShowPinnedBar(!showPinnedBar)}>
+                            <Pin className="w-4 h-4 ml-2" /> الرسائل المثبتة
+                            {pinnedMessages.length > 0 && <Badge className="h-4 text-[9px] px-1 bg-primary/20 text-primary mr-auto">{pinnedMessages.length}</Badge>}
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={handleExport}>
                             <Download className="w-4 h-4 ml-2" /> تصدير المحادثة
                           </DropdownMenuItem>
