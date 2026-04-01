@@ -1810,7 +1810,7 @@ const EncryptedChatInner = () => {
                   {/* Input Area */}
                   <div className="p-2 border-t border-border bg-card shrink-0">
                     <EnhancedChatInput
-                      onSendMessage={useCallback(async (text: string) => {
+                      onSendMessage={async (text) => {
                         if (editingMessage) {
                           await handleEditMessage(editingMessage.id, text.trim());
                           return;
@@ -1839,7 +1839,7 @@ const EncryptedChatInner = () => {
                         } finally {
                           setSending(false);
                         }
-                      }, [editingMessage, handleEditMessage, selectedConvoId, user, sendMessage, replyTo])}
+                      }}
                       onSendFile={async (file) => {
                         const optimistic = {
                           id: `temp_file_${Date.now()}`,
