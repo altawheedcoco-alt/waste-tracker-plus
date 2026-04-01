@@ -1,8 +1,7 @@
-import { useState, useRef, useCallback, memo } from 'react';
+import { useRef, useCallback, memo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Copy, Reply, Forward, Trash2, Pin, Star, X } from 'lucide-react';
+import { Copy, Reply, Forward, Trash2, Pin, Star, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
 
 interface MessageContextMenuProps {
   isOpen: boolean;
@@ -11,18 +10,20 @@ interface MessageContextMenuProps {
   onForward: () => void;
   onCopy: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   onPin?: () => void;
   onStar?: () => void;
   isMine: boolean;
 }
 
 const MessageContextMenu = memo(({ 
-  isOpen, onClose, onReply, onForward, onCopy, onDelete, onPin, onStar, isMine 
+  isOpen, onClose, onReply, onForward, onCopy, onDelete, onEdit, onPin, onStar, isMine 
 }: MessageContextMenuProps) => {
   const actions = [
     { icon: Reply, label: 'رد', onClick: onReply },
     { icon: Copy, label: 'نسخ', onClick: onCopy },
     { icon: Forward, label: 'توجيه', onClick: onForward },
+    ...(isMine && onEdit ? [{ icon: Pencil, label: 'تعديل', onClick: onEdit }] : []),
     ...(onPin ? [{ icon: Pin, label: 'تثبيت', onClick: onPin }] : []),
     ...(onStar ? [{ icon: Star, label: 'تمييز', onClick: onStar }] : []),
     ...(isMine && onDelete ? [{ icon: Trash2, label: 'حذف', onClick: onDelete, destructive: true }] : []),
@@ -54,8 +55,9 @@ const MessageContextMenu = memo(({
           >
             <div className="p-1">
               {actions.map((action, i) => (
-                <button
+                <motion.button
                   key={i}
+                  whileTap={{ scale: 0.97 }}
                   onClick={() => {
                     action.onClick();
                     onClose();
@@ -68,7 +70,7 @@ const MessageContextMenu = memo(({
                 >
                   <action.icon className="w-4 h-4" />
                   <span>{action.label}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
           </motion.div>

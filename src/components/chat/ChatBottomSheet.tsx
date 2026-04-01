@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Reply, Forward, Copy, Trash2, Star, Pin } from 'lucide-react';
+import { Reply, Forward, Copy, Trash2, Star, Pin, Pencil } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const QUICK_REACTIONS = ['❤️', '👍', '😂', '😮', '😢', '🙏'];
@@ -14,6 +14,7 @@ interface ChatBottomSheetProps {
   onForward?: () => void;
   onCopy?: () => void;
   onDelete?: () => void;
+  onEdit?: () => void;
   onStar?: () => void;
   onPin?: () => void;
   onReact?: (emoji: string) => void;
@@ -29,6 +30,7 @@ const ChatBottomSheet = ({
   onForward,
   onCopy,
   onDelete,
+  onEdit,
   onStar,
   onPin,
   onReact,
@@ -37,6 +39,7 @@ const ChatBottomSheet = ({
     onReply && { icon: Reply, label: 'رد', onClick: onReply },
     onForward && { icon: Forward, label: 'إعادة توجيه', onClick: onForward },
     onCopy && { icon: Copy, label: 'نسخ', onClick: onCopy },
+    isOwn && onEdit && { icon: Pencil, label: 'تعديل', onClick: onEdit },
     onPin && { icon: Pin, label: isPinned ? 'إلغاء التثبيت' : 'تثبيت', onClick: onPin },
     onStar && { icon: Star, label: 'تمييز بنجمة', onClick: onStar },
     isOwn && onDelete && { icon: Trash2, label: 'حذف', onClick: onDelete, destructive: true },
@@ -67,17 +70,25 @@ const ChatBottomSheet = ({
               <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
             </div>
 
+            {/* Message Preview */}
+            {messageContent && (
+              <div className="mx-4 mb-2 px-3 py-2 rounded-lg bg-muted/50 border border-border/30">
+                <p className="text-xs text-muted-foreground truncate" dir="rtl">{messageContent.slice(0, 80)}{messageContent.length > 80 ? '...' : ''}</p>
+              </div>
+            )}
+
             {/* Quick Reactions */}
             {onReact && (
               <div className="flex items-center justify-center gap-2 px-4 pb-3 border-b border-border/30">
                 {QUICK_REACTIONS.map((emoji) => (
-                  <button
+                  <motion.button
                     key={emoji}
+                    whileTap={{ scale: 0.85 }}
                     onClick={() => { onReact(emoji); onClose(); }}
-                    className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-full transition-all text-2xl hover:scale-125 active:scale-95"
+                    className="w-11 h-11 flex items-center justify-center hover:bg-muted rounded-full transition-all text-2xl active:scale-95"
                   >
                     {emoji}
-                  </button>
+                  </motion.button>
                 ))}
               </div>
             )}
@@ -85,17 +96,18 @@ const ChatBottomSheet = ({
             {/* Actions */}
             <div className="py-2 px-1">
               {actions.map((action, i) => (
-                <button
+                <motion.button
                   key={i}
+                  whileTap={{ scale: 0.97, backgroundColor: 'hsl(var(--muted))' }}
                   onClick={() => { action.onClick(); onClose(); }}
                   className={cn(
-                    "w-full flex items-center gap-3 px-4 py-3 text-sm transition-colors rounded-lg active:bg-muted/80",
+                    "w-full flex items-center gap-3 px-4 py-3.5 text-sm transition-colors rounded-lg",
                     action.destructive ? "text-destructive hover:bg-destructive/10" : "text-foreground hover:bg-muted/50"
                   )}
                 >
                   <action.icon className="w-5 h-5" />
                   <span className="font-medium">{action.label}</span>
-                </button>
+                </motion.button>
               ))}
             </div>
 
