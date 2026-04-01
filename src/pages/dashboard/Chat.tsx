@@ -6,7 +6,8 @@ import {
   MoreVertical, Lock, Download, VolumeX, Ban,
   Building2, StickyNote, Bell, BellOff,
   ChevronDown, ChevronRight, Users, Plus, X, Hash,
-  Info, BarChart3, Radio, Timer, Image as ImageIcon, Pin, Star
+  Info, BarChart3, Radio, Timer, Image as ImageIcon, Pin, Star,
+  Clock, Moon
 } from 'lucide-react';
 import ClickableImage from '@/components/ui/ClickableImage';
 import ChatPartnerInfo from '@/components/chat/ChatPartnerInfo';
