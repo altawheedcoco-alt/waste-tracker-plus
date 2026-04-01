@@ -13,6 +13,7 @@ import QuickActionsGrid from './QuickActionsGrid';
 import { useQuickActions } from '@/hooks/useQuickActions';
 
 import StoryCircles from '@/components/stories/StoryCircles';
+import { useAdminTabBadges } from '@/hooks/useAdminTabBadges';
 import SmartRequestDialog from './SmartRequestDialog';
 import AdminDashboardSwitcher from './admin/AdminDashboardSwitcher';
 import {
