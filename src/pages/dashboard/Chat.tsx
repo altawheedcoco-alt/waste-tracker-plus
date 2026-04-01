@@ -54,7 +54,7 @@ import ForwardDialog from '@/components/chat/ForwardDialog';
 import { useStarredMessages } from '@/hooks/useStarredMessages';
 import { useDisappearingMessages } from '@/hooks/useDisappearingMessages';
 import DisappearingMessagesDialog from '@/components/chat/DisappearingMessagesDialog';
-import { Timer, Image as ImageIcon, Pin } from 'lucide-react';
+import { Timer, Image as ImageIcon, Pin, Star } from 'lucide-react';
 import FileUploadProgress from '@/components/chat/FileUploadProgress';
 import ScrollToBottomButton from '@/components/chat/ScrollToBottomButton';
 import ChatSearchBar from '@/components/chat/ChatSearchBar';
