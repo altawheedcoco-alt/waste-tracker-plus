@@ -35,7 +35,7 @@ import AutomationSettingsDialog from '@/components/automation/AutomationSettings
 import AdminExecutiveSummary from './admin/AdminExecutiveSummary';
 import AdminStatsGridEnhanced from './admin/AdminStatsGridEnhanced';
 import AdminMobileQuickBar from './admin/AdminMobileQuickBar';
-
+import SystemHealthIndicator from './admin/SystemHealthIndicator';
 
 import {
   FileText, Truck, Building2, Users, Plus, Bot, Zap,
