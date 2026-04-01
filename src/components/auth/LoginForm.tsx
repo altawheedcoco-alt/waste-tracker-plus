@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn, Phone, Loader2 } from 'lucide-react';
+import { Eye, EyeOff, Lock, AlertTriangle, Mail, KeyRound, LogIn, Phone, Loader2, Wand2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
