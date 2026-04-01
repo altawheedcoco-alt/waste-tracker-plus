@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import heroBg from "@/assets/hero-bg-egypt-tech.webp";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { motion } from "framer-motion";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 const Hero = memo(() => {
   const navigate = useNavigate();
