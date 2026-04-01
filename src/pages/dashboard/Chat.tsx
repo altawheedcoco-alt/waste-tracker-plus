@@ -1431,6 +1431,8 @@ const EncryptedChatInner = () => {
                                     onReply={() => handleReply(msg)}
                                     onForward={() => handleForward(msg)}
                                     allMessages={messages}
+                                    isStarred={starredMessageIds.has(msg.id)}
+                                    onStar={() => toggleStar(msg.id, msg.conversation_id, msg.content, msg.message_type)}
                                   />
                                 </SwipeableMessage>
                               );
