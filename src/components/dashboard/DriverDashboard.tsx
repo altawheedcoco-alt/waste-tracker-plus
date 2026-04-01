@@ -717,8 +717,8 @@ const DriverDashboard = () => {
                   driverType={driverInfo.driver_type || 'company'}
                   rating={driverInfo.rating || 0}
                   totalTrips={driverInfo.total_trips || 0}
-                  acceptanceRate={0.85}
-                  isVerified={false}
+                  acceptanceRate={driverInfo.acceptance_rate ?? 0}
+                  isVerified={driverInfo.is_verified ?? false}
                   driverId={driverInfo.id}
                 />
               )}
