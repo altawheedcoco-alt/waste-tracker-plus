@@ -1149,10 +1149,13 @@ const EncryptedChatInner = () => {
         const decrypted = await decryptSingleRow(row, selectedConvoId);
         if (decrypted) {
           setMessages(prev => {
-            // Remove any optimistic temp message & avoid duplicates
             const filtered = prev.filter(m => m.id !== decrypted.id && !m.id.startsWith('temp_'));
             return [...filtered, decrypted];
           });
+          // Play incoming message sound if not from me
+          if (decrypted.sender_id !== user?.id) {
+            try { soundEngine.play('message_received'); } catch {}
+          }
         }
         markAsRead(selectedConvoId);
       })
