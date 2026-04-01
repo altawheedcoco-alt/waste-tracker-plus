@@ -104,12 +104,14 @@ const DispatchToDriverPanel = () => {
   // Smart dispatch mutation - sends to nearest available drivers
   const dispatchMutation = useMutation({
     mutationFn: async ({ shipmentId, price, mode }: { shipmentId: string; price: number; mode: string }) => {
-      // Get available independent drivers
+      // Get available independent drivers (verified, not bound to any org)
       const { data: drivers, error: driversError } = await supabase
         .from('drivers')
         .select('id, license_number, vehicle_plate, rating')
         .eq('driver_type', 'independent')
         .eq('is_available', true)
+        .eq('is_verified', true)
+        .is('organization_id', null)
         .limit(mode === 'smart' ? 5 : 20);
 
       if (driversError) throw driversError;
