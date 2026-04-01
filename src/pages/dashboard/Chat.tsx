@@ -398,8 +398,22 @@ const MessageBubble = memo(({
         onReply={onReply}
         onForward={onForward}
         onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onDelete={isMine ? onDelete : undefined}
         onStar={onStar}
         isMine={isMine}
+      />
+
+      <ChatBottomSheet
+        open={showBottomSheet}
+        onClose={() => setShowBottomSheet(false)}
+        isOwn={isMine}
+        messageContent={message.content}
+        onReply={onReply}
+        onForward={onForward}
+        onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        onDelete={isMine ? onDelete : undefined}
+        onStar={onStar}
+        onReact={(emoji) => onReact(emoji)}
       />
     </>
   );
