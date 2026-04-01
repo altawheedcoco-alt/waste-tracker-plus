@@ -410,11 +410,7 @@ const DriverDashboard = () => {
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB: فرص قريبة — Demand Heatmap (مستقل فقط) */}
           {/* ═══════════════════════════════════════════════ */}
-          <TabsContent value="nearby" className="mt-4">
-            <Suspense fallback={<TabFallback />}>
-              <DemandHeatmapDriver serviceAreaKm={30} />
-            </Suspense>
-          </TabsContent>
+          {/* nearby tab merged into home */}
 
           {/* ═══════════════════════════════════════════════ */}
           {/* TAB 1: المهام - Daily Tasks & Assignment */}
