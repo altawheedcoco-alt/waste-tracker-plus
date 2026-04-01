@@ -152,6 +152,18 @@ const DispatchToDriverPanel = () => {
   // Accept a driver's bid
   const acceptBidMutation = useMutation({
     mutationFn: async ({ bidId, shipmentId, driverId }: { bidId: string; shipmentId: string; driverId: string }) => {
+      // Verify driver is independent (prevent assigning company drivers from other orgs)
+      const { data: driverCheck } = await supabase
+        .from('drivers')
+        .select('id, driver_type, organization_id')
+        .eq('id', driverId)
+        .single();
+      
+      if (!driverCheck) throw new Error('السائق غير موجود');
+      if (driverCheck.driver_type !== 'independent') {
+        throw new Error('لا يمكن قبول عرض من سائق تابع لجهة أخرى');
+      }
+
       // Accept the bid
       const { error: bidError } = await supabase
         .from('driver_shipment_bids')
@@ -159,11 +171,12 @@ const DispatchToDriverPanel = () => {
         .eq('id', bidId);
       if (bidError) throw bidError;
 
-      // Assign driver to shipment
+      // Assign driver to shipment — only if it belongs to this transporter
       const { error: shipError } = await supabase
         .from('shipments')
         .update({ driver_id: driverId, status: 'approved' })
-        .eq('id', shipmentId);
+        .eq('id', shipmentId)
+        .eq('transporter_id', orgId!);
       if (shipError) throw shipError;
 
       // Reject other bids on same shipment

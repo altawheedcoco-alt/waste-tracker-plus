@@ -61,12 +61,23 @@ Deno.serve(async (req) => {
 
     const excludedDriverIds = (existingOffers || []).map((o: any) => o.driver_id);
 
-    // Find freelance drivers with active locations
-    // Freelance driver = has role 'driver' but no organization
+    // Find freelance (independent) drivers with active locations
+    // First get independent driver IDs, then match with locations
+    const { data: independentDrivers } = await supabaseAdmin
+      .from("drivers")
+      .select("id")
+      .eq("driver_type", "independent")
+      .eq("is_available", true)
+      .eq("is_verified", true)
+      .is("organization_id", null);
+
+    const independentIds = (independentDrivers || []).map((d: any) => d.id);
+
     const { data: driverLocations, error: locError } = await supabaseAdmin
       .from("driver_locations")
       .select("driver_id, latitude, longitude, updated_at")
       .eq("is_active", true)
+      .in("driver_id", independentIds.length > 0 ? independentIds : ["__none__"])
       .gte("updated_at", new Date(Date.now() - 30 * 60 * 1000).toISOString()); // Active in last 30 min
 
     if (locError) {
