@@ -35,9 +35,16 @@ export default function ChatPollCard({ poll, currentUserId, onVote, onClose }: C
   };
 
   return (
-    <div className="bg-card border border-border rounded-xl p-4 max-w-sm w-full" dir="rtl">
+    <motion.div
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="bg-card border border-border rounded-xl p-4 max-w-sm w-full shadow-sm"
+      dir="rtl"
+    >
       <div className="flex items-center gap-2 mb-3">
-        <BarChart3 className="w-4 h-4 text-primary" />
+        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center">
+          <BarChart3 className="w-3.5 h-3.5 text-primary" />
+        </div>
         <span className="text-xs font-medium text-primary">تصويت</span>
         {poll.is_anonymous && (
           <span className="text-[10px] text-muted-foreground flex items-center gap-1">
@@ -109,6 +116,6 @@ export default function ChatPollCard({ poll, currentUserId, onVote, onClose }: C
           </Button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }

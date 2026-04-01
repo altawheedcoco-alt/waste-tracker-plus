@@ -50,10 +50,10 @@ const ChatMentionRenderer = memo(({ text, isOwn }: ChatMentionRendererProps) => 
               key={i}
               variant="outline"
               className={cn(
-                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5',
+                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5 font-medium',
                 isOwn
-                  ? 'text-white bg-white/20 border-white/30'
-                  : 'text-emerald-700 bg-emerald-50 border-emerald-200 dark:text-emerald-300 dark:bg-emerald-900/20 dark:border-emerald-800'
+                  ? 'text-primary-foreground bg-primary-foreground/20 border-primary-foreground/30'
+                  : 'text-primary bg-primary/10 border-primary/20'
               )}
             >
               <User className="w-2.5 h-2.5" />
@@ -67,10 +67,10 @@ const ChatMentionRenderer = memo(({ text, isOwn }: ChatMentionRendererProps) => 
               key={i}
               variant="outline"
               className={cn(
-                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5 cursor-pointer',
+                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5 cursor-pointer font-medium',
                 isOwn
-                  ? 'text-white bg-white/20 border-white/30 hover:bg-white/30'
-                  : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 dark:text-blue-300 dark:bg-blue-900/20 dark:border-blue-800'
+                  ? 'text-primary-foreground bg-primary-foreground/20 border-primary-foreground/30 hover:bg-primary-foreground/30'
+                  : 'text-accent-foreground bg-accent border-accent/50 hover:bg-accent/80'
               )}
               onClick={() => navigate(`/dashboard/shipments/${seg.id}`)}
             >
