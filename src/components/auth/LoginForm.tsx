@@ -18,6 +18,7 @@ import { lovable } from '@/integrations/lovable/index';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
 import DemoQuickLogin from './DemoQuickLogin';
+import MagicLinkForm from './MagicLinkForm';
 
 const MAX_LOGIN_ATTEMPTS = 5;
 const LOCKOUT_DURATION_MS = 15 * 60 * 1000;
