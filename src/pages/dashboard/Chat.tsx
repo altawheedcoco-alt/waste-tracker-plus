@@ -47,6 +47,7 @@ import { useTypingIndicator } from '@/hooks/useTypingIndicator';
 import { useOnlinePresence, useUserOnlineStatus } from '@/hooks/useOnlinePresence';
 import TypingIndicator from '@/components/chat/TypingIndicator';
 import SwipeableMessage from '@/components/chat/SwipeableMessage';
+import MessageContextMenu from '@/components/chat/MessageContextMenu';
 
 // ─── Types ──────────────────────────────────────────────
 interface OrgGroup {
@@ -164,7 +165,7 @@ const OrgGroupHeader = memo(({ group, isExpanded, onToggle }: {
 ));
 OrgGroupHeader.displayName = 'OrgGroupHeader';
 
-// ─── Message Bubble with Reactions + Reply ──────────────
+// ─── Message Bubble with Reactions + Reply + Long-press + Double-tap ──────────────
 const MessageBubble = memo(({ 
   message, isMine, reactions, onReact, onReply, onForward, allMessages 
 }: { 
@@ -178,6 +179,10 @@ const MessageBubble = memo(({
 }) => {
   const { getBubbleClasses, textStyle, showTimestamp, compactMode } = useChatAppearance();
   const appNavigate = useAppNavigate();
+  const [showContextMenu, setShowContextMenu] = useState(false);
+  const [showHeartAnim, setShowHeartAnim] = useState(false);
+  const lastTapRef = useRef<number>(0);
+
   const getStatusIcon = () => {
     if (!isMine) return null;
     switch (message.status) {
@@ -187,7 +192,26 @@ const MessageBubble = memo(({
     }
   };
 
-  // Find replied message
+  // Long-press
+  const longPressTimer = useRef<ReturnType<typeof setTimeout>>();
+  const handleTouchStart = useCallback(() => {
+    longPressTimer.current = setTimeout(() => setShowContextMenu(true), 500);
+  }, []);
+  const handleTouchEnd = useCallback(() => clearTimeout(longPressTimer.current), []);
+
+  // Double-tap
+  const handleTap = useCallback(() => {
+    const now = Date.now();
+    if (now - lastTapRef.current < 300) {
+      onReact('❤️');
+      setShowHeartAnim(true);
+      setTimeout(() => setShowHeartAnim(false), 800);
+      lastTapRef.current = 0;
+    } else {
+      lastTapRef.current = now;
+    }
+  }, [onReact]);
+
   const repliedMessage = message.reply_to_id
     ? allMessages.find(m => m.id === message.reply_to_id)
     : null;
@@ -211,131 +235,158 @@ const MessageBubble = memo(({
   }
 
   return (
-    <div className={cn("flex group relative", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}>
-      <div className="max-w-[75%] relative">
-        {/* Quick action buttons on hover */}
-        <div className={cn(
-          "absolute top-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10",
-          isMine ? "-left-20" : "-right-20"
-        )}>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onReply}>
-            <Reply className="w-3.5 h-3.5" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={onForward}>
-            <Forward className="w-3.5 h-3.5" />
-          </Button>
-        </div>
+    <>
+      <motion.div
+        initial={{ opacity: 0, y: 8, scale: 0.97 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 350 }}
+        className={cn("flex group relative select-none", isMine ? "justify-start" : "justify-end", compactMode ? "mb-0.5" : "mb-1")}
+        onClick={handleTap}
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        onTouchMove={handleTouchEnd}
+        onContextMenu={(e) => { e.preventDefault(); setShowContextMenu(true); }}
+      >
+        <div className="max-w-[75%] relative">
+          {/* Quick action buttons on hover (desktop) */}
+          <div className={cn(
+            "absolute top-0 flex items-center gap-0.5 opacity-0 group-hover:opacity-100 transition-opacity z-10",
+            isMine ? "-left-20" : "-right-20"
+          )}>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => { e.stopPropagation(); onReply(); }}>
+              <Reply className="w-3.5 h-3.5" />
+            </Button>
+            <Button variant="ghost" size="icon" className="h-7 w-7 rounded-full" onClick={(e) => { e.stopPropagation(); onForward(); }}>
+              <Forward className="w-3.5 h-3.5" />
+            </Button>
+          </div>
 
-        <div className={cn(getBubbleClasses(isMine), "relative")}>
-          {!isMine && message.sender && (
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                // Navigate to sender's profile - need profileId lookup
-                const partnerId = message.sender_id;
-                if (partnerId) {
-                  // Use user_id to find profile — navigate to profile page
-                  window.open(`/dashboard/profile?userId=${partnerId}`, '_blank');
-                }
-              }}
-              className="text-[10px] font-semibold text-primary mb-0.5 hover:underline cursor-pointer text-right"
-            >
-              {message.sender.full_name}
-            </button>
-          )}
-
-          {/* Quoted Reply */}
-          {repliedMessage && (
-            <QuotedReply
-              senderName={repliedMessage.sender?.full_name || 'مستخدم'}
-              content={repliedMessage.content}
-              isOwn={isMine}
-            />
-          )}
-          
-          {message.file_url && (
-            <div className="mb-1">
-              {message.message_type === 'voice' || (message.message_type === 'file' && message.file_name && /\.(webm|mp3|wav|ogg|m4a)$/i.test(message.file_name)) ? (
-                <VoiceMessagePlayer url={message.file_url} isOwn={isMine} />
-              ) : (() => {
-                const mType = detectMediaType(message.file_url, undefined);
-                if (mType === 'image' || message.message_type === 'image') {
-                  return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" className="max-w-[280px] max-h-60" />;
-                }
-                if (mType === 'video' || message.message_type === 'video') {
-                  return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" aspectRatio="video" className="max-w-[280px]" />;
-                }
-                if (mType === 'pdf') {
-                  return <MediaThumbnail url={message.file_url!} title={message.file_name || 'PDF'} size="md" />;
-                }
-                return (
-                  <a href={message.file_url} target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-2 p-2 rounded-lg bg-background/20 hover:bg-background/30 transition-colors">
-                    <FileText className="w-5 h-5" />
-                    <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
-                    <Download className="w-4 h-4 shrink-0 opacity-60" />
-                  </a>
-                );
-              })()}
-            </div>
-          )}
-          
-          {broadcastLinkMatch ? (
-            <div className="space-y-2">
-              {messageTextWithoutBroadcastLink && (
-                <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>
-                  {messageTextWithoutBroadcastLink}
-                </p>
-              )}
+          <div className={cn(getBubbleClasses(isMine), "relative")}>
+            {!isMine && message.sender && (
               <button
-                type="button"
-                onClick={() => appNavigate(`/dashboard/broadcast-channels?channel=${broadcastLinkMatch[1]}${broadcastLinkMatch[2] ? `&post=${broadcastLinkMatch[2]}` : ''}`)}
-                className="w-full flex items-center gap-3 rounded-xl border border-border/50 bg-muted/40 px-3 py-3 text-right transition-colors hover:bg-muted/70"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (message.sender_id) window.open(`/dashboard/profile?userId=${message.sender_id}`, '_blank');
+                }}
+                className="text-[10px] font-semibold text-primary mb-0.5 hover:underline cursor-pointer text-right"
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  <Radio className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-foreground">
-                    {broadcastLinkMatch[2] ? '📡 منشور من قناة البث' : '📡 قناة بث'}
-                  </p>
-                  <p className="text-xs text-muted-foreground">اضغط لفتح القناة مباشرة</p>
-                </div>
+                {message.sender.full_name}
               </button>
-            </div>
-          ) : (
-            <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
-          )}
-          
-          {showTimestamp && (
-            <div className={cn(
-              "flex items-center gap-1 mt-0.5",
-              isMine ? "justify-start" : "justify-end"
-            )}>
-              <span className={cn(
-                "text-[9px]",
-                isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+            )}
+
+            {repliedMessage && (
+              <QuotedReply
+                senderName={repliedMessage.sender?.full_name || 'مستخدم'}
+                content={repliedMessage.content}
+                isOwn={isMine}
+              />
+            )}
+            
+            {message.file_url && (
+              <div className="mb-1">
+                {message.message_type === 'voice' || (message.message_type === 'file' && message.file_name && /\.(webm|mp3|wav|ogg|m4a)$/i.test(message.file_name)) ? (
+                  <VoiceMessagePlayer url={message.file_url} isOwn={isMine} />
+                ) : (() => {
+                  const mType = detectMediaType(message.file_url, undefined);
+                  if (mType === 'image' || message.message_type === 'image') {
+                    return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" className="max-w-[280px] max-h-60" />;
+                  }
+                  if (mType === 'video' || message.message_type === 'video') {
+                    return <MediaThumbnail url={message.file_url!} title={message.file_name || ''} size="lg" aspectRatio="video" className="max-w-[280px]" />;
+                  }
+                  if (mType === 'pdf') {
+                    return <MediaThumbnail url={message.file_url!} title={message.file_name || 'PDF'} size="md" />;
+                  }
+                  return (
+                    <a href={message.file_url} target="_blank" rel="noopener noreferrer"
+                      className="flex items-center gap-2 p-2 rounded-lg bg-background/20 hover:bg-background/30 transition-colors">
+                      <FileText className="w-5 h-5" />
+                      <span className="text-xs truncate">{message.file_name || 'ملف'}</span>
+                      <Download className="w-4 h-4 shrink-0 opacity-60" />
+                    </a>
+                  );
+                })()}
+              </div>
+            )}
+            
+            {broadcastLinkMatch ? (
+              <div className="space-y-2">
+                {messageTextWithoutBroadcastLink && (
+                  <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>
+                    {messageTextWithoutBroadcastLink}
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={() => appNavigate(`/dashboard/broadcast-channels?channel=${broadcastLinkMatch[1]}${broadcastLinkMatch[2] ? `&post=${broadcastLinkMatch[2]}` : ''}`)}
+                  className="w-full flex items-center gap-3 rounded-xl border border-border/50 bg-muted/40 px-3 py-3 text-right transition-colors hover:bg-muted/70"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Radio className="w-5 h-5" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-foreground">
+                      {broadcastLinkMatch[2] ? '📡 منشور من قناة البث' : '📡 قناة بث'}
+                    </p>
+                    <p className="text-xs text-muted-foreground">اضغط لفتح القناة مباشرة</p>
+                  </div>
+                </button>
+              </div>
+            ) : (
+              <p className="leading-relaxed whitespace-pre-wrap break-words" style={textStyle}>{message.content}</p>
+            )}
+            
+            {showTimestamp && (
+              <div className={cn(
+                "flex items-center gap-1 mt-0.5",
+                isMine ? "justify-start" : "justify-end"
               )}>
-                {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
-              </span>
-              {message.is_edited && (
                 <span className={cn(
                   "text-[9px]",
                   isMine ? "text-primary-foreground/60" : "text-muted-foreground"
-                )}>تم التعديل</span>
+                )}>
+                  {format(new Date(message.created_at), 'hh:mm a', { locale: ar })}
+                </span>
+                {message.is_edited && (
+                  <span className={cn(
+                    "text-[9px]",
+                    isMine ? "text-primary-foreground/60" : "text-muted-foreground"
+                  )}>تم التعديل</span>
+                )}
+                {getStatusIcon()}
+              </div>
+            )}
+
+            {/* Double-tap heart animation */}
+            <AnimatePresence>
+              {showHeartAnim && (
+                <motion.div
+                  initial={{ scale: 0, opacity: 0 }}
+                  animate={{ scale: 1.3, opacity: 1 }}
+                  exit={{ scale: 0, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 10 }}
+                  className="absolute inset-0 flex items-center justify-center pointer-events-none"
+                >
+                  <span className="text-3xl drop-shadow-lg">❤️</span>
+                </motion.div>
               )}
-              {getStatusIcon()}
-            </div>
-          )}
+            </AnimatePresence>
+          </div>
+
+          <MessageReactionsDisplay reactions={reactions} onReact={onReact} isOwn={isMine} />
+          <ReactionPicker onReact={onReact} isOwn={isMine} />
         </div>
+      </motion.div>
 
-        {/* Reactions Display */}
-        <MessageReactionsDisplay reactions={reactions} onReact={onReact} isOwn={isMine} />
-
-        {/* Reaction Picker */}
-        <ReactionPicker onReact={onReact} isOwn={isMine} />
-      </div>
-    </div>
+      <MessageContextMenu
+        isOpen={showContextMenu}
+        onClose={() => setShowContextMenu(false)}
+        onReply={onReply}
+        onForward={onForward}
+        onCopy={() => { navigator.clipboard.writeText(message.content); toast.success('تم النسخ'); }}
+        isMine={isMine}
+      />
+    </>
   );
 });
 MessageBubble.displayName = 'MessageBubble';
