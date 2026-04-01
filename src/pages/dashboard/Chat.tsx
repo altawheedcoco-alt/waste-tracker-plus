@@ -1237,11 +1237,6 @@ const EncryptedChatInner = () => {
     })).filter(g => g.conversations.length > 0);
   }, [orgGroups, searchQuery]);
 
-  if (!user) return null;
-
-  const showChat = !isMobile || !showSidebar;
-  const showSidebarPanel = !isMobile || showSidebar;
-
   // Group messages by date (memoized)
   const groupedMessages = useMemo(() => {
     const groups: { date: Date; messages: DecryptedMessage[] }[] = [];
@@ -1258,6 +1253,11 @@ const EncryptedChatInner = () => {
   }, [messages]);
 
   const totalUnread = useMemo(() => conversations.reduce((s, c) => s + (c.unread_count || 0), 0), [conversations]);
+
+  if (!user) return null;
+
+  const showChat = !isMobile || !showSidebar;
+  const showSidebarPanel = !isMobile || showSidebar;
 
     return (
       <>
