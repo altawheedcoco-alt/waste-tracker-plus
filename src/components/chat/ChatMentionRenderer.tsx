@@ -67,10 +67,10 @@ const ChatMentionRenderer = memo(({ text, isOwn }: ChatMentionRendererProps) => 
               key={i}
               variant="outline"
               className={cn(
-                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5 cursor-pointer',
+                'inline-flex items-center gap-0.5 text-[11px] py-0 px-1.5 mx-0.5 cursor-pointer font-medium',
                 isOwn
-                  ? 'text-white bg-white/20 border-white/30 hover:bg-white/30'
-                  : 'text-blue-700 bg-blue-50 border-blue-200 hover:bg-blue-100 dark:text-blue-300 dark:bg-blue-900/20 dark:border-blue-800'
+                  ? 'text-primary-foreground bg-primary-foreground/20 border-primary-foreground/30 hover:bg-primary-foreground/30'
+                  : 'text-accent-foreground bg-accent border-accent/50 hover:bg-accent/80'
               )}
               onClick={() => navigate(`/dashboard/shipments/${seg.id}`)}
             >

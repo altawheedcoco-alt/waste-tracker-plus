@@ -116,6 +116,6 @@ export default function ChatPollCard({ poll, currentUserId, onVote, onClose }: C
           </Button>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
