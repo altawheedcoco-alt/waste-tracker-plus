@@ -144,20 +144,31 @@ const SECTION_COMPONENTS: Record<string, React.ReactNode> = {
   cta: <CTA />,
 };
 
-const Index = () => {
-  // Fast redirect: if user is authenticated (especially on PWA), skip homepage entirely
+// Fast redirect component for authenticated users (avoids loading heavy homepage)
+const AuthRedirect = memo(() => {
   const hasSession = sessionStorage.getItem('__tab_active_org_id') || 
-    document.cookie.includes('sb-') ||
     localStorage.getItem('sb-dgununqfxohodimmgxuk-auth-token');
   
-  if (hasSession && typeof window !== 'undefined') {
-    // Use replace to avoid homepage flash
+  if (hasSession) {
     window.location.replace('/dashboard');
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
+  }
+  return null;
+});
+AuthRedirect.displayName = 'AuthRedirect';
+
+const Index = () => {
+  // Check for authenticated session before loading heavy homepage
+  const hasSession = sessionStorage.getItem('__tab_active_org_id') || 
+    localStorage.getItem('sb-dgununqfxohodimmgxuk-auth-token');
+  
+  // Skip all homepage logic for authenticated users
+  if (hasSession) {
+    return <AuthRedirect />;
   }
 
   useVisitorTracking();
