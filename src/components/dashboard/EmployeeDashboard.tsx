@@ -356,6 +356,9 @@ const EmployeeDashboard = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* FAB */}
+      <EmployeeQuickFAB />
     </div>
   );
 };
