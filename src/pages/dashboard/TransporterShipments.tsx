@@ -331,7 +331,18 @@ const TransporterShipments = () => {
         </CardHeader>
         <CardContent className="p-3 sm:p-6 pt-0">
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground">{t('common.loading')}</div>
+            <div className="space-y-3">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 p-3 rounded-lg border border-border/30 animate-pulse">
+                  <div className="w-16 h-5 bg-muted rounded" />
+                  <div className="flex-1 space-y-2">
+                    <div className="w-1/3 h-4 bg-muted rounded" />
+                    <div className="w-1/2 h-3 bg-muted rounded" />
+                  </div>
+                  <div className="w-20 h-6 bg-muted rounded-full" />
+                </div>
+              ))}
+            </div>
           ) : filteredShipments.length === 0 ? (
             <div className="text-center py-6">
               <Package className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
