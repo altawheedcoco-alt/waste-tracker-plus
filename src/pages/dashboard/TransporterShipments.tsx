@@ -72,10 +72,9 @@ interface Shipment {
 
 const TransporterShipments = () => {
   const navigate = useNavigate();
-  const { organization } = useAuth();
+  const { organization, user } = useAuth();
   const { t, language } = useLanguage();
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { shipments, isLoading: loading, refetch } = useShipmentList({ role: 'transporter' });
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [partnerFilter, setPartnerFilter] = useState('all');
