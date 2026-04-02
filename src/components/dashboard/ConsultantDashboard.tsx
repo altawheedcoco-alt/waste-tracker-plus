@@ -226,7 +226,26 @@ const ConsultantDashboard = memo(() => {
   }, [selectedOrgId, assignments]);
 
   if (loadingProfile) {
-    return <div className="flex items-center justify-center py-20"><Loader2 className="w-8 h-8 text-primary animate-spin" /></div>;
+    return (
+      <div className="space-y-4" dir="rtl">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 w-64 bg-muted animate-pulse rounded-lg" />
+            <div className="h-4 w-48 bg-muted animate-pulse rounded" />
+          </div>
+          <div className="h-9 w-28 bg-muted animate-pulse rounded-md" />
+        </div>
+        <div className="h-24 bg-muted animate-pulse rounded-xl" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1,2,3,4].map(i => <div key={i} className="h-20 bg-muted animate-pulse rounded-xl" />)}
+        </div>
+        <div className="h-10 bg-muted animate-pulse rounded-lg" />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-48 bg-muted animate-pulse rounded-xl" />
+          <div className="h-48 bg-muted animate-pulse rounded-xl" />
+        </div>
+      </div>
+    );
   }
 
   const orgTypeLabels: Record<string, string> = {
