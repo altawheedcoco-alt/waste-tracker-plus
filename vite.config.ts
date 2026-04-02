@@ -57,6 +57,10 @@ export default defineConfig(({ mode }) => ({
           if (id.includes('html2canvas') || id.includes('jspdf') || id.includes('jszip')) return 'export-tools';
           if (id.includes('react-markdown') || id.includes('remark') || id.includes('rehype')) return 'markdown';
           if (id.includes('qrcode') || id.includes('html5-qrcode') || id.includes('react-barcode')) return 'codes';
+          if (id.includes('firebase')) return 'firebase';
+          if (id.includes('pdfjs-dist')) return 'pdf';
+          // Landing page components — separate chunk from dashboard
+          if (id.includes('/components/landing/') || id.includes('/components/Hero')) return 'landing';
         },
       },
     },
