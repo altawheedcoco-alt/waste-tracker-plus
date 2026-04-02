@@ -204,7 +204,7 @@ const TransporterShipments = () => {
       subtitle: `${s.generator?.name || ''} → ${s.recycler?.name || ''}`,
     }));
 
-  const { user } = useAuth();
+  
 
   return (
     <DashboardLayout>
