@@ -12,13 +12,13 @@ const EmployeeQuickFAB = () => {
   const navigate = useNavigate();
   const { hasAnyPermission } = useMyPermissions();
 
-  const allActions = [
+  const allActions: { icon: any; label: string; color: string; onClick: () => void; perm: EmployeePermission[] }[] = [
     { icon: Package, label: 'شحنة جديدة', color: 'bg-primary text-primary-foreground', onClick: () => navigate('/dashboard/shipments/new'), perm: ['create_shipments'] },
     { icon: DollarSign, label: 'إيداع جديد', color: 'bg-emerald-500 text-white', onClick: () => navigate('/dashboard/deposits'), perm: ['create_deposits'] },
     { icon: FileText, label: 'التقارير', color: 'bg-blue-500 text-white', onClick: () => navigate('/dashboard/reports'), perm: ['view_reports'] },
     { icon: Users, label: 'الشركاء', color: 'bg-purple-500 text-white', onClick: () => navigate('/dashboard/partners'), perm: ['view_partners'] },
     { icon: ClipboardList, label: 'الموافقات', color: 'bg-amber-500 text-white', onClick: () => navigate('/dashboard/approvals'), perm: ['manage_shipments'] },
-    { icon: CalendarDays, label: 'طلب إجازة', color: 'bg-teal-500 text-white', onClick: () => {}, perm: [] }, // Always available
+    { icon: CalendarDays, label: 'طلب إجازة', color: 'bg-teal-500 text-white', onClick: () => {}, perm: [] },
   ];
 
   const actions = allActions.filter(a => a.perm.length === 0 || hasAnyPermission(...a.perm));
