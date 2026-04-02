@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ClipboardList, Inbox, Send, Eye, Loader2, Calendar, Weight, MapPin, AlertTriangle } from 'lucide-react';
+import { ClipboardList, Inbox, Send, Eye, Loader2, Calendar, Weight, MapPin, AlertTriangle, Plus } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -12,6 +12,7 @@ import { format } from 'date-fns';
 import { ar as arLocale, enUS } from 'date-fns/locale';
 import WorkOrderResponseDialog from './WorkOrderResponseDialog';
 import WorkOrderDetailDialog from './WorkOrderDetailDialog';
+import CreateWorkOrderDialog from './CreateWorkOrderDialog';
 
 const WorkOrderInbox = () => {
   const { profile } = useAuth();
@@ -23,6 +24,7 @@ const WorkOrderInbox = () => {
   const [showResponse, setShowResponse] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [showDetail, setShowDetail] = useState(false);
+  const [showCreate, setShowCreate] = useState(false);
 
   // Incoming orders (where I'm a recipient)
   const { data: incoming = [], isLoading: loadingIncoming } = useQuery({
@@ -126,6 +128,9 @@ const WorkOrderInbox = () => {
               <Badge variant="destructive" className="text-xs">{pendingCount}</Badge>
             )}
           </CardTitle>
+          <Button size="sm" onClick={() => setShowCreate(true)} className="gap-1">
+            <Plus className="w-4 h-4" /> {t('workOrder.createNew') || 'أمر شغل جديد'}
+          </Button>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="incoming">
@@ -253,6 +258,8 @@ const WorkOrderInbox = () => {
           workOrder={selectedOrder}
         />
       )}
+
+      <CreateWorkOrderDialog open={showCreate} onOpenChange={setShowCreate} />
     </>
   );
 };
