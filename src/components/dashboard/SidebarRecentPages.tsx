@@ -32,7 +32,7 @@ const SidebarRecentPages = memo(({ pages, onClear }: SidebarRecentPagesProps) =>
         <button
           onClick={onClear}
           className="p-0.5 rounded hover:bg-muted transition-colors"
-          title={t('common.clear', 'مسح')}
+          title={t('common.clear') || 'مسح'}
         >
           <X className="w-3 h-3 text-muted-foreground/40 hover:text-muted-foreground" />
         </button>
