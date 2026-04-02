@@ -183,10 +183,32 @@ const ShipmentDetailsPage = () => {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center min-h-[60vh]">
-          <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }}>
-            <Loader2 className="w-10 h-10 text-primary" />
-          </motion.div>
+        <div className="space-y-4 sm:space-y-5">
+          <Skeleton className="h-8 w-24 rounded-lg" />
+          {/* Header skeleton */}
+          <div className="flex flex-col gap-3">
+            <div className="text-right space-y-2">
+              <div className="flex items-center gap-2 justify-end">
+                <Skeleton className="h-6 w-16 rounded-full" />
+                <Skeleton className="h-7 w-40 rounded" />
+              </div>
+              <Skeleton className="h-4 w-64 mr-auto rounded" />
+            </div>
+            <div className="flex gap-2 flex-wrap">
+              {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-8 w-24 rounded-lg" />)}
+            </div>
+          </div>
+          {/* Timeline skeleton */}
+          <Skeleton className="h-16 w-full rounded-xl" />
+          {/* Document chain skeleton */}
+          <Skeleton className="h-12 w-full rounded-xl" />
+          {/* Tabs skeleton */}
+          <Skeleton className="h-10 w-full rounded-xl" />
+          {/* Content skeleton */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <Skeleton className="h-48 w-full rounded-xl" />
+            <Skeleton className="h-48 w-full rounded-xl" />
+          </div>
         </div>
       </DashboardLayout>
     );
