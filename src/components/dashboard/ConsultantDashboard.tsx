@@ -406,11 +406,16 @@ const ConsultantDashboard = memo(() => {
           </Suspense>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <ConsultantActiveProjects
+              assignments={assignments}
+              selectedOrgId={selectedOrgId}
+              onSelectOrg={setSelectedOrgId}
+            />
             <PersonalSchedule assignments={assignments} selectedOrgId={selectedOrgId} />
-            <Suspense fallback={<LazyLoader />}>
-              <ConsultantAlertsWidget assignments={scopedAssignments} />
-            </Suspense>
           </div>
+          <Suspense fallback={<LazyLoader />}>
+            <ConsultantAlertsWidget assignments={scopedAssignments} />
+          </Suspense>
         </TabsContent>
 
         {/* ═══ العمليات الميدانية ═══ */}
