@@ -50,12 +50,12 @@ const ProactiveAlertsBanner = memo(() => {
       if (!organization?.id) return [];
       const results: ProactiveAlert[] = [];
 
-      // 1. Check overdue shipments
+      // 1. Check overdue shipments (status new/confirmed/in_transit, older than 7 days)
       const { count: overdueCount } = await supabase
         .from('shipments')
         .select('*', { count: 'exact', head: true })
         .eq('organization_id', organization.id)
-        .in('status', ['pending', 'accepted', 'in_transit'])
+        .in('status', ['new', 'confirmed', 'in_transit'] as any)
         .lt('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
 
       if (overdueCount && overdueCount > 0) {
