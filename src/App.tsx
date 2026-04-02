@@ -51,6 +51,9 @@ import { publicRoutes } from "@/routes/PublicRoutes";
 // Core routes are ultra-light (Dashboard, Settings, Notifications, Chat + catch-all)
 import { coreRoutes } from "@/routes/dashboard/CoreRoutes";
 
+// Essential common routes — tiny set every user needs (workspace, profile, support)
+import { essentialCommonRoutes } from "@/routes/dashboard/EssentialCommonRoutes";
+
 // Smart scroll restoration
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { usePageTracking } from '@/hooks/usePageTracking';
