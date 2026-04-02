@@ -402,16 +402,10 @@ const TransporterDashboard = () => {
         <SmartWeightUpload open={showSmartWeightUpload} onOpenChange={setShowSmartWeightUpload} />
       </Suspense>
 
-      {/* FAB — إنشاء شحنة سريع */}
-      <motion.button
-        onClick={() => navigate('/dashboard/transporter-shipments?action=new')}
-        className="fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] sm:bottom-8 right-4 sm:right-8 z-40 w-14 h-14 rounded-full bg-gradient-to-br from-primary to-primary/80 text-primary-foreground shadow-xl shadow-primary/25 flex items-center justify-center touch-manipulation hover:shadow-2xl transition-shadow"
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-        title="إنشاء شحنة جديدة"
-      >
-        <Plus className="w-6 h-6" />
-      </motion.button>
+      {/* FAB — زر عائم متعدد الإجراءات للموبايل */}
+      <Suspense fallback={null}>
+        <TransporterQuickFAB />
+      </Suspense>
     </div>
   );
 };
