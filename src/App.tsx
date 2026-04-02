@@ -167,6 +167,7 @@ const AppRoutes = memo(() => {
         {publicRoutes}
         <Route element={<DashboardRouteGuard />}>
           {coreRoutes}
+          {essentialCommonRoutes}
           {roleRoutes.map((routes, i) => (
             <>{routes}</>
           ))}
