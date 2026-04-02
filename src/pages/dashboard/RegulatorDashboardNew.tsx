@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import BackButton from '@/components/ui/back-button';
 import { Tabs, TabsContent } from '@/components/ui/tabs';
@@ -16,6 +16,8 @@ import RegulatoryReportsPanel from '@/components/regulator/RegulatoryReportsPane
 import ChainOfCustodyPanel from '@/components/regulator/ChainOfCustodyPanel';
 import DashboardV2Header from '@/components/dashboard/shared/DashboardV2Header';
 import V2TabsNav from '@/components/dashboard/shared/V2TabsNav';
+
+const RegulatorQuickFAB = lazy(() => import('@/components/regulator/RegulatorQuickFAB'));
 
 const tabItems = [
   { value: 'overview', label: 'نظرة عامة', icon: BarChart3 },
@@ -84,6 +86,10 @@ const RegulatorDashboardNew = () => {
           <RegulatorDocumentVerification />
         </TabsContent>
       </Tabs>
+
+      <Suspense fallback={null}>
+        <RegulatorQuickFAB onSetTab={setActiveTab} />
+      </Suspense>
     </div>
   );
 };
