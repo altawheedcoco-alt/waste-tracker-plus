@@ -22,6 +22,9 @@ const DisposalSmartKPIs = lazy(() => import('@/components/dashboard/disposal/Dis
 const DisposalFinancialFlow = lazy(() => import('@/components/dashboard/disposal/DisposalFinancialFlow'));
 const DisposalInputIntelligence = lazy(() => import('@/components/dashboard/disposal/DisposalInputIntelligence'));
 const DisposalScorecard = lazy(() => import('@/components/dashboard/disposal/DisposalScorecard'));
+const DisposalSiteStatus = lazy(() => import('@/components/dashboard/disposal/DisposalSiteStatus'));
+const DisposalEnvironmentalMonitor = lazy(() => import('@/components/dashboard/disposal/DisposalEnvironmentalMonitor'));
+const DisposalQuickFAB = lazy(() => import('@/components/dashboard/disposal/DisposalQuickFAB'));
 
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
@@ -300,6 +303,20 @@ const DisposalDashboard = ({ embedded = false }: DisposalDashboardProps) => {
           <Eye className="w-4 h-4" />
         </Button>
       </DashboardV2Header>
+
+      {/* ★ حالة المواقع + الرصد البيئي */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <ErrorBoundary fallbackTitle="خطأ في حالة المواقع">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <DisposalSiteStatus />
+          </Suspense>
+        </ErrorBoundary>
+        <ErrorBoundary fallbackTitle="خطأ في الرصد البيئي">
+          <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
+            <DisposalEnvironmentalMonitor />
+          </Suspense>
+        </ErrorBoundary>
+      </div>
 
       {/* 2. الإجراءات السريعة */}
       <QuickActionsGrid
