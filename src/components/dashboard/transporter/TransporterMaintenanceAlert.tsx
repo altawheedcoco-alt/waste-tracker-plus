@@ -22,7 +22,7 @@ const TransporterMaintenanceAlert = () => {
     queryFn: async () => {
       const { data } = await supabase
         .from('vehicle_maintenance')
-        .select('id, vehicle_id, maintenance_type, next_maintenance_date, cost, status, description')
+        .select('id, vehicle_plate, maintenance_type, next_maintenance_date, cost, status, description')
         .eq('organization_id', organization!.id)
         .not('next_maintenance_date', 'is', null)
         .order('next_maintenance_date', { ascending: true })
