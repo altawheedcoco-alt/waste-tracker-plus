@@ -18,6 +18,8 @@ import { Progress } from '@/components/ui/progress';
 
 const DocumentVerificationWidget = lazy(() => import('@/components/dashboard/DocumentVerificationWidget'));
 
+import ISOMonthlyActivity from '@/components/iso/ISOMonthlyActivity';
+
 
 const ISOBodyDashboard = memo(() => {
   const { profile, organization } = useAuth();

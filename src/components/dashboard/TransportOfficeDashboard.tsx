@@ -14,6 +14,7 @@ import {
 
 const GeofenceAlertsPanel = lazy(() => import('@/components/tracking/GeofenceAlertsPanel'));
 const ESGReportPanel = lazy(() => import('@/components/reports/ESGReportPanel'));
+const TransportOfficeFAB = lazy(() => import('@/components/transport-office/TransportOfficeFAB'));
 
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
@@ -299,6 +300,9 @@ const TransportOfficeDashboard = () => {
         onSaved={() => refetch()}
       />
       <DocumentVerificationWidget open={showDocumentVerification} onOpenChange={setShowDocumentVerification} />
+      <Suspense fallback={null}>
+        <TransportOfficeFAB onAddVehicle={() => { setSelectedVehicle(null); setShowVehicleDialog(true); }} />
+      </Suspense>
     </div>
   );
 };
