@@ -1,6 +1,6 @@
 import { useState, useMemo, useCallback, lazy, Suspense } from 'react';
 import { useRealWeather } from '@/hooks/useRealWeather';
-import StoryCircles from '@/components/stories/StoryCircles';
+const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 import { motion } from 'framer-motion';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';

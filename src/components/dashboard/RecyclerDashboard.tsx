@@ -3,7 +3,7 @@ import { useRealWeather } from '@/hooks/useRealWeather';
 import { useNavigate } from 'react-router-dom';
 import ErrorBoundary from '@/components/common/ErrorBoundary';
 import { useOperationalAlerts } from '@/hooks/useOperationalAlerts';
-import StoryCircles from '@/components/stories/StoryCircles';
+const StoryCircles = lazy(() => import('@/components/stories/StoryCircles'));
 import { Recycle, Package, Truck, Clock, CheckCircle2, Eye, AlertCircle, Sparkles, ListFilter, Beaker, Factory, Award, BarChart3, Cog, Zap, ClipboardList, Calculator, Cpu, Wrench, Lightbulb, Link2, Leaf, FileText, Building2, Route, Scale } from 'lucide-react';
 import { RECYCLER_TAB_BINDINGS } from '@/config/recycler/recyclerBindings';
 import { Button } from '@/components/ui/button';

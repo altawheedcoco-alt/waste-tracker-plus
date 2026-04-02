@@ -25,14 +25,14 @@
 - [x] تحسين LazySection بـ rootMargin أكبر (400px) وتأثير بصري أفضل
 - [x] تحسين Suspense fallback بتأثير animate-pulse
 
-## المرحلة 4: مراجعة لوحات التحكم
-- [ ] السائق (DriverDashboard)
-- [ ] الناقل (TransporterDashboard)
-- [ ] المولد (GeneratorDashboard)
-- [ ] المدور (RecyclerDashboard)
-- [ ] التخلص (DisposalDashboard)
-- [ ] الاستشاري والمكتب الاستشاري
-- [ ] الرقابي (Regulator)
+## المرحلة 4: مراجعة لوحات التحكم ✅ مكتملة (الجولة الأولى)
+- [x] السائق: استخراج useDriverDashboardData hook، skeleton loading، تقليل 831→~530 سطر
+- [x] الناقل: بنية ممتازة — لا تحتاج تعديلات جذرية
+- [x] المولد: lazy StoryCircles، بنية جيدة
+- [x] المدور: lazy StoryCircles
+- [x] التخلص: lazy StoryCircles
+- [ ] الاستشاري والمكتب الاستشاري (جولة لاحقة)
+- [ ] الرقابي (جولة لاحقة)
 
 ## المرحلة 5: القوائم الجانبية والتنقل
 - [ ] مراجعة sidebar لكل جهة

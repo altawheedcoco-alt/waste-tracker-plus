@@ -1,21 +1,19 @@
-import { useEffect, useState, lazy, Suspense } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { useDriverOffers } from '@/hooks/useDriverOffers';
 import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+import { useDriverDashboardData, type DriverShipment } from '@/hooks/useDriverDashboardData';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   Package, Truck, Mail, Phone, Settings, CheckCircle2,
-  Clock, Loader2, Shield, Map, Navigation, ListTodo,
+  Clock, Map, Navigation, ListTodo,
   Wallet, Camera, ClipboardCheck, PenTool,
   Radiation, QrCode, GraduationCap, Route, Wrench, User,
   Briefcase, Zap, Star, BarChart3, ShoppingCart, CreditCard,
-  Power,
+  Power, Shield,
 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import CreateShipmentButton from './CreateShipmentButton';
 import DriverSettingsDialog from './DriverSettingsDialog';
@@ -36,7 +34,6 @@ import ConnectedSmartBrief from './shared/ConnectedSmartBrief';
 import DriverDailySummary from '@/components/driver/DriverDailySummary';
 import { Skeleton } from '@/components/ui/skeleton';
 import { motion } from 'framer-motion';
-
 
 // Lazy load heavy components
 const LiveTrackingMapDialog = lazy(() => import('@/components/tracking/LiveTrackingMapDialog'));
@@ -65,9 +62,8 @@ const GoOnlineButton = lazy(() => import('@/components/driver/GoOnlineButton'));
 const EarningsMiniCard = lazy(() => import('@/components/driver/EarningsMiniCard'));
 const CompanyDriverStats = lazy(() => import('@/components/driver/CompanyDriverStats'));
 const DemandHeatmapDriver = lazy(() => import('@/components/maps/DemandHeatmapDriver'));
-const ShipmentLoadingMode = lazy(() => import('@/components/driver/ShipmentLoadingMode'));
 const TripLifecyclePanel = lazy(() => import('@/components/driver/TripLifecyclePanel'));
-const MutualRatingDialog = lazy(() => import('@/components/driver/MutualRatingDialog'));
+
 const TabFallback = () => (
   <div className="space-y-4 mt-6">
     <Skeleton className="h-32 w-full rounded-xl" />
@@ -75,46 +71,34 @@ const TabFallback = () => (
   </div>
 );
 
-interface DriverInfo {
-  id: string;
-  organization_id: string;
-  license_number: string;
-  vehicle_type: string | null;
-  vehicle_plate: string | null;
-  is_available: boolean;
-  driver_type: DriverType;
-  rating: number;
-  total_trips: number;
-  acceptance_rate: number;
-  is_verified: boolean;
-  organization: {
-    name: string;
-    phone: string;
-  } | null;
-}
-
-interface Shipment {
-  id: string;
-  shipment_number: string;
-  waste_type: string;
-  quantity: number;
-  unit: string;
-  status: string;
-  created_at: string;
-  pickup_address: string;
-  delivery_address: string;
-  driver_id: string | null;
-  expected_delivery_date: string | null;
-  approved_at: string | null;
-  collection_started_at: string | null;
-  in_transit_at: string | null;
-  delivered_at: string | null;
-  confirmed_at: string | null;
-  recycler_notes: string | null;
-  generator: { name: string } | null;
-  recycler: { name: string } | null;
-  transporter: { name: string } | null;
-}
+// Skeleton loading for the entire dashboard
+const DriverDashboardSkeleton = () => (
+  <div className="space-y-3 pb-20">
+    {/* Header skeleton */}
+    <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3">
+      <div className="flex items-center gap-3">
+        <Skeleton className="h-10 w-10 rounded-full" />
+        <div className="space-y-1.5">
+          <Skeleton className="h-3 w-24" />
+          <Skeleton className="h-2.5 w-16" />
+        </div>
+      </div>
+      <div className="flex gap-1.5">
+        <Skeleton className="h-8 w-8 rounded-md" />
+        <Skeleton className="h-8 w-8 rounded-md" />
+      </div>
+    </div>
+    {/* Summary skeleton */}
+    <Skeleton className="h-20 w-full rounded-xl" />
+    {/* Tabs skeleton */}
+    <Skeleton className="h-10 w-full rounded-xl" />
+    {/* Content skeleton */}
+    <div className="space-y-3">
+      <Skeleton className="h-32 w-full rounded-xl" />
+      <Skeleton className="h-48 w-full rounded-xl" />
+    </div>
+  </div>
+);
 
 // Tab configuration per driver type
 const companyTabs = [
@@ -163,17 +147,22 @@ function getTabsForType(type: DriverType | undefined): typeof companyTabs {
 const DriverDashboard = () => {
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [driverInfo, setDriverInfo] = useState<DriverInfo | null>(null);
-  const [shipments, setShipments] = useState<Shipment[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    driverInfo,
+    shipments,
+    activeShipments,
+    completedShipments,
+    loading,
+    refreshData,
+    updateDriverAvailability,
+  } = useDriverDashboardData();
+
   const [showSettingsDialog, setShowSettingsDialog] = useState(false);
   const [lastLocationUpdate, setLastLocationUpdate] = useState<Date | null>(null);
   const [showLiveMapDialog, setShowLiveMapDialog] = useState(false);
-  const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<Shipment | null>(null);
+  const [selectedShipmentForMap, setSelectedShipmentForMap] = useState<DriverShipment | null>(null);
   const [showNavigationView, setShowNavigationView] = useState(false);
-  const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<Shipment | null>(null);
-  // Field tools sub-tab
+  const [selectedShipmentForNav, setSelectedShipmentForNav] = useState<DriverShipment | null>(null);
   const [activeFieldTool, setActiveFieldTool] = useState<string>('checklist');
 
   const { pendingOffer, acceptOffer, rejectOffer, counterOffer } = useDriverOffers();
@@ -186,91 +175,27 @@ const DriverDashboard = () => {
     },
   });
 
-  const handleLocationSuccess = (location: { lat: number; lng: number }) => {
+  const handleLocationSuccess = () => {
     setLastLocationUpdate(new Date());
   };
 
-  const handleOpenLiveMap = (shipment?: Shipment) => {
-    if (shipment) {
-      setSelectedShipmentForMap(shipment);
-    } else {
-      setSelectedShipmentForMap(null);
-    }
+  const handleOpenLiveMap = (shipment?: DriverShipment) => {
+    setSelectedShipmentForMap(shipment || null);
     setShowLiveMapDialog(true);
   };
 
-  const handleNavigateToShipment = (shipment: Shipment) => {
+  const handleNavigateToShipment = (shipment: DriverShipment) => {
     const address = shipment.status === 'approved' ? shipment.pickup_address : shipment.delivery_address;
     if (address) {
-      const encoded = encodeURIComponent(address);
-      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encoded}`, '_blank');
+      window.open(`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(address)}`, '_blank');
     } else {
       setSelectedShipmentForNav(shipment);
       setShowNavigationView(true);
     }
   };
 
-  useEffect(() => {
-    if (profile?.id) {
-      fetchDriverData();
-    }
-  }, [profile?.id]);
-
-  const fetchDriverData = async () => {
-    try {
-      const { data: driver } = await supabase
-        .from('drivers')
-        .select(`id, organization_id, license_number, vehicle_type, vehicle_plate, is_available, driver_type, rating, total_trips, acceptance_rate, is_verified, organization:organizations(name, phone)`)
-        .eq('profile_id', profile?.id)
-        .maybeSingle();
-
-      if (driver) {
-        setDriverInfo(driver as unknown as DriverInfo);
-
-        const { data: shipmentsData } = await supabase
-          .from('shipments')
-          .select(`id, shipment_number, waste_type, quantity, unit, status, created_at, pickup_address, delivery_address, driver_id, expected_delivery_date, approved_at, collection_started_at, in_transit_at, delivered_at, confirmed_at, recycler_notes, generator_id, recycler_id, transporter_id`)
-          .eq('driver_id', driver.id)
-          .order('created_at', { ascending: false });
-
-        if (shipmentsData) {
-          const orgIds: string[] = [];
-          shipmentsData.forEach(s => {
-            if (s.generator_id) orgIds.push(s.generator_id);
-            if (s.recycler_id) orgIds.push(s.recycler_id);
-            if (s.transporter_id) orgIds.push(s.transporter_id);
-          });
-          const uniqueOrgIds = [...new Set(orgIds)];
-          const orgsMap: Record<string, { name: string }> = {};
-          if (uniqueOrgIds.length > 0) {
-            const { data: orgsData } = await supabase.from('organizations').select('id, name').in('id', uniqueOrgIds);
-            orgsData?.forEach(o => { orgsMap[o.id] = { name: o.name }; });
-          }
-          const enriched = shipmentsData.map(s => ({
-            ...s,
-            generator: s.generator_id ? orgsMap[s.generator_id] || null : null,
-            recycler: s.recycler_id ? orgsMap[s.recycler_id] || null : null,
-            transporter: s.transporter_id ? orgsMap[s.transporter_id] || null : null,
-          }));
-          setShipments(enriched as unknown as Shipment[]);
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching driver data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const activeShipments = shipments.filter(s => ['new', 'approved', 'in_transit'].includes(s.status));
-  const completedShipments = shipments.filter(s => ['delivered', 'confirmed'].includes(s.status));
-
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <DriverDashboardSkeleton />;
   }
 
   const fieldTools = [
@@ -282,15 +207,14 @@ const DriverDashboard = () => {
     { id: 'routes', label: 'تحسين المسارات', icon: Route },
   ];
 
-  // Removed unused variable — responsive handled via Tailwind classes
+  const currentTabs = getTabsForType(driverInfo?.driver_type);
+  const defaultTab = currentTabs[0]?.value || 'tasks';
 
   return (
     <div className="space-y-3 pb-20">
-      {/* Smart Daily Brief */}
       <ConnectedSmartBrief role="driver" />
 
-
-      {/* Compact Header with Status */}
+      {/* Compact Header */}
       <div className="flex items-center justify-between rounded-xl border border-border/40 bg-card p-3">
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -329,51 +253,31 @@ const DriverDashboard = () => {
                 signalStrength={lastLocationUpdate ? 'good' : 'offline'}
               />
               <TrackingWatcherIndicator driverId={driverInfo.id} />
-              <QuickLocationButton 
-                driverId={driverInfo.id} 
+              <QuickLocationButton
+                driverId={driverInfo.id}
                 variant="icon"
                 onSuccess={handleLocationSuccess}
               />
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8"
-                onClick={() => handleOpenLiveMap()}
-              >
+              <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => handleOpenLiveMap()}>
                 <Map className="h-4 w-4" />
               </Button>
             </>
           )}
-          <Button 
-            variant="outline" 
-            size="icon"
-            className="h-8 w-8"
-            onClick={() => setShowSettingsDialog(true)}
-          >
+          <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setShowSettingsDialog(true)}>
             <Settings className="h-4 w-4" />
           </Button>
         </div>
       </div>
 
-      {/* Driver Assignment Alert */}
       <DriverAssignmentAlert />
 
-      {/* Daily Summary */}
-      <DriverDailySummary 
-        shipments={shipments as any} 
-        driverName={profile?.full_name || 'السائق'} 
+      <DriverDailySummary
+        shipments={shipments as any}
+        driverName={profile?.full_name || 'السائق'}
       />
 
-      {/* Dynamic Tabs based on driver_type */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        {(() => {
-          const currentTabs = getTabsForType(driverInfo?.driver_type);
-          const defaultTab = currentTabs[0]?.value || 'tasks';
-          return (
+      {/* Dynamic Tabs */}
+      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}>
         <Tabs defaultValue={defaultTab} className="w-full" dir="rtl">
           <div className="relative overflow-x-auto rounded-xl border border-border/50 bg-card p-1 scrollbar-hide">
             <TabsList className="w-full justify-center bg-transparent gap-0.5 sm:gap-1 h-auto p-0">
@@ -390,9 +294,7 @@ const DriverDashboard = () => {
             </TabsList>
           </div>
 
-          {/* ═══════════════════════════════════════════════ */}
           {/* TAB: الرئيسية — Go Online (مستقل فقط) */}
-          {/* ═══════════════════════════════════════════════ */}
           <TabsContent value="home" className="mt-4 space-y-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && (
@@ -400,9 +302,7 @@ const DriverDashboard = () => {
                   <GoOnlineButton
                     driverId={driverInfo.id}
                     isAvailable={driverInfo.is_available}
-                    onToggle={(newState) => {
-                      setDriverInfo(prev => prev ? { ...prev, is_available: newState } : prev);
-                    }}
+                    onToggle={(newState) => updateDriverAvailability(newState)}
                     rating={driverInfo.rating}
                     totalTrips={driverInfo.total_trips}
                     acceptanceRate={driverInfo.acceptance_rate}
@@ -414,16 +314,8 @@ const DriverDashboard = () => {
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: فرص قريبة — Demand Heatmap (مستقل فقط) */}
-          {/* ═══════════════════════════════════════════════ */}
-          {/* nearby tab merged into home */}
-
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB 1: المهام - Daily Tasks & Assignment */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: المهام */}
           <TabsContent value="tasks" className="mt-4 space-y-3">
-            {/* Company driver quick stats */}
             {driverInfo?.driver_type === 'company' && (
               <Suspense fallback={<Skeleton className="h-20 w-full rounded-xl" />}>
                 <CompanyDriverStats
@@ -443,14 +335,11 @@ const DriverDashboard = () => {
             />
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB 2: الشحنات - Active & Completed Shipments */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: الشحنات */}
           <TabsContent value="shipments" className="mt-4 space-y-4">
             <div className="flex items-center justify-between">
-              <CreateShipmentButton variant="eco" onSuccess={fetchDriverData} />
+              <CreateShipmentButton variant="eco" onSuccess={refreshData} />
             </div>
-
             <Tabs defaultValue="active" className="w-full" dir="rtl">
               <TabsList className="grid w-full max-w-xs grid-cols-2">
                 <TabsTrigger value="active" className="gap-1 text-xs">
@@ -462,7 +351,6 @@ const DriverDashboard = () => {
                   مكتملة ({completedShipments.length})
                 </TabsTrigger>
               </TabsList>
-
               <TabsContent value="active" className="mt-3">
                 <div className="space-y-3">
                   {activeShipments.length === 0 ? (
@@ -475,27 +363,14 @@ const DriverDashboard = () => {
                   ) : (
                     activeShipments.map((shipment) => (
                       <div key={shipment.id} className="flex flex-col gap-2">
-                        {/* DiDi-style Trip Lifecycle for independent/hired drivers */}
                         {(driverInfo?.driver_type === 'independent' || driverInfo?.driver_type === 'hired') ? (
                           <Suspense fallback={<Skeleton className="h-64 w-full rounded-xl" />}>
-                            <TripLifecyclePanel
-                              shipment={shipment as any}
-                              onStatusChange={fetchDriverData}
-                            />
+                            <TripLifecyclePanel shipment={shipment as any} onStatusChange={refreshData} />
                           </Suspense>
                         ) : (
                           <>
-                            <ShipmentCard
-                              shipment={shipment}
-                              onStatusChange={fetchDriverData}
-                              variant="full"
-                            />
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="w-full gap-2 text-xs"
-                              onClick={() => handleNavigateToShipment(shipment)}
-                            >
+                            <ShipmentCard shipment={shipment} onStatusChange={refreshData} variant="full" />
+                            <Button variant="outline" size="sm" className="w-full gap-2 text-xs" onClick={() => handleNavigateToShipment(shipment)}>
                               <Navigation className="w-3.5 h-3.5 text-primary" />
                               ابدأ التنقل
                             </Button>
@@ -506,7 +381,6 @@ const DriverDashboard = () => {
                   )}
                 </div>
               </TabsContent>
-
               <TabsContent value="completed" className="mt-3">
                 <div className="space-y-3">
                   {completedShipments.length === 0 ? (
@@ -518,12 +392,7 @@ const DriverDashboard = () => {
                     </Card>
                   ) : (
                     completedShipments.slice(0, 10).map((shipment) => (
-                      <ShipmentCard
-                        key={shipment.id}
-                        shipment={shipment}
-                        onStatusChange={fetchDriverData}
-                        variant="full"
-                      />
+                      <ShipmentCard key={shipment.id} shipment={shipment} onStatusChange={refreshData} variant="full" />
                     ))
                   )}
                 </div>
@@ -531,11 +400,8 @@ const DriverDashboard = () => {
             </Tabs>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB 3: أدوات الميدان - Field Operations Tools */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: أدوات الميدان */}
           <TabsContent value="field" className="mt-4 space-y-4">
-            {/* Field tools selector */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
               {fieldTools.map((tool) => (
                 <button
@@ -552,12 +418,8 @@ const DriverDashboard = () => {
                 </button>
               ))}
             </div>
-
-            {/* Active field tool content */}
             <Suspense fallback={<TabFallback />}>
-              {activeFieldTool === 'checklist' && driverInfo && (
-                <DriverPreTripChecklist driverId={driverInfo.id} />
-              )}
+              {activeFieldTool === 'checklist' && driverInfo && <DriverPreTripChecklist driverId={driverInfo.id} />}
               {activeFieldTool === 'camera' && driverInfo && (
                 <div className="space-y-4">
                   <DriverSmartCamera driverId={driverInfo.id} type="load" />
@@ -565,24 +427,14 @@ const DriverDashboard = () => {
                   <DriverSmartCamera driverId={driverInfo.id} type="delivery" />
                 </div>
               )}
-              {activeFieldTool === 'signature' && driverInfo && (
-                <DriverDeliverySignature driverId={driverInfo.id} />
-              )}
-              {activeFieldTool === 'manifest' && driverInfo && (
-                <DigitalManifest driverId={driverInfo.id} shipment={activeShipments[0] as any} />
-              )}
-              {activeFieldTool === 'classify' && driverInfo && (
-                <WasteClassifierCamera driverId={driverInfo.id} />
-              )}
-              {activeFieldTool === 'routes' && (
-                <SmartRouteOptimizer shipments={shipments as any} />
-              )}
+              {activeFieldTool === 'signature' && driverInfo && <DriverDeliverySignature driverId={driverInfo.id} />}
+              {activeFieldTool === 'manifest' && driverInfo && <DigitalManifest driverId={driverInfo.id} shipment={activeShipments[0] as any} />}
+              {activeFieldTool === 'classify' && driverInfo && <WasteClassifierCamera driverId={driverInfo.id} />}
+              {activeFieldTool === 'routes' && <SmartRouteOptimizer shipments={shipments as any} />}
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB 4: المالية - Wallet, Earnings & Rewards */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: المالية */}
           <TabsContent value="finance" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               <div className="space-y-4">
@@ -593,11 +445,8 @@ const DriverDashboard = () => {
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB 5: حسابي - Profile, Training & Safety */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: حسابي */}
           <TabsContent value="account" className="mt-3 sm:mt-4 space-y-3 sm:space-y-4">
-            {/* Profile Card */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
@@ -636,19 +485,14 @@ const DriverDashboard = () => {
                 </div>
               </CardContent>
             </Card>
-
             <DriverOwnLinkingCode />
             <DriverCredentialsEditor />
             <DriverLinkedOrganizations />
-
-            {/* محدد الوجهات المتقدم */}
             {driverInfo && (
               <Suspense fallback={<Skeleton className="h-48 w-full rounded-xl" />}>
-                <EnhancedDestinationPicker driverId={driverInfo.id} onDestinationAdded={fetchDriverData} />
+                <EnhancedDestinationPicker driverId={driverInfo.id} onDestinationAdded={refreshData} />
               </Suspense>
             )}
-
-            {/* Academy & Safety Section */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Card className="cursor-pointer hover:border-primary/30 transition-colors">
                 <CardHeader className="pb-2">
@@ -663,7 +507,6 @@ const DriverDashboard = () => {
                   </Suspense>
                 </CardContent>
               </Card>
-
               <Card className="cursor-pointer hover:border-primary/30 transition-colors">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex items-center gap-2 text-sm">
@@ -678,61 +521,45 @@ const DriverDashboard = () => {
                 </CardContent>
               </Card>
             </div>
-
-            <QuickActionsGrid
-              actions={quickActions}
-              title="الإجراءات السريعة"
-              subtitle="الوظائف المستخدمة بكثرة"
-            />
+            <QuickActionsGrid actions={quickActions} title="الإجراءات السريعة" subtitle="الوظائف المستخدمة بكثرة" />
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: التحليلات (مؤجر + مستقل) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: التحليلات */}
           <TabsContent value="analytics" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <DriverAnalyticsPanel driverId={driverInfo.id} driverType={driverInfo.driver_type} />}
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: العروض الواردة (مستقل + مؤجر حر) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العروض */}
           <TabsContent value="offers" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <IndependentOffersPanel driverId={driverInfo.id} />}
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: العقود (مؤجر فقط) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: العقود */}
           <TabsContent value="contracts" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <HiredContractsPanel driverId={driverInfo.id} />}
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: سوق الشحنات (مؤجر + مستقل) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: سوق الشحنات */}
           <TabsContent value="marketplace" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               <ShipmentMarketplace />
             </Suspense>
           </TabsContent>
 
-          {/* ═══════════════════════════════════════════════ */}
-          {/* TAB: المحفظة المالية (مؤجر + مستقل) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: المحفظة المالية */}
           <TabsContent value="wallet" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && <DriverFinancialWallet driverId={driverInfo.id} />}
             </Suspense>
           </TabsContent>
 
-          {/* TAB: الملف المهني (مؤجر + مستقل) */}
-          {/* ═══════════════════════════════════════════════ */}
+          {/* TAB: الملف المهني */}
           <TabsContent value="profile" className="mt-4">
             <Suspense fallback={<TabFallback />}>
               {driverInfo && (
@@ -747,10 +574,7 @@ const DriverDashboard = () => {
               )}
             </Suspense>
           </TabsContent>
-
         </Tabs>
-          );
-        })()}
       </motion.div>
 
       {/* Dialogs */}
@@ -758,13 +582,13 @@ const DriverDashboard = () => {
         open={showSettingsDialog}
         onOpenChange={setShowSettingsDialog}
         driverId={driverInfo?.id || ''}
-        onUpdate={fetchDriverData}
+        onUpdate={refreshData}
       />
 
       {showLiveMapDialog && driverInfo && (
         <Suspense fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         }>
           <LiveTrackingMapDialog
@@ -782,7 +606,7 @@ const DriverDashboard = () => {
       {showNavigationView && driverInfo && selectedShipmentForNav && (
         <Suspense fallback={
           <div className="fixed inset-0 flex items-center justify-center bg-background/80 z-50">
-            <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="w-8 h-8 border-3 border-primary border-t-transparent rounded-full animate-spin" />
           </div>
         }>
           <FullNavigationView
@@ -799,16 +623,9 @@ const DriverDashboard = () => {
       {/* Floating Quick Location */}
       {driverInfo && (
         <>
-          <QuickLocationButton 
-            driverId={driverInfo.id} 
-            variant="fab"
-            onSuccess={handleLocationSuccess}
-          />
+          <QuickLocationButton driverId={driverInfo.id} variant="fab" onSuccess={handleLocationSuccess} />
           <Suspense fallback={null}>
-            <DriverSOSButton 
-              driverId={driverInfo.id} 
-              organizationId={driverInfo.organization_id}
-            />
+            <DriverSOSButton driverId={driverInfo.id} organizationId={driverInfo.organization_id} />
           </Suspense>
         </>
       )}
@@ -816,12 +633,7 @@ const DriverDashboard = () => {
       {/* DiDi-style popup for incoming offers */}
       {pendingOffer && (
         <Suspense fallback={null}>
-          <DriverOfferPopup
-            offer={pendingOffer}
-            onAccept={acceptOffer}
-            onReject={rejectOffer}
-            onCounter={counterOffer}
-          />
+          <DriverOfferPopup offer={pendingOffer} onAccept={acceptOffer} onReject={rejectOffer} onCounter={counterOffer} />
         </Suspense>
       )}
     </div>
