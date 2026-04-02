@@ -93,6 +93,9 @@ const SovereignReportsPanel = () => {
             <Sparkles className="w-4 h-4 ml-1" />
             {generating ? 'جاري التوليد...' : 'توليد تقرير'}
           </Button>
+          <Button size="sm" variant="outline" onClick={exportCSV} disabled={!reports || reports.length === 0}>
+            <Download className="w-4 h-4 ml-1" />تصدير
+          </Button>
         </div>
       </div>
 
