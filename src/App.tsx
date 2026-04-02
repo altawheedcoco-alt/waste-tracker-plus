@@ -51,6 +51,9 @@ import { publicRoutes } from "@/routes/PublicRoutes";
 // Core routes are ultra-light (Dashboard, Settings, Notifications, Chat + catch-all)
 import { coreRoutes } from "@/routes/dashboard/CoreRoutes";
 
+// Essential common routes — tiny set every user needs (workspace, profile, support)
+import { essentialCommonRoutes } from "@/routes/dashboard/EssentialCommonRoutes";
+
 // Smart scroll restoration
 import { useScrollRestoration } from '@/hooks/useScrollRestoration';
 import { usePageTracking } from '@/hooks/usePageTracking';
@@ -71,24 +74,26 @@ function getDashboardRouteImports(
 ): Promise<React.ReactNode>[] {
   const imports: Promise<React.ReactNode>[] = [];
 
-  // Always load common routes (shared dashboard features)
-  imports.push(
-    import('@/routes/dashboard/CommonRoutes').then(m => m.commonRoutes)
-  );
+  const isAdmin = roles.includes('admin');
+  const isDriver = roles.includes('driver');
 
-  // Load extended routes (optional features like Omaluna, Videos, etc.)
+  // Drivers get ONLY their specific routes — no common/extended bloat
+  if (isDriver) {
+    imports.push(import('@/routes/dashboard/DriverRoutes').then(m => m.driverRoutes));
+    return imports;
+  }
+
+  // Non-driver users get deferred common routes + extended routes
+  imports.push(
+    import('@/routes/dashboard/DeferredCommonRoutes').then(m => m.deferredCommonRoutes)
+  );
   imports.push(
     import('@/routes/dashboard/ExtendedRoutes').then(m => m.extendedRoutes)
   );
 
   // Role-specific routes
-  const isAdmin = roles.includes('admin');
-  const isDriver = roles.includes('driver');
-
   if (isAdmin) {
     imports.push(import('@/routes/dashboard/AdminRoutes').then(m => m.adminRoutes));
-  } else if (isDriver) {
-    imports.push(import('@/routes/dashboard/DriverRoutes').then(m => m.driverRoutes));
   } else {
     switch (orgType) {
       case 'transporter':
@@ -162,6 +167,7 @@ const AppRoutes = memo(() => {
         {publicRoutes}
         <Route element={<DashboardRouteGuard />}>
           {coreRoutes}
+          {essentialCommonRoutes}
           {roleRoutes.map((routes, i) => (
             <>{routes}</>
           ))}
