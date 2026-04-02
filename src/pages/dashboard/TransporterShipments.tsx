@@ -484,7 +484,7 @@ const TransporterShipments = () => {
                                 <TooltipTrigger asChild>
                                   <div>
                                     <QuickReceiptButton 
-                                      shipment={shipment} 
+                                      shipment={shipment as any} 
                                       onSuccess={fetchShipments}
                                       variant="default"
                                       size="sm"
