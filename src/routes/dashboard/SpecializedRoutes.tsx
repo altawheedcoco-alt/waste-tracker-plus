@@ -97,7 +97,7 @@ export const consultantRoutes = (
     <Route path="/dashboard/audit-sessions" element={<ConsultantPortal />} />
     <Route path="/dashboard/consultant-reports" element={<Reports />} />
     <Route path="/dashboard/compliance-assessment" element={<ConsultantPortal />} />
-    <Route path="/dashboard/consultant-clients" element={<lazyRetry(() => import('@/pages/dashboard/Partners'))} />}
+    <Route path="/dashboard/consultant-clients" element={<Partners />} />
     <Route path="/dashboard/consultant-certifications" element={<RecyclingCertificates />} />
     <Route path="/dashboard/office-consultants" element={<OrgStructure />} />
     <Route path="/dashboard/office-tasks" element={<EmployeeTaskBoard />} />

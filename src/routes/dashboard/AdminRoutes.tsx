@@ -86,7 +86,7 @@ export const adminRoutes = (
     <Route path="/dashboard/governance" element={<GovernanceDashboard />} />
     <Route path="/dashboard/lead-generation" element={<LeadGeneration />} />
     <Route path="/dashboard/company-directory" element={<CompanyDirectory />} />
-    <Route path="/dashboard/call-center" element={<lazyRetry(() => import('@/pages/dashboard/SupportCenter'))} />}
+    <Route path="/dashboard/call-center" element={<SupportCenter />} />
     <Route path="/dashboard/organization/:organizationId" element={<OrganizationView />} />
     <Route path="/dashboard/organization-attestation" element={<OrganizationAttestation />} />
     <Route path="/dashboard/admin-attestations" element={<AdminAttestations />} />
