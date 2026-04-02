@@ -66,7 +66,7 @@ const GeneratorPartnersHub = () => {
       const { data } = await supabase
         .from('organizations')
         .select('id, name, organization_type, city, phone')
-        .in('organization_type', ['transporter', 'recycler'])
+        .or('organization_type.eq.transporter,organization_type.eq.recycler')
         .eq('status', 'active')
         .limit(20);
 
